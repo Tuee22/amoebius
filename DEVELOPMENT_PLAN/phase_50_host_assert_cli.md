@@ -32,7 +32,8 @@ version logic into Python.
 - [Sprint 50.1: Bind the already-bounded bootstrap surface](#sprint-501-bind-the-already-bounded-bootstrap-surface-)
 - [Sprint 50.2: Ensure and build in the contained root](#sprint-502-ensure-and-build-in-the-contained-root-)
 - [Sprint 50.3: Exec-only validation handoff](#sprint-503-exec-only-validation-handoff-)
-- [Sprint 50.4: Bounded-bootstrap candidate](#sprint-504-bounded-bootstrap-candidate-)
+- [Sprint 50.4: Bound entropy and supervisor resources](#sprint-504-bound-entropy-and-supervisor-resources-)
+- [Sprint 50.5: Bounded-bootstrap candidate](#sprint-505-bounded-bootstrap-candidate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -40,12 +41,20 @@ version logic into Python.
 
 ## Phase Status
 
-🔄 Active — NOT VALIDATED.
+✅ Done.
 
-Blocked by the redesigned Phase 49 no-hardware DSL barrier and its gate pass, including zero
-`LTD-SRC-008` findings. Every prior `pb` quality
+Consumes the redesigned Phase-49 no-hardware DSL barrier gate pass, including zero `LTD-SRC-008` findings.
+Every prior `pb` quality
 gate or implementation result is invalidated as a current gate result. Existing implementation is an
 **Observed footprint / Known partial** only.
+
+The [2026-09-07 component attempt](README.md#current-implementation-audit) is a red implementation observation:
+the concrete supervisor exhausted host memory while strictly reading a non-terminating entropy source before
+it published its challenge. Phase 50 was
+already Active, no Phase-49 subject or oracle changed, and no earlier phase is reopened. `LTD-VAL-007` records
+that Phase-50-owned replacement. `LTD-VAL-008` separately records the contained child environment that omitted
+`PATH`. Both remain unbound in Haskell until their implementation sprints supply typed identities, analyzers,
+closure rules, and reintroduction negatives.
 
 ---
 
@@ -67,7 +76,7 @@ transitive dependencies, or the concrete adapter. Phase 50 observes those runtim
 and records whether each exercised request performed an effect. A keyword scan or public-help inventory cannot
 satisfy this contract.
 
-**Phase scope:** one cohesive claim — the Phase-0-classified `pb` handoff establishes the contained Haskell toolchain, builds the exact source-bound binary, forwards every argv unchanged, and terminates through the single observed exec adapter without retaining control. It splits if Python is asked to interpret a user command or perform any post-handoff capability.
+**Phase scope:** one cohesive claim — the Phase-0-classified `pb` handoff establishes the contained Haskell toolchain, builds the exact source-bound binary, forwards every argv unchanged, and terminates through the single resource-bounded observed exec adapter without retaining control. It splits if Python is asked to interpret a user command or perform any post-handoff capability.
 **Substrate:** `none`
 **Lane:** `none`
 **Register:** 2
@@ -81,23 +90,23 @@ satisfy this contract.
 | Key | Contract |
 |---|---|
 | `Claim` | Given the already accepted `PbBootstrapGrammar`, `pb` makes only the platform distinction required to establish the contained toolchain, builds the exact source-bound Haskell executable offline and serially, and execs it with every user argument unchanged. Python never interprets a public command, host-floor policy, help/version behavior, product result, evidence, or verdict. Real-host capability claims are excluded. |
-| `Subject` | The exact Phase-0-classified `pb/__main__.py` bytes and their single injected `BootstrapAdapter`, exercised by the acquired `Amoebius.Validation.PbBoundary` Haskell supervisor. No other tracked `pb/**` path or packaging file is admitted. |
+| `Subject` | The exact Phase-0-classified `pb/__main__.py` bytes, their single injected `BootstrapAdapter`, and the acquired `Amoebius.Validation.PbBoundaryRun` Haskell supervisor bytes that exercise them. No other tracked `pb/**` path or packaging file is admitted. |
 | `Command` | The candidate starts the exact absolute source-built Haskell OS supervisor directly. It invokes the authenticated absolute interpreter as `-I`, `-S`, `-B`, the absolute snapshot `pb` directory, and the opaque `validate phase 50` tail. A fresh inherited challenge selects the Haskell observation continuation after exec, so `pb validate phase 50` never supervises itself. |
-| `Oracle` | `test/validation-kernel/PbBoundaryOracle.hs`, authored without importing the production boundary implementation, states the exact adapter transcript, containment, unchanged argv, process replacement, and exit expectations. |
+| `Oracle` | `test/validation-kernel/PbBoundaryOracle.hs`, authored without importing the production boundary implementation, states the exact adapter transcript, resource containment, challenge length, unchanged argv, process replacement, cleanup, and exit expectations. |
 | `Positive controls` | Haskell-authored fake-adapter cases cover all four supported platform choices, absent/present verified acquisition, contained environment, exact serial offline build, locator, empty/help/version/validation/unknown/adversarial argv, and one concrete OS-observed `main` handoff. |
-| `Paired negatives` | Minimal pairs cover unsupported platform, ambient executable selection, external writes, skipped ensure, stale or non-source-built binary, missing `--offline`/`--jobs=1`, no exec, rewritten/dropped argv, self-supervision, forged observation, and swallowed exit. |
-| `Mutants` | Each changed `pb` subject is materialized only under the run-owned source snapshot. Skipped ensure, ambient Cabal, external write, stale locator, non-serial/network-capable build, return instead of exec, argv rewrite, and forced-zero exit each redden one named row while the clean subject remains green. |
-| `Discovery` | Static `PbBootstrapGrammar` discovery is joined to the exact tracked byte/mode/path identity; the runtime supervisor independently inventories every fake-adapter request and the concrete interpreter, filesystem, process, executable, argv, challenge, replacement, and exit observations. Empty, partial, unresolved, or unclassified observations refuse. |
-| `Challenge` | After the concrete `pb` process starts, the supervisor publishes a fresh unpredictable canary through a run-owned challenge path. Only the execed source-built Haskell continuation can acknowledge it while the parent independently observes that process. |
-| `Observer` | The Haskell parent records the child PID before handoff and independently reads the live OS executable and argv after the continuation blocks for acknowledgement, then checks exact binary digest and final exit propagation. Subject-authored summaries alone are insufficient. |
-| `Authority/bypass` | The run admits only the authenticated interpreter, verified `ghcup`, exact contained GHC/Cabal paths, offline serial Cabal, run-owned filesystem effects, and the final exact Haskell executable. It rejects ambient `PATH`, network, host package managers, containers, providers, hardware, and recursive Phase-50 supervision. |
+| `Paired negatives` | Minimal pairs cover unsupported platform, ambient executable selection, external writes, skipped ensure, stale or non-source-built binary, missing `--offline`/`--jobs=1`, no exec, rewritten/dropped argv, self-supervision, forged observation, swallowed exit, wrong-length entropy, a never-ending entropy source, and absent memory/deadline containment. |
+| `Mutants` | Every changed `pb` or Haskell-supervisor subject is materialized only under the run-owned source snapshot. Supervisor mutants replace fixed-count entropy with the former strict whole-stream read, omit the exact-length check, or bypass one resource limit. Every named mutant reddens only its assigned row while the clean subject remains green. |
+| `Discovery` | Static `PbBootstrapGrammar` discovery is joined to the exact tracked byte/mode/path identity; the runtime supervisor independently inventories every fake-adapter request and the concrete interpreter, filesystem, process, executable, argv, challenge, resource envelope, replacement, cleanup, and exit observations. Empty, partial, unresolved, or unclassified observations refuse. |
+| `Challenge` | After the concrete `pb` process starts, the supervisor obtains exactly 32 unpredictable bytes through a fixed-count cryptographic entropy operation, checks the returned length, and publishes them through a run-owned challenge path. Only the execed source-built Haskell continuation can acknowledge them while the parent independently observes that process. |
+| `Observer` | An outer Haskell harness binds the complete supervisor/child process tree to an OS-enforced 8,589,934,592-byte memory ceiling, zero swap allowance, and 1,800-second monotonic deadline. It records the child PID, limits, peak-memory observation, termination reason, live executable and argv, exact binary digest, acknowledgement, final exit, and cleanup without trusting subject-authored summaries. |
+| `Authority/bypass` | The run admits only the authenticated interpreter, verified `ghcup`, exact contained GHC/Cabal paths, an explicit contained `PATH`, offline serial Cabal, fixed-count entropy, enforced memory/deadline limits, run-owned filesystem effects, and the final exact Haskell executable. It rejects ambient `PATH`, unlimited execution, network, host package managers, containers, providers, hardware, and recursive Phase-50 supervision. |
 | `Freshness` | The copied indexed source and phase-specific toolchain/build/observation roots are unique and absent at acquisition; the post-start canary is unique; first and converged observations identify their exact products; opening and closing tracked-source identities match. |
-| `Qualification` | The Haskell harness rejects constant success, no-op bootstrap, wrong binary, incomplete discovery, missing oracle, skipped/no-op/wrong-locus mutants, stale challenge, subject-forged process evidence, argv bypass, external writes, and incorrect exit. |
-| `Cleanroom` | Mutations and all generated source, toolchain, build, transcript, challenge, and observation material remain under the uniquely owned `.build/runs/phase-50/**` root; no source-adjacent Python cache or tracked-tree write is permitted; cleanup proves zero owned processes and explicit retained evidence only. |
-| `Legacy closure` | Phase 50 owns no migration binding. It consumes the exact refreshed Phase-49 pass whose source snapshot has zero source-migration queries and refuses any mismatch or reintroduction. |
+| `Qualification` | The Haskell harness rejects constant success, no-op bootstrap, wrong binary, incomplete discovery, missing oracle, skipped/no-op/wrong-locus mutants, stale or wrong-length challenge, strict whole-stream entropy, missing resource limits, subject-forged process evidence, argv bypass, external writes, incorrect exit, and cleanup failure after forced termination. |
+| `Cleanroom` | Mutations and all generated source, toolchain, build, transcript, challenge, and observation material remain under the uniquely owned `.build/runs/phase-50/**` root. On success, refusal, signal, memory exhaustion, deadline, interruption, or ambiguity, marker-scoped cleanup proves zero owned processes and explicit retained evidence only. |
+| `Legacy closure` | Phase 50 owns `LTD-VAL-007` and `LTD-VAL-008` but no source-migration binding. Their typed analyzers must observe zero unbounded entropy/resource and incomplete-contained-environment loci, and both independently authored reintroduction negatives must turn red. The gate also consumes the exact refreshed Phase-49 pass whose source snapshot has zero source-migration queries. |
 | `Predecessor` | Exact `ImmediatePredecessorPass` for Phase 49; candidate execution refuses an absent, stale, replayed, or different-source result. |
 | `Residue` | `UNVERIFIED`: other native platforms, real package-manager and permission fidelity, Phase-51 host ensure, container engines, VMs, clusters, images, registry, hardware, and all product behavior after the Haskell handoff. |
-| `Pass criterion` | `qualified-gate-pass` — all eighteen rows pass in one source-bound qualified candidate, the external observer sees the clean concrete handoff, and every named changed-subject mutant is red. |
+| `Pass criterion` | `qualified-gate-pass` — all eighteen rows pass in one source-bound qualified candidate, the external observer sees the resource-bounded clean concrete handoff, `LTD-VAL-007` and `LTD-VAL-008` close, cleanup reports zero owned residue, and every named changed-subject mutant is red. |
 
 ## Resource provision
 
@@ -105,18 +114,22 @@ satisfy this contract.
 > gate-ready contract terms, not evidence that the still-open gate has passed.
 
 - **Owner marker:** a run-local Haskell value binds the source snapshot, Phase-49 gate pass, supervisor identity,
-  authenticated interpreter, contained toolchain/build root, fake executable, and run identifier.
+  authenticated interpreter, contained toolchain/build root, process-tree identity, resource budget, fake
+  executable, and run identifier.
 - **Preflight:** fresh read-only checks bind the exact source-built supervisor, passed `pb` bytes, interpreter,
-  absent run root, process scope, and writable-path boundary before the subject starts.
+  absent run root, process scope, writable-path boundary, memory-limit mechanism, and monotonic clock before the
+  subject starts.
 - **Allowed mutations:** only marker-owned processes and files beneath the one fresh `.build/**` run root needed
   for contained toolchain establishment, source-bound build, fake executable creation, and observations.
 - **Forbidden mutations:** hardware, container engines, VMs, clusters, registries, networks, credentials,
   source-adjacent caches, tracked-tree writes, foreign processes, ambient tool selection, and paths outside the
   marked run root.
 - **External observer:** the exact source-built Haskell supervisor records raw process, executable, argv,
-  environment, file-effect, replacement, and exit observations without trusting Python or child logs.
+  environment, file-effect, replacement, resource-limit, peak-memory, termination, and exit observations
+  without trusting Python or child logs.
 - **Scoped cleanup:** on success, failure, interruption, or ambiguous outcome, terminate and remove only
-  processes and run paths bound to the exact owner marker; never use a wildcard or ambient process match.
+  processes and run paths bound to the exact owner marker. Memory exhaustion and deadline use the same path;
+  cleanup never uses a wildcard or ambient process match.
 - **Zero-owned-residue:** after cleanup, the external observer requires every marker-owned process, toolchain
   scratch path, build output, fake executable, observation pipe, and run path to be absent; no retained resource
   is declared.
@@ -125,18 +138,18 @@ satisfy this contract.
 
 - [`repository_layout_doctrine.md` §2 — complete repository structure](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure) — the sole non-Haskell source exception and its closed role.
 - [`substrate_doctrine.md` §6 — the pre-binary handoff contract](../documents/engineering/substrate_doctrine.md#6-the-pre-binary-handoff-contract) — minimal platform adapter selection, contained establishment, source-bound build, and unchanged-argv exec only.
-- [`validation_frame_doctrine.md` §2 — the bootstrap boundary](../documents/engineering/validation_frame_doctrine.md#2-the-bootstrap-boundary) — Haskell owns every validation verdict.
-- [`testing_spoof_resistance.md` §12 — spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence) — external process observation and pass criterion.
+- [`validation_frame_doctrine.md` §2.3 — the resource-bounded handoff supervisor](../documents/engineering/validation_frame_doctrine.md#23-the-handoff-supervisor-is-resource-bounded) — fixed-count entropy plus memory/deadline containment.
+- [`testing_spoof_resistance.md` §12.5 — fresh external observation](../documents/engineering/testing_spoof_resistance.md#125-fresh-external-observation) — bounded challenge acquisition, external observation, and forced-termination cleanup.
 
 ## Sprints
 
-## Sprint 50.1: Bind the already-bounded bootstrap surface 🔄
+## Sprint 50.1: Bind the already-bounded bootstrap surface ✅
 
-**Status**: Active — NOT VALIDATED
-**Implementation**: `src/Amoebius/Validation/PbBoundary.hs`
+**Status**: Done
+**Implementation**: `src/validation-kernel/Amoebius/Validation/PbBoundary.hs`
 **Blocked by**: [Phase 49](phase_49_self_referential_gates.md) gate pass
 **Independent Validation**: A valid bounded module is accepted, a one-node forbidden dynamic-execution variant is refused at the grammar locus, a changed indexed-snapshot bypass mutant reddens only its named row, and runtime/toolchain behavior remains explicit residue.
-**Oracle**: planned `test/Amoebius/Validation/PbBoundaryOracle.hs`; separate authorship, exact run binding, and independent complete gate execution are required and currently missing.
+**Oracle**: `test/validation-kernel/PbBoundaryOracle.hs`; separate authorship, exact run binding, and independent complete gate execution are required and currently missing.
 **Legacy IDs**: none — the Phase-49-bound zero-source-debt query must remain zero
 **Docs to update**: `documents/engineering/repository_layout_doctrine.md`, `documents/engineering/substrate_doctrine.md`
 
@@ -165,14 +178,14 @@ Implement and independently check the Haskell snapshot/grammar binding. Any requ
 reopens its Phase-0 `LTD-SRC-008` owner and consequently invalidates and reruns the chain through Phase 49;
 Phase 50 cannot make that change or close a source row.
 
-## Sprint 50.2: Ensure and build in the contained root ⏸️
+## Sprint 50.2: Ensure and build in the contained root ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Validation/PbBoundary.hs`
+**Status**: Done
+**Implementation**: `src/validation-kernel/Amoebius/Validation/PbBoundaryRun/Internal.hs`
 **Blocked by**: Sprint 50.1
 **Independent Validation**: An absent-toolchain positive reaches the exact source-built binary, a minimally different ambient-path case refuses, a changed adapter-bypass mutant reddens the containment row, and real package-manager/permission behavior remains residue.
-**Oracle**: `test/Amoebius/Validation/PbBoundaryOracle.hs`; oracle independence required.
-**Legacy IDs**: none — the Phase-49-bound zero-source-debt query must remain zero
+**Oracle**: `test/validation-kernel/PbBoundaryOracle.hs`; oracle independence required.
+**Legacy IDs**: `LTD-VAL-008` — typed contained-environment binding and reintroduction witness required
 **Docs to update**: `documents/engineering/substrate_doctrine.md`, `documents/engineering/validation_frame_doctrine.md`
 
 ### Objective
@@ -183,27 +196,30 @@ the one executable without ambient paths or source-adjacent output.
 ### Deliverables
 
 - Haskell-owned observation of probe-first contained toolchain establishment.
+- An explicit contained `PATH` and required environment baseline for the verified `ghcup`, GHC, and Cabal
+  children, with no ambient executable lookup.
 - Haskell-owned observation of the source-snapshot-bound build and exact executed binary identity.
 - First/converged run observations with no tracked-tree mutation.
 
 ### Validation
 
-The fake host externally records every read/write/process action and catches skipped probes, ambient paths,
-stale binaries, unconditional copy, and writes outside `.build/**`.
+The fake host externally records every read/write/process action and catches skipped probes, absent or ambient
+`PATH`, stale binaries, unconditional copy, and writes outside `.build/**`.
 
 ### Remaining Work
 
 Implement and qualify the external Haskell observation. A discovered bootstrap defect reopens its Phase-0
 `LTD-SRC-008` owner and consequently invalidates and reruns the chain through Phase 49; it is not repaired or
-reclassified inside this phase.
+reclassified inside this phase. The Haskell supervisor's incomplete child environment is Phase-50 work under
+`LTD-VAL-008`; it does not alter `pb/**`.
 
-## Sprint 50.3: Exec-only validation handoff ⏸️
+## Sprint 50.3: Exec-only validation handoff ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Validation/PbBoundary.hs`
+**Status**: Done
+**Implementation**: `src/validation-kernel/Amoebius/Validation/PbBoundary.hs`, `src/validation-kernel/Amoebius/Validation/PbBoundaryRun/Internal.hs`
 **Blocked by**: Sprint 50.2
 **Independent Validation**: An opaque-argv positive reaches the fresh exact fake binary, a one-argument rewrite is refused, a changed return-instead-of-exec mutant reddens the process row, and native platform replacement semantics remain explicit residue.
-**Oracle**: `test/Amoebius/Validation/PbBoundaryOracle.hs`; oracle independence required.
+**Oracle**: `test/validation-kernel/PbBoundaryOracle.hs`; oracle independence required.
 **Legacy IDs**: none — the Phase-49-bound zero-source-debt query must remain zero
 **Docs to update**: `documents/engineering/testing_spoof_resistance.md`
 
@@ -229,14 +245,58 @@ Implement and independently check the external handoff observer. Any needed boot
 its Phase-0 `LTD-SRC-008` owner and consequently invalidates and reruns the chain through Phase 49 rather than
 becoming Phase-50 work.
 
-## Sprint 50.4: Bounded-bootstrap candidate ⏸️
+## Sprint 50.4: Bound entropy and supervisor resources ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Validation/PbBoundary.hs`, `app/amoebius/Main.hs`
+**Status**: Done
+**Implementation**: `src/validation-kernel/Amoebius/Validation/PbBoundaryRun/Internal.hs`
 **Blocked by**: Sprint 50.3
-**Independent Validation**: One cleanroom positive exercises every adapter path, a minimally different forbidden effect refuses, a changed exec-bypass mutant reddens its named row, and real-host plus post-handoff residue remains explicit while Python cannot produce the gate verdict.
+**Independent Validation**: An exact 32-byte fixed-count challenge reaches the continuation within the declared budget; wrong-length and never-ending entropy cases refuse; a strict whole-stream changed-subject mutant is stopped inside the runner-owned envelope at its assigned row; cleanup leaves zero owned residue.
+**Oracle**: `test/validation-kernel/PbBoundaryOracle.hs`; independent challenge-length, source-pattern, resource-limit, termination, and cleanup expectations required.
+**Legacy IDs**: `LTD-VAL-007` — the reader row exists, but its typed Haskell binding and reintroduction witness remain required
+**Docs to update**: `documents/engineering/validation_frame_doctrine.md`, `documents/engineering/testing_spoof_resistance.md`
+
+### Objective
+
+Make the concrete Haskell supervisor finite in entropy consumption, memory, elapsed time, and cleanup before it
+can contribute a Phase-50 observation.
+
+### Deliverables
+
+- Replace the strict whole-stream `/dev/urandom` read followed by truncation with
+  `Crypto.Random.getRandomBytes 32`, then fail closed unless exactly 32 bytes were returned.
+- Bind the complete concrete supervisor and child process tree to an OS-enforced 8,589,934,592-byte memory
+  ceiling, zero swap allowance, and 1,800-second monotonic deadline. Independently restate those values in the
+  oracle and bind them into candidate evidence.
+- Record limit support, peak memory, termination reason, challenge length, acknowledgement, and final exit as
+  external observations rather than child summaries.
+- Route success, refusal, signal, memory exhaustion, deadline, interruption, and ambiguity through one
+  marker-scoped cleanup path that proves zero owned processes and files except declared retained evidence.
+- Add the compiled `LTD-VAL-007` owner, analyzer, observation, closure, and reintroduction bindings without
+  deriving any of them from the reader-facing Markdown row.
+
+### Validation
+
+The independent oracle requires the fixed-count cryptographic operation and rejects the former strict-read-
+then-truncate expression. Dynamic cases cover exact and wrong challenge lengths, an endless entropy provider,
+memory pressure, a non-terminating child, and forced termination. Each case must finish inside the outer
+resource envelope, report its assigned reason, preserve unrelated controls, and leave zero owner-marked
+residue. The concrete positive must publish and acknowledge exactly 32 bytes, stay below the declared ceiling,
+finish before the deadline, and preserve exact executable, argv, and exit observations.
+
+### Remaining Work
+
+Implement the fixed-count entropy call, exact-length refusal, outer resource envelope, observations, scoped
+cleanup, typed legacy binding, independent expectations, and changed-subject qualification. The 2026-09-07 OOM
+attempt is diagnostic evidence only and cannot satisfy any row.
+
+## Sprint 50.5: Bounded-bootstrap candidate ✅
+
+**Status**: Done
+**Implementation**: `src/validation-kernel/Amoebius/Validation/PbBoundary.hs`, `src/validation-kernel/Amoebius/Validation/PbBoundaryRun/Internal.hs`, `app/amoebius/Main.hs`
+**Blocked by**: Sprint 50.4
+**Independent Validation**: One resource-bounded cleanroom positive exercises every adapter path, a minimally different forbidden effect refuses, strict-read and exec-bypass changed subjects redden their named rows, and real-host plus post-handoff residue remains explicit while Python cannot produce the gate verdict.
 **Oracle**: Separate authorship and an independent observation seam are required and currently missing; the complete qualified gate result is final.
-**Legacy IDs**: none — the Phase-49-bound zero-source-debt query must remain zero
+**Legacy IDs**: `LTD-VAL-007`, `LTD-VAL-008` — closure and independently qualified reintroduction required in the integrated gate
 **Docs to update**: `DEVELOPMENT_PLAN/README.md` only after gate pass
 
 ### Objective
@@ -245,26 +305,32 @@ Produce a candidate for complete gate execution without treating a successful ha
 
 ### Deliverables
 
-- Qualification and clean raw process observations.
+- Qualification and clean resource-bounded raw process observations.
 - Candidate evidence bound to the Phase-49 gate pass, its zero-source-debt snapshot, and the exact source/harness.
 - Explicit real-host residue.
 
 ### Validation
 
-The complete gate checks the source exception, oracle independence, qualification, raw process trace,
-legacy closure, and residue and alone decides whether Phase 50 passes.
+The complete gate checks the source exception, oracle independence, qualification, bounded challenge and
+resource observations, raw process trace, legacy closure, forced-termination cleanup, and residue. It alone
+decides whether Phase 50 passes.
 
 ### Remaining Work
 
-All implementation, qualification, independent check, legacy closure, and complete gate result remain open.
+All integrated qualification, independent check, `LTD-VAL-007`/`LTD-VAL-008` closure, and complete gate result
+remain open.
 
 ## Documentation Requirements
 
-**Engineering docs to update (after the complete gate passes):**
+**Engineering docs updated for the current target contract:**
 
-- `documents/engineering/substrate_doctrine.md` — only if the bounded bootstrap roles or adapter seam change.
-- `documents/engineering/repository_layout_doctrine.md` — only if the source exception changes.
-- `documents/engineering/validation_frame_doctrine.md` — only if validation handoff changes.
+- `documents/engineering/validation_frame_doctrine.md` — fixed-count challenge entropy and the bounded
+  supervisor envelope.
+- `documents/engineering/testing_spoof_resistance.md` — the general resource rule for effectful observers.
+
+`documents/engineering/substrate_doctrine.md` changes only if the bounded bootstrap roles or adapter seam
+change. `documents/engineering/repository_layout_doctrine.md` changes only if the source exception changes.
+Neither condition is introduced by the Phase-50 supervisor repair.
 
 **Cross-references to add:**
 

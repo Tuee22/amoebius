@@ -78,6 +78,8 @@ data Provision
     | GateCompletion
     | HardwareFreeDslBarrierPass
     | RunInputClosure
+    | BoundedBootstrapSupervisor
+    | ContainedBootstrapEnvironment
     | BehavioralDocumentClosure
     | PhaseOrdinalNameClosure
     | HostEnsureKernel
@@ -91,6 +93,7 @@ data Provision
     | CompileFailCorpus
     | GenesisCompilerAssumption
     | GeneratedFakeExecutables
+    | LiveTestTopology
     deriving (Bounded, Enum, Eq, Ord, Show)
 
 {- | Whether the consumer's current gate needs the provision or merely records
@@ -169,6 +172,8 @@ provisionLegacyBinding provision = case provision of
     GateCompletion -> Just Legacy.LtdVal004
     HardwareFreeDslBarrierPass -> Just Legacy.LtdVal005
     RunInputClosure -> Just Legacy.LtdVal006
+    BoundedBootstrapSupervisor -> Just Legacy.LtdVal007
+    ContainedBootstrapEnvironment -> Just Legacy.LtdVal008
     BehavioralDocumentClosure -> Just Legacy.LtdDoc001
     PhaseOrdinalNameClosure -> Just Legacy.LtdName001
     HostEnsureKernel -> Just Legacy.LtdHost001
@@ -182,6 +187,7 @@ provisionLegacyBinding provision = case provision of
     CompileFailCorpus -> Nothing
     GenesisCompilerAssumption -> Nothing
     GeneratedFakeExecutables -> Nothing
+    LiveTestTopology -> Nothing
 
 -- | The phase or bootstrap root that provides a provision.
 provisionProvider :: Provision -> Provider
@@ -192,6 +198,7 @@ provisionProvider provision = case provisionLegacyBinding provision of
         CompileFailCorpus -> PhaseProvider "compile_fail_harness"
         GenesisCompilerAssumption -> BootstrapRoot GenesisCompilerInput
         GeneratedFakeExecutables -> PhaseProvider "tool_and_mutant_generation"
+        LiveTestTopology -> PhaseProvider "test_topology_live"
         -- A newly added provision without a provider remains fail-closed through
         -- CAPABILITY-PROVIDER-UNKNOWN below.
         _ -> PhaseProvider ""
@@ -295,6 +302,7 @@ explicitEdges =
            , RequirementEdge "self_referential_gates" GatePrerequisite PbSourceAdmission (LegacyOwnerBinding Legacy.LtdSrc008)
            , RequirementEdge "host_assert_cli" GatePrerequisite HardwareFreeDslBarrierPass (LegacyOwnerBinding Legacy.LtdVal005)
            , RequirementEdge "linux_engine_bringup" GatePrerequisite HostEnsureKernel (LegacyOwnerBinding Legacy.LtdHost001)
+           , RequirementEdge "test_workflow_algebra" DeferredResidue LiveTestTopology (GeneratedRootConsumption "src/test-workflow-algebra/Amoebius/Test/WorkflowAlgebra.hs")
            ]
 
 {- | The self-reference phase establishes the general run-input closure used

@@ -229,11 +229,11 @@ maximumModeCharacters = 7
 #else
 maximumModeCharacters = 6
 #endif
-exactBootstrapBytes = 4795
+exactBootstrapBytes = 4915
 #if defined(VALIDATION_PB_GRAMMAR_SOURCE_BYTE_LIMIT_WIDEN_MUTANT)
 maximumSourceBytes = 4771
 #else
-maximumSourceBytes = 4795
+maximumSourceBytes = 4915
 #endif
 
 maximumPhysicalLines, maximumAstNodes, maximumLexicalUnits, maximumSyntaxDepth :: Int
@@ -289,7 +289,7 @@ maximumDiagnosticProblems = 64
 
 expectedBootstrapSha256 :: Text
 expectedBootstrapSha256 =
-  "c82b525dd47e831338598d495ce5ed5ee8eb87333cf1607e8b91807b5f6a162c"
+  "c978ad12876e570bc12704543b5c59c98fe03362acb19d4e527cbeb6090888bc"
 
 preflightRawInventory
   :: [(FilePath, Text, ByteString)]
@@ -388,7 +388,7 @@ preflightSingleHard path mode bytes =
 #else
     [ preflightFinding
         "PB-GRAMMAR-BYTE-COUNT-EXACT"
-        ( "expected exactly 4795 bytes; observed "
+        ( "expected exactly 4915 bytes; observed "
             <> decimal (ByteString.length bytes)
         )
     | ByteString.length bytes /= exactBootstrapBytes
@@ -633,7 +633,7 @@ preflightObservations rawInventory =
         <> retained retainPreflightExpectedModeObservation
           [observation "expected.mode" "100644"]
         <> retained retainPreflightExpectedBytesObservation
-          [observation "expected.bytes" "4795"]
+          [observation "expected.bytes" "4915"]
         <> retained retainPreflightExpectedSha256Observation
           [observation "expected.sha256" expectedBootstrapSha256]
         <> case (boundedLength 2 rawInventory, take 1 rawInventory) of
@@ -2743,6 +2743,8 @@ canonicalBootstrapBytes =
     , "        cache.mkdir(parents=True, exist_ok=True)"
     , "        temporary.mkdir(parents=True, exist_ok=True)"
     , "        environment = {}"
+    , "        environment[\"PATH\"] = str(toolchain / \".ghcup\" / \"bin\")"
+    , "        environment[\"CABAL_DIR\"] = str(cache / \"cabal\")"
     , "        environment[\"GHCUP_INSTALL_BASE_PREFIX\"] = str(toolchain)"
     , "        environment[\"GHCUP_SKIP_UPDATE_CHECK\"] = \"yes\""
     , "        environment[\"HOME\"] = str(home)"
@@ -4202,6 +4204,8 @@ validateAssignmentTargets (BootstrapAst statements) = concatMap (inStatement "<m
       [ "GHCUP_INSTALL_BASE_PREFIX"
       , "GHCUP_SKIP_UPDATE_CHECK"
       , "HOME"
+      , "PATH"
+      , "CABAL_DIR"
       , "XDG_CACHE_HOME"
       , "TMPDIR"
       , "TEMP"
@@ -4730,7 +4734,7 @@ proveClosedEnvironment ast = do
     ClosedEnvironmentProof
       { environmentStartsEmpty = True
       , environmentExactKeys = exactKeys
-      , environmentContainedPathKeys = ["GHCUP_INSTALL_BASE_PREFIX", "HOME", "XDG_CACHE_HOME", "TMPDIR", "TEMP", "TMP"]
+      , environmentContainedPathKeys = ["PATH", "CABAL_DIR", "GHCUP_INSTALL_BASE_PREFIX", "HOME", "XDG_CACHE_HOME", "TMPDIR", "TEMP", "TMP"]
       , childEnvironmentMappingExact = True
       }
  where
@@ -4750,6 +4754,8 @@ proveClosedEnvironment ast = do
     , mkdir "cache"
     , mkdir "temporary"
     , PyAssign (PyName "environment") PyEmptyDictionary
+    , PyAssign (indexed "PATH") (PyCall (PyName "str") [PyPositional (PyBinary PyPathJoin (PyBinary PyPathJoin (PyName "toolchain") (PyString ".ghcup")) (PyString "bin"))])
+    , PyAssign (indexed "CABAL_DIR") (PyCall (PyName "str") [PyPositional (PyBinary PyPathJoin (PyName "cache") (PyString "cabal"))])
     , PyAssign (indexed "GHCUP_INSTALL_BASE_PREFIX") (stringOf "toolchain")
     , PyAssign (indexed "GHCUP_SKIP_UPDATE_CHECK") (PyString "yes")
     , PyAssign (indexed "HOME") (stringOf "home")
@@ -4760,9 +4766,11 @@ proveClosedEnvironment ast = do
     , PyReturn (PyName "environment")
     ]
   exactKeys =
-    [ "GHCUP_INSTALL_BASE_PREFIX"
+    [ "CABAL_DIR"
+    , "GHCUP_INSTALL_BASE_PREFIX"
     , "GHCUP_SKIP_UPDATE_CHECK"
     , "HOME"
+    , "PATH"
     , "XDG_CACHE_HOME"
     , "TMPDIR"
     , "TEMP"

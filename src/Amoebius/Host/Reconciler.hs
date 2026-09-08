@@ -49,6 +49,7 @@ reconcilers =
       , reconcilerApplies = everySubstrate
       , reconcilerSteps = \substrate ->
           [InstallStep PackageManagerRoot VerifiedOnly [Literal (rootName substrate)]]
+            <> [InstallStep DiskObserver VerifiedOnly [Literal (toolCommandName DiskObserver)]]
       }
   , Reconciler
       { reconcilerName = "haskell-toolchain"

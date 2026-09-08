@@ -653,11 +653,11 @@ firstFailingCase cases = case cases of
 literalIntegrityProblems :: [String]
 literalIntegrityProblems =
   [ "canonical pb literal byte count changed"
-  | ByteString.length canonicalPbBytes /= 4795
+  | ByteString.length canonicalPbBytes /= 4915
   ]
     <> [ "canonical pb literal SHA-256 changed"
        | sha256Hex canonicalPbBytes
-           /= "c82b525dd47e831338598d495ce5ed5ee8eb87333cf1607e8b91807b5f6a162c"
+           /= "c978ad12876e570bc12704543b5c59c98fe03362acb19d4e527cbeb6090888bc"
        ]
     -- Selector cardinality is not asserted: an authored Int against the length
     -- of an authored list in the same module refuses only a half-finished edit
@@ -765,7 +765,7 @@ identityMismatchCase =
             , failureCommitmentSha256 = commitment
             , failureClaimedObservation = claimed
             , failureEntryCount = "1"
-            , failureAggregateBytes = "4795"
+            , failureAggregateBytes = "4915"
             , failureComputedSnapshot = computed
             , failureProblemCount = "1"
             , failureFindingsWithoutCommitment =
@@ -1600,6 +1600,8 @@ canonicalPbBytes =
     , "        cache.mkdir(parents=True, exist_ok=True)"
     , "        temporary.mkdir(parents=True, exist_ok=True)"
     , "        environment = {}"
+    , "        environment[\"PATH\"] = str(toolchain / \".ghcup\" / \"bin\")"
+    , "        environment[\"CABAL_DIR\"] = str(cache / \"cabal\")"
     , "        environment[\"GHCUP_INSTALL_BASE_PREFIX\"] = str(toolchain)"
     , "        environment[\"GHCUP_SKIP_UPDATE_CHECK\"] = \"yes\""
     , "        environment[\"HOME\"] = str(home)"

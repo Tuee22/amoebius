@@ -17,6 +17,7 @@ module Amoebius.Host.Context
 
 import Amoebius.Host.Ensure
 import Amoebius.Host.HostTool
+import Amoebius.Host.Reconciler (installPlan)
 import Amoebius.Host.Substrate
 import Control.Concurrent.MVar
 import Data.ByteString.Lazy.Char8 qualified as ByteString
@@ -25,6 +26,7 @@ import Data.Word (Word64)
 import System.Directory
 import System.Environment (lookupEnv)
 import System.FilePath ((</>))
+import System.Exit (ExitCode (..))
 import Text.Read (readMaybe)
 
 data BootstrapDistro = KindDistro | Rke2Distro
@@ -86,7 +88,8 @@ mkBinaryContext distro replicas
           case stateRoot of
             Nothing -> pure (Left "amoebius-root-not-declared")
             Just checkout -> do
-              tools <- initialHostConfig substrate
+              initial <- initialHostConfig substrate
+              toolsResult <- ensureRequiredTools substrate initial
               let stateDirectory = checkout </> ".data" </> "bootstrap-coordinator"
                   socket = "/var/run/docker.sock"
               socketPresent <- doesPathExist socket
@@ -94,38 +97,65 @@ mkBinaryContext distro replicas
               -- executable-bit resolver, and two predicates over one tool set answer
               -- differently on the same host -- a file that exists but is not
               -- executable was present to one and absent to the other.
-              docker <- resolveTool substrate Docker
-              df <- firstExecutableOf ["/usr/bin/df", "/bin/df"]
-              case (lookupTool Kind tools, lookupTool Kubectl tools, docker, df, socketPresent) of
-                (Just kind, Just kubectl, Just dockerExe, Just dfExe, True) -> do
-                  createDirectoryIfMissing True stateDirectory
-                  pure (Right BinaryContext
-                    { contextSubstrate = substrate
-                    , contextDistro = distro
-                    , contextReplicas = replicas
-                    , contextKind = kind
-                    , contextKubectl = kubectl
-                    , contextDocker = dockerExe
-                    , contextDf = dfExe
-                    , contextDockerSocket = socket
-                    , contextStateDirectory = stateDirectory
-                    , contextKubeconfig = stateDirectory </> "kubeconfig"
-                    })
-                (Nothing, _, _, _, _) -> pure (Left "kind-not-ensured")
-                (_, Nothing, _, _, _) -> pure (Left "kubectl-not-ensured")
-                (_, _, Nothing, _, _) -> pure (Left "container-runtime-prerequisite-absent")
-                (_, _, _, Nothing, _) -> pure (Left "disk-observer-absent")
-                (_, _, _, _, False) -> pure (Left "docker-socket-witness-absent")
+              case toolsResult of
+                Left problem -> pure (Left (renderEnsureError problem))
+                Right tools ->
+                  case (lookupTool Kind tools, lookupTool Kubectl tools, lookupTool Docker tools, lookupTool DiskObserver tools, socketPresent) of
+                    (Just kind, Just kubectl, Just dockerExe, Just dfExe, True) -> do
+                      createDirectoryIfMissing True stateDirectory
+                      pure (Right BinaryContext
+                        { contextSubstrate = substrate
+                        , contextDistro = distro
+                        , contextReplicas = replicas
+                        , contextKind = kind
+                        , contextKubectl = kubectl
+                        , contextDocker = dockerExe
+                        , contextDf = dfExe
+                        , contextDockerSocket = socket
+                        , contextStateDirectory = stateDirectory
+                        , contextKubeconfig = stateDirectory </> "kubeconfig"
+                        })
+                    (Nothing, _, _, _, _) -> pure (Left "kind-not-ensured")
+                    (_, Nothing, _, _, _) -> pure (Left "kubectl-not-ensured")
+                    (_, _, Nothing, _, _) -> pure (Left "container-runtime-prerequisite-absent")
+                    (_, _, _, Nothing, _) -> pure (Left "disk-observer-absent")
+                    (_, _, _, _, False) -> pure (Left "docker-socket-witness-absent")
+
+-- | The production caller for the probe-first kernel. Every required logical
+-- tool is driven through the same plan and the same executable-bit resolver.
+ensureRequiredTools :: Substrate -> HostConfig -> IO (Either EnsureError HostConfig)
+ensureRequiredTools substrate initial = drive initial [Docker, Kubectl, Kind, DiskObserver]
  where
-  -- `df` is a POSIX utility rather than a member of the closed `HostTool` enum, so
-  -- it is resolved by the same executable-bit predicate without joining the enum.
-  firstExecutableOf [] = pure Nothing
-  firstExecutableOf (path : rest) = do
-    present <- doesFileExist path
-    runnable <- if present then executable <$> getPermissions path else pure False
-    if runnable
-      then pure (either (const Nothing) Just (mkAbsExe path))
-      else firstExecutableOf rest
+  drive config [] = pure (Right config)
+  drive config (requested : remaining) = do
+    outcome <- installAndVerify
+      initialHostConfig
+      (performInstallStep substrate)
+      (installPlan substrate)
+      config
+      requested
+    case outcome of
+      Left problem -> pure (Left problem)
+      Right observed -> drive observed remaining
+
+performInstallStep :: Substrate -> InstallStep -> IO (Either EnsureError ())
+performInstallStep substrate step = case stepPerformer step of
+  VerifiedOnly -> do
+    observed <- resolveTool substrate (stepProvides step)
+    pure $ case observed of
+      Nothing -> Left (MissingToolAfterInstall (stepProvides step))
+      Just _ -> Right ()
+  PerformedBy performer -> do
+    resolved <- resolveTool substrate performer
+    case resolved of
+      Nothing -> pure (Left (MissingToolAfterInstall performer))
+      Just executablePath -> case stepArgv requirementVersion step of
+        Left problem -> pure (Left problem)
+        Right arguments -> do
+          result <- runTool executablePath arguments
+          pure $ case toolExitCode result of
+            ExitSuccess -> Right ()
+            ExitFailure code -> Left (InstallFailed (stepProvides step) ("exit-" <> show code))
 
 observePhysicalHost :: BinaryContext -> IO (Either HostAdmissionError HostObservation)
 observePhysicalHost context = do

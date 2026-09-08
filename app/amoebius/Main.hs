@@ -6,6 +6,7 @@ import Amoebius.Entry.ServeUi (runServeUi)
 import Amoebius.Entry.ControlPlane (runControlPlaneDaemon)
 import Amoebius.Exec.Boundary (mkBoundaryTools, runBoundaryCorpus)
 import Amoebius.Image.Resolver (runResolverCommand)
+import Amoebius.Host.LinuxEngine (runLinuxEngineGuestPass)
 import Amoebius.Image.Build (runAdmittedBuildxOci, runBakeInventory, runRenderBakeDockerfile)
 import Amoebius.Vault.Client (runVaultPromptWriteCommand, runVaultReadCommand, runVaultTransitCommand)
 import Amoebius.Vault.Seal (openUnlockMaterial, sealUnlockMaterialIO)
@@ -16,6 +17,7 @@ import Data.ByteString.Char8 qualified as StrictByteString
 import Data.ByteString.Lazy qualified as ByteString
 import System.Environment (getArgs)
 import System.Exit (exitWith)
+import Text.Read (readMaybe)
 
 main :: IO ()
 main = do
@@ -39,6 +41,9 @@ dispatch arguments =
     "vault-transit-decrypt" : options -> runVaultTransitCommand options
     "vault-prompt-write" : options -> runVaultPromptWriteCommand options
     "validate" : options -> runValidateCommand options >>= exitWith
+    ["--version"] -> putStrLn "amoebius 0.1.0.0"
+    ["dev", "linux-engine-guest-pass", passText, outputRoot]
+      | Just pass <- readMaybe passText -> runLinuxEngineGuestPass pass outputRoot
     ["vault-seal-unlock"] -> runSealUnlock
     ["vault-open-unlock"] -> runOpenUnlock
     ["dev", "boundary-fixture", kubectl, docker, helm, pulumi, manifestPath] -> do

@@ -348,7 +348,7 @@ flowchart TD
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
 
-*Design intent. The probe/decision/refuse shape of the install-and-verify reconcile driver; the four-step ensure it drives is proven in the sibling hostbootstrap seed, not an amoebius result.*
+*Phase-51 implementation boundary. `Amoebius.Host.Ensure.installAndVerify` implements this probe/decision/refuse shape, and `Amoebius.Host.Context.ensureRequiredTools` is its production caller. The phase gate remains the authority for whether that implementation is validated.*
 
 ### The exact boundary of the no-`PATH` rule
 
@@ -356,24 +356,30 @@ The rule governs **the host invocation surface**, and only that surface. When am
 boundary — running a subcommand of itself inside a VM or container ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux); the composition lift owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md)) — only the **outermost** host tool is
 resolved to an absolute path; every **nested** tool is the guest's *own* bare name run against the guest's
 own `PATH`, which is legitimate because it is that guest's environment, not the host's
-(`HostBootstrap.Lift.foldLeaf`). The invariant is "amoebius never resolves a tool against the *host's*
+(`Amoebius.Host.Lift.liftArgv`). The invariant is "amoebius never resolves a tool against the *host's*
 `PATH`," not "no `PATH` exists anywhere in the universe."
 
-> **Honesty.** The structural enforcement above (`AbsExe`, the closed enum, full-path exec) exists in the
-> `hostbootstrap` seed. Its *discovery* step today resolves an absolute path via `findExecutable` +
-> `mkAbsExe`; the amoebius target is package-manager-canonical discovery (`brew --prefix` and equivalents). The end-state invariant — invocation is always by absolute path — is the part
-> that is type-enforced now; package-manager-canonical *discovery* is the part still to land. Do not read
-> the current discovery seam as the finished contract.
+> **Honesty.** The structural enforcement above is now amoebius-owned: `AbsExe` hides its constructor,
+> `HostTool` is closed, `candidates` is total and substrate-indexed, and `runTool` accepts only `AbsExe`.
+> `candidatesWithin` projects the same table beneath a fresh fake-host root for Phase 51. Real
+> package-manager prefix/permission fidelity remains deliberately unverified until the native host phases;
+> the gate proves the algebra and its fake boundary, not `brew`, `winget`, or `apt` behavior on hardware.
 >
 > **Observed implementation.** [Phase 51](../../DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md) has a
-> footprint covering the parts that are amoebius's, whose status is recorded in the
+> implementation covering the algebra, whose status is recorded in the
 > [tracker](../../DEVELOPMENT_PLAN/README.md) and nowhere here: an install step is a typed `Performer` plus an argument vector in which a
 > version is a requirement reference rather than a literal, so a pin has one home; `HostTool` carries the
 > container engine, so it is ensured through the one closed enum instead of resolved beside it; a
 > reconciler is a row whose applicability column is the single statement of its set, with the diagnostic
 > rendered from that column; and the driver re-resolves after every step and verifies with the predicate
-> it probed with. Discovery is still `findExecutable`-shaped, and remains UNVERIFIED against the
-> package-manager-canonical target.
+> it probed with. `Context` reaches that driver before admitting bootstrap.
+>
+> `Amoebius.Host.LinuxEngine` is the Phase-52 native Linux implementation boundary. It separately records
+> durable Docker-group membership, current-process and future-session unelevated daemon access, native
+> architecture agreement, the run-local smoke-image result, and a freshly observed zero-mutation second
+> pass. The acquired supervisor owns the pristine Incus guest and external observations; the tracker records
+> whether that complete gate has passed. Native Apple and Windows provider/permission behavior remains
+> UNVERIFIED and belongs to Phases 53–54.
 
 **Phase-67 code generation.** The retired `amoebius-pulsar/Setup.hs` resolved `protoc` and
 `proto-lens-protoc` by absolute path and gave `proto-lens-setup` a closed search domain — never the ambient
@@ -398,7 +404,7 @@ synthesizes an operating system, never an instruction set.
 |----------------|-------------|---------------------|--------------------------|
 | **apple** | **Colima** (`colima`) or **Lima** (`limactl`), by workload ([§4.1](#41-colima-and-lima-on-apple-the-provider-follows-the-workload)) | An Ubuntu-24.04 `linux-cpu/arm64` VM, carrying a Docker endpoint under Colima | `hostbootstrap`'s Colima and Lima ensure modules |
 | **windows** | **WSL2** | An Ubuntu-24.04 `linux-cpu/amd64` distro | `hostbootstrap`'s WSL2 ensure module |
-| **linux-cpu** / **linux-cuda** | **Incus** | An Ubuntu-24.04 `linux-cpu` VM at the parent's natural architecture; CUDA devices are absent unless a different specialized gate explicitly requests passthrough | `hostbootstrap`'s Incus ensure module |
+| **linux-cpu** / **linux-cuda** | **Incus** | An Ubuntu-24.04 `linux-cpu` VM at the parent's natural architecture; CUDA devices are absent unless a different specialized gate explicitly requests passthrough | `Amoebius.Validation.LinuxEngineBringupRun` for the pristine Phase-52 guest boundary |
 
 The fourth column names a **reference implementation**, never a dependency: amoebius links none of those
 modules and re-derives the shape under its own obligations
@@ -414,8 +420,10 @@ new substrate is then an *extension* satisfying a contract rather than an edit t
 **Target frame boundary — NOT VALIDATED.** The plan must establish the three-constructor frame set, total
 wildcard-free substrate/frame/engine relations, and observation-only transition witnesses through the
 numerically owned Haskell contracts. No former implementation or suite result is retained here, and none of
-the provider rows or live observations is current validation evidence. Status lives only in the
-[tracker](../../DEVELOPMENT_PLAN/README.md).
+the Apple or Windows provider rows is current validation evidence. Phase 52 owns only the scoped Incus/Linux
+row and its live observations; its status, like every other phase's, lives only in the
+[tracker](../../DEVELOPMENT_PLAN/README.md). The cross-substrate frame boundary remains UNVERIFIED until its
+later owners close the other rows.
 
 This provider mapping is mandatory for pristine-host gates: **Incus on either Linux hardware substrate,
 Lima on Apple, WSL2 on Windows**. “Pristine” means the guest is newly materialized from the pinned image and
@@ -611,13 +619,13 @@ gate input. Current third-party dependencies and packaging machinery remain `LTD
 target installation contract. A running invocation cannot update itself: doing so would make the run's own
 provenance unanswerable.
 
-**Observed implementation.** The tracked `pb/**` footprint is migration debt under `LTD-SRC-008`; file
-presence and lexical inspection do not establish the role above. Phase 0 must close that row with an exact,
-non-empty, deny-by-default Haskell-owned AST/import/resolved-call/control-flow/potential-effect graph before
-Phase 49 can emit a candidate. That is static source admission only. Phase 49 invokes the source-bound Haskell
-binary directly and cannot use `pb` as evidence. [Phase 50](../../DEVELOPMENT_PLAN/phase_50_host_assert_cli.md)
-alone validates runtime adapter effects, executable identity, unchanged argv, exec replacement, and exit
-propagation for the already-bounded handoff. The tracker records both phases as **NOT VALIDATED**.
+**Observed implementation.** The tracked `pb/**` footprint is statically admitted only by the exact,
+non-empty, deny-by-default Haskell-owned AST/import/resolved-call/control-flow/potential-effect graph. That
+source admission does not establish runtime handoff behavior. Phase 49 invokes the source-bound Haskell binary
+directly and cannot use `pb` as evidence. [Phase 50](../../DEVELOPMENT_PLAN/phase_50_host_assert_cli.md) alone
+owns runtime adapter effects, executable identity, unchanged argv, exec replacement, and exit propagation for
+the already-bounded handoff. The [tracker](../../DEVELOPMENT_PLAN/README.md) is the sole status authority for
+those phases.
 
 Phase 65 owns the Haskell command-mode administrative client —
 node-local Vault init/unseal plus desired-spec update and KV CRUD against the control-plane daemon. Both phases

@@ -15,7 +15,7 @@ later. The pre-hardware harness is owned by
 
 **Status**: Authoritative source
 **Supersedes**: the image-first validation-frame rule previously carried by this file
-**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/image_build_doctrine.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, README.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/image_build_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -26,6 +26,7 @@ later. The pre-hardware harness is owned by
 - [2. The bootstrap boundary](#2-the-bootstrap-boundary)
   - [2.1 GenesisTrust is an irreducible root](#21-genesistrust-is-an-irreducible-root)
   - [2.2 The bounded `pb` handoff](#22-the-bounded-pb-handoff)
+  - [2.3 The handoff supervisor is resource-bounded](#23-the-handoff-supervisor-is-resource-bounded)
 - [3. Why native validation is substrate none](#3-why-native-validation-is-substrate-none)
 - [4. Generated output and cleanroom execution](#4-generated-output-and-cleanroom-execution)
 - [5. Container execution is later parity evidence](#5-container-execution-is-later-parity-evidence)
@@ -110,6 +111,36 @@ command listing cannot establish semantic scope. Any
 new `pb/**` behaviour outside the four admitted operations is a source-closure failure even if its extension
 remains `.py`.
 
+### 2.3 The handoff supervisor is resource-bounded
+
+Phase 50 applies the general [fresh-observation resource rule](./testing_spoof_resistance.md#125-fresh-external-observation)
+to the Haskell process that supervises `pb`. The challenge is exactly 32 unpredictable bytes obtained by a
+fixed-count cryptographic entropy operation. The supervisor refuses any other length before publishing the
+run-owned challenge and never performs a strict whole-stream read from `/dev/urandom` or another
+non-terminating source.
+
+The complete concrete handoff runs beneath an outer Haskell-owned containment envelope. Its typed budget binds
+an OS-enforced 8,589,934,592-byte memory ceiling, zero swap allowance, a 1,800-second monotonic deadline, the
+supervised process-tree identity, termination classification, and marker-scoped cleanup. These are safety
+ceilings, not expected consumption targets. A missing or unenforceable limit, memory exhaustion, deadline,
+signal, orphan, or unexplained termination is a red observation rather than a crash outside the evidence model.
+The memory limit caps a repeat below seven percent of the observed failing footprint while retaining a broad
+allowance for the serialized compiler. Zero swap prevents delayed host pressure, and the deadline is three
+times the earlier cold dependency-solve diagnostic. A clean run exceeding either limit requires an explicit
+contract review; it does not widen the limit from host availability.
+
+The independent Phase-50 oracle owns exact positive and negative expectations. It requires the 32-byte
+challenge, acknowledgement, bounded peak-memory observation, and completion within the declared deadline. It
+also rejects the former strict-read-then-truncate expression, wrong-length entropy, an endless entropy source,
+omitted containment, and retained processes or files after forced termination. The limits are independently
+restated Haskell values bound into candidate evidence; host defaults cannot choose or widen them.
+
+**Observed implementation — NOT VALIDATED.** The 2026-09-07 component attempt reached the current unbounded
+strict read before publishing the challenge and was killed after memory exhaustion. The dated observation and
+its separate contained-environment failure are recorded in the
+[development-plan audit](../../DEVELOPMENT_PLAN/README.md#current-implementation-audit). Phase 50 remains the
+owner because the Phase-49 predecessor had already passed and did not execute this supervisor.
+
 ---
 
 ## 3. Why native validation is `Substrate: none`
@@ -171,8 +202,9 @@ The image phase records its own source and recipe identity and leaves semantic l
 the earlier barrier. Browser or other specialized test images follow the same rule: they are later execution
 substrates for the behaviour they uniquely expose, not general validation authorities.
 
-All numbered phases are presently NOT VALIDATED. This doctrine states the target execution order and makes no
-current image, host, or phase-result claim.
+Current phase status is reported only by the
+[development-plan tracker](../../DEVELOPMENT_PLAN/README.md#phase-overview). This doctrine states the target
+execution order and makes no current image, host, or phase-result claim.
 
 ---
 
@@ -180,6 +212,7 @@ current image, host, or phase-result claim.
 
 - [No-cluster conformance harness](./conformance_harness_doctrine.md)
 - [Testing doctrine](./testing_doctrine.md)
+- [Testing spoof resistance](./testing_spoof_resistance.md)
 - [Image-build doctrine](./image_build_doctrine.md)
 - [Substrate doctrine](./substrate_doctrine.md)
 - [Generated-artifacts doctrine](./generated_artifacts_doctrine.md)

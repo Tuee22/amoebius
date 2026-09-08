@@ -14,7 +14,7 @@ development plan, or register definitions, which belong to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -173,6 +173,24 @@ or independently queried control plane.
 Unavailable, incomplete, unauthenticated, challenge-mismatched, or self-reported evidence fails closed. A
 signature authenticates its emitter; it does not prove that the emitter performed the effect it describes.
 
+**The problem.** A fresh challenge or effectful observer can consume an unbounded stream, allocate without a
+ceiling, or wait forever before producing evidence. In that state, the absence of a receipt is indistinguishable
+from a wedged harness until the host exhausts a shared resource.
+
+**Why the obvious alternative fails.** Applying `take` after a strict whole-stream read does not bound the read.
+The bound is evaluated only after the input reaches EOF, so a non-terminating source can retain every preceding
+chunk. A polling loop without an outer deadline has the same defect for time rather than memory.
+
+**The rule.** Every effectful supervisor acquires fixed-size challenges with a fixed-count operation, checks the
+exact returned length, and runs the complete subject/observer process tree inside a runner-owned memory ceiling
+and monotonic deadline. The external harness records both limits, the observed termination reason, and cleanup.
+An exhausted limit, deadline, missing length check, or unavailable containment mechanism is red.
+
+**What it forecloses.** No whole-stream read from a non-terminating entropy or device source, post-read truncation,
+unbounded wait, or host-global OOM kill can be accepted as validation progress. The qualification corpus includes
+wrong-length entropy, a never-ending source, omitted memory/deadline enforcement, and cleanup after forced
+termination at distinct loci.
+
 Security checks use real least-privilege authority and pair own-scope success with foreign-scope denial while
 observing zero forbidden effect. Route and ownership checks probe the sanctioned route and each plausible
 direct bypass. A positive path without its paired negative is incomplete.
@@ -225,8 +243,8 @@ observer, hardware, or cryptography is uncompromised. Those are named assumption
 future behaviour or another substrate.
 
 Every candidate states its untested layers as `UNVERIFIED`. An empty residue requires an explicit test
-rationale; it is never inferred from a full test count. The current repository reset treats every earlier phase result as
-invalidated evidence, so this doctrine contains no current per-phase success instances.
+rationale; it is never inferred from a full test count. This doctrine contains no current per-phase success
+instances; the [development-plan tracker](../../DEVELOPMENT_PLAN/README.md#phase-overview) alone reports status.
 
 ---
 

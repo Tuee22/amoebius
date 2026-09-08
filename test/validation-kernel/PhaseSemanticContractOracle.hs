@@ -44,7 +44,7 @@ runPhaseSemanticContractOracle =
                 expectedSemanticFindings
                 phaseSemanticContractDiagnostic
             , expectExactResult
-                "the no-input resource registry has the exact eight-ready, 45-unresolved inventory"
+                "the no-input resource registry has the exact nine-ready, 44-unresolved inventory"
                 "resource-provision-contract-diagnostic"
                 expectedResourceObservations
                 expectedResourceFindings
@@ -568,9 +568,9 @@ oraclePhaseVectors =
     , phaseVector 48 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
     , phaseVector 49 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "required|GATE-READY" "phase49:requires=all-source-migration-queries-zero,all-owners-at-or-before-49-zero"
     , phaseVector 50 "PbChildUnderDirectHaskellSupervisor" "BBBBBBBBBBBBBBBBBB" "required|GATE-READY" "phase50:requires=no-source-migration-ownership,phase49-gate-pass-source-snapshot,direct-haskell-supervisor-with-pb-child,identity-argv-exec-handoff,public-target-not-self-supervising"
-    , phaseVector 51 "GatePassBoundHaskellFakeBoundary" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase51:requires=hardware-free-execution,haskell-fake-boundaries-only"
-    , phaseVector 52 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase52:requires=first-hardware-validation"
-    , phaseVector 53 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+    , phaseVector 51 "GatePassBoundHaskellFakeBoundary" "BBBBBBBBBBBBBBBBBB" "required|GATE-READY" "phase51:requires=hardware-free-execution,haskell-fake-boundaries-only"
+    , phaseVector 52 "GatePassBoundHardware" "BBBBBBBBBBBBBBBBBB" "required|GATE-READY" "phase52:requires=first-hardware-validation"
+    , phaseVector 53 "GatePassBoundHardware" "BBBBBBBBBBBBBBBBBB" "required|GATE-READY" ""
     , phaseVector 54 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
     , phaseVector 55 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
     , phaseVector 56 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase56:provider=DistributionRegistry2;image=registry:2;requires=distribution-registry2-only"
@@ -692,11 +692,11 @@ expectedSemanticObservations :: [(Text, Text)]
 expectedSemanticObservations =
     [ ("semantic.phase-count", "96")
     , ("semantic.slot-count", "1728")
-    , ("semantic.gap-count", "810")
-    , ("semantic.bound-count", "918")
+    , ("semantic.gap-count", "756")
+    , ("semantic.bound-count", "972")
     , ("semantic.target-phase", "none")
     , ("semantic.deferred-gap-count", "0")
-    , ("semantic.legacy-count", "26")
+    , ("semantic.legacy-count", "28")
     ]
         <> [("semantic.phase", localPhaseProjection row) | row <- oraclePhases]
         <> [("semantic.bound-slot", slot) | slot <- expectedBoundSlots]
@@ -1621,6 +1621,60 @@ expectedBoundSlots =
     , "phase-50-predecessor=exact-phase-forty-nine-receipt"
     , "phase-50-residue=real-host-platform-and-post-handoff-runtime-owners-explicit"
     , "phase-50-pass-criterion=qualified-phase-fifty-gate-pass"
+    , "phase-51-claim=closed-substrate-indexed-host-ensure-algebra"
+    , "phase-51-subject=acquired-host-ensure-kernel-supervisor"
+    , "phase-51-command=pb-handoff-to-offline-serial-host-ensure-matrix"
+    , "phase-51-oracle=independent-host-ensure-kernel-oracle"
+    , "phase-51-positive-controls=complete-host-ensure-positive-controls"
+    , "phase-51-paired-negatives=exact-host-ensure-paired-negatives"
+    , "phase-51-mutants=applied-host-ensure-production-mutants"
+    , "phase-51-discovery=exact-host-ensure-source-and-fake-root-discovery"
+    , "phase-51-challenge=post-acquisition-host-ensure-challenge"
+    , "phase-51-observer=host-ensure-process-filesystem-and-argv-observation"
+    , "phase-51-authority-bypass=no-network-container-cluster-provider-or-hardware-effects"
+    , "phase-51-freshness=fresh-disjoint-host-roots-and-stable-source"
+    , "phase-51-qualification=qualified-host-ensure-harness"
+    , "phase-51-cleanroom=host-ensure-products-contained-below-build"
+    , "phase-51-legacy-closure=phase-fifty-one-host-legacy-families-closed"
+    , "phase-51-predecessor=exact-phase-fifty-receipt"
+    , "phase-51-residue=live-platform-permission-engine-vm-cluster-and-hardware-owners-explicit"
+    , "phase-51-pass-criterion=qualified-phase-fifty-one-gate-pass"
+    , "phase-52-claim=complete-pristine-linux-engine-and-native-smoke-image"
+    , "phase-52-subject=acquired-linux-engine-bringup-supervisor"
+    , "phase-52-command=pb-handoff-to-serial-qualified-live-incus-run"
+    , "phase-52-oracle=independent-linux-engine-bringup-oracle"
+    , "phase-52-positive-controls=closed-linux-engine-positive-controls"
+    , "phase-52-paired-negatives=exact-linux-engine-paired-negatives"
+    , "phase-52-mutants=applied-linux-engine-production-mutants"
+    , "phase-52-discovery=exact-linux-engine-source-and-live-surface-discovery"
+    , "phase-52-challenge=second-pass-observed-fixed-point"
+    , "phase-52-observer=external-incus-process-group-architecture-and-image-observation"
+    , "phase-52-authority-bypass=unique-owner-marker-and-no-elevated-docker-or-foreign-effects"
+    , "phase-52-freshness=fresh-guest-run-and-stable-source"
+    , "phase-52-qualification=qualified-linux-engine-harness"
+    , "phase-52-cleanroom=guest-and-generated-products-contained-and-destroyed"
+    , "phase-52-legacy-closure=no-phase-fifty-two-legacy-authorities"
+    , "phase-52-predecessor=exact-phase-fifty-one-receipt"
+    , "phase-52-residue=later-platforms-clusters-registry-and-services-explicit"
+    , "phase-52-pass-criterion=qualified-phase-fifty-two-gate-pass"
+    , "phase-53-claim=complete-apple-floor-colima-carve-lift-and-native-arm64-image"
+    , "phase-53-subject=acquired-apple-engine-bringup-supervisor"
+    , "phase-53-command=pb-handoff-to-serial-qualified-live-apple-run"
+    , "phase-53-oracle=independent-apple-engine-bringup-oracle"
+    , "phase-53-positive-controls=closed-apple-engine-positive-controls"
+    , "phase-53-paired-negatives=exact-apple-engine-paired-negatives"
+    , "phase-53-mutants=applied-apple-engine-production-mutants"
+    , "phase-53-discovery=exact-apple-engine-source-and-live-surface-discovery"
+    , "phase-53-challenge=post-start-apple-engine-challenge"
+    , "phase-53-observer=external-apple-provider-architecture-and-image-observation"
+    , "phase-53-authority-bypass=unique-apple-owner-marker-and-no-foreign-or-cluster-effects"
+    , "phase-53-freshness=fresh-apple-profile-and-stable-source"
+    , "phase-53-qualification=qualified-apple-engine-harness"
+    , "phase-53-cleanroom=apple-generated-products-contained-and-owned-profile-destroyed"
+    , "phase-53-legacy-closure=no-phase-fifty-three-legacy-authorities"
+    , "phase-53-predecessor=exact-phase-fifty-two-receipt"
+    , "phase-53-residue=windows-kind-registry-and-services-explicit"
+    , "phase-53-pass-criterion=qualified-phase-fifty-three-gate-pass"
     ]
 
 expectedSemanticFindings :: [ExpectedFinding]
@@ -1710,6 +1764,7 @@ localLegacyReverseMap =
         , (46, ["LTD-SRC-004"])
         , (47, ["LTD-SRC-001", "LTD-SRC-005", "LTD-SRC-006"])
         , (49, ["LTD-VAL-001", "LTD-VAL-002", "LTD-VAL-003", "LTD-VAL-004", "LTD-VAL-005", "LTD-VAL-006"])
+        , (50, ["LTD-VAL-007", "LTD-VAL-008"])
         , (51, ["LTD-HOST-001", "LTD-HOST-002"])
         , (55, ["LTD-RUN-001"])
         , (56, ["LTD-IMG-001"])
@@ -1722,9 +1777,9 @@ expectedResourceObservations =
     [ ("resource.phase-domain-count", "96")
     , ("resource.required-phase-count", "53")
     , ("resource.slot-count", "371")
-    , ("resource.gap-count", "315")
+    , ("resource.gap-count", "294")
     , ("resource.draft-count", "0")
-    , ("resource.gate-ready-count", "56")
+    , ("resource.gate-ready-count", "77")
     , ("resource.target-phase", "none")
     , ("resource.deferred-gap-count", "0")
     ]
@@ -1748,7 +1803,7 @@ expectedResourceFindings =
         <> [ ExpectedFinding
                 "PLAN-RESOURCE-DIAGNOSTIC-ONLY"
                 planRoot
-                "the nullary resource view cannot authorize a run; Phases 1, 13, 14, 15, 25, 34, 49, and 50 are gate-ready and 45 later contracts remain unresolved"
+                "the nullary resource view cannot authorize a run; Phases 1, 13, 14, 15, 25, 34, and 49 through 53 are gate-ready and 42 later contracts remain unresolved"
            ]
 
 canonicalCorpus :: [(FilePath, Text)]
@@ -1879,7 +1934,7 @@ gateRow ordinal category =
 
 resourceSection :: Int -> [Text]
 resourceSection ordinal
-    | ordinal `elem` [1, 13, 14, 15, 25, 34, 49, 50] =
+    | ordinal `elem` [1, 13, 14, 15, 25, 34, 49, 50, 51, 52, 53] =
         [ ""
         , "## Resource provision"
         , "> Run-local owner, preflight, allowed/forbidden write boundary, observer, cleanup, and zero-residue evidence are acquired by the Haskell gate."
@@ -2046,7 +2101,7 @@ summaryOrderMutationResult =
 unresolvedMarkerMutationResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath (oraclePhaseFor 51))
+            (oraclePath phase54)
             phase11SubjectGateRow
             "| `Subject` | blocks validation: independent subject missing. |"
             canonicalCorpus
@@ -2054,7 +2109,7 @@ unresolvedMarkerMutationResult =
 unresolvedSubstringMutationResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath (oraclePhaseFor 51))
+            (oraclePath phase54)
             phase11SubjectGateRow
             "| `Subject` | incidental prose mentions UNRESOLVED without the governed prefix. |"
             canonicalCorpus
@@ -2166,7 +2221,7 @@ resourceHeadingMutationResult =
 indentedResourceBlockerResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase51)
+            (oraclePath phase54)
             resourceBlockerLine
             ("    " <> resourceBlockerLine)
             canonicalCorpus
@@ -2174,7 +2229,7 @@ indentedResourceBlockerResult =
 tabIndentedResourceBlockerResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase51)
+            (oraclePath phase54)
             resourceBlockerLine
             ("\t" <> resourceBlockerLine)
             canonicalCorpus
@@ -2182,7 +2237,7 @@ tabIndentedResourceBlockerResult =
 rawHtmlResourceBlockerResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase51)
+            (oraclePath phase54)
             resourceBlockerLine
             (rawScriptBlock resourceBlockerLine)
             canonicalCorpus
@@ -2190,7 +2245,7 @@ rawHtmlResourceBlockerResult =
 blockquoteRawHtmlResourceResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase51)
+            (oraclePath phase54)
             resourceBlockerLine
             (blockquoteRawScriptBlock resourceBlockerLine)
             canonicalCorpus
@@ -2198,7 +2253,7 @@ blockquoteRawHtmlResourceResult =
 blockquoteFencedResourceResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase51)
+            (oraclePath phase54)
             resourceBlockerLine
             (blockquoteFencedBlock resourceBlockerLine)
             canonicalCorpus
@@ -2206,7 +2261,7 @@ blockquoteFencedResourceResult =
 alternatingFenceResourceResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase51)
+            (oraclePath phase54)
             resourceBlockerLine
             (alternatingFenceBlock resourceBlockerLine)
             canonicalCorpus
@@ -2214,7 +2269,7 @@ alternatingFenceResourceResult =
 blockquoteAlternatingHtmlResourceResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase51)
+            (oraclePath phase54)
             resourceBlockerLine
             (alternatingRawHtmlBlock ">" resourceBlockerLine)
             canonicalCorpus
@@ -2222,7 +2277,7 @@ blockquoteAlternatingHtmlResourceResult =
 listAlternatingHtmlResourceResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase51)
+            (oraclePath phase54)
             resourceBlockerLine
             (alternatingRawHtmlBlock "- " resourceBlockerLine)
             canonicalCorpus
@@ -2487,13 +2542,13 @@ phase11SubjectGateRow =
 resourceBlockerLine =
     "> **UNRESOLVED — blocks validation.** No live mutation may begin. Fixture-only inventory."
 
-phase0, phase1, phase34, phase50, phase51, phase52, phase84, phase95 :: OraclePhase
+phase0, phase1, phase34, phase50, phase52, phase54, phase84, phase95 :: OraclePhase
 phase0 = oraclePhaseFor 0
 phase1 = oraclePhaseFor 1
 phase34 = oraclePhaseFor 34
 phase50 = oraclePhaseFor 50
-phase51 = oraclePhaseFor 51
 phase52 = oraclePhaseFor 52
+phase54 = oraclePhaseFor 54
 phase84 = oraclePhaseFor 84
 phase95 = oraclePhaseFor 95
 
@@ -2559,10 +2614,10 @@ summaryOrderMutationFinding =
         ["Phase scope", "Lane", "Substrate", "Register", "Depends on", "Gate"]
 unresolvedMarkerMutationFinding =
     semanticMismatch
-        51
+        54
         "unresolved-shape"
-        (localGapCategoryNames 51)
-        (filter (/= "Subject") (localGapCategoryNames 51))
+        (localGapCategoryNames 54)
+        (filter (/= "Subject") (localGapCategoryNames 54))
 unresolvedSubstringMutationFinding :: ExpectedFinding
 unresolvedSubstringMutationFinding = unresolvedMarkerMutationFinding
 
@@ -2620,8 +2675,8 @@ indentedResourceBlockerFindings =
     [ semanticJoinRefusal
     , ExpectedFinding
         "PLAN-RESOURCE-JOIN-MISMATCH"
-        (oraclePath phase51)
-        "phase=51 field=unresolved-blocker expected=True actual=False"
+        (oraclePath phase54)
+        "phase=54 field=unresolved-blocker expected=True actual=False"
     , resourceJoinRefusal
     , markdownJoinRefusal
     ]
@@ -3215,9 +3270,9 @@ oracleLiteralProblems =
            | map oraclePhaseVectorFor [0 .. 95] /= oraclePhaseVectors
                 || any ((== vectorOrdinal invalidOraclePhaseVector) . vectorOrdinal) oraclePhaseVectors
            ]
-        <> [ "the Phase-0 through Phase-50 bitmaps must be bound and every later bitmap must retain exactly eighteen ContractGap markers"
-           | any ((/= "BBBBBBBBBBBBBBBBBB") . vectorSlotBitmap) (take 51 oraclePhaseVectors)
-                || any ((/= "GGGGGGGGGGGGGGGGGG") . vectorSlotBitmap) (drop 51 oraclePhaseVectors)
+        <> [ "the Phase-0 through Phase-53 bitmaps must be bound and every later bitmap must retain exactly eighteen ContractGap markers"
+           | any ((/= "BBBBBBBBBBBBBBBBBB") . vectorSlotBitmap) (take 54 oraclePhaseVectors)
+                || any ((/= "GGGGGGGGGGGGGGGGGG") . vectorSlotBitmap) (drop 54 oraclePhaseVectors)
            ]
         <> [ "the explicit oracle stage vector must retain 50 direct, one pb-child, one fake, and 44 hardware rows"
            | Map.fromListWith (+) [(vectorStage row, 1 :: Int) | row <- oraclePhaseVectors]
@@ -3243,11 +3298,11 @@ oracleLiteralProblems =
         <> [ "oracle gate category literals must contain exactly 18 unique rows"
            | length gateCategories /= 18 || Set.size (Set.fromList gateCategories) /= 18
            ]
-        <> [ "oracle gap total must be exactly 810"
-           | sum (map (length . localGapCategoryNames . oracleOrdinal) oraclePhases) /= 810
+        <> [ "oracle gap total must be exactly 756"
+           | sum (map (length . localGapCategoryNames . oracleOrdinal) oraclePhases) /= 756
            ]
-        <> [ "oracle bound total must be exactly 918"
-           | 1728 - sum (map (length . localGapCategoryNames . oracleOrdinal) oraclePhases) /= 918
+        <> [ "oracle bound total must be exactly 972"
+           | 1728 - sum (map (length . localGapCategoryNames . oracleOrdinal) oraclePhases) /= 972
            ]
         <> [ "oracle resource-required phase set must contain exactly 53 unique ordinals"
            | length resourceRequiredOrdinals /= 53
@@ -3258,20 +3313,20 @@ oracleLiteralProblems =
                     , vectorResourceProjection row == "not-required|ABSENT"
                     ]
                     /= 43
-                || length unresolvedResourceOrdinals /= 45
+                || length unresolvedResourceOrdinals /= 42
                 || any
                     (\row -> vectorResourceProjection row `notElem` ["required|GATE-READY", "required|UNRESOLVED", "not-required|ABSENT"])
                     oraclePhaseVectors
            ]
-        <> [ "the frozen semantic and resource inventories must retain 1021/104 observations and 811/316 findings"
-           | length expectedSemanticObservations /= 1021
-                || length expectedSemanticFindings /= 811
+        <> [ "the frozen semantic and resource inventories must retain 1075/104 observations and 757/295 findings"
+           | length expectedSemanticObservations /= 1075
+                || length expectedSemanticFindings /= 757
                 || length expectedResourceObservations /= 104
-                || length expectedResourceFindings /= 316
+                || length expectedResourceFindings /= 295
            ]
-        <> [ "oracle reverse legacy map must contain exactly 26 unique IDs"
+        <> [ "oracle reverse legacy map must contain exactly 28 unique IDs"
            | let identifiers = concat (Map.elems localLegacyReverseMap)
-              in length identifiers /= 26 || Set.size (Set.fromList identifiers) /= 26
+              in length identifiers /= 28 || Set.size (Set.fromList identifiers) /= 28
            ]
         <> [ "the inert-prose negative must replace a nonzero, independently counted sentence in every phase"
            | inertProseReplacementCount <= 0 || inertProseReplacementCount /= 96

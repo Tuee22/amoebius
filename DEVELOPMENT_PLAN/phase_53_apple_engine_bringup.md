@@ -24,7 +24,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
+- [Resource provision](#resource-provision)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 53.1: The Homebrew floor is verified, never installed](#sprint-531-the-homebrew-floor-is-verified-never-installed-)
@@ -39,19 +39,19 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+🔄 Active — NOT VALIDATED.
 
-Blocked by redesigned Phase 52, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
-
-Hardware validation is also prohibited until the hardware-free DSL gate barrier is independently
-satisfied and gate-passed.
+Phase 52 and every earlier gate have passed in numerical order. The source-bound Haskell subject, independent
+oracle, paired negatives, six changed-production-subject mutants, acquired runner, and typed gate/resource
+contracts are implemented and qualified. The exact Phase-53 gate currently refuses at the required live
+boundary because this development host is Linux `x86_64`; a physical Apple Silicon macOS host must execute
+the owned Colima profile before any status projection may mark this phase Done.
 
 ---
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+> **Gate interpretation.** The phase-specific contract is bound but remains NOT VALIDATED until the complete
+> acquired gate passes for one stable source snapshot on physical Apple Silicon. Component checks and a
+> non-Apple refusal cannot substitute for the live result.
 
 ## Phase Summary
 
@@ -83,32 +83,38 @@ appears.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED; live Apple execution remains open.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: one cohesive claim — *an apple host reaches a container engine, a budget-sized frame, and a native `arm64` image, using the linux step list unchanged*. Its sprint seams are the floor, the frame, the selection, the lifecycle, and the lift. It splits if a second substrate or a second acceptance register appears. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 53` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 52; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | A physical Apple Silicon host verifies its operator-owned floor, ensures Colima, admits a checked frame carve, executes the unchanged lifted Linux step list, and builds and runs a native arm64 image without emulation. |
+| `Subject` | `Amoebius.Host.AppleEngine`, the shared `Amoebius.Substrate.Brew` ensure algebra, and the acquired `Amoebius.Validation.AppleEngineBringupRun` supervisor. |
+| `Command` | `pb validate phase 53`; the validated bootstrap hands off unchanged to Haskell, which serially qualifies the changed production subjects before executing one owned live Colima profile. |
+| `Oracle` | `test/spec/host/AppleEngineBringupOracle.hs`, importing no `Amoebius.*` module and separately authoring provider, lifecycle, carve argv, lifted-step, floor, and architecture observations. |
+| `Positive controls` | The complete three-member floor, four workloads, four lifecycle rows, observed-and-admitted 4-core/8-GiB/40-GiB carve, all five executable rows of Phase 51's unchanged Linux plan and their concrete Colima envelopes, all five rows executed and argument-observed through run-owned boundary shims in the disposable live profile, a non-mutating real-guest `df` challenge, ready owned-context Docker endpoint, initially absent and then native arm64 image, and owned teardown form the closed corpus. |
+| `Paired negatives` | Each missing floor member, non-Apple substrate, CPU/memory/disk one-short supply, architecture disagreement, emulation, bare executable, and leaked ephemeral lifecycle are distinguished at exact constructors or argv rows. |
+| `Mutants` | Six Cabal-selected changed production subjects install an operator floor, choose Lima for an image build, persist an ephemeral frame, substitute default sizing, re-author the lifted step, or admit emulation; each must emit its assigned red token while the clean subject remains green. |
+| `Discovery` | The acquired tracked-source inventory equals the Apple-engine product, independent oracle, spec, runner pair, dispatch/evidence/runner wiring, and Cabal declarations; live discovery equals the floor, provider profile, endpoint, architecture, image, invocation, and teardown observations in both directions. |
+| `Challenge` | After Colima reports started, the runner decodes the provider's independent inventory and requires the exact running owner profile, architecture, CPU, memory, disk, and runtime carve; it then challenges the owned-context Docker endpoint, proves the run-owned image is initially absent, builds and executes it without cache, re-reads provider/image architecture, and refuses any cached or pre-start answer. |
+| `Observer` | The outer Haskell supervisor records absolute argv and exits for `uname`, `xcode-select`, `sysctl`, `df`, Homebrew, Colima, and Docker; Colima inventory, Docker-context inventory, and the active Docker context before/after; host/frame/engine/image architecture; guest `binfmt_misc` registrations; container stdout; and cleanup inventory. |
+| `Authority/bypass` | A unique Phase-53 profile and image reference bound the mutable scope. Colima/Lima/Docker root and selector environment overrides are cleared. Colima is started with host mounts, ambient templates, active-context mutation, SSH-agent/config integration, Kubernetes, and binfmt emulation disabled. Only that profile and image may be created; no foreign profile, cluster, registry, published tag, provider-cloud resource, or emulation path is admitted. |
+| `Freshness` | The run root, profile, and image name are newly absent; source and Phase-52 receipt precede mutation; floor and capacity preflight precede provider ensure/start; observations are regenerated; opening and closing source identities match. |
+| `Qualification` | The fixed clean row and six-mutant corpus qualify the Haskell harness with pinned absolute compiler/store, `--jobs=1`, and offline resolution before the live verdict is admitted. |
+| `Cleanroom` | Generated recipes, logs, and compiler products remain below `.build/runs/phase-53/**`; the exact owned image, Colima profile, and separate runtime data are destroyed in an unconditional bracket and Colima/Docker-context inventories return to their pre-run values. |
+| `Legacy closure` | Phase 53 owns no legacy ID; the acquired legacy reverse map must remain empty for this ordinal. |
+| `Predecessor` | Exact `ImmediatePredecessorPass` for Phase 52; an absent, stale, replayed, later-phase, or different-source receipt refuses before any Apple mutation. |
+| `Residue` | `UNVERIFIED`: Windows engine bring-up, kind and later clusters, registry, canonical published base images, services, accelerators, and later live acceptance remain Phase-54+-owned. |
+| `Pass criterion` | `qualified-gate-pass` — all eighteen rows pass for one exact stable source on physical Apple Silicon, all six production mutants are red at assigned loci, live external observations agree, no emulation is observed, and owned live residue is zero. |
 
-## Resource provision — UNRESOLVED
+## Resource provision
 
-> **UNRESOLVED — blocks validation.** No live mutation may begin. Before check this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
+- **Owner marker:** exact source snapshot, Phase-52 receipt, unique Phase-53 run root, unique `amoebius-phase53-<pid>` Colima profile, two boundary-observer shims inside that disposable profile, and matching run-owned image reference.
+- **Preflight:** physical macOS `arm64`; `/opt/homebrew/bin/brew` and `xcode-select -p` verified without repair; sufficient observed CPU, memory, and home-volume disk for the exact carve; absent owner profile and image; no emulation or redirected-root selector.
+- **Allowed mutation:** create run-local `.build/**` evidence; install Colima and the Docker client through the verified Homebrew root only when absent; create/start only the marked profile at the admitted carve; create two exact echo-backed boundary-observer shims only inside that fresh disposable profile; build/run/remove only the run-owned native image.
+- **Forbidden mutation:** no Homebrew installation or Xcode repair, redirected Colima/Lima/Docker state root, foreign Colima profile/image/context, host-directory mount, active Docker-context switch, ambient Colima template, operator SSH config/agent integration, kind/Kubernetes cluster, registry, published tag, cloud resource, cross-build/binfmt emulation, ambient toolchain, concurrent compiler, or repository path outside `.build/**` may be changed.
+- **Observer:** the outer Haskell supervisor reads platform/floor/capacity, Colima inventory, Docker-context inventory, and the active Docker context before/after, exact process argv/exits, Docker endpoint readiness, host/frame/engine/image architecture, guest `binfmt_misc` registrations, container stdout, and final owned-resource inventory.
+- **Cleanup:** the exact validated image reference is removed and the exact validated profile plus its separate runtime data are deleted in an unconditional bracket on success or failure; no wildcard or caller-supplied deletion target is accepted.
+- **Residue:** the owner profile, its boundary-observer shims, context, runtime data, and image must be absent and foreign Colima/Docker-context inventories must byte-equal their pre-run values; only run-owned `.build/**` evidence and allowed durable Colima/Docker-client package ensures may remain.
 
 ## Doctrine adopted
 
@@ -132,15 +138,15 @@ appears.
 
 > **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-## Sprint 53.1: The Homebrew floor is verified, never installed ⏸️
+## Sprint 53.1: The Homebrew floor is verified, never installed 🔄
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Status**: Active — NOT VALIDATED
+**Implementation**: `Amoebius.Host.AppleEngine.admitAppleFloor` and the acquired live supervisor verify physical Apple Silicon, Homebrew, and Xcode before any mutation.
 **Blocked by**: [Phase 52](phase_52_linux_engine_bringup.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: one green floor and three exact missing-prerequisite pairs, plus the installs-floor production mutant.
+**Oracle**: `test/spec/host/AppleEngineBringupOracle.hs`, importing no production module.
+**Legacy IDs**: none.
+**Docs to update**: `documents/engineering/substrate_doctrine.md`.
 
 ### Objective
 
@@ -166,17 +172,17 @@ supply.
 
 ### Remaining Work
 
-The whole sprint.
+Run the complete acquired Phase-53 gate on physical Apple Silicon; only its exact pass can authorize the mechanical status projection.
 
 ## Sprint 53.2: Colima ensured, and a frame sized from the carve ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Implementation**: `Amoebius.Host.AppleEngine.admitFrameDemand` and absolute Colima argv bind the exact carve before provider start.
 **Blocked by**: Sprint 53.1
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: exact admitted carve, CPU/memory/disk one-short refusals, absolute argv, and the default-frame mutant.
+**Oracle**: `AppleEngineBringupOracle.expectedColimaStart`.
+**Legacy IDs**: none.
+**Docs to update**: `documents/engineering/resource_capacity_doctrine.md`.
 
 ### Objective
 
@@ -185,9 +191,9 @@ ensure Colima through the verified root and provision a frame whose size is a ch
 
 ### Deliverables
 
-- A Colima ensure that probes, installs through Homebrew when absent, resolves the absolute path from the
-  package manager, and invokes only that path — a bare `colima` handed to the OS is a search, not a
-  resolution.
+- Colima and Docker-client ensures that probe, install through Homebrew when absent, resolve their absolute
+  paths beneath the verified package-manager prefix, and invoke only those paths — a bare command handed to
+  the OS is a search, not a resolution.
 - A frame whose CPU, memory, and disk come from the carve arithmetic, because a default size is a number
   nothing checked against the host it runs on.
 - A refusal on a failed fit, issued before the provider is called, so an overcommit costs a rejection rather
@@ -202,17 +208,17 @@ ensure Colima through the verified root and provision a frame whose size is a ch
 
 ### Remaining Work
 
-The whole sprint.
+Run the complete acquired Phase-53 gate on physical Apple Silicon; only its exact pass can authorize the mechanical status projection.
 
 ## Sprint 53.3: The provider follows the workload ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Implementation**: `AppleWorkload`, `AppleProvider`, and `providerFor` form the closed workload-sensitive provider table; `providerBrewTool` binds both providers to the one corrected `BrewEnsurePlan` interpreter used by the live runner.
 **Blocked by**: Sprint 53.2
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: all four workload rows, exact Colima/Lima/Docker-client ensure plans, non-absolute path refusals, the non-Apple refusal, and the image-build wrong-provider mutant.
+**Oracle**: `AppleEngineBringupOracle.expectedProviders`.
+**Legacy IDs**: none.
+**Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/substrates.md`.
 
 ### Objective
 
@@ -223,8 +229,8 @@ make the frame a consequence of what the run needs, and make the substrate-only 
 
 - A selection function whose domain is the workload and the substrate together; a selector keyed on the
   substrate alone cannot express the doctrine's rows, so the type does not admit one.
-- Colima for a workload that needs a container endpoint — an image build, a one-off `docker run --rm`, and a
-  kind cluster, whose nodes are themselves containers.
+- Colima for a workload that needs a container endpoint — an image build, a one-off `docker run --rm`, or a
+  persistent container runtime. Kind cluster creation remains Phase 55-owned.
 - Lima for a workload that needs the distribution rather than an endpoint, because software installing into a
   full Linux system cannot be satisfied by a container runtime.
 - One ensure path shared by both providers, since Colima is Lima carrying a container runtime and the
@@ -237,17 +243,17 @@ make the frame a consequence of what the run needs, and make the substrate-only 
 
 ### Remaining Work
 
-The whole sprint.
+Run the complete acquired Phase-53 gate on physical Apple Silicon; only its exact pass can authorize the mechanical status projection.
 
 ## Sprint 53.4: The ephemeral one-off and the frame that persists ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Implementation**: `lifecycleFor`, the typed `StopFrame` action, and the runner's unconditional cleanup bracket bind lifetime to workload and exact ownership.
 **Blocked by**: Sprint 53.3
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: all four lifecycle rows, an ephemeral terminal teardown, the leak mutant, and provider before/after equality.
+**Oracle**: `AppleEngineBringupOracle.expectedLifecycles` plus the outer provider observer.
+**Legacy IDs**: none.
+**Docs to update**: `documents/engineering/substrate_doctrine.md`.
 
 ### Objective
 
@@ -260,29 +266,30 @@ tie each frame's lifetime to the thing it backs, so nothing outlives its reason 
   construction rather than by a cleanup step a failure can skip.
 - A bracket that destroys the frame on the failure path as well as the success path, because a leaked VM is a
   debit no later run knows to account for.
-- A frame that persists for the life of what it backs, since a kind node is a container the run is keeping
-  and the frame is what keeps it.
+- A frame that persists for the life of a persistent container-runtime workload; the cluster lifecycle that
+  will later consume that runtime remains Phase 55-owned.
 - An inventory read that answers from the provider rather than from amoebius's record of what it created, so
   a frame created outside this run is still observed.
 
 ### Validation
 
 1. A failed one-off leaves the provider inventory exactly as it found it.
-2. Destroying the cluster destroys its frame, and destroying the frame is refused while the cluster exists.
+2. A persistent-runtime workload does not receive the ephemeral teardown action; cluster ownership remains
+   unverified until Phase 55.
 
 ### Remaining Work
 
-The whole sprint.
+Run the complete acquired Phase-53 gate on physical Apple Silicon; only its exact pass can authorize the mechanical status projection.
 
 ## Sprint 53.5: The lifted step list and the native image ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Implementation**: `liftLinuxSteps`, `admitNativeArm64`, and the live runner's run-owned image build/invocation bind unchanged lift and native architecture.
 **Blocked by**: Sprint 53.4
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: exact argv for every executable Phase-51 Linux-plan row and every concrete Colima envelope, exact argument echoes from all five rows through live disposable-profile boundary shims, a non-mutating real-guest transport challenge, native/mismatched/emulated pairs, two production mutants, and live frame/engine/image/container architecture reads.
+**Oracle**: `AppleEngineBringupOracle.expectedLiftedPlan`, `expectedColimaLiftedPlan`, and `expectedLiftedStep`, plus the outer Docker/Colima observer.
+**Legacy IDs**: none.
+**Docs to update**: `documents/engineering/substrate_doctrine.md`, `documents/engineering/image_build_doctrine.md`.
 
 ### Objective
 
@@ -293,12 +300,16 @@ run Phase 51's step list inside the Colima frame and build the native image with
 
 - A lift that parameterizes the existing step list by the frame it runs in, so the Colima path carries no
   step the linux path lacks.
-- A frame delta compared with a separately authored Haskell expectation; its diff is emitted lazily beneath
-  `.build/**`, because divergence that is not diffable is divergence discovered late.
+- A frame delta compared with a separately authored Haskell expectation covering every executable Phase-51
+  Linux-plan row; its diff is emitted lazily beneath `.build/**`, because divergence that is not diffable is
+  divergence discovered late. The live provider challenge executes all five unchanged rows through exact
+  run-owned echo shims inside the disposable profile and compares their external argument observations, then
+  executes a non-mutating Phase-51-typed `df` row against the real guest through the same concrete Colima
+  envelope. This proves the complete transport and deliberately does not claim package-install effects.
 - A native image built at `arm64`, the host's natural architecture — virtualization synthesizes an operating
   system, not an instruction set, so no cross-build and no emulation is available or wanted.
-- A kind cluster created from that image inside the frame, which is what proves the endpoint the frame
-  publishes is the endpoint the cluster consumed.
+- A run-owned container invocation from that image through the frame's endpoint. Kind creation and its
+  endpoint-consumption proof remain Phase 55-owned.
 
 ### Validation
 
@@ -307,7 +318,7 @@ run Phase 51's step list inside the Colima frame and build the native image with
 
 ### Remaining Work
 
-The whole sprint.
+Run the complete acquired Phase-53 gate on physical Apple Silicon; only its exact pass can authorize the mechanical status projection.
 
 ---
 
@@ -322,8 +333,6 @@ The whole sprint.
 
 **Cross-references to add:**
 
-- `DEVELOPMENT_PLAN/development_plan_standards.md` — add this phase to the `Declared by` column of the
-  `host-floor` row in §F, because that column is joined in both directions.
 - `DEVELOPMENT_PLAN/substrates.md` — record Colima beside Lima in the apple row, with the workload that
   selects each.
 

@@ -112,6 +112,12 @@ expectedResourceSlots 49 =
   [ResourceGateReady (ResourceDraft 49 field) | field <- resourceFields]
 expectedResourceSlots 50 =
   [ResourceGateReady (ResourceDraft 50 field) | field <- resourceFields]
+expectedResourceSlots 51 =
+  [ResourceGateReady (ResourceDraft 51 field) | field <- resourceFields]
+expectedResourceSlots 52 =
+  [ResourceGateReady (ResourceDraft 52 field) | field <- resourceFields]
+expectedResourceSlots 53 =
+  [ResourceGateReady (ResourceDraft 53 field) | field <- resourceFields]
 expectedResourceSlots ordinal =
   [ResourceContractGap (ResourceGapId ordinal field) | field <- resourceFields]
 
@@ -175,7 +181,7 @@ resourcePermanentRefusal =
   finding
     "PLAN-RESOURCE-DIAGNOSTIC-ONLY"
     "DEVELOPMENT_PLAN/"
-    "the nullary resource view cannot authorize a run; Phases 1, 13, 14, 15, 25, 34, 49, and 50 are gate-ready and 45 later contracts remain unresolved"
+    "the nullary resource view cannot authorize a run; Phases 1, 13, 14, 15, 25, 34, and 49 through 53 are gate-ready and 42 later contracts remain unresolved"
 
 resourceIntegrityFindings :: [Finding]
 resourceIntegrityFindings =
@@ -203,11 +209,11 @@ resourceIntegrityFindings =
         (length allSlots == 371)
         "the resource registry must retain exactly 371 typed slots"
     , integrityFinding
-        (length [() | ResourceContractGap _ <- allSlots] == 315)
-        "exactly the 45 later required phases must retain their 315 unresolved slots"
+        (length [() | ResourceContractGap _ <- allSlots] == 294)
+        "exactly the 42 later required phases must retain their 294 unresolved slots"
     , integrityFinding
-        (length [() | ResourceGateReady _ <- allSlots] == 56)
-        "Phases 1, 13, 14, 15, 25, 34, 49, and 50 must each own exactly seven gate-ready run-local resource slots"
+        (length [() | ResourceGateReady _ <- allSlots] == 77)
+        "Phases 1, 13, 14, 15, 25, 34, and 49 through 53 must each own exactly seven gate-ready run-local resource slots"
     , integrityFinding
         (null [() | ResourceDrafted _ <- allSlots])
         "no resource slot may remain merely drafted"
@@ -392,7 +398,7 @@ renderOrdinal :: Int -> Text
 renderOrdinal ordinal = Text.justifyRight 2 '0' (showText ordinal)
 
 gateReadyResourcePhases :: [Int]
-gateReadyResourcePhases = [1, 13, 14, 15, 25, 34, 49, 50]
+gateReadyResourcePhases = [1, 13, 14, 15, 25, 34, 49, 50, 51, 52, 53]
 
 showText :: Show value => value -> Text
 showText = Text.pack . show

@@ -81,6 +81,9 @@ data PhaseRunner
     | TestWorkflowAlgebraRunner
     | DslBarrierRunner
     | PbBoundaryRunner
+    | HostEnsureKernelRunner
+    | LinuxEngineBringupRunner
+    | AppleEngineBringupRunner
     deriving (Eq, Ord, Show)
 
 data RegisteredRunner = RegisteredRunner
@@ -294,6 +297,18 @@ registeredRunners =
     , RegisteredRunner
         { registeredCapability = "host_assert_cli"
         , registeredRunner = PbBoundaryRunner
+        }
+    , RegisteredRunner
+        { registeredCapability = "host_ensure_kernel"
+        , registeredRunner = HostEnsureKernelRunner
+        }
+    , RegisteredRunner
+        { registeredCapability = "linux_engine_bringup"
+        , registeredRunner = LinuxEngineBringupRunner
+        }
+    , RegisteredRunner
+        { registeredCapability = "apple_engine_bringup"
+        , registeredRunner = AppleEngineBringupRunner
         }
     ]
 

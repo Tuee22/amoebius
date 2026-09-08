@@ -196,7 +196,8 @@ lazy `.build/**` products.
 | Target surface | Haskell ownership shape | Doctrine | Phase owner |
 |---|---|---|---|
 | Bounded pre-binary handoff | `pb/**` exception only | [Repository Layout Doctrine](../documents/engineering/repository_layout_doctrine.md) | [50](phase_50_host_assert_cli.md) |
-| Haskell tool-ensure kernel and engine adapters | `src/**/Substrate/*.hs`; `src/**/Engine/*.hs` | [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) | [51–54](phase_51_host_ensure_kernel.md) |
+| Haskell tool-ensure kernel | `src/Amoebius/Host/{Substrate,Frame,HostTool,Ensure,Reconciler,Lift,Context}.hs`; independent Haskell oracle/spec and package-hidden Phase-51 supervisor | [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) | [51](phase_51_host_ensure_kernel.md) |
+| Native engine and frame adapters | Linux ownership in `src/Amoebius/Host/LinuxEngine.hs`; Apple/Windows target ownership in `src/**/Substrate/*.hs` and `src/**/Engine/*.hs` | [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) | [52–54](phase_52_linux_engine_bringup.md) |
 | Haskell cluster bootstrap coordinator | `src/**/Cluster/*.hs` | [Bootstrap Sequence Doctrine](../documents/engineering/bootstrap_sequence_doctrine.md) | [55](phase_55_bootstrap_coordinator_kind.md) |
 | Native/complementary image materialization | `src/**/Image/*.hs` | [Image Build Doctrine](../documents/engineering/image_build_doctrine.md) | [56–57](phase_56_base_image_registry.md) |
 | Physical host compute | `src/**/HostWorker/*.hs` | [Substrate Doctrine §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized) | [89](phase_89_apple_metal_host_daemon.md) |

@@ -364,12 +364,12 @@ satisfied and gate-passed.
 | 45 | Haskell offline-state semantics and runtime projection | `none` | `none` | Register-1 Haskell gate passed; no browser, storage service, network, host, or hardware authority |
 | 46 | Haskell-generated browser contracts and bundle | `none` | `none` | Register-1 Haskell gate passed; generated browser products remain below `.build/**` and no browser executes |
 | 47 | Foreign-source generator closure, checking tools, and mutants | `none` | `none` | Register-1 Haskell gate passed; nine support artifacts are generated lazily and all owned foreign-source families are closed |
-| 48 | The test-workflow algebra | `none` | `none` | Active Register-1 Haskell lane — pure teardown, suggestion, authority, modeled-inventory, and evidence algebra implemented; integrated gate pending |
-| 49 | No-hardware DSL gate barrier and self-referential gate suite | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 48 |
-| 50 | Bounded `pb` bootstrap and Haskell handoff | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 49 |
-| 51 | The host-ensure kernel | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 50 |
-| 52 | Linux: sudoless Docker and the native image | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 51, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 53 | Apple: Homebrew, Colima, and the native image | `apple` | `linux-cpu/arm64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 52, gate pass, and the independently satisfied hardware-free DSL barrier |
+| 48 | The test-workflow algebra | `none` | `none` | Register-1 Haskell gate passed; teardown, suggestion, authority, modeled-inventory, and evidence algebra are source-bound |
+| 49 | No-hardware DSL gate barrier and self-referential gate suite | `none` | `none` | Register-2 hardware-free DSL barrier passed; all source-migration queries are zero |
+| 50 | Bounded `pb` bootstrap and Haskell handoff | `none` | `none` | Register-2 direct-Haskell-supervised bootstrap handoff gate passed |
+| 51 | The host-ensure kernel | `none` | `none` | Register-2 Haskell fake-boundary gate passed; live host/provider behavior remains owned by later substrate phases |
+| 52 | Linux: sudoless Docker and the native image | `linux-cpu` | `linux-cpu/amd64` | Register-3 gate on one pristine Ubuntu Incus VM: exact bootstrap handoff, sudoless current/future Docker access, a native run-local smoke image, container version output, zero-mutation second pass, and exact teardown inventory |
+| 53 | Apple: Homebrew, Colima, and the native image | `apple` | `linux-cpu/arm64` | Active Register-3 lane — Haskell contract and qualification complete; exact live gate requires physical Apple Silicon macOS and remains NOT VALIDATED |
 | 54 | Windows: WSL2 and the lifted Linux engine | `windows` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 53, gate pass, and the independently satisfied hardware-free DSL barrier |
 | 55 | Haskell substrate coordinator and single kind cluster | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 54, gate pass, and the independently satisfied hardware-free DSL barrier |
 | 56 | The base image, the jit-build resolver, and the in-cluster registry | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 55, gate pass, and the independently satisfied hardware-free DSL barrier |

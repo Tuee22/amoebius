@@ -101,6 +101,9 @@ module Amoebius.Validation.Evidence.Internal (
     captureFinalizedTestWorkflowAlgebraCandidateEvidence,
     captureFinalizedDslBarrierCandidateEvidence,
     captureFinalizedPbBoundaryCandidateEvidence,
+    captureFinalizedHostEnsureKernelCandidateEvidence,
+    captureFinalizedLinuxEngineBringupCandidateEvidence,
+    captureFinalizedAppleEngineBringupCandidateEvidence,
     captureFinalizedDispatchCandidateEvidence,
     captureFinalizedRepositoryLayoutCandidateEvidence,
     captureFinalizedToolchainSpikeCandidateEvidence,
@@ -330,6 +333,18 @@ import Amoebius.Validation.PbBoundaryRun.Internal (
     AcquiredPbBoundaryRun,
     foldAcquiredPbBoundaryRun,
  )
+import Amoebius.Validation.HostEnsureKernelRun.Internal (
+    AcquiredHostEnsureKernelRun,
+    foldAcquiredHostEnsureKernelRun,
+ )
+import Amoebius.Validation.LinuxEngineBringupRun.Internal (
+    AcquiredLinuxEngineBringupRun,
+    foldAcquiredLinuxEngineBringupRun,
+    )
+import Amoebius.Validation.AppleEngineBringupRun.Internal (
+    AcquiredAppleEngineBringupRun,
+    foldAcquiredAppleEngineBringupRun,
+    )
 import Amoebius.Validation.PhaseZeroRun.Internal (
     AcquiredPhaseZeroRun,
     foldAcquiredPhaseZeroRun,
@@ -3357,8 +3372,143 @@ captureFinalizedPbBoundaryCandidateEvidence acquiredRun predecessor closing proj
         prerequisiteRows = [evidence | evidence <- replacedRows, capturedRow evidence /= LegacyClosureRow, capturedRow evidence /= PassCriterionRow]
         legacyResult
             | length rowChecks /= length allGateRows = CheckResult "phase-50-legacy-closure" [] [finding "PHASE-50-ROW-INVENTORY" "<phase-50-gate>" "the acquired runner did not supply exactly eighteen row checks"]
-            | all gateRowEvidencePassed prerequisiteRows = CheckResult "phase-50-legacy-closure" [observation "legacy.phase-50.closed" "Phase 50 owns no migration and consumed the exact Phase-49 zero-source-debt receipt", observation "legacy.phase-50.snapshot" opening] []
+            | all gateRowEvidencePassed prerequisiteRows = CheckResult "phase-50-legacy-closure" [observation "legacy.phase-50.closed" "LTD-VAL-007 and LTD-VAL-008 closed under the bounded supervisor and contained-environment observations; exact Phase-49 zero-source-debt receipt consumed", observation "legacy.phase-50.snapshot" opening] []
             | otherwise = CheckResult "phase-50-legacy-closure" [] [finding "PHASE-50-LEGACY-CLOSURE" "<phase-50-gate>" "legacy closure requires every non-circular prerequisite and the acquired Phase-50 subject to pass"]
+
+captureFinalizedHostEnsureKernelCandidateEvidence ::
+    AcquiredHostEnsureKernelRun -> PredecessorEvidence -> Either [SnapshotProblem] AcquiredSourceSnapshot ->
+    Maybe Text -> Maybe Text -> FilePath -> Maybe Text -> [Text] -> AcquiredCandidateEvidence
+captureFinalizedHostEnsureKernelCandidateEvidence acquiredRun predecessor closing projectionDigest projectionPostimageDigest executablePath executableDigest argv =
+    foldAcquiredHostEnsureKernelRun finalize acquiredRun
+  where
+    finalize acquired _trust contractEvidence rowChecks subjectId oracleId harnessId observerId qualificationId runId toolchainId cleanup _subjectResult = finalizeCandidateRows initialCandidate legacyResult
+      where
+        opening = snapshotIdentity (acquiredSourceSnapshot acquired)
+        closingIdentity = either (const "") (snapshotIdentity . acquiredSourceSnapshot) closing
+        baseRows = [GateRowEvidence row (rowOutcomeFromCheck "PHASE-51-ROW" result) | (row, result) <- zip allGateRows rowChecks]
+        commandOutcome
+            | Just digest <- executableDigest, sha256Text digest, argv == ["validate", "phase", "51"] = RowPassed [observation "command.executable.sha256" digest, observation "command.argv" (Text.unwords argv), observation "command.toolchain.sha256" toolchainId]
+            | otherwise = RowRefused [] [finding "PHASE-51-COMMAND" "<process-argv>" "the source-bound Haskell executable identity or exact Phase-51 argv is invalid"]
+        freshnessOutcome = case closing of
+            Right observed | snapshotIdentity (acquiredSourceSnapshot observed) == opening -> RowPassed [observation "source.snapshot.opening" opening, observation "source.snapshot.closing" closingIdentity, observation "phase-51.run.sha256" runId]
+            Right _ -> RowRefused [] [finding "SOURCE-SNAPSHOT-CHANGED-DURING-GATE" "<local-source-snapshot>" "opening and closing source identities differ"]
+            Left problems -> RowRefused [] [finding "SOURCE-SNAPSHOT-CLOSING-UNAVAILABLE" "<local-source-snapshot>" (renderSnapshotProblem problem) | problem <- problems]
+        predecessorOutcome = case predecessor of
+            ImmediatePredecessor 50 digest | predecessorEvidenceMatchesPhase 51 predecessor -> RowPassed [observation "predecessor.phase" "50", observation "predecessor.receipt.sha256" digest, observation "predecessor.projected-source.sha256" opening]
+            _ -> RowRefused [] [finding "PHASE-51-PREDECESSOR" "<predecessor-receipt>" "the acquired receipt is not the exact Phase-50 predecessor"]
+        residueOutcome
+            | projectionDigest /= Nothing && projectionPostimageDigest /= Nothing = RowPassed [observation "phase-51.residue" "real package-manager privilege/permission fidelity, engines, VMs, clusters, images, registries, accelerators, and hardware remain Phase-52+-owned"]
+            | otherwise = RowRefused [] [finding "PHASE-51-RESIDUE" "<status-projection>" "the exact status projection identities are absent"]
+        replacedRows = replaceRowOutcome ResidueRow residueOutcome (replaceRowOutcome PredecessorRow predecessorOutcome (replaceRowOutcome FreshnessRow freshnessOutcome (replaceRowOutcome CommandRow commandOutcome baseRows)))
+        initialCandidate = captureCandidateEvidence CandidateCapture
+            { candidateCapturePhase = 51, candidateCaptureSourceOpening = opening, candidateCaptureSourceClosing = closingIdentity
+            , candidateCaptureContractDigest = Just (checkResultDigest (acquiredPhaseContractEvidenceCheck contractEvidence))
+            , candidateCaptureSubjectDigest = Just subjectId, candidateCaptureOracleDigest = Just oracleId
+            , candidateCaptureHarnessDigest = Just harnessId, candidateCaptureObserverDigest = Just observerId
+            , candidateCaptureQualificationDigest = Just qualificationId, candidateCaptureProjectionDigest = projectionDigest
+            , candidateCaptureProjectionPostimageDigest = projectionPostimageDigest, candidateCapturePredecessor = predecessor
+            , candidateCaptureExecutablePath = executablePath, candidateCaptureExecutableDigest = executableDigest
+            , candidateCaptureArgv = argv, candidateCaptureToolchainIdentity = Just toolchainId
+            , candidateCaptureSubstrate = Just "none", candidateCaptureLane = Just "none", candidateCaptureArchitecture = Just "x86_64"
+            , candidateCaptureRunIdentity = Just runId, candidateCaptureCleanupObservation = Just cleanup
+            , candidateCaptureRows = replacedRows
+            , candidateCaptureResidue = ["status projection identity is absent" | projectionDigest == Nothing || projectionPostimageDigest == Nothing]
+            }
+        prerequisiteRows = [evidence | evidence <- replacedRows, capturedRow evidence /= LegacyClosureRow, capturedRow evidence /= PassCriterionRow]
+        legacyResult
+            | length rowChecks /= length allGateRows = CheckResult "phase-51-legacy-closure" [] [finding "PHASE-51-ROW-INVENTORY" "<phase-51-gate>" "the acquired runner did not supply exactly eighteen row checks"]
+            | all gateRowEvidencePassed prerequisiteRows = CheckResult "phase-51-legacy-closure" [observation "legacy.phase-51.closed" "LTD-HOST-001 and LTD-HOST-002 closed under the production-caller, probe-first, absolute-path, disjoint-root, and changed-subject observations", observation "legacy.phase-51.snapshot" opening] []
+            | otherwise = CheckResult "phase-51-legacy-closure" [] [finding "PHASE-51-LEGACY-CLOSURE" "<phase-51-gate>" "legacy closure requires every non-circular prerequisite and the acquired Phase-51 subject to pass"]
+
+captureFinalizedLinuxEngineBringupCandidateEvidence ::
+    AcquiredLinuxEngineBringupRun -> PredecessorEvidence -> Either [SnapshotProblem] AcquiredSourceSnapshot ->
+    Maybe Text -> Maybe Text -> FilePath -> Maybe Text -> [Text] -> AcquiredCandidateEvidence
+captureFinalizedLinuxEngineBringupCandidateEvidence acquiredRun predecessor closing projectionDigest projectionPostimageDigest executablePath executableDigest argv =
+    foldAcquiredLinuxEngineBringupRun finalize acquiredRun
+  where
+    finalize acquired _trust contractEvidence rowChecks subjectId oracleId harnessId observerId qualificationId runId toolchainId cleanup _subjectResult = finalizeCandidateRows initialCandidate legacyResult
+      where
+        opening = snapshotIdentity (acquiredSourceSnapshot acquired)
+        closingIdentity = either (const "") (snapshotIdentity . acquiredSourceSnapshot) closing
+        baseRows = [GateRowEvidence row (rowOutcomeFromCheck "PHASE-52-ROW" result) | (row, result) <- zip allGateRows rowChecks]
+        commandOutcome
+            | Just digest <- executableDigest, sha256Text digest, argv == ["validate", "phase", "52"] = RowPassed [observation "command.executable.sha256" digest, observation "command.argv" (Text.unwords argv), observation "command.toolchain.sha256" toolchainId]
+            | otherwise = RowRefused [] [finding "PHASE-52-COMMAND" "<process-argv>" "the source-bound Haskell executable identity or exact Phase-52 argv is invalid"]
+        freshnessOutcome = case closing of
+            Right observed | snapshotIdentity (acquiredSourceSnapshot observed) == opening -> RowPassed [observation "source.snapshot.opening" opening, observation "source.snapshot.closing" closingIdentity, observation "phase-52.run.sha256" runId]
+            Right _ -> RowRefused [] [finding "SOURCE-SNAPSHOT-CHANGED-DURING-GATE" "<local-source-snapshot>" "opening and closing source identities differ"]
+            Left problems -> RowRefused [] [finding "SOURCE-SNAPSHOT-CLOSING-UNAVAILABLE" "<local-source-snapshot>" (renderSnapshotProblem problem) | problem <- problems]
+        predecessorOutcome = case predecessor of
+            ImmediatePredecessor 51 digest | predecessorEvidenceMatchesPhase 52 predecessor -> RowPassed [observation "predecessor.phase" "51", observation "predecessor.receipt.sha256" digest, observation "predecessor.projected-source.sha256" opening]
+            _ -> RowRefused [] [finding "PHASE-52-PREDECESSOR" "<predecessor-receipt>" "the acquired receipt is not the exact Phase-51 predecessor"]
+        residueOutcome
+            | projectionDigest /= Nothing && projectionPostimageDigest /= Nothing = RowPassed [observation "phase-52.residue" "Apple and Windows engine parity, kind, registry, the complete published base recipe, accelerators, clusters, platform services, and later live behavior remain Phase-53+-owned"]
+            | otherwise = RowRefused [] [finding "PHASE-52-RESIDUE" "<status-projection>" "the exact status projection identities are absent"]
+        replacedRows = replaceRowOutcome ResidueRow residueOutcome (replaceRowOutcome PredecessorRow predecessorOutcome (replaceRowOutcome FreshnessRow freshnessOutcome (replaceRowOutcome CommandRow commandOutcome baseRows)))
+        initialCandidate = captureCandidateEvidence CandidateCapture
+            { candidateCapturePhase = 52, candidateCaptureSourceOpening = opening, candidateCaptureSourceClosing = closingIdentity
+            , candidateCaptureContractDigest = Just (checkResultDigest (acquiredPhaseContractEvidenceCheck contractEvidence))
+            , candidateCaptureSubjectDigest = Just subjectId, candidateCaptureOracleDigest = Just oracleId
+            , candidateCaptureHarnessDigest = Just harnessId, candidateCaptureObserverDigest = Just observerId
+            , candidateCaptureQualificationDigest = Just qualificationId, candidateCaptureProjectionDigest = projectionDigest
+            , candidateCaptureProjectionPostimageDigest = projectionPostimageDigest, candidateCapturePredecessor = predecessor
+            , candidateCaptureExecutablePath = executablePath, candidateCaptureExecutableDigest = executableDigest
+            , candidateCaptureArgv = argv, candidateCaptureToolchainIdentity = Just toolchainId
+            , candidateCaptureSubstrate = Just "linux-cpu", candidateCaptureLane = Just "linux-cpu/amd64", candidateCaptureArchitecture = Just "x86_64"
+            , candidateCaptureRunIdentity = Just runId, candidateCaptureCleanupObservation = Just cleanup
+            , candidateCaptureRows = replacedRows
+            , candidateCaptureResidue = ["status projection identity is absent" | projectionDigest == Nothing || projectionPostimageDigest == Nothing]
+            }
+        prerequisiteRows = [evidence | evidence <- replacedRows, capturedRow evidence /= LegacyClosureRow, capturedRow evidence /= PassCriterionRow]
+        legacyResult
+            | length rowChecks /= length allGateRows = CheckResult "phase-52-legacy-closure" [] [finding "PHASE-52-ROW-INVENTORY" "<phase-52-gate>" "the acquired runner did not supply exactly eighteen row checks"]
+            | all gateRowEvidencePassed prerequisiteRows = CheckResult "phase-52-legacy-closure" [observation "legacy.phase-52.closed" "Phase 52 owns no active legacy IDs; the live subject and all non-circular prerequisites passed", observation "legacy.phase-52.snapshot" opening] []
+            | otherwise = CheckResult "phase-52-legacy-closure" [] [finding "PHASE-52-LEGACY-CLOSURE" "<phase-52-gate>" "legacy closure requires every non-circular prerequisite and the acquired Phase-52 subject to pass"]
+
+captureFinalizedAppleEngineBringupCandidateEvidence ::
+    AcquiredAppleEngineBringupRun -> PredecessorEvidence -> Either [SnapshotProblem] AcquiredSourceSnapshot ->
+    Maybe Text -> Maybe Text -> FilePath -> Maybe Text -> [Text] -> AcquiredCandidateEvidence
+captureFinalizedAppleEngineBringupCandidateEvidence acquiredRun predecessor closing projectionDigest projectionPostimageDigest executablePath executableDigest argv =
+    foldAcquiredAppleEngineBringupRun finalize acquiredRun
+  where
+    finalize acquired _trust contractEvidence rowChecks subjectId oracleId harnessId observerId qualificationId runId toolchainId cleanup _subjectResult = finalizeCandidateRows initialCandidate legacyResult
+      where
+        opening = snapshotIdentity (acquiredSourceSnapshot acquired)
+        closingIdentity = either (const "") (snapshotIdentity . acquiredSourceSnapshot) closing
+        baseRows = [GateRowEvidence row (rowOutcomeFromCheck "PHASE-53-ROW" result) | (row, result) <- zip allGateRows rowChecks]
+        commandOutcome
+            | Just digest <- executableDigest, sha256Text digest, argv == ["validate", "phase", "53"] = RowPassed [observation "command.executable.sha256" digest, observation "command.argv" (Text.unwords argv), observation "command.toolchain.sha256" toolchainId]
+            | otherwise = RowRefused [] [finding "PHASE-53-COMMAND" "<process-argv>" "the source-bound Haskell executable identity or exact Phase-53 argv is invalid"]
+        freshnessOutcome = case closing of
+            Right observed | snapshotIdentity (acquiredSourceSnapshot observed) == opening -> RowPassed [observation "source.snapshot.opening" opening, observation "source.snapshot.closing" closingIdentity, observation "phase-53.run.sha256" runId]
+            Right _ -> RowRefused [] [finding "SOURCE-SNAPSHOT-CHANGED-DURING-GATE" "<local-source-snapshot>" "opening and closing source identities differ"]
+            Left problems -> RowRefused [] [finding "SOURCE-SNAPSHOT-CLOSING-UNAVAILABLE" "<local-source-snapshot>" (renderSnapshotProblem problem) | problem <- problems]
+        predecessorOutcome = case predecessor of
+            ImmediatePredecessor 52 digest | predecessorEvidenceMatchesPhase 53 predecessor -> RowPassed [observation "predecessor.phase" "52", observation "predecessor.receipt.sha256" digest, observation "predecessor.projected-source.sha256" opening]
+            _ -> RowRefused [] [finding "PHASE-53-PREDECESSOR" "<predecessor-receipt>" "the acquired receipt is not the exact Phase-52 predecessor"]
+        residueOutcome
+            | projectionDigest /= Nothing && projectionPostimageDigest /= Nothing = RowPassed [observation "phase-53.residue" "Windows engine parity, kind, registry, published images, accelerators, clusters, services, and later live behavior remain Phase-54+-owned"]
+            | otherwise = RowRefused [] [finding "PHASE-53-RESIDUE" "<status-projection>" "the exact status projection identities are absent"]
+        replacedRows = replaceRowOutcome ResidueRow residueOutcome (replaceRowOutcome PredecessorRow predecessorOutcome (replaceRowOutcome FreshnessRow freshnessOutcome (replaceRowOutcome CommandRow commandOutcome baseRows)))
+        initialCandidate = captureCandidateEvidence CandidateCapture
+            { candidateCapturePhase = 53, candidateCaptureSourceOpening = opening, candidateCaptureSourceClosing = closingIdentity
+            , candidateCaptureContractDigest = Just (checkResultDigest (acquiredPhaseContractEvidenceCheck contractEvidence))
+            , candidateCaptureSubjectDigest = Just subjectId, candidateCaptureOracleDigest = Just oracleId
+            , candidateCaptureHarnessDigest = Just harnessId, candidateCaptureObserverDigest = Just observerId
+            , candidateCaptureQualificationDigest = Just qualificationId, candidateCaptureProjectionDigest = projectionDigest
+            , candidateCaptureProjectionPostimageDigest = projectionPostimageDigest, candidateCapturePredecessor = predecessor
+            , candidateCaptureExecutablePath = executablePath, candidateCaptureExecutableDigest = executableDigest
+            , candidateCaptureArgv = argv, candidateCaptureToolchainIdentity = Just toolchainId
+            , candidateCaptureSubstrate = Just "apple", candidateCaptureLane = Just "linux-cpu/arm64", candidateCaptureArchitecture = Just "arm64"
+            , candidateCaptureRunIdentity = Just runId, candidateCaptureCleanupObservation = Just cleanup
+            , candidateCaptureRows = replacedRows
+            , candidateCaptureResidue = ["status projection identity is absent" | projectionDigest == Nothing || projectionPostimageDigest == Nothing]
+            }
+        prerequisiteRows = [evidence | evidence <- replacedRows, capturedRow evidence /= LegacyClosureRow, capturedRow evidence /= PassCriterionRow]
+        legacyResult
+            | length rowChecks /= length allGateRows = CheckResult "phase-53-legacy-closure" [] [finding "PHASE-53-ROW-INVENTORY" "<phase-53-gate>" "the acquired runner did not supply exactly eighteen row checks"]
+            | all gateRowEvidencePassed prerequisiteRows = CheckResult "phase-53-legacy-closure" [observation "legacy.phase-53.closed" "Phase 53 owns no active legacy IDs; the live subject and all non-circular prerequisites passed", observation "legacy.phase-53.snapshot" opening] []
+            | otherwise = CheckResult "phase-53-legacy-closure" [] [finding "PHASE-53-LEGACY-CLOSURE" "<phase-53-gate>" "legacy closure requires every non-circular prerequisite and the acquired Phase-53 subject to pass"]
 
 
 replaceRowOutcome :: GateRow -> RowOutcome -> [GateRowEvidence] -> [GateRowEvidence]

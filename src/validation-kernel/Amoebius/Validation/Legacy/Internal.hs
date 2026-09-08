@@ -127,6 +127,8 @@ data LegacyId
   | LtdVal004
   | LtdVal005
   | LtdVal006
+  | LtdVal007
+  | LtdVal008
   | LtdDoc001
   | LtdName001
   | LtdHost001
@@ -162,6 +164,8 @@ data LegacyAnalyzer
   | AnalyzeGateCompletion
   | AnalyzeHardwareFreeDsl
   | AnalyzeRunInputClosure
+  | AnalyzeBoundedBootstrapSupervisor
+  | AnalyzeContainedBootstrapEnvironment
   | AnalyzeBehavioralDocumentConsumers
   | AnalyzePhaseOrdinalNames
   | AnalyzeHostEnsure
@@ -191,6 +195,8 @@ data LegacyObservationRule
   | ObserveGateCompletionResult
   | ObserveHardwareFreeDslTrace
   | ObserveRunInputProvenance
+  | ObserveBoundedBootstrapResources
+  | ObserveContainedBootstrapEnvironment
   | ObserveDocumentConsumerGraph
   | ObserveRuntimeIdentityGraph
   | ObserveHostEnsureCallGraph
@@ -220,6 +226,8 @@ data LegacyClosureRule
   | CloseGateCompletion
   | CloseHardwareFreeDsl
   | CloseRunInputClosure
+  | CloseBoundedBootstrapSupervisor
+  | CloseContainedBootstrapEnvironment
   | CloseBehavioralDocumentConsumers
   | ClosePhaseOrdinalNames
   | CloseHostEnsure
@@ -251,6 +259,8 @@ data LegacyReintroductionCase
   | RejectIncompleteGate
   | RejectHardwareBeforeDslGatePass
   | RejectAmbientOrStaleRunInput
+  | RejectUnboundedBootstrapSupervisor
+  | RejectIncompleteContainedBootstrapEnvironment
   | RejectBehavioralMarkdownConsumer
   | RejectRuntimePhaseOrdinal
   | RejectBypassedHostEnsure
@@ -564,6 +574,8 @@ canonicalLegacyIdRetained identifier = case identifier of
 #else
     True
 #endif
+  LtdVal007 -> True
+  LtdVal008 -> True
   LtdDoc001 ->
 #if defined(VALIDATION_LEGACY_INTERNAL_UNIVERSE_LTD_DOC001_DROP_MUTANT)
     False
@@ -722,6 +734,8 @@ renderLegacyId LtdVal006 =
 #else
   "LTD-VAL-006"
 #endif
+renderLegacyId LtdVal007 = "LTD-VAL-007"
+renderLegacyId LtdVal008 = "LTD-VAL-008"
 renderLegacyId LtdDoc001 =
 #if defined(VALIDATION_LEGACY_LTD_DOC001_ID_MUTANT)
   "LTD-DOC-00x"
@@ -930,6 +944,8 @@ legacyDecoderTarget identifier = case identifier of
 #else
     LtdVal006
 #endif
+  LtdVal007 -> LtdVal007
+  LtdVal008 -> LtdVal008
   LtdDoc001 ->
 #if defined(VALIDATION_LEGACY_INTERNAL_DECODER_LTD_DOC001_TARGET_MUTANT)
     LtdSrc000
@@ -1122,6 +1138,8 @@ legacyIdOwnerCapability LtdVal006 =
 #else
   "self_referential_gates"
 #endif
+legacyIdOwnerCapability LtdVal007 = "host_assert_cli"
+legacyIdOwnerCapability LtdVal008 = "host_assert_cli"
 legacyIdOwnerCapability LtdDoc001 =
 #if defined(VALIDATION_LEGACY_LTD_DOC001_OWNER_MUTANT)
   "documentation_suite"
@@ -1197,6 +1215,8 @@ legacyIdDisposition LtdVal003 = LegacyActive
 legacyIdDisposition LtdVal004 = LegacyActive
 legacyIdDisposition LtdVal005 = LegacyActive
 legacyIdDisposition LtdVal006 = LegacyActive
+legacyIdDisposition LtdVal007 = LegacyActive
+legacyIdDisposition LtdVal008 = LegacyActive
 legacyIdDisposition LtdDoc001 = LegacyActive
 legacyIdDisposition LtdName001 = LegacyActive
 legacyIdDisposition LtdHost001 = LegacyActive
@@ -1310,6 +1330,8 @@ legacyIdAnalyzer LtdVal006 =
 #else
   AnalyzeRunInputClosure
 #endif
+legacyIdAnalyzer LtdVal007 = AnalyzeBoundedBootstrapSupervisor
+legacyIdAnalyzer LtdVal008 = AnalyzeContainedBootstrapEnvironment
 legacyIdAnalyzer LtdDoc001 =
 #if defined(VALIDATION_LEGACY_LTD_DOC001_ANALYZER_MUTANT)
   AnalyzeCompleteSourceGrammar
@@ -1468,6 +1490,8 @@ legacyIdObservationRule LtdVal006 =
 #else
   ObserveRunInputProvenance
 #endif
+legacyIdObservationRule LtdVal007 = ObserveBoundedBootstrapResources
+legacyIdObservationRule LtdVal008 = ObserveContainedBootstrapEnvironment
 legacyIdObservationRule LtdDoc001 =
 #if defined(VALIDATION_LEGACY_LTD_DOC001_OBSERVATION_MUTANT)
   ObserveCompleteSourceSnapshot
@@ -1626,6 +1650,8 @@ legacyIdClosureRule LtdVal006 =
 #else
   CloseRunInputClosure
 #endif
+legacyIdClosureRule LtdVal007 = CloseBoundedBootstrapSupervisor
+legacyIdClosureRule LtdVal008 = CloseContainedBootstrapEnvironment
 legacyIdClosureRule LtdDoc001 =
 #if defined(VALIDATION_LEGACY_LTD_DOC001_CLOSURE_MUTANT)
   CloseCompleteSourceGrammar
@@ -1784,6 +1810,8 @@ legacyIdReintroductionCases LtdVal006 =
 #else
   RejectAmbientOrStaleRunInput :| []
 #endif
+legacyIdReintroductionCases LtdVal007 = RejectUnboundedBootstrapSupervisor :| []
+legacyIdReintroductionCases LtdVal008 = RejectIncompleteContainedBootstrapEnvironment :| []
 legacyIdReintroductionCases LtdDoc001 =
 #if defined(VALIDATION_LEGACY_LTD_DOC001_REINTRODUCTION_MUTANT)
   RejectDisguisedOrConcealedSource :| []
@@ -1845,10 +1873,10 @@ legacyIdReintroductionCases LtdBoot001 =
 legacyRawDiagnosticBindings :: [(Text, Text, Text, Text, Text, Text, [Text])]
 #if defined(VALIDATION_LEGACY_INTERNAL_RAW_BINDING_LIST_COMPOSITION_MUTANT)
 legacyRawDiagnosticBindings =
-  drop 1 (legacyRawBindingOrder (map rawBinding canonicalLegacyUniverse))
+  drop 1 (legacyRawBindingOrder (map rawBinding legacyRawDiagnosticUniverse))
 #else
 legacyRawDiagnosticBindings =
-  legacyRawBindingOrder (map rawBinding canonicalLegacyUniverse)
+  legacyRawBindingOrder (map rawBinding legacyRawDiagnosticUniverse)
 #endif
  where
 #if defined(VALIDATION_LEGACY_INTERNAL_RAW_BINDING_TUPLE_COMPOSITION_MUTANT)
@@ -1872,6 +1900,14 @@ legacyRawDiagnosticBindings =
     , projectRawBindingReintroduction identifier
     )
 #endif
+
+-- The refusal-only public wire predates the handoff-specific validation rows
+-- and has a deliberately fixed 25-row carrier.  Keep deriving its values from
+-- the typed register while excluding the two rows that are observed only by
+-- the package-hidden Phase-50 projection.
+legacyRawDiagnosticUniverse :: [LegacyId]
+legacyRawDiagnosticUniverse =
+  filter (`notElem` [LtdVal007, LtdVal008]) canonicalLegacyUniverse
 
 legacyRawBindingOrder
   :: [(Text, Text, Text, Text, Text, Text, [Text])]
@@ -2150,6 +2186,8 @@ legacyDispositionProjectionRetained identifier = case identifier of
 #else
     True
 #endif
+  LtdVal007 -> True
+  LtdVal008 -> True
   LtdDoc001 ->
 #if defined(VALIDATION_LEGACY_LTD_DOC001_DISPOSITION_MUTANT)
     False
@@ -2332,6 +2370,8 @@ renderLegacyAnalyzer value = case value of
 #else
     "run-input-closure"
 #endif
+  AnalyzeBoundedBootstrapSupervisor -> "bounded-bootstrap-supervisor"
+  AnalyzeContainedBootstrapEnvironment -> "contained-bootstrap-environment"
   AnalyzeBehavioralDocumentConsumers ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_DOC001_ANALYZER_MUTANT)
     "behavioral-document-consumersx"
@@ -2491,6 +2531,8 @@ renderLegacyObservationRule value = case value of
 #else
     "run-input-provenance"
 #endif
+  ObserveBoundedBootstrapResources -> "bounded-bootstrap-resources"
+  ObserveContainedBootstrapEnvironment -> "contained-bootstrap-environment"
   ObserveDocumentConsumerGraph ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_DOC001_OBSERVATION_MUTANT)
     "document-consumer-graphx"
@@ -2650,6 +2692,8 @@ renderLegacyClosureRule value = case value of
 #else
     "run-input-closure"
 #endif
+  CloseBoundedBootstrapSupervisor -> "bounded-bootstrap-supervisor"
+  CloseContainedBootstrapEnvironment -> "contained-bootstrap-environment"
   CloseBehavioralDocumentConsumers ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_DOC001_CLOSURE_MUTANT)
     "behavioral-document-consumersx"
@@ -2809,6 +2853,8 @@ renderLegacyReintroductionCase value = case value of
 #else
     "reject-ambient-or-stale-run-input"
 #endif
+  RejectUnboundedBootstrapSupervisor -> "reject-unbounded-bootstrap-supervisor"
+  RejectIncompleteContainedBootstrapEnvironment -> "reject-incomplete-contained-bootstrap-environment"
   RejectBehavioralMarkdownConsumer ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_DOC001_REINTRODUCTION_MUTANT)
     "reject-behavioral-markdown-consumerx"
@@ -7321,6 +7367,8 @@ nonSourceLegacyUniverse =
   , LtdVal004
   , LtdVal005
   , LtdVal006
+  , LtdVal007
+  , LtdVal008
   , LtdDoc001
   , LtdName001
   , LtdHost001
@@ -7383,6 +7431,8 @@ nonSourceLegacyRouteRetained identifier = case identifier of
 #else
     True
 #endif
+  LtdVal007 -> True
+  LtdVal008 -> True
   LtdDoc001 ->
 #if defined(VALIDATION_LEGACY_INTERNAL_NON_SOURCE_LTD_DOC001_DROP_MUTANT)
     False

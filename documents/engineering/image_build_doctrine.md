@@ -238,6 +238,13 @@ this rule and is **NOT VALIDATED**. Its Haskell contract must cover all CPU/CUDA
 observed/requested architecture mismatches before emission. Even a future pure result cannot establish an
 engine build, published image, or runtime correspondence.
 
+Phase 52 applies the rule to its narrower run-local smoke image: the independent oracle qualifies exact
+requested/guest/engine mismatch refusals before the live candidate starts, while the live Incus observation
+must show natural `amd64` agreement and execute that native image. The gate deliberately does not falsify a
+guest's architecture merely to manufacture a live mismatch; that paired negative remains a separately
+authored qualification case. Canonical base-image recipe execution, publication, and complementary
+architecture correspondence remain later-owned.
+
 Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid

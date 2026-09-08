@@ -32,10 +32,13 @@ module Amoebius.Host.Ensure
   , HostConfig (..)
   , initialHostConfig
   , initialHostConfigAt
+  , initialHostConfigWithin
   , resolveTool
   , resolveToolAt
+  , resolveToolWithin
   , lookupTool
   , candidates
+  , candidatesWithin
     -- * The driver
   , EnsureError (..)
   , renderEnsureError
@@ -51,11 +54,12 @@ import Amoebius.Host.Substrate
 import Data.ByteString.Lazy (ByteString)
 import Data.ByteString.Lazy qualified as ByteString
 import Data.Char (isAlpha)
+import Data.List (isPrefixOf)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import System.Directory (doesFileExist, executable, getHomeDirectory, getPermissions)
 import System.Exit (ExitCode)
-import System.FilePath (isAbsolute, (</>))
+import System.FilePath (isAbsolute, makeRelative, normalise, (</>))
 import System.Process.Typed (byteStringInput, proc, readProcess, setStdin)
 
 -- ---------------------------------------------------------------------------
@@ -180,6 +184,10 @@ resolveTool substrate tool = do
 resolveToolAt :: FilePath -> Substrate -> HostTool -> IO (Maybe AbsExe)
 resolveToolAt home substrate tool = firstExecutable (candidates home substrate tool)
 
+resolveToolWithin :: FilePath -> FilePath -> Substrate -> HostTool -> IO (Maybe AbsExe)
+resolveToolWithin root home substrate tool =
+  firstExecutable (candidatesWithin root home substrate tool)
+
 initialHostConfig :: Substrate -> IO HostConfig
 initialHostConfig substrate = getHomeDirectory >>= \home -> initialHostConfigAt home substrate
 
@@ -189,6 +197,13 @@ initialHostConfigAt home substrate = do
   pure (HostConfig substrate (Map.fromList [entry | Just entry <- entries]))
  where
   probe tool = fmap (fmap (tool,)) (resolveToolAt home substrate tool)
+
+initialHostConfigWithin :: FilePath -> FilePath -> Substrate -> IO HostConfig
+initialHostConfigWithin root home substrate = do
+  entries <- traverse probe [minBound .. maxBound]
+  pure (HostConfig substrate (Map.fromList [entry | Just entry <- entries]))
+ where
+  probe tool = fmap (fmap (tool,)) (resolveToolWithin root home substrate tool)
 
 lookupTool :: HostTool -> HostConfig -> Maybe AbsExe
 lookupTool tool = Map.lookup tool . hostTools
@@ -210,6 +225,7 @@ candidates home substrate tool = case substrate of
     Docker -> [home </> ".local/bin/docker", "/usr/bin/docker", "/usr/local/bin/docker"]
     Kubectl -> [home </> ".local/bin/kubectl", "/usr/local/bin/kubectl", "/usr/bin/kubectl"]
     Kind -> [home </> ".local/bin/kind", "/usr/local/bin/kind"]
+    DiskObserver -> ["/usr/bin/df", "/bin/df"]
   apple = case tool of
     PackageManagerRoot -> ["/opt/homebrew/bin/brew"]
     Ghcup -> [home </> ".ghcup/bin/ghcup", "/opt/homebrew/bin/ghcup"]
@@ -217,6 +233,7 @@ candidates home substrate tool = case substrate of
     Docker -> [home </> ".local/bin/docker", "/opt/homebrew/bin/docker"]
     Kubectl -> [home </> ".local/bin/kubectl", "/opt/homebrew/bin/kubectl"]
     Kind -> [home </> ".local/bin/kind", "/opt/homebrew/bin/kind"]
+    DiskObserver -> ["/usr/bin/df", "/bin/df"]
   windows = case tool of
     PackageManagerRoot -> ["C:/Windows/System32/winget.exe"]
     Ghcup -> [home </> ".ghcup/bin/ghcup.exe"]
@@ -224,6 +241,24 @@ candidates home substrate tool = case substrate of
     Docker -> [home </> "bin/docker.exe", "C:/Program Files/Docker/Docker/resources/bin/docker.exe"]
     Kubectl -> [home </> "bin/kubectl.exe"]
     Kind -> [home </> "bin/kind.exe"]
+    DiskObserver -> ["C:/Windows/System32/df.exe"]
+
+candidatesWithin :: FilePath -> FilePath -> Substrate -> HostTool -> [FilePath]
+candidatesWithin root home substrate tool =
+  map (scopeCandidate root) (candidates home substrate tool)
+
+scopeCandidate :: FilePath -> FilePath -> FilePath
+scopeCandidate root candidate
+  | normalise root == "/" = candidate
+  | candidateBelowRoot = candidate
+  | isAbsolute candidate = root </> makeRelative "/" candidate
+  | windowsAbsolute candidate = root </> "windows" </> map replaceColon candidate
+  | otherwise = candidate
+ where
+  relative = normalise (makeRelative root candidate)
+  candidateBelowRoot = isAbsolute candidate && relative /= ".." && not ("../" `isPrefixOf` relative) && not (isAbsolute relative)
+  replaceColon ':' = '_'
+  replaceColon character = character
 
 firstExecutable :: [FilePath] -> IO (Maybe AbsExe)
 firstExecutable [] = pure Nothing

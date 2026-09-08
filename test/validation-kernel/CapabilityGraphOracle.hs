@@ -10,7 +10,7 @@ the later work its finite gate excludes is carried as declared, non-gating
 residue.
 This oracle asserts four independent projections:
 
-  * the current typed relation has exactly nine declared forward-residue edges,
+  * the current typed relation has exactly ten declared forward-residue edges,
     no forward gate prerequisite, and no cycle;
   * omitting their declarations fails closed;
   * each removed Forward-deferred reach is rejected as stale;
@@ -49,7 +49,7 @@ runCapabilityGraphOracle = do
     unless (null problems) $
         fail (unlines ("CapabilityGraphOracle component diagnostics failed:" : map ("  " <>) problems))
     putStrLn
-        ( "CapabilityGraphOracle: the capability relation has nine declared non-gating residue edges across three reaches and no forward gate prerequisite; "
+        ( "CapabilityGraphOracle: the capability relation has ten declared non-gating residue edges across four reaches and no forward gate prerequisite; "
             <> "omitted or stale declarations are rejected, and GenesisTrust/local-custody is a non-numbered bootstrap root. "
             <> "No cycle, no unknown provider or consumer. A typed relation, not a gate result."
         )
@@ -57,35 +57,35 @@ runCapabilityGraphOracle = do
 -- | Authored from the plan's current state, not captured from the module.
 expectedObservations :: [(Text, Text)]
 expectedObservations =
-    [ ("capability.provision-count", "30")
-    , ("capability.edge-count", "60")
-    , ("capability.confirmed-edge-count", "60")
+    [ ("capability.provision-count", "33")
+    , ("capability.edge-count", "61")
+    , ("capability.confirmed-edge-count", "61")
     , ("capability.proposed-edge-count", "0")
     , ("capability.gate-prerequisite-edge-count", "51")
-    , ("capability.deferred-residue-edge-count", "9")
+    , ("capability.deferred-residue-edge-count", "10")
     , ("capability.bootstrap-root-count", "1")
-    , ("capability.consumer-phase-count", "48")
-    , ("capability.declared-coverage", "48/96")
-    , ("capability.forward-edge-count", "9")
+    , ("capability.consumer-phase-count", "49")
+    , ("capability.declared-coverage", "49/96")
+    , ("capability.forward-edge-count", "10")
     , ("capability.forward-gate-prerequisite-count", "0")
-    , ("capability.forward-deferred-residue-count", "9")
-    , ("capability.forward-declared-count", "9")
+    , ("capability.forward-deferred-residue-count", "10")
+    , ("capability.forward-declared-count", "10")
     , ("capability.forward-undeclared-count", "0")
-    , ("capability.forward-declaration-count", "3")
+    , ("capability.forward-declaration-count", "4")
     , ("capability.owned-cycle-count", "0")
     , ("capability.unowned-cycle-count", "0")
     ]
 
 -- | Restated independently from the Phase-0 document and graph implementation.
 canonicalResidueDeclarations :: [(Int, Int)]
-canonicalResidueDeclarations = [(0, 1), (0, 2), (0, 49)]
+canonicalResidueDeclarations = [(0, 1), (0, 2), (0, 49), (48, 90)]
 
 cleanCapabilityGraph :: CheckResult
 cleanCapabilityGraph = capabilityGraphDiagnosticWith canonicalResidueDeclarations
 
 -- | One declaration fans out to every exact later-owned capability in that phase.
 omittedCanonicalCases :: [((Int, Int), Int)]
-omittedCanonicalCases = [((0, 1), 1), ((0, 2), 2), ((0, 49), 6)]
+omittedCanonicalCases = [((0, 1), 1), ((0, 2), 2), ((0, 49), 6), ((48, 90), 1)]
 
 {- | The six removed plan reaches, restated independently rather than read back
 from the implementation.
@@ -130,10 +130,10 @@ findingProblems =
         <> show [(Text.unpack (findingCode item), Text.unpack (findingSubjectText item)) | item <- allFindings]
     | not (null allFindings)
     ]
-        <> [ "omitting the three Phase-0 residue declarations did not fail closed for all nine edges: "
+        <> [ "omitting the four canonical residue declarations did not fail closed for all ten edges: "
                 <> show [(Text.unpack (findingCode item), Text.unpack (findingSubjectText item)) | item <- undeclaredResidueFindings]
-           | map findingCode undeclaredResidueFindings /= replicate 9 "PLAN-CAPABILITY-DEFERRED-UNDECLARED"
-                || map findingSubjectText undeclaredResidueFindings /= replicate 9 "documentation_suite"
+           | map findingCode undeclaredResidueFindings /= replicate 10 "PLAN-CAPABILITY-DEFERRED-UNDECLARED"
+                || map findingSubjectText undeclaredResidueFindings /= replicate 9 "documentation_suite" <> ["test_workflow_algebra"]
            ]
         <> [ "omitting canonical declaration "
                 <> show omitted
@@ -148,17 +148,17 @@ findingProblems =
                             (filter (/= omitted) canonicalResidueDeclarations)
                         )
            , map findingCode omittedFindings /= replicate expectedCount "PLAN-CAPABILITY-DEFERRED-UNDECLARED"
-                || map findingSubjectText omittedFindings /= replicate expectedCount "documentation_suite"
+                || map findingSubjectText omittedFindings /= replicate expectedCount (if fst omitted == 48 then "test_workflow_algebra" else "documentation_suite")
            ]
         <> [ "the six removed reaches were not rejected as stale declarations: "
                 <> show [(Text.unpack (findingCode item), Text.unpack (findingSubjectText item)) | item <- removedDeclarationFindings]
            | map findingCode removedDeclarationFindings /= replicate 6 "PLAN-FORWARD-DECLARATION-UNMATCHED"
                 || map findingSubjectText removedDeclarationFindings /= removedDeclarationSubjects
            ]
-        <> [ "stale declarations changed the clean graph's nine forward-residue observations"
-           | observedValueFrom removedDeclarationResult "capability.forward-edge-count" /= "9"
-                || observedValueFrom removedDeclarationResult "capability.forward-declaration-count" /= "9"
-                || observedValueFrom removedDeclarationResult "capability.forward-declared-count" /= "9"
+        <> [ "stale declarations changed the clean graph's ten forward-residue observations"
+           | observedValueFrom removedDeclarationResult "capability.forward-edge-count" /= "10"
+                || observedValueFrom removedDeclarationResult "capability.forward-declaration-count" /= "10"
+                || observedValueFrom removedDeclarationResult "capability.forward-declared-count" /= "10"
            ]
         <> [ "the unrelated Phase-0-to-Phase-3 declaration and six removed reaches must all be stale, observed "
                 <> show

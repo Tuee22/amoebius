@@ -100,6 +100,12 @@ sudo host daemon — substrate detection, the Haskell `BootstrapCoordinator` rol
 no-environment-variables / no-`PATH` lazy-tool-ensure contract — are owned by
 [substrate_doctrine.md](./substrate_doctrine.md).
 
+Phase 51 makes the composition lift concrete without adding a deployment path. A single typed install-step
+list is folded by `Amoebius.Host.Lift.liftArgv` under `OnHost`, `InFrame`, or `InContainer`. Only the
+outermost host entry point is an `AbsExe`; nested tool names belong to the guest environment across that
+boundary. The hardware-free gate checks the exact three projections, while VM/container materialization
+remains owned by later native-host phases.
+
 ---
 
 ## 2. Context × role: an orthogonal grid

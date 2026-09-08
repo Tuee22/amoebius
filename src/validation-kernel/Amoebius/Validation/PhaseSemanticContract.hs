@@ -166,6 +166,9 @@ data GateRequirement
   | RequirePhaseFortyEight PhaseFortyEightRequirement
   | RequirePhaseFortyNine PhaseFortyNineRequirement
   | RequirePhaseFifty PhaseFiftyRequirement
+  | RequirePhaseFiftyOne PhaseFiftyOneRequirement
+  | RequirePhaseFiftyTwo PhaseFiftyTwoRequirement
+  | RequirePhaseFiftyThree PhaseFiftyThreeRequirement
   deriving (Eq, Ord, Show)
 
 -- | The Phase-1 payload is compiled independently of its Markdown projection.
@@ -1226,6 +1229,69 @@ data PhaseFiftyRequirement
   | RequireQualifiedPhaseFiftyGatePass
   deriving (Eq, Ord, Show)
 
+data PhaseFiftyOneRequirement
+  = RequireClosedSubstrateIndexedHostEnsureAlgebra
+  | RequireAcquiredHostEnsureKernelSupervisor
+  | RequirePbHandoffToOfflineSerialHostEnsureMatrix
+  | RequireIndependentHostEnsureKernelOracle
+  | RequireCompleteHostEnsurePositiveControls
+  | RequireExactHostEnsurePairedNegatives
+  | RequireAppliedHostEnsureProductionMutants
+  | RequireExactHostEnsureSourceAndFakeRootDiscovery
+  | RequirePostAcquisitionHostEnsureChallenge
+  | RequireHostEnsureProcessFilesystemAndArgvObservation
+  | RequireNoNetworkContainerClusterProviderOrHardwareEffects
+  | RequireFreshDisjointHostRootsAndStableSource
+  | RequireQualifiedHostEnsureHarness
+  | RequireHostEnsureProductsContainedBelowBuild
+  | RequirePhaseFiftyOneHostLegacyFamiliesClosed
+  | RequireExactPhaseFiftyReceipt
+  | RequireLivePlatformPermissionEngineVmClusterAndHardwareOwnersExplicit
+  | RequireQualifiedPhaseFiftyOneGatePass
+  deriving (Eq, Ord, Show)
+
+data PhaseFiftyTwoRequirement
+  = RequireCompletePristineLinuxEngineAndNativeSmokeImage
+  | RequireAcquiredLinuxEngineBringupSupervisor
+  | RequirePbHandoffToSerialQualifiedLiveIncusRun
+  | RequireIndependentLinuxEngineBringupOracle
+  | RequireClosedLinuxEnginePositiveControls
+  | RequireExactLinuxEnginePairedNegatives
+  | RequireAppliedLinuxEngineProductionMutants
+  | RequireExactLinuxEngineSourceAndLiveSurfaceDiscovery
+  | RequireSecondPassObservedFixedPoint
+  | RequireExternalIncusProcessGroupArchitectureAndImageObservation
+  | RequireUniqueOwnerMarkerAndNoElevatedDockerOrForeignEffects
+  | RequireFreshGuestRunAndStableSource
+  | RequireQualifiedLinuxEngineHarness
+  | RequireGuestAndGeneratedProductsContainedAndDestroyed
+  | RequireNoPhaseFiftyTwoLegacyAuthorities
+  | RequireExactPhaseFiftyOneReceipt
+  | RequireLaterPlatformsClustersRegistryAndServicesExplicit
+  | RequireQualifiedPhaseFiftyTwoGatePass
+  deriving (Eq, Ord, Show)
+
+data PhaseFiftyThreeRequirement
+  = RequireCompleteAppleFloorColimaCarveLiftAndNativeArm64Image
+  | RequireAcquiredAppleEngineBringupSupervisor
+  | RequirePbHandoffToSerialQualifiedLiveAppleRun
+  | RequireIndependentAppleEngineBringupOracle
+  | RequireClosedAppleEnginePositiveControls
+  | RequireExactAppleEnginePairedNegatives
+  | RequireAppliedAppleEngineProductionMutants
+  | RequireExactAppleEngineSourceAndLiveSurfaceDiscovery
+  | RequirePostStartAppleEngineChallenge
+  | RequireExternalAppleProviderArchitectureAndImageObservation
+  | RequireUniqueAppleOwnerMarkerAndNoForeignOrClusterEffects
+  | RequireFreshAppleProfileAndStableSource
+  | RequireQualifiedAppleEngineHarness
+  | RequireAppleGeneratedProductsContainedAndOwnedProfileDestroyed
+  | RequireNoPhaseFiftyThreeLegacyAuthorities
+  | RequireExactPhaseFiftyTwoReceipt
+  | RequireWindowsKindRegistryAndServicesExplicit
+  | RequireQualifiedPhaseFiftyThreeGatePass
+  deriving (Eq, Ord, Show)
+
 -- | A gate-table slot is exactly @Bound specification@ or @ContractGap@
 -- (development_plan_gate_integrity.md section M.6).  The former three-state
 -- encoding could not represent a bound contract without tripping the registry
@@ -1793,10 +1859,12 @@ slotFor 49 category =
   BoundSpecification (GateSpecification 49 category (RequirePhaseFortyNine (phaseFortyNineRequirement category)))
 slotFor 50 category =
   BoundSpecification (GateSpecification 50 category (RequirePhaseFifty (phaseFiftyRequirement category)))
-#ifdef VALIDATION_PHASE_SEMANTIC_GAP_ACCEPTANCE_MUTANT
-slotFor 51 Subject =
-  BoundSpecification (GateSpecification 51 Subject RequireExactSourceBoundPhaseZeroDispatcher)
-#endif
+slotFor 51 category =
+  BoundSpecification (GateSpecification 51 category (RequirePhaseFiftyOne (phaseFiftyOneRequirement category)))
+slotFor 52 category =
+  BoundSpecification (GateSpecification 52 category (RequirePhaseFiftyTwo (phaseFiftyTwoRequirement category)))
+slotFor 53 category =
+  BoundSpecification (GateSpecification 53 category (RequirePhaseFiftyThree (phaseFiftyThreeRequirement category)))
 slotFor ordinal category = ContractGap (GapId ordinal category)
 
 phaseTwoRequirement :: GateCategory -> PhaseTwoRequirement
@@ -2828,6 +2896,69 @@ phaseFiftyRequirement category = case category of
   Residue -> RequireRealHostPlatformAndPostHandoffRuntimeOwnersExplicit
   PassCriterion -> RequireQualifiedPhaseFiftyGatePass
 
+phaseFiftyOneRequirement :: GateCategory -> PhaseFiftyOneRequirement
+phaseFiftyOneRequirement category = case category of
+  Claim -> RequireClosedSubstrateIndexedHostEnsureAlgebra
+  Subject -> RequireAcquiredHostEnsureKernelSupervisor
+  Command -> RequirePbHandoffToOfflineSerialHostEnsureMatrix
+  Oracle -> RequireIndependentHostEnsureKernelOracle
+  PositiveControls -> RequireCompleteHostEnsurePositiveControls
+  PairedNegatives -> RequireExactHostEnsurePairedNegatives
+  Mutants -> RequireAppliedHostEnsureProductionMutants
+  Discovery -> RequireExactHostEnsureSourceAndFakeRootDiscovery
+  Challenge -> RequirePostAcquisitionHostEnsureChallenge
+  Observer -> RequireHostEnsureProcessFilesystemAndArgvObservation
+  AuthorityBypass -> RequireNoNetworkContainerClusterProviderOrHardwareEffects
+  Freshness -> RequireFreshDisjointHostRootsAndStableSource
+  Qualification -> RequireQualifiedHostEnsureHarness
+  Cleanroom -> RequireHostEnsureProductsContainedBelowBuild
+  LegacyClosure -> RequirePhaseFiftyOneHostLegacyFamiliesClosed
+  PredecessorCategory -> RequireExactPhaseFiftyReceipt
+  Residue -> RequireLivePlatformPermissionEngineVmClusterAndHardwareOwnersExplicit
+  PassCriterion -> RequireQualifiedPhaseFiftyOneGatePass
+
+phaseFiftyTwoRequirement :: GateCategory -> PhaseFiftyTwoRequirement
+phaseFiftyTwoRequirement category = case category of
+  Claim -> RequireCompletePristineLinuxEngineAndNativeSmokeImage
+  Subject -> RequireAcquiredLinuxEngineBringupSupervisor
+  Command -> RequirePbHandoffToSerialQualifiedLiveIncusRun
+  Oracle -> RequireIndependentLinuxEngineBringupOracle
+  PositiveControls -> RequireClosedLinuxEnginePositiveControls
+  PairedNegatives -> RequireExactLinuxEnginePairedNegatives
+  Mutants -> RequireAppliedLinuxEngineProductionMutants
+  Discovery -> RequireExactLinuxEngineSourceAndLiveSurfaceDiscovery
+  Challenge -> RequireSecondPassObservedFixedPoint
+  Observer -> RequireExternalIncusProcessGroupArchitectureAndImageObservation
+  AuthorityBypass -> RequireUniqueOwnerMarkerAndNoElevatedDockerOrForeignEffects
+  Freshness -> RequireFreshGuestRunAndStableSource
+  Qualification -> RequireQualifiedLinuxEngineHarness
+  Cleanroom -> RequireGuestAndGeneratedProductsContainedAndDestroyed
+  LegacyClosure -> RequireNoPhaseFiftyTwoLegacyAuthorities
+  PredecessorCategory -> RequireExactPhaseFiftyOneReceipt
+  Residue -> RequireLaterPlatformsClustersRegistryAndServicesExplicit
+  PassCriterion -> RequireQualifiedPhaseFiftyTwoGatePass
+
+phaseFiftyThreeRequirement :: GateCategory -> PhaseFiftyThreeRequirement
+phaseFiftyThreeRequirement category = case category of
+  Claim -> RequireCompleteAppleFloorColimaCarveLiftAndNativeArm64Image
+  Subject -> RequireAcquiredAppleEngineBringupSupervisor
+  Command -> RequirePbHandoffToSerialQualifiedLiveAppleRun
+  Oracle -> RequireIndependentAppleEngineBringupOracle
+  PositiveControls -> RequireClosedAppleEnginePositiveControls
+  PairedNegatives -> RequireExactAppleEnginePairedNegatives
+  Mutants -> RequireAppliedAppleEngineProductionMutants
+  Discovery -> RequireExactAppleEngineSourceAndLiveSurfaceDiscovery
+  Challenge -> RequirePostStartAppleEngineChallenge
+  Observer -> RequireExternalAppleProviderArchitectureAndImageObservation
+  AuthorityBypass -> RequireUniqueAppleOwnerMarkerAndNoForeignOrClusterEffects
+  Freshness -> RequireFreshAppleProfileAndStableSource
+  Qualification -> RequireQualifiedAppleEngineHarness
+  Cleanroom -> RequireAppleGeneratedProductsContainedAndOwnedProfileDestroyed
+  LegacyClosure -> RequireNoPhaseFiftyThreeLegacyAuthorities
+  PredecessorCategory -> RequireExactPhaseFiftyTwoReceipt
+  Residue -> RequireWindowsKindRegistryAndServicesExplicit
+  PassCriterion -> RequireQualifiedPhaseFiftyThreeGatePass
+
 phaseOneRequirement :: GateCategory -> PhaseOneRequirement
 phaseOneRequirement category = case category of
   Claim -> RequireAuthenticatedReproducibleToolchainAndProbeClosure
@@ -2940,6 +3071,8 @@ expectedLegacyOwnerRelation =
   , ("LTD-VAL-004", 49)
   , ("LTD-VAL-005", 49)
   , ("LTD-VAL-006", 49)
+  , ("LTD-VAL-007", 50)
+  , ("LTD-VAL-008", 50)
   , ("LTD-DOC-001", 27)
   , ("LTD-NAME-001", 2)
   , ("LTD-HOST-001", 51)
@@ -3037,8 +3170,8 @@ legacyReverseMapIsExact :: Bool
 legacyReverseMapIsExact =
   actualLegacyOwnerRelation == expectedLegacyOwnerRelation
     && sort mappedIds == sort Legacy.allLegacyIds
-    && length mappedIds == 26
-    && length Legacy.allLegacyIds == 26
+    && length mappedIds == 28
+    && length Legacy.allLegacyIds == 28
     && allUnique (map fst actualLegacyOwnerRelation)
  where
   mappedIds = concatMap semanticLegacyIds canonicalPhaseRegistry
@@ -3067,7 +3200,7 @@ criticalGuardsAreExact :: Bool
 criticalGuardsAreExact =
   actualGuardRelation == expectedGuardRelation
     && phase56GuardIsExact (guards 56)
-    && null (legacy 50)
+    && legacy 50 == [Legacy.LtdVal007, Legacy.LtdVal008]
  where
   guards ordinal = maybe [] semanticCriticalGuards (lookupPhase ordinal canonicalPhaseRegistry)
   legacy ordinal = maybe [] semanticLegacyIds (lookupPhase ordinal canonicalPhaseRegistry)
@@ -3255,6 +3388,9 @@ requirementCategory requirement = case requirement of
   RequirePhaseFortyEight phaseFortyEight -> phaseFortyEightRequirementCategory phaseFortyEight
   RequirePhaseFortyNine phaseFortyNine -> phaseFortyNineRequirementCategory phaseFortyNine
   RequirePhaseFifty phaseFifty -> phaseFiftyRequirementCategory phaseFifty
+  RequirePhaseFiftyOne phaseFiftyOne -> phaseFiftyOneRequirementCategory phaseFiftyOne
+  RequirePhaseFiftyTwo phaseFiftyTwo -> phaseFiftyTwoRequirementCategory phaseFiftyTwo
+  RequirePhaseFiftyThree phaseFiftyThree -> phaseFiftyThreeRequirementCategory phaseFiftyThree
 
 phaseOneRequirementCategory :: PhaseOneRequirement -> GateCategory
 phaseOneRequirementCategory requirement = case requirement of
@@ -4306,6 +4442,69 @@ phaseFiftyRequirementCategory requirement = case requirement of
   RequireRealHostPlatformAndPostHandoffRuntimeOwnersExplicit -> Residue
   RequireQualifiedPhaseFiftyGatePass -> PassCriterion
 
+phaseFiftyOneRequirementCategory :: PhaseFiftyOneRequirement -> GateCategory
+phaseFiftyOneRequirementCategory requirement = case requirement of
+  RequireClosedSubstrateIndexedHostEnsureAlgebra -> Claim
+  RequireAcquiredHostEnsureKernelSupervisor -> Subject
+  RequirePbHandoffToOfflineSerialHostEnsureMatrix -> Command
+  RequireIndependentHostEnsureKernelOracle -> Oracle
+  RequireCompleteHostEnsurePositiveControls -> PositiveControls
+  RequireExactHostEnsurePairedNegatives -> PairedNegatives
+  RequireAppliedHostEnsureProductionMutants -> Mutants
+  RequireExactHostEnsureSourceAndFakeRootDiscovery -> Discovery
+  RequirePostAcquisitionHostEnsureChallenge -> Challenge
+  RequireHostEnsureProcessFilesystemAndArgvObservation -> Observer
+  RequireNoNetworkContainerClusterProviderOrHardwareEffects -> AuthorityBypass
+  RequireFreshDisjointHostRootsAndStableSource -> Freshness
+  RequireQualifiedHostEnsureHarness -> Qualification
+  RequireHostEnsureProductsContainedBelowBuild -> Cleanroom
+  RequirePhaseFiftyOneHostLegacyFamiliesClosed -> LegacyClosure
+  RequireExactPhaseFiftyReceipt -> PredecessorCategory
+  RequireLivePlatformPermissionEngineVmClusterAndHardwareOwnersExplicit -> Residue
+  RequireQualifiedPhaseFiftyOneGatePass -> PassCriterion
+
+phaseFiftyTwoRequirementCategory :: PhaseFiftyTwoRequirement -> GateCategory
+phaseFiftyTwoRequirementCategory requirement = case requirement of
+  RequireCompletePristineLinuxEngineAndNativeSmokeImage -> Claim
+  RequireAcquiredLinuxEngineBringupSupervisor -> Subject
+  RequirePbHandoffToSerialQualifiedLiveIncusRun -> Command
+  RequireIndependentLinuxEngineBringupOracle -> Oracle
+  RequireClosedLinuxEnginePositiveControls -> PositiveControls
+  RequireExactLinuxEnginePairedNegatives -> PairedNegatives
+  RequireAppliedLinuxEngineProductionMutants -> Mutants
+  RequireExactLinuxEngineSourceAndLiveSurfaceDiscovery -> Discovery
+  RequireSecondPassObservedFixedPoint -> Challenge
+  RequireExternalIncusProcessGroupArchitectureAndImageObservation -> Observer
+  RequireUniqueOwnerMarkerAndNoElevatedDockerOrForeignEffects -> AuthorityBypass
+  RequireFreshGuestRunAndStableSource -> Freshness
+  RequireQualifiedLinuxEngineHarness -> Qualification
+  RequireGuestAndGeneratedProductsContainedAndDestroyed -> Cleanroom
+  RequireNoPhaseFiftyTwoLegacyAuthorities -> LegacyClosure
+  RequireExactPhaseFiftyOneReceipt -> PredecessorCategory
+  RequireLaterPlatformsClustersRegistryAndServicesExplicit -> Residue
+  RequireQualifiedPhaseFiftyTwoGatePass -> PassCriterion
+
+phaseFiftyThreeRequirementCategory :: PhaseFiftyThreeRequirement -> GateCategory
+phaseFiftyThreeRequirementCategory requirement = case requirement of
+  RequireCompleteAppleFloorColimaCarveLiftAndNativeArm64Image -> Claim
+  RequireAcquiredAppleEngineBringupSupervisor -> Subject
+  RequirePbHandoffToSerialQualifiedLiveAppleRun -> Command
+  RequireIndependentAppleEngineBringupOracle -> Oracle
+  RequireClosedAppleEnginePositiveControls -> PositiveControls
+  RequireExactAppleEnginePairedNegatives -> PairedNegatives
+  RequireAppliedAppleEngineProductionMutants -> Mutants
+  RequireExactAppleEngineSourceAndLiveSurfaceDiscovery -> Discovery
+  RequirePostStartAppleEngineChallenge -> Challenge
+  RequireExternalAppleProviderArchitectureAndImageObservation -> Observer
+  RequireUniqueAppleOwnerMarkerAndNoForeignOrClusterEffects -> AuthorityBypass
+  RequireFreshAppleProfileAndStableSource -> Freshness
+  RequireQualifiedAppleEngineHarness -> Qualification
+  RequireAppleGeneratedProductsContainedAndOwnedProfileDestroyed -> Cleanroom
+  RequireNoPhaseFiftyThreeLegacyAuthorities -> LegacyClosure
+  RequireExactPhaseFiftyTwoReceipt -> PredecessorCategory
+  RequireWindowsKindRegistryAndServicesExplicit -> Residue
+  RequireQualifiedPhaseFiftyThreeGatePass -> PassCriterion
+
 pathMatchesCapability :: PhaseSemanticContract -> Bool
 pathMatchesCapability contract =
   semanticPath contract == phaseFile (semanticOrdinal contract) (semanticCapabilityId contract)
@@ -4430,6 +4629,9 @@ gateRequirementSlug requirement = case requirement of
   RequirePhaseFortyEight phaseFortyEight -> phaseFortyEightRequirementSlug phaseFortyEight
   RequirePhaseFortyNine phaseFortyNine -> phaseFortyNineRequirementSlug phaseFortyNine
   RequirePhaseFifty phaseFifty -> phaseFiftyRequirementSlug phaseFifty
+  RequirePhaseFiftyOne phaseFiftyOne -> phaseFiftyOneRequirementSlug phaseFiftyOne
+  RequirePhaseFiftyTwo phaseFiftyTwo -> phaseFiftyTwoRequirementSlug phaseFiftyTwo
+  RequirePhaseFiftyThree phaseFiftyThree -> phaseFiftyThreeRequirementSlug phaseFiftyThree
 
 phaseOneRequirementSlug :: PhaseOneRequirement -> Text
 phaseOneRequirementSlug requirement = case requirement of
@@ -5480,6 +5682,69 @@ phaseFiftyRequirementSlug requirement = case requirement of
   RequireExactPhaseFortyNineReceipt -> "exact-phase-forty-nine-receipt"
   RequireRealHostPlatformAndPostHandoffRuntimeOwnersExplicit -> "real-host-platform-and-post-handoff-runtime-owners-explicit"
   RequireQualifiedPhaseFiftyGatePass -> "qualified-phase-fifty-gate-pass"
+
+phaseFiftyOneRequirementSlug :: PhaseFiftyOneRequirement -> Text
+phaseFiftyOneRequirementSlug requirement = case requirement of
+  RequireClosedSubstrateIndexedHostEnsureAlgebra -> "closed-substrate-indexed-host-ensure-algebra"
+  RequireAcquiredHostEnsureKernelSupervisor -> "acquired-host-ensure-kernel-supervisor"
+  RequirePbHandoffToOfflineSerialHostEnsureMatrix -> "pb-handoff-to-offline-serial-host-ensure-matrix"
+  RequireIndependentHostEnsureKernelOracle -> "independent-host-ensure-kernel-oracle"
+  RequireCompleteHostEnsurePositiveControls -> "complete-host-ensure-positive-controls"
+  RequireExactHostEnsurePairedNegatives -> "exact-host-ensure-paired-negatives"
+  RequireAppliedHostEnsureProductionMutants -> "applied-host-ensure-production-mutants"
+  RequireExactHostEnsureSourceAndFakeRootDiscovery -> "exact-host-ensure-source-and-fake-root-discovery"
+  RequirePostAcquisitionHostEnsureChallenge -> "post-acquisition-host-ensure-challenge"
+  RequireHostEnsureProcessFilesystemAndArgvObservation -> "host-ensure-process-filesystem-and-argv-observation"
+  RequireNoNetworkContainerClusterProviderOrHardwareEffects -> "no-network-container-cluster-provider-or-hardware-effects"
+  RequireFreshDisjointHostRootsAndStableSource -> "fresh-disjoint-host-roots-and-stable-source"
+  RequireQualifiedHostEnsureHarness -> "qualified-host-ensure-harness"
+  RequireHostEnsureProductsContainedBelowBuild -> "host-ensure-products-contained-below-build"
+  RequirePhaseFiftyOneHostLegacyFamiliesClosed -> "phase-fifty-one-host-legacy-families-closed"
+  RequireExactPhaseFiftyReceipt -> "exact-phase-fifty-receipt"
+  RequireLivePlatformPermissionEngineVmClusterAndHardwareOwnersExplicit -> "live-platform-permission-engine-vm-cluster-and-hardware-owners-explicit"
+  RequireQualifiedPhaseFiftyOneGatePass -> "qualified-phase-fifty-one-gate-pass"
+
+phaseFiftyTwoRequirementSlug :: PhaseFiftyTwoRequirement -> Text
+phaseFiftyTwoRequirementSlug requirement = case requirement of
+  RequireCompletePristineLinuxEngineAndNativeSmokeImage -> "complete-pristine-linux-engine-and-native-smoke-image"
+  RequireAcquiredLinuxEngineBringupSupervisor -> "acquired-linux-engine-bringup-supervisor"
+  RequirePbHandoffToSerialQualifiedLiveIncusRun -> "pb-handoff-to-serial-qualified-live-incus-run"
+  RequireIndependentLinuxEngineBringupOracle -> "independent-linux-engine-bringup-oracle"
+  RequireClosedLinuxEnginePositiveControls -> "closed-linux-engine-positive-controls"
+  RequireExactLinuxEnginePairedNegatives -> "exact-linux-engine-paired-negatives"
+  RequireAppliedLinuxEngineProductionMutants -> "applied-linux-engine-production-mutants"
+  RequireExactLinuxEngineSourceAndLiveSurfaceDiscovery -> "exact-linux-engine-source-and-live-surface-discovery"
+  RequireSecondPassObservedFixedPoint -> "second-pass-observed-fixed-point"
+  RequireExternalIncusProcessGroupArchitectureAndImageObservation -> "external-incus-process-group-architecture-and-image-observation"
+  RequireUniqueOwnerMarkerAndNoElevatedDockerOrForeignEffects -> "unique-owner-marker-and-no-elevated-docker-or-foreign-effects"
+  RequireFreshGuestRunAndStableSource -> "fresh-guest-run-and-stable-source"
+  RequireQualifiedLinuxEngineHarness -> "qualified-linux-engine-harness"
+  RequireGuestAndGeneratedProductsContainedAndDestroyed -> "guest-and-generated-products-contained-and-destroyed"
+  RequireNoPhaseFiftyTwoLegacyAuthorities -> "no-phase-fifty-two-legacy-authorities"
+  RequireExactPhaseFiftyOneReceipt -> "exact-phase-fifty-one-receipt"
+  RequireLaterPlatformsClustersRegistryAndServicesExplicit -> "later-platforms-clusters-registry-and-services-explicit"
+  RequireQualifiedPhaseFiftyTwoGatePass -> "qualified-phase-fifty-two-gate-pass"
+
+phaseFiftyThreeRequirementSlug :: PhaseFiftyThreeRequirement -> Text
+phaseFiftyThreeRequirementSlug requirement = case requirement of
+  RequireCompleteAppleFloorColimaCarveLiftAndNativeArm64Image -> "complete-apple-floor-colima-carve-lift-and-native-arm64-image"
+  RequireAcquiredAppleEngineBringupSupervisor -> "acquired-apple-engine-bringup-supervisor"
+  RequirePbHandoffToSerialQualifiedLiveAppleRun -> "pb-handoff-to-serial-qualified-live-apple-run"
+  RequireIndependentAppleEngineBringupOracle -> "independent-apple-engine-bringup-oracle"
+  RequireClosedAppleEnginePositiveControls -> "closed-apple-engine-positive-controls"
+  RequireExactAppleEnginePairedNegatives -> "exact-apple-engine-paired-negatives"
+  RequireAppliedAppleEngineProductionMutants -> "applied-apple-engine-production-mutants"
+  RequireExactAppleEngineSourceAndLiveSurfaceDiscovery -> "exact-apple-engine-source-and-live-surface-discovery"
+  RequirePostStartAppleEngineChallenge -> "post-start-apple-engine-challenge"
+  RequireExternalAppleProviderArchitectureAndImageObservation -> "external-apple-provider-architecture-and-image-observation"
+  RequireUniqueAppleOwnerMarkerAndNoForeignOrClusterEffects -> "unique-apple-owner-marker-and-no-foreign-or-cluster-effects"
+  RequireFreshAppleProfileAndStableSource -> "fresh-apple-profile-and-stable-source"
+  RequireQualifiedAppleEngineHarness -> "qualified-apple-engine-harness"
+  RequireAppleGeneratedProductsContainedAndOwnedProfileDestroyed -> "apple-generated-products-contained-and-owned-profile-destroyed"
+  RequireNoPhaseFiftyThreeLegacyAuthorities -> "no-phase-fifty-three-legacy-authorities"
+  RequireExactPhaseFiftyTwoReceipt -> "exact-phase-fifty-two-receipt"
+  RequireWindowsKindRegistryAndServicesExplicit -> "windows-kind-registry-and-services-explicit"
+  RequireQualifiedPhaseFiftyThreeGatePass -> "qualified-phase-fifty-three-gate-pass"
 
 renderGateCategory :: GateCategory -> Text
 renderGateCategory category = case category of

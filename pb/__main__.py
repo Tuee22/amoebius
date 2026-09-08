@@ -50,6 +50,8 @@ class BootstrapAdapter:
         cache.mkdir(parents=True, exist_ok=True)
         temporary.mkdir(parents=True, exist_ok=True)
         environment = {}
+        environment["PATH"] = str(toolchain / ".ghcup" / "bin")
+        environment["CABAL_DIR"] = str(cache / "cabal")
         environment["GHCUP_INSTALL_BASE_PREFIX"] = str(toolchain)
         environment["GHCUP_SKIP_UPDATE_CHECK"] = "yes"
         environment["HOME"] = str(home)

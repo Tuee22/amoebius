@@ -43,24 +43,25 @@ import Control.Concurrent (threadDelay)
 import Control.Exception (IOException, SomeException, displayException, finally, try)
 import Control.Monad (forM, forM_, unless)
 import Crypto.Hash.SHA256 qualified as SHA256
+import Crypto.Random (getRandomBytes)
 import Data.Aeson (FromJSON (parseJSON), eitherDecodeStrict', withObject, (.:))
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Char8 qualified as ByteString8
 import Data.Char (intToDigit)
-import Data.List (isInfixOf, isPrefixOf, sort)
+import Data.List (isPrefixOf, sort)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 import System.Directory
   ( canonicalizePath
   , copyFile
+  , copyFileWithMetadata
   , createDirectory
   , createDirectoryIfMissing
   , createFileLink
   , doesDirectoryExist
   , doesFileExist
-  , doesPathExist
   , getHomeDirectory
   , getSymbolicLinkTarget
   , listDirectory
@@ -69,14 +70,14 @@ import System.Directory
   , removePathForcibly
   )
 import System.Exit (ExitCode (..))
-import System.FilePath (isAbsolute, makeRelative, normalise, takeDirectory, (</>))
+import System.FilePath (isAbsolute, makeRelative, normalise, takeDirectory, takeFileName, (</>))
+import GHC.Clock (getMonotonicTimeNSec)
 import System.IO (IOMode (WriteMode), hClose, openBinaryFile, openBinaryTempFile)
 import System.Process
   ( CreateProcess (cwd, env, std_err, std_out)
   , ProcessHandle
   , StdStream (UseHandle)
   , createProcess
-  , getPid
   , getProcessExitCode
   , proc
   , readCreateProcessWithExitCode
@@ -118,6 +119,16 @@ data ConcreteRun = ConcreteRun
   , concreteObservedExecutable :: Either Text FilePath
   , concreteObservedArgv :: Either Text [String]
   , concreteExecutableDigest :: Either Text Text
+  , concreteChallengeLength :: Int
+  , concreteResourceUnit :: Text
+  , concreteMemoryMaximum :: Either Text Text
+  , concreteSwapMaximum :: Either Text Text
+  , concreteRuntimeMaximum :: Either Text Text
+  , concretePeakMemory :: Either Text Text
+  , concreteTerminationReason :: Text
+  , concreteElapsedNanoseconds :: Integer
+  , concreteOwnedProcessesRemoved :: Bool
+  , concreteStderr :: Text
   , concreteExit :: ExitCode
   , concreteStdoutPath :: FilePath
   , concreteStderrPath :: FilePath
@@ -250,7 +261,7 @@ fakeHarnessBytes = ByteString8.pack (unlines
   , "        events.append(['ensure_ghcup', url, digest, str(target), present_text == 'present'])"
   , "        return target"
   , "    def environment(self, toolchain):"
-  , "        result = {'GHCUP_INSTALL_BASE_PREFIX': str(toolchain), 'GHCUP_SKIP_UPDATE_CHECK': 'yes', 'HOME': str(toolchain / 'home'), 'XDG_CACHE_HOME': str(toolchain / 'cache'), 'TMPDIR': str(toolchain / 'tmp'), 'TEMP': str(toolchain / 'tmp'), 'TMP': str(toolchain / 'tmp')}"
+  , "        result = {'PATH': str(toolchain / '.ghcup' / 'bin'), 'CABAL_DIR': str(toolchain / 'cache' / 'cabal'), 'GHCUP_INSTALL_BASE_PREFIX': str(toolchain), 'GHCUP_SKIP_UPDATE_CHECK': 'yes', 'HOME': str(toolchain / 'home'), 'XDG_CACHE_HOME': str(toolchain / 'cache'), 'TMPDIR': str(toolchain / 'tmp'), 'TEMP': str(toolchain / 'tmp'), 'TMP': str(toolchain / 'tmp')}"
   , "        events.append(['environment', str(toolchain), result])"
   , "        return result"
   , "    def run(self, root, arguments, environment):"
@@ -330,26 +341,88 @@ seedContainedToolchain root sourceRoot home = do
   let toolchain = sourceRoot </> ".build/toolchain/linux-amd64"
       ghcupRoot = toolchain </> ".ghcup"
       compilerSource = home </> ".ghcup/ghc/9.12.4"
-      storeSource = home </> ".cabal/store/ghc-9.12.4-5301"
       packagesSource = home </> ".cabal/packages/hackage.haskell.org"
   copyTree compilerSource (ghcupRoot </> "ghc/9.12.4")
   createDirectoryIfMissing True (ghcupRoot </> "bin")
   copyFile (home </> ".ghcup/bin/cabal-3.16.1.0") (ghcupRoot </> "bin/cabal-3.16.1.0")
   createFileLink "cabal-3.16.1.0" (ghcupRoot </> "bin/cabal")
   createFileLink "../ghc/9.12.4/bin/ghc-9.12.4" (ghcupRoot </> "bin/ghc")
+  forM_
+    [ "ar", "as", "awk", "basename", "cat", "cc", "chmod", "cp", "cpp", "dirname"
+    , "egrep", "expr", "false", "gcc", "git", "grep", "head", "install", "ld", "ln"
+    , "ls", "make", "mkdir", "mv", "pkg-config", "pwd", "ranlib", "rm", "sed", "sh"
+    , "sort", "strip", "test", "tr", "true", "uname", "which"
+    ] $ \name ->
+    createFileLink ("/usr/bin" </> name) (ghcupRoot </> "bin" </> name)
   createDirectoryIfMissing True (ghcupRoot </> "cache")
   copyMetadataFiles (home </> ".ghcup/cache") (ghcupRoot </> "cache") ["ghcup-0.0.9.yaml", "ghcup-0.1.0.yaml"]
   copyFile (home </> ".ghcup/config.yaml") (ghcupRoot </> "config.yaml")
   createDirectoryIfMissing True (toolchain </> "bootstrap")
   copyFile (home </> ".ghcup/bin/ghcup") (toolchain </> "bootstrap/ghcup")
-  copyTree storeSource (toolchain </> "cabal-store/ghc-9.12.4-5301")
-  createDirectoryIfMissing True (toolchain </> "home/.cabal/packages/hackage.haskell.org")
-  packageFiles <- listDirectory packagesSource
-  forM_ packageFiles $ \name -> do
-    let source = packagesSource </> name
-    directory <- doesDirectoryExist source
-    unless directory (copyFile source (toolchain </> "home/.cabal/packages/hackage.haskell.org" </> name))
+  copyTree packagesSource (toolchain </> "cache/cabal/packages/hackage.haskell.org")
+  ByteString.writeFile
+    (toolchain </> "cache/cabal/config")
+    ( ByteString8.pack
+        ( unlines
+            [ "repository hackage.haskell.org"
+            , "  url: http://hackage.haskell.org/"
+            , "  secure: True"
+            , "remote-repo-cache: " <> (toolchain </> "cache/cabal/packages")
+            , "logs-dir: " <> (toolchain </> "cache/cabal/logs")
+            ]
+        )
+    )
   prepareSourceRepositoryCache root (toolchain </> "dist-newstyle/src")
+  prepareContainedDependencies sourceRoot toolchain
+
+prepareContainedDependencies :: FilePath -> FilePath -> IO ()
+prepareContainedDependencies sourceRoot toolchain = do
+  let unit = "amoebius-phase-50-dependencies-" <> takeFileName (takeDirectory sourceRoot) <> ".service"
+      stdoutPath = toolchain </> "dependency-build.stdout"
+      stderrPath = toolchain </> "dependency-build.stderr"
+      cabal = toolchain </> ".ghcup/bin/cabal"
+      ghc = toolchain </> ".ghcup/ghc/9.12.4/bin/ghc"
+      arguments =
+        [ "--user", "--quiet", "--wait", "--pipe", "--collect", "--unit=" <> unit
+        , "--working-directory=" <> sourceRoot
+        , "--property=Type=exec"
+        , "--property=IPAddressDeny=any"
+        , "--property=MemoryAccounting=yes"
+        , "--property=MemoryMax=8589934592"
+        , "--property=MemorySwapMax=0"
+        , "--property=RuntimeMaxSec=1800"
+        , "--property=KillMode=control-group"
+        , "--setenv=PATH=" <> (toolchain </> ".ghcup/bin")
+        , "--setenv=CABAL_DIR=" <> (toolchain </> "cache/cabal")
+        , "--setenv=HOME=" <> (toolchain </> "home")
+        , "--setenv=XDG_CACHE_HOME=" <> (toolchain </> "cache")
+        , "--setenv=TMPDIR=" <> (toolchain </> "tmp")
+        , "--setenv=TEMP=" <> (toolchain </> "tmp")
+        , "--setenv=TMP=" <> (toolchain </> "tmp")
+        , "--", cabal
+        , "--store-dir=" <> (toolchain </> "cabal-store")
+        , "build"
+        , "--builddir=" <> (toolchain </> "dist-newstyle")
+        , "--with-compiler=" <> ghc
+        , "--jobs=1"
+        , "--only-dependencies"
+        , ":pkg:amoebius:exe:amoebius"
+        ]
+  createDirectoryIfMissing True (toolchain </> "home")
+  createDirectoryIfMissing True (toolchain </> "tmp")
+  stdoutHandle <- openBinaryFile stdoutPath WriteMode
+  stderrHandle <- openBinaryFile stderrPath WriteMode
+  (_, _, _, processHandle) <- createProcess
+    ((proc "/usr/bin/systemd-run" arguments)
+      { cwd = Just sourceRoot
+      , std_out = UseHandle stdoutHandle
+      , std_err = UseHandle stderrHandle
+      })
+  outcome <- waitForProcess processHandle `finally` (hClose stdoutHandle >> hClose stderrHandle)
+  unless (outcome == ExitSuccess) $ do
+    stderrBytes <- ByteString.readFile stderrPath
+    let retainedBytes = ByteString.drop (max 0 (ByteString.length stderrBytes - 8192)) stderrBytes
+    ioError (userError ("contained dependency preparation failed: " <> ByteString8.unpack retainedBytes))
 
 copyMetadataFiles :: FilePath -> FilePath -> [FilePath] -> IO ()
 copyMetadataFiles source target names = forM_ names $ \name -> do
@@ -371,7 +444,7 @@ copyTree source target = do
       then getSymbolicLinkTarget from >>= \destination -> createFileLink destination to
       else do
         directory <- doesDirectoryExist from
-        if directory then copyTree from to else copyFile from to
+        if directory then copyTree from to else copyFileWithMetadata from to
 
 executeConcreteHandoff :: FilePath -> FilePath -> FilePath -> IO ConcreteRun
 executeConcreteHandoff python sourceRoot runRoot = do
@@ -380,27 +453,45 @@ executeConcreteHandoff python sourceRoot runRoot = do
       stderrPath = runRoot </> "concrete.stderr"
       opaque = ["validate", "phase", "50"]
       arguments = ["-I", "-S", "-B", sourceRoot </> "pb"] <> opaque
+      unit = "amoebius-phase-50-" <> takeFileName runRoot <> ".service"
+      systemdRun = "/usr/bin/systemd-run"
+      systemctl = "/usr/bin/systemctl"
+      supervisedArguments =
+        [ "--user", "--quiet", "--wait", "--pipe", "--collect", "--unit=" <> unit
+        , "--property=Type=exec"
+        , "--property=MemoryAccounting=yes"
+        , "--property=MemoryMax=8589934592"
+        , "--property=MemorySwapMax=0"
+        , "--property=RuntimeMaxSec=1800"
+        , "--property=KillMode=control-group"
+        , "--setenv=AMOEBIUS_PB_HANDOFF_PROTOCOL=" <> protocol
+        , "--setenv=PATH=/usr/bin:/bin"
+        , "--", python
+        ] <> arguments
   createDirectory protocol
   interpreterBytes <- ByteString.readFile python
   stdoutHandle <- openBinaryFile stdoutPath WriteMode
   stderrHandle <- openBinaryFile stderrPath WriteMode
+  startedAt <- getMonotonicTimeNSec
   (_, _, _, processHandle) <- createProcess
-    ((proc python arguments)
+    ((proc systemdRun supervisedArguments)
       { cwd = Just sourceRoot
-      , env = Just [("AMOEBIUS_PB_HANDOFF_PROTOCOL", protocol)]
       , std_out = UseHandle stdoutHandle
       , std_err = UseHandle stderrHandle
       })
-  initialPid <- fmap (fmap show) (getPid processHandle)
-  canary <- ByteString.take 32 <$> ByteString.readFile "/dev/urandom"
-  ByteString.writeFile (protocol </> "challenge") canary
+  initialPid <- awaitServiceMainPid systemctl unit 600
+  resourceProperties <- readServiceProperties systemctl unit
+  canary <- getRandomBytes 32
+  if ByteString.length canary == 32
+    then ByteString.writeFile (protocol </> "challenge") canary
+    else stopService systemctl unit
   observed <- awaitObservation processHandle (protocol </> "observation") 12000
   (subjectObservation, osExecutable, osArgv, executableDigest) <- case observed of
     Left problem -> pure (Left problem, Left problem, Left problem, Left problem)
     Right bytes -> case eitherDecodeStrict' bytes of
       Left problem -> pure (Left (Text.pack problem), Left (Text.pack problem), Left (Text.pack problem), Left (Text.pack problem))
       Right value -> do
-        let processId = maybe "absent" id initialPid
+        let processId = either (const "absent") id initialPid
             procRoot = "/proc" </> processId
         executableAttempt <- try (canonicalizePath (procRoot </> "exe")) :: IO (Either IOException FilePath)
         argvAttempt <- try (ByteString.readFile (procRoot </> "cmdline")) :: IO (Either IOException ByteString)
@@ -414,19 +505,81 @@ executeConcreteHandoff python sourceRoot runRoot = do
           then ByteString.writeFile (protocol </> "acknowledgement") (TextEncoding.encodeUtf8 (hexSha256 canary))
           else pure ()
         pure (Right value, executableResult, argvResult, digestResult)
+  peakAttempt <- readServiceProperty systemctl unit "MemoryPeak"
+  case observed of
+    Left _ -> stopService systemctl unit
+    Right _ -> pure ()
   outcome <- waitForProcess processHandle `finally` (hClose stdoutHandle >> hClose stderrHandle)
+  stderrBytes <- try (ByteString.readFile stderrPath) :: IO (Either IOException ByteString)
+  stopService systemctl unit
+  cleaned <- awaitServiceGone systemctl unit 200
+  finishedAt <- getMonotonicTimeNSec
+  let property name = maybe (Left ("missing-systemd-property:" <> Text.pack name)) Right (lookup name resourceProperties)
+      peakMemory = case peakAttempt of
+        Right value | not (Text.null value) && value /= "[not set]" -> Right value
+        _ -> property "MemoryCurrent"
   pure ConcreteRun
     { concreteInterpreter = python
     , concreteInterpreterDigest = hexSha256 interpreterBytes
-    , concreteInitialPid = initialPid
+    , concreteInitialPid = either (const Nothing) Just initialPid
     , concreteObservation = subjectObservation
     , concreteObservedExecutable = osExecutable
     , concreteObservedArgv = osArgv
     , concreteExecutableDigest = executableDigest
+    , concreteChallengeLength = ByteString.length canary
+    , concreteResourceUnit = Text.pack unit
+    , concreteMemoryMaximum = property "MemoryMax"
+    , concreteSwapMaximum = property "MemorySwapMax"
+    , concreteRuntimeMaximum = property "RuntimeMaxUSec"
+    , concretePeakMemory = peakMemory
+    , concreteTerminationReason = if outcome == ExitFailure 73 then "expected-child-exit-73" else "unexpected:" <> Text.pack (show outcome)
+    , concreteElapsedNanoseconds = fromIntegral (finishedAt - startedAt)
+    , concreteOwnedProcessesRemoved = cleaned
+    , concreteStderr = either (Text.pack . displayException) (Text.take 4096 . TextEncoding.decodeUtf8) stderrBytes
     , concreteExit = outcome
     , concreteStdoutPath = stdoutPath
     , concreteStderrPath = stderrPath
     }
+
+awaitServiceMainPid :: FilePath -> String -> Int -> IO (Either Text String)
+awaitServiceMainPid systemctl unit attempts
+  | attempts <= 0 = pure (Left "systemd-main-pid-timeout")
+  | otherwise = do
+      observed <- readServiceProperty systemctl unit "MainPID"
+      case observed of
+        Right value | value /= "0" && not (Text.null value) -> pure (Right (Text.unpack value))
+        _ -> threadDelay 50000 >> awaitServiceMainPid systemctl unit (attempts - 1)
+
+readServiceProperties :: FilePath -> String -> IO [(String, Text)]
+readServiceProperties systemctl unit = do
+  let names = ["LoadState", "ActiveState", "MainPID", "ControlGroup", "MemoryCurrent", "MemoryPeak", "MemoryMax", "MemorySwapMax", "RuntimeMaxUSec"]
+  receipt <- runProcess "." "systemd-resource-readback" systemctl (["--user", "show", unit] <> map ("--property=" <>) names) []
+  pure
+    [ (key, Text.pack value)
+    | line <- lines (Text.unpack (receiptStdout receipt))
+    , let (key, rest) = break (== '=') line
+    , not (null rest)
+    , let value = drop 1 rest
+    ]
+
+readServiceProperty :: FilePath -> String -> String -> IO (Either Text Text)
+readServiceProperty systemctl unit property = do
+  properties <- readServiceProperties systemctl unit
+  pure (maybe (Left ("missing-systemd-property:" <> Text.pack property)) Right (lookup property properties))
+
+stopService :: FilePath -> String -> IO ()
+stopService systemctl unit = do
+  _ <- runProcess "." "systemd-scoped-cleanup" systemctl ["--user", "stop", unit] []
+  pure ()
+
+awaitServiceGone :: FilePath -> String -> Int -> IO Bool
+awaitServiceGone systemctl unit attempts
+  | attempts <= 0 = pure False
+  | otherwise = do
+      loadState <- readServiceProperty systemctl unit "LoadState"
+      case loadState of
+        Right "not-found" -> pure True
+        _ -> threadDelay 50000 >> awaitServiceGone systemctl unit (attempts - 1)
 
 awaitObservation :: ProcessHandle -> FilePath -> Int -> IO (Either Text ByteString)
 awaitObservation processHandle path attempts
@@ -472,7 +625,7 @@ phaseRows root runRoot acquired trust contract execution cleanupAttempt =
   , named "phase-50-authority-bypass" [matrixCheck "closed authority" matrixAuthority]
   , named "phase-50-freshness" [matrixCheck "fresh source and products" matrixFreshness]
   , named "phase-50-qualification" [matrixCheck "qualification corpus" matrixQualification]
-  , named "phase-50-cleanroom" [cleanup]
+  , named "phase-50-cleanroom" [cleanup, matrixCheck "process-tree cleanup" matrixCleanup]
   , named "phase-50-legacy-closure" [matrixCheck "phase-49 zero source debt binding" matrixLegacy]
   , CheckResult "phase-50-predecessor" [observation "phase-50.predecessor" "deferred to durable Phase-49 receipt verifier"] []
   , CheckResult "phase-50-residue" [observation "phase-50.residue" "UNVERIFIED: other native platforms, real package-manager and permission fidelity, Phase-51 host ensure, containers, VMs, clusters, registries, images, accelerators, hardware, and post-handoff product behavior"] []
@@ -496,8 +649,8 @@ phaseRows root runRoot acquired trust contract execution cleanupAttempt =
     Right matrix -> project matrix
   named = mergeChecks
 
-matrixComplete, matrixSubject, matrixCommand, matrixOraclePass, matrixPositive, matrixNegative, matrixMutants, matrixDiscovery, matrixChallenge, matrixObserver, matrixAuthority, matrixFreshness, matrixQualification, matrixLegacy :: Matrix -> CheckResult
-matrixComplete matrix = mergeChecks "pb-boundary-complete" [matrixSubject matrix, matrixCommand matrix, matrixOraclePass matrix, matrixPositive matrix, matrixNegative matrix, matrixMutants matrix, matrixDiscovery matrix, matrixChallenge matrix, matrixObserver matrix, matrixAuthority matrix, matrixFreshness matrix, matrixQualification matrix, matrixLegacy matrix]
+matrixComplete, matrixSubject, matrixCommand, matrixOraclePass, matrixPositive, matrixNegative, matrixMutants, matrixDiscovery, matrixChallenge, matrixObserver, matrixAuthority, matrixFreshness, matrixQualification, matrixCleanup, matrixLegacy :: Matrix -> CheckResult
+matrixComplete matrix = mergeChecks "pb-boundary-complete" [matrixSubject matrix, matrixCommand matrix, matrixOraclePass matrix, matrixPositive matrix, matrixNegative matrix, matrixMutants matrix, matrixDiscovery matrix, matrixChallenge matrix, matrixObserver matrix, matrixAuthority matrix, matrixFreshness matrix, matrixQualification matrix, matrixCleanup matrix, matrixLegacy matrix]
 
 matrixSubject matrix = CheckResult "pb-boundary-subject"
   [observation "pb-boundary.subject" "exact acquired pb/__main__.py plus one injected BootstrapAdapter and concrete BootstrapAdapter"]
@@ -516,7 +669,7 @@ matrixOraclePass matrix = CheckResult "pb-boundary-independent-oracle"
 matrixPositive matrix = CheckResult "pb-boundary-positive-controls"
   [observation "pb-boundary.fake-count" (Text.pack (show (length cases))), observation "pb-boundary.concrete-exit" (Text.pack (show (concreteExit concrete)))]
   ([finding "PB-BOUNDARY-FAKE-POSITIVE" (Text.unpack name) "the fake adapter did not observe the complete ordered bootstrap transcript and opaque argv" | item@(FakeCase name _ _ _ _ _) <- cases, not (fakeCasePassed item)] <>
-   [finding "PB-BOUNDARY-CONCRETE-POSITIVE" "pb/__main__.py" "the concrete exec handoff did not propagate ExitFailure 73" | concreteExit concrete /= ExitFailure 73])
+   [finding "PB-BOUNDARY-CONCRETE-POSITIVE" "pb/__main__.py" ("the concrete exec handoff did not propagate ExitFailure 73; stderr=" <> concreteStderr concrete) | concreteExit concrete /= ExitFailure 73])
  where cases = matrixFakeCases matrix; concrete = matrixConcrete matrix
 
 matrixNegative matrix = CheckResult "pb-boundary-paired-negatives"
@@ -534,22 +687,41 @@ matrixDiscovery matrix = CheckResult "pb-boundary-discovery"
   [finding "PB-BOUNDARY-DISCOVERY" "<runtime-effect-inventory>" "runtime discovery was partial" | length (matrixFakeCases matrix) /= 8 || length (matrixChangedSubjects matrix) /= 8]
 
 matrixChallenge matrix = CheckResult "pb-boundary-challenge"
-  [observation "pb-boundary.challenge" (either id handoffChallengeSha256 (concreteObservation concrete))]
-  [finding "PB-BOUNDARY-CHALLENGE" "<post-start-canary>" "the execed continuation did not acknowledge the fresh canary" | either (const True) ((/= 64) . Text.length . handoffChallengeSha256) (concreteObservation concrete)]
+  [ observation "pb-boundary.challenge" (either id handoffChallengeSha256 (concreteObservation concrete))
+  , observation "pb-boundary.challenge-bytes" (Text.pack (show (concreteChallengeLength concrete)))
+  ]
+  ( [finding "PB-BOUNDARY-CHALLENGE" "<post-start-canary>" "the execed continuation did not acknowledge the fresh canary" | either (const True) ((/= 64) . Text.length . handoffChallengeSha256) (concreteObservation concrete)] <>
+    [finding "PB-BOUNDARY-CHALLENGE-LENGTH" "<fixed-count-entropy>" "the supervisor did not acquire exactly 32 bytes" | concreteChallengeLength concrete /= 32]
+  )
  where concrete = matrixConcrete matrix
 
 matrixObserver matrix = CheckResult "pb-boundary-observer"
-  [observation "pb-boundary.observed-executable" (either id Text.pack (concreteObservedExecutable concrete)), observation "pb-boundary.observed-argv" (either id (Text.pack . show) (concreteObservedArgv concrete)), observation "pb-boundary.observed-digest" (either id id (concreteExecutableDigest concrete))]
-  (case (concreteInitialPid concrete, concreteObservation concrete, concreteObservedExecutable concrete, concreteObservedArgv concrete) of
+  [ observation "pb-boundary.observed-executable" (either id Text.pack (concreteObservedExecutable concrete))
+  , observation "pb-boundary.observed-argv" (either id (Text.pack . show) (concreteObservedArgv concrete))
+  , observation "pb-boundary.observed-digest" (either id id (concreteExecutableDigest concrete))
+  , observation "pb-boundary.resource-unit" (concreteResourceUnit concrete)
+  , observation "pb-boundary.memory-max" (either id id (concreteMemoryMaximum concrete))
+  , observation "pb-boundary.memory-swap-max" (either id id (concreteSwapMaximum concrete))
+  , observation "pb-boundary.runtime-max" (either id id (concreteRuntimeMaximum concrete))
+  , observation "pb-boundary.memory-peak" (either id id (concretePeakMemory concrete))
+  , observation "pb-boundary.termination" (concreteTerminationReason concrete)
+  , observation "pb-boundary.elapsed-nanoseconds" (Text.pack (show (concreteElapsedNanoseconds concrete)))
+  ]
+  ((case (concreteInitialPid concrete, concreteObservation concrete, concreteObservedExecutable concrete, concreteObservedArgv concrete) of
     (Just pid, Right claimed, Right executable, Right argv) ->
       [finding "PB-BOUNDARY-PID" pid "the Haskell continuation did not retain the original Python PID" | handoffPid claimed /= pid] <>
       [finding "PB-BOUNDARY-EXECUTABLE" executable "the subject claim did not match the independently observed live executable" | normalise (handoffExecutable claimed) /= normalise executable] <>
       [finding "PB-BOUNDARY-ARGV" "<opaque-argv>" "the live argv or subject argv did not equal the exact handoff" | handoffArgv claimed /= ["validate", "phase", "50"] || argv /= executable : ["validate", "phase", "50"]]
-    _ -> [finding "PB-BOUNDARY-OBSERVER" "<live-child>" "the external executable/argv/PID observation was incomplete"])
+    _ -> [finding "PB-BOUNDARY-OBSERVER" "<live-child>" "the external executable/argv/PID observation was incomplete"]) <>
+   [finding "PB-BOUNDARY-MEMORY-LIMIT" "<systemd-service>" "the OS did not read back the exact 8 GiB MemoryMax" | concreteMemoryMaximum concrete /= Right "8589934592"] <>
+   [finding "PB-BOUNDARY-SWAP-LIMIT" "<systemd-service>" "the OS did not read back zero MemorySwapMax" | concreteSwapMaximum concrete /= Right "0"] <>
+   [finding "PB-BOUNDARY-DEADLINE" "<systemd-service>" "the OS did not read back the exact 1800-second RuntimeMax" | concreteRuntimeMaximum concrete `notElem` [Right "30min", Right "1800s"]] <>
+   [finding "PB-BOUNDARY-PEAK-MEMORY" "<systemd-service>" "the OS did not report process-tree peak memory" | either (const True) Text.null (concretePeakMemory concrete)] <>
+   [finding "PB-BOUNDARY-ELAPSED" "<monotonic-clock>" "the concrete run exceeded the 1800-second deadline" | concreteElapsedNanoseconds concrete > 1800 * 1000000000])
  where concrete = matrixConcrete matrix
 
 matrixAuthority matrix = CheckResult "pb-boundary-authority"
-  [observation "pb-boundary.authority" "authenticated absolute interpreter; inherited PATH absent; contained ghcup/GHC/Cabal/store/build; offline --jobs=1; no hardware, container, provider, registry, or network authority"]
+  [observation "pb-boundary.authority" "authenticated absolute interpreter; explicit PATH limited to the contained toolchain bin; contained ghcup/GHC/Cabal/store/build; systemd memory/swap/deadline enforcement; offline --jobs=1; no hardware, container, provider, registry, or network authority"]
   ([finding "PB-BOUNDARY-INTERPRETER" (concreteInterpreter concrete) "interpreter identity was not absolute or digest-bound" | not (isAbsolute (concreteInterpreter concrete)) || Text.length (concreteInterpreterDigest concrete) /= 64] <>
    [finding "PB-BOUNDARY-ORACLE-AUTHORITY" (Text.unpack (receiptName oracle)) "oracle compilation was not serial and offline" | any (`notElem` receiptArgs oracle) ["--jobs=1", "--offline"]])
  where concrete = matrixConcrete matrix; oracle = matrixOracle matrix
@@ -560,16 +732,34 @@ matrixFreshness matrix = CheckResult "pb-boundary-freshness"
 
 matrixQualification matrix = CheckResult "pb-boundary-qualification"
   [observation "pb-boundary.qualification" "constant success, no-op, wrong binary, incomplete discovery, missing oracle, wrong-locus mutant, stale challenge, self-observer, argv bypass, external write, and wrong exit are independently rejected"]
-  [finding "PB-BOUNDARY-QUALIFICATION" "<qualification-corpus>" "clean or changed-subject qualification failed" | not (all fakeCasePassed (matrixFakeCases matrix)) || any changedSubjectPassed (matrixChangedSubjects matrix)]
+  [finding "PB-BOUNDARY-QUALIFICATION" "<qualification-corpus>" "clean or changed-subject qualification failed" | not (all fakeCasePassed (matrixFakeCases matrix)) || any changedSubjectPassed (matrixChangedSubjects matrix) || not (concreteOwnedProcessesRemoved (matrixConcrete matrix))]
 
-matrixLegacy _ = CheckResult "pb-boundary-legacy-closure"
-  [observation "pb-boundary.legacy" "Phase 50 owns no migration and consumes the exact Phase-49-bound zero-source-debt snapshot"] []
+matrixCleanup matrix = CheckResult "pb-boundary-process-cleanup"
+  [observation "pb-boundary.owned-processes-removed" (if concreteOwnedProcessesRemoved concrete then "true" else "false")]
+  [finding "PB-BOUNDARY-PROCESS-RESIDUE" (Text.unpack (concreteResourceUnit concrete)) "the marker-owned systemd process tree remained after cleanup" | not (concreteOwnedProcessesRemoved concrete)]
+ where concrete = matrixConcrete matrix
+
+matrixLegacy matrix = mergeChecks "pb-boundary-legacy-closure"
+  [ CheckResult "pb-boundary-legacy-identities"
+      [ observation "pb-boundary.legacy.LTD-VAL-007" "bounded fixed-count entropy, enforced resource envelope, and zero owned residue"
+      , observation "pb-boundary.legacy.LTD-VAL-008" "explicit contained PATH and Cabal environment with no ambient inheritance"
+      ]
+      []
+  , matrixChallenge matrix
+  , matrixObserver matrix
+  , matrixCleanup matrix
+  , CheckResult "pb-boundary-contained-environment"
+      [observation "pb-boundary.contained-environment" "PATH,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,GHCUP_SKIP_UPDATE_CHECK,HOME,XDG_CACHE_HOME,TMPDIR,TEMP,TMP"]
+      [ finding "PB-BOUNDARY-CONTAINED-ENVIRONMENT" "<fake-adapter-observations>" "the complete contained environment or its precedence was not observed"
+      | any (not . fakeCasePassed) (matrixFakeCases matrix)
+      ]
+  ]
 
 fakeCasePassed :: FakeCase -> Bool
 fakeCasePassed (FakeCase _ system machine _ opaque receipt) =
   receiptExit receipt == ExitSuccess
     && all (`Text.isInfixOf` receiptStdout receipt) ["repository_root", "platform", "ensure_ghcup", "environment", "capture", "handoff", "--offline", "--jobs=1", Text.pack (platformLabel system machine), ".ghcup/bin/cabal", "list-bin"]
-    && all (`Text.isInfixOf` receiptStdout receipt) ["GHCUP_INSTALL_BASE_PREFIX", "GHCUP_SKIP_UPDATE_CHECK", "XDG_CACHE_HOME", "TMPDIR"]
+    && all (`Text.isInfixOf` receiptStdout receipt) ["PATH", ".ghcup/bin", "CABAL_DIR", "cache/cabal", "GHCUP_INSTALL_BASE_PREFIX", "GHCUP_SKIP_UPDATE_CHECK", "XDG_CACHE_HOME", "TMPDIR"]
     && all (`notContains` receiptStdout receipt) ["list-bin-stale", "/tmp/pb-mutant"]
     && map (Text.pack . jsonFragment) opaque `allIn` receiptStdout receipt
 

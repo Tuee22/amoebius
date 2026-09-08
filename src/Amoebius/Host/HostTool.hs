@@ -9,6 +9,7 @@ module Amoebius.Host.HostTool
   ( HostTool (..)
   , renderHostTool
   , toolCommandName
+  , requirementVersion
   ) where
 
 data HostTool
@@ -23,6 +24,7 @@ data HostTool
     Docker
   | Kubectl
   | Kind
+  | DiskObserver
   deriving stock (Eq, Ord, Show, Enum, Bounded)
 
 -- | The tool's name in this repository's vocabulary, used for records and diagnostics.
@@ -34,6 +36,7 @@ renderHostTool tool = case tool of
   Docker -> "docker"
   Kubectl -> "kubectl"
   Kind -> "kind"
+  DiskObserver -> "disk-observer"
 
 -- | The bare name the tool is published under.
 --
@@ -48,3 +51,16 @@ toolCommandName tool = case tool of
   Docker -> "docker"
   Kubectl -> "kubectl"
   Kind -> "kind"
+  DiskObserver -> "df"
+
+-- | Authored version requirements used by typed install-step arguments.  A
+-- requirement has one home in the host algebra; plans carry a reference to it.
+requirementVersion :: HostTool -> Maybe String
+requirementVersion tool = case tool of
+  Cabal -> Just "3.16.1.0"
+  PackageManagerRoot -> Nothing
+  Ghcup -> Nothing
+  Docker -> Nothing
+  Kubectl -> Nothing
+  Kind -> Nothing
+  DiskObserver -> Nothing

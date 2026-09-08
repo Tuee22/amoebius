@@ -15,7 +15,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -25,7 +25,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
+- [Resource provision](#resource-provision)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 52.1: The pristine guest and its recorded preflight](#sprint-521-the-pristine-guest-and-its-recorded-preflight-)
@@ -40,7 +40,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 Blocked by redesigned Phase 51, its independent validation, and gate pass; every earlier
 gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
@@ -52,14 +52,16 @@ satisfied and gate-passed.
 
 ---
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+> **Gate interpretation.** The phase-specific contract is bound but remains NOT VALIDATED until the complete
+> acquired gate passes for one stable source snapshot. The validated Phase-49 barrier and Phase-50 bootstrap
+> authorize this first hardware-bearing run; no prose or component result substitutes for its candidate.
 
 ## Phase Summary
 
 Every earlier phase decides its claim in-process or against a fake tool directory. This one decides it on a
 Linux guest that carries nothing amoebius put there. The run asserts the floor, builds `exe:amoebius` and
-hands off; the binary installs the container engine and makes it usable without elevation; the sealed recipe
-builds natively at `amd64`; and the built image runs far enough to print a version the gate reads back out of
+hands off; the binary installs the container engine and makes it usable without elevation; a run-local smoke
+image containing that exact binary builds natively at `amd64`; and the built image runs far enough to print a version the gate reads back out of
 the container.
 
 **Sudoless engine access is three distinct proofs, not one.** The first is durable group membership — the
@@ -96,32 +98,38 @@ appears.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED; implementation and independent execution remain open.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: one cohesive claim — *a pristine Linux guest reaches a running amoebius image without elevation, and an identical second run mutates nothing*. Its sprint seams are the guest, the pre-binary leg, the engine, the native build, and the re-run. It splits if a second substrate or a second acceptance register appears. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 52` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 51; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | A pristine Ubuntu Linux guest reaches a running native amoebius smoke image through a sudoless Docker client, and the identical second pass records probes but no mutations. |
+| `Subject` | `Amoebius.Host.LinuxEngine`, the `dev linux-engine-guest-pass` entry point, and the acquired `Amoebius.Validation.LinuxEngineBringupRun` supervisor. |
+| `Command` | `pb validate phase 52`; the validated bootstrap hands off unchanged to Haskell, which serially qualifies the production subject and then owns one live Incus guest from launch through destruction. |
+| `Oracle` | `test/spec/host/LinuxEngineBringupOracle.hs`, importing no `Amoebius.*` module and separately authoring the exact surfaces, ledgers, refusal cases, architecture rule, and unelevated argv. |
+| `Positive controls` | Four pristine surfaces, five typed first-pass mutations, four second-pass probes, two identical converged surface reads, two version reads, and current/future-session unelevated daemon probes form the closed corpus. |
+| `Paired negatives` | Pristine versus each singly dirty surface, agreeing versus mismatched requested/guest/engine architecture, elevated versus unelevated daemon argv, and converged-with-probes versus an empty second ledger are distinguished at exact constructors. |
+| `Mutants` | Five Cabal-selected changed production subjects drop durable membership, skip credential refresh, add elevated retry, erase converged probes, or admit platform override. Each must emit its assigned red token while the clean subject remains green. |
+| `Discovery` | The acquired tracked-source inventory equals the Linux-engine product module, entry point, Haskell spec, independent oracle, runner pair, dispatch/evidence/runner wiring, and Cabal declarations; the live inventory equals the four surface rows and generated ledgers in both directions. |
+| `Challenge` | A uniquely named guest is observed pristine after acquisition, both passes execute against that same live guest, and the second pass must freshly observe every surface while issuing zero mutations. |
+| `Observer` | The outer Haskell runner records Incus inventory, process handoff trace, absolute child argv/exits, group database, current and future-session Docker probes, engine architecture, image inspect result, container stdout, and teardown inventory. |
+| `Authority/bypass` | The unique Phase-52 owner marker bounds the guest. Docker client calls are never elevated, only the owned guest may be mutated, the host engine is not used, and provider inventory before and after must match exactly. |
+| `Freshness` | The run root and guest name are newly absent; source and Phase-51 receipt are acquired before launch; live preflight precedes install; both ledgers are regenerated; opening and closing tracked-source identities must match. |
+| `Qualification` | The fixed clean, four dirty-surface, architecture, unelevated-argv, second-pass, and five-mutant corpus qualifies the harness before its live verdict is admitted. Missing observations, the wrong red locus, cached output, or concurrent compiler argv refuses. |
+| `Cleanroom` | Source/support archives, compiler products, transcripts, and image context exist only below `.build/runs/phase-52/**` or inside the owned guest; the guest is destroyed in an unconditional bracket and provider inventory must return to its pre-run value. |
+| `Legacy closure` | Phase 52 owns no legacy ID; the acquired legacy reverse map must therefore remain empty for this ordinal. |
+| `Predecessor` | Exact `ImmediatePredecessorPass` for Phase 51; an absent, stale, replayed, later-phase, or different-source receipt refuses before the guest is launched. |
+| `Residue` | `UNVERIFIED`: Apple and Windows engine bring-up, VM host actions beyond this disposable Linux guest, clusters, canonical published base-image execution, registry, services, accelerators, and later live acceptance remain Phase-53+-owned. |
+| `Pass criterion` | `qualified-gate-pass` — all eighteen rows pass for one exact stable source snapshot, all five production mutants are red at their assigned loci, both live passes and external observations agree, and owned live residue is exactly zero. |
 
-## Resource provision — UNRESOLVED
+## Resource provision
 
-> **UNRESOLVED — blocks validation.** No live mutation may begin. Before check this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
+- **Owner marker:** exact source snapshot, Phase-51 receipt, unique Phase-52 run root, and unique Incus instance name carrying the `user.owner=phase-52` marker.
+- **Preflight:** Linux `x86_64`, initialized Incus, KVM, adequate storage/memory, an absent run root and guest name, and a guest whose Docker package, group membership, daemon surface, and image reference are all absent.
+- **Allowed mutation:** create run-local `.build/**` evidence; launch and configure only the marked guest; install `docker.io` and contained build prerequisites inside it; add only guest user `ubuntu` to `docker`; start only its Docker daemon; build/run only the run-owned native smoke image.
+- **Forbidden mutation:** no host package, group, daemon, image, VM other than the owned instance, cluster, registry, published tag, foreign Incus instance, ambient toolchain, concurrent compiler, or repository path outside `.build/**` may be changed.
+- **Observer:** the outer Haskell supervisor reads provider inventory before/after, guest preflight and architecture, process `execve` trace, group/session/daemon state, image metadata, both ledgers/surface inventories, and container version stdout.
+- **Cleanup:** the exact validated instance name is forcibly deleted in an unconditional bracket on success or failure; no wildcard or user-supplied deletion target is admitted.
+- **Residue:** provider inventory after cleanup must byte-equal its pre-run inventory; only run-owned `.build/**` evidence may remain, and every other owned live resource count is zero.
 
 ## Doctrine adopted
 
@@ -145,15 +153,15 @@ appears.
 
 > **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-## Sprint 52.1: The pristine guest and its recorded preflight ⏸️
+## Sprint 52.1: The pristine guest and its recorded preflight ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Status**: Done
+**Implementation**: `Amoebius.Validation.LinuxEngineBringupRun` owns unique Incus launch, pristine preflight, observation, and unconditional deletion.
 **Blocked by**: [Phase 51](phase_51_host_ensure_kernel.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: exact four-surface pristine admission plus provider inventory equality after forced teardown.
+**Oracle**: `test/spec/host/LinuxEngineBringupOracle.hs`, importing no production module.
+**Legacy IDs**: none.
+**Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/substrates.md`.
 
 ### Objective
 
@@ -181,17 +189,17 @@ installed.
 
 ### Remaining Work
 
-The whole sprint.
+Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.2: The pre-binary leg on a host that carries nothing ⏸️
+## Sprint 52.2: The pre-binary leg on a host that carries nothing ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Status**: Done
+**Implementation**: the live runner installs only guest build prerequisites, mounts the authenticated contained toolchain read-only, and invokes `pb` under an external `execve` trace.
 **Blocked by**: Sprint 52.1
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: guest `pb --version` output and `execve` trace must identify the source-bound Haskell binary after the Python child.
+**Oracle**: the outer runner independently reads the process trace and exact version token.
+**Legacy IDs**: none.
+**Docs to update**: `documents/engineering/substrate_doctrine.md`.
 
 ### Objective
 
@@ -217,17 +225,17 @@ and observe the handoff from outside the process that performs it.
 
 ### Remaining Work
 
-The whole sprint.
+Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.3: The engine, and sudoless access as three proofs ⏸️
+## Sprint 52.3: The engine, and sudoless access as three proofs ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Status**: Done
+**Implementation**: `Amoebius.Host.LinuxEngine` owns typed probes/mutations and the live absolute-path interpreter.
 **Blocked by**: Sprint 52.2
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: exact durable group row, current-process probe, future-session probe, and no-sudo argv, with three changed-subject mutants.
+**Oracle**: `LinuxEngineBringupOracle.expectedFirstLedger`, `expectedUnelevatedProbe`, and `expectedFutureSession`.
+**Legacy IDs**: none.
+**Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 
@@ -254,22 +262,22 @@ install the container engine and make it usable without elevation as three prope
 
 ### Remaining Work
 
-The whole sprint.
+Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.4: The native build and the version verdict ⏸️
+## Sprint 52.4: The native build and the version verdict ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Status**: Done
+**Implementation**: `Amoebius.Host.LinuxEngine.admitNativeBuild` and its live image builder own three-way architecture admission and the run-local smoke image.
 **Blocked by**: Sprint 52.3
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: all agreeing architectures admit, each singly mismatched triple refuses, the platform-override mutant reddens, and live container stdout equals the recorded version.
+**Oracle**: `LinuxEngineBringupOracle.architectureCases` and the outer container-output observer.
+**Legacy IDs**: none.
+**Docs to update**: `documents/engineering/image_build_doctrine.md`.
 
 ### Objective
 
 Adopt [`image_build_doctrine.md` §3 — one image per architecture](../documents/engineering/image_build_doctrine.md#3-one-image-per-architecture--the-tag-carries-the-architecture-not-an-index);
-build the sealed recipe on this guest, at this guest's architecture, and run the result far enough to produce
+build the exact run-local binary smoke recipe on this guest, at this guest's architecture, and run the result far enough to produce
 a verdict.
 
 ### Deliverables
@@ -280,8 +288,9 @@ a verdict.
   the build log describes what was asked for rather than what runs.
 - An image reference carrying its architecture, so no later consumer can select bytes its host cannot
   execute.
-- A build that consumes the recipe as published bytes and renders none of its own, since a build that
-  re-renders is a second projection nothing pinned.
+- A run-local recipe written by the source-bound Haskell subject beside the exact executing binary; the
+  canonical published base-image recipe and fixed tags remain explicit later residue rather than being
+  silently substituted into this engine-access gate.
 
 ### Validation
 
@@ -291,17 +300,17 @@ a verdict.
 
 ### Remaining Work
 
-The whole sprint.
+Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.5: The second run that changes nothing ⏸️
+## Sprint 52.5: The second run that changes nothing ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Status**: Done
+**Implementation**: `planLinuxEnginePass` derives each ledger from a fresh live observation and the runner invokes it twice in one guest.
 **Blocked by**: Sprint 52.4
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: the second exact ledger is four probes and zero mutations, both surface tables and version outputs agree, and the empty-ledger mutant reddens.
+**Oracle**: `LinuxEngineBringupOracle.expectedSecondLedger` and `expectedSurfaces`.
+**Legacy IDs**: none.
+**Docs to update**: `documents/engineering/testing_doctrine.md`.
 
 ### Objective
 
@@ -329,23 +338,21 @@ run the whole sequence a second time against the same guest and require that it 
 
 ### Remaining Work
 
-The whole sprint.
+Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
 ---
 
 ## Documentation Requirements
 
-**Engineering docs to update (after the complete gate passes):**
+**Engineering docs that must agree with the exact gate snapshot:**
 
 - `documents/engineering/substrate_doctrine.md` — §3.1's linux floor records what a real guest actually
   needed, and §4.3 records Incus as an exercised provider rather than a planned one.
-- `documents/engineering/image_build_doctrine.md` — §3's refusal-on-mismatch rule records its observed
-  failure mode once a mismatch has been refused on a host.
+- `documents/engineering/image_build_doctrine.md` — §3 distinguishes the independently qualified
+  architecture-mismatch refusal from the naturally agreeing live-host observation.
 
 **Cross-references to add:**
 
-- `DEVELOPMENT_PLAN/development_plan_standards.md` — add this phase to the `Declared by` column of the
-  `host-floor` row in §F, because that column is joined in both directions.
 - `DEVELOPMENT_PLAN/substrates.md` — add the per-phase row naming this gate's substrate, lane, and what it
   validates.
 

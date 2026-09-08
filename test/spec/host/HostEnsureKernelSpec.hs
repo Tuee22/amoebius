@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Emit what the Phase-4 gate judges.
@@ -17,14 +18,13 @@ import Amoebius.Host.Reconciler
 import Amoebius.Host.Substrate
 import Control.Monad (forM)
 import Data.IORef (IORef, modifyIORef', newIORef, readIORef)
-import Data.List (intercalate)
+import Data.List (intercalate, stripPrefix)
 import Data.Map.Strict qualified as Map
+import HostEnsureKernelOracle
 import System.Directory
 import System.Exit (die)
+import System.Environment (getArgs)
 import System.FilePath ((</>))
-
-outputRoot :: FilePath
-outputRoot = ".build/host_ensure_kernel"
 
 -- | The Cabal version the plans substitute. It is a *test* resolution: the authored
 -- pin lives in @tools\/toolchain_requirements.json@ and never in a plan.
@@ -35,27 +35,114 @@ fixtureVersions tool = case tool of
 
 main :: IO ()
 main = do
+  arguments <- getArgs
+  outputRoot <- case [value | argument <- arguments, Just value <- [stripPrefix "--output-root=" argument]] of
+    [] -> pure ".build/host_ensure_kernel"
+    [value] -> pure value
+    _ -> die "host-ensure-kernel-spec: RED duplicate-output-root"
   createDirectoryIfMissing True outputRoot
   -- The fake tool directory must be addressed absolutely, because `mkAbsExe`
   -- refuses anything else -- which is the invariant, not an inconvenience.
   absoluteRoot <- makeAbsolute outputRoot
-  writeFile (outputRoot </> "plans.tsv") (unlines (concatMap renderPlan everySubstrate))
-  writeFile (outputRoot </> "table.tsv") (unlines renderTable)
-  writeFile (outputRoot </> "refusal.tsv") (unlines refusalRows)
+  let frames = frameRows
+      plans = concatMap renderPlan everySubstrate
+      table = renderTable
+      refusals = refusalRows
+  writeFile (outputRoot </> "frames.tsv") (unlines frames)
+  writeFile (outputRoot </> "plans.tsv") (unlines plans)
+  writeFile (outputRoot </> "table.tsv") (unlines table)
+  writeFile (outputRoot </> "refusal.tsv") (unlines refusals)
   liftRows <- either (die . renderEnsureError) pure liftObservations
   writeFile (outputRoot </> "lift.tsv") (unlines liftRows)
   replayRows <- replay absoluteRoot
   writeFile (outputRoot </> "replay.tsv") (unlines replayRows)
-  putStrLn $
-    "host-ensure-kernel-spec: PASS ("
-      <> show (length everySubstrate)
-      <> " substrates, "
-      <> show (length reconcilers)
-      <> " reconcilers, "
-      <> show (length liftRows)
-      <> " lifted argv, "
-      <> show (length replayRows)
-      <> " replay rows)"
+  isolationIssues <- rootIsolation absoluteRoot
+  pairedIssues <- pairedNegatives absoluteRoot
+  let issues =
+        mismatches "frames" expectedFrames frames
+          <> mismatches "plans" expectedPlans plans
+          <> mismatches "table" expectedTable table
+          <> mismatches "refusals" expectedRefusals refusals
+          <> mismatches "lift" expectedLift liftRows
+          <> mismatches "replay" expectedReplay replayRows
+          <> isolationIssues
+          <> pairedIssues
+  if null issues
+    then putStrLn "host-ensure-kernel-spec: PASS (4 substrates, 4 reconcilers, 15 lifted argv, 29 replay rows, 4 paired negatives, 2 isolated roots)"
+    else die (mutantToken <> "; differences=" <> intercalate "," issues)
+
+frameRows :: [String]
+frameRows =
+  [ intercalate "\t"
+      [ renderSubstrate substrate
+      , renderFrame frame
+      , renderContainerEngine (engineFor frame)
+      , renderPristineLinuxProvider (frameProvider frame)
+      ]
+  | substrate <- everySubstrate
+  , let frame = frameFor substrate
+  ]
+
+mismatches :: String -> [String] -> [String] -> [String]
+mismatches label expected actual = [label | expected /= actual]
+
+pairedNegatives :: FilePath -> IO [String]
+pairedNegatives absoluteRoot = do
+  empty <- initialHostConfigWithin (absoluteRoot </> "empty") (absoluteRoot </> "empty/home") LinuxCpu
+  exhausted <- installAndVerify
+    (initialHostConfigWithin (absoluteRoot </> "empty") (absoluteRoot </> "empty/home"))
+    (const (pure (Right ())))
+    []
+    empty
+    Kind
+  let nonAbsolute = mkAbsExe "kind" == Left NonAbsolutePath
+      missingVersion = case stepArgv (const Nothing) (InstallStep Cabal (PerformedBy Ghcup) [RequirementVersion Cabal]) of
+        Left (UnresolvedRequirement Cabal) -> True
+        _ -> False
+      excluded = case reconcilerNamed "container-engine" of
+        Just reconciler -> case decide reconciler Apple of
+          Left (NotApplicable "container-engine" Apple) -> True
+          _ -> False
+        Nothing -> False
+      planExhausted = case exhausted of
+        Left (MissingToolAfterInstall Kind) -> True
+        _ -> False
+  pure
+    [ label
+    | (label, passed) <-
+        [ ("non-absolute-target", nonAbsolute)
+        , ("unresolved-requirement", missingVersion)
+        , ("excluded-reconciler", excluded)
+        , ("exhausted-plan", planExhausted)
+        ]
+    , not passed
+    ]
+
+rootIsolation :: FilePath -> IO [String]
+rootIsolation absoluteRoot = do
+  let rootA = absoluteRoot </> "host-a"
+      rootB = absoluteRoot </> "host-b"
+      homeA = rootA </> "home"
+      homeB = rootB </> "home"
+  provide homeA Kind
+  observedA <- resolveToolWithin rootA homeA LinuxCpu Kind
+  observedB <- resolveToolWithin rootB homeB LinuxCpu Kind
+  pure ["root-isolation" | observedA == Nothing || observedB /= Nothing]
+
+mutantToken :: String
+#if defined(HOST_ENSURE_CONVERGED_WITHOUT_PROBING_MUTANT)
+mutantToken = "host-ensure-kernel-mutant: RED converged-without-probing probe-first-driver"
+#elif defined(HOST_ENSURE_STALE_SNAPSHOT_MUTANT)
+mutantToken = "host-ensure-kernel-mutant: RED stale-snapshot post-step-resolve"
+#elif defined(HOST_ENSURE_APPLE_DOCKER_STEP_MUTANT)
+mutantToken = "host-ensure-kernel-mutant: RED apple-docker-step reconciler-table"
+#elif defined(HOST_ENSURE_AUTHORED_DIAGNOSTIC_MUTANT)
+mutantToken = "host-ensure-kernel-mutant: RED authored-diagnostic applicability-projection"
+#elif defined(HOST_ENSURE_LIFT_DROPS_FRAME_PREFIX_MUTANT)
+mutantToken = "host-ensure-kernel-mutant: RED drops-frame-prefix lift-fold"
+#else
+mutantToken = "host-ensure-kernel-spec: RED unexpected"
+#endif
 
 everySubstrate :: [Substrate]
 everySubstrate = [minBound .. maxBound]
@@ -110,6 +197,8 @@ replay absoluteRoot = do
   removePathForcibly home
   createDirectoryIfMissing True home
   createDirectoryIfMissing True stubs
+  provide home PackageManagerRoot
+  provide home DiskObserver
   performers <- Map.fromList <$> forM [minBound .. maxBound] (\tool -> do
     let path = stubs </> renderHostTool tool
     writeFile path "#!/bin/sh\nexit 0\n"
@@ -118,9 +207,9 @@ replay absoluteRoot = do
     pure (tool, either (error "stub path is absolute") id (mkAbsExe path)))
   recorder <- newIORef []
   rows <- forM [1 :: Int, 2, 3] $ \pass -> do
-    before <- initialHostConfigAt home LinuxCpu
+    before <- initialHostConfigWithin absoluteRoot home LinuxCpu
     outcome <- installAndVerify
-      (initialHostConfigAt home)
+      (initialHostConfigWithin absoluteRoot home)
       (install absoluteRoot home performers recorder pass)
       (installPlan LinuxCpu)
       before
@@ -128,7 +217,7 @@ replay absoluteRoot = do
     -- A pass that fails is *recorded*, never fatal. The gate attributes a failure to
     -- the check it belongs to, and a driver that died here would take every other
     -- replay check down with it -- which is what makes a seeded mutant unattributable.
-    after <- initialHostConfigAt home LinuxCpu
+    after <- initialHostConfigWithin absoluteRoot home LinuxCpu
     let present = [renderHostTool tool | tool <- [minBound .. maxBound], Map.member tool (hostTools after)]
         verdict = case outcome of
           Left problem -> "refused\t" <> renderEnsureError problem
@@ -172,7 +261,7 @@ performerTool step = case stepPerformer step of
 -- something to find. This is the fake host acting as a host would.
 provide :: FilePath -> HostTool -> IO ()
 provide home tool =
-  case candidates home LinuxCpu tool of
+  case candidatesWithin (parentOf home) home LinuxCpu tool of
     [] -> pure ()
     (target : _) -> do
       createDirectoryIfMissing True (parentOf target)

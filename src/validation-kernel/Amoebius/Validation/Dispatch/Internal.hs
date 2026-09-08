@@ -304,6 +304,24 @@ import Amoebius.Validation.PbBoundaryRun.Internal
   , acquirePbBoundaryRun
   , acquiredPbBoundaryRunCheck
   )
+import Amoebius.Validation.HostEnsureKernelRun.Internal
+  ( AcquiredHostEnsureKernelRun
+  , acquireHostEnsureKernelRefreshRun
+  , acquireHostEnsureKernelRun
+  , acquiredHostEnsureKernelRunCheck
+  )
+import Amoebius.Validation.LinuxEngineBringupRun.Internal
+  ( AcquiredLinuxEngineBringupRun
+  , acquireLinuxEngineBringupRefreshRun
+  , acquireLinuxEngineBringupRun
+  , acquiredLinuxEngineBringupRunCheck
+  )
+import Amoebius.Validation.AppleEngineBringupRun.Internal
+  ( AcquiredAppleEngineBringupRun
+  , acquireAppleEngineBringupRefreshRun
+  , acquireAppleEngineBringupRun
+  , acquiredAppleEngineBringupRunCheck
+  )
 import Amoebius.Validation.Documentation.Internal (checkDocuments)
 import Amoebius.Validation.Evidence.Internal
   ( PublishedCandidateEvidence
@@ -361,6 +379,9 @@ import Amoebius.Validation.Evidence.Internal
   , captureFinalizedTestWorkflowAlgebraCandidateEvidence
   , captureFinalizedDslBarrierCandidateEvidence
   , captureFinalizedPbBoundaryCandidateEvidence
+  , captureFinalizedHostEnsureKernelCandidateEvidence
+  , captureFinalizedLinuxEngineBringupCandidateEvidence
+  , captureFinalizedAppleEngineBringupCandidateEvidence
   , captureFinalizedDispatchCandidateEvidence
   , captureFinalizedRepositoryLayoutCandidateEvidence
   , captureFinalizedToolchainSpikeCandidateEvidence
@@ -372,7 +393,7 @@ import Amoebius.Validation.GatePass.Internal (verifyPublishedGatePass)
 import Amoebius.Validation.Legacy.Internal (legacyCheck)
 import Amoebius.Validation.PhaseContract.Internal (checkPhaseContractsForPhase)
 import Amoebius.Validation.PhaseRunner.Internal
-  ( PhaseRunner (ArtifactCalculusRunner, BudgetCalculusRunner, LiftCalculusRunner, WorkflowCalculusRunner, EvidenceCalculusRunner, ScopeIndexRunner, ResourceIndexRunner, CalculusCompositionRunner, FormalModelKernelRunner, ExplicitStateCheckerRunner, SymbolicCheckerRunner, RefinementCheckerRunner, CompileFailHarnessRunner, DeterministicSimulationRunner, GatewayMigrationModelRunner, DslFormalModelRunner, ReconcileCoreRunner, ExtensionDeclarationRunner, ExtensionLawsRunner, ExtensionCompositionRunner, ExtensionSecurityRunner, ConformanceGateRunner, DhallSchemaRunner, GadtDecodeRunner, IllegalStateCoveringRunner, StorageGeometryRunner, ExecutionAcceleratorRunner, CapabilityBindRunner, ProvisionSealRunner, InferenceAcceleratorRunner, RenderManifestRunner, ChainBoundaryRunner, ImageRecipeRunner, TransactionVocabularyRunner, UiProgramSchemaRunner, UiAuthorizationRunner, UiEffectBindingRunner, UiPlanCompilerRunner, OfflineLanguagePlanRunner, UiBrowserInterpreterRunner, UiServerBoundaryRunner, UiLocalCompositionRunner, EncryptedBrowserRuntimeRunner, UiContractGenerationRunner, ToolAndMutantGenerationRunner, TestWorkflowAlgebraRunner, DslBarrierRunner, PbBoundaryRunner, DocumentationSuiteRunner, ToolchainSpikeRunner, RepositoryLayoutRunner)
+  ( PhaseRunner (ArtifactCalculusRunner, BudgetCalculusRunner, LiftCalculusRunner, WorkflowCalculusRunner, EvidenceCalculusRunner, ScopeIndexRunner, ResourceIndexRunner, CalculusCompositionRunner, FormalModelKernelRunner, ExplicitStateCheckerRunner, SymbolicCheckerRunner, RefinementCheckerRunner, CompileFailHarnessRunner, DeterministicSimulationRunner, GatewayMigrationModelRunner, DslFormalModelRunner, ReconcileCoreRunner, ExtensionDeclarationRunner, ExtensionLawsRunner, ExtensionCompositionRunner, ExtensionSecurityRunner, ConformanceGateRunner, DhallSchemaRunner, GadtDecodeRunner, IllegalStateCoveringRunner, StorageGeometryRunner, ExecutionAcceleratorRunner, CapabilityBindRunner, ProvisionSealRunner, InferenceAcceleratorRunner, RenderManifestRunner, ChainBoundaryRunner, ImageRecipeRunner, TransactionVocabularyRunner, UiProgramSchemaRunner, UiAuthorizationRunner, UiEffectBindingRunner, UiPlanCompilerRunner, OfflineLanguagePlanRunner, UiBrowserInterpreterRunner, UiServerBoundaryRunner, UiLocalCompositionRunner, EncryptedBrowserRuntimeRunner, UiContractGenerationRunner, ToolAndMutantGenerationRunner, TestWorkflowAlgebraRunner, DslBarrierRunner, PbBoundaryRunner, HostEnsureKernelRunner, LinuxEngineBringupRunner, AppleEngineBringupRunner, DocumentationSuiteRunner, ToolchainSpikeRunner, RepositoryLayoutRunner)
   , selectPhaseRunner
   )
 import Amoebius.Validation.PhaseZeroRun.Internal
@@ -1092,6 +1113,9 @@ validatePhaseLocked git root phase = do
         Right TestWorkflowAlgebraRunner -> validateTestWorkflowAlgebra acquired
         Right DslBarrierRunner -> validateDslBarrier acquired
         Right PbBoundaryRunner -> validatePbBoundary acquired
+        Right HostEnsureKernelRunner -> validateHostEnsureKernel acquired
+        Right LinuxEngineBringupRunner -> validateLinuxEngineBringup acquired
+        Right AppleEngineBringupRunner -> validateAppleEngineBringup acquired
  where
   validateBootstrap acquired = do
     trustResult <- acquireGenesisTrust root
@@ -1941,6 +1965,54 @@ validatePhaseLocked git root phase = do
         finalSnapshot <- loadGitSnapshot git root
         finishGateLifecycle git root phase acquired (Just (FinalizedPhaseFifty phaseFiftyRun predecessor)) finalSnapshot projectionResult
           (bindFinalSourceSnapshot acquired finalSnapshot (acquiredPbBoundaryRunCheck phaseFiftyRun))
+  validateHostEnsureKernel acquired = do
+    let opening = snapshotIdentity (acquiredSourceSnapshot acquired)
+        projectionResult = prepareValidationProjection phase acquired
+    predecessorResult <- acquireImmediatePredecessorEvidence root phase opening
+    trustResult <- acquireGenesisTrust root
+    case (predecessorResult, trustResult) of
+      (Left predecessorProblems, _) -> finalizeGeneric acquired (CheckResult "phase-51-predecessor" [] predecessorProblems)
+      (_, Left trustProblems) -> finalizeGeneric acquired (CheckResult "phase-51-genesis-trust" [] trustProblems)
+      (Right predecessor, Right trust) -> do
+        projectionResult `seq` pure ()
+        phaseFiftyOneRun <- case projectionResult of
+          Right projection | projectionIsReceiptRefresh projection -> acquireHostEnsureKernelRefreshRun root acquired trust
+          _ -> acquireHostEnsureKernelRun root acquired trust
+        finalSnapshot <- loadGitSnapshot git root
+        finishGateLifecycle git root phase acquired (Just (FinalizedPhaseFiftyOne phaseFiftyOneRun predecessor)) finalSnapshot projectionResult
+          (bindFinalSourceSnapshot acquired finalSnapshot (acquiredHostEnsureKernelRunCheck phaseFiftyOneRun))
+  validateLinuxEngineBringup acquired = do
+    let opening = snapshotIdentity (acquiredSourceSnapshot acquired)
+        projectionResult = prepareValidationProjection phase acquired
+    predecessorResult <- acquireImmediatePredecessorEvidence root phase opening
+    trustResult <- acquireGenesisTrust root
+    case (predecessorResult, trustResult) of
+      (Left predecessorProblems, _) -> finalizeGeneric acquired (CheckResult "phase-52-predecessor" [] predecessorProblems)
+      (_, Left trustProblems) -> finalizeGeneric acquired (CheckResult "phase-52-genesis-trust" [] trustProblems)
+      (Right predecessor, Right trust) -> do
+        projectionResult `seq` pure ()
+        phaseFiftyTwoRun <- case projectionResult of
+          Right projection | projectionIsReceiptRefresh projection -> acquireLinuxEngineBringupRefreshRun root acquired trust
+          _ -> acquireLinuxEngineBringupRun root acquired trust
+        finalSnapshot <- loadGitSnapshot git root
+        finishGateLifecycle git root phase acquired (Just (FinalizedPhaseFiftyTwo phaseFiftyTwoRun predecessor)) finalSnapshot projectionResult
+          (bindFinalSourceSnapshot acquired finalSnapshot (acquiredLinuxEngineBringupRunCheck phaseFiftyTwoRun))
+  validateAppleEngineBringup acquired = do
+    let opening = snapshotIdentity (acquiredSourceSnapshot acquired)
+        projectionResult = prepareValidationProjection phase acquired
+    predecessorResult <- acquireImmediatePredecessorEvidence root phase opening
+    trustResult <- acquireGenesisTrust root
+    case (predecessorResult, trustResult) of
+      (Left predecessorProblems, _) -> finalizeGeneric acquired (CheckResult "phase-53-predecessor" [] predecessorProblems)
+      (_, Left trustProblems) -> finalizeGeneric acquired (CheckResult "phase-53-genesis-trust" [] trustProblems)
+      (Right predecessor, Right trust) -> do
+        projectionResult `seq` pure ()
+        phaseFiftyThreeRun <- case projectionResult of
+          Right projection | projectionIsReceiptRefresh projection -> acquireAppleEngineBringupRefreshRun root acquired trust
+          _ -> acquireAppleEngineBringupRun root acquired trust
+        finalSnapshot <- loadGitSnapshot git root
+        finishGateLifecycle git root phase acquired (Just (FinalizedPhaseFiftyThree phaseFiftyThreeRun predecessor)) finalSnapshot projectionResult
+          (bindFinalSourceSnapshot acquired finalSnapshot (acquiredAppleEngineBringupRunCheck phaseFiftyThreeRun))
   finalizeGeneric acquired result = do
     let projectionResult = prepareValidationProjection phase acquired
     finalSnapshot <- loadGitSnapshot git root
@@ -2006,6 +2078,9 @@ data FinalizedDispatchRun
   | FinalizedPhaseFortyEight AcquiredTestWorkflowAlgebraRun PredecessorEvidence
   | FinalizedPhaseFortyNine AcquiredDslBarrierRun PredecessorEvidence
   | FinalizedPhaseFifty AcquiredPbBoundaryRun PredecessorEvidence
+  | FinalizedPhaseFiftyOne AcquiredHostEnsureKernelRun PredecessorEvidence
+  | FinalizedPhaseFiftyTwo AcquiredLinuxEngineBringupRun PredecessorEvidence
+  | FinalizedPhaseFiftyThree AcquiredAppleEngineBringupRun PredecessorEvidence
 
 statusLifecycleFailure :: Int -> [Finding] -> CheckResult
 statusLifecycleFailure phase problems =
@@ -2401,6 +2476,27 @@ finishGateLifecycle git root phase opening finalizedRun closing projectionResult
         Just (FinalizedPhaseFifty acquiredRun predecessor)
           | phase == 50 ->
             captureFinalizedPbBoundaryCandidateEvidence
+              acquiredRun predecessor closing
+              (either (const Nothing) (Just . projectionDigest) projectionResult)
+              (either (const Nothing) (Just . projectionPostimageDigest) projectionResult)
+              executablePath executableDigest processArgv
+        Just (FinalizedPhaseFiftyOne acquiredRun predecessor)
+          | phase == 51 ->
+            captureFinalizedHostEnsureKernelCandidateEvidence
+              acquiredRun predecessor closing
+              (either (const Nothing) (Just . projectionDigest) projectionResult)
+              (either (const Nothing) (Just . projectionPostimageDigest) projectionResult)
+              executablePath executableDigest processArgv
+        Just (FinalizedPhaseFiftyTwo acquiredRun predecessor)
+          | phase == 52 ->
+            captureFinalizedLinuxEngineBringupCandidateEvidence
+              acquiredRun predecessor closing
+              (either (const Nothing) (Just . projectionDigest) projectionResult)
+              (either (const Nothing) (Just . projectionPostimageDigest) projectionResult)
+              executablePath executableDigest processArgv
+        Just (FinalizedPhaseFiftyThree acquiredRun predecessor)
+          | phase == 53 ->
+            captureFinalizedAppleEngineBringupCandidateEvidence
               acquiredRun predecessor closing
               (either (const Nothing) (Just . projectionDigest) projectionResult)
               (either (const Nothing) (Just . projectionPostimageDigest) projectionResult)

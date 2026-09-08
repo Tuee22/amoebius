@@ -67,9 +67,11 @@ and exit propagation remain Phase-50 runtime observations. Every source-migratio
 zero before the Phase-49 hardware-free gate barrier may emit a candidate. Phase 49 builds and invokes the
 Haskell barrier directly; it does not use `pb` as transport. Phase 50 alone validates the runtime behavior of
 the already source-bounded handoff and owns no source-migration binding: the exact source-built Haskell
-supervisor starts directly and invokes `pb` as its observed child subject. Phase 51 onward retains the same
-closed grammar. Phase 51 remains a hardware-free Haskell host-ensure gate against fake boundaries; Phase 52 is
-the first hardware-bearing validation phase. That target discipline
+supervisor starts directly and invokes `pb` as its observed child subject. The
+[validation-execution doctrine](./documents/engineering/validation_frame_doctrine.md#23-the-handoff-supervisor-is-resource-bounded)
+requires that supervisor to use fixed-count challenge entropy and an explicit memory/deadline envelope. Phase
+51 onward retains the same closed grammar. Phase 51 remains a hardware-free Haskell host-ensure gate against
+fake boundaries; Phase 52 is the first hardware-bearing validation phase. That target discipline
 generalises jitML's just-in-time discipline from machine learning to everything amoebius touches, and it is
 owned by the [JIT artifact doctrine](./documents/engineering/jit_artifact_doctrine.md) and the
 [JIT budget doctrine](./documents/engineering/jit_budget_doctrine.md).

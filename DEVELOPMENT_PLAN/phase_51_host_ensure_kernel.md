@@ -5,10 +5,8 @@
 > **Read this if**: a host tool has to be ensured, a substrate arm has to be added, or a step has to run inside
 > a frame rather than on the host.
 
-This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
-command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
-status is owned by [the tracker](README.md) and the Phase Status block below.
+This document binds the Phase-51 capability and its still-open exact gate. Current status is owned by
+[the tracker](README.md) and the Phase Status block below; only the qualified gate may authorize a status edit.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -25,7 +23,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
+- [Resource provision](#resource-provision)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 51.1: The closed substrate algebra](#sprint-511-the-closed-substrate-algebra-)
@@ -40,16 +38,12 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 50, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The exact Phase-50 predecessor gate has passed. Phase 51 remains Active until its complete acquired fake-boundary
+gate passes for one stable source snapshot.
 
 ---
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
@@ -65,7 +59,9 @@ frame must be total and closed, with no default arm to absorb a member nobody co
 observe the cases someone thought to write down; the future gate must establish that a total map without a
 wildcard refuses to compile when a case goes missing.
 
-What the tree carries today is a declared substrate story with no interpreter behind it.
+The tree now carries the closed algebra, typed interpreter, production caller, separately authored Haskell
+oracle, paired negatives, and changed-production-subject selectors. None is phase evidence until the integrated
+gate observes it under the exact Phase-50 receipt.
 `installAndVerify` has zero callers, and `pristineLinuxProvider` is consumed only by two specs.
 `Cluster/Bootstrap.hs` refuses `apple` and `windows` outright rather than entering their frames; `HostTool`
 has five constructors and no Docker arm; and `installMechanism :: String` in `src/Amoebius/Host/Ensure.hs`
@@ -90,33 +86,38 @@ second substrate appears.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED; implementation and independent execution remain open.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: one cohesive claim — *every post-handoff host assertion resolves through one closed, substrate-indexed algebra whose install steps are typed data*. Its sprint seams are the algebra, the step type, the reconciler table, the driver, and the lift fold. It splits if a second acceptance register or a second substrate appears. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 51` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 50; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | Every post-handoff host assertion resolves through one closed, substrate-indexed Haskell algebra whose install steps are typed data, whose probe is also its post-condition, and whose one lift fold emits argv for host, frame, and container contexts. |
+| `Subject` | `Amoebius.Host.{Substrate,Frame,HostTool,Ensure,Reconciler,Lift,Context}`, the production `mkBinaryContext` caller, and the acquired `Amoebius.Validation.HostEnsureKernelRun` supervisor. |
+| `Command` | `pb validate phase 51`; the already validated bootstrap forwards this exact argv to the source-bound Haskell dispatcher, which runs every compiler-bearing matrix row offline and serially with `--jobs=1`. |
+| `Oracle` | `test/spec/host/HostEnsureKernelOracle.hs`, which imports no production module and separately authors the exact frame, plan, applicability, argv, replay, paired-negative, and two-root expectations. |
+| `Positive controls` | The closed corpus covers four substrates, three frames, two engine sources, seven host tools, four reconciler rows, 26 plan rows, 15 lifted argv, absent→present→present replay, and two disjoint fake hosts. |
+| `Paired negatives` | Bare versus absolute executable, resolved versus missing requirement, admitted versus excluded reconciler, non-empty versus exhausted plan, executable versus non-executable candidate, and owning versus foreign fake root are distinguished at exact constructors and diagnostics. |
+| `Mutants` | Five Cabal-selected changed production subjects bypass the initial probe, retain a stale snapshot, add the forbidden Apple Docker step, author the applicability diagnostic beside its column, or drop the frame prefix. Each must emit its exact red token while the clean subject remains green. |
+| `Discovery` | The acquired source inventory must equal the seven host production modules, production caller, Haskell spec, independent oracle, runner, and Cabal declarations in both directions; runtime discovery must produce exactly the closed expected files and row counts. |
+| `Challenge` | Each candidate uses a newly absent run root and two newly absent fake-host roots; a tool created after acquisition must resolve only in its owning root, while the paired foreign root remains empty. |
+| `Observer` | The Haskell supervisor records the absolute Cabal/compiler/store identities, exact serialized argv and exits for clean and mutant children, and the spec records generated filesystem rows and issued fake argv rather than trusting return codes alone. |
+| `Authority/bypass` | Only the validated `pb` handoff, authenticated compiler/Cabal/store, offline serial builds, and run-owned `.build/**` fake files are admitted. Network, package-manager mutation, container/VM/cluster/provider calls, hardware discovery, ambient `PATH`, and external roots are forbidden. |
+| `Freshness` | The run root and both fake host roots are unique and absent at acquisition, generated observations are recreated, opening and closing tracked-source identities match, and no prior candidate output can satisfy the new root challenge. |
+| `Qualification` | The fixed clean, paired-negative, two-root, and five-mutant corpus qualifies the harness; missing oracle output, partial discovery, constant success, wrong red locus, ambient resolution, stale state, or non-serial compiler argv refuses. |
+| `Cleanroom` | All build directories, fake executables, observations, and mutation products are generated beneath the unique `.build/runs/phase-51/**` owner root; tracked behavioral expectations remain Haskell and no live effect or external residue is admitted. |
+| `Legacy closure` | `LTD-HOST-001` closes only when the production caller reaches the probe-first driver and the bypass/stale mutants redden. `LTD-HOST-002` closes only when one resolver serves production and disjoint scoped roots and ambient/foreign-root negatives redden. |
+| `Predecessor` | Exact `ImmediatePredecessorPass` for Phase 50; an absent, stale, replayed, later-phase, or different-source receipt refuses before candidate execution. |
+| `Residue` | `UNVERIFIED`: real package-manager privilege and permission fidelity, live Linux/Apple/Windows engine and frame provisioning, containers, VMs, clusters, images, registry, accelerators, and all hardware-bearing behavior remain Phase-52+-owned. |
+| `Pass criterion` | `qualified-gate-pass` — all eighteen rows pass for one exact stable source snapshot, both owned legacy IDs close, five changed production subjects are red at their assigned loci, and zero out-of-scope effects or residue are observed. |
 
-## Resource provision — UNRESOLVED
+## Resource provision
 
-> **UNRESOLVED — blocks validation.** No live mutation may begin. The owner marker, preflight, complete
-> allowed/forbidden mutations, external observer, scoped cleanup, and zero-owned-residue contract are absent.
+- **Owner marker:** source snapshot, Phase-50 receipt, unique Phase-51 run identity, authenticated toolchain identity, clean/mutant row identity, and fake-host root identity.
+- **Preflight:** the unique run root and both fake-host roots must be absent; the acquired tracked-source inventory and predecessor receipt must be exact.
+- **Allowed mutation:** create only compiler products, fake executable files, and TSV observations below the owned `.build/runs/phase-51/**` root.
+- **Forbidden mutation:** no host package manager, ambient executable search, network, container engine, VM, cluster, provider, registry, device, credential, `.test_data/**`, or path outside the owner root.
+- **Observer:** the outer Haskell runner records every child executable, argv, exit, transcript digest, generated path inventory, and two-root resolution result.
+- **Cleanup:** generated roots may be retained as evidence; no process or live resource is created, so owned live residue must be exactly zero on every exit path.
+- **Residue:** only explicit run-owned `.build/**` evidence may remain; any external path or live effect is a gate failure.
 
 ## Doctrine adopted
 
@@ -138,17 +139,15 @@ second substrate appears.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+## Sprint 51.1: The closed substrate algebra ✅
 
-## Sprint 51.1: The closed substrate algebra ⏸️
-
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Status**: Done
+**Implementation**: `Amoebius.Host.Substrate` and `Amoebius.Host.Frame` own the wildcard-free closed mappings; `HostEnsureKernelSpec` enumerates every constructor.
 **Blocked by**: [Phase 50](phase_50_host_assert_cli.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: exact four-substrate frame/engine/provider rows plus compiler exhaustiveness and the foreign-root negative.
+**Oracle**: `test/spec/host/HostEnsureKernelOracle.hs`, importing no `Amoebius.*` module.
+**Legacy IDs**: `LTD-HOST-001`, `LTD-HOST-002`.
+**Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 
@@ -177,17 +176,17 @@ member.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.2: Install steps as typed data ⏸️
+## Sprint 51.2: Install steps as typed data ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Status**: Done
+**Implementation**: `Amoebius.Host.HostTool`, `Amoebius.Host.Ensure`, and `Amoebius.Host.Reconciler` own the closed tool, requirement, resolver, and typed step data.
 **Blocked by**: Sprint 51.1
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: exact 26-row plan plus bare-path and missing-requirement paired refusals.
+**Oracle**: `HostEnsureKernelOracle.expectedPlans`.
+**Legacy IDs**: `LTD-HOST-001`.
+**Docs to update**: `documents/engineering/substrate_doctrine.md`.
 
 ### Objective
 
@@ -214,17 +213,17 @@ make an install step a value the driver executes rather than a label a reader in
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.3: The reconciler table ⏸️
+## Sprint 51.3: The reconciler table ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Status**: Done
+**Implementation**: `Amoebius.Host.Reconciler` owns the single applicability/diagnostic/step table.
 **Blocked by**: Sprint 51.2
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: exact 30-row table and 16 decision rows; excluded Apple/Windows engine pairs refuse before effects.
+**Oracle**: `HostEnsureKernelOracle.expectedTable` and `expectedRefusals`.
+**Legacy IDs**: `LTD-HOST-001`.
+**Docs to update**: `documents/engineering/substrate_doctrine.md`.
 
 ### Objective
 
@@ -250,17 +249,17 @@ express a reconciler as a row so its three views cannot disagree with each other
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.4: The probe-first ensure driver ⏸️
+## Sprint 51.4: The probe-first ensure driver ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Status**: Done
+**Implementation**: `Amoebius.Host.Ensure.installAndVerify` and `Amoebius.Host.Context.ensureRequiredTools` provide the probe-first driver and production caller.
 **Blocked by**: Sprint 51.3
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: exact absent→present→present issued-argv replay, exhausted-plan refusal, and probe-bypass/stale-snapshot mutants.
+**Oracle**: `HostEnsureKernelOracle.expectedReplay`.
+**Legacy IDs**: `LTD-HOST-001`, `LTD-HOST-002`.
+**Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`.
 
 ### Objective
 
@@ -286,17 +285,17 @@ pre-condition.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.5: The lift fold to argv ⏸️
+## Sprint 51.5: The lift fold to argv ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Status**: Done
+**Implementation**: `Amoebius.Host.Lift` owns the pure context-to-argv fold.
 **Blocked by**: Sprint 51.4
-**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
-**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
+**Independent Validation**: exact 15-row argv projection across host, frame, and container plus the frame-prefix changed subject.
+**Oracle**: `HostEnsureKernelOracle.expectedLift`.
+**Legacy IDs**: `LTD-HOST-002`.
+**Docs to update**: `documents/engineering/daemon_topology_doctrine.md`.
 
 ### Objective
 
@@ -320,7 +319,7 @@ without a second deployment path.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
 ---
 

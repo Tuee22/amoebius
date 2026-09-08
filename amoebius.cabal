@@ -520,6 +520,86 @@ flag self-referential-gates-skip-mutant-mutant
     default:     False
     manual:      True
 
+flag host-ensure-converged-without-probing-mutant
+    description: Enable the Phase-51 probe-bypass production mutant
+    default:     False
+    manual:      True
+
+flag host-ensure-stale-snapshot-mutant
+    description: Enable the Phase-51 stale post-install snapshot production mutant
+    default:     False
+    manual:      True
+
+flag host-ensure-apple-docker-step-mutant
+    description: Enable the Phase-51 excluded Apple engine-step production mutant
+    default:     False
+    manual:      True
+
+flag host-ensure-authored-diagnostic-mutant
+    description: Enable the Phase-51 non-derived applicability diagnostic production mutant
+    default:     False
+    manual:      True
+
+flag host-ensure-lift-drops-frame-prefix-mutant
+    description: Enable the Phase-51 frame-prefix omission production mutant
+    default:     False
+    manual:      True
+
+flag linux-engine-ephemeral-membership-mutant
+    description: Enable the Phase-52 durable-membership omission production mutant
+    default:     False
+    manual:      True
+
+flag linux-engine-unrefreshed-credentials-mutant
+    description: Enable the Phase-52 current-credential refresh omission production mutant
+    default:     False
+    manual:      True
+
+flag linux-engine-elevated-retry-mutant
+    description: Enable the Phase-52 elevated Docker retry production mutant
+    default:     False
+    manual:      True
+
+flag linux-engine-converge-without-probe-mutant
+    description: Enable the Phase-52 second-pass probe omission production mutant
+    default:     False
+    manual:      True
+
+flag linux-engine-platform-override-mutant
+    description: Enable the Phase-52 native-architecture bypass production mutant
+    default:     False
+    manual:      True
+
+flag apple-engine-installs-floor-mutant
+    description: Enable the Phase-53 operator-floor installation production mutant
+    default:     False
+    manual:      True
+
+flag apple-engine-wrong-provider-mutant
+    description: Enable the Phase-53 workload-provider selection production mutant
+    default:     False
+    manual:      True
+
+flag apple-engine-leaks-ephemeral-mutant
+    description: Enable the Phase-53 ephemeral-frame lifecycle production mutant
+    default:     False
+    manual:      True
+
+flag apple-engine-default-frame-mutant
+    description: Enable the Phase-53 unchecked default-frame production mutant
+    default:     False
+    manual:      True
+
+flag apple-engine-reauthors-lift-mutant
+    description: Enable the Phase-53 re-authored Linux step production mutant
+    default:     False
+    manual:      True
+
+flag apple-engine-allows-emulation-mutant
+    description: Enable the Phase-53 architecture/emulation bypass production mutant
+    default:     False
+    manual:      True
+
 flag deterministic-simulation-dropped-partition-mutant
     description: Enable the isolated Phase-16 stale-read production mutant
     default:     False
@@ -4169,6 +4249,9 @@ library validation-kernel
         Amoebius.Validation.PbBootstrapGrammar
         Amoebius.Validation.PbBoundary
         Amoebius.Validation.PbBoundaryRun
+        Amoebius.Validation.HostEnsureKernelRun
+        Amoebius.Validation.LinuxEngineBringupRun
+        Amoebius.Validation.AppleEngineBringupRun
         Amoebius.Validation.PhaseContract
         Amoebius.Validation.PhaseSemanticContract
         Amoebius.Validation.PhaseSemanticJoin
@@ -4233,6 +4316,9 @@ library validation-kernel
         Amoebius.Validation.TestWorkflowAlgebraRun.Internal
         Amoebius.Validation.DslBarrierRun.Internal
         Amoebius.Validation.PbBoundaryRun.Internal
+        Amoebius.Validation.HostEnsureKernelRun.Internal
+        Amoebius.Validation.LinuxEngineBringupRun.Internal
+        Amoebius.Validation.AppleEngineBringupRun.Internal
         Amoebius.Validation.BootstrapQualification.Internal
         Amoebius.Validation.BootstrapTrust.Internal
         Amoebius.Validation.CompilerBuildInfo.Internal
@@ -4268,6 +4354,7 @@ library validation-kernel
 
     build-depends:
         base >=4.21 && <4.22,
+        amoebius:dsl-core,
         aeson ==2.2.5.0,
         bytestring >=0.12 && <0.13,
         Cabal-syntax ==3.16.1.0,
@@ -5026,6 +5113,9 @@ library dsl-core
         Amoebius.Host.Reconciler
         Amoebius.Host.Lift
         Amoebius.Host.Context
+        Amoebius.Host.LinuxEngine
+        Amoebius.Host.AppleEngine
+        Amoebius.Substrate.Brew
         Amoebius.Pulumi.Engine
         Amoebius.Cluster.Kind
         Amoebius.Cluster.Inventory
@@ -5216,6 +5306,54 @@ library dsl-core
 
     if flag(astcheck-export-ctor-mutant)
         cpp-options: -DASTCHECK_EXPORT_CTOR_MUTANT
+
+    if flag(host-ensure-converged-without-probing-mutant)
+        cpp-options: -DHOST_ENSURE_CONVERGED_WITHOUT_PROBING_MUTANT
+
+    if flag(host-ensure-stale-snapshot-mutant)
+        cpp-options: -DHOST_ENSURE_STALE_SNAPSHOT_MUTANT
+
+    if flag(host-ensure-apple-docker-step-mutant)
+        cpp-options: -DHOST_ENSURE_APPLE_DOCKER_STEP_MUTANT
+
+    if flag(host-ensure-authored-diagnostic-mutant)
+        cpp-options: -DHOST_ENSURE_AUTHORED_DIAGNOSTIC_MUTANT
+
+    if flag(host-ensure-lift-drops-frame-prefix-mutant)
+        cpp-options: -DHOST_ENSURE_LIFT_DROPS_FRAME_PREFIX_MUTANT
+
+    if flag(linux-engine-ephemeral-membership-mutant)
+        cpp-options: -DLINUX_ENGINE_EPHEMERAL_MEMBERSHIP_MUTANT
+
+    if flag(linux-engine-unrefreshed-credentials-mutant)
+        cpp-options: -DLINUX_ENGINE_UNREFRESHED_CREDENTIALS_MUTANT
+
+    if flag(linux-engine-elevated-retry-mutant)
+        cpp-options: -DLINUX_ENGINE_ELEVATED_RETRY_MUTANT
+
+    if flag(linux-engine-converge-without-probe-mutant)
+        cpp-options: -DLINUX_ENGINE_CONVERGE_WITHOUT_PROBE_MUTANT
+
+    if flag(linux-engine-platform-override-mutant)
+        cpp-options: -DLINUX_ENGINE_PLATFORM_OVERRIDE_MUTANT
+
+    if flag(apple-engine-installs-floor-mutant)
+        cpp-options: -DAPPLE_ENGINE_INSTALLS_FLOOR_MUTANT
+
+    if flag(apple-engine-wrong-provider-mutant)
+        cpp-options: -DAPPLE_ENGINE_WRONG_PROVIDER_MUTANT
+
+    if flag(apple-engine-leaks-ephemeral-mutant)
+        cpp-options: -DAPPLE_ENGINE_LEAKS_EPHEMERAL_MUTANT
+
+    if flag(apple-engine-default-frame-mutant)
+        cpp-options: -DAPPLE_ENGINE_DEFAULT_FRAME_MUTANT
+
+    if flag(apple-engine-reauthors-lift-mutant)
+        cpp-options: -DAPPLE_ENGINE_REAUTHORS_LIFT_MUTANT
+
+    if flag(apple-engine-allows-emulation-mutant)
+        cpp-options: -DAPPLE_ENGINE_ALLOWS_EMULATION_MUTANT
 
     if flag(image-recipe-buildx-subcommand-mutant)
         cpp-options: -DIMAGE_RECIPE_BUILDX_SUBCOMMAND_MUTANT
@@ -10082,6 +10220,7 @@ test-suite host-ensure-kernel-spec
     type:             exitcode-stdio-1.0
     main-is:          HostEnsureKernelSpec.hs
     hs-source-dirs:   test/spec/host
+    other-modules:    HostEnsureKernelOracle
     default-language: GHC2024
     ghc-options:
         -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
@@ -10089,6 +10228,7 @@ test-suite host-ensure-kernel-spec
 
     build-depends:
         base >=4.21 && <4.22,
+        amoebius:dsl-core,
         amoebius:artifact-calculus,
         amoebius:budget-calculus,
         amoebius:calculus-composition,
@@ -10104,6 +10244,21 @@ test-suite host-ensure-kernel-spec
         directory >=1.3 && <1.4,
         filepath >=1.5 && <1.6
 
+    if flag(host-ensure-converged-without-probing-mutant)
+        cpp-options: -DHOST_ENSURE_CONVERGED_WITHOUT_PROBING_MUTANT
+
+    if flag(host-ensure-stale-snapshot-mutant)
+        cpp-options: -DHOST_ENSURE_STALE_SNAPSHOT_MUTANT
+
+    if flag(host-ensure-apple-docker-step-mutant)
+        cpp-options: -DHOST_ENSURE_APPLE_DOCKER_STEP_MUTANT
+
+    if flag(host-ensure-authored-diagnostic-mutant)
+        cpp-options: -DHOST_ENSURE_AUTHORED_DIAGNOSTIC_MUTANT
+
+    if flag(host-ensure-lift-drops-frame-prefix-mutant)
+        cpp-options: -DHOST_ENSURE_LIFT_DROPS_FRAME_PREFIX_MUTANT
+
 test-suite bootstrap-coordinator-host-spec
     type:             exitcode-stdio-1.0
     main-is:          BootstrapCoordinatorSpec.hs
@@ -10114,6 +10269,67 @@ test-suite bootstrap-coordinator-host-spec
         base >=4.21 && <4.22,
         amoebius:dsl-core,
         containers >=0.7 && <0.8
+
+test-suite linux-engine-bringup-spec
+    type:             exitcode-stdio-1.0
+    main-is:          LinuxEngineBringupSpec.hs
+    hs-source-dirs:   test/spec/host
+    other-modules:    LinuxEngineBringupOracle
+    default-language: GHC2024
+    ghc-options:
+        -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+        -Werror=incomplete-uni-patterns
+
+    build-depends:
+        base >=4.21 && <4.22,
+        amoebius:dsl-core
+
+    if flag(linux-engine-ephemeral-membership-mutant)
+        cpp-options: -DLINUX_ENGINE_EPHEMERAL_MEMBERSHIP_MUTANT
+
+    if flag(linux-engine-unrefreshed-credentials-mutant)
+        cpp-options: -DLINUX_ENGINE_UNREFRESHED_CREDENTIALS_MUTANT
+
+    if flag(linux-engine-elevated-retry-mutant)
+        cpp-options: -DLINUX_ENGINE_ELEVATED_RETRY_MUTANT
+
+    if flag(linux-engine-converge-without-probe-mutant)
+        cpp-options: -DLINUX_ENGINE_CONVERGE_WITHOUT_PROBE_MUTANT
+
+    if flag(linux-engine-platform-override-mutant)
+        cpp-options: -DLINUX_ENGINE_PLATFORM_OVERRIDE_MUTANT
+
+test-suite apple-engine-bringup-spec
+    type:             exitcode-stdio-1.0
+    main-is:          AppleEngineBringupSpec.hs
+    hs-source-dirs:   test/spec/host
+    other-modules:    AppleEngineBringupOracle
+    default-language: GHC2024
+    ghc-options:
+        -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+        -Werror=incomplete-uni-patterns
+
+    build-depends:
+        base >=4.21 && <4.22,
+        amoebius:dsl-core
+
+    if flag(apple-engine-installs-floor-mutant)
+        cpp-options: -DAPPLE_ENGINE_INSTALLS_FLOOR_MUTANT
+
+    if flag(apple-engine-wrong-provider-mutant)
+        cpp-options: -DAPPLE_ENGINE_WRONG_PROVIDER_MUTANT
+
+    if flag(apple-engine-leaks-ephemeral-mutant)
+        cpp-options: -DAPPLE_ENGINE_LEAKS_EPHEMERAL_MUTANT
+
+    if flag(apple-engine-default-frame-mutant)
+        cpp-options: -DAPPLE_ENGINE_DEFAULT_FRAME_MUTANT
+
+    if flag(apple-engine-reauthors-lift-mutant)
+        cpp-options: -DAPPLE_ENGINE_REAUTHORS_LIFT_MUTANT
+
+    if flag(apple-engine-allows-emulation-mutant)
+        cpp-options: -DAPPLE_ENGINE_ALLOWS_EMULATION_MUTANT
 
 test-suite base-image-registry-spec
     type:             exitcode-stdio-1.0
