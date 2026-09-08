@@ -20,9 +20,9 @@ by [platform_services_doctrine.md](./platform_services_doctrine.md).
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. Two régimes: host-driven bootstrap, then control-plane-daemon-driven steady state](#2-two-régimes-host-driven-bootstrap-then-control-plane-daemon-driven-steady-state)
 - [3. The ordered bootstrap sequence](#3-the-ordered-bootstrap-sequence)
@@ -32,9 +32,9 @@ by [platform_services_doctrine.md](./platform_services_doctrine.md).
 - [7. Planning ownership](#7-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Why this doctrine exists
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 Two questions in the vision are left unowned by the docs that touch them:
 

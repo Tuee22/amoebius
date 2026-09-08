@@ -21,9 +21,9 @@ by [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bri
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. The load-bearing limit: the spec forecloses the sequence *shape*, not the port's *liveness*](#2-the-load-bearing-limit-the-spec-forecloses-the-sequence-shape-not-the-ports-liveness)
 - [3. Readiness is a condition, never a duration](#3-readiness-is-a-condition-never-a-duration)
@@ -34,9 +34,9 @@ by [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bri
 - [8. Planning ownership](#8-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Why this doctrine exists
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 The vision names the anti-pattern directly:
 

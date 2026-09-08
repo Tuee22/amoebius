@@ -23,6 +23,7 @@ Reading it presumes the context and role grid of
 </details>
 
 ## Contents
+
 - [1. The host-origin surface: two channels, both localhost-only](#1-the-host-origin-surface-two-channels-both-localhost-only)
 - [2. The decision that was open, and is now resolved](#2-the-decision-that-was-open-and-is-now-resolved)
 - [3. There is no bespoke control channel — coordination *is* Pulsar + MinIO](#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)
@@ -33,8 +34,6 @@ Reading it presumes the context and role grid of
 - [8. Boundaries this doc does and does not own](#8-boundaries-this-doc-does-and-does-not-own)
 - [9. Planning ownership](#9-planning-ownership)
 - [Related Documents](#related-documents)
-
----
 
 ## 1. The host-origin surface: two channels, both localhost-only
 

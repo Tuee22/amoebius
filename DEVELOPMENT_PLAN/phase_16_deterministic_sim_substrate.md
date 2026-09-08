@@ -34,18 +34,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 15, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-15 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -78,9 +75,8 @@ NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-16 semantic payload, package-hidden serial
-supervisor, ten-module production substrate, independently authored Haskell oracle, and three
-changed-production subjects are complete; only a fresh integrated run may authorize status.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -99,9 +95,9 @@ changed-production subjects are complete; only a fresh integrated run may author
 | `Qualification` | The three exact mutant deaths, closed source inventory, source discipline, oracle controls, and legacy closure qualify the harness before the clean candidate is accepted. |
 | `Cleanroom` | Cabal products, foreign-source cache copies, logs, and transcripts stay below the fresh run root; the shared package store is only an offline contained input. |
 | `Legacy closure` | The Python gate, JSON schedules, TSV expectations/locus/surfaces, and materialized Haskell mutant are absent. |
-| `Predecessor` | Consume exactly one durable Phase-15 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 15 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | Modeled-environment fidelity remains `ASSUMED`; concrete model claims, runtime correspondence, host behavior, hardware, and live substrate remain later-owned. |
-| `Pass criterion` | `qualified-phase-sixteen-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
+| `Pass criterion` | `qualified-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
 ## Doctrine adopted
 
@@ -112,11 +108,12 @@ changed-production subjects are complete; only a fresh integrated run may author
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 16.1: Polymorphic environment and interpreters ✅
+## Sprint 16.1: Polymorphic environment and interpreters ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Sim/{Env,Interp/Real,Interp/Sim,Reconcile}.hs` and the six modules under `src/Amoebius/Sim/Fakes/`
 **Blocked by**: [Phase 15](phase_15_compile_fail_harness.md) gate pass
 **Independent Validation**: one reference program green under injected `IO` clients and `IOSim`; exact ten-module polymorphism scan
@@ -143,11 +140,12 @@ Keep concurrency-bearing reconcile code independent of the interpreter used to e
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 16.2: Modeled contracts and semantic schedules ✅
+## Sprint 16.2: Modeled contracts and semantic schedules ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: the six typed fake modules, Haskell `scheduleCorpus`, and `test/harness/deterministic_simulation/CalculusProjection.hs`
 **Blocked by**: Sprint 16.1
 **Independent Validation**: four authored schedule outcomes, enabled/disabled fault pairs, and five exact composition facts
@@ -176,11 +174,12 @@ implementation snapshots.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 16.3: Determinism, exploration, and mutation ✅
+## Sprint 16.3: Determinism, exploration, and mutation ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: CPP mutant loci in `Amoebius.Sim.{Reconcile,Interp.Sim}` and package-hidden `DeterministicSimulationRun.Internal`
 **Blocked by**: Sprint 16.2
 **Independent Validation**: same-seed byte equality, changed-seed inequality, four bounded POR runs, and three exact production-mutant deaths
@@ -208,7 +207,8 @@ Show that explored modeled faults are reproducible and that the gate rejects a m
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
 ## Documentation Requirements
 

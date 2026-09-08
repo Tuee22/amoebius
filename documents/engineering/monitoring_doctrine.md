@@ -24,9 +24,9 @@ not own the capacity types that cost passes through, owned by
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Monitoring is a property of what is deployed, not a bolt-on](#1-monitoring-is-a-property-of-what-is-deployed-not-a-bolt-on)
 - [2. The four mandatory obligations](#2-the-four-mandatory-obligations)
 - [3. Derivation and the operator read-model](#3-derivation-and-the-operator-read-model)
@@ -38,8 +38,6 @@ not own the capacity types that cost passes through, owned by
 - [9. Planning ownership](#9-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 **Pure cost-model target — NOT VALIDATED.** The
 [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) must execute the finite
 `MonitoringWorkBudget` evaluation, query/proxy compute, and TSDB temporary-plus-resident storage derivation in
@@ -47,6 +45,8 @@ Register 1. It must pair a direct one-axis volume-over-budget case with its exac
 and rendered/live correspondence remain unverified; no current fold ledger is asserted here.
 
 ## 1. Monitoring is a property of what is deployed, not a bolt-on
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 **The problem.** A workflow can decode, deploy, and then go dark: its daemons run, its topics carry traffic,
 and nothing observes whether it is healthy. The same is true of everything else a spec deploys — a platform

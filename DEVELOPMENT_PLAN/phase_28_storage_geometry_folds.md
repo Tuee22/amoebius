@@ -20,7 +20,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -39,17 +39,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 27 and every earlier gate have passed in numerical order. The Phase-28 pure fold, independent Haskell
-oracle, 30 paired cases, six covered properties, and 31 changed-production challenges are present; only the
-complete integrated Phase-28 gate may authorize the status transition.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-27 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -129,7 +127,8 @@ and the candidate verdict.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -148,9 +147,9 @@ and the candidate verdict.
 | `Qualification` | `qualified-storage-geometry-harness` |
 | `Cleanroom` | `storage-geometry-products-contained-below-build` |
 | `Legacy closure` | `retired-storage-geometry-authorities-absent` |
-| `Predecessor` | `exact-phase-twenty-seven-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 27 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `later-binding-provision-runtime-storage-owners-explicit` |
-| `Pass criterion` | `qualified-phase-twenty-eight-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -189,14 +188,15 @@ and the candidate verdict.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 28.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ✅
+## Sprint 28.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/storage-geometry-folds/Amoebius/Capacity/{Storage,StorageGeometry,ServiceStorage,Growable}.hs` owns the closed bounded arithmetic and physical geometry; `StorageGeometryFixtures.hs` supplies 30 isolated negative/legal pairs.
 **Blocked by**: [Phase 27](phase_27_illegal_state_covering.md) gate pass
 **Independent Validation**: The Haskell battery checks exact error tags, legal twins, service peaks, failure products, rounding, per-backing claims, both Pulsar ceilings, cache nesting, and provider-root geometry.
@@ -323,11 +323,12 @@ phase; this sprint consumes that base and owns the storage declarations plus the
 
 ### Remaining Work
 
-The implementation-ready seam is complete; only the complete integrated Phase-28 gate can validate it.
+The seam is retained as an Observed footprint / Known partial. Reconcile its obligations with the replacement
+acceptance baseline and qualify the complete Phase-28 gate.
 
-## Sprint 28.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ✅
+## Sprint 28.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/storage-geometry-folds/Amoebius/Capacity/StorageScaling.hs` owns the private finite envelope, complete observed snapshot, four total plan arms, and fingerprint/high-water refusals.
 **Blocked by**: Sprint 28.1
 **Independent Validation**: Fingerprint mismatch and insufficient migration high-water each reject beside a one-axis legal twin; two applied production mutants admit those negatives and turn the suite red.
@@ -373,11 +374,12 @@ observed snapshot — never a live mutation, and never a check that requires a l
 
 ### Remaining Work
 
-The implementation-ready seam is complete; only the complete integrated Phase-28 gate can validate it.
+The seam is retained as an Observed footprint / Known partial. Reconcile its obligations with the replacement
+acceptance baseline and qualify the complete Phase-28 gate.
 
-## Sprint 28.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ✅
+## Sprint 28.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `test/spec/dsl/StorageGeometryProps.hs` owns six 300-sample `checkCoverage` equivalence properties with independent BookKeeper, MinIO, and presentation/allocation reference formulae.
 **Blocked by**: Sprint 28.2
 **Independent Validation**: Every sampled fold meets at least 30% accepting and 30% rejecting coverage, while the library compiles with incomplete-pattern and incomplete-uni-pattern warnings promoted to errors.
@@ -453,11 +455,12 @@ compute `place`.
 
 ### Remaining Work
 
-The implementation-ready seam is complete; only the complete integrated Phase-28 gate can validate it.
+The seam is retained as an Observed footprint / Known partial. Reconcile its obligations with the replacement
+acceptance baseline and qualify the complete Phase-28 gate.
 
-## Sprint 28.4: The storage-geometry fold-negative corpus + the gate ✅
+## Sprint 28.4: The storage-geometry fold-negative corpus + the gate ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Validation.StorageGeometryRun.Internal` runs the 31 changed-production builds then the clean Haskell suite in one unique run root and supplies all eighteen acquired phase rows.
 **Blocked by**: Sprint 28.3
 **Independent Validation**: The package-hidden supervisor checks exact source discovery, direct offline `--jobs=1` Cabal argv, all 31 red loci, the exact clean token, stable source identity, predecessor receipt, and zero hardware/live authority.
@@ -551,7 +554,8 @@ honest foreclosure layer of each.
 
 ### Remaining Work
 
-The implementation and documentation seams are complete. The remaining work is the exact clean component
+The implementation and documentation seams are an Observed footprint / Known partial. Reconcile their
+replacement acceptance baseline, then execute the exact clean component
 rerun followed by the complete integrated Phase-28 gate; only that pass may authorize the mechanical status
 transition.
 

@@ -22,16 +22,16 @@ entries and their loci are owned here; the numbering belongs to
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Scope](#1-scope)
 - [2. The capacity & placement illegal states](#2-the-capacity--placement-illegal-states)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Scope
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 This document is a **themed slice** of the illegal-state catalog. It reproduces the deep treatment of the
 capacity / placement / accelerator entries and adds, per entry, the orthogonal **validation-locus** axis.

@@ -19,11 +19,12 @@ are expressed, owned by [formal_model_doctrine.md](./formal_model_doctrine.md).
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
 ## Why this doc is deprecated
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 This document described a **two-tier** record for a **hand-written** TLA+ specification: a design-model tier
 authored now, and a **variable-to-implementation correspondence tier** (a prose table + divergence log) to be
@@ -31,11 +32,10 @@ completed later. That framing is retired for two reasons converged during the DS
 
 1. **The `.tla` is no longer hand-written.** A protocol is authored once as a reifiable Haskell **`Model`**;
    both the runtime decision function (`interpret`) and the generated, never-committed `.tla` (`emitTLA`) are
-   total renderings of that one value ([formal_model_doctrine.md](./formal_model_doctrine.md), [generated_artifacts_doctrine.md](./generated_artifacts_doctrine.md)). The model↔code correspondence is
-   therefore **by construction** — there is **no correspondence table to maintain**, which is the entire
-   artifact this document existed to track.
+   required interpretations of that one value ([formal_model_doctrine.md](./formal_model_doctrine.md), [generated_artifacts_doctrine.md](./generated_artifacts_doctrine.md)). Shared values avoid a second maintained model definition. They do not establish correctness of the
+   interpreter, emitter, or production binding; the formal-model doctrine owns those correspondence obligations.
 
-2. **The obligation covers both migration branches.** The sole amoebius simulation/proof obligation is now
+2. **The obligation covers both migration branches.** The cross-cluster protocol obligation includes
    **gateway migration — both the `Planned` and `Failover` branches** of `GatewayMigration` (this document
    previously scoped the model to `Failover` only and treated `Planned` RPO=0 as merely assumed). The
    First-Axis control-plane-election obligation is **removed**: the control-plane daemon is a Kubernetes

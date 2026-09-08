@@ -33,20 +33,19 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 10, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-10 predecessor and its compatible evidence chain.
 
 ## Phase Summary
+
+The audit exposed inconsistent equality and binding rules, and evaluation errors that became absent transitions. This phase must repair and qualify the model kernel before any downstream proof result is admitted. Existing fixture totals describe examples only; they do not establish the complete language or a meta-theorem of renderer correctness.
 
 This phase specifies a Haskell target capability; it does not report a current implementation or
 result. The target is to represent a transition system once as a Haskell value, interpret and
@@ -78,30 +77,29 @@ interpret and explore it in-process, and lazily render any TLA+/CFG representati
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-11 semantic payload, package-hidden serial
-supervisor, Haskell-owned semantic oracle, generated-artifact containment checks, and three changed-production
-subjects are complete; only a fresh integrated run may authorize status.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
-| `Claim` | One closed Haskell `Model` value has total interpretation, bounded exploration, and structural TLA+/CFG projection, including the exact Phase-10 composition projection. |
+| `Claim` | One closed Haskell `Model` has checked binding and sort rules, total error-preserving interpretation, bounded exploration, and TLA+/CFG projection that agree on every admitted constructor and declared composition law. |
 | `Subject` | The six production modules are acquired only through package-hidden `Amoebius.Validation.FormalModelKernelRun.Internal`. |
 | `Command` | Future public spelling is `pb validate phase 11`; before `BOOTSTRAP_HANDOFF`, the exact absolute Haskell executable and authenticated GHC 9.12.4 compiler run directly and synchronously. |
-| `Oracle` | `RoundTripSpec.hs` owns the hand-derived eight-state/eight-transition model, eight invariant rows, 25 renderer facts, exact composition projection, and 200 generated-model expectations without reading behavioral data. |
-| `Positive controls` | The well-formed ToyModel, exact explorer state set, structural renderer semantics, generated projections, composition bridge, and 200-model corpus pass. |
-| `Paired negatives` | A ToyModel copy differing only by one duplicate variable is rejected at the exact structural problem while the original is accepted. |
-| `Mutants` | Guard bypass, UNCHANGED loss, and invariant weakening compile as changed production subjects and turn the unchanged Haskell oracle red at their assigned loci. |
-| `Discovery` | Six production modules and one independent oracle are discovered from the source snapshot and equal the fixed seven-file inventory bidirectionally. |
-| `Challenge` | All three mutations execute after source acquisition and must be distinguished by independent transition, renderer, or invariant observations. |
+| `Oracle` | `test/spec/formal/RoundTripSpec.hs` must independently specify binding, sorts, extensional values, transition frames, initialization, and expression/temporal rendering laws. Existing ToyModel and generated examples remain controls within a separately declared complete constructor inventory. |
+| `Positive controls` | Every admitted constructor is exercised at its legal sorts and binder scopes; nested sets and function keys preserve extensional equality, valid actions remain executable, and actual indexed calculus values retain order and resource meaning. |
+| `Paired negatives` | Reject duplicate/unknown names, invalid names, ill-sorted guards/effects/domains/invariants, invalid function application, and inconsistent bindings at exact errors; pair each refusal with the minimally changed legal control. |
+| `Mutants` | Changed production subjects erase an evaluation error, change binder precedence, replace extensional equality with representation equality, omit a transition/frame, or weaken an invariant; an independent selector-to-case registry assigns each exact semantic failure. |
+| `Discovery` | Join the complete `Value`, `Expr`, `Action`, binder, fairness and temporal constructor universe, its owning Haskell modules, independent cases, and production mutation/build assignments in both directions; a historical file or fixture count cannot define completeness. |
+| `Challenge` | Every mutation in the current accepted registry executes after source acquisition and must be distinguished by independent transition, renderer, or invariant observations. |
 | `Observer` | The supervisor records absolute executable, exact argv, exit, transcript digest, and bounded failure text for every compiler and oracle process. |
 | `Authority/bypass` | `pb`, network, JVM/TLC, hardware, live services, compiler substitution, and compiler/linker overlap are forbidden; generated bytes cannot act as expectations. |
 | `Freshness` | Every run creates a fresh `.build/runs/phase-11/work/**` root and the dispatcher requires equal opening/closing source identities. |
-| `Qualification` | Clean controls, semantic pair, exact discovery, contained generation, and all three changed-production subjects pass together. |
+| `Qualification` | All legal controls, exact error pairs, constructor laws, composition observations and assigned changed-subject failures must run together. A well-formedness token, source scan, digest or count cannot replace semantic observation. |
 | `Cleanroom` | Binaries, objects, transcripts, and four required `.tla`/`.cfg` observations are generated lazily beneath the fresh run root. |
 | `Legacy closure` | Retired Phase-11 TSV/text oracles, materialized mutant descriptors, and the Python verdict gate are absent; later formal-model fixtures remain later-owned. |
-| `Predecessor` | Consume exactly one durable Phase-10 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 10 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | Checker algorithms, concrete protocol models, runtime fidelity, live effects, and hardware remain explicitly later-owned. |
-| `Pass criterion` | `qualified-phase-eleven-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
+| `Pass criterion` | `qualified-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
 ## Doctrine adopted
 
@@ -117,14 +115,15 @@ subjects are complete; only a fresh integrated run may authorize status.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 11.1: Reifiable kernel and semantic expectations ✅
+## Sprint 11.1: Reifiable kernel and semantic expectations ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Formal/{Model,Interpret,Explore,EmitTLA,ToyModel}.hs` and `src/formal-composition-model/Amoebius/Formal/CalculusComposition.hs`
 **Blocked by**: [Phase 10](phase_10_calculus_composition.md) gate pass
-**Independent Validation**: exact hand-derived transition/state/invariant/renderer/composition expectations and three applied production mutations
+**Independent Validation**: Accept legal typed expressions and their exact transitions; reject the paired malformed guard/domain/effect at its named error; kill error-erasure, binding and representation-equality mutants at independently assigned cases; retain unproved renderer metatheory as explicit residue.
 **Oracle**: `test/spec/formal/RoundTripSpec.hs`, separately authored in Haskell against public production interfaces
 **Legacy IDs**: none; the retired Phase-11 serialized oracles, mutant descriptors, and Python gate are checked absent
 **Docs to update**: this phase file, `formal_model_doctrine.md`, `generated_artifacts_doctrine.md`, `testing_doctrine.md`, and `system_components.md`
@@ -137,6 +136,10 @@ snapshots with semantic expectations.
 
 ### Deliverables
 
+- A Haskell well-formedness pass checks all expression contexts, names, binder scope, initialization and action effects before exploration or emission. Declare one binding policy shared by every interpretation; reject shadowing explicitly or preserve its lexical meaning everywhere.
+- An error-carrying transition result distinguishes a disabled guard from a malformed expression, missing key, or failed domain evaluation. All callers propagate these errors; an invalid action cannot disappear from the enabled-event set.
+- One extensional finite-set/function semantics governs equality, membership, domains, update, lookup, duplicate normalization and fingerprints, including nested sets and reordered function keys.
+
 - Closed `Value`, `Expr`, `Action`, fairness, temporal-property, and `Model` data types with structural
   well-formedness checks.
 - Total `interpret`, bounded `explore`, and structural `emitTLA` consumers.
@@ -148,6 +151,10 @@ snapshots with semantic expectations.
 
 ### Validation
 
+- Retain the audit model whose guard is an integer: model admission or evaluation must return its exact error, never a one-state successful exploration. Pair it with the same model using a boolean guard.
+- Independently check that equal reordered sets are interchangeable as members, action arguments and function keys; include nested sets, duplicate representations and update outside the declared domain.
+- Exercise a state variable and action parameter with the same spelling. Require the declared binding refusal or the same lexical result in every consumer; constructor coverage alone cannot settle this law.
+
 1. Require `ToyModel` to be structurally well formed and contain every named hard fragment constructor.
 2. Replay the hand transition rows, match the eight-state safety oracle, and exhaust the invariant truth table.
 3. Extract renderer meaning into a fact set and require exact equality to 25 authored facts.
@@ -158,12 +165,12 @@ snapshots with semantic expectations.
 
 Run the complete integrated gate after the second sprint's contained supervisor is ready.
 
-## Sprint 11.2: Explorer/emission correspondence and contained evidence ✅
+## Sprint 11.2: Explorer/emission correspondence and contained evidence ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: package-hidden `src/validation-kernel/Amoebius/Validation/FormalModelKernelRun/Internal.hs`
 **Blocked by**: Sprint 11.1
-**Independent Validation**: 200 exact generated-model cases, four contained projections, exact source discovery, and serialized direct-GHC process receipts
+**Independent Validation**: Compare all admitted constructor observations and exact error classifications against authored laws; retain legal controls while assigned interpreter/emitter mutants fail; leave general renderer correctness explicitly unproved.
 **Oracle**: the same Haskell semantic oracle; generated TLA+/CFG bytes are observations only
 **Legacy IDs**: none; later concrete-model TSV inventories remain explicitly later-owned
 **Docs to update**: this phase file, `formal_model_doctrine.md`, `generated_artifacts_doctrine.md`, `testing_doctrine.md`, and `system_components.md`
@@ -177,22 +184,27 @@ Phase 12 and later checker capabilities own executable checking claims.
 
 ### Deliverables
 
+- An oracle-owned constructor/law/selector registry discovers actual expression combinations and their observations. Existing generated-model totals are a regression floor and cannot stand in for this inventory.
+
 - Exact explorer semantics on `ToyModel` and 200 generated bounded models, plus structural emission facts from
   the same values.
-- Three changed-production mutations split across transition guards, invariant meaning, and renderer frame
-  conditions.
+- Retain the original transition-guard, invariant, and renderer-frame mutations within the expanded
+  independently assigned semantic registry; the former count does not cap its required scope.
 - Coverage floors for safety-red, expansion-boundary, expression, fairness, and temporal constructors.
 - Fresh generated TLA+/CFG emission, complete surface join, machine-derived Register-1 ledger, containment,
   write guard, natural-architecture record, and exact source-bound run record.
 
 ### Validation
 
+- Compare semantic outputs for each generated model and constructor combination, including errors and binder scope, against independent expectations; counting generated sources or checking emitted token presence is insufficient.
+- Record exactly which bounded laws were tested and which proof obligations remain assumptions; a passing kernel gate must not claim a whole-DSL proof.
+
 1. Require exact `ToyModel` explorer safety, distinct-state, and fingerprint-set agreement.
 2. Require the renderer's 25 semantic facts and exact invariant/property obligation sets.
 3. Run every production mutant and require its assigned independent locus to turn red.
 4. Pass 200 deterministic generated cases with exact state, boundary, safety, and renderer expectations.
-5. Require exact seven-source discovery, four generated-only artifacts, containment, serial execution, and
-   source-bound evidence.
+5. Reconcile the complete current source and artifact registries, containment, serial execution, and
+   source-bound evidence. The earlier seven-source/four-artifact corpus remains a regression example only.
 
 ### Remaining Work
 

@@ -22,11 +22,9 @@ set.
 
 </details>
 
-> **Historical result (invalidated).** Every pre-reset phase-run and implementation-result statement is
-> diagnostic only and never current validation evidence. Target doctrine remains normative; current state is
-> owned exclusively by the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. The Invariant: every cluster is the same cluster](#1-the-invariant-every-cluster-is-the-same-cluster)
 - [2. HA always — including `replicas=1`](#2-ha-always--including-replicas1)
 - [3. The registry — the single image source](#3-the-registry--the-single-image-source)
@@ -42,9 +40,9 @@ set.
 - [13. Planning ownership](#13-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. The Invariant: every cluster is the same cluster
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 An amoebius cluster is **fungible** in its **eight-core capability set**, not necessarily in every manifest.
 Tear one down and spin another up — on a different substrate, at a different replica count — and it offers the

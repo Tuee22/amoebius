@@ -20,8 +20,6 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 </details>
 
----
-
 ## Contents
 
 - [Phase Status](#phase-status)
@@ -33,14 +31,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-The complete Phase-3 gate is recorded for the same source identity before this phase may run. The phase remains
-Active until its complete integrated gate authorizes the mechanical status projection.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-3 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -73,9 +72,8 @@ NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-4 semantic payload, package-hidden serial
-supervisor, independent Haskell relation, paired compile negatives, and changed-production matrix are complete;
-only a fresh integrated run may authorize status.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -94,9 +92,9 @@ only a fresh integrated run may authorize status.
 | `Qualification` | Clean controls, exact negatives, and all five mutants pass together; any survivor or wrong-locus failure refuses. |
 | `Cleanroom` | Every binary, interface, object, stub, and transcript is generated lazily beneath the fresh run root. |
 | `Legacy closure` | Phase 4 owns no legacy-debt identifier; all non-circular prerequisites must pass while later-owned source debt remains residue. |
-| `Predecessor` | Consume exactly one durable Phase-3 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 3 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | Calculus composition, actual free-space observation, effects, runtimes, hardware, and live services remain explicitly later-owned. |
-| `Pass criterion` | `qualified-phase-four-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
+| `Pass criterion` | `qualified-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
 ## Doctrine adopted
 
@@ -106,9 +104,9 @@ only a fresh integrated run may authorize status.
 
 The sprint seam is bound to the same Haskell-only subject, oracle, and serial supervisor as the gate.
 
-## Sprint 4.1: The budget calculus ✅
+## Sprint 4.1: The budget calculus ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Calculus/Budget/{Grant,Admission,Store,Retention}.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/BudgetCalculusRun/Internal.hs`
 **Blocked by**: [Phase 3](phase_03_artifact_calculus.md) gate pass
 **Independent Validation**: ten clean predicates and identical refusal store images; exact constructor/reaper compile negatives; five assigned changed-production mutants; composition and live free-space remain residue

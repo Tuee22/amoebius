@@ -21,9 +21,9 @@ client that speaks to the bus, owned by [pulsar_client_doctrine.md](./pulsar_cli
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Why this doctrine exists: two ways to say "run this elsewhere"](#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)
 - [2. The two topologies](#2-the-two-topologies)
 - [3. The binding: reachability is a type, not a runtime probe](#3-the-binding-reachability-is-a-type-not-a-runtime-probe)
@@ -33,9 +33,9 @@ client that speaks to the bus, owned by [pulsar_client_doctrine.md](./pulsar_cli
 - [7. Planning ownership](#7-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Why this doctrine exists: two ways to say "run this elsewhere"
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 The vision wants a workload's state to live in "a single logical Pulsar and KV store irrespective of how
 many nodes are running or where they are running." Taken naively, that collides head-on with a locked

@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/gateway_migration_model_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -30,21 +30,19 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Sprints](#sprints)
 - [Sprint 17.1: Concrete model, semantic renderer, and calculus projection](#sprint-171-concrete-model-semantic-renderer-and-calculus-projection-)
 - [Sprint 17.2: Explorer and TLC proof battery](#sprint-172-explorer-and-tlc-proof-battery-)
-- [Sprint 17.3: Historical schedule/cutoff gate work](#sprint-173-schedule-agreement-structural-cutoff-and-sealed-gate-)
+- [Sprint 17.3: Schedule agreement, structural cutoff, and sealed gate](#sprint-173-schedule-agreement-structural-cutoff-and-sealed-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 16 has a durable passing receipt for the current source lineage. The Phase-17 implementation and
-compiled semantic contract are bound below, but no completion claim exists until the exact integrated gate
-passes and authorizes the mechanical status projection.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-16 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -78,16 +76,8 @@ model-checker product generated only beneath `.build/**`. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-17 semantic payload, package-hidden serial
-supervisor, pure model and structural-fit subject, independently authored Haskell oracle, digest-pinned
-offline JVM/TLC inputs, and three changed-production subjects are complete; only a fresh integrated run may
-authorize status.
-
-The admitted runtime inputs are the Temurin 21.0.9+10 x86_64 Linux JRE whose `bin/java` SHA-256 is
-`e865867065e48928c58293f30e7ae26a79c842f8607fa51d7e2e9fb90b602786` and the TLA+ 1.8.0 calver
-`2026.09.04.170753` jar whose SHA-256 is
-`b658b4e504fdf0b721caf7066320f6b6fe5805f4dd2f717d0e47baba4097205e`. They are local-custody ignored
-inputs; a later rolling `v1.8.0` asset is not silently substituted for the pinned jar.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -106,9 +96,9 @@ inputs; a later rolling `v1.8.0` asset is not silently substituted for the pinne
 | `Qualification` | Exact tool digests, three production-mutant deaths, closed source inventory, source discipline, Haskell oracle controls, generated-product inventory, and legacy closure qualify the harness. |
 | `Cleanroom` | Cabal products, copied source-repository cache, rendered foreign products, logs, and results stay below the fresh run root; shared package/JVM/TLC stores are read-only authenticated inputs. |
 | `Legacy closure` | The Python Phase-17 gate and all eight serialized gateway contract/surface/oracle manifests are absent. |
-| `Predecessor` | Consume exactly one durable Phase-16 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 16 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | Runtime fidelity remains `UNVERIFIED`; the decomposition lemma remains `OPEN`; live gateway effects remain Phase-75-owned. |
-| `Pass criterion` | `qualified-phase-seventeen-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
+| `Pass criterion` | `qualified-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
 ## Doctrine adopted
 
@@ -120,11 +110,12 @@ inputs; a later rolling `v1.8.0` asset is not silently substituted for the pinne
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 17.1: Concrete model, semantic renderer, and calculus projection ✅
+## Sprint 17.1: Concrete model, semantic renderer, and calculus projection ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Formal/GatewayMigration.hs`, `test/spec/formal/gateway/{GatewayMigrationSpec,GatewayMigrationOracle}.hs`, and `test/harness/deterministic_simulation/CalculusProjection.hs`
 **Blocked by**: [Phase 16](phase_16_deterministic_sim_substrate.md) gate pass
 **Independent Validation**: structural problems empty, exact 53-state exploration, twelve semantic renderer facts, two renderer mutants, and exact five-calculus projection
@@ -151,11 +142,12 @@ hand-maintained TLA+ source or generated byte fixture.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 17.2: Explorer and TLC proof battery ✅
+## Sprint 17.2: Explorer and TLC proof battery ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Formal.{GatewayMigration,Explore,EmitTLA}` plus the Phase-17 Haskell oracle and digest-pinned run-scoped TLC invocation
 **Blocked by**: Sprint 17.1
 **Independent Validation**: explorer/TLC fingerprint equality, five exact invariant deaths, five mechanical deaths, three fairness deaths, and complete action/antecedent reachability
@@ -183,11 +175,12 @@ load-bearing.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 17.3: Schedule agreement, structural cutoff, and sealed gate ✅
+## Sprint 17.3: Schedule agreement, structural cutoff, and sealed gate ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Multicluster/StructuralFit.hs`, the IOSimPOR/cutoff/stress sections of `GatewayMigrationSpec.hs`, and package-hidden `GatewayMigrationModelRun.Internal`
 **Blocked by**: Sprint 17.2
 **Independent Validation**: IOSimPOR safety agreement, eleven cutoff cases, 500 covered equivalence cases, 500 totality cases, eight clause deletions, shared-resource correct/mutant pair, and three compiled production mutants

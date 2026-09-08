@@ -22,9 +22,9 @@ is an activity rather than a phase gate, and the registers that are gates are ow
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. The io-classes environment abstraction — build it pure, lift it whole](#2-the-io-classes-environment-abstraction--build-it-pure-lift-it-whole)
 - [3. The simulated environment and its fault model](#3-the-simulated-environment-and-its-fault-model)
@@ -35,9 +35,9 @@ is an activity rather than a phase gate, and the registers that are gates are ow
 - [8. Planning ownership](#8-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Why this doctrine exists
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 The concurrency-and-failover method ([chaos_failover_doctrine.md §10](./chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim))
 offers the io-sim lift as a **conditional** move — taken "where the in-process concurrency is intricate enough

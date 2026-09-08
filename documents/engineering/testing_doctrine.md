@@ -1,9 +1,6 @@
 # Testing
-> **Purpose**: Define amoebius testing as a self-tearing-down `InForceSpec` topology — spin up resources, run a
-> workflow, **always** tear down — plus the `suggest-test` generator, flagged test credentials, the
-> elevated harness as the sole automated deleter of test-owned durable storage, and the per-run
-> proven/tested/assumed ledger
-> artifact.
+> **Purpose**: Define testing registers, production test workflows, independent coverage expectations,
+> test-owned resource cleanup, and the evidence each run may claim.
 > **Read this if**: a validation has to be designed, or an existing claim has to be read for what it actually establishes.
 
 This document owns how amoebius validates itself: the registers of evidence, the test-topology contract, and
@@ -24,6 +21,7 @@ nor the phase gates that consume its registers, owned by
 </details>
 
 ## Contents
+
 - [1. A test is an amoebius spec](#1-a-test-is-an-amoebius-spec)
 - [2. The registers of amoebius testing](#2-the-registers-of-amoebius-testing)
 - [3. The test-topology contract: spin up → run → always tear down](#3-the-test-topology-contract-spin-up--run--always-tear-down)
@@ -39,8 +37,6 @@ nor the phase gates that consume its registers, owned by
 - [13. End-to-end tests run in the Playwright image, against three browsers](#13-end-to-end-tests-run-in-the-playwright-image-against-three-browsers)
 - [14. Offline-state semantic evidence](#14-offline-state-semantic-evidence)
 - [Related Documents](#related-documents)
-
----
 
 ```mermaid
 flowchart LR
@@ -59,118 +55,84 @@ the complete qualified gate can admit the candidate ledger. Teardown is owned by
 
 ## 1. A test is an amoebius spec
 
-**amoebius has no separate behavioral test language — a test *is* a Haskell-declared amoebius deployment.** Everything amoebius
-already knows how to do — stand up a cluster, render typed manifests from Dhall, place workloads, inject
-secrets, fail a leader over — is exactly the machinery a test needs. So a test is not written in some second
-language with its own tracked runner; Haskell lazily renders the same external Dhall DSL beneath `.build/**`, and the test inherits the same
-illegal-state-unrepresentable guarantee. There is no "test mode" of the type system that lets a test express
-a broken cluster the production DSL would reject. The test suite may itself be driven by an amoebius root
-cluster — the root stands up the test topology, runs the workflow, and tears it down, exactly as it rolls
-out any child manifest.
+**The problem.** A separate test deployment path can accept configurations or take effects that production
+cannot. A live test may validate that second implementation instead of the product.
 
-Concretely, amoebius tests are Haskell `InForceSpec` topology declarations that lazily render any required
-Dhall, spin up resources, run the workflow, and tear down resources. There is no tracked `.dhall` test corpus
-or second-language gate runner; what
-is needed is a general test topology (which, by definition, always tears down the resources it creates). The
-vision is emphatic that there is **no enumerated catalog of tests** to maintain — there is a *topology*, and
-specific tests are values of it.
+**Why the obvious alternative fails.** Repeating production decisions in a test runner creates a second
+implementation. Reusing production decisions to construct the expected result instead creates a circular oracle.
 
-**The mechanism behind "always tears down" is owned elsewhere.** The parenthesis above states a property and
-this doctrine used to leave it as one. It is now a type: a test is a **workflow**, provisioning returns a
-teardown obligation alongside its handle, and a workflow that ends holding an undischarged obligation does not
-compile ([`workflow_calculus_doctrine.md` §3](./workflow_calculus_doctrine.md#3-teardown-is-a-type-obligation)).
-The same document owns the reason the test path and the production path cannot diverge — there is one deploy
-arm, so a test has no second one to take
-([`workflow_calculus_doctrine.md` §4](./workflow_calculus_doctrine.md#4-a-test-is-a-workflow-with-an-assertion)).
-What stays here is everything about *evidence*: the register model, the proven/tested/assumed ledger, the
-independent-oracle discipline, and the mutant obligations.
+**The rule.** Live topology tests use the actual Haskell-declared deployment, binding, planning, and apply
+path. Independent expectations observe its results. Test scheduling, assertions, and cleanup are workflow
+operations; they do not replace production decision functions.
 
-Phase 47 supplies the closed Haskell declaration boundary for serialized cases and mutation bodies. Those
-bytes are materialized lazily and content-addressed beneath `.build/test-corpora/**`; independently authored
-Haskell expectations remain the oracle, and neither a generated case nor a generated mutant body can decide
-its own verdict.
+Pure and boundary gates precede live topology tests. They require no running cluster and must not inherit a
+live dependency from the test-workflow representation. The finite bootstrap and hardware-free ordering are
+owned by [validation_frame_doctrine.md](./validation_frame_doctrine.md).
 
-Three consequences fall straight out of "a test is a spec":
+The production DSL must reject an illegal test deployment at the same declared type, decode, or provision
+boundary as an illegal production deployment. Each claimed rejection needs its independent positive twin,
+exact negative outcome, and changed-production witness. Sharing the DSL does not itself establish the claim.
 
-- **A test is a deployment-rules layer.** A test composes an app spec (or the platform itself) with a
-  deployment-rules layer that adds three things the production layer omits: a **chaos/failover schedule**, a
-  typed **expectation surface** (the `Expectation` values of
-  [chaos_failover_doctrine.md §11.2](./chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation),
-  which state what the injected faults must not break), and a **mandatory teardown**. That chaos injection
-  lives in deployment rules, never in application logic — the
-  app under test does not know it is being tested — per
-  [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).
-- **A test cannot reach execution with an illegal cluster.** Because the test reuses the production DSL and
-  conditional post-bind infrastructure/materialization/provision boundary, a `.dhall` value that mis-binds a
-  PVC, opens a backdoor ingress, or pairs a
-  CUDA workload with a GPU-less substrate is rejected at its declared dhall-typecheck, gadt-decode, or `provision-seal`
-  locus before it runs. The CUDA pairing is a structured `ProvisionError` at the provision seal, not a claim
-  that value arithmetic fails Dhall
-  type-checking — the contract is owned by [dsl_doctrine.md](./dsl_doctrine.md),
-  [resource_capacity_doctrine.md](./resource_capacity_doctrine.md), and
-  [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md).
-- **The test runs the real thing.** There is no parallel mock cluster. A test stands up real platform
-  services (or a representative subset) and runs a real workflow against them; the only things that make it
-  a *test* rather than a deployment are the chaos schedule, the expectation surface, and the always-teardown
-  contract of [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).
+A test workflow must carry its teardown obligation. The static rule is owned by
+[workflow_calculus_doctrine.md](./workflow_calculus_doctrine.md#3-teardown-is-a-type-obligation).
+That type obligation cannot guarantee external cleanup after every process or host failure. The runner must
+observe cleanup separately and refuse successful results when resources remain.
+
+All behavioral test declarations, expectations, fakes, and mutation intent are Haskell source. Required Dhall
+and other external forms are generated lazily beneath `.build/**`. Generated cases carry input, not authority
+to decide their own expected outcome.
+
+**What it forecloses.** Tests cannot use a parallel deployment implementation or self-generated semantic
+expectations. A complete test workflow remains evidence only for its declared register, observations, and
+environmental assumptions.
 
 ---
 
 ## 2. The registers of amoebius testing
 
-A defect can hide at three depths, and each depth needs a *different* kind of test, because
-a test pitched at one depth is structurally blind to the others. amoebius keeps **three phase-gate registers**
-— 1, 2 and 3 — plus the **Register-2.5 deterministic-simulation activity** between the second and third.
-The numbering is fixed here and used unchanged everywhere: a phase gate keys to exactly one of 1, 2 or 3, and
-never to 2.5 ([`development_plan_standards.md §K`](../../DEVELOPMENT_PLAN/development_plan_standards.md#k-honesty-proven--tested--assumed)).
-Cheapest first, and never confuse one for another.
+A gate names one final register: 1, 2, or 3. Deterministic simulation is a supporting activity, designated 2.5.
+Phase 0's finite governance seed declares no behavioural register. The
+[phase standard](../../DEVELOPMENT_PLAN/development_plan_standards.md#k-honesty-proven--tested--assumed) owns
+how these boundaries constrain numerical progression.
 
-| Register | Name | What it exercises | Where it runs | Mocking posture |
-|----------|------|-------------------|---------------|-----------------|
-| **1** | **Pure** | DSL decoding, renderers, validation helpers, decision functions, DAG logic | in-process, no cluster; a later owner may acquire a hermetic checker over input freshly generated from Haskell, but a producer kernel cannot require its consumer checker to seal | **none** — pure code never touches a mock |
-| **2** | **Boundary integration** | The binary's CLI routing, subprocess behaviour, config load — through fake tools or controlled subprocesses | in-process + fake/real tool binaries | mocking only at the subprocess/interpreter boundary |
-| **2.5** | **Deterministic simulation** (an activity, never a phase gate) | The **real** daemon/reconciler code (lifted onto `io-classes`) run under `IOSim`/`IOSimPOR` against a modeled, fault-injectable environment — concurrent schedules + injected partition/reorder/redelivery/crash, deterministically replayable | in-process, no cluster | no mocks — the *real* code against *modeled* substrates (fake Pulsar/MinIO/apiserver/route53/Vault/clock) |
-| **3** | **Test-`.dhall` topology** | The whole system: a real cluster spun up, a real workflow run, real chaos injected, then torn down | a live substrate ([§8](#8-one-substrate-per-validation)) | no mocks — the real platform |
+| Register | Subject | Boundary | Evidence limit |
+|---|---|---|---|
+| **1 — Pure** | Actual Haskell decoders, folds, renderers, planners, and checkers | Values and admitted compiler/checker inputs; no live infrastructure | Only declared value-level or formal claims |
+| **2 — Boundary integration** | Real production binary and effect interpreter | Externally observed tools, fakes, or controlled processes | Actual request selection; real-provider fidelity is separate |
+| **2.5 — Deterministic simulation** | Real concurrent production code | Modeled environment under deterministic schedules | Explored schedules and stated environment assumptions |
+| **3 — Live topology** | Real deployment and workflows | Named substrate, providers, and injected faults | Only observed effects, architecture, and cleanup |
 
-**Register 2.5 — deterministic simulation** sits between the boundary register and the live topology. It runs
-the *real* daemon/reconciler code — written once against `io-classes` so one source is both the production
-daemon (`m = IO`) and the model under test (`m = IOSim s`) — under `IOSimPOR` against modeled, fault-injectable
-substrates, so a rare concurrent interleaving or environment fault becomes a **deterministically replayable**
-counterexample rather than a once-a-month live flake. It is not a mock in the prohibited sense: the *code* is
-real; only the *substrates* are modeled, and the fidelity of those models to the real Pulsar/apiserver/route53
-is an explicit assumed premise discharged by a narrow live conformance check. The mechanics, the fault model,
-and the honesty tradeoff are owned by
-[deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md); this doc owns only the register
-*definition* above.
+Register 1 may execute a real compiler or solver as a semantic instrument. Its identity and decision
+authority require qualification. Replacing that instrument with a fake changes what can be established;
+solver-shaped output cannot retain the real solver's proof authority.
 
-The first two registers **generalize the prodbox interpreter-only mocking doctrine**: *pure code never
-touches mocks; all mocking happens at the subprocess or interpreter boundary* — pure helpers, DAG logic,
-and renderers are testable without mocks, and subprocess fakes live in a boundary suite, not deep inside
-planning code. Prefer concrete typed values (real ADTs) over mocks whenever the code under test is pure.
-The standard Haskell test stack (Cabal `test-suite` stanzas, `tasty`/HUnit/QuickCheck,
-`typed-process`, structured `bracket`/`finally` cleanup) is inherited from prodbox and pinned by the shared
-toolchain owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Toolchain) — this
-doc does not restate the version pins.
+Register 2 places fakes at declared effect boundaries. Pure decisions remain production code rather than
+test replacements. The independently authored oracle determines expected requests; the fake records actual
+ones without deciding its own expected behaviour.
 
-The third register is the amoebius novelty and the subject of the rest of this document. It is where "a
-test is a spec" ([§1](#1-a-test-is-an-amoebius-spec)) cashes out, and it is the only register that can prove the deployed system survives a
-fault — at the cost of needing a live substrate and an honest teardown.
+Register 2.5 runs the same concurrent source through production and modeled interpreters. It must expose
+schedule and environmental failures reproducibly. Model fidelity remains an assumption until separately
+observed; the [simulation doctrine](./deterministic_simulation_doctrine.md) owns its mechanics.
 
-The blindness between registers is load-bearing, not incidental: a green pure suite says nothing about
-whether the protocol those decisions compose into survives a real partition, and a green topology run says
-nothing about the interleavings it did not inject. The three-layer correctness argument (Decision →
-Protocol → Runtime) and the Extract → Model → Inject moves that guard them are owned by
-[chaos_failover_doctrine.md](./chaos_failover_doctrine.md); this doc owns only the *test-delivery* shape of
-the Runtime-layer (Inject) move — the topology that injects faults against a live amoebius cluster.
+Register 3 exercises actual infrastructure. A successful fault drill demonstrates that observed run; it
+does not prove every future execution or untested interleaving. Test topology ownership and cleanup follow
+[§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).
+
+The Decision, Protocol, and Runtime distinction belongs to
+[chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
+A result in one register cannot substitute for a missing obligation in another.
 
 ---
 
 ## 3. The test-topology contract: spin up → run → always tear down
 
-**A test that can leak a resource cannot be run twice.** If a failed run could strand an EBS volume, a
-hosted zone, or a live cluster, then every test would silt up the substrate and the next run would start
-from a dirtier world than the last. amoebius forecloses that by making teardown **structural**, not a final
-step whose execution is merely hoped for.
+**The problem.** A failed test can strand volumes, hosted zones, or clusters and contaminate later runs.
+
+**Why the obvious alternative fails.** A final cleanup step can be skipped by an earlier failure. A type-level
+cleanup obligation also cannot make external deletion survive a host failure.
+
+**The rule.** The workflow carries cleanup obligations, handled exits reach teardown, and an independent
+supervisor observes the remaining resources before any pass is emitted.
 
 Before those lifecycle clauses apply, **tests have one physical root and may not touch production**. The
 harness resolves the checkout root, creates `.test_data/runs/<run-id>/`, writes an exclusive ownership marker,
@@ -187,9 +149,9 @@ teardown via `bracket`/`finally`):
    primary cleanup path, and that obligation is *in the spec*, not hidden behind ambient machine state. This
    is the prodbox fixture-ownership rule lifted to the `.dhall` surface: the code that creates owns the
    destroy.
-2. **Teardown runs on every exit — success, failure, and Ctrl-C.** Teardown is wrapped in structured
-   cleanup so an aborted or crashed run still reclaims what it built. "Always tears down" means *by
-   construction of the topology type*, not by operator diligence.
+2. **Every handled exit reaches teardown.** Structured cleanup covers success, failure, and cancellation.
+   An outer supervisor must handle terminated children and observe remaining resources. A process or host
+   failure can interrupt cleanup; the type obligation cannot make that external effect inevitable.
 3. **Destroy is idempotent and path-exact.** Re-running teardown converges to "nothing left." The harness may
    delete only the exact run root it created after re-resolving it beneath `.test_data/runs/**` and verifying
    its ownership marker. A missing, replaced, or edited marker quarantines the root and fails the run rather
@@ -218,9 +180,9 @@ flowchart TD
 ```
 *Design intent: every exit reaches the same teardown sink, and an external post-run inventory must show no test-owned residue.*
 
-The "no explicit list of tests" principle is what makes this a *contract* rather
-than a checklist: amoebius does not maintain an enumerated test catalog that each could forget the teardown
-clause. The teardown is a property of the topology *type*, so every value of it inherits the guarantee.
+**What it forecloses.** A workflow cannot report success while its cleanup observation is absent or shows
+owned residue. Type-level obligations constrain workflow construction; actual cleanup remains an observed
+runtime result, including forced termination and recovery.
 
 ---
 
@@ -299,24 +261,19 @@ amoebius can simply *look at*. amoebius already detects what a host is and what 
 
 Per the original vision, `suggest-test`:
 
-1. **Detects the current substrate and its complete supply** — allocatable CPU, memory, and logical pod-local
-   ephemeral storage; nodefs/imagefs/containerfs identities and capacities plus **all** current OCI content
-   objects and committed/active snapshots; disjoint presented durable and
-   native-host-cache backings; accelerator family, whole-device
-   count, per-device raw/reserved/net-allocatable and current-free VRAM or Apple unified memory; and any
-   provider candidate-node shapes — using the same
-   pure substrate classification and inventory owned by
-   [substrate_doctrine.md](./substrate_doctrine.md) (detection is a fact about the host, never a knob).
+1. **Detects the current substrate and complete supply.** Inventory includes CPU, memory, logical pod-local
+   ephemeral storage, filesystem identities/capacities, OCI content objects, and committed/active snapshots.
+   It also includes disjoint durable/native-cache backings, accelerator family/count, raw/reserved/net/current-free
+   device memory, and provider candidate shapes. The classification belongs to
+   [substrate_doctrine.md](./substrate_doctrine.md); detection is a host observation.
 2. **Takes SSH and AWS credentials and inspects what they can do** — the machine resources and the
    *permissions and quotas* associated with those credentials. It probes capability (whether these credentials
    can create EBS or a hosted zone, and how much) so the emitted test is *sized to what is actually reachable*, not a
    guess.
-3. **Materializes a proposed test `.dhall` beneath `.build/**`** that (a) spins up a **representative set of resources** whose fully expanded
-   CPU, memory, pod-ephemeral/catalog-cache, platform-selected OCI-content/snapshot/import workspace,
-   presentation-rounded durable/native-host-cache, accelerator/VRAM, and distinct provider compute/
-   node-root/durable-quota envelope
-   provisions inside the detected supply and credential authority, and (b) schedules the appropriate
-   **delegated HA and substrate-quorum failovers** for that topology.
+3. **Materializes a proposed test `.dhall` beneath `.build/**`.** Its expanded CPU, memory, ephemeral/cache,
+   OCI workspace, rounded durable/native-cache, accelerator-memory, and distinct provider compute/root/durable
+   envelopes must fit detected supply and authority. The proposal includes the topology's required delegated
+   HA and substrate-quorum failovers.
 
 ```mermaid
 flowchart TD
@@ -380,9 +337,8 @@ amoebius re-derives the `prodbox` `aws_admin_for_test_simulation` pattern, gener
   to see, and these get deleted by the elevated test credentials. Every
   resource a topology allocates is tagged test-owned at creation, so the harness can later find *exactly*
   what it created and reclaim it without guessing — the basis of the leak-free sweep in [§7](#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles).
-- **The flagged credential is still a secret-by-name.** The credential's *material* lives in Vault and is
-  referenced from Dhall by name only, exactly as in [§5](#5-suggest-test-detect-the-world-emit-a-representative-test-dhall) — flagging changes *which* credential a test uses and
-  *what it is allowed to do*, not *where the secret lives*. The vaulting and injection are owned by
+- **The flagged credential is still a secret-by-name.** Its material lives in Vault and Dhall references
+  only its name. Flagging changes the selected identity and authority. Vaulting and injection remain owned by
   [vault_pki_doctrine.md](./vault_pki_doctrine.md).
 - **The flagged test-secret value is external, untracked, and ignored.** In production, secrets are CRUD'd
   into Vault **by name** through the operator's admin REST before a `.dhall` is uploaded
@@ -482,15 +438,14 @@ doctrine:
 - **A test topology is lane-locked.** A single test `.dhall` targets one execution lane; its validation
   logic carries **no substrate-conditional branching**. Full coverage across substrates is *several
   substrate-locked runs*, not one branchy run that flips between worlds.
-- **Fail fast on missing specialized inputs; no silent fallback.** A topology that requires a substrate's
-  real inputs (a hosted zone, a credential, a GPU) fails fast when they are absent — it does not quietly
-  retarget the other substrate, and a fake-tool fixture does not satisfy a prerequisite that demands real
-  infrastructure.
+- **Fail fast on missing specialized inputs.** A topology requiring a hosted zone, credential, or GPU fails
+  when that input is absent. Retargeting another substrate or substituting a fake cannot satisfy the original
+  live prerequisite.
 - **The CPU baseline is universal, not a fallback.** Explicitly selecting `linux-cpu` is valid on
   `linux-cpu`, `linux-cuda`, `apple`, or `windows` hardware. It runs natively or through the canonical
   Incus/Lima/WSL2 guest and exposes no accelerator. If the gate requires a pristine Linux host, that guest is
   newly created and its clean preflight is evidence.
-- **An architecture is proven only where it runs.** A validation names `linux-cpu/amd64` or
+- **An architecture is tested only where it runs.** A validation names `linux-cpu/amd64` or
   `linux-cpu/arm64`, and the lane it names is the host's natural architecture. Emulating the other
   architecture, or cross-building an artifact for it, produces no evidence about it: covering both is two
   runs on two machines, the same way covering two substrates is.
@@ -510,172 +465,63 @@ CUDA/Metal run may never relabel itself CPU after failure.
 
 ## 9. Derivation: generated enumeration, authored expectation
 
-The Phase-42 browser-interpreter Register-1 differential is a closed typed Haskell interaction corpus against
-an independently authored Haskell expectation module. It covers pure trace, focus/accessibility, request-plan,
-freshness, and projected-source structure; actual browser fidelity and OS-boundary observation remain live,
-post-barrier obligations.
+**The problem.** A manually maintained coverage list can omit new production constructors and remain green.
+An expectation generated from the same decision function can remain green when that function is wrong.
 
-A test suite maintained by hand drifts from the specification it covers. A component added to an
-`InForceSpec` acquires no fault drill; a union arm added to a workflow ADT acquires no driven interaction;
-an entry added to the illegal-state catalog acquires no negative fixture. The drift is silent at author
-time, at type-check, and at decode — the suite still compiles and still passes, reporting a green result
-whose coverage no longer matches the surface it claims to cover. The uncovered surface is first exercised
-in production.
+**Why the obvious alternative fails.** Generating discovery and expected outcomes from production makes the
+test circular. Keeping only independent expected outcomes leaves omitted production surfaces invisible.
+Comparing counts establishes neither identity equality nor semantic coverage.
 
-Generating the tests from the specification removes the drift and destroys the test. An expectation
-rendered from the same source as the subject asserts only that the source agrees with itself: a driven
-interaction generated from the contract the frontend consumes, or a golden regenerated from the renderer
-under test, passes for any output, a stub's included. This is the tautology
-[development_plan_standards.md §M](../../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
-already forbids — an equivalence check defines its reference side independently of the code under test.
+**The rule.** Production declarations supply the discovered surface. Independently authored Haskell
+requirements supply the obligation universe and expected behaviour. The runner reconciles those identities
+in both directions before accepting exact actual observations.
 
-**A test artifact divides into two halves with opposite correctness requirements, and the derivation boundary falls between them.**
+| Input | Authority | Required check |
+|---|---|---|
+| Production constructors, arms, routes, and consumers | Discover the real program's surface | No filtering that hides unlisted surfaces |
+| Independent Haskell obligation declarations | Specify required semantics and exclusions | Stable identity, owner, scope, and complete expectation |
+| Independent cases and mutations | Challenge required boundaries | Exact positive, negative, and changed-production outcomes |
+| Generated transports and reports | Carry inputs and raw observations | No expected-result or verdict authority |
 
-| Half | Content | Requirement | Disposition |
-|---|---|---|---|
-| **Enumeration** — which surfaces exist | declared components, admissible fault targets, capability arms, illegal-state entries, contract constructors | never lags the spec | generated from Haskell, never committed |
-| **Expectation** — what must hold | Haskell assertions, semantic predicates, expected values and error identities | independent of the code under test | separately authored Haskell source |
+Discovery includes the semantic arms and required interactions of the real language. Files, labels, stage
+counts, and CPP flags provide provenance but cannot replace that inventory. An obligation omitted by both a
+rewritten test list and its rewritten fixture list must remain detectable against the preserved requirement
+baseline.
 
-The boundary applies uniformly:
+The plan owns scope conservation when an obligation moves:
+[development_plan_phase_model.md](../../DEVELOPMENT_PLAN/development_plan_phase_model.md#n-reopening-and-amending-a-phase).
+A new phase name or register cannot silently withdraw an earlier language obligation.
 
-- security and authorization arms are enumerated from production Haskell declarations and joined to a
-  separately authored Haskell relation;
-- browser observations are compared with a distinct Haskell reference semantics and Haskell-authored expected
-  accessibility, focus, transport, and denial values; and
-- every external-language fixture, client program, browser interaction script, or encoded oracle is generated
-  beneath `.build/**` immediately before the relevant boundary or live check.
+Expectations use separately authored Haskell types, values, limits, and predicates. A driver may convert an
+independent input into the public production type and invoke production for the actual result. It must not
+use production conversion, encoding, folds, or constants to choose the expected semantics.
 
-Phase 8 is the bounded scoped-identity instance of this split: Git discovery enumerates the two production
-modules, one Haskell oracle, and ten Haskell compiler twins, while `test/spec/ui/ScopeSpec.hs` independently
-states the owner, flow, diagnostic, and generated reject-class expectations. No TSV, `.hs.fail`, or serialized
-mutant is an input to that verdict.
+Required comparisons observe the whole stated projection. Accessibility and transport rows must be compared
+with production observations, not counted in the oracle. Compiler rejection needs a legal twin and exact
+diagnostic. A model counterexample must be the assigned invariant failure rather than any failed process.
 
-Phase 9 applies the same boundary to capacity and topology: Git discovery enumerates three production
-modules, four Haskell oracle modules, and fourteen compiler twins; separately authored Haskell values state
-the fifteen fold outcomes, nine compatibility decisions, eight-current/three-deferred locus join, and four
-property predicates. Nineteen serial CPP builds alter production modules while keeping that oracle fixed.
+Generated artifacts need their actual consumer when syntax, type correctness, or executable meaning is
+claimed. Deterministic materialization establishes byte stability only. Placeholder scripts and undefined
+bindings cannot qualify because a text scan finds expected identifiers.
 
-Phase 10 exhausts the finite five-calculus surface in Haskell: its authored table covers all 25 ordered pairs,
-the suite constructs all 125 kind triples, and a same-scope/different-scope compiler pair pins conjunction of
-the generative index. Three serial changed-production challenges independently weaken resource addition,
-label-transform preservation, and scope conjunction. The 500-case numeric properties are sampled evidence,
-not a claim of exhaustive `Natural` arithmetic.
+Mutation operators must change the real decision used by production while preserving independent expectations.
+The runner records the changed subject, assigned red observation, unrelated green controls, and restored clean
+result. The protected execution boundary is owned by
+[testing_spoof_resistance.md](./testing_spoof_resistance.md#122-test-split).
 
-Phase 14 applies the split to source refinement: six real Haskell fixture modules and a compiled Phase-11
-model projection provide the enumerated subjects, while `RefinementCheckerSpec.hs` independently owns exact
-statuses, reasons, line numbers, source digests, and required correspondence pairs. Three CPP builds change
-the production checker without changing that oracle; generated invariant and result tables remain run-local
-observations.
+A missing required obligation is red. An explicitly later-owned layer may remain `UNVERIFIED` only under its
+typed ownership and barrier deadline. An unverified ledger entry records the gap; it does not discharge it.
+The candidate schema belongs to the
+[gate-integrity standard](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass).
 
-Phase 15 applies the split to compile-time foreclosure. `Amoebius.Compiler.CompileFailHarness` parses only
-structured GHC diagnostics and requires each illegal source to match its authored code, start, and message
-fragments after its legal twin compiles cleanly. `CompileFailHarnessSpec.hs` independently owns the ten
-claim/twin rows across Phases 4, 5, 6, 7, and 10. A compile-fail observation therefore proves only
-*this expression was rejected for this pinned reason*; it does not prove every expression outside the legal
-language is rejected. Wrong-reason, omitted-positive, and impossible-pin changed-production subjects keep
-that boundary executable, and all compiler products and result tables remain run-local.
+Historical derivation analysis remains a reference in
+[test_derivation_analysis.md](./test_derivation_analysis.md).
+Current inventories, implementation observations, and remaining work belong to the
+[development-plan tracker](../../DEVELOPMENT_PLAN/README.md), not a second per-phase account in this doctrine.
 
-Phase 16 applies Register 2 to deterministic modeled effects. The ten-module
-`deterministic-simulation-substrate` library carries one `Env m` reference reconciler through injected
-real-client and `IOSim` interpreters; `SimSpec.hs`, `FaultContracts.hs`, and `CalculusProjection.hs`
-independently author four schedules, six fake-boundary contracts, and five Phase-10 composition facts.
-Same-seed trace bytes, changed-seed sensitivity, bounded `IOSimPOR`, and three CPP-selected production
-mutants establish the modeled claim. The result says only that the code upholds its invariants against those
-models: model fidelity is `ASSUMED`, and live-substrate behavior remains `UNVERIFIED`.
-
-Phase 27 applies the split to the complete illegal-state inventory. The production catalogue enumerates 121
-subcases and emits its catalogue and validation-locus ledger only beneath the fresh run root; the separately
-authored Haskell oracle fixes the expected digest, counts, Phase-9 join, foreclosure pairs, compiler loci, and
-product census. Seven structural, thirteen decode, and five compile-refusal pairs discharge 43 reached rows,
-while 78 later-owned rows remain explicit ledger deferrals. Four QuickCheck claims run with coverage floors
-and are labelled `TESTED (sampled)`; only exhaustive traversal of the three `Rke2Servers` arms is labelled
-`PROVEN`. Four changed-production mutants challenge structural, decode, indexed, and property behavior.
-
-[Phase 28](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) applies Register 1 to the pure
-logical-to-physical storage fold. A separately authored Haskell oracle
-fixes 30 negative/legal pairs, two composed positive rows, six sampled equivalence properties, and 31 exact
-production-mutation loci. Every property carries accepting and rejecting coverage floors; compiler
-exhaustiveness supplies the totality evidence that sampling cannot. The supervisor builds each mutation and
-the clean subject serially in one fresh run root. Live backing observation, allocation, migration, healing,
-and scaling enactment remain `UNVERIFIED` with their later owners.
-
-[Phase 29](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) applies Register 1 to the pure
-execution-epoch, scheduler-reservation, runtime/node-local storage, accelerator-residency, provider-root, and
-composed-placement folds. The independent Haskell oracle fixes 37 negative/legal pairs across 18 named
-families, two composed positives, seven sampled properties with coverage floors, a 128-unit five-calculus
-projection, and 45 exact changed-production loci. The supervisor executes every mutation and the clean suite
-serially in a unique run root. Model-to-runtime correspondence, live scheduling, device attachment, provider
-allocation, and physical enforcement remain `UNVERIFIED` with their later owners.
-
-The split also applies to lint and mutation corpora. A positive seed, mutation operator, and expected
-diagnostic identity may be committed only as Haskell. Materialized negative copies and serialized diagnostics
-are generated under `.build/test-corpora/` or `.build/tmp/`. The gate joins each case to its Haskell
-expectation by stable mutation identity; it does not retain a second source tree of copies.
-
-Git chronology is provenance evidence only. A separately authored
-Haskell expectation qualifies as independent when the complete gate proves the subject/oracle separation,
-exact projection, paired negatives, and changed-subject sabotage required here. A same-change fixture may be
-a regression fixture; chronology alone neither qualifies nor disqualifies it.
-
-Enumeration is a pure projection of a committed typed value, so it is a generated artifact in the ordinary
-sense and inherits the ordinary treatment of
-[generated_artifacts_doctrine.md §3](./generated_artifacts_doctrine.md#3-the-rule) — emitted at gate time,
-stamped generated, never checked in. Expectation is independently authored Haskell source
-([generated_artifacts_doctrine.md §5](./generated_artifacts_doctrine.md#5-authored-vs-generated-the-committed-source))
-and is committed as `.hs`. Neither half changes the existing artifact rules; what is new is that a test contains
-both and that they are treated differently.
-
-**The coverage obligation.** The generator emits not tests but the list of surfaces requiring an authored
-expectation. Each enumerated surface is either bound to a committed Haskell expectation or it is not, and an unbound
-surface emits an **UNVERIFIED** row in the ledger's `coverage` array ([§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)),
-naming the surface — the `coverage` axis exists precisely so an uncovered surface is recorded, not lost.
-
-[Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md) applies the same separation to the pure
-UI authorization boundary. `AuthorizationCases.hs` supplies typed subject inputs, while
-`AuthorizationOracle.hs` imports neither production nor the case module and fixes the exact registry,
-decision, refusal, calculus, and production-mutant expectations. The acquired supervisor runs both changed
-production subjects and the clean suite serially beneath a fresh `.build/runs/phase-38/**` root; a test-local
-Boolean surrogate or serialized matrix cannot qualify the production authorization transition.
-
-[Phase 44](../../DEVELOPMENT_PLAN/phase_44_ui_local_composition.md) applies it to hardware-free application
-composition. `UiLocalCompositionCases.hs` names the generated interaction and calculus surfaces, while
-`UiLocalCompositionReference.hs` independently fixes visible, effect, access, and denial observations without
-importing production or the case module. Five CPP-selected production mutations must each fail at its named
-semantic locus; the retired Node, Python, TSV, and materialized-mutant corpus is not an oracle.
-
-```mermaid
-flowchart TD
-%% register: algebra
-  spec["production Haskell declarations: ADTs and catalog"]:::intent -->|pure projection| enum["enumeration: surfaces requiring coverage (generated, not committed)"]:::intent
-  enum -->|join by identity| oblig[/"coverage obligation"\]:::intent
-  auth["independent Haskell expectations: predicates and tagged values"]:::intent -->|join by identity| oblig
-  oblig -->|every surface bound| reached["layer status from the run"]:::intent
-  oblig -->|surface unbound| unver>"UNVERIFIED row naming the uncovered surface"]:::refuse
-  reached --> ledger["per-run proven / tested / assumed ledger"]:::intent
-  unver --> ledger
-  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
-  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
-```
-*Design intent: the generated enumeration accumulates with separately authored Haskell expectations by
-identity; every bound surface yields a candidate layer observation and every unbound surface falls closed to
-an UNVERIFIED ledger row.*
-
-This introduces no new honesty vocabulary. UNVERIFIED already denotes an applicable move a run did not
-perform, already blocks promotion to prod, and must be checked through independent observation and the complete gate
-([§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)). The extension is to the *set* of things
-recordable as UNVERIFIED — from skipped moves to uncovered surfaces — so absent coverage becomes a claim the
-ledger states rather than a gap no artifact represents. Because the enumeration is regenerated at gate time
-and never committed, a surface cannot be removed from the required set by editing a checked-in list.
-
-What this forecloses: a hand-curated inventory of what a suite covers, which is the artifact that goes
-stale; and generated assertions, with them the appearance of coverage a generated suite produces at no
-evidential cost. Haskell expectations can still be weak or wrong; the gate's Haskell mutant operators and
-oracle-independence checks must expose that failure.
-
-The analysis this rule was drawn from — including the alternatives rejected, the recommendations not
-adopted, and the corpus defects repaired alongside it — is recorded in
-[test_derivation_analysis.md](./test_derivation_analysis.md). That record is not authoritative; this section
-is.
+**What it forecloses.** Production cannot generate its own oracle, and an independently named module cannot
+claim coverage through unused expected values. Requirements and expectations can still contain mistakes.
+Their provenance, qualification, and residual assumptions must remain visible.
 
 ---
 
@@ -712,8 +558,10 @@ runs pass all required independence, sabotage-control, predecessor-chain, and ow
 
 ## 12. Spoof-resistant evidence
 
-A gate must observe an **unforgeable effect produced after the gate started**, never a value the system under test supplied. The rule and its per-phase application are owned by
-[testing_spoof_resistance.md](./testing_spoof_resistance.md), a slice of this document.
+An effectful claim requires fresh observation outside the candidate's authority. A pure claim requires an
+independent semantic comparison. The threat model, qualification, and explicit residual trust are owned by
+[testing_spoof_resistance.md](./testing_spoof_resistance.md). Neither a candidate report nor the word
+unforgeable establishes that boundary.
 
 ## 13. End-to-end tests run in the Playwright image, against three browsers
 
@@ -737,11 +585,17 @@ Two rules keep the exception bounded:
 
 ## 14. Offline-state semantic evidence
 
-The hardware-free offline-state gate joins a Haskell case declaration to a separately authored Haskell
-expectation module, then changes seven production loci covering ciphertext, credential exclusion, single-owner
-fencing, generation advance, dependency-aware quota refusal, partition scope, and generated-runtime fence
-hooks. Run-local file materialization proves deterministic projection mechanics only; real browser behavior
-remains a later observation.
+Offline-state checks must exercise actual Haskell transitions for encrypted-envelope handling, credential
+exclusion, fencing, generation advance, quota refusal, partition scope, and replay. Independent expectations
+and changed-production challenges must observe each assigned boundary.
+
+Encryption claims require the real cryptographic construction and its admitted assumptions. An opaque string,
+reversible encoding, or absence of a plaintext canary cannot establish encryption. Generated runtime code needs
+its actual compiler and semantic consumer when executable projection is claimed.
+
+Browser storage, locks, crypto APIs, service workers, and cross-tab behaviour remain separate boundaries under
+the [browser-offline doctrine](./browser_offline_runtime_doctrine.md). Deferring those live observations cannot
+excuse missing pure state semantics or invalid generated source.
 
 ## Related Documents
 - [Engineering Doctrine Index](./README.md)

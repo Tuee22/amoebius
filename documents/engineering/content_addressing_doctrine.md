@@ -23,9 +23,9 @@ owned by [resource_capacity_storage.md](./resource_capacity_storage.md).
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. A content-derived name that cannot be forged](#1-a-content-derived-name-that-cannot-be-forged)
 - [2. The three-tier store: blobs ← manifests ← pointers](#2-the-three-tier-store-blobs--manifests--pointers)
 - [3. `experimentHash`: identity is *what was requested* ‖ *where it ran*](#3-experimenthash-identity-is-what-was-requested--where-it-ran)
@@ -36,9 +36,9 @@ owned by [resource_capacity_storage.md](./resource_capacity_storage.md).
 - [8. Planning ownership](#8-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. A content-derived name that cannot be forged
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 Most data corruption starts with a *name that does not match its bytes* — a pointer to a blob
 that was overwritten, an image tag that moved, a "checkpoint v3" that two machines disagree about. amoebius

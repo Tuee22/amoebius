@@ -26,15 +26,15 @@ This contract owns the hardware-free authenticated request boundary; live identi
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 42 and every earlier numerical predecessor have passed. The authenticated scoped Haskell boundary,
-independent oracle, typed cases, nine production-mutant seams, and acquired serial supervisor are implemented;
-the complete integrated gate has not yet passed.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-42 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -77,7 +77,8 @@ and HA remain deferred.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -96,9 +97,9 @@ and HA remain deferred.
 | `Qualification` | `qualified-ui-server-boundary-harness` |
 | `Cleanroom` | `ui-server-boundary-products-contained-below-build` |
 | `Legacy closure` | `retired-ui-server-boundary-authorities-absent` |
-| `Predecessor` | `exact-phase-forty-two-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 42 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `live-identity-provider-browser-deployment-and-ha-owners-explicit` |
-| `Pass criterion` | `qualified-phase-forty-three-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -112,9 +113,9 @@ and HA remain deferred.
 
 ## Sprints
 
-## Sprint 43.1: Authenticated scoped UI-server dispatch ✅
+## Sprint 43.1: Authenticated scoped UI-server dispatch ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Ui/Server/{Dispatch,RequestContext,Security,SecurityHeaders,WebSocket}.hs`, `src/Amoebius/Ui/Realtime/Envelope.hs`, typed cases, production CPP seams, and the package-hidden acquired Phase-43 supervisor.
 **Blocked by**: [Phase 42](phase_42_ui_browser_interpreter.md) gate pass
 **Independent Validation**: authenticated HTTP, authorization-before-dispatch, startup registry admission, public/private asset separation, idempotent retry, WebSocket registration, calculus, and nine changed-production checks.

@@ -19,9 +19,8 @@ document each invariant cites. It presumes nothing.
 
 </details>
 
----
-
 ## Contents
+
 - [1. The everything-orchestrator shape: one runtime binary, three contexts](#1-the-everything-orchestrator-shape-one-runtime-binary-three-contexts)
 - [2. The seed projects: reference implementations amoebius re-derives from](#2-the-seed-projects-reference-implementations-amoebius-re-derives-from)
 - [3. The hard constraints (cross-cutting invariants)](#3-the-hard-constraints-cross-cutting-invariants)
@@ -29,18 +28,16 @@ document each invariant cites. It presumes nothing.
 - [5. Reset baseline and live status authority](#5-reset-baseline-and-live-status-authority)
 - [Related Documents](#related-documents)
 
----
-
 This document explains *what amoebius is and why it is shaped that way*. It does not track status, order, or
 remaining work — that is [README.md](README.md)'s job, and per
 [development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed) status lives **only** in the plan tracker.
 The doctrine under [`../documents/engineering/`](../documents/engineering/README.md) owns the normative
 detail of each subsystem; this overview summarizes and links, and **never restates** doctrine content
 ([documentation_standards.md §5](../documents/documentation_standards.md#5-duplication-rules)). This document is the target-architecture companion to that grand, non-binding
-vision; the plan is its binding, executable decomposition.
+vision; the plan specifies the required decomposition. Haskell owns executable acceptance contracts.
 
-> **Reopened implementation, read this first.** Source and tests exist, but the generated-artifact redesign
-> invalidates every prior phase result, so the phase statuses in this document's prose would go stale the moment
+> **Reopened implementation, read this first.** Source and tests exist, but the [2026-09-08 reset](README.md#reopened-numeric-sequence)
+> withdraws prior certification, so the phase statuses in this document's prose would go stale the moment
 > they were written. [README.md](README.md)'s tracker is the sole record of which phase is where
 > ([development_plan_standards.md §C](development_plan_standards.md#c-status-vocabulary)); read it, not a
 > summary of it. Every prescriptive sentence remains design intent until the redesigned complete qualified
@@ -214,10 +211,12 @@ opens. A bounded DSL decision/protocol tranche is model-checked in
 The **Register-2.5 deterministic-simulation activity is never a phase gate**
 ([development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)); where a
 live-band phase eventually runs it, the activity may compare built code with the independently validated
-Phase-19 model only after Phase 19 has passed its qualified gate. Phase 19 is currently **NOT VALIDATED**.
+Phase-19 model only after Phase 19 has passed its qualified gate. Its current status and evidence belong to the [tracker](README.md#phase-overview).
 Front-loading a *design* model ahead of its runtime is legitimate only while correspondence and runtime
 fidelity remain explicitly unverified
 ([development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed), [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md)).
+
+### Hardware-free foundations and formal semantics
 
 *Foundations (substrate `none`):*
 - **Phase 0 — Documentation, source-policy, and validation-trust suite (not DSL validation)** → [phase_0](phase_00_documentation_suite.md).
@@ -272,6 +271,8 @@ fidelity remain explicitly unverified
   pure-link verdict; execution, observer authenticity, proof, and runtime fidelity remain UNVERIFIED →
   [phase_24](phase_24_conformance_gate_generator.md).
 
+### Generated DSL surfaces and integrated validation
+
 *The generative surface — every artifact class becomes a recipe (substrate `none`, Registers 1–2):*
 - **Phase 25 — Haskell-derived Dhall projection and smart-constructor prelude** → [phase_25](phase_25_dhall_schema_generation.md).
 - **Phase 26 — Haskell protocol declarations, GADT-indexed IR, and total decoder** → [phase_26](phase_26_gadt_decode_ir.md).
@@ -300,6 +301,8 @@ fidelity remain explicitly unverified
 *Test-as-workflow (substrate `none`, Register 1):*
 - **Phase 48 — The test-workflow algebra** → [phase_48](phase_48_test_workflow_algebra.md).
 - **Phase 49 — No-hardware DSL gate barrier and self-referential gate suite** → [phase_49](phase_49_self_referential_gates.md).
+
+### Host realization, live platform, and domain instances
 
 *Pre-binary and host — the first machine (Registers 2–3):*
 - **Phase 50 — Bounded `pb` bootstrap and Haskell handoff** → [phase_50](phase_50_host_assert_cli.md).

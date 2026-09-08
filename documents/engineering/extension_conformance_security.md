@@ -23,9 +23,9 @@ and the algebra it rests on belongs to
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Scope](#1-scope)
 - [2. Why a security family exists at all](#2-why-a-security-family-exists-at-all)
 - [3. The skolem scope](#3-the-skolem-scope)
@@ -33,9 +33,9 @@ and the algebra it rests on belongs to
 - [5. What the seed observation is worth](#5-what-the-seed-observation-is-worth)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Scope
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 This document is a **family slice**. It owns S1–S6 and the skolem-scope mechanism they share. It does not own
 the tenant model, the gateway and identity edge, the offline runtime, or the relational data plane; each S-law

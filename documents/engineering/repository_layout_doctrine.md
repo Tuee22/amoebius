@@ -17,12 +17,13 @@ that active inventory to readers.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [1. Classification rule](#1-classification-rule)
 - [2. Complete repository structure](#2-complete-repository-structure)
 - [3. Complete generated-output inventory](#3-complete-generated-output-inventory)
@@ -33,8 +34,6 @@ that active inventory to readers.
 - [8. Enforcement and source-snapshot acceptance](#8-enforcement-and-source-snapshot-acceptance)
 - [9. Migration boundary](#9-migration-boundary)
 - [Related Documents](#related-documents)
-
----
 
 ## 1. Classification rule
 

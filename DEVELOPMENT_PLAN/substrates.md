@@ -16,12 +16,13 @@ phase order by [README.md](README.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, README.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [1. The one-substrate-per-validation discipline](#1-the-one-substrate-per-validation-discipline)
 - [2. Substrate inventory](#2-substrate-inventory)
 - [3. Virtualized substrates: Incus / Lima / WSL2](#3-virtualized-substrates-incus--lima--wsl2)
@@ -29,9 +30,9 @@ phase order by [README.md](README.md).
 - [5. Generated sections](#5-generated-sections)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. The one-substrate-per-validation discipline
+
+Current certification and evidence are recorded in the [development plan](README.md).
 
 This document is the **plan-side projection** of the substrate catalog. The normative catalog — what the four
 substrate names *mean*, how they are detected, the no-`PATH` lazy tool-ensure contract, the virtualization
@@ -84,13 +85,6 @@ flowchart LR
 ```
 *Orientation. Every detected hardware substrate reaches a CPU-only Linux baseline, but only the one its own architecture can execute — Apple reaches `arm64`, Windows reaches `amd64`, and a Linux host reaches whichever it natively is. Incus, Lima, and WSL2 are the fixed pristine-guest routes; accelerator lanes add capability and never replace the baseline, as owned by [§1](#1-the-one-substrate-per-validation-discipline).*
 
-> **Historical result (invalidated).** Pre-amendment runs exercised substrate-`none` and native
-> `linux-cpu` slices. The 2026-08-11 amendment invalidated every seal, so the catalog's `Delivery note` fields and
-> the fourth-column outcome prose are diagnostic observations, not current results. Apple/Lima, Windows/WSL2,
-> CUDA, Metal, and managed-provider gaps remain relevant to revalidation. Where detection and the virtualization providers lean on the sibling
-> `hostbootstrap` library, that is *evidence from a sibling*, not amoebius proof — see the honesty notes in
-> [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md). Current status and dated progress are owned only by
-> [README.md](README.md).
 
 ---
 
@@ -361,15 +355,15 @@ satisfied and gate-passed.
 | 42 | Haskell browser-interpreter semantics and projection | `none` | `none` | Register-1 Haskell gate over generic client-plan semantics, deterministic source projection, typed cases, an independent oracle, and nine production mutants; no browser, Node, Python, network, host, or hardware authority |
 | 43 | [Haskell UI-server boundary](phase_43_ui_server_boundary.md) | `none` | `none` | Register-2 Haskell gate over authenticated scoped dispatch, startup admission, asset and retry policy, WebSocket registration, typed cases, an independent oracle, and nine production mutants; no browser, Node, Python, network, live authority, host, or hardware |
 | 44 | [Hardware-free Haskell UI composition](phase_44_ui_local_composition.md) | `none` | `none` | Register-2 Haskell gate over typed workflow/artifact handles, scoped ownership, ready-receipt ordering, plan identity, direct bypass refusal, an independent oracle, and five production mutants; no browser, Node, Dhall executable, network, provider, host, or hardware |
-| 45 | Haskell offline-state semantics and runtime projection | `none` | `none` | Register-1 Haskell gate passed; no browser, storage service, network, host, or hardware authority |
-| 46 | Haskell-generated browser contracts and bundle | `none` | `none` | Register-1 Haskell gate passed; generated browser products remain below `.build/**` and no browser executes |
-| 47 | Foreign-source generator closure, checking tools, and mutants | `none` | `none` | Register-1 Haskell gate passed; nine support artifacts are generated lazily and all owned foreign-source families are closed |
-| 48 | The test-workflow algebra | `none` | `none` | Register-1 Haskell gate passed; teardown, suggestion, authority, modeled-inventory, and evidence algebra are source-bound |
-| 49 | No-hardware DSL gate barrier and self-referential gate suite | `none` | `none` | Register-2 hardware-free DSL barrier passed; all source-migration queries are zero |
-| 50 | Bounded `pb` bootstrap and Haskell handoff | `none` | `none` | Register-2 direct-Haskell-supervised bootstrap handoff gate passed |
-| 51 | The host-ensure kernel | `none` | `none` | Register-2 Haskell fake-boundary gate passed; live host/provider behavior remains owned by later substrate phases |
+| 45 | Haskell offline-state semantics and runtime projection | `none` | `none` | Required Register-1 Haskell gate; no browser, storage service, network, host, or hardware authority |
+| 46 | Haskell-generated browser contracts and bundle | `none` | `none` | Required Register-2 Haskell-supervised gate; generated browser products remain below `.build/**` with authenticated offline compile/execute checks against modeled software boundaries |
+| 47 | Foreign-source generator closure, checking tools, and mutants | `none` | `none` | Required Register-1 Haskell gate; support artifacts must be generated lazily and every owned foreign-source family must close |
+| 48 | The test-workflow algebra | `none` | `none` | Required Register-1 Haskell gate; teardown, suggestion, authority, modeled-inventory, and evidence algebra are source-bound |
+| 49 | No-hardware DSL gate barrier and self-referential gate suite | `none` | `none` | Required Register-2 hardware-free DSL barrier; the real typed pipeline and every source-migration zero require qualified evidence |
+| 50 | Bounded `pb` bootstrap and Haskell handoff | `none` | `none` | Required Register-2 direct-Haskell-supervised bootstrap handoff gate |
+| 51 | The host-ensure kernel | `none` | `none` | Required Register-2 Haskell fake-boundary gate; live host/provider behavior remains owned by later substrate phases |
 | 52 | Linux: sudoless Docker and the native image | `linux-cpu` | `linux-cpu/amd64` | Register-3 gate on one pristine Ubuntu Incus VM: exact bootstrap handoff, sudoless current/future Docker access, a native run-local smoke image, container version output, zero-mutation second pass, and exact teardown inventory |
-| 53 | Apple: Homebrew, Colima, and the native image | `apple` | `linux-cpu/arm64` | Active Register-3 lane — Haskell contract and qualification complete; exact live gate requires physical Apple Silicon macOS and remains NOT VALIDATED |
+| 53 | Apple: Homebrew, Colima, and the native image | `apple` | `linux-cpu/arm64` | Required Register-3 lane on physical Apple Silicon macOS; component diagnostics do not establish live qualification |
 | 54 | Windows: WSL2 and the lifted Linux engine | `windows` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 53, gate pass, and the independently satisfied hardware-free DSL barrier |
 | 55 | Haskell substrate coordinator and single kind cluster | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 54, gate pass, and the independently satisfied hardware-free DSL barrier |
 | 56 | The base image, the jit-build resolver, and the in-cluster registry | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 55, gate pass, and the independently satisfied hardware-free DSL barrier |

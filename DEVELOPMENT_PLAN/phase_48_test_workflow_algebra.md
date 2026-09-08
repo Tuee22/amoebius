@@ -31,14 +31,15 @@ This plan owns only the hardware-free decision algebra. Phase 90 owns every live
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 47 and every earlier numerical predecessor are recorded Done. The complete qualified Phase-48 gate and
-its exact emitted status projection remain required.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-47 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -63,7 +64,8 @@ deletion, observe inventory, or award Runtime evidence.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -82,9 +84,9 @@ deletion, observe inventory, or award Runtime evidence.
 | `Qualification` | `qualified-test-workflow-algebra-harness` |
 | `Cleanroom` | `test-workflow-algebra-products-contained-below-build` |
 | `Legacy closure` | `no-phase-forty-eight-legacy-authorities` |
-| `Predecessor` | `exact-phase-forty-seven-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 47 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `live-test-execution-teardown-inventory-runtime-evidence-and-hardware-owners-explicit` |
-| `Pass criterion` | `qualified-phase-forty-eight-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 The future public spelling is `pb validate phase 48`. Before Phase 50 passes, validation invokes the exact
 source-bound Haskell executable directly. Its acquired supervisor runs every compiler-bearing row serially,
@@ -100,9 +102,9 @@ offline, with `--jobs=1` and the pinned compiler/store.
 
 ## Sprints
 
-## Sprint 48.1: Typed teardown workflow ✅
+## Sprint 48.1: Typed teardown workflow ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/test-workflow-algebra/Amoebius/Test/WorkflowAlgebra.hs`, `test/negative/test_workflow_algebra/legal_teardown.hs`, and `test/negative/test_workflow_algebra/missing_teardown.hs`
 **Blocked by**: [Phase 47](phase_47_tool_and_mutant_generation.md) gate pass
 **Independent Validation**: six exact terminal-fold cases, the legal compiler witness, the teardown-pending compiler refusal, and three terminal/teardown changed-production subjects.
@@ -132,9 +134,9 @@ cleanup-success, and primary-replacement mutants each turn red at a distinct pro
 
 Run the complete integrated gate. Live execution and teardown remain Phase-90 work.
 
-## Sprint 48.2: Pure supplied-model suggestion ✅
+## Sprint 48.2: Pure supplied-model suggestion ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/test-workflow-algebra/Amoebius/Test/WorkflowAlgebra.hs` and `test/spec/workflow/TestWorkflowAlgebraSpec.hs`
 **Blocked by**: Sprint 48.1
 **Independent Validation**: exact-fit and one-short comparisons over five branches and all nine resource axes.
@@ -161,9 +163,9 @@ case. A provider-debit mutant is killed. Two independently executed projection w
 
 Run the complete integrated gate. Host, quota, and provider observation remain Phase-90 work.
 
-## Sprint 48.3: Symbolic flagged authority ✅
+## Sprint 48.3: Symbolic flagged authority ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/test-workflow-algebra/Amoebius/Test/WorkflowAlgebra.hs`
 **Blocked by**: Sprint 48.2
 **Independent Validation**: flagged/ordinary and test-owned/ordinary/missing pairs plus inline-secret refusals.
@@ -190,9 +192,9 @@ turns red without contacting any credential store.
 
 Run the complete integrated gate. Credential resolution and permission checks remain Phase-90 work.
 
-## Sprint 48.4: Modeled inventory classification ✅
+## Sprint 48.4: Modeled inventory classification ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/test-workflow-algebra/Amoebius/Test/WorkflowAlgebra.hs`
 **Blocked by**: Sprint 48.3
 **Independent Validation**: exact five-domain discovery, retained/post-only pairs, and incomplete-domain refusal.
@@ -219,9 +221,9 @@ differ by one modeled resource. The dropped-domain mutant turns incomplete cover
 
 Run the complete integrated gate. External inventory readback and deletion remain Phase-90 work.
 
-## Sprint 48.5: Honest evidence and live handoff ✅
+## Sprint 48.5: Honest evidence and live handoff ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/test-workflow-algebra/Amoebius/Test/WorkflowAlgebra.hs` and `src/validation-kernel/Amoebius/Validation/TestWorkflowAlgebraRun/Internal.hs`
 **Blocked by**: Sprint 48.4
 **Independent Validation**: exact Extract/Model/Inject move derivation and Runtime-unverified strengths.

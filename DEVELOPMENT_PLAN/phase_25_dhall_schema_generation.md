@@ -34,18 +34,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 24, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-24 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -72,7 +69,8 @@ the generated typechecker observations.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -91,7 +89,7 @@ the generated typechecker observations.
 | `Qualification` | The supervisor kills all four changed-production subjects, proves all fourteen paired refusals, and then requires the clean independent corpus to pass. |
 | `Cleanroom` | The authenticated source-repository cache is copied below the unique run root; compiler state and all 38 Dhall/TSV projections remain below that root. |
 | `Legacy closure` | Phase-25-owned `LTD-SRC-002` requires zero tracked `.dhall` paths and absence of the retired locus registry, Python gates, shell wrappers, serialized oracles, fixtures, and materialized mutants. |
-| `Predecessor` | Exact durable `ImmediatePredecessorPass` for Phase 24, projected monotonically onto this candidate's opening source; absent, malformed, wrong-phase, or non-green evidence fails. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 24 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | Binding, GADT-indexed decode, cross-field arithmetic, whole-deployment feasibility, effects, runtimes, host, service, cluster, and hardware claims remain `UNVERIFIED` and later-phase-owned. |
 | `Pass criterion` | Every one of the eighteen rows and seven resource-provision fields passes in one qualified stable-source run; that complete pass is sufficient for the mechanical status-only transition. |
 
@@ -138,14 +136,15 @@ the external observer; generated products are scoped to the run root and owned e
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 25.1: Dhall prelude + typed surfaces + smart constructors ✅
+## Sprint 25.1: Dhall prelude + typed surfaces + smart constructors ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/dhall-schema-generation/Amoebius/Dhall/Schema/Generation.hs`; package-hidden `Amoebius.Validation.DhallSchemaRun.Internal`.
 **Blocked by**: [Phase 24](phase_24_conformance_gate_generator.md) gate pass
 **Independent Validation**: Eighteen exact module projections and the required/no-arm invariants for Resources, Image, Storage, Capability, topology, and SecretRef.
@@ -422,9 +421,9 @@ cache/registry/Vault storage cannot pass.
 The pre-reset record said `None`; that statement and its schema/mutant results cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass,
 owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 25.2: dhall-typecheck positive corpus ✅
+## Sprint 25.2: dhall-typecheck positive corpus ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: Haskell-declared cases in `Amoebius.Dhall.Schema.Generation`; `DhallSchemaConformanceSpec.hs` invokes the in-process Dhall 1.42.3 engine.
 **Blocked by**: Sprint 25.1
 **Independent Validation**: Four exact positive names, typechecker success, and generated-product presence.
@@ -479,9 +478,9 @@ the authoring-time demonstration that the schema *admits* every intended world.
 The pre-reset record said `None`; that statement and its positive-corpus result cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass,
 owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger ✅
+## Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: Fourteen Haskell-declared negative/pair/locus cases and a generated partial-foreclosure ledger in `Amoebius.Dhall.Schema.Generation`.
 **Blocked by**: Sprint 25.2
 **Independent Validation**: Fourteen refusals, fourteen passing siblings, four changed-production subjects, import-policy refusal, and explicit Gate-2/runtime residue.
@@ -549,9 +548,9 @@ at gadt-decode.
 The pre-reset record said `None`; that statement and its negative/mutant/ledger results cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass,
 owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative ✅
+## Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: Closed `Vault | TransitKey | Prompt` reference union in the Haskell generator; plaintext-arm production mutant and paired plaintext negative.
 **Blocked by**: Sprint 25.3
 **Independent Validation**: Required reference union locus, absence of `PlainText`, one failing plaintext case, and one changed-production arm-addition subject.

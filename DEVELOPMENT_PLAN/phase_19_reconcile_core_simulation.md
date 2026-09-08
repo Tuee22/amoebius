@@ -30,20 +30,19 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Sprints](#sprints)
 - [Sprint 19.1: Pure typed decision core](#sprint-191-pure-typed-decision-core-)
 - [Sprint 19.2: Four deterministic reconcile schedules](#sprint-192-four-deterministic-reconcile-schedules-)
-- [Sprint 19.3: Historical protocol/gate work](#sprint-193-protocol-correspondence-and-sealed-gate-)
+- [Sprint 19.3: Protocol correspondence and sealed gate](#sprint-193-protocol-correspondence-and-sealed-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 18 and every earlier gate have current passing receipts. The Phase-19 implementation and compiled
-semantic contract are bound below; completion still requires the exact integrated Phase-19 gate.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-18 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -74,7 +73,8 @@ three-valued-observation behavior under deterministic modeled schedules. NOT VAL
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -93,7 +93,7 @@ three-valued-observation behavior under deterministic modeled schedules. NOT VAL
 | `Qualification` | The supervisor first kills all five changed-production mutations at exact loci, then requires the legal delete twin and clean independent corpus to pass. |
 | `Cleanroom` | The authenticated source repository cache is copied beneath the unique run root, Cabal builds there, and the clean generated result must exist only below that root. |
 | `Legacy closure` | The four JSON schedules, five serialized TSV/surface authorities, and test-local mutant module are absent; reintroduction is an exact failure. |
-| `Predecessor` | Exact durable `ImmediatePredecessorPass` for Phase 18 on the current source snapshot; absent, stale, replayed, or different-source evidence fails. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 18 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | Modeled environment fidelity is `ASSUMED`; effectful runtime, host, service, cluster, and hardware correspondence remain `UNVERIFIED` and later-phase-owned. |
 | `Pass criterion` | Every one of the eighteen rows passes in one qualified run for the exact source; that complete pass is sufficient for the mechanical status-only transition. |
 
@@ -106,11 +106,12 @@ three-valued-observation behavior under deterministic modeled schedules. NOT VAL
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 19.1: Pure typed decision core ✅
+## Sprint 19.1: Pure typed decision core ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/reconcile-core/Amoebius/Reconcile/Core.hs`; typed observations and actions, total planner, fixed points, and production mutation loci.
 **Blocked by**: [Phase 18](phase_18_dsl_formal_model.md) gate pass
 **Independent Validation**: Nine exact actual/reference rows, two fixed points, and the present/unreachable compile pair.
@@ -138,11 +139,12 @@ the observation type rather than a runtime flag.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 19.2: Four deterministic reconcile schedules ✅
+## Sprint 19.2: Four deterministic reconcile schedules ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/reconcile-core/Amoebius/Reconcile/Sim.hs`; four schedule values, versioned snapshot tokens, and bounded deterministic execution.
 **Blocked by**: Sprint 19.1
 **Independent Validation**: Exact final inventories and transition counts, two fresh same-seed readings, changed-seed order, and four bounded POR runs.
@@ -170,11 +172,12 @@ convergent semantic evidence without committing trace bytes.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 19.3: Protocol correspondence and sealed gate ✅
+## Sprint 19.3: Protocol correspondence and sealed gate ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/reconcile-core/Amoebius/Reconcile/Sim.hs`; `src/execution-accelerator-folds/Amoebius/Capacity/Scheduler.hs`; package-hidden `Amoebius.Validation.ReconcileCoreRun.Internal`.
 **Blocked by**: Sprint 19.2
 **Independent Validation**: Concurrent token and reservation controls, three recovery cuts, four exact formal links, five production mutations, source discovery, containment, and acquired evidence.
@@ -203,7 +206,8 @@ the bounded result with mutation and repository-hygiene evidence.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
 ## Documentation Requirements
 

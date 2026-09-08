@@ -18,17 +18,17 @@ rule disagree, the rule is correct and the example is the defect. Nothing here h
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [Appendix A — retired (control-plane single-instance is delegated to k8s/etcd)](#appendix-a--retired-control-plane-single-instance-is-delegated-to-k8setcd)
 - [Appendix B — Worked example (fenced): cross-cluster geo-replication failover (the open cross-cluster failover question)](#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question)
 - [Appendix C — Worked example (fenced): active-active mutable state across the cluster boundary](#appendix-c--worked-example-fenced-active-active-mutable-state-across-the-cluster-boundary)
 - [Related Documents](#related-documents)
 
----
-
 ## Appendix A — retired (control-plane single-instance is delegated to k8s/etcd)
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 > The former **First-Axis** worked example — a control-plane daemon *elected over a replicated log* — is
 > **retired**. Single-writer authority of the control-plane daemon is delegated to Kubernetes/etcd (a

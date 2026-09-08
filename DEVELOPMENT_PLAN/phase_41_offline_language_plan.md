@@ -32,15 +32,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 40 and every earlier numerical predecessor have passed. The typed Phase-41 subject, independent oracle,
-production-mutant seams, and acquired serial supervisor are implemented; the complete integrated gate has not
-yet passed.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-40 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -66,7 +66,8 @@ deterministic paired plans, not a browser or server-storage mechanism.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -85,9 +86,9 @@ deterministic paired plans, not a browser or server-storage mechanism.
 | `Qualification` | `qualified-offline-language-plan-harness` |
 | `Cleanroom` | `offline-language-plan-products-contained-below-build` |
 | `Legacy closure` | `retired-offline-language-plan-authorities-absent` |
-| `Predecessor` | `exact-phase-forty-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 40 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `browser-storage-server-replay-and-publication-owners-explicit` |
-| `Pass criterion` | `qualified-phase-forty-one-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -97,9 +98,9 @@ deterministic paired plans, not a browser or server-storage mechanism.
 
 ## Sprints
 
-## Sprint 41.1: Author the continuity language ✅
+## Sprint 41.1: Author the continuity language ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/offline-language-types/Amoebius/Ui/Offline/Types.hs`, `src/Amoebius/Ui/Offline/Decode.hs`, and typed subjects in `test/spec/ui/OfflinePlanCases.hs`.
 **Blocked by**: [Phase 40](phase_40_ui_plan_compiler.md) gate pass
 **Independent Validation**: three exact continuity rows and thirteen exact refusal tags in `offline-plan-spec`.
@@ -126,9 +127,9 @@ Adopt the authored continuity surface and make its complete bounded queue terms 
 
 The complete integrated Phase-41 gate and mechanical status projection remain. Browser persistence and server replay remain later-owned.
 
-## Sprint 41.2: Compile paired offline plans ✅
+## Sprint 41.2: Compile paired offline plans ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Ui/Offline/Plan.hs` and typed subject cases in `test/spec/ui/OfflinePlanCases.hs`.
 **Blocked by**: Sprint 41.1
 **Independent Validation**: eight exact plan rows, three paired key sets, determinism, private-field/mechanism exclusions, and two artifact commands in `offline-plan-spec`.
@@ -157,9 +158,9 @@ counterpart.
 
 The complete integrated Phase-41 gate and mechanical status projection remain. Generated plans remain lazy `.build/**` products.
 
-## Sprint 41.3: Seal the pure boundary ✅
+## Sprint 41.3: Seal the pure boundary ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/validation-kernel/Amoebius/Validation/OfflineLanguagePlanRun/Internal.hs`, dispatcher/evidence integration, compiled Phase-41 semantic contract, and serial Cabal matrix.
 **Blocked by**: Sprint 41.2
 **Independent Validation**: exact source discovery, five serial production-mutant rows, source stability, cleanroom containment, legacy absence, and the eighteen-row acquired gate.

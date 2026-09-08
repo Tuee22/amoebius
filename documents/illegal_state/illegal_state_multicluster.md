@@ -21,14 +21,12 @@ them appears in the single-cluster slices. Their numbering is held by
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Scope](#1-scope)
 - [2. The multi-cluster & fabric illegal states](#2-the-multi-cluster--fabric-illegal-states)
 - [Related Documents](#related-documents)
-
----
 
 ```mermaid
 flowchart LR
@@ -48,6 +46,8 @@ flowchart LR
 *Orientation. Design intent. Where this slice's entries are caught, counted from the primary `**Validation-locus:**` of each entry below; an entry may also name a secondary locus, which this count does not show. The forest slice is the only one where an entry's *primary* locus is a live effect; secondary live-effect residues are common everywhere. The axis itself is owned by [illegal_state_techniques.md §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer).*
 
 ## 1. Scope
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 This document is a **themed slice** of the illegal-state catalog: the deep treatment of the multi-cluster and
 network-fabric illegal states. It carries only the catalog entries listed in [§2](#2-the-multi-cluster--fabric-illegal-states),

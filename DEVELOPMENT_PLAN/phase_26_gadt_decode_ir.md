@@ -36,20 +36,19 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 25, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-25 predecessor and its compatible evidence chain.
 
 ## Phase Summary
+
+The rich language and IR obligations below remain the target. The former bounded controller examples and node-count calculus projection are insufficient acceptance criteria. The replacement gate must compare actual decoded trees and semantics and expose every unimplemented schema/IR arm before this phase can pass.
 
 **Target capability — NOT VALIDATED.** The second typed boundary is to reject values that are structurally
 well-typed but do not describe a legal amoebius world. Haskell is to own the protocol declarations, the
@@ -122,26 +121,27 @@ never a partial result. Generated Dhall/protocol bytes stay beneath `.build/**`;
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
-| `Claim` | Haskell owns a bounded protocol descriptor, controller-indexed GADT, and total decoder that produces a legal decoded world or one structured refusal; all Dhall and Proto projections are run-local products. |
+| `Claim` | Haskell owns the complete declared authored-language decode boundary, controller/ownership/resource-indexed IR and total structured refusal semantics. Every admitted source field survives into its exact typed meaning; generated Dhall and protocol artifacts are consumed as observations. |
 | `Subject` | `src/gadt-decode-ir/Amoebius/Dsl/GadtDecode.hs`, acquired and exercised by the package-hidden Phase-26 supervisor. |
 | `Command` | `pb validate phase 26` is the future public spelling. This pre-handoff gate invokes the exact source-bound Haskell executable as `validate phase 26`; its child matrix uses exact Cabal/GHC offline with `--jobs=1`. |
-| `Oracle` | `test/spec/dsl/GadtDecodeOracle.hs` independently owns the complete case corpus and protocol message/field-number rows without importing production types or decoder functions. |
-| `Positive controls` | Five values cover Deployment, StatefulSet, DaemonSet, Job, and HostProcess GADT constructors; all nineteen declared Dhall/Proto/inventory products are regenerated and decoded from the unique run root. |
-| `Paired negatives` | Twelve cases cover unknown surface/controller/resource, empty identity, zero revision, tenant ownership, plaintext secret, pod/host arm compatibility, forbidden env/remote imports, and malformed Dhall. |
-| `Mutants` | Four Cabal flags change production revision, ownership, resource-arm, or protocol-field behavior; every changed subject turns the shared spec red at its independently fixed locus. |
-| `Discovery` | The acquired source snapshot must contain exactly the production decoder, spec, and independent oracle Phase-26 source set in both directions. |
+| `Oracle` | `test/spec/dsl/GadtDecodeOracle.hs` independently declares source forms, full decoded trees, field meanings, protocol tags, negative reasons and compile witnesses without deriving expectations from production constructors, renderings or counts. |
+| `Positive controls` | Exercise every declared authored-language/controller/resource/identity arm and its legal combinations at boundaries; compare complete decoded values, generated language round trips and preserved source-to-IR identities against independent expectations. |
+| `Paired negatives` | Retain the existing decoder refusal corpus and add omitted/defaulted fields, changed identities/resources and legal/illegal combinations whose totals are identical. Require the exact refusal constructor, field path and zero downstream effects. |
+| `Mutants` | Change actual decoding, ownership/index witnesses, resource quantities, required fields, discriminants or protocol tags. Every mutation has an independently assigned semantic or compile-failure case; summary-count changes are insufficient. |
+| `Discovery` | Reconcile the full authored schema, decoder branches, IR constructors/fields and protocol descriptors against independent Haskell case and mutation registries in both directions; five examples or a fixed source-file total cannot define the language. |
 | `Challenge` | All four production mutations are compiled and evaluated after acquisition before the clean candidate; no serialized fixture or generated projection can absorb the change. |
 | `Observer` | The supervisor retains absolute executable, argv, exit, stdout/stderr, and digest observations for Cabal version, four mutant rows, and the clean decoder run. |
 | `Authority/bypass` | Authority is limited to exact Cabal/compiler/store paths and the unique run root; builds are offline and serial. `pb`, network, host, container, cluster, service, and hardware effects are forbidden. |
 | `Freshness` | One unique `.build/runs/phase-26/work/candidate-*` root is acquired; every product is regenerated there and opening/closing source identities must match. |
-| `Qualification` | The exact four changed-production failures and one clean success jointly qualify the bounded decoder harness; missing or unexpected loci fail closed. |
+| `Qualification` | The serial harness must establish exact typed observations, specific refusals, compiler witnesses, actual generated-artifact consumption and every assigned changed-production failure over the complete declared decode surface. |
 | `Cleanroom` | The source-repository cache is copied into the unique build root; generated Dhall, Proto, inventory, objects, and logs remain beneath `.build/**` with zero external residue. |
 | `Legacy closure` | Phase-26-owned `LTD-SRC-003` closes only when tracked `.proto`/`proto/**`, the retired Python gate, and serialized Phase-26 fixtures/oracles/mutants are absent; the Haskell protocol-field mutant is the reintroduction negative. |
-| `Predecessor` | Exact `ImmediatePredecessorPass` for Phase 25; absent, stale, replayed, or different-source evidence refuses the candidate. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 25 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | Capacity feasibility, capability binding, provisioning, rendering, effects, runtimes, host, service, cluster, and hardware behavior remain later-owned and UNVERIFIED. |
 | `Pass criterion` | All eighteen rows pass in one finalized candidate for the exact current source; that complete qualified pass is sufficient for the status-only transition. |
 
@@ -181,14 +181,15 @@ never a partial result. Generated Dhall/protocol bytes stay beneath `.build/**`;
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 26.1: The amoebius cabal package + `gadt-decode-spec` test-suite skeleton ✅
+## Sprint 26.1: The amoebius cabal package + `gadt-decode-spec` test-suite skeleton ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `amoebius.cabal`, `src/gadt-decode-ir/Amoebius/Dsl/GadtDecode.hs`, and `test/spec/dsl/GadtDecodeSpec.hs` define the package and suite boundary.
 **Blocked by**: [Phase 25](phase_25_dhall_schema_generation.md) gate pass
 **Independent Validation**: The package-hidden supervisor builds the exact suite offline and serially in a unique run root and records its process receipt.
@@ -204,10 +205,14 @@ gadt-decode needs, with **no** chain/reconcile/control-plane daemon kernel.
 
 ### Deliverables
 
+- Make `test/spec/dsl/GadtDecodeOracle.hs` own a complete independent Haskell schema/IR surface registry and exact semantic observations. Existing examples remain a regression floor, not the entire admitted language.
+
 - `amoebius.cabal` + `cabal.project` pinned to GHC 9.12.4 / Cabal 3.16.1.0 with the Phase-1 `allow-newer`
   set, exposing the `dsl-core` modules and a `gadt-decode-spec` test-suite stanza.
 
 ### Validation
+
+- An added or omitted schema field, decoder arm, IR constructor or protocol entry must create a named discovery mismatch even when the number of fixtures stays constant.
 
 1. Rejected historical observation: direct Cabal builds and the `gadt-decode-spec` Cabal suite were recorded
    successful under GHC 9.12.4 / Cabal 3.16.1.0;
@@ -226,9 +231,9 @@ gadt-decode needs, with **no** chain/reconcile/control-plane daemon kernel.
 
 The pre-reset `None` claim is permanently invalid; Phase 26 remains blocked and NOT VALIDATED. Later DSL expansion belongs to the numerically assigned phases.
 
-## Sprint 26.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ✅
+## Sprint 26.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Dsl.GadtDecode` defines controller-indexed `Execution`, existential `SomeExecution`, surfaces, resource arms, ownership fields, and refined worlds.
 **Blocked by**: Sprint 26.1
 **Independent Validation**: Five positive controls cover every public execution constructor; ownership and resource-arm negatives prove refinement boundaries.
@@ -246,6 +251,10 @@ Complete normalized resource/capacity data is retained in the semantic-hash-pinn
 refined execution retains its exact resource subtree; no provisioned total is synthesized here.
 
 ### Deliverables
+
+#### Typed vocabulary and role relations
+
+- Retain actual decoded identities, tenant/ownership indices, resource values and controller-specific witnesses for downstream semantic projection; do not replace them with numbers of retained rows.
 
 - `ClusterIR` and its component ADTs as GADT-indexed types + smart constructors exposing only a legal
   vocabulary, carried by `src/Amoebius/Dsl/Types.hs` alongside the normalized resource/capacity declaration
@@ -276,6 +285,9 @@ refined execution retains its exact resource subtree; no provisioned total is sy
   arm carries an `InClusterRole`, which has no host-daemon arm, so catalog
   [§3.75](../documents/illegal_state/illegal_state_lifecycle.md#375-a-container-whose-process-is-unnamed)
   is foreclosed one gate earlier and is not re-checked here.
+
+#### Execution envelopes and resource operands
+
 - Normalized resource declarations wired into the real IR, not ornamental side records: every execution-unit
   component carries stable id/revision plus one private controller-indexed body: Deployment/StatefulSet use
   `Once | Replicated`;
@@ -334,6 +346,9 @@ refined execution retains its exact resource subtree; no provisioned total is sy
   - No raw IR field can author physical bytes;
   - Phase 31's post-bind `provision` boundary constructs the private rounded `ProvisionedVolumeDemand`
     consumed by render, using the geometry and folds implemented in Phase 9.
+
+#### Service storage and durable geometry
+
 - Canonical bounded service-storage inputs remain structural rather than being collapsed to caller-authored
   peak scalars. `InClusterCacheDemand`/`HostCacheDemand` preserve `CachePopulationDemand` with the exact
   catalog asset identity/digest/resident/temporary bytes and finite first-miss concurrency.
@@ -378,6 +393,9 @@ refined execution retains its exact resource subtree; no provisioned total is sy
   `BookKeeperLogicalDemand` always carries required positive byte quantities for `retainedHotBytes`,
   `openLedgerHeadroom`, `inFlightOffloadBytes`, and `deletionLagBytes`; zero, omission, and an `Optional` bypass
   have no IR representation.
+
+#### Physical storage and capacity identities
+
 - The normalized capacity tree retains the physical identity graph without alias-erasing or synthesizing
   ids: `PhysicalHostCapacity` has a non-empty `PhysicalDiskPartition` list keyed by globally scoped
   `PhysicalDiskBackingId`; each retains `allocatableRawBytes` after unmanaged-host reserve but before all
@@ -408,6 +426,9 @@ refined execution retains its exact resource subtree; no provisioned total is sy
     the core capacity arithmetic they feed.
   - CUDA device supply likewise preserves stable identity/profile plus `rawVram`, mandatory
     `driverRuntimeReserve`, and net `allocatableVram`; only the net value is a later fold operand.
+
+#### Managed provider templates and quotas
+
 - A managed provider target preserves the exact normalized `{ account : CloudAccountId, nodeClasses :
   NonEmpty ProviderNodeClass, quota : ProviderQuota }` shape.
   - Each class retains a distinct catalog-pinned `ProviderSkuRef` and the exact
@@ -454,6 +475,9 @@ refined execution retains its exact resource subtree; no provisioned total is sy
     different key cannot be reconstructed from credentials.
   - The hostless control plane never erases worker supply from `ClusterIR`, and `quotaVcpu` is never
     inferred from net `allocatableCpu`.
+
+#### Monitoring, build and engine declarations
+
 - Every normalized `Observability` deployment binding retains a mandatory finite
   `MonitoringWorkBudget { maxWorkflows, maxRules, maxSeries, maxScrapeSamplesPerSecond,
   evaluationInterval, evaluationCpu, evaluationMemory, retention,
@@ -503,6 +527,9 @@ refined execution retains its exact resource subtree; no provisioned total is sy
       failure.
     - Phase 55 owns kind fit/enforcement; live multi-node rke2 admission/enforcement remains an explicitly
       unassigned Phase-N gate and no current live phase may claim it.
+
+#### Decode limits and compile witnesses
+
 - An in-file honesty note that binding/capacity/topology totals ([§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)/[§4.7](../documents/illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)) are *not* foreclosed by these
   types — the decoded declarations are intentionally **unprovisioned**. Phase 9 owns the total feasibility
   folds and Phase 31 invokes them on the fully expanded `BoundDeployment`; only their private constructor
@@ -511,6 +538,8 @@ refined execution retains its exact resource subtree; no provisioned total is sy
 - GateReady `.hs` minimal-pair compile-fail declarations: for each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally), a legal twin compiles and is joined by a Haskell case identity to the named Phase-25 positive it decodes through. Its illegal twin fails `ghc -fno-code` with a type error naming the same constructor/index; a separately authored `.hs` oracle owns the expected error class and locus.
 
 ### Validation
+
+- Compare independently authored complete trees for otherwise similar inputs differing in one resource, identity or ownership value; a same-count change must remain observable.
 
 1. For each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom tenant), [§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (GADT transition index), and [§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (ownership index), the phase reviews
    **two `.hs` source declarations differing only in the one index** — tenant tag, state index, or owner. The
@@ -603,9 +632,9 @@ refined execution retains its exact resource subtree; no provisioned total is sy
 
 The pre-reset `None` claim is permanently invalid; Phase 26 remains blocked and NOT VALIDATED. Exhaustive catalog expansion is Phase 27.
 
-## Sprint 26.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ✅
+## Sprint 26.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `decodeWorld`/`decodeWorldFile` catch read and Dhall failures, reject forbidden imports before resolution, and refine raw values to structured `Either DecodeFailure DecodedWorld`.
 **Blocked by**: Sprint 26.2
 **Independent Validation**: Twelve named negatives pin exact failure constructors, including malformed input and env/remote import refusal.
@@ -621,6 +650,8 @@ auto` and its `Left (ContextDecodeFailed …)` fail-fast return — *sibling evi
 so nothing is ever reconciled against a config that did not fully decode.
 
 ### Deliverables
+
+- Total decode errors identify the exact failing source field and violated legality/ownership rule. Unsupported syntax and missing required fields cannot be normalized into default legal values.
 
 - `decodeCluster :: FilePath -> IO (Either DecodeError ClusterIR)` over the native `dhall` library, with a
   structured `DecodeError` whose class of failure is carried by **distinct constructors** — `SchemaMismatch`,
@@ -644,6 +675,8 @@ so nothing is ever reconciled against a config that did not fully decode.
 
 ### Validation
 
+- Pair each declared legal source form with its closest invalid form and assert the precise structured reason and absence of bind/provision/effect calls.
+
 1. A malformed or out-of-domain value returns a structured `Left DecodeError` — including inputs on which
    `Dhall.inputFile auto` throws, which the wrapper catches and tags rather than propagating; the partiality
    gate reports no partial call reachable from the pure decode code; and the `evaluate . force` on the decoded
@@ -658,12 +691,12 @@ so nothing is ever reconciled against a config that did not fully decode.
 
 The pre-reset `None` claim is permanently invalid; Phase 26 remains blocked and NOT VALIDATED.
 
-## Sprint 26.4: The gadt-decode decode battery (`gadt-decode-spec`) — the gate ✅
+## Sprint 26.4: The gadt-decode decode battery (`gadt-decode-spec`) — the gate ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `GadtDecodeSpec.hs` and `Amoebius.Validation.GadtDecodeRun.Internal` generate nineteen products and execute four changed-production rows plus clean.
 **Blocked by**: Sprint 26.3
-**Independent Validation**: The gate requires four exact failure loci, one exact clean token, bidirectional source discovery, generated-product census, and stable source snapshots.
+**Independent Validation**: Decode every independently declared source/IR arm to its full expected value; paired omissions and illegal values refuse at exact paths; assigned decoder mutants fail semantic cases; feasibility and runtime fidelity remain later-owned.
 **Oracle**: `GadtDecodeOracle.hs` plus the package-hidden acquired-process receipt checks.
 **Legacy IDs**: `LTD-SRC-003`.
 **Docs to update**: this phase, validation standards, and system components.
@@ -681,6 +714,8 @@ checked at [Phase 31](phase_31_provision_seal.md)'s conditional post-bind infras
 provisioning boundary.
 
 ### Deliverables
+
+- Replace `checkDecodedCalculusProjection` row-count summaries with a typed projection of actual decoded values into the Phase-18 correspondence vocabulary, preserving identities, indices, resources and semantic ordering.
 
 - `test/spec/dsl/DecodeSpec.hs` asserting: each Haskell-declared positive lazily rendered as `legal_*.dhall`
   decodes to its `ClusterIR`; each run-local `illegal_decode_*.dhall` gadt-decode negative first passes
@@ -767,6 +802,9 @@ provisioning boundary.
 
 ### Validation
 
+- Hold all corpus and node counts constant while changing a decoded resource or identity; require the independent semantic correspondence to fail.
+- Reconcile exact source forms, IR fields, compile witnesses and selector-to-case assignments, and run every assigned changed subject on its exact case before admitting the clean run.
+
 1. Rejected historical observation: the `gadt-decode-spec` Cabal suite was recorded green — positives decode;
    every `illegal_decode_*.dhall` negative first passes
    `dhall type` (suite red otherwise, so the rejection on record is gadt-decode's and not dhall-typecheck's, which
@@ -784,11 +822,12 @@ provisioning boundary.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate. The exhaustive per-catalog-entry corpus begins in Phase 27.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure. The exhaustive per-catalog-entry corpus begins in Phase 27.
 
-## Sprint 26.5: Decoding the shared `SecretRef` and rejecting a literal ✅
+## Sprint 26.5: Decoding the shared `SecretRef` and rejecting a literal ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `SecretRef` is the closed `Vault | TransitKey | Prompt` Haskell sum; refinement rejects `PlainText` with `PlaintextSecret`.
 **Blocked by**: Sprint 26.4
 **Independent Validation**: Three positive reference arms and the plaintext negative run from Haskell-declared sources beneath the unique output root.

@@ -37,18 +37,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 1, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. This phase owns replacing its retained inventory with exact typed contracts and independent oracles. That hardware-free implementation may be prepared before Phases 0–1 pass, but its gate, candidate evidence, predecessor consumption, and status remain blocked by them. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-1 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -85,8 +82,8 @@ NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-2 semantic payload, package-hidden acquired
-supervisor, and independent oracle are complete; only a fresh integrated run may authorize status.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -105,9 +102,9 @@ supervisor, and independent oracle are complete; only a fresh integrated run may
 | `Qualification` | The independently authored oracle and fixed clean/negative/control corpus must both pass from freshly compiled Haskell. |
 | `Cleanroom` | Generated project, extracted tool, build output, and transcripts are contained beneath `.build/runs/phase-02/**`; no generated material becomes authored source. |
 | `Legacy closure` | `LTD-SRC-000`, `LTD-SRC-008`, `LTD-META-001`, and `LTD-NAME-001` are zero only when compiler build, bounded `pb` grammar, layout predicates, and every non-circular gate prerequisite pass for the same source. |
-| `Predecessor` | Consume exactly one durable Phase-1 receipt bound to this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 1 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | Only explicitly typed later-owned source migrations and later hardware/live claims remain; no Phase-2 evidence row is residue. |
-| `Pass criterion` | `qualified-phase-two-gate-pass`: all eighteen rows must be execution-derived green in one candidate for one stable source, with exact predecessor receipt and empty mandatory residue. |
+| `Pass criterion` | `qualified-gate-pass`: all eighteen rows must be execution-derived green in one candidate for one stable source, with exact predecessor receipt and empty mandatory residue. |
 
 ## Doctrine adopted
 
@@ -124,10 +121,8 @@ supervisor, and independent oracle are complete; only a fresh integrated run may
 
 ## Sprints
 
-> **Reset validation check.** A sprint whose required fields still say `UNRESOLVED` retains its pre-reset
-> `Independent Validation` and `### Validation` only as historical capability inventory. A wholly replaced
-> sprint contract may guide hardware-free implementation, but cannot run this phase gate or change status before
-> the Phase-1 predecessor pass.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
 ```mermaid
 flowchart LR
@@ -149,9 +144,9 @@ flowchart LR
 ```
 *Orientation. Which sprint produces what the next consumes, ending at the gate; the seam rules are owned by [development_plan_standards.md §F](development_plan_standards.md#f-the-sprint-block-format). The de-phasing precedes the registry because a registry authored first would name a hundred paths the same phase then renames.*
 
-## Sprint 2.1: `test/`'s second level collapses to the seven role nouns ✅
+## Sprint 2.1: `test/`'s second level collapses to the seven role nouns ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: [Phase 1](phase_01_toolchain_spike.md) gate pass
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -187,9 +182,9 @@ directories are not target roots; any such transport artifact is rendered lazily
 The pre-reset record said `None`; that statement and its test-tree count  cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass,
 owned legacy closure, and a Haskell-only test tree with lazy transport material beneath `.build/**`.
 
-## Sprint 2.2: The package-only roots become cabal stanzas ✅
+## Sprint 2.2: The package-only roots become cabal stanzas ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 2.1
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -233,9 +228,9 @@ condemned tracked Proto schema remains migration debt, and Phase 26 — its owne
 binding generation from checked Haskell declarations beneath `.build/proto/**`. Its typed legacy binding is
 explained in the reader-facing register.
 
-## Sprint 2.3: Tracked UI roots enter typed deletion ownership ✅
+## Sprint 2.3: Tracked UI roots enter typed deletion ownership ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 2.2
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -266,9 +261,9 @@ language or adding to those roots.
 Phase 46 must replace the tracked UI/package inputs with Haskell declarations and lazy `.build/ui/**`
 materialization. Until that owner reaches zero findings, this is only accounted debt and remains NOT VALIDATED.
 
-## Sprint 2.4: Every authored name loses its phase ordinal ✅
+## Sprint 2.4: Every authored name loses its phase ordinal ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 2.3
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -311,9 +306,9 @@ and the ordinal-bearing-name analyzer does not scan it; the tree's own precedent
 the phase that owns the module. Renaming two hundred macros across the Haskell sources would be a behavioural
 edit this phase's scope excludes.
 
-## Sprint 2.5: One mutant record format, one registry ✅
+## Sprint 2.5: One mutant record format, one registry ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 2.4
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -365,9 +360,9 @@ from converting a refusal into a satisfied state. A flag with no authored operat
 a registry row at all: it is deleted, or it is authored into a real mutant. Until then it is reported as
 unwired coverage against the capability that owns closing it, and is never counted.
 
-## Sprint 2.6: Compiler-backed source graph and typed legacy reconciliation ✅
+## Sprint 2.6: Compiler-backed source graph and typed legacy reconciliation ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/validation-kernel/Amoebius/Validation/RepositoryLayoutRun.hs`, `src/validation-kernel/Amoebius/Validation/CompilerComponentPlan.hs`, `src/validation-kernel/Amoebius/Validation/CompilerSourceGraph.hs`, `src/validation-kernel/Amoebius/Validation/SourceClosure.hs`, and `src/validation-kernel/Amoebius/Validation/SourceConsumerGraph.hs`; acquired composition remains UNRESOLVED and blocks validation.
 **Blocked by**: Sprint 2.5
 **Independent Validation**: From the exact Phase-1 toolchain receipt and captured source, run the complete `VALIDATION_PB_GRAMMAR` selector corpus and reconcile the Cabal plan and every source/module/import/parse/rename/typecheck/call/control-flow/effect/provenance/dynamic-load/sink/consumer edge in both directions. Missing, extra, stale, disguised, unresolved, dynamically bypassed, or wrong-consumer edges are paired exact negatives; each applied changed-subject selector must red only its assigned row.

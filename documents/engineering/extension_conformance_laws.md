@@ -21,9 +21,9 @@ discharges them, and the closure argument that consumes C1 are owned by the hub,
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Scope](#1-scope)
 - [2. How to read a law](#2-how-to-read-a-law)
 - [3. L1–L5: the per-extension laws](#3-l1l5-the-per-extension-laws)
@@ -31,9 +31,9 @@ discharges them, and the closure argument that consumes C1 are owned by the hub,
 - [5. Why these twelve](#5-why-these-twelve)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Scope
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 This document is a **family slice**. It owns the statement, justification, and discharge of L1–L5 and C1–C7,
 and nothing else: the five-component obligation surface, the verdict seal, and link-time union closure belong

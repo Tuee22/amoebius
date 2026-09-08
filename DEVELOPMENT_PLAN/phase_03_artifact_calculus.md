@@ -20,8 +20,6 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 </details>
 
----
-
 ## Contents
 
 - [Phase Status](#phase-status)
@@ -33,14 +31,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-The complete Phase-2 gate is recorded for the same source identity before this phase may run. The phase remains
-Active until its own complete integrated gate passes and authorizes the mechanical status projection.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-2 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -73,9 +72,8 @@ and reap boundaries as one typed Haskell calculus. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-3 semantic payload, package-hidden serial
-compiler supervisor, independent Haskell oracle, paired compile-negative control, and changed-production
-matrix are complete; only a fresh integrated run may authorize status.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -94,9 +92,9 @@ matrix are complete; only a fresh integrated run may authorize status.
 | `Qualification` | Clean controls, the exact compile-negative diagnostic, and all three fixed changed-production subjects must pass together; a survivor or wrong-locus failure rejects the candidate. |
 | `Cleanroom` | All binaries, interfaces, objects, stubs, and transcripts are generated lazily under the fresh Phase-3 run root; none becomes authored source. |
 | `Legacy closure` | Phase 3 owns no legacy-debt identifier; the complete predecessor and phase prerequisites must pass, while later-owned typed source debt remains residue rather than evidence. |
-| `Predecessor` | Consume exactly one durable Phase-2 receipt bound to this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 2 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | Budget, composed calculi, effects, runtimes, hardware, and live-service claims remain explicitly owned by later phases; no Phase-3 evidence row is residue. |
-| `Pass criterion` | `qualified-phase-three-gate-pass`: all eighteen rows must be execution-derived green in one candidate for one stable source, with the exact Phase-2 receipt and empty mandatory residue. |
+| `Pass criterion` | `qualified-gate-pass`: all eighteen rows must be execution-derived green in one candidate for one stable source, with the exact Phase-2 receipt and empty mandatory residue. |
 
 **This phase owns its compile-negative evidence.** Each illegal twin below requires a phase-local, source-bound
 GHC invocation, a minimally different positive control, and a separately authored exact-diagnostic oracle.
@@ -111,9 +109,9 @@ prerequisite of this earlier gate. This phase's local package-hidden runner owns
 
 The sprint seam below is bound to the same Haskell-only subject, oracle, and serial supervisor as the gate.
 
-## Sprint 3.1: The artifact calculus ✅
+## Sprint 3.1: The artifact calculus ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Calculus/Artifact/{Target,Recipe,Address,Region}.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/ArtifactCalculusRun/Internal.hs`
 **Blocked by**: [Phase 2](phase_02_repository_layout_conformance.md) gate pass
 **Independent Validation**: eleven clean predicates and equal clean seed reports; exact GHC-25897 paired negative; address-rendering, ambient-recipe, and region-escape production mutants; later calculi and effectful observations remain explicit residue
@@ -161,8 +159,8 @@ changed-production matrix.
 
 ### Remaining Work
 
-The implementation and phase-local evidence contract are complete. The phase remains Active until the exact
-Phase-2 predecessor receipt is refreshed for the final source identity and the integrated Phase-3 gate passes.
+Reconcile the retained implementation with its protected replacement acceptance contract and qualify the
+full gate. Phase-2 predecessor evidence needs current compatibility under the admitted generation.
 The budget a materialization spends is the next calculus's explicit residue; nothing here observes a running
 system.
 

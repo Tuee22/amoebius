@@ -16,11 +16,12 @@ This document owns workflow and artifact lifting into the UX. It does not own th
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
 ## 12. Workflows and artifact lifting into the UX
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 Workflow UI is expressed through typed lifecycle ports rather than transport details:
 

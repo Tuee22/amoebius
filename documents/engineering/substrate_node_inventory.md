@@ -19,11 +19,12 @@ follows — owned by [substrate_doctrine.md](./substrate_doctrine.md), of which 
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
 ## 8. The node inventory: the single owner of hosts, capacity, and taints
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 The substrate is a *fact about the host* ([§1](./substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob)); the **node inventory** is the typed projection of those facts
 that the rest of amoebius reads. It is the **single owner** (an ownership index,

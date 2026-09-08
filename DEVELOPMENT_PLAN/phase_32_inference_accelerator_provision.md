@@ -32,15 +32,15 @@ owned by the exact integrated gate and the mechanical status projection that fol
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 31 and every earlier gate have passed in numerical order. The Phase-32 engine/accelerator provision
-implementation, independent Haskell oracle, closed positive/negative corpus, property challenge, and five
-changed-production mutations are bound; only the complete integrated Phase-32 gate may authorize completion.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-31 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -101,7 +101,8 @@ offering has no deployable value. No device is queried and no runtime behavior i
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -120,9 +121,9 @@ offering has no deployable value. No device is queried and no runtime behavior i
 | `Qualification` | `qualified-inference-accelerator-harness` |
 | `Cleanroom` | `inference-accelerator-products-contained-below-build` |
 | `Legacy closure` | `retired-inference-accelerator-authorities-absent` |
-| `Predecessor` | `exact-phase-thirty-one-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 31 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `later-render-runtime-live-engine-owners-explicit` |
-| `Pass criterion` | `qualified-phase-thirty-two-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -173,9 +174,9 @@ offering has no deployable value. No device is queried and no runtime behavior i
 
 ## Sprints
 
-## Sprint 32.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ✅
+## Sprint 32.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/provision-seal/Amoebius/Capability/Engine.hs` owns the closed lane/family relations, target offering quotient, and provision-seal accelerator checks.
 **Blocked by**: [Phase 31](phase_31_provision_seal.md) gate pass
 **Independent Validation**: three inference fixtures, four offering quotients, twelve family/lane cells, eight paired provision negatives, and the closed no-URL union execute in `capability-spec`.
@@ -244,9 +245,9 @@ resolve.
 
 The complete integrated Phase-32 gate and its mechanical status projection remain.
 
-## Sprint 32.2: The accelerator-provision corpus + the Register-1 gate ✅
+## Sprint 32.2: The accelerator-provision corpus + the Register-1 gate ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `EngineAcceleratorGate.hs`, `EngineAcceleratorProps.hs`, and `EngineAcceleratorSpec.hs` own the Haskell corpus/property harness; the Phase-32 acquired runner owns the serial clean/mutant matrix.
 **Blocked by**: Sprint 32.1
 **Independent Validation**: the exact 17-row locus ledger, five-calculus/34-unit projection, sampled eight-branch property, and five production CPP mutations are acquired serially in fresh build roots.

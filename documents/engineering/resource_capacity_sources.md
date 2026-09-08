@@ -19,16 +19,16 @@ claimed as evidence is owned by
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [8. Where the numbers come from: declared in pure input, provisioned before render, cross-checked at runtime](#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)
 - [9. What this doctrine deliberately does not own](#9-what-this-doctrine-deliberately-does-not-own)
 - [Related Documents](#related-documents)
 
----
-
 ## 8. Where the numbers come from: declared in pure input, provisioned before render, cross-checked at runtime
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 For overcommit to be a pure checked rejection rather than only a runtime error, the capacity the fold checks
 against must be a **pure-model input** — a demand cannot be provisioned against a number learned only after

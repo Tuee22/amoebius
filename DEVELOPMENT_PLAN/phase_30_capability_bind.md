@@ -34,16 +34,15 @@ evidence; only the complete qualified gate can authorize the status projection. 
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 29 and every earlier gate have passed in numerical order. The Phase-30 capability library, independent
-Haskell oracle, nine-arm/two-shape corpus, seven paired negatives, QuickCheck property, and four
-changed-production challenges are bound; only the complete integrated Phase-30 gate may authorize the status
-transition.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-29 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -105,7 +104,8 @@ graphs when deployment shape differs. Nothing is provisioned, rendered, or obser
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -124,9 +124,9 @@ graphs when deployment shape differs. Nothing is provisioned, rendered, or obser
 | `Qualification` | `qualified-capability-bind-harness` |
 | `Cleanroom` | `capability-bind-products-contained-below-build` |
 | `Legacy closure` | `retired-capability-bind-authorities-absent` |
-| `Predecessor` | `exact-phase-twenty-nine-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 29 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `later-provision-render-runtime-capability-owners-explicit` |
-| `Pass criterion` | `qualified-phase-thirty-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -189,9 +189,9 @@ at the wholly unprovisioned `BoundDeployment`.
 
 ## Sprints
 
-## Sprint 30.1: The closed capability union + the no-product-arm dhall-typecheck foreclosure ✅
+## Sprint 30.1: The closed capability union + the no-product-arm dhall-typecheck foreclosure ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/capability-bind/Amoebius/Capability/Types.hs` owns the closed union and Haskell-derived Dhall type projections; `src/capability-bind/Amoebius/Capability/Phase30Mutation.hs` owns the closed changed-production registry.
 **Blocked by**: [Phase 29](phase_29_execution_accelerator_folds.md) gate pass
 **Independent Validation**: Nine exact arms and app-surface projections are compared with an independent literal oracle; product, URL, and deployment-field Dhall expressions are paired with legal twins; catchall-arm and shared-app-surface production mutations turn red.
@@ -240,9 +240,9 @@ contains.
 
 Run and retain this seam inside the complete integrated Phase-30 gate.
 
-## Sprint 30.2: The `CapabilityBinding` + total representational `bind` ✅
+## Sprint 30.2: The `CapabilityBinding` + total representational `bind` ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/capability-bind/Amoebius/Capability/{Binding,Types}.hs` owns total binding, provider graphs, extension validation, and the unprovisioned deployment boundary.
 **Blocked by**: Sprint 30.1
 **Independent Validation**: All 18 arm×shape binds match independent object/execution/intent projections; seven tagged negative pairs and the copy-shape/provision-boundary production mutations exercise exact loci.
@@ -328,9 +328,9 @@ stopping at the wholly unprovisioned `BoundDeployment`.
 
 Run and retain this seam inside the complete integrated Phase-30 gate.
 
-## Sprint 30.3: The bind property/corpus + the Register-1 gate ✅
+## Sprint 30.3: The bind property/corpus + the Register-1 gate ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `test/spec/capability/{BindGate,BindProps,CapabilityBindOracle,ShapeOracle,CapabilityBindSpec}.hs` and `src/validation-kernel/Amoebius/Validation/CapabilityBindRun/Internal.hs` own the property/corpus and qualified integrated runner.
 **Blocked by**: Sprint 30.2
 **Independent Validation**: The clean corpus, 1,200-sample nine-constructor property, exact five-calculus projection, four selector-specific changed-production reds, source discovery, authority, freshness, and residue all join one candidate.

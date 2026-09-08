@@ -34,18 +34,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 14, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-14 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -78,9 +75,8 @@ must fail. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-15 semantic and resource payloads,
-package-hidden serial supervisor, typed Haskell diagnostic subject, independently authored ten-pair corpus,
-and three changed-production subjects are complete; only a fresh integrated run may authorize status.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -99,9 +95,9 @@ and three changed-production subjects are complete; only a fresh integrated run 
 | `Qualification` | Exact inventory, clean legal/illegal corpus, three specific boundary refusals, artifact metrics, discovery, and all changed-production subjects pass together. |
 | `Cleanroom` | Binaries, objects, wrong-reason fixtures, transcripts, and results are generated lazily beneath the fresh run root. |
 | `Legacy closure` | Retired Phase-15 Python harness/gate and serialized behavioral manifest/surfaces are absent. |
-| `Predecessor` | Consume exactly one durable Phase-14 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 14 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | Deterministic simulation, concrete models, runtimes, live effects, and hardware remain explicitly later-owned. |
-| `Pass criterion` | `qualified-phase-fifteen-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
+| `Pass criterion` | `qualified-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
 ## Resource provision
 
@@ -118,11 +114,12 @@ scoped, and no external owned residue is permitted.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 15.1: Structured diagnostic and twin contract ✅
+## Sprint 15.1: Structured diagnostic and twin contract ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/compile-fail-harness/Amoebius/Compiler/CompileFailHarness.hs` and the twenty Haskell twin fixtures
 **Blocked by**: [Phase 14](phase_14_refinement_checker.md) gate pass
 **Independent Validation**: ten legal-green prerequisites, ten exact structured illegal pins, source digests, and three specific wrong-reason refusals
@@ -152,11 +149,12 @@ claim names.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 15.2: Claim inventory and mutation evidence ✅
+## Sprint 15.2: Claim inventory and mutation evidence ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: package-hidden `src/validation-kernel/Amoebius/Validation/CompileFailHarnessRun/Internal.hs`
 **Blocked by**: Sprint 15.1
 **Independent Validation**: serial clean/three-mutant matrix, exact red loci, discovery, containment, metrics, and process receipts
@@ -187,7 +185,8 @@ missing positives, and impossible expectations.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
 ## Documentation Requirements
 

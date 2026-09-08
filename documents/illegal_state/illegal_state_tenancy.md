@@ -28,16 +28,16 @@ exist for the entries below. The tenant model itself is owned by
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Scope](#1-scope)
 - [2. The tenancy, scope & authentication illegal states](#2-the-tenancy-scope--authentication-illegal-states)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Scope
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 This document is a **themed slice** of the illegal-state catalog. Its entries share one shape: the value that
 decides which tenant, subject, or audience a piece of data belongs to is learned while the program runs, so a

@@ -20,8 +20,6 @@ after the exact integrated gate succeeds for the current source. Current status 
 
 </details>
 
----
-
 ## Contents
 
 - [Phase Status](#phase-status)
@@ -33,16 +31,15 @@ after the exact integrated gate succeeds for the current source. Current status 
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 21 and every earlier gate have current passing receipts. The Phase-22 implementation and compiled
-semantic contract are bound below; completion still requires the exact integrated Phase-22 gate.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-21 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -73,7 +70,8 @@ negatives, and mutants. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -92,7 +90,7 @@ negatives, and mutants. NOT VALIDATED.
 | `Qualification` | The supervisor first kills all seven changed-production mutations and verifies both request-scope compile siblings, then requires the clean independent corpus to pass. |
 | `Cleanroom` | The authenticated source-repository cache is copied beneath the unique run root, Cabal builds there, and both clean generated products must exist only below that root. |
 | `Legacy closure` | The Python composition gate, three serialized composition authorities, serialized surface inventory, and test-local mutant module are absent; reintroduction is an exact failure. |
-| `Predecessor` | Exact durable `ImmediatePredecessorPass` for Phase 21, projected monotonically onto this candidate's opening source; absent, malformed, wrong-phase, or non-green evidence fails. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 21 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | Security laws, generated conformance verdicts, universal closure proofs, decoding, effects, runtimes, host, service, cluster, and hardware claims remain `UNVERIFIED` and later-phase-owned. |
 | `Pass criterion` | Every one of the eighteen rows passes in one qualified run for the exact source; that complete pass is sufficient for the mechanical status-only transition. |
 
@@ -102,11 +100,12 @@ negatives, and mutants. NOT VALIDATED.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 22.1: The compositional laws C1-C7 ✅
+## Sprint 22.1: The compositional laws C1-C7 ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/extension-laws-compositional/Amoebius/Extension/Laws/Compositional.hs`; package-hidden `Amoebius.Validation.ExtensionCompositionRun.Internal`.
 **Blocked by**: [Phase 21](phase_21_extension_laws_per_extension.md) gate pass
 **Independent Validation**: Seven composition cases, 63 exact verdict cells, fourteen identity and seven association checks, seven resource sums, four independent hashes, a request-scope compile pair, and seven changed-production mutants.
@@ -137,7 +136,8 @@ honestly.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
 ## Documentation Requirements
 

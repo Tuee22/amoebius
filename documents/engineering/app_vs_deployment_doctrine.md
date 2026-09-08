@@ -20,9 +20,9 @@ capacity, capability, and platform doctrines it cites. It presumes only that a s
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Two surfaces, one app written once](#1-two-surfaces-one-app-written-once)
 - [2. The application-logic surface — what an app *is*](#2-the-application-logic-surface--what-an-app-is)
 - [3. The deployment-rules surface — how the same app *runs*](#3-the-deployment-rules-surface--how-the-same-app-runs)
@@ -37,9 +37,9 @@ capacity, capability, and platform doctrines it cites. It presumes only that a s
 - [12. Planning ownership](#12-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Two surfaces, one app written once
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 In amoebius, **an app does not know how many of it exist.** A developer describes *what their app is* — its
 UI, its users, the data it keeps, the libraries it leans on — and **never** writes down how many replicas

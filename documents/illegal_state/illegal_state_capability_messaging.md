@@ -22,11 +22,12 @@ or put an untyped payload on the wire. The numbering belongs to
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
 ## 1. Scope
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 This document is a **themed slice** of the illegal-state catalog: an app welding itself to a product name rather
 than a capability abstraction ([§3.12](#312-an-app-that-names-a-product-instead-of-a-capability)), a producer

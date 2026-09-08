@@ -24,6 +24,7 @@ knowledge of amoebius; every term it uses about amoebius itself is routed throug
 </details>
 
 ## Contents
+
 - [1. Philosophy](#1-philosophy)
 - [2. Naming](#2-naming)
 - [3. Required header metadata](#3-required-header-metadata)
@@ -98,11 +99,13 @@ checks must not derive a product choice, source classification, provider selecti
 coverage verdict, generator input, legacy closure, or validation result from prose, a table cell, or keyword
 occurrence.
 
-The production structural checker freezes the complete governed path set by exact count and SHA-256 manifest
-digest; a separate component oracle restates both values and observes the production corpus. A missing, extra,
-renamed, or newly exempted governed document therefore refuses until the documentation gate validates the manifest change, and
-an isolated changed-production baseline mutant must make only that oracle red. This same-workstream restatement
-is a diagnostic control, not independent validation. Current phase, sprint, and Gate-summary status
+Structural corpus checks compare the governed path inventory with an accepted Haskell baseline. Repeating its
+count and manifest digest in a second module supplies a diagnostic control, not independent validation.
+A changed inventory requires qualification against the retained scope and independent acceptance obligations.
+Deleting an obligation, excluding a failing file, or lowering a count cannot make that qualification pass.
+The accepted baseline and revision authority belong to
+[gate integrity §M.0](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation).
+Current phase, sprint, and Gate-summary status
 fields use exact raw one-line forms; a second marker, dual-status phrase, fence, comment, or physical wrap cannot
 supply the required reset syntax.
 
@@ -257,8 +260,9 @@ is promoted into reader-facing prose it takes the anchor-link form.
 
 ## 6. Honesty (the proven/tested/assumed discipline)
 
-amoebius doctrine inherits the chaos/failover doctrine's moral rule: **never report a tested, assumed, or merely argued result as proven.** Verification claims state the layer they actually reach; the rest is
-evidence, not proof, and the document must say so. See
+**Never report a tested, assumed, or merely argued result as proven.** Verification claims state their exact
+subject, acceptance boundary, and supporting observation. Anything outside that boundary remains an explicit
+assumption or limitation. See
 [`engineering/chaos_failover_doctrine.md`](./engineering/chaos_failover_doctrine.md) (Phase 0).
 
 Doctrine states the target design; it does not maintain a second implementation-status ledger. A statement
@@ -269,16 +273,33 @@ footprint. A historical pass remains diagnostic after reopening and cannot be ph
 Historical text is permanently invalidated: it must not contain a condition such as “unless the phase is
 Done” that could reactivate it. Doctrine never records a current pass, green count, or validation ledger.
 Those belong to retrievable run evidence and the plan's mechanical status projection.
+
+A documentation revision preserves the accepted scope of a requirement until a separately qualified
+baseline revision replaces it. A correction may withdraw unsupported certification while retaining the
+intended capability as required work. It must not redefine a failing requirement into a weaker claim and
+describe the unchanged implementation as having satisfied the original objective.
+
+Coverage counts describe their actual enumerated universe. They do not establish that the universe covers
+the language, production dependency closure, or accepted requirement surface. Restating a production count,
+matching source tokens, replaying success text, or assigning a mutant label to an unrelated failure supplies
+no independent qualification. These boundaries are owned by
+[gate integrity](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
+
+Formal claims name the checked model, quantified domain, bounds, assumptions, and implementation correspondence.
+A finite model check or property sample does not establish an unbounded language theorem. A type-level
+argument does not establish external effect fidelity. A documentation change does not implement the required
+verifier, certification generation, custody boundary, or compatibility decision.
+
 Every discovered mismatch between doctrine, plan, tests, and code receives a typed Haskell identity, owner,
 observation, closure predicate, and reintroduction negative. Its reader-facing explanation is updated in
 [`legacy_tracking_for_deletion.md`](../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) under the reconciliation
 policy in
 [`development_plan_standards.md` §T](../DEVELOPMENT_PLAN/development_plan_standards.md#t-plan-to-implementation-reconciliation).
 
-**A claim of unrepresentability cites the Haskell declaration that proves it.** A document may state *in the
-indicative* that some illegal state has no inhabitant only where it names the separately authored `.hs`
-fixture/oracle declaration that generates and checks the compile-fail case; any serialized compiler input or
-expected diagnostic is a lazy `.build/**` product, not a tracked fixture.
+**A claim of unrepresentability cites its Haskell declaration and qualified evidence.** A source path alone
+does not establish the claim. The citation identifies the accepted construction boundary and separately
+authored `.hs` oracle, including the legal control and exact compile-negative observation.
+Serialized compiler input and expected diagnostics are lazy `.build/**` products, not tracked fixtures.
 Without one the sentence records an intention rather than a result: the type may have admitted the state from
 the day it was written, and nothing in the corpus would have said so. This is the type-level twin of the rule
 above, because an unproven foreclosure claim is precisely the argued result reported as proven that this
@@ -292,7 +313,7 @@ everywhere the indicative is not. What remains forbidden in every mood is the un
 does not compile", "there is no back door" — about machinery no gate has run against, because a reader cannot
 tell it from a result.
 
-Every required row of the qualified phase gate must pass before a phase or sprint becomes Done or Validated.
+Every required row of the qualified phase gate must pass before a phase or sprint becomes Done.
 A human, agent, or CI job may then record that result as a mechanical status-only projection. Documentation may
 describe a target contract, candidate evidence, or an observed footprint, but prose alone cannot turn any of
 them into validation status. The development-plan standards own

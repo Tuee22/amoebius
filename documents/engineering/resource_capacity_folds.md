@@ -19,15 +19,15 @@ numbers entering them come from, owned by
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [4. The total fold: `fits`, `carve`, `place`, and the nesting](#4-the-total-fold-fits-carve-place-and-the-nesting)
 - [Related Documents](#related-documents)
 
----
-
 ## 4. The total fold: `fits`, `carve`, `place`, and the nesting
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 An aggregate `Σ demand ≤ Σ capacity` is **necessary but not sufficient** for schedulability —
 because pods are **atomic and cannot straddle nodes**, a workload set can fit in aggregate yet have a single

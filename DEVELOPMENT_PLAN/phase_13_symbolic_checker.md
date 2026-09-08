@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_14_refinement_checker.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_14_refinement_checker.md, documents/engineering/formal_model_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -34,20 +34,19 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 12, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-12 predecessor and its compatible evidence chain.
 
 ## Phase Summary
+
+The audit found both a semantic translation error and an unsound qualification oracle: parameter/state shadowing differed between runtime and SMT, while the fake solver reported unsatisfiability after finite sampling. This phase must establish actual symbolic observations over its admitted theory with authenticated offline solver input. It does not turn a checker capability into a proof of every production DSL function.
 
 This phase specifies a Haskell target capability; it does not report a current implementation or
 result. The target is to classify the supported Phase 11 model fragment through a Haskell-owned SMT
@@ -79,30 +78,29 @@ only beneath `.build/**` and no shell or Python verdict. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-13 semantic and resource payloads,
-package-hidden serial supervisor, Haskell semantic oracle, run-local fake SMT boundary, and three
-changed-production subjects are complete; only a fresh integrated run may authorize status.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
-| `Claim` | The Haskell checker totally classifies the supported boolean/QF-LIA fragment through full-conjunction base/step induction and preserves unsupported or inconclusive outcomes. |
+| `Claim` | The Haskell checker translates the admitted boolean/QF-LIA fragment with the same bindings and transitions as the runtime and discharges full-conjunction base/step obligations through an authenticated complete SMT solver; unsupported, failure and unknown outcomes remain non-proofs. |
 | `Subject` | `Amoebius.Checker.Symbolic` is acquired only through package-hidden `Amoebius.Validation.SymbolicCheckerRun.Internal`. |
 | `Command` | Future public spelling is `pb validate phase 13`; before `BOOTSTRAP_HANDOFF`, the exact absolute Haskell executable and authenticated GHC 9.12.4 compiler run directly and synchronously. |
-| `Oracle` | `SymbolicCheckerSpec.hs` owns seven exact symbolic/explicit relation rows and drives a separately authored Haskell SMT semantic boundary without reading behavioral data. |
-| `Positive controls` | Seven fixtures cover inductive, base-failure, step-failure, conservative non-induction, coupled invariants, booleans, and unsupported theory. |
-| `Paired negatives` | Absolute solver injection is paired with relative-path refusal; positive induction is paired with base, step, conservative, and unsupported classifications. |
-| `Mutants` | Conjoined-hypothesis deletion, guard negation, and satisfiable-step acceptance compile as changed production subjects and turn assigned oracle loci red. |
-| `Discovery` | The production checker, independent oracle, and fake SMT boundary equal the fixed three-file source inventory bidirectionally. |
+| `Oracle` | `test/spec/formal/symbolic/SymbolicCheckerSpec.hs` independently owns formula meaning, known satisfying assignments, invariant classifications, and explicit-state comparisons. `FakeSmtSolver.hs` is a protocol/fault control only and cannot certify integer unsatisfiability. |
+| `Positive controls` | Use source-bound formulas with independently established inductive invariants and satisfying witnesses beyond any finite sampling domain; compare emitted obligations, runtime transitions and a pinned real SMT engine. |
+| `Paired negatives` | Admitted models are paired with the same-name parameter/state audit case, satisfiable base/step obligations, unsupported theory, solver error/unknown/truncation/nonzero exit and substituted solver identity; each result has a specific reason. |
+| `Mutants` | Retain conjoined-hypothesis deletion, guard negation and sat-step acceptance; add binder-precedence change, sample-exhaustion-as-unsat and ignored-solver-failure subjects, each assigned to an independently literal exact-case oracle. |
+| `Discovery` | Reconcile the admitted model/translation constructor universe, oracle cases, exact solver input identity, protocol fault controls, and all production/build/selector assignments in both directions. |
 | `Challenge` | All three mutations execute after acquisition and must be distinguished by independent status observations. |
 | `Observer` | The supervisor records absolute executable, exact argv, exit, transcript digest, and bounded failure text for every compiler and oracle process. |
-| `Authority/bypass` | `pb`, PATH solver lookup, host packages, network, hardware, live services, imports of other checker algorithms, and compiler/linker overlap are forbidden. |
+| `Authority/bypass` | Before bootstrap handoff, invoke only the exact Haskell supervisor and authenticated absolute compiler/solver inputs, offline and serially. No network, bootstrap transport, live host effect or hardware discovery is admitted. |
 | `Freshness` | Every run creates a fresh `.build/runs/phase-13/work/**` root and requires equal opening/closing source identities. |
-| `Qualification` | Clean controls, result-class negatives, exact discovery, contained fake execution, and all three changed-production subjects pass together. |
-| `Cleanroom` | Fake solver, binaries, objects, transcripts, and results are generated lazily beneath the fresh run root. |
+| `Qualification` | Run real solver observations, independent formula witnesses, runtime/translation binding comparisons, fault-protocol controls and every assigned changed subject together. A bounded fake emitting `unsat` cannot qualify a proof. |
+| `Cleanroom` | The authenticated solver and compiler inputs are available without acquisition from the network; generated queries, process receipts and products remain beneath the unique run root. |
 | `Legacy closure` | Retired Phase-13 serialized behavioral oracles and Python verdict gate are absent. |
-| `Predecessor` | Consume exactly one durable Phase-12 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
-| `Residue` | Refinement, reusable compile-fail machinery, simulation, concrete models, runtimes, live effects, and hardware remain explicitly later-owned. |
-| `Pass criterion` | `qualified-phase-thirteen-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 12 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
+| `Residue` | SMT engine correctness remains an explicitly named trusted assumption; unsupported theories, concrete DSL-model obligations, production source refinement, simulation and live fidelity retain their separate owners. |
+| `Pass criterion` | `qualified-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
 ## Resource provision
 
@@ -123,14 +121,15 @@ owned external residue.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 13.1: Total symbolic boundary and inductive obligations ✅
+## Sprint 13.1: Total symbolic boundary and inductive obligations ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/symbolic-checker/Amoebius/Checker/Symbolic.hs`
 **Blocked by**: [Phase 12](phase_12_explicit_state_checker.md) gate pass
-**Independent Validation**: seven exact symbolic/explicit rows, fourteen obligations, three witnesses, three counterexamples, and unsupported classification
+**Independent Validation**: Match an independently authored inductive model and its formula obligations; reject the audit shadowing counterexample or classify its reachable violation consistently; kill binding and induction-schema mutants at assigned cases; name SMT correctness as a trust assumption.
 **Oracle**: `test/spec/formal/symbolic/SymbolicCheckerSpec.hs` with `FakeSmtSolver.hs` as the independent run-local decision boundary
 **Legacy IDs**: none; retired Phase-13 serialized oracles and Python gate are checked absent
 **Docs to update**: this phase file, `formal_model_doctrine.md`, `testing_doctrine.md`, and `system_components.md`
@@ -142,6 +141,9 @@ dynamically resolved solver, and classify every input without promoting unsuppor
 
 ### Deliverables
 
+- Use the Phase-11 binding policy in translation. Variable, parameter and constant environments cannot apply a different precedence from executable interpretation.
+- Bind each complete SMT response, exact executable identity, argv, query bytes, exit and stderr to the owning obligation; unknown, malformed/truncated response and failing process outcomes never mint induction evidence.
+
 - Absolute-path `Solver` construction with no ambient executable discovery.
 - Total `SymbolicResult`: `Inductive`, `NotInductive`, `Unsupported`, or `Inconclusive`.
 - Sort inference and SMT-LIB emission for boolean/QF linear-integer expressions.
@@ -151,6 +153,9 @@ dynamically resolved solver, and classify every input without promoting unsuppor
 
 ### Validation
 
+- Retain the model with state `x = 0`, parameter `x` drawn from `{1}`, update `x := x`, and invariant `x == 0`. Either model admission rejects shadowing consistently or explicit and symbolic outcomes both expose the transition to one; `Inductive` is forbidden when the runtime violates the invariant.
+- Check conjunction, initialization, unchanged variables and every admitted expression translation against authored formula meanings and real solver observations, rather than emitted substrings.
+
 1. Reject relative or non-executable solver paths.
 2. Require exact base and step results from the authored oracle.
 3. Require all induction witnesses to cover their declared obligation count with valid query digests.
@@ -159,14 +164,15 @@ dynamically resolved solver, and classify every input without promoting unsuppor
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 13.2: Solver differential and mutation evidence ✅
+## Sprint 13.2: Solver differential and mutation evidence ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: package-hidden `src/validation-kernel/Amoebius/Validation/SymbolicCheckerRun/Internal.hs`
 **Blocked by**: Sprint 13.1
-**Independent Validation**: serialized fake/clean/three-mutant compiler matrix, exact red loci, source discipline, discovery, and containment
+**Independent Validation**: A pinned authenticated SMT executable accepts known formulas and finds independently known witnesses outside sample bounds; exact unknown/error/identity pairs refuse; sampled-unsat and ignored-exit mutants fail their assigned cases; broader theories remain excluded.
 **Oracle**: the same Haskell semantic oracle; solver/result bytes are observations only
 **Legacy IDs**: none; retired Phase-13 serialized oracles and Python gate are checked absent
 **Docs to update**: this phase file, `formal_model_doctrine.md`, `testing_doctrine.md`, and `system_components.md`
@@ -178,6 +184,9 @@ expected conservative gap, and demonstrate sensitivity to hypotheses, guards, an
 
 ### Deliverables
 
+- Acquire the real SMT executable from authenticated, network-independent toolchain input before candidate execution, with bounded process resources and complete observation custody.
+- Restrict the Haskell fake SMT process to deterministic protocol and error-injection controls. Exhausting a finite search domain is an inconclusive sample result, never an integer-theory `unsat` proof.
+
 - Seven exact symbolic/explicit expectations and 14 declared proof obligations.
 - Five explicit-state agreements, one conservative non-inductive case, and one unsupported-theory case.
 - Three induction witnesses and three solver-backed counterexamples.
@@ -187,8 +196,11 @@ expected conservative gap, and demonstrate sensitivity to hypotheses, guards, an
 
 ### Validation
 
+- The formula `x = 100 + 100` must be satisfiable with witness `x = 200`. Add arithmetic witnesses outside literal-neighbor domains and ensure the historical fake result cannot enter a proof receipt.
+- Run each supported theory obligation through the real solver; independently replay satisfying witnesses and refuse unexpected solver exits, missing answers, stale responses or executable substitutions.
+
 1. Compare every symbolic, explicit, relation, and obligation observation to its independently authored row;
-   reject a run without the complete suite token.
+   reject any missing acquired case observation even if a complete suite token is printed.
 2. Require digest and safety-class agreement on all five overlapping fixtures.
 3. Require the safe-but-non-inductive fixture to remain explicitly conservative.
 4. Compile the hypothesis, polarity, and satisfiable-step defects separately; each must redden only its named
@@ -197,7 +209,8 @@ expected conservative gap, and demonstrate sensitivity to hypotheses, guards, an
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
 ## Documentation Requirements
 
@@ -209,7 +222,7 @@ The pre-reset record said `None`; that statement cannot support a gate pass. Cur
 **Cross-references to add:**
 
 - `DEVELOPMENT_PLAN/README.md`, `overview.md`, `substrates.md`, and `system_components.md` — reconcile status,
-  lane, implementation paths, dynamically resolved solver, and evidence.
+  lane, implementation paths, authenticated offline solver input, and evidence.
 - `DEVELOPMENT_PLAN/phase_14_refinement_checker.md` — open only after this phase seals; its code-refinement
   claim remains independent of the model-checking algorithms.
 

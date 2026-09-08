@@ -18,7 +18,6 @@ by [resource_capacity_folds.md](./resource_capacity_folds.md).
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -32,6 +31,8 @@ the `Check` GADT, its interpreters, the worst-case envelope, and the forest proo
 Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ## 1. Why this doctrine exists
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 The Dhall gates foreclose only structurally-illegal specifications. dhall-typecheck (typecheck) and gadt-decode (the total decoder) reject a spec that names no API-key `SecretRef` for a cloud provision, or no SSH key for a self-managed host ([dsl_doctrine.md §2](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)). What they cannot decide is anything about a running world. Is the secret store reachable, and does a named key exist in it? Does the live cloud or host authority recognise that key, and grant the permissions and quotas the spec demands? Does a host actually carry its declared hardware? Do two clusters in a forest collide in a provider's resource identity? Each of those is settled only by observation. A spec that decodes cleanly can therefore still fail at the first cloud or host call.
 

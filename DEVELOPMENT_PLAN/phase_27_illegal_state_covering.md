@@ -34,17 +34,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 26 and every earlier gate have passed in numerical order. The Phase-27 implementation and its bounded
-contract are present; the complete integrated Phase-27 gate remains the only authority for the status
-transition below.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-26 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -71,7 +69,8 @@ invocation and the candidate verdict.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -90,9 +89,9 @@ invocation and the candidate verdict.
 | `Qualification` | `qualified-illegal-state-covering-harness` |
 | `Cleanroom` | `illegal-state-products-contained-below-build` |
 | `Legacy closure` | `retired-behavioral-document-authorities-absent` |
-| `Predecessor` | `exact-phase-twenty-six-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 26 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `later-provision-render-runtime-owners-explicit` |
-| `Pass criterion` | `qualified-phase-twenty-seven-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -128,14 +127,15 @@ invocation and the candidate verdict.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 27.1: Exhaustive negative/positive corpus split by foreclosure locus ✅
+## Sprint 27.1: Exhaustive negative/positive corpus split by foreclosure locus ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/illegal-state-covering/Amoebius/Dsl/IllegalStateCovering.hs` owns the closed catalogue, structural and decode pairs, deferral disposition, and property subjects; `test/spec/dsl/IllegalStateCoveringSpec.hs` owns the executable battery.
 **Blocked by**: [Phase 26](phase_26_gadt_decode_ir.md) gate pass
 **Independent Validation**: The suite joins all 121 catalogue rows to independent identities/counts, exercises seven structural and thirteen decode pairs, and requires the structural and decode production mutants to fail at their pinned loci.
@@ -236,11 +236,12 @@ must pass `dhall type` and decode-reject — never billing a gadt-decode-only fo
 
 ### Remaining Work
 
-The implementation-ready seam is complete; only the complete integrated Phase-27 gate can validate it.
+The seam is retained as an Observed footprint / Known partial. Reconcile its obligations with the replacement
+acceptance baseline and qualify the complete Phase-27 gate.
 
-## Sprint 27.2: GADT-index compile-refusal cases (type-foreclosed layer) ✅
+## Sprint 27.2: GADT-index compile-refusal cases (type-foreclosed layer) ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Dsl.IllegalStateCovering` exports five indexed compile-refusal vocabularies; `IllegalStateCoveringSpec` generates their ten legal/illegal modules beneath the fresh run root and invokes the exact acquired GHC serially.
 **Blocked by**: Sprint 27.1
 **Independent Validation**: Every legal twin compiles, every illegal twin yields structured GHC type diagnostics at its independent locus, and the GADT production mutant admits a negative and makes the suite red.
@@ -289,11 +290,12 @@ Phase-25 honesty caveat routed here, since Dhall has no opaque types.
 
 ### Remaining Work
 
-The implementation-ready seam is complete; only the complete integrated Phase-27 gate can validate it.
+The seam is retained as an Observed footprint / Known partial. Reconcile its obligations with the replacement
+acceptance baseline and qualify the complete Phase-27 gate.
 
-## Sprint 27.3: QuickCheck property suite ✅
+## Sprint 27.3: QuickCheck property suite ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Dsl.IllegalStateCovering` provides the closed smart-constructor, round-trip, fold, composition, and finite RKE2 subjects; `IllegalStateCoveringSpec` runs four covered 300-sample properties and exhausts all three RKE2 arms.
 **Blocked by**: Sprint 27.2
 **Independent Validation**: Explicit QuickCheck coverage obligations prevent vacuous generators; the property mutant changes production behavior and makes the suite red while the clean subject retains four sampled and one exhausted-domain claim.
@@ -342,11 +344,12 @@ exhausted (the three `Rke2Servers` arms).
 
 ### Remaining Work
 
-The implementation-ready seam is complete; only the complete integrated Phase-27 gate can validate it.
+The seam is retained as an Observed footprint / Known partial. Reconcile its obligations with the replacement
+acceptance baseline and qualify the complete Phase-27 gate.
 
-## Sprint 27.4: The per-entry validation-locus ledger — the gate ✅
+## Sprint 27.4: The per-entry validation-locus ledger — the gate ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Validation.IllegalStateCoveringRun.Internal` acquires the exact source set, executes four changed-production challenges and the clean suite, checks the 26 generated products, source stability, legacy closure, and zero external residue, then finalizes Phase-27 evidence through the dispatch kernel.
 **Blocked by**: Sprint 27.3
 **Independent Validation**: The package-hidden supervisor requires bidirectional three-source discovery, exact catalogue/ledger/product counts, four pinned red mutant loci, one exact clean token, stable source digests, predecessor evidence, and contained run-root writes.
@@ -427,7 +430,8 @@ its schema, linter, and path are centrally owned rather than re-derived here.
 
 ### Remaining Work
 
-The implementation and documentation seams are complete. The remaining work is the exact clean component
+The implementation and documentation seams are an Observed footprint / Known partial. Reconcile their
+replacement acceptance baseline, then execute the exact clean component
 rerun followed by the complete integrated Phase-27 gate; only that result may authorize the mechanical status
 update. Enumeration, ledgers, and run evidence remain generated beneath `.build/` and join to authored
 expectations at gate time.

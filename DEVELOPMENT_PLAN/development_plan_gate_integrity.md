@@ -12,7 +12,7 @@ section lettering lives in [`development_plan_standards.md`](development_plan_st
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_03_artifact_calculus.md, DEVELOPMENT_PLAN/phase_04_budget_calculus.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_06_workflow_calculus.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md, DEVELOPMENT_PLAN/phase_47_tool_and_mutant_generation.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_03_artifact_calculus.md, DEVELOPMENT_PLAN/phase_04_budget_calculus.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_06_workflow_calculus.md, DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_14_refinement_checker.md, DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_20_extension_declaration.md, DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md, DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md, DEVELOPMENT_PLAN/phase_23_extension_security_laws.md, DEVELOPMENT_PLAN/phase_24_conformance_gate_generator.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md, DEVELOPMENT_PLAN/phase_47_tool_and_mutant_generation.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_90_test_topology_live.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -24,8 +24,6 @@ section lettering lives in [`development_plan_standards.md`](development_plan_st
 - [T. Plan-to-implementation reconciliation](#t-plan-to-implementation-reconciliation)
 - [U. The final repository layout](#u-the-final-repository-layout)
 - [Related Documents](#related-documents)
-
----
 
 <a id="m-gate-integrity-a-gate-cannot-be-passed-by-a-stub"></a>
 
@@ -40,11 +38,12 @@ Two test responsibilities remain deliberately distinct:
 1. the **subject** implements the claimed behaviour; and
 2. the **oracle and harness** attempt to falsify that behaviour without importing its decision logic.
 
-The gate remains **NOT VALIDATED** until every required row passes in one qualified run. That complete pass may
-be recorded as ✅ Done by a human, agent, or CI job. The package-hidden `VerifiedGatePass` binds phase, source
-preimage, complete acquired-evidence digest, exact status-patch digest, and projected whole-source postimage
-digest, and retains the opaque durable-publication receipt. Every identity, execution-context value, predecessor,
-ordered row observation, and residue entry is transitively bound by the evidence digest.
+The gate remains **NOT VALIDATED** until every required row passes in one qualified run under the accepted
+verifier. That complete pass may be recorded as ✅ Done by a human, agent, or CI job.
+The required `VerifiedGatePass` binds certification generation, accepted baseline, phase, source preimage,
+acquired evidence, status patch, and projected source postimage. Its authenticated custody receipt binds the
+execution context, predecessor, ordered observations, and scoped limitations. Package visibility and hashes
+alone do not establish that these events occurred.
 
 The patch's closed diff may touch only the typed status frontier derived for the passing phase: its tracker
 row and phase-status line, both status surfaces for every sprint it closes, and—except at the terminal
@@ -57,6 +56,49 @@ They are test requirements. The validator emits the verified patch beneath `.bui
 tree unchanged; only after it exits may a human, agent, or CI job recheck the preimage and apply it. After recording a pass, execution may continue
 with the next phase in numeric order.
 
+### M.0 Accepted baseline and certification generation
+
+The 2026-09-08 audit reset withdraws all earlier certification. A new Haskell-owned generation must reject
+pre-reset receipts before predecessor acquisition, compatibility reuse, status recording, or hardware authority.
+The existing implementation does not enforce this reset generation. This section specifies required work;
+editing Markdown cannot mint or implement the authority it describes.
+
+The accepted baseline contains Haskell requirement identities, acceptance predicates, oracle provenance,
+dependency and build closures, verifier identity, and qualification obligations. Candidate code and proposed
+baseline changes are distinct inputs. The candidate cannot select a weaker accepted baseline or replace the
+oracle, observer, verifier, discovery inventory, or expected rejection locus that judges it.
+
+Generated accepted baselines, verifier executables, private authority material, and receipts remain beneath
+repository `.build/**` roots. Their location does not confer trust. An OS-enforced principal or equivalent
+protected execution boundary must deny candidate writes and prevent candidate access to receipt-issuing authority.
+The candidate must also lack permission to replace an ancestor directory, read private authority material,
+or impersonate the observer through inherited handles or environment.
+
+The threat model covers a faulty or dishonest candidate with repository-editing access. The operator and
+the protected verifier's OS authority remain explicit trust assumptions. Two processes sharing candidate-writable
+files, package-hidden constructors, matching JSON copies, and content-addressed filenames are insufficient custody.
+The verifier must test and retain evidence of the actual permission boundary before relying on it.
+
+The initial accepted seed is a finite, explicitly identified bootstrap assumption. It does not certify its
+compiler, the whole language, or the later universal harness. Phase 0 retains the closed protocol in §M.4;
+Phase 1 adds toolchain claims and Phase 2 adds compiler-backed source closure. No early gate depends on
+Phase 49, `pb` validation transport, or a live substrate.
+
+A baseline revision is qualified separately by the previously accepted verifier against retained obligations
+and the independently authored revision oracle. Adding a phase or changing implementation cannot silently
+remove, weaken, reassign, or forward-defer an accepted obligation. A changed claim needs an explicit scope
+mapping, preserved consumer obligations, and qualification of the replacement before promotion.
+
+Within accepted scope, agents may implement, qualify, record, refresh, reopen, and advance automatically.
+No routine sprint or phase boundary requires human approval. An unresolved semantic change to accepted scope
+must be settled as a baseline revision; it cannot become a passing candidate by editing its own expectations.
+Independent authorship remains an explicit assurance boundary, not a conclusion inferred from import names.
+
+Required Haskell repairs include generation enforcement, protected baseline admission, authenticated evidence
+custody, dependency-based compatibility, and exact execution-derived qualification. The current report-based
+DSL barrier, exception-based mutant acceptance, source-token checks, and unauthenticated receipt reacquisition
+must be replaced before their owning claims can be certified again.
+
 ### M.1 The fixed gate contract
 
 Every numbered phase contains a `## Gate integrity` section with exactly one table using the following keys.
@@ -68,7 +110,7 @@ evidence cannot populate authored contract fields.
 | `Claim` | One falsifiable capability statement and its explicit exclusions. |
 | `Subject` | The production `.hs` module and entry point exercised; a wrapper, manifest, or gate runner alone is not a subject. |
 | `Command` | Future public target: `pb validate phase NN`. Before the Phase-50 gate passes, the executable candidate command is the exact absolute source-bound Haskell binary invoked directly; invoking `pb` is inadmissible evidence. Phase 0 binds the narrow non-numbered `GenesisTrust` local-custody token, which does not authenticate the actual compiler executable bytes, derivation, loader, broader host, or reproducibility. Phase 1 owns those acquisition/provenance claims for subsequent builds; neither claim lets a binary prove its own compiler. Phase 50 starts the exact Haskell OS supervisor directly and has it invoke `pb` as the externally observed child subject; the public spelling cannot supervise its own handoff. Phase 51 onward may use `pb` only while binding the current Phase-50 gate pass. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
-| `Oracle` | A separately authored `.hs` oracle module, its independence boundary, and provenance. |
+| `Oracle` | A separately authored `.hs` oracle module, its accepted baseline identity, independence boundary, and provenance. The candidate cannot substitute its own expectations. |
 | `Positive controls` | A closed named corpus and the exact observations expected for each member. |
 | `Paired negatives` | For every foreclosed dimension, a minimally different positive/negative pair and the exact rejection locus and reason. |
 | `Mutants` | An independently literal oracle-owned selector-to-exact-case registry, exact two-way identity reconciliation against production and build mappings, and, for each mutant, its atomic requirement predicate, operator, production locus, applied-change witness, assigned exact red observation, named rejection locus, and same-harness controls that must remain green. The sole finite-bootstrap exception is Phase 0's exact three `BootstrapPredicate` cases in §M.4, which use acquired one-line replacements and a direct serial compiler harness rather than Cabal selectors. |
@@ -77,11 +119,11 @@ evidence cannot populate authored contract fields.
 | `Observer` | The observer outside the subject, raw observation it reads, authenticity check, and fail-closed rule. |
 | `Authority/bypass` | Paired least-privilege success/foreign-scope denial and alternate-path probes, or tested non-applicability. |
 | `Freshness` | How stale state, cached output, prior evidence, and replayed responses are made unable to pass. |
-| `Qualification` | The phase-owned qualification that precedes the clean candidate. Phase 0 uses the exact clean-plus-three finite-bootstrap protocol in §M.4. The `self_referential_gates` universal owner uses the closed seventeen-case sabotage corpus; no earlier phase must counterfeit that later capability. |
-| `Cleanroom` | Proof that the gate starts without its disallowed current-run products and derives required outputs lazily. The ordinary sole retained generated input is the exact read-only immediate-predecessor receipt. Phase 0 instead consumes its seven GenesisTrust inputs and proves only that its uniquely named qualification leaf is absent after the serial run; whole-`.build/**` absent-before and universal replay closure belong to Phase 49. |
+| `Qualification` | The phase-owned qualification precedes the clean candidate and protects every acceptance mechanism when first used. Phase 0 retains its finite protocol in §M.4. Phase 49 additionally qualifies the complete seventeen-case universal composition; earlier mechanisms cannot postpone their own qualification to that barrier. |
+| `Cleanroom` | Candidate products start absent and outputs are derived lazily. Accepted verifier state, authenticated toolchain and dependency inputs, and applicable predecessor evidence are explicit read-only inputs. Undeclared caches or copied candidate products refuse. Phase 0 retains its finite GenesisTrust and cleanup boundary. |
 | `Legacy closure` | Reader-facing references to the typed Haskell IDs due in this phase; the compiled lifecycle/owner/required-analyzer dispatch and the owning analyzer's independent oracle supply the zero-finding decision. Phase 0 instead proves structural register integrity and an exact due-count of zero; its separately required scoped `SourcePb` zero does not retire Phase-2-owned `LTD-SRC-008`. An unavailable analyzer for a due or retired ID refuses; before its owner an active unavailable analyzer is an explicit forward deferral and cannot claim closure. Cell text supplies no executable value. |
-| `Predecessor` | The immediately preceding phase's current gate-pass result, or the digest-bound irreducible `GenesisTrust`/`BootstrapRoot` represented structurally as `genesis` for Phase 0. |
-| `Residue` | Phase 0 requires exactly empty `captureResidue`; later-owned capabilities are typed exclusions/forward deferrals and never candidate residue. A later phase states applicable untested layers and assumptions as `UNVERIFIED`; an empty later-phase residue requires an explicit test rationale. |
+| `Predecessor` | The immediately preceding phase's authenticated pass from the admitted certification generation, with current compatibility established under §M.6. Phase 0 instead binds the irreducible `GenesisTrust`/`BootstrapRoot`, represented structurally as `genesis`. |
+| `Residue` | Typed evidence distinguishes missing required observations, forbidden resource residue, and explicit limitations outside the accepted claim. Missing required evidence or forbidden residue refuses. Assumptions and excluded later-owned capabilities remain visible as `UNVERIFIED`; an empty list is never a universal pass requirement. |
 | `Pass criterion` | Always `qualified-gate-pass`: every required row succeeds in one qualified run for the exact current source. That result is sufficient for the status-only transition. |
 
 The `**Gate:**` summary line contains only the future public command and a link to this table. A
@@ -149,6 +191,10 @@ subject. A build flag is admissible only when the resulting compiled production 
 both observed. Production or build declarations may be reconciled against the oracle registry, but may not
 generate it or define its expected cardinality. An aggregate oracle red outside the assigned row, a
 warning-as-error caused by dead changed-subject code, or a failure at another boundary is not a mutant kill.
+The observed failing-case set must equal the independently assigned set. Every declared unaffected case must
+remain green in the same changed binary. A compile-selected label printed for any failure supplies no
+attribution. Catching an arbitrary exception, accepting a syntax error, or matching a generic red substring
+cannot qualify a mutant.
 At a milestone gate, every independent acceptance conjunct, permanent refusal, resource and
 result-retention bound, closed-grammar alternative, and routing or composition decision requires an atomic
 selector; a compound challenge is supplemental rather than a substitute. An ordinary gate draws from that same
@@ -191,15 +237,21 @@ Phase-0 deliverable.
 
 ### M.4 Harness qualification precedes every candidate
 
+Each acceptance mechanism is qualified before its first phase verdict. Later universal qualification composes
+those established mechanisms; it cannot excuse an earlier gate that trusts unqualified mutation, receipt,
+observer, or discovery logic. Qualification must exercise the actual accepted decision path, including its
+failure handling and custody boundary.
+
 Every candidate is preceded by the qualification contract owned at its capability frontier. Phase 0 has one
 explicit finite-seed exception: `BootstrapQualification.Internal` compiles and runs, serially, the unchanged
 `BootstrapPredicate` followed by exactly `digest-equality-bypass`, `snapshot-freshness-bypass`, and
-`bootstrap-path-bypass`. The independent `BootstrapMutationDriver` must accept only clean; every mutant must
-change both source and binary identity; the exact ordered transcript binds the acquired snapshot, genesis
-compiler path, exits, stdout/stderr, and teardown; clean must return silent `ExitSuccess`; every mutant must
-return `ExitFailure 1`, empty stdout, and its canonical case label plus one newline on stderr; and the generated
-leaf must be absent. This v2 protocol is the whole Phase-0 qualification requirement. It does not claim the
-universal validator can detect all ways of sabotaging itself.
+`bootstrap-path-bypass`. The independent `BootstrapMutationDriver` must accept only clean. Every mutant must
+change both source and binary identity. The ordered transcript binds the acquired snapshot, genesis compiler
+path, exits, stdout/stderr, and teardown. Clean must return silent `ExitSuccess`. Every mutant must return
+`ExitFailure 1`, empty stdout, and its canonical case label plus one newline on stderr. The generated leaf
+must be absent. This v2 protocol is the complete Phase-0 changed-source matrix. The separate finite
+seed-custody and generation corpus in [Phase 0](phase_00_documentation_suite.md#finite-phase-0-exit-contract)
+also requires an independently observed integrated receipt. Neither corpus claims universal validator soundness.
 
 At the `self_referential_gates` universal owner, the harness is additionally qualified against this fixed,
 separately authored seventeen-case sabotage corpus before it judges the universal clean candidate. That
@@ -235,9 +287,14 @@ Phase 1 separately adds authenticated toolchain acquisition and Phase 2 adds the
 neither is pulled into Phase 0. Later-owned cases are typed forward deferrals and cannot block an earlier
 candidate merely because the closed plan already names their owner.
 
+The universal run must sabotage the actual accepted harness and observer, then restore and run the clean
+candidate. Testing a diagnostic report checker and printing seventeen labels does not execute that corpus.
+Each earlier gate must already reject the sabotage forms relevant to mechanisms it consumes.
+
 Both qualification authorities are opaque. The Phase-0 authority binds one common acquired snapshot, subject,
 independent driver, qualification harness, absolute genesis compiler path, clean receipt, three mutation
-receipts, transcript, and zero-residue teardown. The universal authority binds its common source, executable,
+receipts, transcript, and zero-residue teardown. It also binds the seven-case seed-custody receipt, its
+independent oracle, certification generation, accepted seed, and observed OS-boundary identities. The universal authority binds its common source, executable,
 harness, oracle, compiler, toolchain, and execution identity to a clean full-subject run, all seventeen
 positional sabotage runs, and terminal teardown. Each universal sabotage carries exact source/executable
 preimage and postimage, independently assigned code/subject/gate-row locus, exact same-run unaffected controls,
@@ -264,6 +321,11 @@ A pure claim cannot use a live nonce meaningfully. It instead uses a separately 
 coverage obligations, boundary generators, explicit positive/negative pairs, and changed-subject mutants.
 Property sampling reports only the explored sample and its coverage; it never upgrades to universal proof.
 
+An observation records the executable, argv, request, result, and effects actually observed at the boundary.
+Expected argv cannot populate the observed-argv field. A planned-action ledger cannot establish absence of
+unrecorded mutations. Source-token presence, fixed digest-shaped examples, aggregate counts, and success text
+cannot replace production execution or independently acquired effects.
+
 ### M.6 Candidate evidence and gate pass
 
 Production runner selection is a closed capability-keyed Haskell registry. The dispatcher first resolves the
@@ -271,33 +333,43 @@ requested ordinal through the compiled phase-identity table and then requires ex
 that capability; an absent identity, absent runner, duplicate capability, or ambiguous selection refuses. A
 second ordinal switch or caller-supplied runner name is not an execution authority. A candidate runs that one
 selected phase; it does not re-run gates `0..N` as one expanding subject. Phase 0 binds `GenesisTrust`, and every
-later candidate binds an exact verified immediate-predecessor receipt. That receipt records the predecessor's
-completed frontier transition and is monotonic across later source snapshots. The active phase's exact
-current-source gate owns compatibility with the capabilities it consumes, including shared validation policy.
-A source change therefore cannot erase an earlier pass or force recursive prefix replay; malformed, detached,
-wrong-phase, or non-green predecessor evidence still refuses.
+later candidate binds an authenticated immediate-predecessor receipt from the admitted certification generation.
+The receipt preserves what passed for its recorded inputs. Reuse against current source additionally requires
+an accepted compatibility decision; historical success alone cannot supply that decision.
+
+Compatibility binds the accepted requirement, production dependency graph, oracle, observer, harness,
+qualification, build configuration, toolchain, and external-input closures. The protected verifier computes
+change impact from the accepted graph and the candidate's independently acquired build graph.
+Candidate declarations cannot remove dependencies from this comparison. Missing graph edges, unknown impact,
+changed acceptance, or an unqualified verifier refuses reuse.
+
+Unchanged qualified closures may reuse authenticated evidence. Changed closures and affected consumers must
+run their required acceptance and qualification again, in numerical order. A shared validation-policy change
+invalidates every receipt that relies on that policy until separately qualified compatibility or replacement
+evidence is available. An unrelated edit does not force full-prefix replay.
 
 A Done phase has one additional legal execution mode: **receipt refresh**. It reruns the complete
 qualified gate against the exact current source, changes no tracked status, emits an identity status projection,
-and installs a new content-addressed receipt. Receipt refresh cannot make a phase Done, skip a failed row, or
-advance the frontier. It is an explicit regression operation, never a prerequisite automatically induced by a
-later edit. Normal phase implementation therefore never recursively invalidates the completed prefix.
+and installs a new authenticated receipt. Receipt refresh cannot make a phase Done, skip a failed row, or
+advance the frontier. The accepted impact calculation may require refresh of an affected closure.
+A failed accepted claim or incompatible contract follows the reopening procedure instead.
 
-Repeated qualified runs for the same phase form one receipt equivalence class; their
-run-specific identities may differ without creating competing predecessor meanings. Acquisition verifies every
-entry fail-closed, filters to the exact phase, and selects the lexicographically least content digest as the
-deterministic exact receipt. A malformed or detached entry still fails the whole acquisition. Thus refresh is
-idempotent while conflicting provenance cannot be silently selected.
+Repeated runs are interchangeable only when their certification generation, accepted baseline, phase, scope,
+and compatibility closures agree. Acquisition authenticates custody and checks those fields before choosing
+deterministically among equivalent receipts. A malformed, detached, revoked, or conflicting receipt refuses.
+Two equal JSON files or a lexicographically preferred hash cannot establish equivalence or provenance.
 
-The dispatcher first constructs one opaque acquired run whose owner recomputes the selected Subject from the
+The required dispatcher constructs one opaque acquired run whose owner recomputes the selected Subject from the
 exact source/compiler/qualification/debt/contract products. Evidence cannot accept a caller-authored Subject or
 opening digest. It seals the sixteen non-circular rows, evaluates Legacy from those exact premises, and derives
 Pass criterion only afterward. The dispatcher then serializes those raw observations into a package-hidden, schema-checked
 candidate bundle beneath `.build/runs/phase-NN/candidates/**`. Its content digest binds the serialized evidence;
 it does not make the contents true. The writer publishes the bounded canonical bytes without replacement at the
 exact phase/content address, exact-reads and synchronizes the same no-follow regular-file descriptor and parent,
-exact-reads again, and only then returns an opaque receipt bound to repository, directory, and file identity.
-The acquired v2 candidate records opening and closing source digests, contract/subject/oracle/
+exact-reads again, and records repository, directory, and file identity. These durability checks protect bytes;
+the accepted verifier must separately authenticate the observed execution and its publication custody.
+The required candidate records certification generation, accepted baseline, compatibility closures, opening
+and closing source digests, contract/subject/oracle/
 harness/observer/qualification identities, proposed-status-patch and postimage digests, typed predecessor,
 executable path/digest and argv, toolchain/substrate/lane/architecture/run/cleanup context, the exact ordered
 eighteen-row inventory, and explicit residue. Each row is exactly execution-derived `green`, `red`, or
@@ -306,15 +378,20 @@ TSV field; its value may retain tab-framed raw columns, while an empty value, li
 JSON publication escapes admitted tabs without changing their bytes. Missing, duplicate, reordered, empty,
 defaulted, skipped, or caller-constructed row evidence cannot pass verification.
 
-The public evidence and gate-pass records remain caller-constructible diagnostic seams and carry no tracked-
-state write authority. `verifyPublishedGatePass` first re-acquires the absolute canonical content-addressed
-regular non-symlink file, its stored identities, and exact bytes; an unpublished or in-memory candidate cannot
-mint authority. Only that package-hidden verifier can mint `VerifiedGatePass`, and only after the source is
-unchanged, every required identity and execution-context field is present and canonical, all eighteen rows are
-green, residue exactly matches the contract's explicit later-owned or assumed `UNVERIFIED` set with no due,
-unclassified, or undeclared item, and the typed predecessor is the digest-bound `GenesisTrust` root only for
-Phase 0 or the immediate predecessor's evidence digest otherwise. The token binds phase, source, complete
-evidence digest, exact proposed patch, projected whole-source postimage, and the retained publication receipt.
+Public evidence records remain caller-constructible diagnostic seams without tracked-state write authority.
+The required `verifyPublishedGatePass` authenticates custody, generation, accepted baseline, compatibility,
+qualification, and complete raw observations before accepting a publication. It also reacquires the canonical
+non-symlink file and exact bytes. Neither a copied file nor a package-hidden constructor proves execution.
+
+Only the accepted verifier may issue `VerifiedGatePass`. Source must remain unchanged during execution, every
+required identity and context must be canonical, and all eighteen rows must satisfy their accepted predicates.
+The typed predecessor is `GenesisTrust` for Phase 0 or the compatible immediate-predecessor receipt otherwise.
+The token binds the exact proposed patch and projected source postimage.
+
+Residue is a typed classification, not a demand for an empty list. Required evidence gaps and forbidden
+resource residue refuse. Explicit assumptions and excluded later-owned capabilities remain recorded as
+`UNVERIFIED` without satisfying an acceptance obligation. Removing a limitation to obtain an empty list is
+an acceptance defect. Phase 0 still requires zero owned resource leakage and retains its narrow trust assumptions.
 
 An authored `ContractGap` and an observed `EvidenceAbsent` are different typed refusals. A gate-table slot is
 `Bound specification` or `ContractGap`; it never embeds the current presence of a receipt, live host, or run
@@ -462,15 +539,13 @@ Every phase inherits the following postconditions. They are part of the gate, no
 6. **No source-adjacent output.** Compilation, generation, resolution, caches, temporary files, interpreter
    bytecode, evidence, and test discovery remain beneath `.build/**`. There is no cache exception beside
    authored source, including for `pb`.
-7. **Snapshot closure.** The documented command ordinarily succeeds from a fresh source snapshot with the
-   current run, build/cache, `.data/**`, and `.test_data/**` roots absent. The sole retained generated input is
-   the exact read-only content-addressed immediate-predecessor receipt beneath `.build/evidence-store/**`.
-   Phase 0 instead consumes its seven GenesisTrust files, binds exact opening/pre-publication-closing source
-   identities, re-acquires Git source after status-projection emission, and proves its unique qualification leaf
-   absent after the run; it does not claim whole-`.build/**` absent-before or universal replay detection. A
-   Every later candidate projects the verified immediate-predecessor frontier fact onto its current opening
-   source; repeated valid receipts for that phase form the deterministic equivalence class defined in §M.6. Malformed or detached
-   evidence, or any other ignored worktree input outside the declared Phase-0 exception, makes the gate fail.
+7. **Snapshot closure.** Candidate products and undeclared runtime state start absent. Accepted verifier
+   state, authenticated toolchain and dependency inputs, and applicable predecessor receipts are explicit
+   read-only inputs beneath `.build/**`. Their accepted input manifest binds exact contents, custody,
+   permissions, and permitted use; directory names or cache-entry counts cannot authenticate them.
+   Phase 0 consumes its seven GenesisTrust inputs and proves its unique qualification leaf absent afterward.
+   It does not claim whole-`.build/**` absence or universal replay detection. Later candidates establish
+   compatibility under §M.6. Undeclared caches, detached receipts, and reused candidate products refuse.
 8. **No condemned fallback.** The cleanroom run starts with every legacy path owned by the phase absent and
    proves no fallback, migration input, compatibility copy, or pre-generated substitute was read.
 9. **Tracked-tree immutability.** The gate does not change any tracked file and leaves no unignored output.
@@ -506,18 +581,20 @@ Every phase inherits the following postconditions. They are part of the gate, no
     Neither seam may interpret a row, table cell, ID
     spelling, owner phrase, predicate-shaped string, or row count as legacy semantics or use it to alter a
     closure verdict. The documentation gate owns correspondence between the Haskell bindings and that explanation.
-17. **Predecessor closure.** Except Phase 0, the immediately preceding phase has a valid durable gate-pass
-    result. The current phase owns compatibility with its exact opening source. Hardware-specific work cannot run as a phase gate before the no-hardware DSL
-    gate barrier passes.
+17. **Predecessor closure.** Except Phase 0, the immediately preceding phase supplies an authenticated
+    gate pass in the admitted certification generation. The accepted verifier establishes current dependency
+    compatibility before reuse. Hardware gates require the no-hardware DSL barrier and all intervening
+    numerical predecessors to pass.
 18. **Complete gate pass.** Run bundles record the test. An isolated or partial check is insufficient, while
     the complete qualified phase-gate pass is sufficient for
     ✅ Done.
 
 <a id="s-commit-timing"></a>
 
-The source-snapshot digest records what ran; version-control commit timing is not a gate input. A later source or contract change
-invalidates only evidence it changes, but every phase in the present reset is explicitly **NOT VALIDATED** and
-has no reusable gate pass. No pre-reset result may be carried into the current gate.
+The source-snapshot digest records what ran; version-control commit timing is not a gate input. The accepted
+dependency graph determines which later edits invalidate current evidence reuse. The 2026-09-08 reset
+withdraws every existing certification and admits no pre-reset receipt into the new generation.
+Implementation remains available, but this documentation change supplies no reusable gate pass.
 
 ---
 

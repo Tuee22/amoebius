@@ -25,6 +25,7 @@ owned by [namespace_layout_doctrine.md](./namespace_layout_doctrine.md).
 </details>
 
 ## Contents
+
 - [1. Why this doctrine exists: types render manifests, Helm does not](#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)
 - [2. The typed manifest model: `renderAll` is the sole public pure function to objects](#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects)
 - [3. Best practice by construction: an unsafe manifest is not constructible](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)
@@ -35,8 +36,6 @@ owned by [namespace_layout_doctrine.md](./namespace_layout_doctrine.md).
 - [8. Reusable prodbox seeds vs. what is new](#8-reusable-prodbox-seeds-vs-what-is-new)
 - [9. Planning ownership](#9-planning-ownership)
 - [Related Documents](#related-documents)
-
----
 
 ## 1. Why this doctrine exists: types render manifests, Helm does not
 

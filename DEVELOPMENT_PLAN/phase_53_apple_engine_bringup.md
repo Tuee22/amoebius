@@ -35,23 +35,30 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-🔄 Active — NOT VALIDATED.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 52 and every earlier gate have passed in numerical order. The source-bound Haskell subject, independent
-oracle, paired negatives, six changed-production-subject mutants, acquired runner, and typed gate/resource
-contracts are implemented and qualified. The exact Phase-53 gate currently refuses at the required live
-boundary because this development host is Linux `x86_64`; a physical Apple Silicon macOS host must execute
-the owned Colima profile before any status projection may mark this phase Done.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
----
+Gate execution remains blocked by the qualified Phase-52 predecessor and its compatible evidence chain.
+Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
 
-> **Gate interpretation.** The phase-specific contract is bound but remains NOT VALIDATED until the complete
-> acquired gate passes for one stable source snapshot on physical Apple Silicon. Component checks and a
-> non-Apple refusal cannot substitute for the live result.
+The tracker previously recorded Phase 52 and every earlier gate as Done. This checkout is on macOS `arm64`, but the
+2026-09-08 inspection found no transferred predecessor receipt, matching original candidate, bootstrap
+inputs, or authenticated source-repository cache. The existing Phase-53 dispatcher also acquires the
+Linux/`x86_64`-only `GenesisTrust` token before reaching its Apple runner. Native toolchain acquisition and
+the predecessor evidence must be bound without relaxing the original genesis assumption or substituting
+tracker status for execution evidence.
+
+The Haskell subject, independent oracle, paired negatives, six production mutation selectors, runner, and
+typed gate/resource contracts exist. Serialized native direct-source component diagnostics accept the clean
+subject and reject all six mutants at their independently assigned assertion sets. They also reject a combined
+mutant with an unrelated failure and a selected mutant linked against unchanged production. These are component
+observations only; no complete Phase-53 gate or live Colima execution occurred in this checkout.
+
 
 ## Phase Summary
 
@@ -83,7 +90,8 @@ appears.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED; live Apple execution remains open.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -93,7 +101,7 @@ appears.
 | `Oracle` | `test/spec/host/AppleEngineBringupOracle.hs`, importing no `Amoebius.*` module and separately authoring provider, lifecycle, carve argv, lifted-step, floor, and architecture observations. |
 | `Positive controls` | The complete three-member floor, four workloads, four lifecycle rows, observed-and-admitted 4-core/8-GiB/40-GiB carve, all five executable rows of Phase 51's unchanged Linux plan and their concrete Colima envelopes, all five rows executed and argument-observed through run-owned boundary shims in the disposable live profile, a non-mutating real-guest `df` challenge, ready owned-context Docker endpoint, initially absent and then native arm64 image, and owned teardown form the closed corpus. |
 | `Paired negatives` | Each missing floor member, non-Apple substrate, CPU/memory/disk one-short supply, architecture disagreement, emulation, bare executable, and leaked ephemeral lifecycle are distinguished at exact constructors or argv rows. |
-| `Mutants` | Six Cabal-selected changed production subjects install an operator floor, choose Lima for an image build, persist an ephemeral frame, substitute default sizing, re-author the lifted step, or admit emulation; each must emit its assigned red token while the clean subject remains green. |
+| `Mutants` | Six Cabal-selected changed production subjects install an operator floor, choose Lima for an image build, persist an ephemeral frame, substitute default sizing, re-author the lifted step, or admit emulation. The independent oracle assigns each selector its exact ordered failing-assertion set; only that set may emit its assigned red token. An unrelated failure, surviving mutant, or unchanged production subject refuses qualification while the clean subject remains green. |
 | `Discovery` | The acquired tracked-source inventory equals the Apple-engine product, independent oracle, spec, runner pair, dispatch/evidence/runner wiring, and Cabal declarations; live discovery equals the floor, provider profile, endpoint, architecture, image, invocation, and teardown observations in both directions. |
 | `Challenge` | After Colima reports started, the runner decodes the provider's independent inventory and requires the exact running owner profile, architecture, CPU, memory, disk, and runtime carve; it then challenges the owned-context Docker endpoint, proves the run-owned image is initially absent, builds and executes it without cache, re-reads provider/image architecture, and refuses any cached or pre-start answer. |
 | `Observer` | The outer Haskell supervisor records absolute argv and exits for `uname`, `xcode-select`, `sysctl`, `df`, Homebrew, Colima, and Docker; Colima inventory, Docker-context inventory, and the active Docker context before/after; host/frame/engine/image architecture; guest `binfmt_misc` registrations; container stdout; and cleanup inventory. |
@@ -102,7 +110,7 @@ appears.
 | `Qualification` | The fixed clean row and six-mutant corpus qualify the Haskell harness with pinned absolute compiler/store, `--jobs=1`, and offline resolution before the live verdict is admitted. |
 | `Cleanroom` | Generated recipes, logs, and compiler products remain below `.build/runs/phase-53/**`; the exact owned image, Colima profile, and separate runtime data are destroyed in an unconditional bracket and Colima/Docker-context inventories return to their pre-run values. |
 | `Legacy closure` | Phase 53 owns no legacy ID; the acquired legacy reverse map must remain empty for this ordinal. |
-| `Predecessor` | Exact `ImmediatePredecessorPass` for Phase 52; an absent, stale, replayed, later-phase, or different-source receipt refuses before any Apple mutation. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 52 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `UNVERIFIED`: Windows engine bring-up, kind and later clusters, registry, canonical published base images, services, accelerators, and later live acceptance remain Phase-54+-owned. |
 | `Pass criterion` | `qualified-gate-pass` — all eighteen rows pass for one exact stable source on physical Apple Silicon, all six production mutants are red at assigned loci, live external observations agree, no emulation is observed, and owned live residue is zero. |
 
@@ -136,11 +144,12 @@ appears.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint contracts below own the current implementation seams. Their component diagnostics do not close
+any sprint; the complete acquired phase gate remains the required validation boundary.
 
-## Sprint 53.1: The Homebrew floor is verified, never installed 🔄
+## Sprint 53.1: The Homebrew floor is verified, never installed ⏸️
 
-**Status**: Active — NOT VALIDATED
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.AppleEngine.admitAppleFloor` and the acquired live supervisor verify physical Apple Silicon, Homebrew, and Xcode before any mutation.
 **Blocked by**: [Phase 52](phase_52_linux_engine_bringup.md) gate pass
 **Independent Validation**: one green floor and three exact missing-prerequisite pairs, plus the installs-floor production mutant.
@@ -172,7 +181,13 @@ supply.
 
 ### Remaining Work
 
-Run the complete acquired Phase-53 gate on physical Apple Silicon; only its exact pass can authorize the mechanical status projection.
+Restore the verified Phase-52 receipt together with its matching original candidate and the authenticated
+build inputs. Replace the Phase-53 dispatcher's dependence on locally reacquiring Linux-only GenesisTrust
+with an independently checked native toolchain authority that consumes the predecessor fact without changing
+the original bootstrap assumption. Resolve the qualification compiler, Cabal, and store from that authority;
+the runner's hard-coded `~/.cabal/store` is absent on this host, which uses Cabal's XDG store. Then run the
+complete acquired Phase-53 gate on physical Apple Silicon; only its exact pass can authorize the mechanical
+status projection.
 
 ## Sprint 53.2: Colima ensured, and a frame sized from the carve ⏸️
 

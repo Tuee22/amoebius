@@ -36,27 +36,20 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 51, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-Hardware validation is also prohibited until the hardware-free DSL gate barrier is independently
-satisfied and gate-passed.
-
----
-
-> **Gate interpretation.** The phase-specific contract is bound but remains NOT VALIDATED until the complete
-> acquired gate passes for one stable source snapshot. The validated Phase-49 barrier and Phase-50 bootstrap
-> authorize this first hardware-bearing run; no prose or component result substitutes for its candidate.
+Gate execution remains blocked by the qualified Phase-51 predecessor and its compatible evidence chain.
+Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
 
 ## Phase Summary
+
+This phase is the first live hardware-bearing gate, and its prerequisites remain closed until every predecessor has a new qualified pass. The audit found planned ledgers presented as executed actions, version-only tracing that missed both guest passes, root Docker probes/builds despite a sudoless claim, and selector-based generic failure labels. The replacement gate must observe complete execution and exact refusal loci before asserting engine readiness or second-pass convergence.
 
 Every earlier phase decides its claim in-process or against a fake tool directory. This one decides it on a
 Linux guest that carries nothing amoebius put there. The run asserts the floor, builds `exe:amoebius` and
@@ -98,28 +91,29 @@ appears.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED; implementation and independent execution remain open.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
-| `Claim` | A pristine Ubuntu Linux guest reaches a running native amoebius smoke image through a sudoless Docker client, and the identical second pass records probes but no mutations. |
+| `Claim` | One pristine natural-architecture Ubuntu Linux guest installs its engine and runs the native source-bound smoke image through a designated non-root Docker client. Complete external observations cover the whole run; the identical second complete guest pass issues required probes and zero mutations. |
 | `Subject` | `Amoebius.Host.LinuxEngine`, the `dev linux-engine-guest-pass` entry point, and the acquired `Amoebius.Validation.LinuxEngineBringupRun` supervisor. |
 | `Command` | `pb validate phase 52`; the validated bootstrap hands off unchanged to Haskell, which serially qualifies the production subject and then owns one live Incus guest from launch through destruction. |
 | `Oracle` | `test/spec/host/LinuxEngineBringupOracle.hs`, importing no `Amoebius.*` module and separately authoring the exact surfaces, ledgers, refusal cases, architecture rule, and unelevated argv. |
-| `Positive controls` | Four pristine surfaces, five typed first-pass mutations, four second-pass probes, two identical converged surface reads, two version reads, and current/future-session unelevated daemon probes form the closed corpus. |
-| `Paired negatives` | Pristine versus each singly dirty surface, agreeing versus mismatched requested/guest/engine architecture, elevated versus unelevated daemon argv, and converged-with-probes versus an empty second ledger are distinguished at exact constructors. |
-| `Mutants` | Five Cabal-selected changed production subjects drop durable membership, skip credential refresh, add elevated retry, erase converged probes, or admit platform override. Each must emit its assigned red token while the clean subject remains green. |
-| `Discovery` | The acquired tracked-source inventory equals the Linux-engine product module, entry point, Haskell spec, independent oracle, runner pair, dispatch/evidence/runner wiring, and Cabal declarations; the live inventory equals the four surface rows and generated ledgers in both directions. |
+| `Positive controls` | Acquire the pristine guest and complete successful install, durable membership, current/future-session access, native smoke build/run and second complete guest pass. Independently observe every process, daemon endpoint, credential context, surface and owned resource involved. |
+| `Paired negatives` | Pair each dirty-surface, architecture, credential, root-client, endpoint, missing-probe and unexpected-mutation refusal with a successful observed control. Require the exact independent error and zero forbidden effects, including unrelated-failure and untraced-action regressions. |
+| `Mutants` | Mutate actual membership, credential refresh, elevation, architecture, probing, process observation or ledger derivation. Each must fail its independently assigned exact semantic/authority case; any assertion failure printed as the active selector token is rejected. |
+| `Discovery` | Join every process and effect-producing call site, typed action, Docker invocation, observed UID/groups/environment/endpoint and resource to an independent expected role and case. Planned rows or a fixed four-surface list cannot conceal unobserved actions. |
 | `Challenge` | A uniquely named guest is observed pristine after acquisition, both passes execute against that same live guest, and the second pass must freshly observe every surface while issuing zero mutations. |
-| `Observer` | The outer Haskell runner records Incus inventory, process handoff trace, absolute child argv/exits, group database, current and future-session Docker probes, engine architecture, image inspect result, container stdout, and teardown inventory. |
-| `Authority/bypass` | The unique Phase-52 owner marker bounds the guest. Docker client calls are never elevated, only the owned guest may be mutated, the host engine is not used, and provider inventory before and after must match exactly. |
+| `Observer` | An external supervisor continuously records both actual guest passes and smoke work, including executable/argv/environment, UID/effective UID/groups, Docker endpoint/context, syscall/process outcomes, package/group/daemon/image effects, version output and teardown. The earlier version-only trace cannot supply this coverage. |
+| `Authority/bypass` | Only the marked guest may change. Privileged package/group/daemon setup is explicit; every Docker client invocation, including version/info/inspect/build/run, must run as the designated non-root user against the declared guest daemon endpoint, without elevated retry. Parent engine and hidden root probes are forbidden. |
 | `Freshness` | The run root and guest name are newly absent; source and Phase-51 receipt are acquired before launch; live preflight precedes install; both ledgers are regenerated; opening and closing tracked-source identities must match. |
-| `Qualification` | The fixed clean, four dirty-surface, architecture, unelevated-argv, second-pass, and five-mutant corpus qualifies the harness before its live verdict is admitted. Missing observations, the wrong red locus, cached output, or concurrent compiler argv refuses. |
+| `Qualification` | Observe successful legal controls and exact dirty/architecture/credential/ledger refusals, then reject wrong-case selector labels, fabricated planned ledgers, missing pass traces, root Docker calls, endpoint substitutions and hidden second-pass mutations before admitting any live verdict. |
 | `Cleanroom` | Source/support archives, compiler products, transcripts, and image context exist only below `.build/runs/phase-52/**` or inside the owned guest; the guest is destroyed in an unconditional bracket and provider inventory must return to its pre-run value. |
 | `Legacy closure` | Phase 52 owns no legacy ID; the acquired legacy reverse map must therefore remain empty for this ordinal. |
-| `Predecessor` | Exact `ImmediatePredecessorPass` for Phase 51; an absent, stale, replayed, later-phase, or different-source receipt refuses before the guest is launched. |
-| `Residue` | `UNVERIFIED`: Apple and Windows engine bring-up, VM host actions beyond this disposable Linux guest, clusters, canonical published base-image execution, registry, services, accelerators, and later live acceptance remain Phase-53+-owned. |
-| `Pass criterion` | `qualified-gate-pass` — all eighteen rows pass for one exact stable source snapshot, all five production mutants are red at their assigned loci, both live passes and external observations agree, and owned live residue is exactly zero. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 51 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
+| `Residue` | Apple/Windows, other guest architectures, clusters, canonical published images, registries/services, accelerators and later live acceptance remain unverified. No unseen setup/smoke/root action is deferred as residue; complete observation and declared authority are required within this guest run. |
+| `Pass criterion` | All eighteen rows pass for one stable source and exact predecessor; assigned mutants fail their specific independently observed cases, all Docker calls obey the declared non-root boundary, both actual passes have complete truthful ledgers, and externally observed owned live residue is zero. |
 
 ## Resource provision
 
@@ -151,14 +145,15 @@ appears.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 52.1: The pristine guest and its recorded preflight ✅
+## Sprint 52.1: The pristine guest and its recorded preflight ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Validation.LinuxEngineBringupRun` owns unique Incus launch, pristine preflight, observation, and unconditional deletion.
 **Blocked by**: [Phase 51](phase_51_host_ensure_kernel.md) gate pass
-**Independent Validation**: exact four-surface pristine admission plus provider inventory equality after forced teardown.
+**Independent Validation**: Externally acquire and observe the pristine owned guest; each singly dirty surface refuses at its exact reason after successful setup; assigned preflight/observer mutants are detected; foreign hosts and other substrates remain excluded.
 **Oracle**: `test/spec/host/LinuxEngineBringupOracle.hs`, importing no production module.
 **Legacy IDs**: none.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/substrates.md`.
@@ -170,6 +165,8 @@ materialize the guest the rest of the phase runs inside, and record what it look
 installed.
 
 ### Deliverables
+
+- Start external process/effect observation before guest setup and retain it through both passes, smoke work and cleanup. Assign every permitted privileged setup action an explicit role; no Docker client call is exempt from non-root observation.
 
 - A guest created from the pinned image at the parent's detected architecture, after the provider's
   initialisation has verified, because a guest created from an unverified provider proves nothing about
@@ -183,6 +180,8 @@ installed.
 
 ### Validation
 
+- Interrupt at every acquisition/setup boundary and require independently observed cleanup. A failing provider or absent guest is setup failure, not a successful dirty-surface negative.
+
 1. The recorded preflight names the engine, the group row, and the image reference as absent, and the run
    refuses when any of the three is already present.
 2. A run interrupted between creation and the first install leaves the provider inventory as it found it.
@@ -191,9 +190,9 @@ installed.
 
 Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.2: The pre-binary leg on a host that carries nothing ✅
+## Sprint 52.2: The pre-binary leg on a host that carries nothing ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: the live runner installs only guest build prerequisites, mounts the authenticated contained toolchain read-only, and invokes `pb` under an external `execve` trace.
 **Blocked by**: Sprint 52.1
 **Independent Validation**: guest `pb --version` output and `execve` trace must identify the source-bound Haskell binary after the Python child.
@@ -208,6 +207,8 @@ and observe the handoff from outside the process that performs it.
 
 ### Deliverables
 
+- Bind the externally observed bootstrap-to-binary handoff to the same guest, exact authenticated source/toolchain and credential context used by subsequent passes; version tracing alone cannot attest later execution.
+
 - A linux floor decision taken before any tool is resolved: the package-manager root at its absolute path,
   and the privilege that installs through it, verified without a prompt.
 - The virtualization fact excluded from the guest's floor, because `/dev/kvm` is the parent's prerequisite
@@ -219,6 +220,8 @@ and observe the handoff from outside the process that performs it.
 
 ### Validation
 
+- Continue custody after the version handoff through the actual ensure entry points. Missing observation intervals or substituted guest/UID/executable identities refuse before live acceptance.
+
 1. The floor decision is recorded before the first install argv, and a guest whose package-manager root is
    removed refuses with the remedy.
 2. After the handoff exactly one amoebius process exists in the guest, and it is the binary.
@@ -227,12 +230,12 @@ and observe the handoff from outside the process that performs it.
 
 Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.3: The engine, and sudoless access as three proofs ✅
+## Sprint 52.3: The engine, and sudoless access as three proofs ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.LinuxEngine` owns typed probes/mutations and the live absolute-path interpreter.
 **Blocked by**: Sprint 52.2
-**Independent Validation**: exact durable group row, current-process probe, future-session probe, and no-sudo argv, with three changed-subject mutants.
+**Independent Validation**: Observe durable membership and actual non-root Docker access in current and future sessions; root/elevated/endpoint-substituted variants fail specifically; assigned access mutants fail their exact cases; no other substrate is claimed.
 **Oracle**: `LinuxEngineBringupOracle.expectedFirstLedger`, `expectedUnelevatedProbe`, and `expectedFutureSession`.
 **Legacy IDs**: none.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
@@ -243,6 +246,9 @@ Adopt [`substrate_doctrine.md` §3 — the no-environment / no-`PATH` lazy tool-
 install the container engine and make it usable without elevation as three properties checked apart.
 
 ### Deliverables
+
+- Every actual Docker client call carries independently observed UID/effective UID, supplementary groups, argv, environment, context and endpoint. Use the explicit default owned-guest daemon endpoint and refuse ambient context/socket substitution.
+- Observe all probe, version, info, inspect, build and run invocations as the designated non-root user. Privileged package/group/service setup does not authorize a root Docker client.
 
 - An engine install driven as probe, install, resolve, invoke, whose probe is also its post-condition, so the
   same read decides both whether to act and whether the action worked.
@@ -256,6 +262,9 @@ install the container engine and make it usable without elevation as three prope
 
 ### Validation
 
+- Reproduce the audited hidden root version/build path and require exact authority refusal even if the non-root access probes also succeed. Include wrong endpoint, ambient Docker context and elevated retry negatives.
+- An unrelated assertion failure under a membership/refresh selector cannot count as its kill; require its independently assigned exact failed access observation and a passing unaffected control.
+
 1. A client call issued inside a login session created after the install succeeds, unelevated.
 2. The same call from the installing process succeeds before any re-login.
 3. No daemon call the run issues is wrapped in an elevation, on either the success or the failure path.
@@ -264,9 +273,9 @@ install the container engine and make it usable without elevation as three prope
 
 Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.4: The native build and the version verdict ✅
+## Sprint 52.4: The native build and the version verdict ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.LinuxEngine.admitNativeBuild` and its live image builder own three-way architecture admission and the run-local smoke image.
 **Blocked by**: Sprint 52.3
 **Independent Validation**: all agreeing architectures admit, each singly mismatched triple refuses, the platform-override mutant reddens, and live container stdout equals the recorded version.
@@ -282,6 +291,8 @@ a verdict.
 
 ### Deliverables
 
+- Build and run the owned native smoke image through the same observed non-root client and declared daemon endpoint. Record smoke build/run effects separately but retain them in the complete run ledger.
+
 - A three-way architecture agreement — requested, guest, engine — checked before the build starts, with a
   mismatch refused and the disagreeing pair named.
 - A version verdict read from the running container's own output, because a version taken from the recipe or
@@ -294,6 +305,9 @@ a verdict.
 
 ### Validation
 
+- Compare observed requested/guest/engine/image architectures and actual container output from the acquired non-root invocation. A root-side inspect/build result cannot substitute.
+- Require observation of the real build/run process and image/container effects; generated recipe text, a source-bound version expectation or a planned build row is not execution evidence.
+
 1. A build requesting an architecture the guest cannot execute refuses, and names which of the three reads
    disagreed.
 2. The verdict the gate records and the string the container printed are identical.
@@ -302,12 +316,12 @@ a verdict.
 
 Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.5: The second run that changes nothing ✅
+## Sprint 52.5: The second run that changes nothing ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `planLinuxEnginePass` derives each ledger from a fresh live observation and the runner invokes it twice in one guest.
 **Blocked by**: Sprint 52.4
-**Independent Validation**: the second exact ledger is four probes and zero mutations, both surface tables and version outputs agree, and the empty-ledger mutant reddens.
+**Independent Validation**: The actual first and second complete guest passes have externally derived full action ledgers; the second retains required probes and no mutations; hidden-action/root-client/plan-only-ledger pairs and assigned mutants fail exactly; all owned resources are externally absent after teardown.
 **Oracle**: `LinuxEngineBringupOracle.expectedSecondLedger` and `expectedSurfaces`.
 **Legacy IDs**: none.
 **Docs to update**: `documents/engineering/testing_doctrine.md`.
@@ -319,6 +333,9 @@ run the whole sequence a second time against the same guest and require that it 
 
 ### Deliverables
 
+- Derive both ledgers from acquired process/effect events, then reconcile them bidirectionally to the planned typed actions. `planLinuxEnginePass` supplies intended actions only and cannot populate an executed ledger.
+- Give the entire run an explicit ledger scope: guest acquisition, each complete production guest pass including smoke work, and final cleanup. The second complete pass must reuse converged package/group/daemon/image/container resources through observed probes; rebuilding an image, creating an unrecorded container or moving smoke mutations outside its ledger cannot satisfy zero mutations.
+
 - An action ledger per pass that types each entry as a probe or a mutation, so two passes are comparable
   rather than merely both green.
 - A post-state read after each pass over exactly the surfaces the Haskell oracle enumerates, joined in both
@@ -329,6 +346,10 @@ run the whole sequence a second time against the same guest and require that it 
   record rather than only from the console.
 
 ### Validation
+
+- Reproduce a plan-only second ledger with an injected actual install, root Docker call, image rebuild or smoke mutation; the external action join must identify and reject the hidden event.
+- Trace both actual guest passes, not only an earlier `pb --version` call. Compare exact observed probes/mutations, credential contexts, surfaces and endpoints before claiming idempotence.
+- Require each qualification failure to identify its exact independent case/reason and observed event. The active CPP selector cannot determine a generic red label for any failed assertion.
 
 1. The second pass records at least one probe per assertion and no mutation.
 2. The two post-state reads agree on every enumerated surface, and any surface only one of them names is a

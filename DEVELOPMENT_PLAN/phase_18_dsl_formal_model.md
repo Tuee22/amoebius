@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/formal_model_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -34,18 +34,19 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 17 and every earlier gate have current passing receipts. The Phase-18 implementation and compiled
-semantic contract are bound below; completion still requires the exact integrated Phase-18 gate.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-17 predecessor and its compatible evidence chain.
 
 ## Phase Summary
+
+The prior projection reduced parts of the DSL to constants and fixture counts and exercised only a few protocol examples. This phase must state and test the actual bounded semantic correspondence it claims. The later decoder, provision, renderer and chain owners must extend that correspondence using real values before the DSL barrier can pass.
 
 This phase has a bound Haskell implementation but does not report a passing result until its complete gate
 runs. It projects a bounded tranche of DSL decisions and concurrent protocols from
@@ -83,29 +84,28 @@ calver `2026.09.04.170753` jar SHA-256
 `b658b4e504fdf0b721caf7066320f6b6fe5805f4dd2f717d0e47baba4097205e`. Both are ignored local-custody
 inputs and both exact digests are rechecked by the Haskell supervisor.
 
-**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-18 semantic payload, package-hidden serial
-supervisor, pure production models and decision subjects, separately authored Haskell oracle, fixed offline
-JVM/TLC inputs, and three changed-production subjects are complete; only a fresh integrated run may authorize status.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
-| `Claim` | Six Haskell `Model` values cover the bounded projection, token, reservation, Lease, reconcile, and five-calculus claims; explorer and TLC agree for the five transition-bearing DSL models. |
+| `Claim` | Haskell-authored bounded DSL decisions and protocol models have independently specified safety/liveness obligations and explicit correspondence to actual production decisions; explorer/TLC results establish only those declared models and bounds. |
 | `Subject` | `Amoebius.Formal.Dsl.Models`, the Phase-9 capacity fold, three protocol decision modules, and the calculus projection are acquired only through package-hidden `DslFormalModelRun.Internal`. |
 | `Command` | Future public spelling is `pb validate phase 18`; before `BOOTSTRAP_HANDOFF`, the exact source-bound Haskell executable invokes absolute Cabal 3.16.1.0 and GHC 9.12.4 directly, offline and serially, with digest-pinned Java 21.0.9/TLA+ 1.8.0. |
-| `Oracle` | `DslFormalModelOracle.hs` separately declares exact model structure, state totals, capacity domain, calculus facts, and mutation catalogue without reading production renderings. |
-| `Positive controls` | Six exact model contracts, 18 explorer states, five explorer/TLC fingerprint equalities, 6,561 capacity pairs, eight calculus facts, and three actual protocol decisions pass. |
-| `Paired negatives` | Overcommit/admitted capacity pairs, token first/second consumption, unreachable/present reconciliation, eight exact safety mutants, and four fairness deletions all distinguish their intended boundary. |
-| `Mutants` | Three Cabal flags change production projection count, token reuse, and unreachable deletion; each fresh build must fail at its exact independent oracle locus before the clean row. |
-| `Discovery` | The closed five-production/three-oracle Haskell source set is joined bidirectionally to the captured source snapshot. |
+| `Oracle` | `test/spec/formal/dsl/DslFormalModelOracle.hs` independently states domain values, actual decision/input-output relations, model states/transitions, safety/liveness obligations, fairness assumptions and exact mutation assignments. |
+| `Positive controls` | Exercise every declared bounded decision and transition correspondence, capacity boundary, token, reservation, Lease, reconcile and indexed calculus case; compare semantic states and edges with independently generated TLC observations. |
+| `Paired negatives` | Minimally alter actual capacity decisions, token reuse, reservation transitions, authority, unreachable deletion and convergence; the relevant invariant or correspondence must fail for its specific reason while the legal control succeeds. |
+| `Mutants` | Mutate actual production decisions and model/implementation projection seams, including binding and resource values; changing a fixture-count constant or checker-only pass flag cannot discharge a production-semantic obligation. |
+| `Discovery` | Reconcile the independently declared bounded DSL/protocol semantic surface with production constructors/functions, model obligations, actual correspondence observations and exact selector assignments. Historical model/state/fixture totals are examples, never the discovery authority. |
 | `Challenge` | The three changed-production builds are post-acquisition challenges and must each fail while the clean subject passes. |
 | `Observer` | Exact process argv, exits, stdout/stderr digests, generated-product inventory, and source snapshots are captured outside the test subject. |
 | `Authority/bypass` | No `pb`, network, host, hardware, or live service is admitted; only absolute Cabal, GHC, JVM, and TLC paths run, with compiler and TLC workers fixed to one. |
 | `Freshness` | One unique `.build/runs/phase-18/work/candidate-*` root is created after acquisition; opening and closing source identities must match. |
-| `Qualification` | Exact toolchain digests, all three production mutants, the independent oracle, paired negatives, discovery, containment, and legacy absence must pass before the clean result can qualify. |
+| `Qualification` | Use qualified model/checker predecessors and authenticated TLC input, then require independent decision/transition correspondences, safety/liveness observations, paired negatives and assigned changed-production failures together. |
 | `Cleanroom` | All TLA/CFG/DOT/log/result products are created beneath the fresh run root; the authenticated network-independent source-package cache is copied into that root. |
 | `Legacy closure` | The Python Phase-18 gate and four serialized behavioral oracle files are absent and independently enumerated. |
-| `Predecessor` | Exact durable Phase-17 receipt for the current evolutionary source lineage; absent, stale, replayed, or wrong-phase evidence refuses execution. |
-| `Residue` | Runtime/effect fidelity remains UNVERIFIED; decoder and provision/render/chain projections remain assigned to Phases 26, 31, 33, and 34. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 17 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
+| `Residue` | No unbounded whole-language or runtime-effect theorem is claimed. Decoder correspondence is owned by Phase 26, provision by Phase 31, rendering by Phase 33 and chain by Phase 34; their actual-value joins are required by Phase 49. |
 | `Pass criterion` | Every one of these 18 rows must be execution-derived green in one qualified run for the exact source snapshot. |
 
 ## Doctrine adopted
@@ -118,14 +118,15 @@ JVM/TLC inputs, and three changed-production subjects are complete; only a fresh
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 18.1: Actual bounded DSL projections ✅
+## Sprint 18.1: Actual bounded DSL projections ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/capacity-topology/Amoebius/Capacity/Fold.hs`, `test/harness/deterministic_simulation/CalculusProjection.hs`, and the capacity/calculus sections of `DslFormalModelSpec.hs`
 **Blocked by**: [Phase 17](phase_17_gateway_migration_model.md) gate pass
-**Independent Validation**: exhaustive componentwise reference subtraction over all 6,561 pairs and eight exact five-calculus facts
+**Independent Validation**: Observe real bounded DSL decisions and indexed values against independent expectations; pair a semantic value change with its exact correspondence failure; kill production-decision mutants; exclude unbounded and later-owned semantics.
 **Oracle**: `DslFormalModelOracle.hs` plus the independently constructed `referenceCalculusProjection`
 **Legacy IDs**: none; retired serialized Phase-18 oracles are checked absent directly
 **Docs to update**: this phase file, `formal_model_doctrine.md`, `dsl_doctrine.md`, and `system_components.md`
@@ -137,10 +138,16 @@ hashes or byte snapshots as semantic evidence.
 
 ### Deliverables
 
+- Replace count-only projection facts with typed input, decision, resource, identity and transition values from the actual production entry points. Model observations retain their independently declared domain and projection relation.
+- A Haskell semantic inventory links each bounded claim to its production owner, model obligation, independent oracle and later extension owner. Existing numerical examples remain controls, not complete-language declarations.
+
 - Exhaustive four-axis `0..2` demand/capacity differential over 6,561 pairs.
 - Actual five-calculus composition projected through the shared formal bridge.
 
 ### Validation
+
+- Hold fixture counts constant while changing a production decision, resource amount or object identity; the actual semantic projection must change and its independent correspondence check must fail.
+- Require the same actual value to supply executable and modeled observations; separately constructed stand-in models and literal summary totals cannot establish correspondence.
 
 1. Compare `fits` to independent componentwise subtraction on every finite-domain pair.
 2. Match all eight shared calculus facts.
@@ -158,13 +165,14 @@ composition over Phase-11 `Model` values.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate. The two removed tranches are
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure. The two removed tranches are
 carried as obligations on Phases 26 and 34 rather than as residue here, because this phase no longer claims
 them.
 
-## Sprint 18.2: Protocol models and correspondence ✅
+## Sprint 18.2: Protocol models and correspondence ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Formal/Dsl/Models.hs`, `Manifest/Authority.hs`, `Scheduler/Reservation.hs`, `Cluster/NodeProvisioner.hs`, and `DslFormalModelSpec.hs`
 **Blocked by**: Sprint 18.1
 **Independent Validation**: exact 18-state structure plus actual one-use token, reservation, and unreachable/present decision pairs
@@ -179,11 +187,15 @@ code correspondence explicitly bounded.
 
 ### Deliverables
 
+- For every modeled action, define the precise production decision and state projection it denotes, including refusal and stuttering behavior, with independently authored Haskell correspondence expectations.
+
 - One projection model and four transition models with eight safety and four liveness obligations.
 - Actual one-use token, one-debit reservation, and unreachable-refusal readings.
 - Six-model contract including the actual calculus-composition model.
 
 ### Validation
+
+- Exercise each declared bounded protocol edge and refusal under the real decision function, including concurrency/order boundaries where in scope; three illustrative calls cannot substitute for complete declared edge correspondence.
 
 1. Require exact model structure and an 18-state explorer total.
 2. Require the actual protocol decisions at their exact outcomes and reasons.
@@ -191,11 +203,12 @@ code correspondence explicitly bounded.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 18.3: Explorer, TLC, mutation, and gate ✅
+## Sprint 18.3: Explorer, TLC, mutation, and gate ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `DslFormalModelSpec.hs`, `DslFormalModelOracle.hs`, and package-hidden `DslFormalModelRun.Internal`
 **Blocked by**: Sprint 18.2
 **Independent Validation**: five explorer/TLC fingerprint comparisons, eight exact safety mutants, four fairness deletions, and three compiled production mutants
@@ -210,11 +223,16 @@ source-bound phase-gate result.
 
 ### Deliverables
 
+- Retain exact states, edges, obligations, fairness premises and cutoff assumptions in qualified model receipts; distinguish bounded proof from sampled executable correspondence.
+
 - Five exact explorer/TLC fingerprint comparisons.
 - Eight exact safety mutants and four fairness-drop mutants red.
 - Fourteen metrics, 15-surface/18-item join, ledger, containment, write guard, and exact run binding.
 
 ### Validation
+
+- Run model mutants and actual production-decision mutants separately at their assigned obligations. A change to `capacityCases` alone cannot satisfy a capacity-semantics mutation requirement.
+- Reject any candidate missing an owner/model/case link or relying on an unqualified Phase-11 through Phase-14 checker; retain each unsupported or assumed layer explicitly.
 
 1. Require explorer/TLC fingerprint equality on all five transition-bearing DSL models.
 2. Require each safety mutant to violate exactly its authored invariant and each fairness drop to fail TLC.
@@ -223,7 +241,8 @@ source-bound phase-gate result.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
 ## Documentation Requirements
 

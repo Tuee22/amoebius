@@ -20,6 +20,7 @@ replay. It does not own the online runtime it pairs with, owned by
 </details>
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. Scope and adjacent owners](#2-scope-and-adjacent-owners)
 - [3. The external continuity surface](#3-the-external-continuity-surface)
@@ -34,8 +35,6 @@ replay. It does not own the online runtime it pairs with, owned by
 - [12. Deployment policy, resources, and honesty](#12-deployment-policy-resources-and-honesty)
 - [13. Hardware-free semantic boundary](#13-hardware-free-semantic-boundary)
 - [Related Documents](#related-documents)
-
----
 
 Phase order, implementation status, and validation gates live only in
 [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). This doctrine states the offline target
@@ -354,9 +353,10 @@ not equivalent to server-side Vault custody. Encryption at rest does not protect
 compromised same-origin runtime code, browser extensions, or a compromised device; CSP, dependency integrity,
 the bounded generated client, and local unlock reduce that exposure but do not remove it.
 
-Only after the hardware-free UI/DSL/generator barrier passes may the local browser gate
-compile freshly generated PureScript with the closed offline facilities. Separate
-browser processes must preserve and recover a fresh encrypted canary, enforce partitioning and fenced
+The hardware-free UI/DSL/generator barrier must compile freshly generated PureScript and JavaScript and
+exercise their pure semantics against independent expectations. Only after that barrier passes may the local
+browser gate observe the closed offline facilities. Separate browser processes must preserve and recover a
+fresh encrypted canary, enforce partitioning and fenced
 ownership, observe handoff, retain only the generated immutable asset set, and report quota refusal. Haskell
 oracles and Haskell-declared production-source mutants must be checked independently; browser/container
 success cannot retroactively qualify their generator or expectations, and status remains solely in the
@@ -375,13 +375,19 @@ the application DSL. This is sibling evidence, not an amoebius implementation cl
 
 ## 13. Hardware-free semantic boundary
 
-The Phase-45 implementation expresses encrypted-envelope opacity, tenant/subject/device/program/epoch
-partitioning, quota refusal, fenced single ownership, adjacent schema migration, ordered recovery, the closed
-six-facility set, and its generic runtime projection as Haskell values. The projection is materialized only
-beneath `.build/**`; tracked PureScript and JavaScript copies are not authorities.
+The hardware-free contract requires tenant/subject/device/program/epoch partitioning, quota refusal, fenced
+single ownership, adjacent schema migration, ordered recovery, the closed six-facility set, and a generated
+runtime projection. Opaque Haskell envelope values do not establish encryption; the required cryptographic
+construction and independent semantic checks must exist before the barrier.
 
-This boundary does not claim IndexedDB, OPFS, Web Locks, BroadcastChannel, service-worker, WebCrypto,
-cross-tab, or browser-quota fidelity. Those require later post-barrier browser observation.
+The projection is materialized only beneath `.build/**` and must compile and execute its claimed pure
+semantics. A list of facility names or source tokens cannot satisfy that obligation. Tracked PureScript and
+JavaScript copies are not authorities.
+
+IndexedDB, OPFS, Web Locks, BroadcastChannel, service-worker, WebCrypto integration, cross-tab behavior, and
+browser-quota fidelity require later post-barrier browser observation. That later evidence cannot discharge
+missing hardware-free encryption or generated-code obligations. The [Development Plan](../../DEVELOPMENT_PLAN/README.md)
+owns implementation progress and current certification.
 
 ## Related Documents
 - [Low-Code UI Runtime](./low_code_ui_runtime_doctrine.md)

@@ -32,18 +32,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 38, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
----
+Gate execution remains blocked by the qualified Phase-38 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -75,7 +72,8 @@ implementation, provider state, browser enforcement, and live tenant isolation r
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -94,9 +92,9 @@ implementation, provider state, browser enforcement, and live tenant isolation r
 | `Qualification` | `qualified-ui-effect-binding-harness` |
 | `Cleanroom` | `ui-effect-binding-products-contained-below-build` |
 | `Legacy closure` | `retired-ui-effect-binding-authorities-absent` |
-| `Predecessor` | `exact-phase-thirty-eight-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 38 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `ui-plan-runtime-and-provider-owners-explicit` |
-| `Pass criterion` | `qualified-phase-thirty-nine-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -110,11 +108,12 @@ implementation, provider state, browser enforcement, and live tenant isolation r
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 39.1: Exact port and capability binding ✅
+## Sprint 39.1: Exact port and capability binding ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`, `test/spec/ui/{EffectBindingCases,UiEffectBindingSpec,EffectBindingReference}.hs`, and the package-hidden Phase-39 supervisor own this sprint surface.
 **Blocked by**: [Phase 38](phase_38_ui_authorization_kernel.md) gate pass
 **Independent Validation**: one clean Haskell semantic suite and seven production CPP mutations execute serially from one acquired fresh build root.
@@ -140,11 +139,12 @@ Adopt one exact relation whose only successful result is a constructor-private `
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 39.2: Trusted links and negative controls ✅
+## Sprint 39.2: Trusted links and negative controls ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`, `test/spec/ui/{EffectBindingCases,UiEffectBindingSpec,EffectBindingReference}.hs`, and the package-hidden Phase-39 supervisor own this sprint surface.
 **Blocked by**: Sprint 39.1
 **Independent Validation**: one clean Haskell semantic suite and seven production CPP mutations execute serially from one acquired fresh build root.
@@ -171,11 +171,12 @@ Keep navigation names separate from effect transport and provider coordinates.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 39.3: Calculus projection and phase seal ✅
+## Sprint 39.3: Calculus projection and phase seal ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`, `test/spec/ui/{EffectBindingCases,UiEffectBindingSpec,EffectBindingReference}.hs`, and the package-hidden Phase-39 supervisor own this sprint surface.
 **Blocked by**: Sprint 39.2
 **Independent Validation**: one clean Haskell semantic suite and seven production CPP mutations execute serially from one acquired fresh build root.
@@ -202,7 +203,8 @@ Seal the pure binding claim with current calculus, architecture, surface, contai
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
 ---
 

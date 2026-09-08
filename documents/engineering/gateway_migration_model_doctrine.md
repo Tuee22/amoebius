@@ -1,6 +1,6 @@
 # The Gateway-Migration Model: amoebius's one proof obligation
 
-> **Purpose**: Single source of truth for the *one* protocol amoebius proves itself — the cross-cluster **gateway migration**, covering **both** branches of `GatewayMigration = <Planned | Failover>` — expressed as a reifiable `Model` ([formal_model_doctrine.md](./formal_model_doctrine.md)), **simulated** with io-sim and **proven** with TLC, and reduced to every `InForceSpec` by a decode-time structural-fit fold rather than any per-spec model-check.
+> **Purpose**: Define the cross-cluster gateway-migration model, its bounded safety and liveness proof obligations, and the structural-fit conditions required to admit an `InForceSpec`.
 > **Read this if**: the migration's formal claim has to be read, extended, or checked.
 
 This document owns the formal model of the gateway migration: the states, the safety invariants, the
@@ -19,9 +19,9 @@ model-as-data machinery it is expressed in, owned by
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. The one obligation](#1-the-one-obligation)
 - [2. The two branches (the state machine this model checks)](#2-the-two-branches-the-state-machine-this-model-checks)
 - [3. The `Model`](#3-the-model)
@@ -31,9 +31,9 @@ model-as-data machinery it is expressed in, owned by
 - [7. Planning ownership](#7-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. The one obligation
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 amoebius delegates almost every consensus problem to a system that already discharges it, and does not re-prove
 it ([chaos_failover_doctrine.md](./chaos_failover_doctrine.md)):
@@ -46,7 +46,7 @@ it ([chaos_failover_doctrine.md](./chaos_failover_doctrine.md)):
   **no bespoke leader election** — amoebius does not duplicate etcd, and there is no First-Axis
   control-plane-election model to prove.
 
-What is left — the single place a per-system proof obligation concentrates on amoebius itself — is the
+The cross-cluster protocol obligation owned here is the
 **asynchronous cross-cluster gateway migration**: moving the wild-ingress gateway between clusters and
 repointing DNS, across geo-replication lag, without stranding a live session or admitting two owners. etcd
 cannot cover it because it spans clusters. This is the *only* boundary **this** model targets. It is no
@@ -55,8 +55,9 @@ longer amoebius's only proof obligation: the DSL's own semantics and concurrent 
 reservation state machine fail in different ways and neither covers the other.
 
 Both branches are in scope. The prior framing (`tla_modelling_assumptions.md`, now superseded) scoped the
-model to the `Failover` branch and treated the `Planned` branch's RPO=0 as merely an argued assumption. **This doctrine reverses that:** the `Planned` coordinated handover and the `Failover` emergency takeover are *both*
-modelled, simulated, and proven.
+model to the `Failover` branch and treated the `Planned` branch's RPO=0 as merely an argued assumption. Both
+the `Planned` coordinated handover and the `Failover` emergency takeover require model, simulation, and
+bounded proof evidence under this doctrine.
 
 ---
 
@@ -154,9 +155,10 @@ Both instruments read the **same** `Model`:
   not the later Register-2.5 daemon simulation.
 - **Prove (TLC).** `emitTLA` renders the `Model` to a spec TLC model-checks exhaustively at a bounded scope,
   and must reach every safety invariant with no counterexample **and** every liveness `PROPERTY` under the
-  fairness `F`. Because the model is the value the runtime interprets, an separately authored successful
-  run can be proven-for-the-model *about the
-  shape the code takes*, at the bound. Liveness is a TLC-only verdict — the io-sim and explorer readings assert
+  fairness `F`. A successful qualified run establishes the recorded bounded model property. Transferring that
+  result to production requires actual decision-entrypoint bindings or checked refinement, together with an
+  independent semantic renderer oracle. Shared model values alone do not establish that correspondence.
+  Liveness is a TLC-only verdict — the io-sim and explorer readings assert
   the *safety* predicates only ([formal_model_doctrine.md §3](./formal_model_doctrine.md#3-two-total-renderings)).
 
 Both are Register-1, in-process, needing no cluster ([conformance_harness_doctrine.md](./conformance_harness_doctrine.md)).
@@ -176,9 +178,13 @@ than validating a substitute. Runtime fidelity remains UNVERIFIED.
 
 ## 5. One-and-done, plus a per-`InForceSpec` structural fit
 
-The protocol is proven **once**, at design time, over the bounded `Model`. TLC is **never** on the spec-decode
-path. What runs per-`InForceSpec` is a fast, total **decode-time structural-fit fold** that rejects any spec
-whose migration graph falls outside the proven envelope.
+The bounded protocol must be model-checked before admission; TLC is not on the spec-decode path. Evidence
+may be reused only while its accepted model, renderer, independent oracle, checker, bounds, assumptions, and
+production bindings remain valid. Changes to those inputs require renewed qualification and validation.
+
+What runs per-`InForceSpec` is a total **decode-time structural-fit fold** that must reject any spec whose
+migration graph falls outside the validated envelope. This reuse rule does not turn a bounded model result
+into a proof of the cutoff argument or the effectful runtime.
 
 The envelope is bought by the DSL shape: `GatewayFailover { active, standby, dnsRecord, hubRole }` is the
 per-migration record the decoder folds into a migration graph, which the fold then bounds on two axes — graph
@@ -257,17 +263,18 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
   decomposition lemma is discharged, and until then the shape is unavailable rather than unsound. The
   over-scope stress run still *models* a shared survivor in, so the stress model retains the ability to detect
   a cutoff violation the fold now forecloses.
-- **Single-source correspondence narrows drift; runtime fidelity is bridged, not only sampled.** Because
-  `interpret` and `emitTLA` consume one `Model`, there is no separate variable→module correspondence table to
-  complete later, but renderer faithfulness remains a differential-test obligation —
-  the inversion the superseded doc left "empty and UNVERIFIED until Phase 74" is dissolved. The residual
-  **runtime-fidelity** obligation (that the effectful daemon only takes transitions the `Model` sanctions) is
-  is assigned in two stages, not one: **trace validation**
+- **Single-source model definitions narrow drift; production correspondence remains an obligation.**
+  `interpret` and `emitTLA` must consume one `Model`, and independent expectations must check renderer
+  faithfulness. Actual production entrypoints must use those decisions or satisfy an explicit checked
+  refinement; a second demonstration model or matching labels cannot establish the connection.
+  **Runtime fidelity** requires evidence that the effectful daemon takes only transitions the model sanctions.
+  That obligation has two stages: **trace validation**
   ([formal_model_doctrine.md §8](./formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge)) —
   the daemon's observed transition log is checked step-by-step against the emitted spec's `Next` relation —
   is owned by the later runtime-correspondence phase against `Amoebius.Multicluster.GatewayMigration`, while
   Register 3 is owned by the later live-drill phase. Until those gates pass, runtime fidelity is
-  **UNVERIFIED**: the Phase-17 explorer/TLC/IOSimPOR agreement proves only the bounded model and does not show
+  **UNVERIFIED**: qualified explorer/TLC/IOSimPOR agreement would establish only its bounded model and tested
+  correspondence claims. It would not show
   that a local authoritative DNS server is Route53 or that a single-host pause reproduces WAN physics.
 
 **Current source boundary.** Phase 17's production model is

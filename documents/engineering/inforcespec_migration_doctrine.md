@@ -21,9 +21,9 @@ the specification.
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. A migration is a typed diff, not a new operation](#2-a-migration-is-a-typed-diff-not-a-new-operation)
 - [3. The DSL exposes no destructive verb — the closed `StorageMutation` union](#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union)
@@ -35,9 +35,9 @@ the specification.
 - [9. Planning ownership](#9-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Why this doctrine exists
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 A long-lived cluster does not keep one fixed `InForceSpec`; the operator uploads a new generation whenever the
 target shape changes — a bigger volume, a renamed bucket, a shrunk topic retention, a migrated schema. The

@@ -23,11 +23,9 @@ never names a product. It does not own how those providers are deployed, owned b
 
 </details>
 
-> **Historical result (invalidated).** Every pre-reset phase-run and implementation-result statement is
-> diagnostic only and never current validation evidence. Target doctrine remains normative; current state is
-> owned exclusively by the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Why capabilities, not products](#1-why-capabilities-not-products)
 - [2. The capability set](#2-the-capability-set)
 - [3. Canonical providers; extension is capability-specific](#3-canonical-providers-extension-is-capability-specific)
@@ -39,9 +37,9 @@ never names a product. It does not own how those providers are deployed, owned b
 - [9. Planning ownership](#9-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Why capabilities, not products
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 **An app declares a need for an ObjectStore, never for MinIO.** Whether that object storage is served by
 MinIO, by a cloud S3, or by something amoebius has not written yet is an implementation detail of the
@@ -280,6 +278,8 @@ canonical (part 2 above) and could later admit an alternate, an `InferenceEngine
 cluster there is no single cluster-wide substrate to consult; selection must name a concrete eligible offering
 or an elastic candidate class.
 
+#### Closed identities and lazy resolution
+
 **The canonical provider is a closed union of substrate-tagged `EngineRuntime` identities.** The executable
 closed sets must be the Haskell `EngineRuntime` and `InferenceFamily` data types, and the executable lane/family
 availability relation is a total Haskell mapping over those constructors. No binder or checker parses the
@@ -318,6 +318,8 @@ arm through the target offering projected from the *detected* substrate (the sub
 [substrate_doctrine.md](./substrate_doctrine.md));
 it has no syntax with which to *author* an arbitrary download or build. This is the [§1](#1-why-capabilities-not-products) object-storage lesson taken to
 its limit: an app can no more write "curl this engine URL at boot" than it can write "deploy `minio`."
+
+#### Detected offerings and model compatibility
 
 **The engine offering is a downward-closed set derived from one eligible target's detected substrate, not an
 orthogonal cluster-wide axis, and this doctrine owns that mapping.** `EngineRuntime` is a capability
@@ -384,6 +386,8 @@ engine-as-capability side — the family-availability-on-serving-substrate check
 may still fail to **load** on the serving lane (bytes are portable, not guaranteed cross-lane loadable), a residue
 owned by [content_addressing_doctrine.md §6.1](./content_addressing_doctrine.md#61-proven--tested--assumed-spelled-out),
 not foreclosed here.
+
+#### Complete accelerator workloads and rejection boundaries
 
 **The identity-complete accelerator workload set (this doctrine owns it, single-owner).** The *left operand* of
 the accelerator-memory fold is not one favorable owner scalar. `InferenceBinding` carries an exact source
@@ -461,6 +465,8 @@ of these mistakes into unrepresentable states is owned by
 [illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model). This doctrine owns only that the **engine is a capability whose provider is substrate-selected and jit-resolved** — the resolver + toolchain are baked into the
 base container, the engine *payload* is not (it is materialized on first miss into the `CacheBudget`-bounded
 content-addressed cache, [content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
+
+#### Validation scope and sibling evidence
 
 > **Honesty — target only, NOT VALIDATED.** Phase 32 must eventually test the pure `InferenceEngine` offering
 > quotient, family/lane relation, identity-complete CUDA/Metal owner demands, residency/coexistence checks,

@@ -41,21 +41,16 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
 ⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 57, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-Hardware validation is also prohibited until the hardware-free DSL gate barrier is independently
-satisfied and gate-passed.
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-57 predecessor and its compatible evidence chain.
+Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
 
 ## Phase Summary
 
@@ -182,7 +177,8 @@ Phase 89 respectively).
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -201,7 +197,7 @@ Phase 89 respectively).
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
 | `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 57; candidate execution refuses an absent, stale, replayed, or different-source result. |
+| `Predecessor` | UNRESOLVED — blocks validation: the typed generation/compatibility binding still requires implementation. Require authenticated `ImmediatePredecessorPass` for Phase 57 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
 | `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
 
@@ -259,16 +255,8 @@ Phase 89 respectively).
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
-
-> **Permanently invalid pre-reset seal record.** A 2026-08-16 run claimed to reseal Sprints 38.1–27.5; that
-> claim and every referenced path are historical inventory only and cannot satisfy this contract. There is no
-> current candidate evidence or gate pass. A future candidate may write only run-owned material beneath
-> `.build/**`. Functional and validation outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Future closure
-> requires the redesigned phase gate, predecessor gate pass, legacy closure, universal artifact hygiene, and
-> complete gate pass.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
 ## Sprint 58.1: Deployment-global desired state + authenticated live inventory + typed action plan ⏸️
 
@@ -366,7 +354,8 @@ Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate. The receipt and its three-check transcript are written into this run's bundle under `.build/runs/`, never
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure. The receipt and its three-check transcript are written into this run's bundle under `.build/runs/`, never
 into the plan tree. Sprint 58.2 consumes the typed action/authority boundary.
 
 ## Sprint 58.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch ⏸️
@@ -435,7 +424,8 @@ observed handoff. The scheduler's CAS reservation/Binding path and its two-stage
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate. The live receipt records the Lease CAS, scoped managed fields, stable no-op, and clean postflight.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure. The live receipt records the Lease CAS, scoped managed fields, stable no-op, and clean postflight.
 
 ## Sprint 58.3: Staged execution transitions, Job terminal protocol, and authenticated deletion ⏸️
 
@@ -503,7 +493,8 @@ capability.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate. Sprint 58.4 composes these actions into the full convergence/no-op corpus.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure. Sprint 58.4 composes these actions into the full convergence/no-op corpus.
 
 ## Sprint 58.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) ⏸️
 
@@ -569,7 +560,8 @@ This is the phase gate.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate. The receipt and the live/mutation results are written into this run's bundle under `.build/runs/`. The
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure. The receipt and the live/mutation results are written into this run's bundle under `.build/runs/`. The
 content-addressed completion gateway and the rollback/release ledger stay deferred to the content-store phase
 and are carried UNVERIFIED, never green.
 
@@ -616,7 +608,8 @@ open. The scheduler's CAS-race schedules are Phase 59's `SchedulerSim`.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate. The Register-2.5 receipt and its seven-mutant ledger are written into this run's bundle under
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure. The Register-2.5 receipt and its seven-mutant ledger are written into this run's bundle under
 `.build/runs/`; modeled-apiserver fidelity remains assumed, as the register boundary requires, and the same run's
 Register-3 half supplies the live boundary evidence that bounds it.
 

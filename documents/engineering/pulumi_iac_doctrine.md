@@ -19,9 +19,9 @@ unable to remove durable backing. It does not own the capacity checks that admit
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [0. Decision record: why Pulumi stays — and why that is not the Helm decision](#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision)
 - [1. Pulumi runs only from inside an existing amoebius cluster](#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster)
 - [2. The backend: every byte of state is a Vault-enveloped object in MinIO](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio)
@@ -35,9 +35,9 @@ unable to remove durable backing. It does not own the capacity checks that admit
 - [10. Planning ownership](#10-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 0. Decision record: why Pulumi stays — and why that is not the Helm decision
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 amoebius dropped Helm ([manifest_generation_doctrine.md §1](./manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)) but keeps
 Pulumi, and the two decisions can look inconsistent until the asymmetry that separates them is made explicit.

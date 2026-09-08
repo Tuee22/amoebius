@@ -31,17 +31,19 @@ owned by the exact integrated gate and the mechanical status projection that fol
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 32 and every earlier gate have passed in numerical order. The pure renderer, independent Haskell
-semantic oracle, property battery, Aeson round-trip corpus, and twelve changed-production challenges are
-bound; only the complete integrated Phase-33 gate may authorize completion.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-32 predecessor and its compatible evidence chain.
 
 ## Phase Summary
+
+The complete manifest obligations below remain mandatory. The former calculus projection recorded numbers of deployments, objects and tests; it did not relate provisioned meaning to manifests. This phase must observe real values and serialized semantics with an independent oracle, while apiserver admission and live convergence remain later-owned.
 
 **Target capability — NOT VALIDATED.** The pure Haskell target comprises the typed `K8sObject` model and
 `renderAll :: ProvisionedSpec -> [K8sObject]`, which projects the complete whole-deployment object set from
@@ -106,28 +108,29 @@ separately authored Haskell predicate. Renderer output is never its own expectat
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
-| `Claim` | `pure-total-render-all-boundary` |
+| `Claim` | Pure total `renderAll` consumes the actual opaque `ProvisionedSpec` and preserves its complete identity, security, resources, storage, image, accelerator and activation semantics in typed objects and serialized manifests. |
 | `Subject` | `acquired-render-manifest-supervisor` |
 | `Command` | `pb validate phase 33` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
-| `Oracle` | `independent-render-manifest-oracle` |
-| `Positive controls` | `render-manifest-positive-controls` |
-| `Paired negatives` | `paired-render-manifest-negatives` |
-| `Mutants` | `applied-render-manifest-production-mutants` |
-| `Discovery` | `exact-render-manifest-source-discovery` |
+| `Oracle` | `test/spec/manifest/RenderGoldenOracle.hs` independently authors full object and serialized semantic expectations derived from declared contracts; it must not call production renderers or reduce objects to counts. |
+| `Positive controls` | Every render-source/object variant and capability shape declared below preserves its exact provisioned fields, object identity set, resource/security/storage/image meaning and encode/decode semantics. |
+| `Paired negatives` | A minimally changed resource, identity, image digest, mount, access/ownership field, controller shape or activation frame is rejected by its exact object-field correspondence while the matched legal input/output passes. |
+| `Mutants` | Mutate actual rendering and serialization at each declared semantic obligation; every selector is assigned to its independent exact object/field case, including same-object-count omissions or substitutions. |
+| `Discovery` | Reconcile all provisioned render-source arms, object constructors/fields, serializer projections, independent semantic obligations and production mutation assignments in both directions. |
 | `Challenge` | `post-acquisition-render-manifest-challenge` |
 | `Observer` | `render-manifest-process-observation` |
 | `Authority/bypass` | `no-pb-network-host-hardware-or-render-manifest-parallelism` |
 | `Freshness` | `fresh-render-manifest-build-root-and-stable-source` |
-| `Qualification` | `qualified-render-manifest-harness` |
+| `Qualification` | Complete actual input/output correspondence, exact object-field negatives, serializer observations, purity/totality witnesses and assigned changed-production cases must qualify together; deterministic bytes and object counts alone are insufficient. |
 | `Cleanroom` | `render-manifest-products-contained-below-build` |
 | `Legacy closure` | `retired-render-manifest-authorities-absent` |
-| `Predecessor` | `exact-phase-thirty-two-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 32 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `later-actions-dry-run-runtime-live-owners-explicit` |
-| `Pass criterion` | `qualified-phase-thirty-three-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -182,9 +185,9 @@ separately authored Haskell predicate. Renderer output is never its own expectat
 
 ## Sprints
 
-## Sprint 33.1: The typed `K8sObject` model + Aeson serialization ✅
+## Sprint 33.1: The typed `K8sObject` model + Aeson serialization ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: the private `manifest-render` library at `src/manifest-render/Amoebius/Manifest/{Types,K8sObject}.hs` owns the closed typed object model and canonical Aeson encoding.
 **Blocked by**: [Phase 32](phase_32_inference_accelerator_provision.md) gate pass
 **Independent Validation**: 164 exact typed objects round-trip through canonical Aeson bytes without changing value or encoding.
@@ -201,12 +204,16 @@ text.
 
 ### Deliverables
 
+- Independently specify each object field and its serialized meaning, including optional/absent distinctions and stable identity. Unknown or omitted semantic fields cannot disappear behind an object count.
+
 - A typed `K8sObject` sum covering the full deployment object set, each variant a Haskell record with an
   Aeson `ToJSON`/`FromJSON` instance; the record is the manifest — no `values.yaml`, no text template.
 - The Secret variant carries a Vault coordinate (a reference), structurally admitting no literal secret
   bytes; the whole `SecretRef` / Vault model stays owned by the vault/PKI doctrine and is not restated.
 
 ### Validation
+
+- Round-trip actual generated manifests through an independent structural decoder and compare declared field semantics, not only the production encoder against its own decoder.
 
 1. The model compiles on the pinned toolchain; a hand-built object round-trips through Aeson to an equal
    value and re-encodes to the same canonical bytes.
@@ -216,9 +223,9 @@ text.
 The complete integrated Phase-33 gate and its mechanical status projection remain. Live Kubernetes decoding
 and apiserver correspondence remain later-owned residue.
 
-## Sprint 33.2: Pure total `renderAll` + best-practice-by-construction ✅
+## Sprint 33.2: Pure total `renderAll` + best-practice-by-construction ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/manifest-render/Amoebius/Manifest/{Render,RenderAll}.hs` and the `Amoebius.Manifest` facade own the sole pure total render path.
 **Blocked by**: Sprint 33.1
 **Independent Validation**: eighteen capability/shape domains, nine object variants, deterministic identity ordering, four activation stages, reconcile modes, and three non-vacuous safety predicates execute in `render-golden`.
@@ -273,6 +280,8 @@ bounded, while memory-backed volumes retain their access, persistence, and one-c
 
 ### Deliverables
 
+- A Haskell correspondence projection retains the actual `ProvisionedSpec` resources, identities and witnesses alongside the exact `renderAll` output they constrain.
+
 - `renderAll :: ProvisionedSpec -> [K8sObject]`, pure and total (no I/O, no apiserver, no partial head),
   producing best-practice-by-construction objects. It maps Phase 31's sealed
   `Map K8sObjectIdentity (ProvisionedRenderSource K8sObjectIdentity)` one-for-one, proves every emitted
@@ -291,6 +300,8 @@ bounded, while memory-backed volumes retain their access, persistence, and one-c
   Deployment-`replicas=1` control-plane daemon under its mandatory Lease (no bespoke election).
 
 ### Validation
+
+- Use same-object-count controls with changed resource quantities, volume backings or image identities and require an exact field mismatch. No independently fabricated stand-in provision value may supply the rendering claim.
 
 1. The `-Werror=incomplete-patterns`/`-Werror=incomplete-uni-patterns` compile passes. The boundary check
    reports no partial call and no `IO`/`unsafePerformIO`/partial-`Prelude` name reachable from `renderAll`.
@@ -343,13 +354,13 @@ bounded, while memory-backed volumes retain their access, persistence, and one-c
 The complete integrated Phase-33 gate and its mechanical status projection remain. SSA, ApplySet pruning,
 readiness, and live convergence remain Phase-58 work.
 
-## Sprint 33.3: The rendered-output semantic-oracle battery (`render-oracle`) — the gate ✅
+## Sprint 33.3: The rendered-output semantic-oracle battery (`render-oracle`) — the gate ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `test/spec/manifest/RenderGolden{Gate,Props,Spec}.hs` and the package-hidden Phase-33 supervisor own the clean and mutation matrix.
 **Blocked by**: Sprint 33.2
-**Independent Validation**: the exact 33-entry locus inventory, five-calculus/198-unit projection, covered nine-arm/two-shape property, and twelve production CPP mutations are acquired serially in a fresh build root.
-**Oracle**: `RenderGoldenOracle.hs`; the supervisor checks source independence and exact acceptance tokens.
+**Independent Validation**: Render every declared source/object family to independently expected typed and serialized semantics; a minimally changed field fails its exact locus; assigned renderer mutants are rejected; apiserver and live fidelity remain unverified.
+**Oracle**: `RenderGoldenOracle.hs`; the supervisor checks source independence and acquired exact per-case semantic observations.
 **Legacy IDs**: the acquired gate joins the Haskell source closure and requires the old serialized/tool-local authorities absent.
 **Docs to update**: this phase and every documentation owner listed below.
 
@@ -364,6 +375,8 @@ and blocking/underived-NetworkPolicy ([`§3.6`](../documents/illegal_state/illeg
 states — directly on the emitted objects, all without a cluster.
 
 ### Deliverables
+
+- Replace `checkRenderCalculusProjection` fixture-count vectors with actual provision-to-manifest semantic relations and reconcile them with the Phase-18 bridge.
 
 - Eighteen semantic rows cover every capability arm under `SingleNode` and `Distributed`, including exact identity, kind, activation, reconcile-mode, workload, policy, exposure, and accelerator facts.
 - Shape checks preserve the selected workload kind and sealed source-identity domain.
@@ -394,6 +407,8 @@ confirms the intended production locus changed:
   live band). The semantic oracle is authored source; rendered deployments remain generated and untracked.
 
 ### Validation
+
+- Every resource, security, identity, storage, image and activation obligation in this phase must have an independently declared case and production mutation assignment; a covered-property count cannot substitute for this join.
 
 1. The `render-golden` Cabal suite must be green — output matches the
    independently authored semantic projection across

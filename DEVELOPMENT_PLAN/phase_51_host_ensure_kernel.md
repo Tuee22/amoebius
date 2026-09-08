@@ -34,18 +34,19 @@ This document binds the Phase-51 capability and its still-open exact gate. Curre
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-The exact Phase-50 predecessor gate has passed. Phase 51 remains Active until its complete acquired fake-boundary
-gate passes for one stable source snapshot.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
----
+Gate execution remains blocked by the qualified Phase-50 predecessor and its compatible evidence chain.
 
 ## Phase Summary
+
+The audit found selector-dependent failure labels that could turn any assertion failure into an apparent assigned mutant kill, and a production-caller check based on the occurrence of `installAndVerify` in source text. The required gate must execute the actual caller through fake boundaries and bind every failure to its independent exact assertion and observation.
 
 The binary takes over every assertion the moment [Phase 50](phase_50_host_assert_cli.md) execs it, and the
 pressure on this phase is that the takeover happens once, in one place. One table answers which frame a
@@ -86,26 +87,27 @@ second substrate appears.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED; implementation and independent execution remain open.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
-| `Claim` | Every post-handoff host assertion resolves through one closed, substrate-indexed Haskell algebra whose install steps are typed data, whose probe is also its post-condition, and whose one lift fold emits argv for host, frame, and container contexts. |
+| `Claim` | The actual Haskell host-context caller drives the typed probe-first ensure and lift semantics against independently observed fake host boundaries, with precise applicability/refusal reasons, fresh resolution after changes and no installation on an already converged second pass. |
 | `Subject` | `Amoebius.Host.{Substrate,Frame,HostTool,Ensure,Reconciler,Lift,Context}`, the production `mkBinaryContext` caller, and the acquired `Amoebius.Validation.HostEnsureKernelRun` supervisor. |
 | `Command` | `pb validate phase 51`; the already validated bootstrap forwards this exact argv to the source-bound Haskell dispatcher, which runs every compiler-bearing matrix row offline and serially with `--jobs=1`. |
 | `Oracle` | `test/spec/host/HostEnsureKernelOracle.hs`, which imports no production module and separately authors the exact frame, plan, applicability, argv, replay, paired-negative, and two-root expectations. |
-| `Positive controls` | The closed corpus covers four substrates, three frames, two engine sources, seven host tools, four reconciler rows, 26 plan rows, 15 lifted argv, absent→present→present replay, and two disjoint fake hosts. |
-| `Paired negatives` | Bare versus absolute executable, resolved versus missing requirement, admitted versus excluded reconciler, non-empty versus exhausted plan, executable versus non-executable candidate, and owning versus foreign fake root are distinguished at exact constructors and diagnostics. |
-| `Mutants` | Five Cabal-selected changed production subjects bypass the initial probe, retain a stale snapshot, add the forbidden Apple Docker step, author the applicability diagnostic beside its column, or drop the frame prefix. Each must emit its exact red token while the clean subject remains green. |
+| `Positive controls` | Observe the actual production caller on every declared substrate/frame/tool/reconciler arm, exact typed plans and lifted requests, absent-to-present convergence, a probe-only second pass and two isolated fake hosts. |
+| `Paired negatives` | Require successful paired controls before bare/missing/nonexecutable/foreign-root/excluded-substrate/exhausted-plan cases. Each refusal must match its independently authored constructor, arguments and diagnostic with zero forbidden process requests. |
+| `Mutants` | Change initial probing, resolution freshness, applicability, diagnostic derivation, frame lifting or actual production caller routing. The assigned independent exact case must fail for its expected reason; a generic issue list labeled by the active selector is inadmissible. |
 | `Discovery` | The acquired source inventory must equal the seven host production modules, production caller, Haskell spec, independent oracle, runner, and Cabal declarations in both directions; runtime discovery must produce exactly the closed expected files and row counts. |
 | `Challenge` | Each candidate uses a newly absent run root and two newly absent fake-host roots; a tool created after acquisition must resolve only in its owning root, while the paired foreign root remains empty. |
-| `Observer` | The Haskell supervisor records the absolute Cabal/compiler/store identities, exact serialized argv and exits for clean and mutant children, and the spec records generated filesystem rows and issued fake argv rather than trusting return codes alone. |
+| `Observer` | The acquired supervisor retains actual fake-boundary process/file identities, argv/environment, requests, state transitions and cleanup, and observes calls reached from the production binary host-context entry point. |
 | `Authority/bypass` | Only the validated `pb` handoff, authenticated compiler/Cabal/store, offline serial builds, and run-owned `.build/**` fake files are admitted. Network, package-manager mutation, container/VM/cluster/provider calls, hardware discovery, ambient `PATH`, and external roots are forbidden. |
 | `Freshness` | The run root and both fake host roots are unique and absent at acquisition, generated observations are recreated, opening and closing tracked-source identities match, and no prior candidate output can satisfy the new root challenge. |
-| `Qualification` | The fixed clean, paired-negative, two-root, and five-mutant corpus qualifies the harness; missing oracle output, partial discovery, constant success, wrong red locus, ambient resolution, stale state, or non-serial compiler argv refuses. |
+| `Qualification` | Reject generic-failure selector labeling, wrong-case assertions, failed positive setup, source-token-only caller checks, no-op driver/caller, stale snapshots and forged process observations through their exact acquired qualification cases before accepting the clean corpus. |
 | `Cleanroom` | All build directories, fake executables, observations, and mutation products are generated beneath the unique `.build/runs/phase-51/**` owner root; tracked behavioral expectations remain Haskell and no live effect or external residue is admitted. |
 | `Legacy closure` | `LTD-HOST-001` closes only when the production caller reaches the probe-first driver and the bypass/stale mutants redden. `LTD-HOST-002` closes only when one resolver serves production and disjoint scoped roots and ambient/foreign-root negatives redden. |
-| `Predecessor` | Exact `ImmediatePredecessorPass` for Phase 50; an absent, stale, replayed, later-phase, or different-source receipt refuses before candidate execution. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 50 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `UNVERIFIED`: real package-manager privilege and permission fidelity, live Linux/Apple/Windows engine and frame provisioning, containers, VMs, clusters, images, registry, accelerators, and all hardware-bearing behavior remain Phase-52+-owned. |
 | `Pass criterion` | `qualified-gate-pass` — all eighteen rows pass for one exact stable source snapshot, both owned legacy IDs close, five changed production subjects are red at their assigned loci, and zero out-of-scope effects or residue are observed. |
 
@@ -139,9 +141,9 @@ second substrate appears.
 
 ## Sprints
 
-## Sprint 51.1: The closed substrate algebra ✅
+## Sprint 51.1: The closed substrate algebra ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.Substrate` and `Amoebius.Host.Frame` own the wildcard-free closed mappings; `HostEnsureKernelSpec` enumerates every constructor.
 **Blocked by**: [Phase 50](phase_50_host_assert_cli.md) gate pass
 **Independent Validation**: exact four-substrate frame/engine/provider rows plus compiler exhaustiveness and the foreign-root negative.
@@ -171,6 +173,8 @@ member.
 
 ### Validation
 
+- For each legal substrate/frame control, require its exact constructed result. An unrelated build or assertion failure under a constructor mutation cannot be accepted as the intended exhaustiveness witness.
+
 1. Every `case` over `Substrate` in the host modules is exhaustive and wildcard-free.
 2. Adding a constructor to `Substrate` or `Frame` fails the build at each table obliged to answer for it.
 
@@ -178,9 +182,9 @@ member.
 
 Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.2: Install steps as typed data ✅
+## Sprint 51.2: Install steps as typed data ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.HostTool`, `Amoebius.Host.Ensure`, and `Amoebius.Host.Reconciler` own the closed tool, requirement, resolver, and typed step data.
 **Blocked by**: Sprint 51.1
 **Independent Validation**: exact 26-row plan plus bare-path and missing-requirement paired refusals.
@@ -195,6 +199,8 @@ make an install step a value the driver executes rather than a label a reader in
 
 ### Deliverables
 
+- Observe typed install/tool resolution values through the actual host-context entry point using isolated Haskell fake boundaries, including executable identity and argv rather than source-token presence.
+
 - An `InstallStep` carrying a resolved host tool plus its arguments, replacing `installMechanism :: String`.
   An install step is not a string, it is a tool and an argument vector, and a string is exactly the shape that
   compiles while naming a mechanism no interpreter implements.
@@ -207,6 +213,8 @@ make an install step a value the driver executes rather than a label a reader in
 
 ### Validation
 
+- Replace the production caller with a no-op while retaining the token `installAndVerify` in a comment or unused function; the behavioral integration case must fail.
+
 1. The step type admits no constructor whose payload is an unparsed string.
 2. Every tool a production path invokes is a `HostTool` constructor, joined from the invocation sites to the
    enum in both directions.
@@ -215,12 +223,12 @@ make an install step a value the driver executes rather than a label a reader in
 
 Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.3: The reconciler table ✅
+## Sprint 51.3: The reconciler table ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.Reconciler` owns the single applicability/diagnostic/step table.
 **Blocked by**: Sprint 51.2
-**Independent Validation**: exact 30-row table and 16 decision rows; excluded Apple/Windows engine pairs refuse before effects.
+**Independent Validation**: Drive an admitted reconciler through the real caller and observe requests; its minimally excluded counterpart refuses at the exact independently authored constructor/diagnostic before effects; assigned applicability mutants fail their exact case; real package-manager fidelity remains unverified.
 **Oracle**: `HostEnsureKernelOracle.expectedTable` and `expectedRefusals`.
 **Legacy IDs**: `LTD-HOST-001`.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`.
@@ -243,6 +251,8 @@ express a reconciler as a row so its three views cannot disagree with each other
 
 ### Validation
 
+- Compare the exact expected refusal constructor and payload at each excluded applicability case. A generic failure relabeled with `mutantToken` must fail harness qualification.
+
 1. A reconciler's diagnostic names exactly the substrates its applicability column admits, with no third
    place where either is written.
 2. Driving a reconciler on an excluded substrate refuses before any process is created.
@@ -251,12 +261,12 @@ express a reconciler as a row so its three views cannot disagree with each other
 
 Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.4: The probe-first ensure driver ✅
+## Sprint 51.4: The probe-first ensure driver ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.Ensure.installAndVerify` and `Amoebius.Host.Context.ensureRequiredTools` provide the probe-first driver and production caller.
 **Blocked by**: Sprint 51.3
-**Independent Validation**: exact absent→present→present issued-argv replay, exhausted-plan refusal, and probe-bypass/stale-snapshot mutants.
+**Independent Validation**: The production host-context entry point observes absent-to-present and a probe-only second pass on independent fake hosts; exhausted/stale/foreign-root pairs fail exactly; assigned driver/caller mutants fail their named assertion; live host behavior remains unverified.
 **Oracle**: `HostEnsureKernelOracle.expectedReplay`.
 **Legacy IDs**: `LTD-HOST-001`, `LTD-HOST-002`.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`.
@@ -269,6 +279,9 @@ pre-condition.
 
 ### Deliverables
 
+- A Haskell integration harness invokes the real `mkBinaryContext`/host ensure path with acquired fake boundaries and observes the full probe, install, fresh resolution and final verification sequence. Text containing a function name cannot supply this evidence.
+- Each error retains its originating action, executable, refusal constructor and exact diagnostic under a case identifier fixed by the independent oracle; the selector does not choose a blanket error label.
+
 - An installer that executes a typed step by absolute path and returns a classified failure, so a failed
   install is distinguishable from a tool that was never attempted.
 - A re-resolve after every step, because a tool a step laid down is absent from the config snapshot that step
@@ -280,6 +293,9 @@ pre-condition.
 
 ### Validation
 
+- Run a wrong-case assertion failure under each active selector and require qualification to reject it. Also reject controls that fail before their intended driver action.
+- Drive two disjoint fake roots through the actual caller and verify externally observed request/state isolation, then repeat the successful root to require fresh probes and zero install requests.
+
 1. A second run issues no install argv, and the recorded argv set is the evidence rather than a return code.
 2. A plan exhausted with the requested tool still unresolved fails with that tool named.
 
@@ -287,9 +303,9 @@ pre-condition.
 
 Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.5: The lift fold to argv ✅
+## Sprint 51.5: The lift fold to argv ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.Lift` owns the pure context-to-argv fold.
 **Blocked by**: Sprint 51.4
 **Independent Validation**: exact 15-row argv projection across host, frame, and container plus the frame-prefix changed subject.
@@ -305,6 +321,8 @@ without a second deployment path.
 
 ### Deliverables
 
+- Bind exact lift-fold results to observed outer-tool invocations from the actual caller, preserving each frame’s declared authority and environment.
+
 - A `LiftContext` describing where a step executes, and one pure fold from that context and a step to the argv
   that runs it. Two deployment paths for one step list is how a fix reaches one substrate and not the others.
 - Absolute-path resolution applied to the outermost tool only, with a nested command left as the guest's own
@@ -313,6 +331,8 @@ without a second deployment path.
   `.build/**`, so a fold change is visible without a serialized repository golden.
 
 ### Validation
+
+- Pair a correct nested invocation with a wrong prefix or substituted executable and require the exact observed mismatch; printing the assigned mutant token cannot satisfy this check.
 
 1. The three contexts consume one step list and differ only in the prefix the fold emits.
 2. The fold creates no process and reads no environment variable, so it is testable as a pure function.

@@ -7,7 +7,7 @@ This document owns the *order*, and nothing else. Every index in the corpus — 
 [engineering doctrine index](./engineering/README.md), the
 [illegal-state family](./illegal_state/README.md), the
 [plan tracker](../DEVELOPMENT_PLAN/README.md) — groups documents by subject; none of them says which to open
-first, and subject order is not reading order. The stops below name what each document establishes and where
+first, and subject order is not reading order. The stops below name what each document specifies and where
 to stop reading it; the documents themselves remain the only authority on their content. Nothing here presumes
 prior knowledge, but every stop presumes the stops above it.
 
@@ -22,6 +22,7 @@ prior knowledge, but every stop presumes the stops above it.
 </details>
 
 ## Contents
+
 - [Before starting](#before-starting)
 - [Stop 1. What amoebius is](#stop-1-what-amoebius-is)
 - [Stop 2. The one idea — illegal states are unrepresentable](#stop-2-the-one-idea--illegal-states-are-unrepresentable)
@@ -33,23 +34,20 @@ prior knowledge, but every stop presumes the stops above it.
 - [Stop 7. Where to go next, by role](#stop-7-where-to-go-next-by-role)
 - [Related Documents](#related-documents)
 
----
-
 ## Before starting
 
 > **Doctrine describes the target; it is not implementation or validation evidence.** Candidate gate output
-> cannot pass by reporting success alone. A complete qualified gate pass is sufficient for phase status after
-> independent expectations, sabotage controls, predecessor order, and the applicable hardware-free barrier pass.
+> cannot establish a pass by reporting success alone. The accepted verifier must establish independent
+> expectations, qualification, custody, and predecessor compatibility before a result can authorize status.
 
 - [`glossary.md`](./glossary.md) — open in a second tab and leave it open; every stop below assumes it.
-
-The whole path runs about three hours. Stops 1 and 2 alone, about forty minutes, are enough to follow a design
-discussion.
+- [`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md) — consult the current certification frontier and dated audit before interpreting implementation claims.
+- [Accepted baseline and certification generation](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation) — the trust boundary required for certification after the reset.
 
 ## Stop 1. What amoebius is
 
 - [`DEVELOPMENT_PLAN/overview.md` §1](../DEVELOPMENT_PLAN/overview.md#1-the-everything-orchestrator-shape-one-runtime-binary-three-contexts) — one binary, three contexts, and the shape of the whole system.
-- [`DEVELOPMENT_PLAN/overview.md` §2](../DEVELOPMENT_PLAN/overview.md#2-the-seed-projects-reference-implementations-amoebius-re-derives-from) — the five seed projects amoebius re-derives from, and why depending on none of them is the point.
+- [`DEVELOPMENT_PLAN/overview.md` §2](../DEVELOPMENT_PLAN/overview.md#2-the-seed-projects-reference-implementations-amoebius-re-derives-from) — the seed projects and their intended role as reference implementations.
 - [`repository_layout_doctrine.md` §1](./engineering/repository_layout_doctrine.md#1-classification-rule) — the closed source boundary: behavioral source is Haskell, `pb/**` is the sole source-language exception, and everything else is generated lazily or supplied externally.
 
 Stop there. The invariant table in
@@ -58,8 +56,8 @@ Stop there. The invariant table in
 
 ## Stop 2. The one idea — illegal states are unrepresentable
 
-Everything else in the corpus is downstream of this stop. The foreclosure layers below are stated in the
-vocabulary of the validation registers, so that stop comes first.
+Unrepresentability is a design objective with a separate evidence obligation for each claimed construction
+boundary. The foreclosure layers use the validation-register vocabulary, so the register definition comes first.
 
 - [`testing_doctrine.md` §2](./engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — the registers of evidence, and what each one can and cannot reach.
 - [`illegal_state_techniques.md` §4](./illegal_state/illegal_state_techniques.md#4-the-typing-techniques) — the nine construction patterns that do the work.
@@ -67,18 +65,17 @@ vocabulary of the validation registers, so that stop comes first.
 - [`illegal_state_techniques.md` §6.1](./illegal_state/illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer) — the orthogonal axis naming where a state is actually caught.
 - [`illegal_state_catalog.md` §3](./illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent) — skim the enumeration, then read three entries in full. Three, not eighty.
 
-**Then read why the catalogue is finishable.** The list above is a technique set; the claim that it *covers*
-its subject rests on the covering obligation, and the claim that it survives an open set of domains rests on
-the algebra. Both are short:
+The catalogue's coverage must be established against an independently declared taxonomy. Extension to new
+domains additionally requires the composition obligations introduced at the next stop.
 
 - [`documentation_standards.md` §16](./documentation_standards.md#16-the-illegal-state-catalogue-is-a-covering-not-a-list) — why the catalogue is a covering over a declared taxonomy, and why an unjustified empty cell is a defect.
 - [`illegal_state/README.md`](./illegal_state/README.md) — the three axes that taxonomy names, and what is specified versus discharged.
 
 ## Stop 2b. The algebra and the laws
 
-This is the stop that makes the previous one hold for code nobody has written yet. amoebius is an **open core**:
-it admits extensions carrying arbitrary logic, so it cannot enumerate its compositions and instead proves that
-lawful instances compose.
+The **open core** is specified to admit extensions with arbitrary domain logic. Its laws therefore state
+obligations for admitting an extension and composing accepted instances. Their declarations do not establish
+that every implementation satisfies those laws or that all possible compositions have been checked.
 
 - [`extension_conformance_doctrine.md` §1](./engineering/extension_conformance_doctrine.md#1-why-this-doctrine-exists)–[§3](./engineering/extension_conformance_doctrine.md#3-the-obligation-surface-one-component-per-calculus) — why an open core needs a contract, and the five-component obligation surface that is the whole of it.
 - [`extension_conformance_doctrine.md` §7](./engineering/extension_conformance_doctrine.md#7-link-time-union-closure) — the closure argument: read this one carefully, it is the load-bearing claim.
@@ -94,11 +91,11 @@ lawful instances compose.
 
 ## Stop 4. From description to effect
 
-This is the spine: how an external operator value or a version-controlled Haskell declaration becomes a
-running cluster. External-language materializations are lazy `.build/**` products, never a second tracked
+This is the intended spine from an external operator value or Haskell declaration to cluster effects.
+Each boundary requires its own implementation and evidence. External-language materializations are lazy `.build/**` products, never a second tracked
 source surface.
 
-- [`dsl_doctrine.md` §5](./engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) — the contract stop 2 described, stated as the language's own guarantee.
+- [`dsl_doctrine.md` §5](./engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) — the language's required construction contract and its foreclosure boundaries.
 
 - [`resource_capacity_doctrine.md` §1](./engineering/resource_capacity_doctrine.md#1-capacity-is-a-budget-the-fold-consumes-and-overcommit-is-a-checked-rejection) — capacity as a budget a fold consumes, and overcommit as a checked rejection.
 - [`resource_capacity_doctrine.md` §2](./engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed) — the honesty limit that keeps the whole model from overclaiming.
@@ -109,8 +106,8 @@ source surface.
 
 ## Stop 5. What the gates establish, and what they do not
 
-The corpus is unusually careful about the difference between proving something and testing it. This stop is
-what makes the rest of it readable at face value.
+This stop distinguishes specified obligations, finite model results, sampled tests, implementation
+correspondence, and live observations. The limits of each result remain part of its claim.
 
 - [`documentation_standards.md` §6](./documentation_standards.md#6-honesty-the-proventestedassumed-discipline) — the rule every claim in the corpus is written under.
 - [`chaos_failover_doctrine.md` §6](./engineering/chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives) — why one boundary carries the whole formal obligation and the rest delegate.
@@ -124,8 +121,10 @@ downstream evidence. Later replay checks portability; it cannot stand in for the
 
 ## Stop 6. The plan
 
-- [`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md) — the tracker; the only place phase order, status, and gates live.
-- [`development_plan_standards.md` §M](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the fixed eighteen-row contract that stops a gate from being passable by a stub.
+- [`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md) — the tracker for phase order, current status, and dated implementation audits; each linked phase owns its contract.
+- [`development_plan_standards.md` §M](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the eighteen required gate rows and their execution obligations; table completeness alone supplies no certification.
+- [Accepted baseline and certification generation](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation) — separate acceptance authority, contract revision, and protected receipt custody.
+- [Candidate evidence and gate pass](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass) — dependency-based compatibility and authenticated evidence reuse.
 - [`development_plan_standards.md` §K](../DEVELOPMENT_PLAN/development_plan_standards.md#k-honesty-proven--tested--assumed) — how stop 5's discipline binds a phase before it may be marked done.
 - [`development_plan_standards.md` §C](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — a complete qualified gate pass is sufficient for status; a human, agent, or CI job may record the narrow status projection while a component self-report cannot pass by itself.
 - [`development_plan_standards.md` §L](../DEVELOPMENT_PLAN/development_plan_standards.md#l-one-substrate-discipline) — later hardware evidence stays scoped to the one natural substrate actually exercised and cannot be generalized to an untested substrate.
@@ -133,6 +132,8 @@ downstream evidence. Later replay checks portability; it cannot stand in for the
 Work proceeds in numerical phase order. A later hardware-dependent gate does not compensate for an open or
 unaccepted predecessor, and no hardware provisioning should begin merely to validate a language surface that
 has not crossed the hardware-free barrier above.
+Hardware-free implementation may continue through ready seams under the plan's separate implementation rules.
+Ordinary qualification and phase progression remain automatic within accepted scope.
 
 ## Stop 7. Where to go next, by role
 

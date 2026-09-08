@@ -12,7 +12,7 @@ This slice owns the phase model. [`README.md`](README.md) is the sole current-st
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/validation_frame_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_90_test_topology_live.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -28,8 +28,6 @@ This slice owns the phase model. [`README.md`](README.md) is the sole current-st
 - [R. Where the cross-cutting invariants live](#r-where-the-cross-cutting-invariants-live)
 - [Related Documents](#related-documents)
 
----
-
 ## C. Status vocabulary
 
 The marker and phrase in the tracker, phase status block, and each sprint must agree.
@@ -38,13 +36,20 @@ The marker and phrase in the tracker, phase status block, and each sprint must a
 |---|---|
 | ✅ **Done** | The complete qualified gate passed for the exact current contract and its status-only result was recorded. |
 | 🔄 **Active — NOT VALIDATED** | Work is in progress. No current validation claim is permitted. |
-| 📋 **Planned — NOT VALIDATED** | The contract is specified but work has not begun. |
 | ⏸️ **Blocked — NOT VALIDATED** | Gate execution and status are held shut by a named predecessor or external prerequisite. Hardware-free implementation may exist under the separate rules in §O. |
-| 🧪 **Live-proof pending — NOT VALIDATED** | Candidate code exists, but the required live gate has not passed. |
 
 The literal `NOT VALIDATED` is mandatory on every non-Done current status. It is deliberately redundant: a
 reader must not have to infer that Active or Blocked invalidates historical completion language elsewhere in
 a large phase document.
+
+These are the only three phase and sprint status values. Implementation progress and unavailable live
+prerequisites belong in prose, not additional status categories.
+
+The 2026-09-08 certification reset withdraws all prior phase certifications. Phase 0 becomes Active and
+Phases 1–95 become Blocked; no phase is renumbered and implementation remains available for repair.
+The new certification generation must be enforced by Haskell as specified in
+[gate integrity §M.0](development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation).
+This documentation reset does not implement that authority or establish a gate pass.
 
 A complete qualified phase-gate pass is sufficient to change a phase and its sprints to ✅ Done. A human,
 agent, or CI job may record the narrow status patch after the validator exits. The gate-pass contract is defined by
@@ -74,8 +79,8 @@ a Done phase is Done; Sprint N.1 is Active at the frontier and its later sprints
 mechanically advances the frontier: Phase N and all of its sprints become Done, while Phase N+1 and its first
 sprint become Active when a successor exists. At the upper bound every phase and sprint is Done. A missing
 Done predecessor, two Active phases, a Done gap, or tracker/phase/sprint disagreement refuses validation.
-Planned and Live-proof pending remain vocabulary for explicitly designed non-candidate states; neither is an
-automated gate frontier until a typed transition contract defines it.
+The same projection rules apply after reopening an affected claim. Compatible historical receipts may
+support automatic restoration only after the accepted verifier establishes their current applicability.
 
 ---
 
@@ -98,6 +103,9 @@ automated gate frontier until a typed transition contract defines it.
   paths, and Linux/`x86_64`. It does not authenticate publisher identity, actual compiler executable bytes or
   derivation, the loader, the broader host, or reproducibility. It has no phase ordinal, does not advance
   status, and cannot be proved by the Phase-0 binary it compiled; Phase 1 owns those broader claims.
+- The accepted seed verifier and its custody boundary are explicit bootstrap assumptions. Phase 0 qualifies
+  only its finite seed; it does not depend on the full language, later host transport, or universal Phase-49
+  qualification. Later verifier versions are admitted by the previously accepted verifier.
 - `pb/**` is a pre-phase bootstrap boundary, not a delivered language, test framework, or source of validation
   verdicts. It may ensure the Haskell toolchain, build the binary, and hand off; the Haskell binary owns all
   numbered-phase behaviour and verdicts.
@@ -119,8 +127,9 @@ GenesisTrust (non-numbered root)
   → live platform and domain instances
 ```
 
-Phase 49 is not satisfied by replaying earlier top-level exit codes. It re-exercises, from an empty generated
-tree, the complete Haskell-owned pipeline and its independent oracles. Phase 50 and every later phase remain
+Phase 49 is not satisfied by replaying earlier top-level exit codes. It re-exercises the complete Haskell-owned
+pipeline and independent oracles from fresh candidate products and explicitly admitted, authenticated inputs.
+Each production stage consumes the preceding stage's typed output. Phase 50 and every later phase remain
 blocked until that barrier gate passes. This ordering prevents a working container engine,
 GPU, cluster, or cloud resource from being used as proxy evidence that the DSL itself is sound.
 
@@ -165,22 +174,22 @@ Phase 0 is the finite governance, source-policy, and gate seed and declares no b
 uses one final register. Supporting lower-register checks remain explicit rows; they do not turn a live gate
 into several interchangeable gates.
 
-The current reset permanently invalidates all prior completion evidence. Old seals, receipts, hashes,
+The 2026-09-08 reset permanently invalidates all prior completion evidence for current certification. Old seals, receipts, hashes,
 attestations, “built”, “validated”, “policy-conformant”, scoped-instance results, or Done prose may remain only
 when explicitly labelled `Invalidated historical record`; they cannot be reactivated or cited as a current
 candidate. Every phase must satisfy its rewritten gate in numerical order.
 
-A gate writes a generated candidate ledger and verified status patch beneath `.build/runs/**`. The ledger
-records source, contract, harness qualification, observations, residue, and the complete pass/fail result. A
-passing ledger for the exact current source is sufficient for the status-only transition, but the validator
-never performs that tracked edit. After it exits, a human, agent, or CI job may recheck the bound preimage and
-apply the exact emitted patch. The tracker never embeds or manufactures a run transcript.
+A gate writes a generated candidate ledger beneath `.build/runs/**`. The accepted verifier must authenticate
+its execution, qualification, scope, observations, and custody before issuing the verified status patch.
+A green ledger or content digest alone cannot authorize a transition. After the verifier exits, a human,
+agent, or CI job may recheck the preimage and apply the emitted patch automatically.
+The tracker never embeds or manufactures a run transcript.
 
-An already-Done phase may be executed again only as an explicit receipt refresh. The full gate must pass against
-the exact current source, but the generated status projection is an identity with no tracked targets. A refresh
-adds durable regression evidence and never alters the frontier. It is not induced recursively by later source
-changes: a verified predecessor receipt is monotonic, and the active gate owns current-source compatibility.
-This is the evolutionary predecessor rule defined by gate integrity §M.6.
+An already-Done phase may run a receipt refresh against its exact current source, with an identity status
+projection. A refresh adds authenticated regression evidence without advancing the frontier.
+The accepted dependency graph determines whether changes require that refresh or reopening under §N.
+Unchanged qualified closures remain reusable; changed closures and affected consumers require revalidation.
+Unknown impact fails closed under [gate integrity §M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass).
 
 ---
 
@@ -226,16 +235,22 @@ pre-hardware DSL validation. The retired rule that all language validation must 
 
 ## N. Reopening and amending a phase
 
-Any phase may be reopened when its contract, subject, oracle, source boundary, or predecessor evidence
-changes. Reopening preserves one coherent numerical story:
+A phase reopens when its accepted claim fails or loses current compatibility. A source edit alone does not
+erase an earlier observation. The accepted verifier computes the affected closure before permitting reuse;
+unknown impact is an unresolved validation dependency.
 
-1. update the current contract in place rather than appending an alternative;
-2. move the tracker and phase marker together to a non-Done status carrying `NOT VALIDATED`;
-3. reset affected sprints to a non-Done status;
-4. invalidate the prior gate result and evidence explicitly;
-5. add every current implementation mismatch to the typed Haskell legacy inventory and update its explanation
-   in the one reader-facing legacy register; and
-6. re-run from that phase forward in numerical order after each predecessor gate passes.
+1. Propose contract changes separately from the candidate that must satisfy them. Preserve existing accepted
+   obligations until the baseline-revision procedure admits their replacement.
+2. Move the frontier to the earliest affected phase. Make that phase Active and its successors Blocked,
+   preserving the single contiguous status vector and resetting their sprint projections.
+3. Record which evidence is incompatible and retain compatible receipts as historical observations.
+4. Add implementation mismatches to the typed Haskell legacy inventory and its single reader explanation.
+5. Revalidate affected closures and consumers in numeric order. The accepted verifier may restore an
+   unaffected successor from compatible authenticated evidence without rerunning its unchanged closure.
+
+These transitions are automated within accepted scope. Routine reopening, qualification, and progression do
+not require intermediate user confirmation. Baseline revision cannot authorize a candidate to discard the
+requirement that made its own gate fail.
 
 An `Invalidated historical record` block may preserve minimal audit context inside `## Phase Status`. It ends
 at the next `##` heading and is always non-normative. It may state what an earlier run claimed, but it may not

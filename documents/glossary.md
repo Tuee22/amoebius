@@ -23,6 +23,7 @@ as the set its first-use rule ranges over.
 </details>
 
 ## Contents
+
 - [1. The spine — from accepted input to running cluster](#1-the-spine--from-accepted-input-to-running-cluster)
 - [2. Foreclosure, gates, and where a check lands](#2-foreclosure-gates-and-where-a-check-lands)
 - [3. Evidence, testing, and the plan](#3-evidence-testing-and-the-plan)
@@ -35,9 +36,8 @@ as the set its first-use rule ranges over.
 - [10. Governed acronyms](#10-governed-acronyms)
 - [Related Documents](#related-documents)
 
----
-
 <a id="1-the-spine--from-authored-spec-to-running-cluster"></a>
+
 ## 1. The spine — from accepted input to running cluster
 
 - [tracked source boundary](./engineering/repository_layout_doctrine.md#1-classification-rule) — behavioral/runtime/test/gate/generator source is Haskell; bounded Python under `pb/**` is the sole source-language exception and may only bootstrap, build, and `exec` Haskell.
@@ -55,7 +55,7 @@ as the set its first-use rule ranges over.
 
 ## 2. Foreclosure, gates, and where a check lands
 
-- [unrepresentable](./engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) — admitting no value in the type system; the strongest guarantee amoebius claims.
+- [unrepresentable](./engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) — admitting no value through a specified type-construction boundary; each claimed foreclosure requires evidence for that boundary.
 - [illegal state](./illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent) — an enumerated cluster configuration a valid spec must be unable to express.
 - [foreclosure layer](./illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) — the three-valued axis: type-foreclosed, decode-foreclosed, or runtime-checked.
 - [validation-locus](./illegal_state/illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer) — the six-valued axis naming where a state is actually caught; orthogonal to the layer.
@@ -70,12 +70,17 @@ as the set its first-use rule ranges over.
 - [validation register](./engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — the tiers of evidence: pure, boundary-with-fakes, deterministic simulation, and live.
 - [the per-run ledger](./engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) — the artifact a validation run emits recording what each layer actually established.
 - [derivation](./engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) — the rule that Haskell generates coverage enumeration while a separately authored Haskell module supplies the semantic expectation.
-- [spoof-resistant gate](./engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence) — a gate observing an unforgeable post-start effect rather than a self-report.
-- [mutant](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — a Haskell-declared seeded transformation whose disposable materialization lives beneath `.build/**`; a gate is trusted only once the intended mutant turns it red while the clean control stays green.
-- [gate integrity](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the fixed eighteen-row contract ensuring a gate cannot declare its own pass or pass through a stub.
+- [spoof-resistant gate](./engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence) — a gate required to distinguish actual subject behavior from fabricated observations under its declared threat model.
+- [mutant](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject) — a Haskell-declared production change tested at its exact assigned failure set with unaffected controls; disposable materializations remain beneath `.build/**`.
+- [gate integrity](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the eighteen-row acceptance contract and required execution boundaries; a completed table alone establishes no pass.
+- [accepted baseline](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation) — the required protected Haskell acceptance specification and verifier identity against which a candidate is judged.
+- [certification generation](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation) — the required Haskell authority separating admitted certification from receipts withdrawn by a reset.
+- [evidence custody](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation) — the protected execution and publication boundary that prevents a candidate from manufacturing verifier authority.
+- [current compatibility](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass) — the accepted dependency-closure decision required before historical evidence can apply to current source.
+- [harness qualification](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m4-harness-qualification-precedes-every-candidate) — execution against deliberate sabotage of the actual acceptance path, with exact refusals and restored clean controls.
 - [natural architecture](./engineering/substrate_doctrine.md#11-the-natural-architecture-rule) — the architecture a detected host executes without translation; the only one its lanes may be validated at.
 - [substrate](./engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob) — the detected hardware platform family; it always derives a `linux-cpu` execution lane at its natural architecture and may add an accelerator lane. A pristine Linux lane uses Incus on Linux, Lima on Apple, or WSL2 on Windows.
-- [status vocabulary](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — the five phase markers, and the rule confining status to the plan.
+- [status vocabulary](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — the three phase and sprint statuses: Done, Active — NOT VALIDATED, and Blocked — NOT VALIDATED.
 - [Single Source of Truth](./documentation_standards.md#1-philosophy) — the rule that exactly one document owns a concept and the rest link to it.
 
 ## 4. Clusters, hosts, and topology

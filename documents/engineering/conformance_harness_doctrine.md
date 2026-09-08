@@ -24,24 +24,29 @@ This document owns the pre-hardware spine and its gate barrier. Register definit
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. The registers, as amoebius uses them for pre-cluster validation](#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)
 - [3. The load-bearing invariant: rendering never touches live infrastructure](#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)
-- [4. The spine: decode → legality → bind/expand → plan/resolve → provision → renderAll → plan → dry-run → fake apply](#4-the-spine-decode--legality--bindexpand--planresolve--provision--renderall--plan--dry-run--fake-apply)
+- [4. The spine: decode → legality → bind/expand → plan/resolve → provision → `renderAll` → plan → dry-run → fake apply](#4-the-spine-decode--legality--bindexpand--planresolve--provision--renderall--plan--dry-run--fake-apply)
 - [5. The pre-hardware gate barrier](#5-the-pre-hardware-gate-barrier)
 - [6. Honesty: what the harness does and does not establish](#6-honesty-what-the-harness-does-and-does-not-establish)
 - [7. Planning ownership](#7-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Why this doctrine exists
 
-A deployment language becomes hard to validate when its first complete execution requires the platform it is
-supposed to describe. That dependency invites a dangerous shortcut: a container, cluster, or GPU comes up, so
-the language is described as valid even though decode, legality, binding, planning, rendering, or dry-run was
-never independently challenged.
+**The problem.** A language can appear complete while its integrated test exercises a second implementation
+that merely reports the names of the production stages. A successful cluster or accelerator run cannot expose
+that missing semantic connection.
 
-amoebius instead makes every pre-effect stage a Haskell value and validates their composition before any
-hardware-specific work. The live platform later tests fidelity and real effects; it does not supply first
-evidence that the language means what its contract says.
+**Why the obvious alternative fails.** Separately green component tests and a nine-row pipeline report do not
+show that the actual decoder output reaches the binder, renderer, planner, and effect boundary. Comparing
+matching labels leaves constant stages and ignored inputs undetected.
+
+**The rule.** The hardware-free harness must invoke the real production entry points and pass their typed
+outputs into their real consumers. Independent expectations cover the complete declared language surface and
+its required compositions. Live phases later test provider fidelity and physical effects.
+
+**What it forecloses.** A surrogate pipeline, stage count, generated success report, or live deployment cannot
+substitute for this integration. The result remains bounded by its explicit cases, models, and assumptions;
+covering the declared language does not prove every program correct.
 
 The tracked source boundary is closed. Product, DSL, generator, test, oracle, fake, and harness logic is
 Haskell. `pb/**` exists only to ensure/build/exec the binary. Any Dhall, PureScript, JavaScript, shell, Proto,
@@ -94,10 +99,10 @@ language semantics established here.
 
 One cleanroom run exercises every stage, in order, through production entry points:
 
-1. **Decode.** A Haskell-authored source value is encoded through the production codec where serialization is
-   part of the contract and decoded through the production entry point. Paired negatives pin exact diagnostic
-   code and locus. No repository-retained serialized fixture is read; any required encoding is materialized
-   lazily beneath `.build/**` from the Haskell value.
+1. **Decode.** Independent Haskell declarations supply legal and illegal external inputs for the production
+   decoder. Production encoding is an additional round-trip subject, never the sole author of decoder inputs.
+   Paired negatives pin exact diagnostic code and locus. Required serializations are generated lazily beneath
+   `.build/**` without importing the production encoder into the expectation.
 2. **Legality.** The decoded value passes the complete illegal-state and extension-law checks. Each
    unrepresentability claim has a minimally different positive/compile-fail pair, and runtime refusals have
    exact tags rather than generic failure.
@@ -122,10 +127,23 @@ One cleanroom run exercises every stage, in order, through production entry poin
    observations, paired failures, bypass probes, and cleanup show which effects the binary attempted. This
    establishes boundary protocol, not live-provider fidelity.
 
-The run starts with `.build/**`, `.data/**`, `.test_data/**`, generated formats, and condemned legacy copies
-absent. It generates everything it consumes lazily, records actual read paths, and fails if discovery is empty
-or a stage is skipped. Each stage has a changed-production-subject mutant whose applied change is witnessed and
-whose named oracle row turns red while unrelated controls stay green.
+Every edge carries the preceding stage's actual output. The harness must reject replacement with an empty,
+constant, stale, foreign, or independently reconstructed value, even if the next stage and final report retain
+their expected names. A separately declared pipeline type is insufficient without this production connection.
+
+Discovery reconciles the independent obligation set with constructors, legality families, capability/provider
+and shape arms, folds, render classes, plan operations, and generated-language consumers. It includes required
+interactions between those dimensions. Filtering discovery to a preselected file list cannot establish that
+an omitted production arm has no obligation.
+
+Each meaningful stage decision and connection has an applied production mutation. The unchanged expectation
+must observe the assigned semantic difference downstream while unrelated controls remain green. Mutating only
+a report label, test-side branch, counter, or disconnected stage copy does not challenge the production path.
+
+The run uses the isolated namespace and authenticated read-only inputs defined by
+[validation_frame_doctrine.md](./validation_frame_doctrine.md#4-generated-output-and-cleanroom-execution).
+It derives all candidate products lazily, records actual inputs, and refuses unlisted generated fallbacks.
+Production `.data/**` is neither an input nor a cleanup target.
 
 ---
 
@@ -133,7 +151,8 @@ whose named oracle row turns red while unrelated controls stay green.
 
 [Phase 49](../../DEVELOPMENT_PLAN/phase_49_self_referential_gates.md) owns the integrated no-hardware barrier.
 Its candidate is admissible only when one qualified Haskell harness run demonstrates all nine stages from an
-empty generated tree and joins the complete earlier DSL/capability surface in both directions.
+isolated generated tree and joins the complete earlier DSL/capability surface in both directions. Nine stage
+names are navigation labels; they do not define the semantic coverage set.
 
 The barrier additionally requires:
 
@@ -149,7 +168,18 @@ The self-referential workflow representation is itself a subject of this barrier
 independently authored runner under clean and sabotaged cases; only the complete qualified barrier result may
 set Done status.
 
-Phase 50 and all later work remain blocked until the barrier gate passes. A successful container build,
+The language target includes generated artifacts consumed outside Haskell. Their required syntax, compilation,
+and semantic correspondence must be checked against the actual generated products at their assigned owners.
+Undefined browser bindings, bare identifier lists, and placeholder recipes cannot satisfy an executable
+projection claim merely because their files are deterministic.
+
+Moving an obligation between phases preserves its identity, coverage, and barrier deadline under the
+[phase-amendment rule](../../DEVELOPMENT_PLAN/development_plan_phase_model.md#n-reopening-and-amending-a-phase).
+Real device effects may remain later-owned. Pure interpreter semantics, generated-source validity, or a missing
+production connection cannot be relabelled hardware fidelity to remove them from this barrier.
+
+Later gate execution remains blocked until the barrier and immediate predecessors pass. Hardware-free
+implementation preparation follows the separate numerical-frontier rules in the plan. A successful container build,
 registry push/pull, host setup, accelerator calculation, kind cluster, or live deployment cannot substitute
 for or backfill this barrier.
 
@@ -157,9 +187,9 @@ for or backfill this barrier.
 
 ## 6. Honesty: what the harness does and does not establish
 
-A passing barrier establishes that, for the tested corpus and source snapshot, the complete Haskell
-pipeline produced the independently expected semantic values and boundary requests, caught its specified
-mutants, refused its sabotage cases, and left no observed residue.
+A qualified passing barrier establishes that the connected production pipeline produced independently expected
+semantic values and boundary requests for its declared corpus and source snapshot. It also establishes the
+observed mutation sensitivity, harness refusals, and cleanup. Each claim retains its actual evidence strength.
 
 It does not establish:
 
@@ -169,16 +199,25 @@ It does not establish:
 - future repeatability or another architecture; or
 - that the compiler, kernel, or test environment is uncompromised.
 
-Those layers remain explicit assumptions or `UNVERIFIED` and are discharged only by their later numerical
-owners. Hardware work adds fidelity evidence; it never upgrades an omitted language claim.
+Formal evidence follows
+[formal_model_doctrine.md](./formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not).
+Type rejection, finite model proof, sampled testing, and tested model/code correspondence remain distinct.
+Shared model names or fixture counts establish none of those connections by themselves.
+
+Unreached applicable layers remain `UNVERIFIED`; environmental fidelity is an explicit assumption until its
+owning gate observes it. Hardware work adds fidelity evidence and never upgrades an omitted language claim.
 
 ---
 
 ## 7. Planning ownership
 
-This doctrine is normative. The development plan owns current status and the exact phase contracts. All
-numbered phases are presently NOT VALIDATED. Earlier scoped runs, attestations, seals, hashes, or implementation
-claims are invalidated and are not current instances of this doctrine.
+This doctrine owns the target pipeline. The
+[development-plan tracker](../../DEVELOPMENT_PLAN/README.md) owns the validation reset, dated implementation
+audit, current status, and remaining work. This document makes no current gate-pass claim.
+
+The bootstrap seed remains finite. The complete language corpus and universal harness qualification are
+barrier obligations, not prerequisites recursively imposed on Phase 0. After a qualified gate and exact
+status-only update, automated work continues in numerical order without an intermediate approval ritual.
 
 ---
 

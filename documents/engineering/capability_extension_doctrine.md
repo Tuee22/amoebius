@@ -21,9 +21,9 @@ nor the extensions themselves, owned by [lift_and_compose_doctrine.md](./lift_an
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. Three extension kinds: workload, capability, and app](#2-three-extension-kinds-workload-capability-and-app)
 - [3. The PROVIDE and REQUIRE contract](#3-the-provide-and-require-contract)
@@ -33,9 +33,9 @@ nor the extensions themselves, owned by [lift_and_compose_doctrine.md](./lift_an
 - [7. Planning ownership](#7-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Why this doctrine exists
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 A linked ML extension rarely stands alone: `jitML` needs the shared build/cache resolver and the
 single-writer primitives its Feed-sourced trainer runs on, and `infernix` needs the same resolver. Composing

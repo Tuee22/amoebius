@@ -22,6 +22,7 @@ rather than restated.
 </details>
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. Five arms, one algebra](#2-five-arms-one-algebra)
 - [3. Teardown is a type obligation](#3-teardown-is-a-type-obligation)
@@ -30,8 +31,6 @@ rather than restated.
 - [6. What the calculus does not decide](#6-what-the-calculus-does-not-decide)
 - [7. Planning ownership](#7-planning-ownership)
 - [Related Documents](#related-documents)
-
----
 
 ## 1. Why this doctrine exists
 

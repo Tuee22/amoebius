@@ -14,7 +14,7 @@ section/anchor surface and the exact document templates.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/formal_model_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/documentation_standards.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -43,8 +43,6 @@ section/anchor surface and the exact document templates.
 - [T. Plan-to-implementation reconciliation](#t-plan-to-implementation-reconciliation)
 - [U. The final repository layout](#u-the-final-repository-layout)
 - [Related Documents](#related-documents)
-
----
 
 ## A. Header metadata (same block as the doctrine suite)
 
@@ -117,15 +115,22 @@ non-Haskell material is a lazy `.build/**` product and never an `Implementation`
 
 ## C. Status vocabulary
 
-The five markers and their mandatory wording are defined in
+The three markers and their mandatory wording are defined in
 [`development_plan_phase_model.md` §C](development_plan_phase_model.md#c-status-vocabulary). Every non-Done
 phase and sprint says `NOT VALIDATED`. A complete qualified phase-gate pass is sufficient for ✅ Done. Digests
 and generated evidence remain inputs to the test rather than substitutes for running it.
 
-The 2026-08-22 reset initialized Phase 0 as `🔄 Active — NOT VALIDATED` and every later numbered phase as
-`⏸️ Blocked — NOT VALIDATED`; no pre-reset completion claim survived. Current status is read only from the
-canonical tracker/phase/sprint projection, whose complete vector must be one Done prefix, exactly one Active
-phase, and one Blocked suffix (or the terminal all-Done state).
+The 2026-09-08 certification reset initializes Phase 0 as `🔄 Active — NOT VALIDATED` and Phases 1–95 as
+`⏸️ Blocked — NOT VALIDATED`. It withdraws every earlier certification without deleting implementation or
+renumbering phases. Current status comes from the canonical tracker, phase, and sprint projection.
+Its vector contains one Done prefix, exactly one Active phase, and one Blocked suffix, or the terminal all-Done state.
+
+The reset requires a new Haskell-owned certification generation under
+[gate integrity §M.0](development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation).
+That authority is required implementation, not a capability supplied by this Markdown change. Pre-reset receipts
+cannot restore status, satisfy a predecessor, or authorize hardware work in the new generation.
+Retained phase rows still specify intended capabilities. Their new generation and accepted-baseline binding
+remain an unresolved Haskell specification obligation, distinct from an unavailable runtime receipt.
 
 The current phase-status line is a raw, one-line, exact field and occurs once. The `**Gate:**` summary is a
 separate immutable command/link field: it never carries status or result prose, so recording a pass cannot make
@@ -151,16 +156,20 @@ exists; every later phase remains Blocked. The validator emits the verified patc
 never changes a tracked file. After that process exits, a human, agent, or CI job may recheck the bound preimage
 and apply the exact patch. Any other byte change creates a new candidate and requires the gate to run again.
 
-A later implementation change does not invalidate an earlier pass merely because the repository-wide source
-digest changes. A verified immediate-predecessor receipt is a monotonic frontier fact: the active gate projects
-that fact onto its exact opening snapshot and owns compatibility between the current source and every capability
-it consumes. Receipt refresh remains available when a completed phase itself is deliberately revalidated, uses
-an identity projection, changes no status, and installs a new durable receipt; it is not a recursive prerequisite
-for later development. Multiple valid receipts for one phase are one deterministic equivalence class, not
-ambiguous authority: the verifier checks every entry and selects the lexicographically least content digest.
-Malformed, detached, wrong-phase, and non-green evidence remains fail-closed. This rule prevents an edit to the
-current validator or a later phase from forcing replay of the entire completed prefix while keeping each new
-candidate bound to both an authentic predecessor fact and its exact current-source gate result.
+A later edit preserves an earlier run as a historical fact, but current reuse requires an authenticated
+compatibility decision under [gate integrity §M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass).
+The accepted Haskell dependency graph identifies affected production, oracle, build, toolchain, observer, and
+validation-policy closures. Unchanged, qualified closures may reuse evidence; affected closures and their
+consumers require revalidation. Unknown impact refuses reuse.
+
+An unrelated edit does not require replaying every completed gate. Receipt refresh revalidates a compatible
+Done phase with an identity status projection. A failed or incompatible accepted claim instead follows the
+reopening procedure. Receipt age, filename hashes, copied candidate bytes, and an active phase's assertion of
+compatibility supply no reuse authority.
+
+Within accepted scope, implementation, qualification, recording, and numerical progression continue
+automatically. Routine sprint boundaries require no user confirmation. Contract or verifier changes follow
+the separately qualified baseline-revision procedure; the candidate cannot weaken its own acceptance.
 
 ---
 
@@ -491,8 +500,9 @@ two-way complete, required freshness/authority checks fail closed, and cleanup l
 Phase 0 has the closed finite exception in gate-integrity §M.4: its three changed sources and binaries must
 differ from clean; its v2 transcript must retain a silent successful clean run and, for every mutant, exact
 `ExitFailure 1`, empty stdout, and canonical case-label-plus-newline stderr.
-Its `captureResidue` is empty; later-owned work is an exclusion/forward deferral, not an `UNVERIFIED` candidate
-entry. Later phases retain their applicable `UNVERIFIED` layers. Once the complete gate passes, the status
+Required evidence gaps and forbidden resource residue must be absent. Explicit trust assumptions and excluded
+later-owned capabilities remain visible as scoped `UNVERIFIED` limitations. No phase may erase limitations to
+satisfy a blanket empty-residue check. Once the accepted verifier certifies the complete gate, the status
 update is mechanical.
 
 Mutation scope is bounded by the claim and typed owner frontier. A milestone runs the cumulative selector
@@ -524,9 +534,10 @@ The full rule is in
 
 ## N. Reopening and amending a phase
 
-Changing a subject, oracle, contract, source boundary, or predecessor invalidates affected evidence and
-returns status to a non-Done marker carrying `NOT VALIDATED`. Historical detail is minimal, explicitly
-invalidated, and never reusable; Git history holds the archive.
+The accepted dependency graph identifies evidence affected by a subject, oracle, contract, boundary, or
+predecessor change. Incompatible claims reopen with `NOT VALIDATED`; unchanged qualified closures may retain
+authenticated evidence. Contract revisions require separate qualification against the accepted baseline.
+Invalidated certification cannot be restored from historical prose; Git history holds the archive.
 
 The full rule is in
 [`development_plan_phase_model.md` §N](development_plan_phase_model.md#n-reopening-and-amending-a-phase).

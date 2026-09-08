@@ -24,9 +24,9 @@ replica must meet before taking the gateway, owned by
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. The backup surface — a closed `BackupPolicy` deployment rule](#2-the-backup-surface--a-closed-backuppolicy-deployment-rule)
 - [3. The three strategies](#3-the-three-strategies)
@@ -40,9 +40,9 @@ replica must meet before taking the gateway, owned by
 - [11. Planning ownership](#11-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Why this doctrine exists
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 **The problem this doctrine prevents.** Durability under
 [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md) is delivered by *retaining bytes and
@@ -379,9 +379,10 @@ is caught up (today), or a cold seed proven within `freshnessBound` (new). The m
 **`NoTakeWithoutProvenFreshness`** safety invariant; this recovery doctrine supplies its cold-seed witness arm.
 Because a stalled state with zero gateway owners satisfies safety and only violates
 liveness, the consistency-over-availability choice is exactly this shape: staying down is *safe*, and liveness
-convergence requires freshness to become reachable. The invariant is proven for safety and, under the fairness
-assumption, for liveness (TLC), with io-sim agreement and a per-invariant mutant, and the structural-fit fold
-gains the `freshnessBound` parameter-envelope check — never a per-spec model-check
+convergence requires freshness to become reachable. The model must establish the safety invariant and,
+under declared fairness, the associated liveness property with qualified bounded TLC evidence. Independent
+semantic checks, io-sim agreement, and a per-invariant mutant are required. The structural-fit fold must
+check the `freshnessBound` parameter envelope without invoking a per-spec model-check
 ([`gateway_migration_model_doctrine.md` §5](./gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit)).
 
 **The enactment (owned by [`cluster_lifecycle_doctrine.md`](./cluster_lifecycle_doctrine.md)).** Standing up
@@ -391,10 +392,11 @@ the seed produces the `FreshnessWitness` the model's guard consumes. This step i
 that the seeded bytes are correct and the observed watermark is truthful is runtime-checked, never proven by
 the spec.
 
-Net: the promote guard, the `NoTakeWithoutProvenFreshness` safety invariant, and the stay-down-rather-than-
-serve-stale property are proven in amoebius's one formal obligation
-([`gateway_migration_model_doctrine.md` §1](./gateway_migration_model_doctrine.md#1-the-one-obligation)); the
-deploy-and-seed mechanics are honestly runtime-checked.
+The promote guard, `NoTakeWithoutProvenFreshness`, and the stay-down-rather-than-serve-stale property are
+bounded model obligations under
+[`gateway_migration_model_doctrine.md` §1](./gateway_migration_model_doctrine.md#1-the-one-obligation).
+Production correspondence requires actual decision bindings or checked refinement. The deploy-and-seed
+mechanics require runtime observation.
 
 ---
 
@@ -411,9 +413,9 @@ Per [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-t
   [`pulumi_ebs_credential_model.md` §6](./pulumi_ebs_credential_model.md#6-the-ebs-create-vs-delete-credential-model).
 - **The key-independence premise is assumed.** That the envelope key is recoverable independently of the
   protected coordinate is a named premise, monitored, never proven by the type.
-- **The cold-seed freshness guarantee is proven-for-the-model, tested by drill, and assumed at the physics.**
-  `NoTakeWithoutProvenFreshness` is proven at the model scope; the RTO of an actual cold-seed recovery is
-  validated by drill; that the observed watermark faithfully reflects real replication/backup lag is a
+- **The cold-seed freshness target separates bounded proof, observed drills, and physical assumptions.**
+  `NoTakeWithoutProvenFreshness` requires proof at the declared model scope. Actual cold-seed recovery RTO
+  requires a qualified live drill; that the observed watermark faithfully reflects real replication/backup lag is a
   monitored, assumed premise ([`consistency_pacelc_doctrine.md` §4](./consistency_pacelc_doctrine.md#4-honesty-proven--tested--assumed)).
 - **Phase 17 owns the model-scoped freshness proof obligation; the recovery runtime is separate.** Its target
   gate must establish `NoTakeWithoutProvenFreshness` for the bounded gateway model and catch its dedicated witness-removal mutant.

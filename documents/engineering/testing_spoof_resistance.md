@@ -2,8 +2,7 @@
 
 > **Purpose**: Define the threat model and test separation that prevent a subject, runner, fixture, stale
 > artifact, or generated report from manufacturing validation.
-> **Read this if**: a gate reports success and you need to determine whether its evidence could have been
-> produced without the claimed behaviour.
+> **Read this if**: a gate's evidence must distinguish exercised behaviour from fabricated success.
 
 This document owns spoof-resistant evidence. It does not own phase status or its mechanical transition, which belong to the
 development plan, or register definitions, which belong to
@@ -14,7 +13,7 @@ development plan, or register definitions, which belong to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -22,18 +21,7 @@ development plan, or register definitions, which belong to
 ## Contents
 
 - [12. Spoof-resistant evidence](#12-spoof-resistant-evidence)
-- [12.1 Threat model](#121-threat-model)
-- [12.2 Test split](#122-test-split)
-- [12.3 Harness qualification](#123-harness-qualification)
-- [12.4 Subject-change witnesses](#124-subject-change-witnesses)
-- [12.5 Fresh external observation](#125-fresh-external-observation)
-- [12.6 Pure claims](#126-pure-claims)
-- [12.7 Complete candidate evidence is the gate result](#127-complete-candidate-evidence-is-the-gate-result)
-- [12.8 Source and cleanroom boundary](#128-source-and-cleanroom-boundary)
-- [12.9 Residue and limits](#129-residue-and-limits)
 - [Related Documents](#related-documents)
-
----
 
 ## 12. Spoof-resistant evidence
 
@@ -63,9 +51,26 @@ Assume each of the following can be wrong, stale, empty, bypassed, or adversaria
 - fake tools, live observers, credentials, and cleanup code; and
 - documentation or automation that converts a result into status.
 
-Also assume subject and gate source in one repository can accidentally agree on the same defect. Mutation
-sensitivity and separately authored expectations reduce that risk. The project accepts the residual shared-
-repository risk and treats a complete qualified gate pass as sufficient.
+**The problem.** A candidate and its test can agree on the same defect. A process that can replace its oracle,
+runner, compiler, or recorded observations can also manufacture apparent independence.
+
+**Why the obvious alternative fails.** Separate modules, absolute executable paths, content digests, and green
+mutation summaries do not establish who controlled the tested bytes. A candidate can preserve every label
+while changing the predicate behind it.
+
+**The rule.** Before candidate execution, the supervising runner binds the requirement, independent
+expectations, qualification corpus, tool identities, and observation policy. Candidate execution cannot alter
+that baseline, replace its processes, or write its evidence. Changes to those authorities require their own
+qualification and invalidate affected evidence.
+
+The privilege and storage boundary is owned by
+[validation_frame_doctrine.md](./validation_frame_doctrine.md#4-generated-output-and-cleanroom-execution).
+The candidate's permitted writes are explicit. Merely making a directory read-only while retaining the same
+effective write authority does not establish separation.
+
+**What it forecloses.** A simultaneous subject/oracle rewrite cannot certify itself by accepting its new
+outputs. This does not eliminate mistaken requirements or compromise of the supervising host. Those remain
+named trust assumptions, with no claim of protection beyond the enforced boundary.
 
 ### 12.2 Test split
 
@@ -76,10 +81,17 @@ The validation boundary has two distinct roles:
 | **Subject** | Implement the capability and emit ordinary outputs | Define its own expected result |
 | **Oracle/harness** | Attempt to falsify the claim, preserve raw observations, and produce the complete gate result | Import subject decision logic or omit required gate rows |
 
-The oracle is separately authored Haskell source, is based on the requirement rather than captured output, and
-does not mechanically translate or call the subject's decision function. A second implementation produced by
-the same derivation is not independent. The gate records the exact source snapshot, current phase contract,
-qualified-harness digest, and raw-observation digest so a later edit cannot reuse an earlier pass.
+The oracle is separately authored Haskell source based on the requirement. Its expected values cannot be
+captured from, mechanically translated from, or computed by the subject's decision function. The driver invokes
+production to obtain the actual value; it does not invoke production to choose the expected value.
+
+Import separation is a useful structural check, not evidence of semantic independence. Literal expected counts,
+duplicated decision code, and generated copies of subject outputs remain circular. The gate binds requirement,
+subject, oracle, harness, and observation identities before the run and checks their continued separation.
+
+Each accepted row compares an actual production observation with its independent expectation. Counting the
+oracle's own rows does not observe accessibility, transport, or any other product behaviour. Comparing a pure
+projection with itself tests no semantic property. A fixed PASS banner cannot replace the missing comparison.
 
 An integrity adapter that has not crossed its required acquisition, observer, or qualification boundary is a
 diagnostic refusal, not a smaller success type. Its raw decoder, integrity-consistent records, constructors,
@@ -105,8 +117,8 @@ private import failed first.
 
 ### 12.3 Harness qualification
 
-Before each clean candidate, the exact harness build is challenged with a fixed sabotage corpus. It must
-reject all of these:
+Before a clean candidate, the exact harness build is challenged with its assigned sabotage corpus. The
+universal corpus must reject all of these:
 
 1. constant success;
 2. no-op behaviour;
@@ -122,12 +134,21 @@ reject all of these:
 12. a generated or legacy input smuggled into an otherwise clean run;
 13. a selector present in production, the oracle, or the build mapping but absent from either of the other
     two inventories; and
-14. a changed subject that makes the broad oracle red while its independently assigned exact row stays green.
+14. a changed subject that makes the broad oracle red while its independently assigned exact row stays green;
+15. correct stage labels with disconnected, ignored, or constant production outputs;
+16. replacement of a solver or compiler with a transcript-replaying process;
+17. an exception or tool failure relabelled as the required semantic rejection; and
+18. expectations or raw observations modified by the candidate during execution.
 
 Qualification is a separate invocation over the same harness digest, followed by the clean candidate run.
 The sabotage corpus and qualifier are Haskell source; their observations are generated lazily beneath
 `.build/**`. A harness cannot qualify itself by emitting a list saying that these cases passed. The runner
 retains the raw refusal observed for each injected sabotage.
+
+The phase assignment is owned by the
+[gate-integrity standard](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject).
+The finite bootstrap seed qualifies only its declared partition under `GenesisTrust`. The complete universal
+corpus belongs to the DSL barrier; it must not become a recursive prerequisite for establishing that seed.
 
 ### 12.4 Subject-change witnesses
 
@@ -145,6 +166,10 @@ the harness must observe:
 
 A missing target, no-op transform, alternate dead implementation, compilation failure unrelated to the claim,
 or blanket red result fails mutation qualification. Mutant count alone carries no evidentiary weight.
+
+The red observation must be the assigned semantic result, with unrelated controls still observed. A crashed
+solver, parse error, timeout, arbitrary exception, or matching text fragment cannot count as an invariant
+counterexample. The run retains the typed classification and the raw observation that supports it.
 
 Mutation discovery is not itself a pass. Each component oracle owns a literal, closed registry mapping
 every expected production selector to the exact independently authored case and rejection locus it is intended
@@ -209,38 +234,53 @@ A property run says only that its explored sample found no counterexample. A com
 the named expression failed for the pinned reason. A byte comparison says only that two bytestrings agree.
 None becomes a universal proof through wording.
 
+Formal claims additionally require the evidence strength defined by
+[formal_model_doctrine.md](./formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not).
+A finite search that finds no satisfying assignment cannot report general SMT unsatisfiability. A model that
+asserts its own fixture count does not establish a production fold's semantics. A fake may qualify request
+handling while leaving the real solver's decision authority unestablished.
+
 ### 12.7 Complete candidate evidence is the gate result
 
-The Haskell harness emits a candidate bundle with explicit row states: `green`, `red`, `refused`, or
-`UNVERIFIED`. The schema rejects missing rows, empty required arrays, implicit “tested” defaults, skipped work,
-and a top-level pass with no raw observations. A digest binds provenance but does not make a claim true.
+The Haskell harness emits a candidate bundle using the exact row states and refusal vocabulary owned by the
+[gate-integrity standard](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass).
+The schema rejects missing observations, implicit tested defaults, skipped work, and a top-level pass without
+its required rows. A digest binds bytes; it does not establish their truth.
 
 CI, an agent, or a human may mark a phase Done when the exact current candidate has every required row and the
 qualified gate passes. Recording the status is mechanical. Partial evidence, a digest without execution, or an
 old result from a different contract remains insufficient.
+
+Numerical progression remains automatic after a complete qualified pass and its exact status-only update.
+Oracle amendments, missing observations, or failed qualification stop the gate through executable refusal.
+They do not create a routine request for human approval at every sprint or phase boundary.
 
 ### 12.8 Source and cleanroom boundary
 
 All product, test, gate, oracle, fake, generator, and mutation logic is Haskell source. The sole non-Haskell
 source exception, `pb/**`, may only make the minimum platform distinction needed to establish the pinned
 Haskell toolchain, build the source-bound binary, and exec it with every user argument unchanged. Haskell
-owns host-floor policy, help, version, validation, and every other public command. Phase 0 bounds the checked-in
-exception statically with an exact non-empty, deny-by-default Haskell-owned AST/import/resolved-call/
-control-flow/potential-effect graph; tokens, filenames, comments, dead strings, and help output cannot satisfy
-it. That result is source admission, not runtime evidence. Phase 0 through Phase 49 invoke Haskell directly.
-Phase 50 alone places the already source-bounded adapter effects, executable identity, unchanged argv, exec
-replacement, and exit propagation under an external observer.
+owns host-floor policy, help, version, validation, and every other public command. Source admission and runtime
+handoff are separate obligations. Their finite bootstrap, complete grammar, and external-observation ownership
+is defined by [validation_frame_doctrine.md](./validation_frame_doctrine.md#2-the-bootstrap-boundary).
+Tokens, filenames, comments, and help output cannot establish either obligation.
 
-Every candidate starts without `.build/**`, `.data/**`, `.test_data/**`, generated formats, evidence, caches,
-or legacy fallbacks. The run derives required non-Haskell material lazily beneath `.build/**`, proves which
-inputs it read, leaves tracked files unchanged, and reports all external residue. A run that succeeds only
-because the worktree retained an ignored input is a refusal, not a pass.
+Each candidate uses a fresh, isolated run namespace under `.build/**`. Its permitted read-only inputs include
+the exact source snapshot, authenticated toolchain inputs, and required predecessor receipt. Their acquisition
+and the finite bootstrap exception are owned by
+[validation_frame_doctrine.md](./validation_frame_doctrine.md#4-generated-output-and-cleanroom-execution).
+Unlisted caches and generated fallbacks are unavailable. Production `.data/**` remains inaccessible; validation
+never deletes production state to manufacture an empty cleanroom.
 
 ### 12.9 Residue and limits
 
 Spoof resistance does not prove that the compiler, kernel, identity authority, provider,
 observer, hardware, or cryptography is uncompromised. Those are named assumptions. Nor does one live run prove
 future behaviour or another substrate.
+
+The runner must state which protections it actually enforces against candidate writes, process replacement,
+and observation tampering. Shared-repository authorship and an uncompromised supervising host remain residual
+trust where no stronger boundary is established. Neither is silently discharged by a successful sabotage run.
 
 Every candidate states its untested layers as `UNVERIFIED`. An empty residue requires an explicit test
 rationale; it is never inferred from a full test count. This doctrine contains no current per-phase success

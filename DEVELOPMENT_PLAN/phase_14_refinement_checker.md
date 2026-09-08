@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md, documents/engineering/formal_model_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -34,20 +34,19 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 13, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-13 predecessor and its compatible evidence chain.
 
 ## Phase Summary
+
+The audit showed that a raw-line parser can select a safe equation inside a comment while GHC compiles an unsafe multiline definition. The required repair is compiler-owned syntax and identity correspondence, not another text filter. The existing arithmetic examples remain regression controls and must not be described as verification of production DSL source.
 
 This phase specifies a Haskell target capability; it does not report a current implementation or
 result. The target is to check a bounded GHC-compiled Haskell function fragment against source-local
@@ -78,30 +77,29 @@ obligation. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-14 semantic and resource payloads,
-package-hidden serial supervisor, Haskell source/refinement oracle, compiled model projection, and three
-changed-production subjects are complete; only a fresh integrated run may authorize status.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
-| `Claim` | The Haskell checker compiles and checks a closed source-annotation fragment for postcondition preservation and explicit implementation-to-model correspondence. |
+| `Claim` | The Haskell refinement checker derives its admitted function fragment from the exact compiler-parsed and typechecked source, then uses authenticated SMT observations for preservation and explicit implementation-to-model correspondence; unsupported source is refused. |
 | `Subject` | `Amoebius.Checker.Refinement` is acquired only through package-hidden `Amoebius.Validation.RefinementCheckerRun.Internal`. |
 | `Command` | Future public spelling is `pb validate phase 14`; before `BOOTSTRAP_HANDOFF`, the exact absolute Haskell executable and authenticated GHC 9.12.4 compiler run directly and synchronously. |
-| `Oracle` | `RefinementCheckerSpec.hs` embeds six exact outcomes and two correspondence predicates; `RefinementModelProjection.hs` independently projects the Phase-11 model expressions. |
-| `Positive controls` | Increment, decrement, and sum compile and prove with exact source line/digest identity and complete required-pair coverage. |
-| `Paired negatives` | Relative solver, unbound variable, ill-sorted precondition, counterexample, correspondence mismatch, and unknown invariant paths are exact refusals or classifications. |
-| `Mutants` | Precondition-conjunct deletion, correspondence omission, and postcondition weakening compile as changed production subjects and turn their assigned result loci red. |
-| `Discovery` | Production checker, two Haskell oracles, shared fake SMT boundary, and six compiled Haskell fixtures equal the fixed ten-file inventory bidirectionally. |
+| `Oracle` | `test/spec/formal/refinement/RefinementCheckerSpec.hs` and `RefinementModelProjection.hs` independently specify compiled behavior, accepted syntax, preservation and correspondence, including comments, layout, shadowing and compiler-transformation counterexamples. |
+| `Positive controls` | Admitted compiled Integer functions agree with independently authored source/AST projections and runtime boundary examples; real SMT observations establish their stated preservation and model-correspondence formulas. |
+| `Paired negatives` | Retain arithmetic/correspondence/unknown-invariant negatives; add commented safe equations paired with actual unsafe multiline definitions, duplicate annotations, unsupported constructs, rebinding and compiler/source identity mismatch, each requiring its specific refusal or counterexample. |
+| `Mutants` | Production changes selecting commented code, using a separately reparsed equation, omitting source/AST custody, deleting preconditions, omitting correspondence or weakening postconditions fail independently assigned exact cases. |
+| `Discovery` | Join supported compiler-AST constructors, annotations and exact compiled function identities to independent cases, named model obligations and production mutation/build assignments; six arithmetic fixtures cannot define production DSL coverage. |
 | `Challenge` | All three mutations execute after acquisition and must be distinguished at their independent status observations. |
 | `Observer` | The supervisor records absolute executable, argv, exit, transcript digest, and bounded failure text for every compiler, projection, and oracle process. |
 | `Authority/bypass` | `pb`, PATH solver lookup, network, host/hardware effects, writes outside the run root, and compiler/linker overlap are forbidden. |
 | `Freshness` | Every run creates a fresh `.build/runs/phase-14/work/**` root and requires equal opening/closing source identities. |
-| `Qualification` | Model projection, six fixture compiles, clean classifications, exact discovery, and all three changed-production subjects pass together. |
+| `Qualification` | Exact compiler-AST/source correspondence, real solver decisions, independently observed compiled behavior, all supported syntax/refusal pairs and every assigned changed subject must qualify together. |
 | `Cleanroom` | Fake solver, binaries, objects, projected invariants, transcripts, and results are generated lazily beneath the fresh run root. |
 | `Legacy closure` | Retired Phase-14 Python checker/gate and serialized behavioral oracles are absent. |
-| `Predecessor` | Consume exactly one durable Phase-13 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
-| `Residue` | Reusable compile-fail machinery, simulation, concrete models, runtimes, live effects, and hardware remain explicitly later-owned. |
-| `Pass criterion` | `qualified-phase-fourteen-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 13 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
+| `Residue` | The admitted fragment remains explicit and narrow; effects, recursion and other unsupported Haskell require later specified obligations. No production DSL refinement is claimed without its registered function, invariant and demonstrated correspondence. |
+| `Pass criterion` | `qualified-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
 ## Resource provision
 
@@ -118,14 +116,15 @@ the external observer, cleanup is run-root scoped, and no external owned residue
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 14.1: Compiled-source refinement boundary ✅
+## Sprint 14.1: Compiled-source refinement boundary ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/refinement-checker/Amoebius/Checker/Refinement.hs` and the six compiled Haskell fixture modules
 **Blocked by**: [Phase 13](phase_13_symbolic_checker.md) gate pass
-**Independent Validation**: six exact outcomes, source identities, paired grammar/type refusals, and two required correspondence pairs
+**Independent Validation**: Compile and prove the admitted source through one authenticated compiler identity; pair it with the commented-equation audit counterexample and require its actual violation or exact unsupported-source refusal; kill AST/source-substitution mutants; exclude unsupported Haskell.
 **Oracle**: `test/spec/formal/refinement/RefinementCheckerSpec.hs` and compiled `RefinementModelProjection.hs`
 **Legacy IDs**: none; retired Python and serialized Phase-14 behavioral sources are checked absent
 **Docs to update**: this phase file, `formal_model_doctrine.md`, `testing_doctrine.md`, and `system_components.md`
@@ -137,6 +136,9 @@ while keeping compiler and solver responsibilities explicit.
 
 ### Deliverables
 
+- A Haskell compiler-API boundary binds exact source bytes, language options, preprocessing inputs, parsed/typechecked function identity and admitted expression tree. The checker consumes that tree rather than selecting equations or signatures from raw lines.
+- Annotations resolve to the exact compiled binding, arguments and model projection. Comments, source layout, duplicate declarations, local rebinding, imports and preprocessing cannot supply a different function to the checker.
+
 - Closed six-field source annotation and exact `Integer` function-equation boundary.
 - Owned linear-integer/boolean parser, sort checker, SMT translation, and rejection diagnostics.
 - GHC `-fno-code` compilation plus absolute injected compiler and solver paths.
@@ -146,6 +148,9 @@ while keeping compiler and solver responsibilities explicit.
 
 ### Validation
 
+- Compile a module with a commented `f x = x + 1` and a real multiline `f x = x - 1`. With precondition `x >= 0` and postcondition `result >= 0`, require the counterexample at zero or an exact unsupported-fragment refusal; never report `Proved` for the comment.
+- Pair legal layout/comment variants with duplicate or ambiguous annotations and changed compiler options; require stable semantics for the legal variants and named identity/syntax refusals for the others.
+
 1. Compile each of the six source modules before checking annotations.
 2. Reject missing/duplicate annotation fields, signature/equation disagreement, unbound variables,
    ill-sorted terms, unsupported expressions, relative tools, and non-decision solver results.
@@ -154,14 +159,15 @@ while keeping compiler and solver responsibilities explicit.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 14.2: Correspondence, negatives, and mutation evidence ✅
+## Sprint 14.2: Correspondence, negatives, and mutation evidence ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: package-hidden `src/validation-kernel/Amoebius/Validation/RefinementCheckerRun/Internal.hs`
 **Blocked by**: Sprint 14.1
-**Independent Validation**: serial projection/fixture/clean/three-mutant matrix, exact red loci, discovery, containment, and process receipts
+**Independent Validation**: Require independently registered preservation and model correspondence through the qualified real solver; matched weakening and wrong-model negatives fail specifically; assigned checker mutants are detected; each unregistered production obligation remains unverified.
 **Oracle**: the same two independently authored Haskell oracles; generated projection and result bytes are observations only
 **Legacy IDs**: none; retired Python and serialized Phase-14 behavioral sources are checked absent
 **Docs to update**: this phase file, `formal_model_doctrine.md`, `testing_doctrine.md`, and `system_components.md`
@@ -173,6 +179,9 @@ reason, and demonstrate that the gate detects weakened hypotheses, omitted corre
 
 ### Deliverables
 
+- Use the authenticated solver/response boundary established by Phase 13 and independently replay known counterexamples. The bounded Haskell fake remains a protocol fault control.
+- A Haskell registry identifies every function actually claimed refined, its exact compiler binding, precondition, postcondition, model invariant and projection. Fixture coverage cannot discharge an absent production entry.
+
 - Two required `(model, invariant)` registry rows covered by three proved functions.
 - One postcondition counterexample, one correspondence mismatch, and one missing-invariant rejection.
 - Three registry-backed checker mutation modes, each red at its declared result field.
@@ -181,14 +190,19 @@ reason, and demonstrate that the gate detects weakened hypotheses, omitted corre
 
 ### Validation
 
+- Join claimed functions to compiler-derived source identities and model obligations in both directions; reject missing, duplicate, unrelated and fixture-only substitutions.
+- Keep preservation, source correspondence and model correspondence as separate required observations; a source digest or successful GHC invocation cannot stand in for any of them.
+
 1. Require all required model/invariant pairs to exist in the registry and have a proved function mapping.
-2. Compare all eleven generated metrics to the authored expectations.
+2. Compare full compiler-derived binding, formula and result observations to independent expectations;
+   generated metrics are supplemental summaries, not semantic verdicts.
 3. Run each mutant in isolation and require the exact sum, negative-identity, or broken-decrement mismatch.
 4. Join every run-time item to an authored surface and leave runtime fidelity `UNVERIFIED`.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
 ## Documentation Requirements
 

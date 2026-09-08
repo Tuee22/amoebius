@@ -20,11 +20,12 @@ pairing simply has no constructor, so nothing needs to reject it. The numbering 
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
 ## 1. Scope
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 This document is a **themed slice** of the illegal-state catalog: the cluster-topology entries —
 compute-engine ↔ substrate compatibility (managed providers first-class), the `LinuxHost` witness that

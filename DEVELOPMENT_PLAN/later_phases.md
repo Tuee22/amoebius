@@ -20,6 +20,7 @@ promoted into [README.md](README.md), which remains the sole tracker.
 </details>
 
 ## Contents
+
 - [Candidate phase: DB schema-migration automation + manifest-change correctness semantics](#candidate-phase-db-schema-migration-automation--manifest-change-correctness-semantics)
 - [Candidate phase: The amoebius-native JIT (jitML absorbed)](#candidate-phase-the-amoebius-native-jit-jitml-absorbed)
 - [Candidate phase: Native desktop + mobile application surfaces](#candidate-phase-native-desktop--mobile-application-surfaces)
@@ -32,8 +33,6 @@ promoted into [README.md](README.md), which remains the sole tracker.
 - [Candidate phase: Live backup / restore / cold-DR seed](#candidate-phase-live-backup--restore--cold-dr-seed)
 - [Assigned — *not* a later phase: capacity / topology / bounded-storage type discipline](#assigned--not-a-later-phase-capacity--topology--bounded-storage-type-discipline)
 - [Related Documents](#related-documents)
-
----
 
 Phases 0–95 each own a dedicated `phase_NN_<slug>.md`. Everything past Phase 95 is *in scope* but not yet
 detailed: the README phase index lists it as the single row **`96+ — Later phases`**. This document is that

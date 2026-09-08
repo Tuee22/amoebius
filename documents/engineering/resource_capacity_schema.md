@@ -20,9 +20,9 @@ constructed, from scalar quantities outward to whole-deployment budgets, and eve
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Compute quantities and container envelopes](#1-compute-quantities-and-container-envelopes)
 - [2. Images and the kubelet filesystem layout](#2-images-and-the-kubelet-filesystem-layout)
 - [3. Provider node capacity and per-instance templates](#3-provider-node-capacity-and-per-instance-templates)
@@ -51,9 +51,9 @@ constructed, from scalar quantities outward to whole-deployment budgets, and eve
 - [26. Engine, kind host, network fabric, and monitoring budgets](#26-engine-kind-host-network-fabric-and-monitoring-budgets)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Compute quantities and container envelopes
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 ```text
 Residual u =

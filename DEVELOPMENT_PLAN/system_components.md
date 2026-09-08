@@ -42,8 +42,6 @@ the documentation gate owns the correspondence.
 - [14. The pre-cluster (Register 1–2) design-first validation surface](#14-the-pre-cluster-register-12-design-first-validation-surface)
 - [Related Documents](#related-documents)
 
----
-
 ## How to read this inventory
 
 Every row is a target obligation and every phase is **NOT VALIDATED**. A path describes the intended Haskell
@@ -244,12 +242,14 @@ Provider/cluster state and drill records are live or `.build/**` products.
 
 ## 14. The pre-cluster (Register 1–2) design-first validation surface
 
-Phases 1–49 establish the Haskell language, semantics, generators, independent oracles, mutation qualification,
+Phases 1–49 must establish the Haskell language, semantics, generators, independent oracles, mutation qualification,
 cleanroom derivation, and full hardware-free pipeline before any live/hardware work. Their shared future public
 spelling is `pb validate phase NN`, but `pb` is inadmissible evidence until Phase 50 is gate-passed. Each
-Phase 1–49 candidate therefore builds and invokes the exact source-bound Haskell binary directly from an
+Phase 1–49 candidate therefore builds and invokes the exact source-bound Haskell binary directly from a
 pinned, network-independent toolchain input. Each phase's 18-key table must be resolved, independently
-run fresh and gate-passed in strict numerical order.
+run and gate-passed in strict numerical order. Current applicability of historical evidence follows
+[§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass), including its protected
+baseline and dependency closure; a status field cannot establish it.
 
 | Target surface | Haskell ownership shape | Doctrine | Phase owner |
 |---|---|---|---|

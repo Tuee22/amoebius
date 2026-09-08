@@ -19,15 +19,15 @@ stated once in [resource_capacity_doctrine.md §2](./resource_capacity_doctrine.
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [3. The types: `Quantity`, `Capacity`, `Demand`, `Budget`](#3-the-types-quantity-capacity-demand-budget)
 - [Related Documents](#related-documents)
 
----
-
 ## 3. The types: `Quantity`, `Capacity`, `Demand`, `Budget`
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 Every quantity is refined and unit-tagged, every provider advertises a typed capacity, and every execution
 unit carries one complete resource envelope. Kubernetes resource maps are a **rendered projection** of this

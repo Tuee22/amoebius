@@ -31,17 +31,19 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 41 and every earlier numerical predecessor have passed. The pure Haskell interpreter, projection,
-independent oracle, nine production-mutant seams, and acquired serial supervisor are implemented; the complete
-integrated gate has not yet passed.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-41 predecessor and its compatible evidence chain.
 
 ## Phase Summary
+
+The audit requires this phase to demonstrate generic interpretation of the real compiled plan, rather than executing a small separate event model and reporting constant accessibility or request facts. Existing traces remain useful controls, but acceptance must depend on the plan instructions and exact observed outputs.
 
 **Target capability — NOT VALIDATED.** This phase specifies the generic `ClientPlan` interpreter as Haskell
 semantics and a Haskell projection that will lazily emit the PureScript implementation beneath `.build/**`.
@@ -64,28 +66,29 @@ or a network service. Browser execution belongs to the post-Phase-49 live UI ban
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
-| `Claim` | `pure-generic-ui-browser-interpreter-semantics` |
-| `Subject` | `acquired-ui-browser-interpreter-supervisor` |
+| `Claim` | One generic Haskell interpreter consumes the actual compiled `ClientPlan`, executes its declared view/event/state/route instructions, and produces exact visible/accessibility/focus/navigation and typed same-origin request values without per-application implementation code. |
+| `Subject` | `Amoebius.Ui.Browser.Interpreter` and `Amoebius.Ui.Browser.Projection`, acquired with the actual Phase-40/41 plan compiler outputs by the package-hidden Phase-42 supervisor. |
 | `Command` | `pb validate phase 42` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
-| `Oracle` | `independent-ui-browser-interpreter-oracle` |
-| `Positive controls` | `ui-browser-interpreter-positive-controls` |
-| `Paired negatives` | `exact-ui-browser-interpreter-paired-negatives` |
-| `Mutants` | `applied-ui-browser-interpreter-production-mutants` |
-| `Discovery` | `exact-ui-browser-interpreter-source-discovery` |
+| `Oracle` | `test/spec/ui/UiBrowserInterpreterReference.hs` independently authors plan-specific visible trees, accessibility properties, state transitions, routes and request values without deriving them from production output or trace labels. |
+| `Positive controls` | Interpret multiple materially different actual compiled plans and their events with the unchanged generic interpreter; compare every declared instruction and exact output, including accessible names, focus targets and typed request arguments. |
+| `Paired negatives` | Pair correct plans/events with altered bindings, escaped text, hidden data, stale envelopes, wrong route/focus, forbidden requests and omitted instructions; each produces its precise refusal or expected output mismatch. |
+| `Mutants` | Change actual plan consumption, instruction dispatch, state update, trusted rendering, accessibility/focus projection or request construction; every independently assigned exact case must fail while an unaffected plan still passes. |
+| `Discovery` | Join compiled plan/view/event/state/route/port constructors and runtime dispatch arms to independent output cases and exact mutation assignments; a list of trace names or fixed row counts cannot define generic interpretation. |
 | `Challenge` | `post-acquisition-ui-browser-interpreter-challenge` |
 | `Observer` | `ui-browser-interpreter-process-observation` |
 | `Authority/bypass` | `no-pb-browser-node-python-network-host-hardware-or-parallelism` |
 | `Freshness` | `fresh-ui-browser-interpreter-build-root-and-stable-source` |
-| `Qualification` | `qualified-ui-browser-interpreter-harness` |
+| `Qualification` | Actual compiled plans, independent exact outputs, paired refusals, complete dispatch discovery and assigned changed-production failures must run together. Hardcoded traces, expected booleans and constant accessibility/request values must be rejected. |
 | `Cleanroom` | `ui-browser-interpreter-products-contained-below-build` |
 | `Legacy closure` | `retired-ui-browser-interpreter-authorities-absent` |
-| `Predecessor` | `exact-phase-forty-one-receipt` |
-| `Residue` | `live-browser-server-provider-release-and-ha-owners-explicit` |
-| `Pass criterion` | `qualified-phase-forty-two-gate-pass` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 41 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
+| `Residue` | Actual browser layout, keyboard delivery, browser accessibility API fidelity, CSP, network/server authority and release/HA remain later-owned; generated bundle compilation and isolated software execution are required in Phase 46. |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -101,12 +104,12 @@ or a network service. Browser execution belongs to the post-Phase-49 live UI ban
 
 ## Sprints
 
-## Sprint 42.1: Generic `ClientPlan` interpreter and Haskell semantic boundary ✅
+## Sprint 42.1: Generic `ClientPlan` interpreter and Haskell semantic boundary ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Ui/Browser/{Interpreter,Projection}.hs`, typed cases, production CPP seams, and the package-hidden acquired Phase-42 supervisor.
 **Blocked by**: [Phase 41](phase_41_offline_language_plan.md) gate pass
-**Independent Validation**: pure trace, stale-envelope, trusted-text, accessibility/focus, same-origin transport, challenge, source-structure, calculus, and nine changed-production checks.
+**Independent Validation**: Interpret distinct real compiled plans against independently authored full outputs; a minimally changed plan binding, accessibility attribute or request must fail exactly; assigned interpreter mutants fail while an unaffected plan passes; actual browser fidelity remains unverified.
 **Oracle**: `test/spec/ui/UiBrowserInterpreterReference.hs`, importing no production or case module.
 **Legacy IDs**: exact 25-path browser/Node/Python/serialized/materialized-mutant inventory in `UiBrowserInterpreterRun.Internal`.
 **Docs to update**: this plan, the tracker/component/substrate maps, and the four doctrine owners named below.
@@ -119,6 +122,10 @@ authors.
 
 ### Deliverables
 
+- Consume the actual immutable `ClientPlan` produced by the production compiler, including its instruction graph, view tree, state definitions, route bindings and typed ports; reject unsupported instructions instead of substituting a canned application.
+- Represent actual visible tree, accessible names/roles/states, keyboard/focus transitions and request method/path/body/arguments as semantic outputs independently constrained by `UiBrowserInterpreterReference`.
+- Define one Haskell instruction/field-to-case registry for all admitted plans. The generator must project this same generic semantics; generated compilation/execution is qualified in Phase 46.
+
 - A Haskell `ClientPlan` decoder/interpreter, trusted-component rendering semantics, deterministic
   event/update/route semantics, and typed HTTPS-bootstrap and same-origin WebSocket request-plan values. No
   socket is opened.
@@ -129,6 +136,10 @@ authors.
   other external form are generated only beneath `.build/**`.
 
 ### Validation
+
+- Compile two materially different programs, run both through the unchanged interpreter, then alter one view, binding, event, route or port argument while preserving counts. Only the corresponding outputs may change; constant output must fail qualification.
+- Assert actual accessibility values and focus targets from the returned view state, and actual requests from the interpreted port instruction. A literal `True`, trace label or fixed expected record cannot satisfy an observation.
+- Retain same-origin and no-private-data negative controls, and add stale/missing instruction and generated/interpreter divergence cases assigned to their exact production loci.
 
 1. Require two-way equality between the independently declared surface universe and the surfaces discovered
    from the closed Haskell trace corpus. Empty discovery and every omitted event, route, link, or port fail.

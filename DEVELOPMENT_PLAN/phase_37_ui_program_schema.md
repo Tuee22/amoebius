@@ -32,18 +32,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 36, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
----
+Gate execution remains blocked by the qualified Phase-36 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -76,7 +73,8 @@ browser, server, identity-provider, and storage-provider enforcement remain UNVE
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -95,9 +93,9 @@ browser, server, identity-provider, and storage-provider enforcement remain UNVE
 | `Qualification` | `qualified-ui-program-schema-harness` |
 | `Cleanroom` | `ui-program-schema-products-contained-below-build` |
 | `Legacy closure` | `retired-ui-program-schema-authorities-absent` |
-| `Predecessor` | `exact-phase-thirty-six-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 36 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `ui-runtime-and-provider-owners-explicit` |
-| `Pass criterion` | `qualified-phase-thirty-seven-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -121,9 +119,9 @@ browser, server, identity-provider, and storage-provider enforcement remain UNVE
 
 > **Historical sprint results.** Earlier completion statements in sprint prose are capability inventory only; current completion remains owned by the integrated gate.
 
-## Sprint 37.1: Closed source algebra and total checker ✅
+## Sprint 37.1: Closed source algebra and total checker ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Ui/{Source,Check}.hs`, `test/spec/ui/{UiProgramSchemaCases,UiProgramSchemaSpec,UiProgramSchemaOracle}.hs`, the compiler twins, and the package-hidden Phase-37 supervisor own this sprint surface.
 **Blocked by**: [Phase 36](phase_36_transaction_vocabulary.md) gate pass
 **Independent Validation**: one clean Haskell semantic suite, two compiler-barrier rows, and six production CPP mutations execute serially from one acquired fresh build root.
@@ -152,9 +150,9 @@ admission total.
 
 The complete integrated Phase-37 gate and its mechanical status projection remain. Authorization, binding, planning, browser/server execution, provider enforcement, and hardware remain later-owned residue.
 
-## Sprint 37.2: Independent semantics and rejection coverage ✅
+## Sprint 37.2: Independent semantics and rejection coverage ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Ui/{Source,Check}.hs`, `test/spec/ui/{UiProgramSchemaCases,UiProgramSchemaSpec,UiProgramSchemaOracle}.hs`, the compiler twins, and the package-hidden Phase-37 supervisor own this sprint surface.
 **Blocked by**: Sprint 37.1
 **Independent Validation**: one clean Haskell semantic suite, two compiler-barrier rows, and six production CPP mutations execute serially from one acquired fresh build root.
@@ -184,9 +182,9 @@ snapshot of derived bytes.
 
 The complete integrated Phase-37 gate and its mechanical status projection remain. Authorization, binding, planning, browser/server execution, provider enforcement, and hardware remain later-owned residue.
 
-## Sprint 37.3: Calculus projection and phase seal ✅
+## Sprint 37.3: Calculus projection and phase seal ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Ui/{Source,Check}.hs`, `test/spec/ui/{UiProgramSchemaCases,UiProgramSchemaSpec,UiProgramSchemaOracle}.hs`, the compiler twins, and the package-hidden Phase-37 supervisor own this sprint surface.
 **Blocked by**: Sprint 37.2
 **Independent Validation**: one clean Haskell semantic suite, two compiler-barrier rows, and six production CPP mutations execute serially from one acquired fresh build root.

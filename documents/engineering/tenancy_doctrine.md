@@ -21,9 +21,9 @@ owned by [platform_services_doctrine.md](./platform_services_doctrine.md).
 
 </details>
 
-> **Historical result (invalidated).** Every pre-reset phase-run and implementation-result statement is diagnostic only and never current validation evidence. Target doctrine remains normative; current state is owned exclusively by the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. The tenant axis is orthogonal to the cluster axis](#2-the-tenant-axis-is-orthogonal-to-the-cluster-axis)
 - [3. What a tenant is](#3-what-a-tenant-is)
@@ -35,9 +35,9 @@ owned by [platform_services_doctrine.md](./platform_services_doctrine.md).
 - [9. Planning ownership](#9-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Why this doctrine exists
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 A multi-tenant workload keeps more than one customer's data on shared platform services, and the
 load-bearing obligation is isolation: tenant B must never read, share, or destroy tenant A's data. The

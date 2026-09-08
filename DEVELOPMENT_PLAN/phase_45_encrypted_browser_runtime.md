@@ -27,17 +27,19 @@ This plan owns the hardware-free encrypted offline-state and generated-runtime p
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 44 and every earlier numerical predecessor have passed. The Haskell state model, typed cases,
-independent oracle, seven production-mutant seams, lazy runtime projection, and acquired serial supervisor are
-implemented; the complete integrated gate has not yet passed.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-44 predecessor and its compatible evidence chain.
 
 ## Phase Summary
+
+This phase must generate a complete offline runtime whose operations mean the same thing as the Haskell state machine. A skeleton containing facility names and fencing hook strings does not meet that requirement. Hardware-free compilation and isolated execution of those generated operations belong to the immediate generated-bundle owner, Phase 46; actual browser fidelity remains later-owned.
 
 This phase defines the offline state machine, encryption envelope, identity partitioning, quota/eviction
 outcomes, replay ordering, and fenced ownership as Haskell values. Haskell also declares the projection that
@@ -62,28 +64,29 @@ service-worker, or WebCrypto fidelity; those are post-Phase-49 live-browser obli
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
-| `Claim` | `haskell-encrypted-offline-state-and-runtime-projection` |
+| `Claim` | The Haskell offline runtime consumes actual checked continuity plans, preserves encrypted-envelope/partition/fence/quota/replay semantics and generates complete runtime implementations whose software correspondence is executable under isolated fake browser facilities in Phase 46. |
 | `Subject` | `acquired-encrypted-browser-runtime-supervisor` |
 | `Command` | `pb validate phase 45` (future public spelling); before Phase 50, invoke the exact source-bound Haskell executable directly and let its acquired supervisor run the offline serial matrix. |
-| `Oracle` | `independent-encrypted-browser-runtime-oracle` |
-| `Positive controls` | `encrypted-browser-runtime-positive-controls` |
-| `Paired negatives` | `exact-encrypted-browser-runtime-paired-negatives` |
-| `Mutants` | `applied-encrypted-browser-runtime-production-mutants` |
-| `Discovery` | `exact-encrypted-browser-runtime-source-discovery` |
+| `Oracle` | `test/spec/browser/OfflineRuntimeReference.hs` independently specifies full envelope bytes/fields, record operations, partition ownership, replay/fencing and facility requests; stub declarations, names and source substrings cannot satisfy runtime meaning. |
+| `Positive controls` | Exercise every declared plan/state transition, persistence/encryption operation and facility adapter with actual input/output values, and emit a complete callable generated runtime for the next phase to compile and execute. |
+| `Paired negatives` | Tampered envelope, wrong partition/key context, quota boundary, stale fence, dual owner, crash/recovery and unsupported facility pairs must fail at exact transitions or requests while matched legal controls pass. |
+| `Mutants` | Mutate actual envelope, partition, fence, quota/replay semantics and generated operation bodies; an independently literal exact-case registry must detect each without relying on expected tokens or hook names. |
+| `Discovery` | Join actual continuity-plan/state/facility constructors, generated exports/operations, independent semantic cases and mutation assignments in both directions. |
 | `Challenge` | `post-acquisition-encrypted-browser-runtime-challenge` |
 | `Observer` | `encrypted-browser-runtime-process-observation` |
 | `Authority/bypass` | `no-pb-browser-node-purescript-javascript-dhall-network-live-host-hardware-or-parallelism` |
 | `Freshness` | `fresh-encrypted-browser-runtime-build-root-and-stable-source` |
-| `Qualification` | `qualified-encrypted-browser-runtime-harness` |
+| `Qualification` | Require real Haskell semantic observations and complete generated-operation structure plus all assigned changed subjects. Missing implementation bodies or constant no-op adapters refuse even if required facility names are present. |
 | `Cleanroom` | `encrypted-browser-runtime-products-contained-below-build` |
 | `Legacy closure` | `retired-encrypted-browser-runtime-authorities-absent` |
-| `Predecessor` | `exact-phase-forty-four-receipt` |
-| `Residue` | `live-browser-storage-crypto-lock-service-worker-replay-release-ha-and-hardware-owners-explicit` |
-| `Pass criterion` | `qualified-phase-forty-five-gate-pass` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 44 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
+| `Residue` | Actual browser storage durability, WebCrypto implementation fidelity, cross-tab scheduling and service-worker lifecycle remain unverified until their live owners. Phase 46 owns generated-runtime compilation and isolated fake-facility execution. |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -93,12 +96,12 @@ service-worker, or WebCrypto fidelity; those are post-Phase-49 live-browser obli
 
 ## Sprints
 
-## Sprint 45.1: Build the encrypted local interpreter ✅
+## Sprint 45.1: Build the encrypted local interpreter ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: the six `src/Amoebius/Ui/Offline/Browser/*.hs` phase modules, typed cases, production CPP seams, and package-hidden acquired Phase-45 supervisor.
 **Blocked by**: [Phase 44](phase_44_ui_local_composition.md) gate pass
-**Independent Validation**: fourteen actions; storage, asset, quota, access, migration, replay, facility, deterministic-projection, calculus, and seven changed-production observations.
+**Independent Validation**: Check full actual continuity-plan state/envelope/facility outputs against independent expectations; tamper, wrong-partition and stale-fence pairs fail exactly; assigned state and generated-body mutants are rejected; real browser fidelity remains unverified.
 **Oracle**: `test/spec/browser/OfflineRuntimeReference.hs`, importing no production or case module.
 **Legacy IDs**: exact 26-path Python/PureScript/JavaScript/serialized/materialized-mutant inventory in `EncryptedBrowserRuntimeRun.Internal`.
 **Docs to update**: this plan, tracker/component/substrate maps, browser-offline, testing, and generated-artifact doctrine owners.
@@ -110,6 +113,9 @@ multiple replay owners.
 
 ### Deliverables
 
+- Make each generated storage, crypto, worker, lock and channel operation implement its typed Haskell semantics with explicit inputs, results, errors and facility calls. Empty declarations, placeholder returns and unused hook names are rejected as incomplete source generation.
+- Provide a Haskell-authored independent operation/ABI/case registry and deterministic fake browser-facility semantics for the Phase-46 generated software execution contract; no tracked foreign-language fixture or implementation is introduced.
+
 - Closed Haskell values for encrypted structured/blob records, public asset-cache metadata, identity
   partitions, local-unlock outcomes, and supported-facility declarations.
 - Pure Haskell transitions for quota, eviction, crash recovery, migration, replay ordering, and single-fenced
@@ -120,6 +126,9 @@ multiple replay owners.
   changed-subject mutations for the state and projection boundaries.
 
 ### Validation
+
+- Compare actual envelope fields and bytes, partition keys, fence generations, requested operations and failure outcomes. Replacing an operation body with a no-op while preserving source names must fail its assigned projection case.
+- Retain all declared quota, crash, migration, ownership and replay boundaries; a fixture count or same generated source hash cannot discharge one of these semantic obligations.
 
 1. Compare every declared state transition with a separately authored Haskell expectation. The corpus must
    cover envelope identity, partition switching, quota, eviction, recovery, migration, replay ordering, and

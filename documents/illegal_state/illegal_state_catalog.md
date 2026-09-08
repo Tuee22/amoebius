@@ -24,11 +24,20 @@ different file than its target.
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+## Contents
+
+- [1. Illegal states fail to type-check](#1-illegal-states-fail-to-type-check)
+- [2. The load-bearing limit: a type-check proves the spec composes, not that the cluster enforces it](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
+- [3. The catalog — states a valid spec cannot represent](#3-the-catalog--states-a-valid-spec-cannot-represent)
+- [4. Planning ownership](#4-planning-ownership)
+- [Related Documents](#related-documents)
+
 
 ---
 
 ## 1. Illegal states fail to type-check
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 In raw Kubernetes a Deployment can mount a PVC no PV will ever
 bind, a NetworkPolicy can strand a service from the database it needs, or an Ingress can quietly route

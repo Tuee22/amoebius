@@ -9,6 +9,7 @@ module AppleEngineBringupOracle
   , expectedColimaLiftedPlan
   , expectedLiftedStep
   , expectedColimaLiftedStep
+  , expectedMutantFailures
   ) where
 
 -- Independent observation vocabulary: this module imports no Amoebius module.
@@ -84,4 +85,26 @@ expectedColimaLiftedStep :: [String]
 expectedColimaLiftedStep =
   [ "/opt/homebrew/bin/colima", "ssh", "--profile", "amoebius-phase53-oracle"
   , "--", "df", "-kP", "/"
+  ]
+
+-- A selected mutant may fail only its assigned observations.  Keep this registry
+-- independent of both production CPP branches and observed test output: an
+-- unrelated failure must never acquire the selected mutant's acceptance token.
+expectedMutantFailures :: [(String, [String])]
+expectedMutantFailures =
+  [ ("apple-engine-bringup-mutant: RED installs-floor homebrew-refusal",
+      ["floor-homebrew-negative"])
+  , ("apple-engine-bringup-mutant: RED wrong-provider image-build-selection",
+      ["provider-table"])
+  , ("apple-engine-bringup-mutant: RED leaks-ephemeral lifecycle",
+      ["lifecycle-table"])
+  , ("apple-engine-bringup-mutant: RED default-frame checked-carve",
+      ["frame-fit", "cpu-negative", "memory-negative", "disk-negative"])
+  , ("apple-engine-bringup-mutant: RED reauthors-lift unchanged-linux-step",
+      [ "complete-lifted-linux-plan", "complete-colima-lift-envelope"
+      , "live-challenge-step-shape", "live-challenge-colima-envelope"
+      , "complete-plan-actions"
+      ])
+  , ("apple-engine-bringup-mutant: RED allows-emulation native-arm64",
+      ["architecture-negative", "emulation-negative"])
   ]

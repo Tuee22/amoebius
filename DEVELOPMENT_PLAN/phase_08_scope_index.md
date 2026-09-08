@@ -31,14 +31,15 @@ and the Phase Status block below; only the complete integrated gate may authoriz
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-The complete Phase-7 gate is recorded as the verified immediate-predecessor frontier fact. Phase 8's complete
-integrated gate authorized the recorded mechanical status projection.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-7 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -70,9 +71,8 @@ exchange. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-8 semantic payload, package-hidden serial
-supervisor, independent Haskell oracle, five compile-negative pairs, and changed-production subject are
-complete; only a fresh integrated run may authorize status.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -91,9 +91,9 @@ complete; only a fresh integrated run may authorize status.
 | `Qualification` | Clean controls, five exact negative pairs, source discipline, and the changed-production subject pass together; a survivor or wrong-locus result refuses. |
 | `Cleanroom` | Every binary, interface, object, stub, and transcript is generated lazily beneath the fresh run root. |
 | `Legacy closure` | Phase 8 owns no legacy-debt identifier; all non-circular prerequisites must pass while later-owned source debt remains residue. |
-| `Predecessor` | Consume exactly one durable Phase-7 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 7 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | Persisted-value re-entry, resource indexing, five-calculus composition, effects, runtimes, hardware, and live services remain explicitly later-owned. |
-| `Pass criterion` | `qualified-phase-eight-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
+| `Pass criterion` | `qualified-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
 **This phase owns its compile-negative evidence.** Each illegal twin requires a phase-local source-bound GHC
 invocation, a minimally different positive control, and a separately authored exact diagnostic expectation.
@@ -112,9 +112,9 @@ invocation, a minimally different positive control, and a separately authored ex
 
 The sprint seam is bound to the same Haskell-only subject, oracle, and serial supervisor as the gate.
 
-## Sprint 8.1: Rank-2 scope index and total flow checking ✅
+## Sprint 8.1: Rank-2 scope index and total flow checking ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Scope/{Index,Flow}.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/ScopeIndexRun/Internal.hs`
 **Blocked by**: [Phase 7](phase_07_evidence_calculus.md) gate pass
 **Independent Validation**: six owner rows, two exact swap errors, four flow decisions, four exact diagnostics, nine generated reject classes, five exact compile-negative pairs, and one assigned changed-production subject

@@ -22,11 +22,12 @@ in [chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-concentra
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
 ## 1. Why this doctrine exists
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 **The problem this doctrine prevents.** amoebius has already fixed its position on every PACELC axis (Abadi
 2010/2012: under a **P**artition choose **A**vailability or **C**onsistency; **E**lse, in the healthy case,

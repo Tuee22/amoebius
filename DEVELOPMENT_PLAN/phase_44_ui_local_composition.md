@@ -10,7 +10,7 @@ This contract owns the hardware-free composition of client plans, server authori
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, documents/engineering/app_vs_deployment_doctrine.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/app_vs_deployment_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -26,15 +26,15 @@ This contract owns the hardware-free composition of client plans, server authori
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 43 and every earlier numerical predecessor have passed. The pure Haskell composition, typed cases,
-independent oracle, five production-mutant seams, and acquired serial supervisor are implemented; the complete
-integrated gate has not yet passed.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-43 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -59,7 +59,8 @@ infrastructure. Any external-language encoding or fake executable is generated r
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -78,9 +79,9 @@ infrastructure. Any external-language encoding or fake executable is generated r
 | `Qualification` | `qualified-ui-local-composition-harness` |
 | `Cleanroom` | `ui-local-composition-products-contained-below-build` |
 | `Legacy closure` | `retired-ui-local-composition-authorities-absent` |
-| `Predecessor` | `exact-phase-forty-three-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 43 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `live-workflow-provider-browser-deployment-release-and-ha-owners-explicit` |
-| `Pass criterion` | `qualified-phase-forty-four-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -93,9 +94,9 @@ infrastructure. Any external-language encoding or fake executable is generated r
 
 ## Sprints
 
-## Sprint 44.1: Single-/multi-tenant workflow-to-artifact composition gate ✅
+## Sprint 44.1: Single-/multi-tenant workflow-to-artifact composition gate ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Ui/LocalComposition.hs`, typed cases, production CPP seams, and the package-hidden acquired Phase-44 supervisor.
 **Blocked by**: [Phase 43](phase_43_ui_server_boundary.md) gate pass
 **Independent Validation**: two application shapes, visible/effect/access/denial rows, plan identity, direct bypass, calculus, and five changed-production checks.

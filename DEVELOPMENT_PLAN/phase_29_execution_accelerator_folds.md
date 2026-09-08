@@ -18,7 +18,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -38,17 +38,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 28 and every earlier gate have passed in numerical order. The Phase-29 pure folds, independent Haskell
-oracle, 37 paired cases, seven properties, and 45 changed-production challenges are bound; only the complete
-integrated Phase-29 gate may authorize the status transition.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-28 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -143,7 +141,8 @@ names the refusing axis. It observes no device, host, provider, or cluster.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -162,9 +161,9 @@ names the refusing axis. It observes no device, host, provider, or cluster.
 | `Qualification` | `qualified-execution-accelerator-harness` |
 | `Cleanroom` | `execution-accelerator-products-contained-below-build` |
 | `Legacy closure` | `retired-execution-accelerator-authorities-absent` |
-| `Predecessor` | `exact-phase-twenty-eight-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 28 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `later-binding-provision-runtime-execution-owners-explicit` |
-| `Pass criterion` | `qualified-phase-twenty-nine-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -203,14 +202,15 @@ names the refusing axis. It observes no device, host, provider, or cluster.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra ✅
+## Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/execution-accelerator-folds/Amoebius/Capacity/{Execution,Scheduler,HostReservation}.hs` owns execution epochs, reservation projections, aggregate-ledger CAS, and recovery-state debits.
 **Blocked by**: [Phase 28](phase_28_storage_geometry_folds.md) gate pass
 **Independent Validation**: Exact execution and scheduler tags are checked beside legal twins; thirteen applied production mutations cover rollout, prior-reference, projection, CAS, and retained-debit seams.
@@ -313,9 +313,9 @@ numbers only — the pure expansion fold Phase 31's `provision` seal later invok
 
 Run and record the complete integrated Phase-29 gate; component diagnostics cannot authorize completion.
 
-## Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ✅
+## Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/execution-accelerator-folds/Amoebius/Capacity/{RuntimeStorage,NodeLocalStorage}.hs` owns role routing, metadata/image joins, filesystem-layout observation, and physical-parent accounting.
 **Blocked by**: Sprint 29.1
 **Independent Validation**: Runtime, image, layout, and partition tags are checked beside one-axis legal twins; seventeen applied production mutations challenge every owned join and accounting seam.
@@ -435,9 +435,9 @@ structure, route them through `KubeletNodefs | CriRuntimeRoot` and the selected
 
 Run and record the complete integrated Phase-29 gate; component diagnostics cannot authorize completion.
 
-## Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ✅
+## Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/execution-accelerator-folds/Amoebius/Capacity/{Accelerator,ProviderRoot,Etcd,PulumiExecution}.hs` owns residency, net VRAM, provider-root, etcd, and Pulumi demand derivations.
 **Blocked by**: Sprint 29.2
 **Independent Validation**: Accelerator/provider/etcd refusal tags and twins are challenged by fifteen applied production mutations, including every residency and root-quota distinction.
@@ -529,9 +529,9 @@ derivations as pure, checked `provision-seal` operations that feed the composed 
 
 Run and record the complete integrated Phase-29 gate; component diagnostics cannot authorize completion.
 
-## Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ✅
+## Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/execution-accelerator-folds/Amoebius/Capacity/Composed.hs` composes execution, storage, accelerator, and topology folds; `ExecutionAcceleratorProps.hs` owns seven covered soundness properties.
 **Blocked by**: Sprint 29.3
 **Independent Validation**: Two composed positives and seven 300-sample covered properties establish sound placement over the full owned vector while retaining explicit runtime-fidelity residue.
@@ -625,9 +625,9 @@ may reject a packable one) for the composed compute `place`, and never claim com
 
 Run and record the complete integrated Phase-29 gate; component diagnostics cannot authorize completion.
 
-## Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ✅
+## Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `ExecutionAcceleratorGate.hs` executes the Haskell corpus; `Amoebius.Validation.ExecutionAcceleratorRun.Internal` runs 45 changed-production builds and the clean suite in one unique run root.
 **Blocked by**: Sprint 29.4
 **Independent Validation**: The package-hidden supervisor checks exact source discovery, direct offline `--jobs=1` Cabal argv, all 45 red loci, the clean token, stable source, predecessor receipt, and zero hardware/live authority.

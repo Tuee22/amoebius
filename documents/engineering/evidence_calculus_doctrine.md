@@ -14,7 +14,7 @@ This document owns the evidence calculus. Execution registers and harness topolo
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/workflow_calculus_doctrine.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, README.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/workflow_calculus_doctrine.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -29,8 +29,6 @@ This document owns the evidence calculus. Execution registers and harness topolo
 - [6. The residue](#6-the-residue)
 - [7. Planning ownership](#7-planning-ownership)
 - [Related Documents](#related-documents)
-
----
 
 ## 1. Why this doctrine exists
 
@@ -89,7 +87,11 @@ therefore requires all of the following:
 - the oracle does not import, call, copy, or mechanically translate subject decision logic;
 - the oracle is separately authored from the subject's decision logic;
 - subject and expectation provenance is visible in the source snapshot; and
-- amending the expectation invalidates affected evidence and re-runs its mutants.
+- amendments require a qualified accepted-baseline revision before affected evidence can be reused.
+
+[Testing spoof resistance §12](testing_spoof_resistance.md#12-spoof-resistant-evidence) owns the protection of
+oracle, observer, verifier, and receipt authority from candidate edits. Distinct source files and opaque
+constructors do not establish that protection.
 
 Independent oracle logic is `.hs`. A Dhall/JSON/YAML/TSV/golden copy is not made independent by being written
 in another format; it is behavioural source outside the closed Haskell boundary. When bytes or another format
@@ -129,7 +131,8 @@ The calculus makes claims reviewable and falsifiable; it does not make them true
 - It does not prove the compiler, kernel, observer, authority, provider, or hardware uncompromised.
 - It does not let a component self-report or isolated exit code substitute for the
   complete qualified gate.
-- It does not let prior evidence survive a changed contract, subject, oracle, source boundary, or predecessor.
+- It does not establish current applicability from a historical pass alone; the accepted verifier must check
+  the dependency compatibility relation in [§M.6](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass).
 
 Every result names these limits as assumptions or `UNVERIFIED` residue. The evidence-calculus implementation
 is the four public Haskell modules under `Amoebius.Calculus.Evidence`; only a complete current Phase-7 gate

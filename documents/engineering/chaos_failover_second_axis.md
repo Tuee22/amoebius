@@ -14,23 +14,23 @@ argument in [chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [16. The Second Axis — when one cluster becomes a forest](#16-the-second-axis--when-one-cluster-becomes-a-forest)
 - [17. The boundary and its classifier](#17-the-boundary-and-its-classifier)
 - [18. The rules scale to the boundary](#18-the-rules-scale-to-the-boundary)
 - [19. The cross-boundary ledger and conformance rows](#19-the-cross-boundary-ledger-and-conformance-rows)
 - [Related Documents](#related-documents)
 
----
-
 ## 16. The Second Axis — when one cluster becomes a forest
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 > **Gate.** Everything above assumed a single, strongly-consistent domain: one cluster, where a committed
 > write is immediately visible to every reader and the standard services run their own consensus ([§6](./chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives)). If

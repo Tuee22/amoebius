@@ -20,11 +20,22 @@ amoebius carries a formal proof obligation rather than delegating it.
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+## Contents
+
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. The `Planned` branch — a coordinated strong-consistency handover](#2-the-planned-branch--a-coordinated-strong-consistency-handover)
+- [3. The `Failover` branch — an availability-first emergency takeover](#3-the-failover-branch--an-availability-first-emergency-takeover)
+- [4. Client rebind — a live session must always find the gateway](#4-client-rebind--a-live-session-must-always-find-the-gateway)
+- [5. The migration as a typed, edge-observed state machine](#5-the-migration-as-a-typed-edge-observed-state-machine)
+- [6. Honesty and layer markers](#6-honesty-and-layer-markers)
+- [Related Documents](#related-documents)
+
 
 ---
 
 ## 1. Why this doctrine exists
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 **The problem this doctrine prevents.** Two unlike operations were conflated under one label. One is a
 coordinated handover of the wild-ingress gateway between two live clusters; the other is an emergency
@@ -78,11 +89,12 @@ chaos-failover's emergency DNS repoint is `Failover`.
 
 | Arm | Trigger | Both clusters up? | Data-loss guarantee | Modelled? |
 |---|---|---|---|---|
-| `Planned` | A new `InForceSpec`, or amoebius automated logic (e.g. a `ScalingPolicy`) | Yes | RPO=0 — no committed write lost (the `PlannedIsLossless` model invariant, proven-for-the-model; [§6](#6-honesty-and-layer-markers)) | Yes — `PlannedIsLossless` (cutover reachable only after `verify-caught-up`); no *async* divergence |
+| `Planned` | A new `InForceSpec`, or amoebius automated logic (e.g. a `ScalingPolicy`) | Yes | Target RPO=0 — no committed write lost (`PlannedIsLossless` requires bounded model evidence; [§6](#6-honesty-and-layer-markers)) | Required — `PlannedIsLossless` (cutover reachable only after `verify-caught-up`); no *async* divergence |
 | `Failover` | The active gateway is down or unreachable | No — the active has vanished | RPO>0 — bounded by the declared data-loss budget | Yes — the async "Second Axis" (`NoWriteAfterStaleFailover`/`MergeConverges`; [chaos_failover_second_axis.md §16](./chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)) |
 
-Both branches are modelled as one reifiable `Model` — simulated (io-sim) and proven (TLC) at design time — by
-[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md), amoebius's one proof obligation.
+Both branches require one reifiable `Model`, design-schedule simulation, and bounded TLC evidence under
+[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md). This is the cross-cluster
+protocol proof obligation; it does not replace the DSL's other semantic and correspondence obligations.
 
 ---
 
@@ -284,21 +296,22 @@ The forest/geo-replication substrate is assigned to **Phase 74**. Phase 75 owns 
 status.
 
 - The `Planned` branch's **RPO=0** is the model invariant **`PlannedIsLossless`** — cutover is reachable only
-  after a `verify-caught-up` edge, so no committed write is lost. It is **proven-for-the-model at scope 2**
-  ([gateway_migration_model_doctrine.md §3](./gateway_migration_model_doctrine.md#3-the-model), [§6](./gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)), not merely argued. What stays
+  after a `verify-caught-up` edge, so no committed write may be lost in the admitted model. The target is
+  **proven-for-the-model at scope 2**
+  ([gateway_migration_model_doctrine.md §3](./gateway_migration_model_doctrine.md#3-the-model), [§6](./gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)). What stays
   **assumed** is the *runtime physics* the model abstracts — that the caught-up verification and the
   MinIO/Pulsar/Patroni lossless delegation actually hold live — a **runtime-observed** caught-up edge, not a
   constructive type-level impossibility. Phase 75 owns the outside-forest-journal and positive-lag observation. Per the
   honesty rule ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)),
   the model property targets *proven-for-the-model* strength and the drilled runtime fidelity targets *tested* strength.
-- **Both** branches are the subject of amoebius's one proof obligation, owned by
+- **Both** branches are the subject of the cross-cluster protocol proof obligation, owned by
   [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) and set in the concentration
   principle of [chaos_failover_doctrine.md](./chaos_failover_doctrine.md): the `Failover` async correctness via
   `NoWriteAfterStaleFailover` (safety) and `MergeConverges` (liveness), and the `Planned` handover via
-  `PlannedIsLossless` — one reifiable `Model`, simulated (io-sim) and proven (TLC) at design time, with
-  spec↔decision-core correspondence differentially checked and no deferred prose table. The Register-3 drill
-  covers both arms, all modeled actions, raw-kernel hub handoff, and authoritative local DNS. Provider Route53
-  mutation and WAN physics remain UNVERIFIED.
+  `PlannedIsLossless`. The target requires bounded TLC proof, simulation checks, an independent semantic
+  renderer oracle, and actual production decision bindings or checked refinement. The Register-3 drill must
+  cover both arms, all modeled actions, raw-kernel hub handoff, and authoritative local DNS. Provider Route53
+  mutation and WAN physics require their own observations; none follows from the model alone.
 - The typed `GatewayFailover { active : ClusterId, standby : ClusterId, dnsRecord, hubRole }` forest relation
   is a **parent-owned** relation in the `RootInForceSpec`, projected read-only into each child's
   `ChildInForceSpec` — the same derive-don't-author, relations-owned-by-the-enclosing-scope pattern the

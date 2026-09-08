@@ -23,14 +23,12 @@ be observed as having happened. The numbering belongs to
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Scope](#1-scope)
 - [2. The readiness, promotion & monitoring illegal states](#2-the-readiness-promotion--monitoring-illegal-states)
 - [Related Documents](#related-documents)
-
----
 
 ```mermaid
 flowchart LR
@@ -50,6 +48,8 @@ flowchart LR
 *Orientation. Design intent. Where this slice's entries are caught, counted from the primary `**Validation-locus:**` of each entry below; an entry may also name a secondary locus, which this count does not show. Lifecycle is the only slice reaching the extension-source check, and no entry has the provisioning seal as its primary locus. The axis itself is owned by [illegal_state_techniques.md §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer).*
 
 ## 1. Scope
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 This document is a **themed slice** of the illegal-state catalog: the lifecycle illegal states — the
 duration-gated / hand-ordered bring-up race ([§3.41](#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race)),

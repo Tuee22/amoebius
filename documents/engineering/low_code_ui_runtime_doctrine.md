@@ -23,6 +23,7 @@ owned by [browser_offline_runtime_doctrine.md](./browser_offline_runtime_doctrin
 </details>
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. Scope and single-source ownership](#2-scope-and-single-source-ownership)
 - [3. One checked value, two runtime plans](#3-one-checked-value-two-runtime-plans)
@@ -43,8 +44,6 @@ owned by [browser_offline_runtime_doctrine.md](./browser_offline_runtime_doctrin
 - [18. Honesty boundary](#18-honesty-boundary)
 - [19. Extension rule and permanently absent escape hatches](#19-extension-rule-and-permanently-absent-escape-hatches)
 - [Related Documents](#related-documents)
-
----
 
 Phase order, implementation status, and validation gates live only in
 [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). This document owns the intended UI language

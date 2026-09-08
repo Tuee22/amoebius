@@ -20,6 +20,7 @@ the doctrine that defines each output.
 </details>
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. What is generated (and from what)](#2-what-is-generated-and-from-what)
 - [3. The rule](#3-the-rule)
@@ -27,8 +28,6 @@ the doctrine that defines each output.
 - [5. Authored vs generated: the committed source](#5-authored-vs-generated-the-committed-source)
 - [6. Planning ownership](#6-planning-ownership)
 - [Related Documents](#related-documents)
-
----
 
 ## 1. Why this doctrine exists
 

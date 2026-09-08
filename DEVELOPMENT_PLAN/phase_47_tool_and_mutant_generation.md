@@ -16,8 +16,6 @@ This plan owns the hardware-free Haskell support-material generation and tracked
 
 </details>
 
----
-
 ## Contents
 
 - [Phase Status](#phase-status)
@@ -29,15 +27,15 @@ This plan owns the hardware-free Haskell support-material generation and tracked
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 46 and every earlier numerical predecessor are recorded Done. The complete qualified Phase-47 gate
-passed for the exact source snapshot, its durable receipt was installed, and its authorized status projection
-was applied before Phase 48 began.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-46 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -58,7 +56,8 @@ families.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -77,9 +76,9 @@ families.
 | `Qualification` | `qualified-tool-and-mutant-generation-harness` |
 | `Cleanroom` | `generated-support-products-contained-below-build` |
 | `Legacy closure` | `phase-forty-seven-source-families-zero` |
-| `Predecessor` | `exact-phase-forty-six-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 46 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `generated-tool-execution-provider-semantics-live-runtime-and-hardware-owners-explicit` |
-| `Pass criterion` | `qualified-phase-forty-seven-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -88,9 +87,9 @@ families.
 
 ## Sprints
 
-## Sprint 47.1: Generated repository support material ✅
+## Sprint 47.1: Generated repository support material ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/tool-and-mutant-generation/Amoebius/Generate/CheckingCorpus.hs` and the package-hidden acquired Phase-47 supervisor.
 **Blocked by**: [Phase 46](phase_46_ui_contract_generation.md) gate pass
 **Independent Validation**: exact two-way comparison of nine declarations and generated files; three minimally different build-root/refusal pairs; three applied production mutants at distinct loci; zero tracked tools, Pulumi, and non-Haskell test source; and zero authored-tree residue.
@@ -120,7 +119,9 @@ legacy families and reconciles the nine expected/generated artifacts in both dir
 
 ### Remaining Work
 
-The complete integrated gate passed and its exact emitted status projection was applied. Generated-tool
+The earlier integrated pass and status projection are historical claims withdrawn by the reset.
+Requalify the generated tools by their actual semantics, including real solver outcomes distinct from
+bounded fake responses; generated-file presence does not satisfy this phase. Generated-tool
 execution, provider semantics, live runtime behavior, and hardware fidelity remain later-owned.
 
 ## Documentation Requirements

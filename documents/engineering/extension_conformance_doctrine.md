@@ -21,9 +21,9 @@ are stated over are owned by their own doctrines.
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. What an extension is](#2-what-an-extension-is)
 - [3. The obligation surface: one component per calculus](#3-the-obligation-surface-one-component-per-calculus)
@@ -36,9 +36,9 @@ are stated over are owned by their own doctrines.
 - [10. Planning ownership](#10-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Why this doctrine exists
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 amoebius is not a closed DSL with a fixed list of things it can deploy. It is a **core for distributed systems
 that admits extensions carrying arbitrary logic** — new domains, new providers, new hardware. That openness is
@@ -211,9 +211,9 @@ third has to be built rather than derived from it:
 3. **It records which suite ran, which is binding rather than authenticity.** A verdict minted from a
    hand-modified suite is a perfectly well-formed value carrying that suite's digest; content addressing
    detects the substitution only for a reader who independently knows the digest the declaration should have
-   produced. Unforgeability is a separate obligation: the verdict constructor must be available only to the
-   gate, on the terms [`jit_budget_doctrine.md` §2](./jit_budget_doctrine.md#2-the-grant-is-the-authority-to-exist)
-   states for a grant. This document specifies that; nothing yet enforces it.
+   produced. Authenticated issuance is a separate obligation under
+   [testing spoof resistance §12](testing_spoof_resistance.md#12-spoof-resistant-evidence). Package hiding alone
+   cannot protect issuer authority from a candidate that edits or replaces the verifier.
 
 This is the [`release_lifecycle_doctrine.md`](./release_lifecycle_doctrine.md) evidence-gate shape applied to
 extensions: a handle that only a passing run can mint, and that every downstream operation demands.
@@ -228,7 +228,7 @@ verdict construction, verdict omission, and cross-request verdict use.
 That is content binding and a single API introduction path, not authenticated execution. Any in-process
 caller can supply an observation bundle to the pure runner; no signature, process isolation, or external gate
 service proves where those results came from. The Phase-24 contract records this as UNVERIFIED rather than promoting the
-modeled passing seal to the unforgeability claim above. SHA-256 collision absence is likewise ASSUMED.
+modeled passing seal to authenticated execution. SHA-256 collision absence is likewise ASSUMED.
 
 ---
 
@@ -245,7 +245,7 @@ in which an arbitrary composition is well defined.
 **C1 is specified, not proven, and the induction inherits that.** Stating the argument's standing precisely:
 
 - **The base case is checked per extension**, by the generated gate of [§5](#5-the-conformance-gate-is-generated-not-authored), and the verdict of [§6](#6-the-verdict-seal) records it.
-- **C1 is discharged by finite testing, not by proof.** The composition suite instantiates C1–C7 over each
+- **The specified finite suite does not discharge universal C1.** The composition suite instantiates C1–C7 over each
   pair drawn from the link set. Pairwise testing establishes the presence of counterexamples, never their
   absence, so what the gate delivers is a sampled property and not the universally quantified lemma the
   induction consumes.
@@ -258,7 +258,7 @@ in which an arbitrary composition is well defined.
 
 So the honest claim is conditional: *given* C1, closure follows. A proof of C1 — by parametricity over the
 declaration type, or by a mechanised argument in the proof stack — is owed and does not exist. Until it does,
-the conformance machinery is strong evidence for closure and not a demonstration of it. The link set is finite
+qualified finite results can support only their explicitly bounded closure claim. The link set is finite
 because a binary links a finite set of libraries, not because finiteness is what the checking budget can afford.
 
 What C7 (address collision) contributes is the reason the union is a union at all: artifact addresses are

@@ -19,15 +19,15 @@ provisioned. It does not carry the types themselves, owned by
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [Checked construction](#checked-construction)
 - [Related Documents](#related-documents)
 
----
-
 ## Checked construction
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 ```mermaid
 flowchart LR

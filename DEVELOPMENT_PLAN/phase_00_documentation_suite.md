@@ -6,7 +6,7 @@
 > **Read this if**: Phase 0's status or contract is being assessed, a cross-cutting rule changes, or a later phase needs the exact boundary
 > between bootstrap assumptions and numbered validation claims.
 
-Phase 0 is deliberately small. It proves only the seed needed to start ordered validation; it does not prove a
+Phase 0 specifies the finite seed needed to start ordered validation; it does not prove a
 reproducible toolchain, a compiler-backed semantic source graph, universal harness self-reference, the `pb`
 runtime handoff, a product capability, or any live substrate.
 
@@ -15,7 +15,7 @@ runtime handoff, a product capability, or any live substrate.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, documents/documentation_standards.md, documents/engineering/migration_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, documents/documentation_standards.md, documents/engineering/migration_doctrine.md, documents/engineering/validation_frame_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -24,8 +24,6 @@ runtime handoff, a product capability, or any live substrate.
 
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
-- [GenesisTrust pins](#genesistrust-pins)
-- [Finite Phase-0 exit contract](#finite-phase-0-exit-contract)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
@@ -40,17 +38,13 @@ runtime handoff, a product capability, or any live substrate.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+🔄 Active — NOT VALIDATED.
 
-The status above is the sole phase-level lifecycle field. No component diagnostic, prepared input, emitted
-candidate, or prose change can alter it; only a complete Phase-0 gate pass and the exact emitted status patch
-can record Done.
-
----
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
 ## Phase Summary
 
@@ -73,11 +67,12 @@ admission predicate, and reject a changed closing snapshot. It does not qualify 
 `VALIDATION_PB_GRAMMAR` selector/oracle suite or parse, rename, typecheck, or infer behavior for the whole
 repository. Those owner-level grammar and compiler-backed semantic source-graph claims belong to Phase 2.
 
-The only changed-production source qualification required by this seed is the exact clean control plus the
+The changed-production source qualification required by this seed is the exact clean control plus the
 three cases in Sprint 0.5. They are compiled and executed one at a time with the compiler named by
 `GenesisTrust`; each mutant must change the copied production source and its binary, then fail the independent
-driver while the clean copy passes. Complete per-owner mutation coverage and universal self-reference belong
-to Phase 49.
+driver while the clean copy passes. Each later owner qualifies its acceptance mechanisms at first use;
+Phase 49 additionally qualifies their universal composition. The separate finite custody and generation
+controls below must also produce integrated receipts; the three predicate mutants cannot observe OS authority.
 
 Numerical order governs gate execution, evidence, and status. It does not prohibit implementation of a later
 `Substrate: none` phase after that phase has an exact typed contract and separately authored oracle. Such work
@@ -124,12 +119,18 @@ the sorted file pins into an opaque token; callers cannot mint the token from st
 This checklist is the complete exit boundary. New hardening that is not necessary to falsify one of these
 items is assigned to its numbered owner instead of extending Phase 0.
 
+- Admit the replacement Haskell certification generation and finite accepted seed under the tested custody
+  boundary in [§M.0](development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation).
+  The seed identity and operator/OS assumptions are explicit; pre-reset evidence supplies no authority.
 - Acquire one opaque `GenesisTrust` from exactly the seven pins and environment facts above, while making
   no publisher-authentication or reproducible-acquisition claim.
 - Capture and re-capture one exact tracked source snapshot; close the static Haskell source partition and
   the bounded `pb/**` grammar without requiring the Phase-2 compiler semantic graph.
 - Check the governed-document inventory, link metadata, canonical status syntax, sprint fields, immediate
   blockers, and fixed eighteen-row tables without deriving executable semantics from Markdown.
+- Observe the finite seed-custody corpus through its separately authored Haskell oracle: protected issuer
+  success; old-generation refusal; forged receipt plus matching-copy refusal; candidate baseline replacement
+  denial; authority-ancestor replacement denial; private issuer read denial; inherited-authority impersonation denial.
 - Bind all eighteen Phase-0 semantic requirements while permitting later phase semantic contracts to
   remain owned by those later phases.
 - Run the clean bootstrap predicate and exactly three changed-source cases serially, retaining source,
@@ -139,36 +140,36 @@ items is assigned to its numbered owner instead of extending Phase 0.
   `LTD-SRC-008` active for its Phase-2 owner-level analyzer and reintroduction proof.
 - Observe that the compiled legacy due-count for Phase 0 is zero. No legacy ID is owned or retired here;
   later owners remain explicit typed forward deferrals outside the Phase-0 candidate.
-- Produce one complete qualified candidate whose required rows pass and whose `captureResidue` is exactly
-  empty; a forward-deferred exclusion is not serialized as `UNVERIFIED` candidate residue.
+- Produce one complete qualified candidate whose required rows pass. Keep assumptions and later exclusions
+  visible as typed limitations; missing required observations and forbidden resource residue refuse.
 - Emit the exact verified status-only patch beneath `.build/**`; do not apply it or otherwise mutate a
   tracked file from the validator process, and re-acquire the Git source snapshot after emission to prove it
   still equals the opening snapshot.
 
 ## Gate integrity
 
-**Contract check**: SPECIFICATION RESOLVED. The rows below are the complete Phase-0 contract, not a record of
-execution or a second status field.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
-| `Claim` | For one exact source snapshot, the governed documentation structure, closed cross-cutting policy, bounded static source classification, finite bootstrap qualification, and evidence/status-patch protocol agree. Later-owned toolchain reproducibility, compiler semantic closure, universal self-reference, runtime handoff, product, and live-resource claims are excluded. |
-| `Subject` | The source-bound Haskell Phase-0 dispatcher joins one opaque `GenesisTrust`, one acquired opening/closing source snapshot, the typed policy and Phase-0 contract, structural document observations, the static source/`pb` checks, the finite qualification receipt, and the evidence verifier. No caller-authored snapshot, digest, row result, predecessor, or status projection can substitute for an acquired value. |
+| `Claim` | For one exact source snapshot, the governed documentation structure, closed cross-cutting policy, bounded static source classification, finite bootstrap qualification, and evidence/status-patch protocol agree. Later-owned toolchain reproducibility, compiler semantic closure, universal self-reference, runtime handoff, product, and live-resource claims are excluded. The candidate binds the replacement generation and protected accepted seed. |
+| `Subject` | The source-bound Haskell Phase-0 dispatcher joins one opaque `GenesisTrust`, one acquired opening/closing source snapshot, the typed policy and Phase-0 contract, structural document observations, the static source/`pb` checks, both the predicate-matrix and seven-case seed-custody/generation receipts, and the evidence verifier. No caller-authored snapshot, digest, row result, predecessor, or status projection can substitute for an acquired value. |
 | `Command` | Future public spelling is `pb validate phase 00`, but `pb` is inadmissible before `BOOTSTRAP_HANDOFF`. The actual gate launches the running Haskell executable directly by its absolute path with the exact argv suffix `validate`, `phase`, `00`, no wrapper or extra argument. The executable records its path, digest, argv, and GenesisTrust token; it does not claim the executable bytes' compiler/build derivation, which Phase 1 owns. The clean plus three qualification binaries compile serially with `-j1`. |
-| `Oracle` | The candidate oracle is the separately tracked `test/validation-kernel/BootstrapMutationDriver.hs`, whose acquired bytes are distinct from both `BootstrapPredicate.hs` and the qualification harness. It states the clean and three bypass expectations. Other named Haskell oracles are bounded component diagnostics and their results are not represented as integrated Phase-0 oracle receipts. |
+| `Oracle` | Acquired `test/validation-kernel/BootstrapMutationDriver.hs` independently states the clean-plus-three predicate expectations. A separately authored Haskell seed-custody oracle, still to implement, must independently observe the closed seven-case custody/generation corpus above. Both receipt families are integrated inputs bound to the protected accepted seed; component-only results cannot satisfy either family. |
 | `Positive controls` | Exactly one unchanged acquired `BootstrapPredicate.hs` copy compiles and its independent driver exits successfully. Genesis, policy, documentation, source, contract, and mutation-inventory checks are composed into the separately digest-bound `Subject` result rather than being restated as additional positive-control receipts. |
 | `Paired negatives` | Exactly three minimally changed predicate copies compile and the independent driver rejects them: digest equality bypass, snapshot freshness bypass, and bootstrap-input path bypass. Each mutant must return exactly `ExitFailure 1`, emit empty stdout, and emit exactly its canonical case label plus one newline on stderr. The unchanged control must return `ExitSuccess` with both streams empty. |
 | `Mutants` | The complete Phase-0 changed-production set is exactly `digest-equality-bypass`, `snapshot-freshness-bypass`, and `bootstrap-path-bypass`. Each replaces exactly one stable line in an acquired copy of `BootstrapPredicate.hs`; no `VALIDATION_*` selector family, Cabal-flag universe, or per-module exhaustive selector matrix is Phase-0-owned. Broad validation-infrastructure families belong to Phase 49; source/toolchain families belong to their typed Phase-1/Phase-2 owners. |
-| `Discovery` | The executed qualification inventory must be exactly the ordered clean-plus-three case universe and its snapshot digest must equal the candidate's opening source identity. Governed Markdown, tracked-path, and seven-pin discovery are checked inside the composed `Subject`; they are not claimed as separate Discovery-row receipts. |
-| `Challenge` | Each qualification case copies the acquired production subject and independent driver into one unique ignored run leaf, changes exactly one named predicate line, and refuses a missing or duplicate marker. The exact three bypass attempts must each return `ExitFailure 1`, empty stdout, and its exact case-label stderr. |
-| `Observer` | The opaque protocol retains each compile exit, run exit, stdout, stderr, changed-source SHA-256, changed-binary SHA-256, the acquired oracle/harness digests, compiler path, v2 transcript digest, and removed run-leaf name. It requires a silent successful clean control; exact mutant `ExitFailure 1`, empty stdout, and canonical case-label-plus-newline stderr; distinct source/binary identities; and observed cleanup. |
-| `Authority/bypass` | Package-hidden constructors protect `GenesisTrust`, the acquired source snapshot, qualification authority, row outcomes, gate pass, and projection authorization. The finite gate directly challenges mismatched well-formed digest and snapshot values and rejects either equality bypass; broader universal authority and replay attacks belong to Phase 49. |
+| `Discovery` | Independently reconcile the exact clean-plus-three changed-source inventory and the separate seven-case seed-custody corpus with executed observations. Their oracle and snapshot identities must match the accepted seed and opening source. Governed Markdown, tracked-path, and seven-pin discovery remain composed Subject checks, not additional semantic oracles. |
+| `Challenge` | Each of the three changed-source cases copies the acquired production subject and independent driver into one unique ignored run leaf, changes exactly one named predicate line, and refuses a missing or duplicate marker. The exact three bypass attempts must each return `ExitFailure 1`, empty stdout, and its exact case-label stderr. |
+| `Observer` | The opaque protocol binds both receipt families, their independent oracles, generation, accepted seed, and observed OS-boundary identities. It retains each compile exit, run exit, stdout, stderr, changed-source SHA-256, changed-binary SHA-256, the acquired oracle/harness digests, compiler path, v2 transcript digest, and removed run-leaf name. It requires a silent successful clean control; exact mutant `ExitFailure 1`, empty stdout, and canonical case-label-plus-newline stderr; distinct source/binary identities; and observed cleanup. |
+| `Authority/bypass` | The accepted seed, verifier, oracle, and receipt authority are protected from candidate writes by an observed OS custody boundary under §M.0. Package hiding prevents accidental construction only. Direct JSON/copy forgery, candidate-selected baselines, replacement of authority-bearing ancestors, and access to private issuer state must refuse. The finite seed identity and operator/OS authority remain explicit assumptions; the clean-plus-three bootstrap matrix does not prove universal unforgeability. |
 | `Freshness` | The candidate binds exact opening and independently re-acquired pre-publication closing source identities; inequality or unavailable capture refuses. After the authorized status projection is emitted, the dispatcher re-acquires the Git snapshot again and refuses if it is unavailable or differs from the opening identity. Qualification uses a unique temporary leaf and binds its v2 transcript to the opening snapshot. Phase 0 does not claim that the whole `.build/**` tree was initially absent or that it universally detects prior-run replay. |
-| `Qualification` | The exact sequence is clean, `digest-equality-bypass`, `snapshot-freshness-bypass`, `bootstrap-path-bypass`. All four compile one at a time with the absolute genesis compiler and `-j1`; clean returns `ExitSuccess` with empty stdout/stderr; every mutant returns `ExitFailure 1`, empty stdout, and its canonical case label plus newline on stderr; identities are distinct; the ordered v2 transcript retains those outputs and binds the snapshot; and cleanup is observed. |
+| `Qualification` | Execute the clean-plus-three predicate matrix serially with the absolute genesis compiler and `-j1`, retaining exact exits, streams, source/binary identities, transcript, and cleanup. Also acquire the independent seven-case custody/generation receipt before the candidate verdict. The seed's operator and OS trust assumptions remain explicit; no universal compiler or harness proof is claimed. |
 | `Cleanroom` | Qualification generates copied source, objects, and binaries beneath one unique `.build/runs/phase-00/bootstrap-qualification-*` leaf, compiles serially, and requires that leaf to be absent afterward. Candidate evidence and the authorized status projection are written beneath `.build/**`. This finite row does not claim whole-tree absent-before observation; universal run-input/cleanroom closure belongs to Phase 49. |
 | `Legacy closure` | The compiled Haskell inventory owns IDs, owners, analyzers, closures, and reintroduction cases; the Markdown register is reader-facing only. `legacyBootstrapClosureAcquired` must observe a Phase-0 due-count of zero, because every legacy ID has a later capability owner. The separately required scoped `SourcePb` zero proves only the captured Phase-0 `pb` source predicate; it neither executes the Phase-2 owner analyzer nor retires `LTD-SRC-008`. |
 | `Predecessor` | `genesis` means the explicit non-numbered `GenesisTrust`/`BootstrapRoot`; there is no prior numbered phase and no synthetic Phase -1 result. |
-| `Residue` | `captureResidue` must be exactly empty. Phase-1 toolchain provenance, Phase-2 compiler/`pb` owner closure, Phase-49 universal validation, Phase-50 runtime handoff, and every product or live-resource capability are typed exclusions or `Forward-deferred` relations, not `UNVERIFIED` entries in a Phase-0 candidate. Any retained candidate residue refuses this row. |
+| `Residue` | Missing required seed evidence or forbidden owned-resource residue refuses. Genesis assumptions, Phase-1 toolchain provenance, Phase-2 compiler/source closure, Phase-49 universal composition, Phase-50 handoff, and product/live capabilities remain explicit typed limitations outside this claim. Empty `captureResidue` alone cannot establish their absence or qualification. |
 | `Pass criterion` | `qualified-gate-pass` — every required Phase-0 row succeeds in one serial run for the same exact source and GenesisTrust identities. The only tracked-state result is a verified status-only patch emitted beneath `.build/**`; the validator never applies it. |
 
 ## Doctrine adopted
@@ -183,9 +184,9 @@ execution or a second status field.
 
 ## Sprints
 
-## Sprint 0.1: One documentary policy surface ✅
+## Sprint 0.1: One documentary policy surface 🔄
 
-**Status**: Done
+**Status**: Active — NOT VALIDATED
 **Implementation**: `src/validation-kernel/Amoebius/Validation/PolicyContract.hs`, `src/validation-kernel/Amoebius/Validation/PolicyContract/Internal.hs`, `AGENTS.md`, `CLAUDE.md`, `README.md`, `DEVELOPMENT_PLAN/phase_00_documentation_suite.md`, `DEVELOPMENT_PLAN/development_plan_standards.md`, `documents/documentation_standards.md`, `documents/engineering/repository_layout_doctrine.md`, and `documents/engineering/validation_frame_doctrine.md`
 **Blocked by**: `genesis`
 **Independent Validation**: The canonical typed policy and matching prose are the component positive control; minimally different raw owner, source-boundary, ordering, and status values are component paired negatives. The Phase-0 changed-production witness remains only `digest-equality-bypass`; the broad `VALIDATION_POLICY` selector family and complete owner mutation coverage belong to Phase 49.
@@ -201,6 +202,8 @@ order, GenesisTrust, gate sufficiency, and emitted-only status patches.
 ### Deliverables
 
 - Closed Haskell policy values and stable owner references.
+- Replacement certification-generation and accepted-seed identities, admitted independently of candidate edits.
+- Exactly three lifecycle statuses in the Haskell policy and structural projections; prior-generation receipts refuse.
 - Canonical documentation statements with reciprocal metadata links.
 - Structural status vocabulary that cannot be interpreted as a verdict.
 
@@ -211,12 +214,15 @@ documentation bytes. Reject a one-field policy change and a prose-only decoy at 
 
 ### Remaining Work
 
+Implement generation and baseline admission, qualify their finite seed boundary, and retain the protected
+acceptance identity in every seed result. These controls are required work, not supplied by this documentation.
+
 Until this sprint records Done, its raw observations must be retained by the integrated Phase-0 gate. No
 standalone diagnostic or historical result closes it; after Done, the gate result is the closure authority.
 
-## Sprint 0.2: One active legacy register ✅
+## Sprint 0.2: One active legacy register ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`, `src/validation-kernel/Amoebius/Validation/Legacy.hs`, and `src/validation-kernel/Amoebius/Validation/Legacy/Internal.hs`
 **Blocked by**: Sprint 0.1
 **Forward-deferred**: every owner-domain analyzer and reintroduction proof belongs to its later typed capability; Phase 0 requires only zero IDs assigned to `documentation_suite`
@@ -246,9 +252,9 @@ typed ID, duplicate encoding, wrong owner, missing analyzer, early zero, or Mark
 No owner-domain legacy row closes here. Later-owned entries stay active until their own numerically ordered
 gates; Phase 0 proves only inventory integrity, structural register integrity, and that its due-count is zero.
 
-## Sprint 0.3: Haskell source-closure classifier ✅
+## Sprint 0.3: Haskell source-closure classifier ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/validation-kernel/Amoebius/Validation/BootstrapPredicate.hs`, `src/validation-kernel/Amoebius/Validation/BootstrapTrust/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SourceClosure.hs`, `src/validation-kernel/Amoebius/Validation/SourceClosure/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SourceDebtBaseline.hs`, `src/validation-kernel/Amoebius/Validation/SourceDebtBaseline/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PbBootstrapGrammar.hs`, and `src/validation-kernel/Amoebius/Validation/PbBootstrapGrammar/Internal.hs`
 **Blocked by**: Sprint 0.2
 **Forward-deferred**: the complete `VALIDATION_PB_GRAMMAR` selector/oracle suite, compiler-backed parsing, renaming, typechecking, call/effect analysis, complete source graph, and owner-level `pb` retirement — Phase 2 `repository_layout_conformance` / `LTD-SRC-000`, `LTD-SRC-008`
@@ -282,9 +288,9 @@ Until this sprint records Done, the integrated run must bind the snapshot and tr
 row. Phase-2 full grammar-selector qualification, semantic analysis, and owner-level `LTD-SRC-008` retirement,
 plus Phase-50 handoff observation, remain outside this sprint.
 
-## Sprint 0.4: Haskell documentation and plan-contract checker ✅
+## Sprint 0.4: Haskell documentation and plan-contract checker ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/validation-kernel/Amoebius/Validation/Documentation.hs`, `src/validation-kernel/Amoebius/Validation/Documentation/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PhaseContract.hs`, `src/validation-kernel/Amoebius/Validation/PhaseContract/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PhaseSemanticContract.hs`, and `src/validation-kernel/Amoebius/Validation/PhaseSemanticJoin.hs`
 **Blocked by**: Sprint 0.3
 **Forward-deferred**: universal phase-contract/evidence qualification and `LTD-VAL-002` retirement — Phase 49 `self_referential_gates`
@@ -313,9 +319,9 @@ cause a documentation correspondence finding but cannot construct a semantic con
 Until this sprint records Done, the Phase-0 typed/prose join and full integrated observation remain required.
 Later semantic contracts are not a Phase-0 completion condition.
 
-## Sprint 0.5: Gate-kernel qualification and spoof corpus ✅
+## Sprint 0.5: Gate-kernel qualification and spoof corpus ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/validation-kernel/Amoebius/Validation/BootstrapPredicate.hs`, `src/validation-kernel/Amoebius/Validation/BootstrapQualification/Internal.hs`, and `test/validation-kernel/BootstrapMutationDriver.hs`
 **Blocked by**: Sprint 0.4
 **Forward-deferred**: complete per-owner mutation coverage and hardware-free universal self-reference — Phase 49 `self_referential_gates` / `LTD-VAL-001`
@@ -351,14 +357,14 @@ Until this sprint records Done, its receipt must be consumed by the same integra
 row. Phase 49, not this sprint, owns cumulative mutation completeness and validation of the validator against
 the full hardware-free surface.
 
-## Sprint 0.6: Candidate evidence and gate-pass result ✅
+## Sprint 0.6: Candidate evidence and gate-pass result ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/validation-kernel/Amoebius/Validation/Evidence.hs`, `src/validation-kernel/Amoebius/Validation/Evidence/Internal.hs`, `src/validation-kernel/Amoebius/Validation/GatePass.hs`, `src/validation-kernel/Amoebius/Validation/GatePass/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PhaseRunner/Internal.hs`, `src/validation-kernel/Amoebius/Validation/StatusFrontier.hs`, and `src/validation-kernel/Amoebius/Validation/StatusProjection/Internal.hs`
 **Blocked by**: Sprint 0.5
 **Forward-deferred**: universal evidence/gate-pass qualification and `LTD-VAL-003`/`LTD-VAL-004` retirement — Phase 49 `self_referential_gates`
 **Independent Validation**: One dispatcher-acquired, complete, ordered green bundle bound to the current source, contract, GenesisTrust, qualification, executable/argv, and exact frontier is the positive control; a missing, duplicate, reordered, red, stale, forged, or widened input is a paired negative. `digest-equality-bypass` and `snapshot-freshness-bypass` must red stale identity acceptance. Applying the emitted patch is explicitly outside the validator.
-**Oracle**: `test/validation-kernel/EvidenceGatePassInternalOracle.hs`, `test/validation-kernel/PhaseRunnerInternalOracle.hs`, `test/validation-kernel/StatusFrontierOracle.hs`, and `test/validation-kernel/StatusProjectionInternalOracle.hs` are bounded component diagnostics; their results are not integrated candidate oracle receipts. Candidate oracle authority remains the acquired `BootstrapMutationDriver` digest and finite qualification transcript.
+**Oracle**: `test/validation-kernel/EvidenceGatePassInternalOracle.hs`, `test/validation-kernel/PhaseRunnerInternalOracle.hs`, `test/validation-kernel/StatusFrontierOracle.hs`, and `test/validation-kernel/StatusProjectionInternalOracle.hs` are bounded component diagnostics; their results are not integrated candidate oracle receipts. The independent Haskell seed-custody oracle still to implement supplies the integrated seven-case receipt.
 **Legacy IDs**: `LTD-VAL-003`, `LTD-VAL-004` — finite seed references only; Phase 49 owns retirement
 **Docs to update**: `AGENTS.md`, `DEVELOPMENT_PLAN/development_plan_phase_model.md`, and `documents/engineering/testing_spoof_resistance.md`
 
@@ -370,7 +376,10 @@ validator tracked-write authority.
 ### Deliverables
 
 - Schema-checked, content-addressed candidate evidence beneath `.build/**`.
-- Package-hidden verification that rejects partial, stale, red, or caller-authored candidates.
+- Verification under protected custody that rejects partial, stale, red, or caller-authored candidates.
+- Authenticated receipt acquisition bound to generation, accepted baseline, issuer, and dependency identities;
+  two matching candidate-writable files or recomputed digests cannot mint authority.
+- Typed separation of historical execution, current compatibility, missing evidence, and excluded assumptions.
 - An exact frontier patch serializer restricted to tracker, Phase-0, all Phase-0 sprint, and immediate-successor status fields.
 - `writeAuthorizedStatusProjection` accepts only an `AuthorizedStatusProjection` sealed by the verified pass and
   emits beneath `.build/**`; its unsealed writer is reachable only through the direct-source test seam.
@@ -387,12 +396,16 @@ tracked-tree immutability for the run; it is not a universal prior-run replay-de
 
 ### Remaining Work
 
+Replace unauthenticated receipt re-reading and blanket empty-residue acceptance before the seed gate runs.
+Exercise direct forgery, old-generation reuse, candidate baseline replacement, and custody denial through the
+accepted seed verifier. Record its remaining assumptions without claiming they were proved by its own token.
+
 The positive authority can be obtained only by the integrated Phase-0 run. External patch application occurs
 after validator exit and requires a fresh preimage check, irrespective of the recorded sprint status.
 
-## Sprint 0.7: Check all numbered phase contracts ✅
+## Sprint 0.7: Check all numbered phase contracts ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `DEVELOPMENT_PLAN/phase_[0-9][0-9]_*.md`, `src/validation-kernel/Amoebius/Validation/PhaseContract.hs`, and `src/validation-kernel/Amoebius/Validation/PhaseSemanticContract.hs`
 **Blocked by**: Sprint 0.6
 **Forward-deferred**: universal phase-contract qualification and `LTD-VAL-002` retirement — Phase 49 `self_referential_gates`
@@ -422,14 +435,18 @@ later contracts structurally, but do not make Phase 0 implement or validate thei
 Until this sprint records Done, the integrated gate must bind its observations to the opening source snapshot.
 Each later owner still has to replace its own semantic gaps before its own gate can pass.
 
-## Sprint 0.8: Integrated Phase-0 candidate ✅
+Reconcile compiled phase metadata and independently authored structural expectations with this reset.
+The existing Phase-46 projection still declares Register 1; its required generated-software execution uses
+Register 2. Correcting that metadata cannot certify the later implementation or derive semantics from Markdown.
 
-**Status**: Done
+## Sprint 0.8: Integrated Phase-0 candidate ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/validation-kernel/Amoebius/Validation/Dispatch.hs`, `src/validation-kernel/Amoebius/Validation/Dispatch/Internal.hs`, and `app/amoebius/Main.hs`
 **Blocked by**: Sprint 0.7
-**Forward-deferred**: Phase-1 toolchain acquisition, Phase-2 compiler/`pb` owner closure, and Phase-49 universal self-reference are typed exclusions and never enter `captureResidue`
-**Independent Validation**: One fresh direct execution of the running Haskell binary by its exact absolute path with argv `validate phase 00` is the positive control; wrong argv, `pb` transport, overlapping qualification compiles, changed source, missing GenesisTrust, incomplete rows, nonzero Phase-0 legacy due-count, nonempty `captureResidue`, generated residue leakage, or a reachable status-application call is a paired negative. All three bootstrap changed sources must have qualified the same snapshot before the clean candidate. Executable build derivation and later-owner evidence are excluded.
-**Oracle**: `test/validation-kernel/DispatchOracle.hs` is a refusal-only raw-input component diagnostic and `test/validation-kernel/Main.hs` is a component runner; neither observes the Phase-0 process or retains candidate rows. The integrated candidate's only independent oracle identity is the acquired `test/validation-kernel/BootstrapMutationDriver.hs` source and its finite transcript.
+**Forward-deferred**: Phase-1 toolchain acquisition, Phase-2 compiler/`pb` owner closure, and Phase-49 universal self-reference remain visible typed exclusions
+**Independent Validation**: One fresh direct execution of the running Haskell binary by its exact absolute path with argv `validate phase 00` is the positive control; wrong argv, `pb` transport, overlapping qualification compiles, changed source, missing GenesisTrust, incomplete rows, nonzero Phase-0 legacy due-count, missing required evidence, forbidden resource residue, generated residue leakage, or a reachable status-application call is a paired negative. All three bootstrap changed sources must have qualified the same snapshot before the clean candidate. Executable build derivation and later-owner evidence are excluded.
+**Oracle**: `test/validation-kernel/DispatchOracle.hs` is a refusal-only raw-input component diagnostic and `test/validation-kernel/Main.hs` is a component runner; neither observes the Phase-0 process or retains candidate rows. The integrated candidate must consume both the acquired `BootstrapMutationDriver` transcript and the independently observed seven-case seed-custody/generation receipt.
 **Legacy IDs**: none due at Phase 0; all compiled legacy IDs retain later capability owners
 **Docs to update**: `DEVELOPMENT_PLAN/README.md` only through the exact emitted status patch after the complete pass
 
@@ -440,14 +457,16 @@ Run the first admissible finite phase gate and emit its result without editing t
 ### Deliverables
 
 - One source-bound Phase-0 dispatcher and closed runner selection.
-- One complete candidate binding every gate row to the same GenesisTrust and source snapshot.
+- One complete candidate binding every gate row to the admitted generation, protected baseline, GenesisTrust,
+  and source snapshot. Legacy receipts and self-authored evidence cannot satisfy this join.
 - One pass/refusal result and, only on pass, one emitted verified status-only patch beneath `.build/**`.
 
 ### Validation
 
 Build under the repository's one-compiler-job development rule, then invoke exactly one absolute candidate executable directly with the argv suffix
 `validate phase 00`. Within that single gate run, execute the clean-plus-three qualification sequence serially,
-compose the Phase-0 subject checks, re-acquire source before verification, publish and verify the candidate,
+acquire the separate seven-case custody/generation receipt, compose the Phase-0 subject checks, re-acquire
+source before verification, publish and verify the candidate,
 authorize and emit the projection only beneath `.build/**`, then re-acquire Git source and require the final
 identity to equal the opening identity. The validator never invokes its retained application API.
 Any failed row returns refusal and emits no authorized patch.

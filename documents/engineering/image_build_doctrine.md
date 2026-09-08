@@ -25,15 +25,13 @@ nor the runtime asset cache that is the deliberate exception, owned by
 
 </details>
 
-> **Historical result (invalidated).** Every pre-reset phase-run and implementation-result statement is
-> diagnostic only and never current validation evidence. Target doctrine remains normative; current state is
-> owned exclusively by the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Scope — the build side, not the registry's existence](#1-scope--the-build-side-not-the-registrys-existence)
 - [2. The single distribution rule: bake the binaries, build the amoebius image, pull only in-cluster](#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)
-- [3. One image per architecture — the tag carries the architecture, not an index](#3-multi-architecture-images--one-natively-built-child-per-architecture)
-- [4. Atomic publication — a partial upload is a failed upload](#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload)
+- [3. One image per architecture — the tag carries the architecture, not an index](#3-one-image-per-architecture--the-tag-carries-the-architecture-not-an-index)
+- [4. Atomic publication — a partial upload is a failed upload](#4-atomic-publication--a-partial-upload-is-a-failed-upload)
 - [5. What the image identity is, given that the tag is an address](#5-what-the-image-identity-is-given-that-the-tag-is-an-address)
 - [6. Host build vs in-pod build — DEVELOPMENT_PLAN decision (recommended default: host builder for v1)](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)
 - [7. What amoebius bakes vs builds — the base container is the supply chain](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)
@@ -42,9 +40,9 @@ nor the runtime asset cache that is the deliberate exception, owned by
 - [10. Honesty and planning ownership](#10-honesty-and-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Scope — the build side, not the registry's existence
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 There are two halves to "containers in amoebius." **That the in-cluster registry exists** — the
 single-binary Distribution `registry:2` registry as a standard service, the single pull source on every cluster — is

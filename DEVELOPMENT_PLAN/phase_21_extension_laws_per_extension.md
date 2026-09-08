@@ -20,8 +20,6 @@ after the exact integrated gate succeeds for the current source. Current status 
 
 </details>
 
----
-
 ## Contents
 
 - [Phase Status](#phase-status)
@@ -33,16 +31,15 @@ after the exact integrated gate succeeds for the current source. Current status 
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 20 and every earlier gate have current passing receipts. The Phase-21 implementation and compiled
-semantic contract are bound below; completion still requires the exact integrated Phase-21 gate.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-20 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -72,7 +69,8 @@ using independently authored `.hs` controls, oracles, paired negatives, and muta
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -91,7 +89,7 @@ using independently authored `.hs` controls, oracles, paired negatives, and muta
 | `Qualification` | The supervisor first kills all five changed-production mutations and verifies the claim/fixture compile pair, then requires the clean independent corpus to pass. |
 | `Cleanroom` | The authenticated source-repository cache is copied beneath the unique run root, Cabal builds there, and the clean generated result must exist only below that root. |
 | `Legacy closure` | The Python law gate, three serialized law authorities, serialized surface inventory, and test-local mutant module are absent; reintroduction is an exact failure. |
-| `Predecessor` | Exact durable `ImmediatePredecessorPass` for Phase 20, projected monotonically onto this candidate's opening source; absent, malformed, wrong-phase, or non-green evidence fails. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 20 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | Compositional and security laws, generated conformance verdicts, decoding, effects, runtimes, host, service, cluster, and hardware claims remain `UNVERIFIED` and later-phase-owned. |
 | `Pass criterion` | Every one of the eighteen rows passes in one qualified run for the exact source; that complete pass is sufficient for the mechanical status-only transition. |
 
@@ -101,11 +99,12 @@ using independently authored `.hs` controls, oracles, paired negatives, and muta
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 21.1: The per-extension laws L1-L5 ✅
+## Sprint 21.1: The per-extension laws L1-L5 ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/extension-laws/Amoebius/Extension/Laws/PerExtension.hs`; package-hidden `Amoebius.Validation.ExtensionLawsRun.Internal`.
 **Blocked by**: [Phase 20](phase_20_extension_declaration.md) gate pass
 **Independent Validation**: Two lawful controls, five single-law negatives, six generated-operation cases, 35 exact verdicts, the Phase-15 compile pair, and five changed-production mutants.
@@ -139,7 +138,8 @@ the finite boundary distinct from generated conformance and runtime claims.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
+qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
 ## Documentation Requirements
 

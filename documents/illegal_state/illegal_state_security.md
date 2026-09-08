@@ -23,16 +23,16 @@ owned by [platform_services_doctrine.md](../engineering/platform_services_doctri
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Scope](#1-scope)
 - [2. The security, ingress & secrets illegal states](#2-the-security-ingress--secrets-illegal-states)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Scope
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 This document is a **themed slice** of the illegal-state catalog: the security, ingress, and secrets entries
 drawn from [`illegal_state_catalog.md`](./illegal_state_catalog.md) and reorganized as their own doc,

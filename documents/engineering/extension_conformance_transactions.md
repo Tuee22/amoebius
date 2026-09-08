@@ -34,9 +34,9 @@ the family: the closure argument does not carry them across a seam. The algebra 
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Scope](#1-scope)
 - [2. Postgres has two roles, and only one of them is amoebius's](#2-postgres-has-two-roles-and-only-one-of-them-is-amoebiuss)
 - [3. Why there is no ORM](#3-why-there-is-no-orm)
@@ -44,9 +44,9 @@ the family: the closure argument does not carry them across a seam. The algebra 
 - [5. What this costs](#5-what-this-costs)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Scope
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 This document is a **family slice**. It owns the six transaction laws and the role split of [§2](#2-postgres-has-two-roles-and-only-one-of-them-is-amoebiuss). It does not own
 the provisioning of a Postgres instance, its backup and recovery, its capacity accounting, or the tenant model

@@ -20,9 +20,9 @@ resulting daemon uses, owned by [host_cluster_comms_doctrine.md](./host_cluster_
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. The commitment: headless, on-host, no VM](#1-the-commitment-headless-on-host-no-vm)
 - [2. Requirements the Apple build/run path satisfies](#2-requirements-the-apple-buildrun-path-satisfies)
 - [3. Architecture](#3-architecture)
@@ -32,9 +32,9 @@ resulting daemon uses, owned by [host_cluster_comms_doctrine.md](./host_cluster_
 - [7. Planning ownership](#7-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. The commitment: headless, on-host, no VM
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 The Apple-Metal host worker ([substrate_doctrine.md §5](./substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized))
 compiles and executes Metal **in the macOS host process itself** — never inside a VM. Metal needs Apple

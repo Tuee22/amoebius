@@ -21,11 +21,12 @@ it, so these entries bound what that exception may do. Their numbering is held b
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
 ## 1. Scope
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 This document is a **themed slice** of the illegal-state catalog: it carries the deep treatment of the
 ML-asset and training illegal states ([§3.25](#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model), [§3.32](#332-a-continuous-training-run-with-no-checkpoint-cadence-or-a-feed-with-no-bounded-retention), [§3.33](#333-a-multi-partition-training-feed-with-no-defined-merge-order), [§3.34](#334-an-app-serving-or-continuing-another-apps-model-without-a-grant), [§3.84](#384-a-model-output-used-as-an-authority-bearing-command-or-identity)) and nothing else.

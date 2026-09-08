@@ -17,12 +17,13 @@ into, owned by [manifest_generation_doctrine.md](./manifest_generation_doctrine.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. Two languages, one system: Dhall carries params, Haskell carries logic](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)
 - [3. The orchestration surface: parameters, context, witness](#3-the-orchestration-surface-parameters-context-witness)
@@ -34,8 +35,6 @@ into, owned by [manifest_generation_doctrine.md](./manifest_generation_doctrine.
 - [9. Toolchain note](#9-toolchain-note)
 - [10. Planning ownership](#10-planning-ownership)
 - [Related Documents](#related-documents)
-
----
 
 ## 1. Why this doctrine exists
 
@@ -93,8 +92,8 @@ dhall"*. It gets there by a hard split between two languages:
 **The schema is generated; the value is external.** The split above says Dhall carries the data, and it leaves
 open where the *type* of that data comes from. It is reflected from the Haskell checked-IR types rather than
 authored beside them: the schema, the prelude of smart constructors, and the examples are all rendered from the
-same types the decoder is written against, so the two cannot disagree and there is no parity report because
-there is no second statement to compare
+same types the decoder is written against. This removes a second maintained schema; generation and decoding
+can still be wrong. Independent semantic correspondence remains required
 ([`generated_artifacts_doctrine.md` §2](./generated_artifacts_doctrine.md#2-what-is-generated-and-from-what),
 [`jit_artifact_doctrine.md`](./jit_artifact_doctrine.md)). An operator's `InForceSpec` and an application's
 `UiSource` are external or untracked inputs. Repository tests construct Haskell values and render temporary
@@ -114,8 +113,8 @@ tenant/module/node/link meaning rather than copying normalized bytes.
 That split is load-bearing in three ways:
 
 - **The plan is the data.** Because `[Step]` is a pure value, `amoebius … --dry-run` can render the exact plan it would execute — `renderChainPlan` / `renderChain` (`Step.hs`, `Chain.hs`) — *without running a
-  single action*. The preview is byte-for-byte what runs. There is no hidden imperative layer between
-  the rendered plan and the effects.
+  single action*. The preview must describe the exact plan consumed by the interpreter. Independent boundary observations
+  must establish that the effects follow it.
 - **Only the binary acts.** The recursive interpreter (`runChainFromFrame`, `Chain.hs`) runs a step's
   action only when the binary is *in that step's frame*; the descent logic itself is pure and unit-tested,
   and `runChainFromFrame` is *"the thin effectful seam."* The decoded Dhall value chose *what*; the
@@ -130,19 +129,19 @@ Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 flowchart TD
 %% register: algebra
   author["Operator authors typed InForceSpec Dhall"]:::intent -->|imports and composition| expr["One Dhall expression"]:::intent
-  expr -->|Dhall typechecker total and pure| typed["Well-typed Dhall value"]:::provenPB
+  expr -->|Dhall typechecker total and pure| typed["Well-typed Dhall value"]:::intent
   expr -->|schema mismatch| reject1>"Rejected before any effect"]:::refuse
   typed -->|decode into Haskell ADTs| decoded["Typed Haskell config value"]:::intent
   typed -->|out-of-domain or unspellable combination| reject2>"Decode failure fail fast"]:::refuse
   decoded -->|pure chain cfg to Steps| chain[["chain produces a list of Steps"]]:::intent
   chain -->|recursive interpreter runs each Step in its frame| effects[/"Cluster reconcile actions"/]:::effect
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
-  classDef provenPB fill:#dbeafe,stroke:#1e5fa8,color:#0b2f57,stroke-width:2px
   classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
 
-*Design intent. The Dhall typecheck and GADT decode rest on proven-in-sibling totality; the chain-to-effects seam is Tier-1 design intent, its runtime enactment not proven here.*
+*Design intent. Upstream language properties do not prove amoebius decoder correctness or correspondence
+between checked values, rendered plans, and observed effects. Each implementation seam needs its own evidence.*
 
 ---
 
@@ -481,9 +480,9 @@ GADT-indexed state machines, ownership indices, content-address totality, the ca
 topology relations over a collection) are owned in full by
 [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) — do not look for them restated here.
 
-The bounded formal bridge does not pull later DSL artifacts forward. Phase 18 compares the Phase-9 capacity
+The bounded formal bridge does not pull later DSL artifacts forward. Phase 18 must compare the Phase-9 capacity
 fold against separately authored componentwise subtraction over the complete `0..2` four-axis domain and
-projects the already available five-calculus composition into the shared formal model. Its token,
+project the five-calculus composition into the shared formal model. Its required token,
 reservation, Lease, and reconcile models cover temporal protocol obligations, not decoder totality or live
 runtime behavior. `decodeCluster`, `provision`, `renderAll`, and `chain` acquire their own correspondence
 evidence only in the phases that own those artifacts.
@@ -639,7 +638,7 @@ flowchart TD
 %% register: algebra
   author["External operator InForceSpec input"]:::intent
   g1{{"dhall-typecheck: Dhall typecheck, total and pure"}}:::gate
-  typed["Well-typed Dhall value"]:::provenPB
+  typed["Well-typed Dhall value"]:::intent
   g2{{"gadt-decode: Haskell GADT decode, fail-fast"}}:::gate
   bound["BoundDeployment: unprovisioned intent"]:::intent
   plan[["planInfrastructure: demand from intent and supply"]]:::intent
@@ -664,7 +663,6 @@ flowchart TD
   sealed --> render
   render -->|"later live apply/readback"| live
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
-  classDef provenPB fill:#dbeafe,stroke:#1e5fa8,color:#0b2f57,stroke-width:2px
   classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
   classDef decision fill:#fdf3d8,stroke:#b8791b,color:#5c3a06,stroke-width:1px
   classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px

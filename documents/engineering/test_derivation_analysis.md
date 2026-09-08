@@ -21,6 +21,7 @@ owns no validation status or independent obligation. The repository source bound
 </details>
 
 ## Contents
+
 - [1. Why this analysis exists](#1-why-this-analysis-exists)
 - [2. Target boundary](#2-target-boundary)
 - [3. Generate the enumeration; author the expectation](#3-generate-the-enumeration-author-the-expectation)
@@ -30,8 +31,6 @@ owns no validation status or independent obligation. The repository source bound
 - [7. What this analysis does not own](#7-what-this-analysis-does-not-own)
 - [8. Normative consequences](#8-normative-consequences)
 - [Related Documents](#related-documents)
-
----
 
 ## 1. Why this analysis exists
 

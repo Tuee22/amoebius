@@ -21,9 +21,9 @@ nor the reconciler that applies a generation, owned by
 
 </details>
 
-> **Historical result (invalidated).** Every pre-reset phase-run and implementation-result statement is diagnostic only and never current validation evidence. Target doctrine remains normative; current state is owned exclusively by the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. No external CI/CD control plane — delivery is typed composition on primitives amoebius owns](#1-no-external-cicd-control-plane--delivery-is-typed-composition-on-primitives-amoebius-owns)
 - [2. `Release` and the immutable release ledger (`releaseHash`)](#2-release-and-the-immutable-release-ledger-releasehash)
 - [3. `Environment` and the ETag-CAS promotion pointer](#3-environment-and-the-etag-cas-promotion-pointer)
@@ -32,9 +32,9 @@ nor the reconciler that applies a generation, owned by
 - [6. What this doctrine deliberately does not own / Planning ownership](#6-what-this-doctrine-deliberately-does-not-own--planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. No external CI/CD control plane — delivery is typed composition on primitives amoebius owns
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 A conventional platform bolts a **second control plane** onto the cluster to do delivery: Argo CD polls a git
 repo and reconciles the diff, Flux does the same with its own CRDs, Tekton runs pipeline pods, and each one is

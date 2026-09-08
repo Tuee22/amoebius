@@ -28,7 +28,7 @@ owned by the exact integrated gate and the mechanical status projection that fol
 - [Resource provision](#resource-provision)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 34.1: The `Step` algebra + `chain :: cfg -> \[Step\]` builder](#sprint-341-the-step-algebra--chain--cfg---step-builder-)
+- [Sprint 34.1: The `Step` algebra + `chain :: cfg -> [Step\]` builder](#sprint-341-the-step-algebra--chain--cfg---step-builder-)
 - [Sprint 34.2: The pure descent — `nextFrameAfter` / `foldLift` (semantic-oracle locked)](#sprint-342-the-pure-descent--nextframeafter--foldlift-semantic-oracle-locked-)
 - [Sprint 34.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra)](#sprint-343-renderchainplan----dry-run-byte-for-byte-render-no-live-infra-)
 - [Sprint 34.4: The semantic plan battery (`chain-spec`) — the Part-A gate](#sprint-344-the-semantic-plan-battery-chain-spec--the-part-a-gate-)
@@ -40,17 +40,19 @@ owned by the exact integrated gate and the mechanical status projection that fol
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 33 and every earlier gate have passed in numerical order. The pure plan, exact binary boundary,
-run-local Haskell fakes, independent Haskell oracle, AST checker, opaque link seal, and seven
-changed-production challenges are bound; only the complete integrated Phase-34 gate may authorize completion.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-33 predecessor and its compatible evidence chain.
 
 ## Phase Summary
+
+This phase must carry real checked configuration, steps, frames and payloads through planning and the fake process boundary. The audit count-based calculus projection is an insufficient replacement for that relation. Fake boundaries may test software behavior without live infrastructure, but their observations must reflect actual invocations and request bytes.
 
 **Target capability — NOT VALIDATED.** This phase specifies a pure reconcile kernel whose plan is data
 (Part A) and a Haskell-binary boundary exercised only against Haskell-generated run-local fakes (Part B).
@@ -113,28 +115,29 @@ tool, corpus, and mutant generation; it does not supply a prerequisite retroacti
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
-| `Claim` | `pure-chain-and-fake-boundary` |
+| `Claim` | The production `chain` consumes actual checked configuration and preserves typed step order, frame descent and plan/dry-run meaning; its sanctioned process boundary sends the exact derived executable, argv, environment and request bytes to observed fake tools. |
 | `Subject` | `acquired-chain-boundary-supervisor` |
 | `Command` | `pb validate phase 34` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
-| `Oracle` | `independent-chain-boundary-oracle` |
-| `Positive controls` | `chain-boundary-positive-controls` |
-| `Paired negatives` | `paired-chain-boundary-negatives` |
-| `Mutants` | `applied-chain-boundary-production-mutants` |
-| `Discovery` | `exact-chain-boundary-source-discovery` |
+| `Oracle` | `test/spec/chain_boundary/ChainBoundaryOracle.hs` independently defines full semantic plans, frame transitions, request payloads, refusal reasons and process observations; expected argv and payload cannot be copied into observed records. |
+| `Positive controls` | Execute the complete declared plan/descent/fake-boundary surface using the same actual values produced by prior stages; correlate rendered previews, typed steps and externally observed requests. |
+| `Paired negatives` | Change one step, frame, executable, argument, environment value, request byte, challenge or authority capability and require its exact failure; a zero-effect dry run is paired with an attempted process call. |
+| `Mutants` | Change actual chain construction, descent, preview rendering, process invocation, payload or sanctioned API enforcement; exact independently owned selector-to-case assignments must detect each at its intended locus. |
+| `Discovery` | Reconcile configuration/step/frame constructors, actual process call sites and transports, extension authority surfaces, semantic cases and changed-subject/build assignments in both directions. |
 | `Challenge` | `post-acquisition-chain-boundary-challenge` |
 | `Observer` | `chain-boundary-process-observation` |
 | `Authority/bypass` | `no-pb-network-live-host-hardware-or-parallelism` |
 | `Freshness` | `fresh-chain-boundary-build-root-and-stable-source` |
-| `Qualification` | `qualified-chain-boundary-harness` |
+| `Qualification` | Full plan/value correspondence, raw fake-process observations, dry-run zero effects, API/AST witnesses, exact negatives and assigned changed subjects must all pass; stored plan counts and tool success strings are insufficient. |
 | `Cleanroom` | `chain-boundary-products-contained-below-build` |
 | `Legacy closure` | `retired-chain-boundary-authorities-absent` |
-| `Predecessor` | `exact-phase-thirty-three-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 33 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `live-interpreter-runtime-and-hardware-owners-explicit` |
-| `Pass criterion` | `qualified-phase-thirty-four-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Resource provision
 
@@ -187,14 +190,15 @@ and records zero external residue. No live cleanup authority is requested or imp
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 34.1: The `Step` algebra + `chain :: cfg -> [Step]` builder ✅
+## Sprint 34.1: The `Step` algebra + `chain :: cfg -> [Step]` builder ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: [Phase 33](phase_33_render_manifest_oracles.md) gate pass
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
@@ -208,6 +212,8 @@ Adopt [`dsl_doctrine.md §2 — Dhall carries params, Haskell carries logic`](..
 seed hostbootstrap's chain/Step algebra as the amoebius reconcile kernel — `chain :: cfg -> [Step]`, instantiated with a checked plan config containing the whole `ProvisionedSpec`, each `Step` being a pure renderable shape (label, frame, `StepKind`, the `[K8sObject]` it would apply) plus an effectful `stepRun` action — with the chain being the system and the checked config supplying `cfg`.
 
 ### Deliverables
+
+- Retain typed configuration-to-step correspondence for every step and resource/identity input; the plan consumes the actual predecessor result rather than a separately reconstructed configuration.
 
 - A `Step` type = label + frame + `StepKind` + `stepRun :: cfg -> IO ()`, and a generic `chain :: cfg -> [Step]`;
   the amoebius `cfg` exposes only the opaque whole-deployment `ProvisionedSpec` to the manifest-plan builder,
@@ -223,6 +229,8 @@ seed hostbootstrap's chain/Step algebra as the amoebius reconcile kernel — `ch
 
 ### Validation
 
+- Change one input identity or resource while holding the number of plan rows fixed; the expected dependent steps must change and stale plans must fail.
+
 1. The real provision path followed by `chain` on each case in the checked Haskell corpus
    produces a pure `[Step]` whose renderable shape is fully inspectable without executing any `stepRun`; the evaluation is partiality-free in the sense above (`deepseq` to normal form succeeds; `stepRun` excluded from `NFData`).
 2. The identity-disjoint union of all manifest-bearing Step projections equals the one whole-deployment
@@ -235,9 +243,9 @@ seed hostbootstrap's chain/Step algebra as the amoebius reconcile kernel — `ch
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.2: The pure descent — `nextFrameAfter` / `foldLift` (semantic-oracle locked) ✅
+## Sprint 34.2: The pure descent — `nextFrameAfter` / `foldLift` (semantic-oracle locked) ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.1
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
@@ -266,6 +274,8 @@ Part B (Register 2) and Register 3.
 
 ### Validation
 
+- Independently compare every real step and nested frame transition, including refusal paths. Frame counts cannot replace exact descent observations.
+
 1. A descent over both case chains reproduces the authored ordered frame/step assignments exactly; the
    out-of-frame step appears in the fold but its `stepRun` is
    unreachable (`deepseq`-to-NF of the plan with the constructor counter reading zero confirms no action
@@ -278,9 +288,9 @@ Part B (Register 2) and Register 3.
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) ✅
+## Sprint 34.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.2
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
@@ -298,6 +308,8 @@ only on the (here-absent) apply path.
 
 ### Deliverables
 
+- Render previews directly from the acquired typed plan and record exact input/step/preview identity; dry-run entry points must carry a boundary that cannot invoke a process.
+
 - A pure `renderChainPlan` / `renderChain :: [Step] -> PlanText` that serializes the fold-derived plan deterministically (stable ordering, no ambient clock/host reads).
 - A `--dry-run` render command that emits the plan and returns, structurally incapable of reaching the effectful
   seam; the emitted plan is a *generated artifact* — rendered from source only beneath `.build/**`
@@ -311,6 +323,8 @@ only on the (here-absent) apply path.
 
 ### Validation
 
+- A plan-preview mismatch and an injected dry-run process attempt must each fail their specific oracle while the matching zero-effect control passes.
+
 1. `renderChainPlan` is a pure value and `--dry-run` produces it with credentials scrubbed and socket calls
    blocked and observed (part of the `chain-spec` gate invocation). A separately authored Haskell
    import-closure assertion confirms `Amoebius.Kernel.Plan` and the `--dry-run` path reach no
@@ -320,9 +334,9 @@ only on the (here-absent) apply path.
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.4: The semantic plan battery (`chain-spec`) — the Part-A gate ✅
+## Sprint 34.4: The semantic plan battery (`chain-spec`) — the Part-A gate ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.3
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
@@ -339,6 +353,8 @@ proves no action runs during render, emitting a Register-1 proven/tested/assumed
 correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Register 3).
 
 ### Deliverables
+
+- Replace `checkChainCalculusProjection` plan/test totals with actual plan ordering, frame and payload values linked to the Phase-18 semantic bridge.
 
 - The formal-bridge projection transplanted from Phase 18: two provision/render/chain projections totaling 19
   objects and steps, with exact render/chain identities and frames, unique objects, and zero
@@ -373,6 +389,8 @@ correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Regis
 
 ### Validation
 
+- Retain all row counts while replacing a command, frame or payload; require a named semantic mismatch, and reconcile every declared chain arm to an independent case.
+
 1. Rejected historical observation: the `chain-spec` Cabal suite, with credentials scrubbed and socket calls
    blocked and observed, was recorded green. Both
    cases match all nineteen semantic entries, their canonical Plan bytes decode and re-encode identically, the
@@ -385,9 +403,9 @@ correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Regis
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.5: The single typed subprocess seam + `boundary-spec` skeleton ✅
+## Sprint 34.5: The single typed subprocess seam + `boundary-spec` skeleton ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.4
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
@@ -420,9 +438,9 @@ prodbox single-IO-seam shape as *sibling evidence, not an amoebius result*.
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ✅
+## Sprint 34.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.5
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
@@ -440,6 +458,8 @@ prerequisite — that distinction is what keeps Register 2 honestly separate fro
 
 ### Deliverables
 
+- Fake tool recorders independently capture the actual executable/process identity, argv, environment and stdin request; the observer cannot populate those fields from expected constants.
+
 - A checked Haskell fake-tool executable that transcribes argv + stdin (the applied-manifest bytes) and
   returns a configured canned exit. The harness lazily materializes four controlled absolute executable paths
   beneath `.build/fakes/**`; no shell/Python recorder or transcript is repository source.
@@ -448,6 +468,8 @@ prerequisite — that distinction is what keeps Register 2 honestly separate fro
 
 ### Validation
 
+- Invoke a fake with deliberately wrong argv while keeping the expected record unchanged; qualification must reject the observed mismatch. An echo of a challenge alone cannot stand in for a manifest application.
+
 1. Each fake transcribes argv order and applied-manifest bytes losslessly and returns its canned exit; the
    round-trip check is red if any byte or argv element is dropped or re-encoded.
 
@@ -455,12 +477,12 @@ prerequisite — that distinction is what keeps Register 2 honestly separate fro
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ✅
+## Sprint 34.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.6
-**Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
+**Independent Validation**: The same typed plan must produce independently expected raw process requests after readiness; wrong argv/payload/order and dry-run-effect pairs fail exactly; actual invocation mutants fail assigned cases; live tool fidelity remains unverified.
 **Oracle**: `test/spec/chain_boundary/ChainBoundaryOracle.hs` independently fixes plan rows, calculus projection, boundary argv/bytes, AST reasons/spans, sanctioned API, validation loci, and mutant expectations without importing production or fixtures.
 **Legacy IDs**: Phase-local closure covers the retired Python gate, shell fakes, serialized oracle/golden/fixture files, surface registry, and five materialized mutants.
 **Docs to update**: this phase, `system_components.md`, `substrates.md`, and the linked DSL, conformance, generated-artifact, security, and testing doctrines.
@@ -498,6 +520,8 @@ is owned by [phase_65_live_dsl_deploy.md](phase_65_live_dsl_deploy.md) and the l
 
 ### Validation
 
+- Require a supervisor-issued post-readiness challenge to travel through the actual request bytes, correlate every process event with its typed step, and reject replayed/canned observations or unobserved cleanup.
+
 1. Rejected historical observation: the `boundary-spec` Cabal suite was recorded green — commands match the
    separately authored Haskell argv expectation, applied bytes match the Haskell-declared boundary input
    exactly, the three invoked tool transcripts (`kubectl`/`docker`/`pulumi`)
@@ -511,9 +535,9 @@ is owned by [phase_65_live_dsl_deploy.md](phase_65_live_dsl_deploy.md) and the l
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.8: The sanctioned-API surface — what extension source may reach ✅
+## Sprint 34.8: The sanctioned-API surface — what extension source may reach ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.7
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
@@ -545,9 +569,9 @@ so that widening it is a checked amendment rather than something an extension au
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.9: extension-astcheck — the extension AST checker and the link seal ✅
+## Sprint 34.9: extension-astcheck — the extension AST checker and the link seal ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.8
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.

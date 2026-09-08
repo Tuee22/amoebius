@@ -35,16 +35,16 @@ separate gate passs.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
 ⏸️ Blocked — NOT VALIDATED.
 
-Blocked by the current Phase 54 contract, independent validation, and gate pass, plus the exact gate pass
-chain from Phase 0 through Phase 54. In particular, Phase 49's no-hardware DSL gate-pass result is mandatory
-before this live gate may start. All earlier Phase-55 completion or implementation claims are historical and
-not current gate results; existing code is an **Observed footprint / Known partial** only.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-54 predecessor and its compatible evidence chain.
+Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
 
 ## Phase Summary
 
@@ -65,9 +65,8 @@ service, secret service, GPU claim, or provider deployment is in scope.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED. The criteria below are the required replacement contract;
-production entry points, oracle independence, and live observer remain unresolved, so
-the command cannot produce an admissible candidate.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -86,7 +85,7 @@ the command cannot produce an admissible candidate.
 | `Qualification` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Before live mutation, the same harness must reject the fixed sabotage corpus: constant success, no-op subject, wrong output, empty discovery, missing subject/oracle, skipped/no-op mutant, wrong-locus failure, stale evidence, self-observer, authority bypass, residue, and smuggled generated/legacy input. |
 | `Cleanroom` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Begin with generated outputs absent and no owned cluster. Generate configuration, cases, plans, and observations lazily beneath one `.build/**` run root; refuse repository-retained generated behavioral transport material and writes beside source. |
 | `Legacy closure` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: The typed Haskell binding explained to readers as `LTD-RUN-001` must have zero findings and its second-executable/obsolete-identity reintroduction negatives must fail. The source classifier must also report exact accounting and zero due bindings owned by Phase 55 or earlier. Markdown row content is not an input. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 54; candidate execution refuses an absent, stale, replayed, or different-source result. |
+| `Predecessor` | UNRESOLVED — blocks validation: the typed generation/compatibility binding still requires implementation. Require authenticated `ImmediatePredecessorPass` for Phase 54 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `UNVERIFIED`: all Phase-55 behavior until the contract is implemented and checked; every registry, image publication, platform service, storage service, workload, GPU, multi-node, provider, and second-substrate claim remains outside scope. |
 | `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
 

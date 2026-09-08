@@ -16,11 +16,17 @@ This document owns the determinism construction and its per-stage obligations. I
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+## Contents
+
+- [4. Determinism by construction: pinned inputs + pure stages + derived seed](#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)
+- [Related Documents](#related-documents)
+
 
 ---
 
 ## 4. Determinism by construction: pinned inputs + pure stages + derived seed
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 Reproducibility is not a debugging aid added afterward; it is a property established at the input
 boundary when every input is pinned, every stage is declared a pure function of its declared inputs, and the
@@ -129,6 +135,8 @@ into the bounded cache on first miss. The foreclosure therefore **shifts** from 
 (baked)" to **"no arbitrary-URL arm (a closed named catalog) + a `CacheBudget`-bounded cache"**
 ([`illegal_state_catalog.md` §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)).
 
+#### Cache demand and ownership
+
 The cache is a **bounded typed pool with one node/host owner.** Each closed-catalog entry owns an
 `AssetMaterializationDemand { identity, digest, residentBytes, peakTemporaryBytes }`; deployment binding
 collects the exact selected entries per node/host and carries a finite
@@ -163,6 +171,8 @@ deleted catalog operand, conflicting size, or unobservable resident is a closed 
 The trade this accepts, relative to baking, is stated plainly: baking gave no-network-at-boot and instant
 availability; the cache pays a **first-miss materialization** (download-or-build) the first time a named asset
 is needed on a host, amortized across every later use.
+
+#### Artifact identity, scope, and provenance
 
 Two types carry the axis:
 
@@ -226,6 +236,8 @@ deployment's substrate — an unmatched model has no landing engine. This is a *
 capability a model must match is owned by [`service_capability_doctrine.md` §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding). **Cross-substrate serving is representable** ([§3.1](./content_addressing_doctrine.md#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint)): the `ModelArtifact` / manifest carries an **engine-`family` tag** ([§2.1](./content_addressing_doctrine.md#21-three-object-classes-two-write-protocols)), and the landing
 predicate keys on that family being available on the **serving** substrate lane — so a CUDA-produced model may
 serve on Apple-Metal when the family is baked there, subject to the [§3.1](./content_addressing_doctrine.md#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint) runtime-checked weight-layout load residue.
+
+#### Asset tiers and reproducibility
 
 The three asset kinds, **one cache shape** (`resolve = {download | build}` on first miss → the
 `CacheBudget`-bounded content-addressed cache):

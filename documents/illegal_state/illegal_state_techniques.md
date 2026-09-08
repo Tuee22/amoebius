@@ -23,18 +23,18 @@ the specification language of [dsl_doctrine.md](../engineering/dsl_doctrine.md).
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Scope](#1-scope)
 - [4. The typing techniques](#4-the-typing-techniques)
 - [5. Coverage matrix — which technique forecloses which illegal state](#5-coverage-matrix--which-technique-forecloses-which-illegal-state)
 - [6. Three layers of foreclosure (and the honesty they force)](#6-three-layers-of-foreclosure-and-the-honesty-they-force)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Scope
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 This document is the **techniques** slice of the illegal-state catalog. It owns the nine reusable typing
 techniques ([§4](#4-the-typing-techniques)), the coverage matrix ([§5](#5-coverage-matrix--which-technique-forecloses-which-illegal-state)),

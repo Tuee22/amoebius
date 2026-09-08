@@ -39,14 +39,11 @@ main = do
         [row] -> either (Left . show) Right (colimaSshArgv colima "amoebius-phase53-oracle" row)
         _ -> Left "unexpected lifted-row count"
       planned = planAppleEngine supply demand ContainerImageBuild (either (const []) id liftedPlan)
-      floorNegatives =
-        [ admitAppleFloor greenFloor {appleOs = "linux"} == Left (AppleFloorMissing AppleSiliconMac (prerequisiteRemedy AppleSiliconMac))
-        , admitAppleFloor greenFloor {appleBrewPath = Nothing} == Left (AppleFloorMissing HomebrewRoot (prerequisiteRemedy HomebrewRoot))
-        , admitAppleFloor greenFloor {appleXcodePath = Nothing} == Left (AppleFloorMissing XcodeCommandLineTools (prerequisiteRemedy XcodeCommandLineTools))
-        ]
       problems = [label | (label, ok) <-
         [ ("floor-positive", admitAppleFloor greenFloor == Right ())
-        , ("floor-paired-negatives", and floorNegatives)
+        , ("floor-platform-negative", admitAppleFloor greenFloor {appleOs = "linux"} == Left (AppleFloorMissing AppleSiliconMac "run phase 53 on physical Apple Silicon macOS"))
+        , ("floor-homebrew-negative", admitAppleFloor greenFloor {appleBrewPath = Nothing} == Left (AppleFloorMissing HomebrewRoot "install Homebrew from https://brew.sh and expose /opt/homebrew/bin/brew"))
+        , ("floor-xcode-negative", admitAppleFloor greenFloor {appleXcodePath = Nothing} == Left (AppleFloorMissing XcodeCommandLineTools "run xcode-select --install"))
         , ("prerequisite-domain", applePrerequisites == [AppleSiliconMac, HomebrewRoot, XcodeCommandLineTools])
         , ("provider-table", providers == expectedProviders)
         , ("provider-shared-brew-ensure", brewEnsurePlans == expectedBrewEnsurePlans)
@@ -56,9 +53,9 @@ main = do
         , ("relative-provider-negative", planBrewEnsure "/opt/homebrew/bin/brew" (Just "bin/colima") (providerBrewTool ColimaProvider) == Left "resolved-tool-path-must-be-absolute")
         , ("lifecycle-table", lifecycles == expectedLifecycles)
         , ("frame-fit", admitFrameDemand supply demand == Right demand)
-        , ("cpu-negative", admitFrameDemand supply demand {demandedCpuCores = 9} == Left (FrameCpuOvercommit 9 8))
-        , ("memory-negative", case admitFrameDemand supply demand {demandedMemoryBytes = 17 * gib} of Left (FrameMemoryOvercommit _ _) -> True; _ -> False)
-        , ("disk-negative", case admitFrameDemand supply demand {demandedDiskBytes = 101 * gib} of Left (FrameDiskOvercommit _ _) -> True; _ -> False)
+        , ("cpu-negative", admitFrameDemand supply {suppliedCpuCores = 3} demand == Left (FrameCpuOvercommit 4 3))
+        , ("memory-negative", admitFrameDemand supply {suppliedMemoryBytes = 8 * gib - 1} demand == Left (FrameMemoryOvercommit (8 * gib) (8 * gib - 1)))
+        , ("disk-negative", admitFrameDemand supply {suppliedDiskBytes = 40 * gib - 1} demand == Left (FrameDiskOvercommit (40 * gib) (40 * gib - 1)))
         , ("colima-carve-argv", colimaStartArgv colima "amoebius-phase53-oracle" demand == expectedColimaStart)
         , ("colima-owned-data-teardown", colimaStopArgv colima "amoebius-phase53-oracle" == expectedColimaStop)
         , ("docker-context-argv", dockerArchitectureArgv docker "colima-amoebius-phase53-oracle" == expectedDockerArchitecture)
@@ -68,14 +65,18 @@ main = do
         , ("live-challenge-colima-envelope", colimaLiftedStep == Right expectedColimaLiftedStep)
         , ("colima-lift-envelope-negative", case colimaSshArgv colima "amoebius-phase53-oracle" ["colima", "--", "df"] of Left (InvalidColimaLiftEnvelope _) -> True; _ -> False)
         , ("native-arm64", admitNativeArm64 "arm64" "aarch64" "arm64" False == Right ())
-        , ("architecture-negative", case admitNativeArm64 "arm64" "amd64" "amd64" False of Left (NativeArm64Mismatch _ _ _) -> True; _ -> False)
+        , ("architecture-negative", admitNativeArm64 "arm64" "amd64" "amd64" False == Left (NativeArm64Mismatch "arm64" "amd64" "amd64"))
         , ("emulation-negative", admitNativeArm64 "arm64" "arm64" "arm64" True == Left EmulationForbidden)
         , ("complete-plan-actions", case planned of
               Right actions -> length [() | ExecuteLiftedLinuxStep _ <- actions] == length expectedLiftedPlan
               Left _ -> False)
         , ("ephemeral-teardown", case planned of Right actions -> last actions == StopFrame; Left _ -> False)
         ], not ok]
-  unless (null problems) (die (mutantToken <> "; differences=" <> show problems))
+  unless (null problems) $ case lookup mutantToken expectedMutantFailures of
+    Just expected | problems == expected -> die mutantToken
+    _ -> die ("apple-engine-bringup-spec: RED unassigned differences=" <> show problems)
+  unless (mutantToken == "apple-engine-bringup-spec: RED unexpected")
+    (die "apple-engine-bringup-spec: RED selected mutant survived")
   putStrLn "apple-engine-bringup-spec: PASS (3 floor negatives, 3 brew ensure rows, 3 path negatives, 4 provider rows, 4 lifecycle rows, 3 fit negatives, complete unchanged lift, native arm64, ephemeral teardown)"
 
 mutantToken :: String

@@ -31,18 +31,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 8, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Gate execution remains blocked by the qualified Phase-8 predecessor and its compatible evidence chain.
 
 ## Phase Summary
 
@@ -76,9 +73,8 @@ consulting a host or cluster. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-9 semantic payload, package-hidden serial
-supervisor, independent Haskell oracle, seven compile-negative pairs, and nineteen changed-production
-subjects are complete; only a fresh integrated run may authorize status.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
@@ -97,9 +93,9 @@ subjects are complete; only a fresh integrated run may authorize status.
 | `Qualification` | Clean controls, seven exact compiler pairs, source discipline, and all nineteen changed-production subjects pass together; a survivor or wrong-locus result refuses. |
 | `Cleanroom` | Every binary, interface, object, stub, and transcript is generated lazily beneath the fresh run root. |
 | `Legacy closure` | Phase 9 owns no legacy-debt identifier; all non-circular prerequisites must pass while later-owned source debt remains residue. |
-| `Predecessor` | Consume exactly one durable Phase-8 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 8 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | Composition, decode, binding, rendering, effects, runtimes, hardware, and cleanup remain explicitly later-owned. |
-| `Pass criterion` | `qualified-phase-nine-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
+| `Pass criterion` | `qualified-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
 ## Doctrine adopted
 
@@ -113,11 +109,12 @@ subjects are complete; only a fresh integrated run may authorize status.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
+Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 9.1: Base capacity and topology witness ✅
+## Sprint 9.1: Base capacity and topology witness ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/capacity-topology/Amoebius/Capacity/{Types,Fold}.hs`, `src/capacity-topology/Amoebius/Dsl/Topology.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/ResourceIndexRun/Internal.hs`
 **Blocked by**: [Phase 8](phase_08_scope_index.md) gate pass
 **Independent Validation**: fifteen exact negative/twin decisions, two topology witnesses, nine compatibility decisions, seven exact compiler pairs, four coverage-bound properties, an eight-current/three-deferred locus join, and nineteen applied production mutations

@@ -20,15 +20,13 @@ once in the type and again by a total check before any effect. The enumeration's
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Scope](#1-scope)
 - [2. The storage illegal states](#2-the-storage-illegal-states)
 - [3. The backup & recovery illegal states](#3-the-backup--recovery-illegal-states)
 - [Related Documents](#related-documents)
-
----
 
 ```mermaid
 flowchart LR
@@ -48,6 +46,8 @@ flowchart LR
 *Orientation. Design intent. Where this slice's entries are caught, counted from the primary `**Validation-locus:**` of each entry below; an entry may also name a secondary locus, which this count does not show. Storage is the largest slice and the one caught earliest, with 79 per cent foreclosed before any provisioning fold runs. The axis itself is owned by [illegal_state_techniques.md §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer).*
 
 ## 1. Scope
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 This document is a **themed slice** of the illegal-state catalog: the durable-storage, bounded-backing, and
 Pulsar-retention entries, faithfully reproduced with their original numbers and headings so inbound links

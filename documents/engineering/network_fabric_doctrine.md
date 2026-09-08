@@ -23,6 +23,7 @@ the fabric makes reachable, owned by
 </details>
 
 ## Contents
+
 - [1. Why this doctrine exists: the inter-cluster wire is an open gap](#1-why-this-doctrine-exists-the-inter-cluster-wire-is-an-open-gap)
 - [2. Raw WireGuard, not Netmaker](#2-raw-wireguard-not-netmaker)
 - [3. Keys, config, and distribution — WireGuard as just-another-reconcile](#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)
@@ -32,8 +33,6 @@ the fabric makes reachable, owned by
 - [7. Boundaries this doc owns vs defers](#7-boundaries-this-doc-owns-vs-defers)
 - [8. Planning ownership](#8-planning-ownership)
 - [Related Documents](#related-documents)
-
----
 
 ## 1. Why this doctrine exists: the inter-cluster wire is an open gap
 

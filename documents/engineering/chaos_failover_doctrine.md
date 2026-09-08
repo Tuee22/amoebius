@@ -21,9 +21,9 @@ discharge is owned by [gateway_migration_doctrine.md](./gateway_migration_doctri
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. The defect this doctrine targets](#1-the-defect-this-doctrine-targets)
 - [2. When this applies — the gate](#2-when-this-applies--the-gate)
 - [3. The defect class — one shape, two disguises](#3-the-defect-class--one-shape-two-disguises)
@@ -49,8 +49,6 @@ discharge is owned by [gateway_migration_doctrine.md](./gateway_migration_doctri
 - [20. Epilogue — the honest system](#20-epilogue--the-honest-system)
 - [Related Documents](#related-documents)
 
----
-
 > **Honesty up front.** Prescriptive statements below are target design. Current implementation and
 > revalidation progress live in the [tracker](../../DEVELOPMENT_PLAN/README.md#current-implementation-audit),
 > and every result attributed to sibling prodbox is evidence from another system, never an amoebius result.
@@ -59,6 +57,8 @@ discharge is owned by [gateway_migration_doctrine.md](./gateway_migration_doctri
 > is this document's own moral core ([§12](#12-the-moral-core--proven-tested-assumed)).
 
 ## 1. The defect this doctrine targets
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 A control-plane decision is unsound when it acts on a premise that was true when read and false when acted on.
 Two illustrations fix the shape.
@@ -672,8 +672,8 @@ reported as proven. Keep this ledger explicitly:
 
 | Technique | Establishes | Strength | Does **not** establish |
 |---|---|---|---|
-| GADT-indexed state machine | Illegal in-process transitions are compile errors | **Proven** (machine-checked, exhaustive) | Anything across processes |
-| **Extract** — pure decision + property test | The branch is a total function of typed inputs; unknowns and distinguished states are explicit; safety-critical freshness is fenced | **Proven** for purity / totality / fence wiring; **tested** (sampled) for the property unless the input space is finite and exhausted | That the protocol composing these decisions is sound; that an unfenced observation is current |
+| GADT-indexed state machine | Transition indices and private constructors exclude specified source shapes | **Type-enforced**, subject to constructor visibility and safe-language assumptions; compile-negative checks test the intended boundary | Termination, bottom, unsafe escape hatches, production wiring, or behavior across processes |
+| **Extract** — pure decision + property test | The pure interface separates effects; unknowns, distinguished states, and freshness obligations must be explicit | **Tested** for sampled properties; a complete finite enumeration supports only its declared finite domain. Totality and correct fence wiring require separate evidence; a Haskell signature does not prove them | That the production caller uses the decision; protocol soundness; freshness of an unfenced observation |
 | **Model** — design model-checking | The *algorithm* upholds the (possibly *conditional*, R7) **safety** invariant and, under a named fairness, the **liveness** property, under modeled crash/reorder, within scope | **Target strength: proven for the model** after TLC covers safety on every reachable state and liveness (TLC-only) **under the assumed fairness `F`**, with fairness sensitivity checked; one shared `Model` removes the manual mapping, while differential checks test the spec↔decision-core `interpret` correspondence, **not** the effectful daemon; the three instruments over one `Model` = **one** protocol proof (TLC) + renderer cross-checks, not three; runtime fidelity remains **assumed** until trace validation (Register 2.5 sim, Register 3 live) and the Phase-75 Register-3 challenge — as do actor counts beyond scope | That the built runtime's real physics refine the model; behaviour above scope; real-time / clock-skew / fairness premises (R8, F) |
 | **Simulate** — design schedules (Register 1) then deterministic daemon simulation (Register 2.5) | The pure decision must uphold the invariant under bounded-exhaustive IOSimPOR schedules (Tier-1, Phase 17); **and later** the daemon/reconciler code, run under `IOSim`/`IOSimPOR` against a **modeled faulty environment** (fake Pulsar/MinIO/apiserver/route53/Vault/clock), must uphold the invariants under injected partition/reorder/redelivery/crash — deterministically replayable, no cluster | **Target strength: tested** — Phase 17 owns the bounded decision-model schedules; modeled-environment daemon schedules remain UNVERIFIED until their owning phase, and fidelity to the real substrate remains **assumed** until Register 3 | Schedules/faults beyond the recorded bounds; that the real Pulsar/k8s behave as the sim models them (Register 3); real-time physics |
 | **Inject** — live fault injection | The deployed forest survived the injected faults | **Tested** (the faults chosen), never proven | Faults/interleavings not injected; that the invariant is *sound* |
@@ -694,8 +694,12 @@ Phase 75 owns the deferred Tier-2 multi-cluster runtime and live model↔code co
 complete qualified gate passes, claiming the
 control-plane daemon is "hardened" because prodbox proved a sibling invariant is exactly what this section forbids.
 
-The rule, stated once and meant absolutely: **never report a tested, assumed, or merely argued result as proven.** Type-checking, decision purity, and finite-and-exhausted decision properties can be *proven* at
-the code layer; everything else is *evidence*. The ledger is the deliverable: not an assertion of safety
+The rule, stated once and meant absolutely: **never report a tested, assumed, or merely argued result as proven.**
+Type checking establishes only the encoded type guarantee under its stated assumptions. Exhaustive finite
+checks establish properties only for the complete recorded finite domain. Totality, production correspondence,
+and external-effect fidelity require their own evidence under
+[formal_model_doctrine.md §6](./formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not).
+The ledger is the deliverable: not an assertion of safety
 but a precise record of what is known and by what means. An honestly
 *conditional* invariant a system enforces is worth more than an *absolute* one it silently violates under
 partition.

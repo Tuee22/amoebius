@@ -34,17 +34,19 @@ owned by the exact integrated gate and the mechanical status projection that fol
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
----
-
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-Phase 30 and every earlier gate have passed in numerical order. The Phase-31 provision-seal library,
-independent Haskell oracle, positive and negative corpus, properties, and four changed-production challenges
-are bound; only the complete integrated Phase-31 gate may authorize the status transition.
+The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
+implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
+phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+
+Gate execution remains blocked by the qualified Phase-30 predecessor and its compatible evidence chain.
 
 ## Phase Summary
+
+This phase retains the full planner, capacity, expansion, identity and seal requirements below. The audit found that the named calculus projection merely encoded counts of tests. That projection must be replaced with actual provision semantics and independent correspondence before the seal can support the DSL barrier.
 
 **Target capability — NOT VALIDATED.** This phase specifies the pure Haskell **post-bind provision seal**.
 It models exactly two total functions and the private artifact they may construct; it does not inspect a host,
@@ -111,28 +113,29 @@ inventory, provider realization, and engine resolution remain UNVERIFIED live-ba
 
 ## Gate integrity
 
-**Contract check**: BOUND — NOT VALIDATED.
+**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
+binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
 
 | Key | Contract |
 |---|---|
-| `Claim` | `complete-provision-seal-boundary` |
+| `Claim` | The whole-deployment provision fold consumes the actual bound deployment and checked infrastructure plan, preserves every resource/identity/ownership obligation, and produces an opaque `ProvisionedSpec` whose complete render-source inventory is independently justified. |
 | `Subject` | `acquired-provision-seal-supervisor` |
 | `Command` | `pb validate phase 31` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
-| `Oracle` | `independent-provision-seal-oracle` |
-| `Positive controls` | `provision-seal-positive-controls` |
-| `Paired negatives` | `paired-provision-seal-negatives` |
-| `Mutants` | `applied-provision-seal-production-mutants` |
-| `Discovery` | `exact-provision-seal-source-discovery` |
+| `Oracle` | `test/spec/capability/ProvisionSealGate.hs` and its separately authored `ProvisionSealOracle` expectations must compare full demand, capacity, headroom, physical identity, activation and render-source values; expected observations cannot be computed by production folds. |
+| `Positive controls` | Exercise the complete infrastructure planner and whole-deployment expansion obligations below, including exact-fit/one-over boundaries and all indexed resource families, with actual input-to-provisioned-value correspondence. |
+| `Paired negatives` | For every admitted family, vary exactly one capacity, identity, epoch, ownership, metadata, exclusivity or activation condition and require its named refusal before rendering or effects; include same-count semantic changes. |
+| `Mutants` | Mutate actual planning, reservation, provisioning, seal construction and render-source identity values; independently literal selector assignments require the exact affected oracle case and an unaffected clean control. |
+| `Discovery` | Join every declared deployment/capability/resource family and planner path to its real provision outputs, independent cases and mutation assignments in both directions; fixed positive/negative/property counts are not discovery. |
 | `Challenge` | `post-acquisition-provision-seal-challenge` |
 | `Observer` | `provision-seal-process-observation` |
 | `Authority/bypass` | `no-pb-network-host-hardware-or-provision-seal-parallelism` |
 | `Freshness` | `fresh-provision-seal-build-root-and-stable-source` |
-| `Qualification` | `qualified-provision-seal-harness` |
+| `Qualification` | All required actual-value correspondences, seal/compile refusals, independent boundary controls and assigned changed-production cases must pass in the same acquired serial run. |
 | `Cleanroom` | `provision-seal-products-contained-below-build` |
 | `Legacy closure` | `retired-provision-seal-authorities-absent` |
-| `Predecessor` | `exact-phase-thirty-receipt` |
+| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 30 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | `later-render-runtime-live-provision-owners-explicit` |
-| `Pass criterion` | `qualified-phase-thirty-one-gate-pass` |
+| `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted
 
@@ -182,9 +185,9 @@ inventory, provider realization, and engine resolution remain UNVERIFIED live-ba
 
 ## Sprints
 
-## Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ✅
+## Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/provision-seal/Amoebius/Capacity/Provision.hs` owns demand derivation, both planner arms, validation, readback enactment, replay protection, and the provision context.
 **Blocked by**: [Phase 30](phase_30_capability_bind.md) gate pass
 **Independent Validation**: Both planner paths, replay/readback negatives, exact receipt classifications, and two planner changed-production challenges execute in the Phase-31 matrix.
@@ -201,6 +204,8 @@ already materialized or returns exactly one non-renderable plan owning the close
 
 ### Deliverables
 
+- Retain an acquired typed relation from bound deployment through the conditional infrastructure plan to each materialized capacity/identity witness, including preexisting and creation branches.
+
 - `planInfrastructure :: ProvisionTargetSupply -> BoundDeployment -> Either ProvisionError
   InfrastructurePlanningResult`, run after every capability/provider graph and standard-platform expansion.
   `StandaloneRoot` supplies the complete declared node/host/account/backing/API-etcd inventory; `ForestMember`
@@ -216,6 +221,8 @@ already materialized or returns exactly one non-renderable plan owning the close
 
 ### Validation
 
+- Keep row totals unchanged while substituting a planner result, resolved owner or capacity; the independently expected plan and materialization relation must reject the substitution.
+
 1. The pre-existing fixture yields `NoInfrastructureRequired`; the creation fixture returns exactly one
    `InfrastructureRequired` plan with a fresh token and one action batch; the derived demand equals an
    independent enumeration over the expanded `BoundDeployment`; only receipt-bound readback constructs
@@ -225,9 +232,9 @@ already materialized or returns exactly one non-renderable plan owning the close
 
 Integrated Phase-31 gate execution and its mechanical status projection remain.
 
-## Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ✅
+## Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/provision-seal/Amoebius/Capacity/Provision.hs` and `src/provision-seal/Amoebius/Capability/{Engine,Provisioned}.hs` own the whole-deployment fold and opaque successful result.
 **Blocked by**: Sprint 31.1
 **Independent Validation**: Eighteen inherited positive deployments, ten exact negatives, two properties, exact instance/runtime joins, and drop-execution/drop-runtime mutations execute in the matrix.
@@ -244,6 +251,8 @@ complete resource vector, so the only deployable representation is the opaque wh
 and an impossible target has no deployable value.
 
 ### Deliverables
+
+- Expose an observation projection of actual demand, capacity, headroom, debit, physical backing, epoch and ownership values for every expansion family. The projection must follow the real fold and preserve the distinctions enumerated below.
 
 - `provision :: ProvisionContext -> Topology -> BoundDeployment -> Either ProvisionError ProvisionedSpec`, run
   after every capability/provider graph and the standard platform set have been expanded. Its private
@@ -315,6 +324,8 @@ and an impossible target has no deployable value.
 
 ### Validation
 
+- Independently compare each real expanded value and refusal, including exact-fit and one-over cases. Counting properties or observing a successful fold is insufficient.
+
 1. Each of the nine per-arm positives provisions to an opaque `ProvisionedSpec` on both shapes; the independent
    instance/epoch enumeration exact-equals the provision result for steady (incl. Job-completed empty) and every
    rollout step, and each one-unit-short desired-replica/surge/old-revision case rejects. The
@@ -332,9 +343,9 @@ and an impossible target has no deployable value.
 
 Integrated Phase-31 gate execution and its mechanical status projection remain.
 
-## Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ✅
+## Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/provision-seal/Amoebius/Capacity/RenderSource.hs` owns the identity-keyed render-source seal and activation discipline; `Provision.hs` alone inserts it into `ProvisionedSpec`.
 **Blocked by**: Sprint 31.2
 **Independent Validation**: Exact key/domain/owner correspondence and all four independently classified activation stages execute in the clean Haskell candidate.
@@ -350,6 +361,8 @@ identity-keyed render-source set with per-field ownership and a four-stage activ
 `renderAll` privately maps a unique set and no service projection can render on its own.
 
 ### Deliverables
+
+- Bind the seal to the same checked deployment/plan and full identity-keyed render-source set that the fold produced, with exact ordering and four-stage activation meaning.
 
 - `K8sObjectIdentity` (and its compatibility alias `KubernetesObjectId`), the closed private
   `ProvisionedRenderSource identity`, and the closed
@@ -370,6 +383,8 @@ identity-keyed render-source set with per-field ownership and a four-stage activ
 
 ### Validation
 
+- Swap a same-sized render-source set, change one identity/resource, or reuse a seal for another plan; each pair must fail at the exact seal/correspondence boundary.
+
 1. The full `ProvisionedDeploymentParts` domain contributes exactly one equal-keyed `ProvisionedRenderSource`
    per object identity; duplicate/omitted/key-mismatched/owner-mismatched candidates reject; the independent
    activation classifier assigns each source its stage from the separately authored Haskell reference table and rejects a
@@ -379,12 +394,12 @@ identity-keyed render-source set with per-field ownership and a four-stage activ
 
 Integrated Phase-31 gate execution and its mechanical status projection remain.
 
-## Sprint 31.4: The provision-seal property/corpus + the Register-1 gate ✅
+## Sprint 31.4: The provision-seal property/corpus + the Register-1 gate ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `test/spec/capability/{ProvisionSealGate,ProvisionSealSpec,ProvisionFixtures,ProvisionProps,RuntimeStorageBindingProps}.hs` and `Amoebius.Validation.ProvisionSealRun.Internal` own the serial qualified gate.
 **Blocked by**: Sprint 31.3
-**Independent Validation**: The acquired runner builds four changed production subjects and one clean subject serially in a unique run root, observes exact failures/tokens, and proves exact 11-source discovery.
+**Independent Validation**: Compare complete actual provision values against independently authored demand/identity/resource expectations; exact-fit controls survive while one-over and substituted-value pairs refuse; each assigned production mutant fails its named case; live materialization remains unverified.
 **Oracle**: `test/spec/capability/ProvisionSealOracle.hs` is the separately authored literal oracle; the runner checks its import independence before trusting the clean result.
 **Legacy IDs**: Eighteen exact retired paths are checked absent and all generated products remain below `.build/**`.
 **Docs to update**: this phase, `system_components.md`, `substrates.md`, and the resource, manifest, capability, illegal-state, and testing doctrines.
@@ -399,6 +414,8 @@ constructing `ProvisionedSpec` — and emit the per-entry validation-locus ledge
 UNVERIFIED.
 
 ### Deliverables
+
+- Replace `checkProvisionCalculusProjection` test-count resources with actual provisioned resources and typed relation witnesses for the Phase-18 semantic bridge.
 
 - The **concrete provision corpus** (§M.7): the nine per-arm positives (both shapes, inherited) provisioned
   against their declared targets, the pre-existing and creation `ProvisionTargetSupply` boundary fixtures, and
@@ -430,6 +447,9 @@ UNVERIFIED.
   claims.
 
 ### Validation
+
+- Hold the number of positives, planners, negatives, properties and mutants fixed while changing a production debit or render-source identity; the semantic oracle must fail.
+- Require the complete declared resource-family and seal surface, rather than the historical small fixture corpus, in the gate discovery join.
 
 1. The `provision-seal-spec` Cabal suite must be green — each of the
    nine per-arm positives provisions (both shapes) to

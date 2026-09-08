@@ -25,11 +25,9 @@ half of the partition is derived directly from it.
 
 </details>
 
-> **Historical result (invalidated).** Every pre-reset phase-run and implementation-result statement is
-> diagnostic only and never current validation evidence. Target doctrine remains normative; current state is
-> owned exclusively by the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. One namespace per platform capability — the derived set](#2-one-namespace-per-platform-capability--the-derived-set)
 - [3. The Postgres namespace holds the operator, not per-consumer databases](#3-the-postgres-namespace-holds-the-operator-not-per-consumer-databases)
@@ -40,9 +38,9 @@ half of the partition is derived directly from it.
 - [8. Planning ownership](#8-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Why this doctrine exists
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 **The problem.** A Kubernetes namespace is the coarse isolation and blast-radius boundary every workload lands
 in. It scopes role-based access control (RBAC), NetworkPolicy, resource quota, and the per-namespace teardown

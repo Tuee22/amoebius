@@ -18,17 +18,17 @@ owned by [resource_capacity_folds.md](./resource_capacity_folds.md).
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [5. `StorageBudget`: bounded by construction, single-owner ceiling per arm](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)
 - [6. `Growable` / `ScalingPolicy`: the quota-bounded dynamic-provisioning arm](#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)
 - [7. Pulsar has two ceilings: the hot tier and the durable total](#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total)
 - [Related Documents](#related-documents)
 
----
-
 ## 5. `StorageBudget`: bounded by construction, single-owner ceiling per arm
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 There is no such thing as "unbounded storage" — storage is *either* host-level (bounded by a
 physical disk) *or* cloud (bounded by a quota). amoebius encodes that as a **closed union with no unbounded arm**, so "unbounded storage" (I9) has no syntax.
@@ -469,15 +469,15 @@ Binding is plural and exhaustive, never one tenant at a time. `planTenantPolicyT
 exact `TenantPolicyWholeDeploymentInventory`; `bindTenantPolicyInventory` consumes it once, resolves abstract
 attachments against the base `BoundExecutionSet`, and groups every tenant's complete resource delta by
 resolved `ExecutionUnitId`. The delta algebra covers every Pod or host `ResourceEnvelope` axis; keyed shared
-extents union only on equal model/backing, numeric axes add, arm mismatches reject, and merge is proven
-associative with an explicit empty identity. A shared target's deltas are summed and its base
+extents union only on equal model/backing, numeric axes add, arm mismatches reject, and merge must satisfy
+associativity with an explicit empty identity. These algebraic laws require independently checked evidence. A shared target's deltas are summed and its base
 control-plane daemon/controller is replaced exactly once; a dedicated target supplies one complete seed before its
 delta is applied. Observed executor commitments live in one deployment-global target map with tenant
 memberships, never copied under every tenant. `ProvisionedTenantPolicyPersistence` stores private
 `ProvisionedTenantPolicyExecutionRef`s plus provider-indexed sealed output/action maps, exact old/new targets,
 provider commands, snapshot preconditions, and capacity/coalescing witnesses; it never stores
-`BoundTenantPolicyExecutionTarget` or another binder-stage value. The positive two-tenant/shared-role case
-proves one target, two deltas, and one base debit. Duplicate dedicated target, uncoalesced shared delta, and
+`BoundTenantPolicyExecutionTarget` or another binder-stage value. The positive two-tenant/shared-role case must
+observe one target, two deltas, and one base debit; this example does not prove the general merge laws. Duplicate dedicated target, uncoalesced shared delta, and
 double-base mutants return respectively `Left DuplicateTenantPolicyExecutionTarget`, `Left
 UncoalescedTenantPolicyExecutionDelta`, and `Left TenantPolicyBaseExecutionDoubleDebit` before effects.
 

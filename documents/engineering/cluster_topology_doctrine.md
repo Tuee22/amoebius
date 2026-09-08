@@ -23,9 +23,9 @@ resulting node set, owned by [resource_capacity_folds.md](./resource_capacity_fo
 
 </details>
 
-> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
+
 - [1. Two axes: the substrate is detected, the engine is declared](#1-two-axes-the-substrate-is-detected-the-engine-is-declared)
 - [2. `ComputeEngine`: a closed union, EKS a first-class arm](#2-computeengine-a-closed-union-eks-a-first-class-arm)
 - [3. The `LinuxHost` witness: rke2/kind on a host with no Linux node is uninhabitable](#3-the-linuxhost-witness-rke2kind-on-a-host-with-no-linux-node-is-uninhabitable)
@@ -35,9 +35,9 @@ resulting node set, owned by [resource_capacity_folds.md](./resource_capacity_fo
 - [7. Planning ownership](#7-planning-ownership)
 - [Related Documents](#related-documents)
 
----
-
 ## 1. Two axes: the substrate is detected, the engine is declared
+
+Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
 
 amoebius keeps two orthogonal axes strictly apart, and conflating them is the exact bug this doctrine exists
 to prevent:
