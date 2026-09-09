@@ -1,12 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-{- | Package-hidden authority produced only after the complete gate binding has
-been checked.  The public 'GatePass' records are diagnostic claims; they do
-not carry write authority.  Keeping this constructor hidden gives the
-status projector a token that cannot be manufactured by an external caller.
+{- | Reserved package-hidden gate authority. No current function produces this
+value: the replacement protected issuer is not yet qualified. Public GatePass
+records and candidate consistency checks remain diagnostic claims only.
 -}
 module Amoebius.Validation.GatePass.Internal (
     VerifiedGatePass,
+    candidateBindingFindings,
     verifiedPassEvidenceDigest,
     verifiedPassPhase,
     verifiedPassProjectionDigest,
@@ -16,13 +16,14 @@ module Amoebius.Validation.GatePass.Internal (
     verifyPublishedGatePass,
 ) where
 
+import Amoebius.Validation.CertificationReset.Internal (certificationAdmissionRefusal)
+import Data.List.NonEmpty qualified as NonEmpty
 import Amoebius.Validation.Evidence.Internal (
     AcquiredCandidateEvidence,
     CandidateCapture,
     GateRowEvidence,
     PublishedCandidateEvidence,
     acquiredCandidateCapture,
-    acquiredCandidateDigest,
     allGateRows,
     captureArchitecture,
     captureArgv,
@@ -50,7 +51,6 @@ import Amoebius.Validation.Evidence.Internal (
     capturedRow,
     gateRowEvidencePassed,
     predecessorEvidenceMatchesPhase,
-    recheckPublishedCandidateEvidence,
     renderGateRow,
  )
 import Amoebius.Validation.GatePass (requiredGateRows)
@@ -89,29 +89,13 @@ verifiedPassProjectionPostimageDigest = verifiedProjectionPostimageDigestValue
 verifyPublishedGatePass ::
     PublishedCandidateEvidence ->
     IO (Either [Finding] VerifiedGatePass)
-verifyPublishedGatePass published = do
-    reacquired <- recheckPublishedCandidateEvidence published
-    pure (reacquired >>= verifyAcquiredGatePass published)
+verifyPublishedGatePass _ = pure (Left (NonEmpty.toList certificationAdmissionRefusal))
 
-verifyAcquiredGatePass ::
-    PublishedCandidateEvidence ->
-    AcquiredCandidateEvidence ->
-    Either [Finding] VerifiedGatePass
-verifyAcquiredGatePass published evidence =
-    case verificationFindings of
-        [] -> case (captureProjectionDigest captured, captureProjectionPostimageDigest captured) of
-            (Just projectionDigest, Just postimageDigest) ->
-                Right
-                    VerifiedGatePass
-                        { verifiedPhaseValue = formatOrdinal (capturePhase captured)
-                        , verifiedSourceDigestValue = captureSourceOpening captured
-                        , verifiedEvidenceDigestValue = acquiredCandidateDigest evidence
-                        , verifiedProjectionDigestValue = projectionDigest
-                        , verifiedProjectionPostimageDigestValue = postimageDigest
-                        , verifiedPublicationValue = published
-                        }
-            _ -> Left [gateFinding "GATE-PASS-PROJECTION" "status projection or postimage digest is absent"]
-        problems -> Left problems
+-- | Local consistency diagnostics confer no receipt or status authority.
+-- The old success-producing function is absent: only a future protected,
+-- qualified issuer can restore production of VerifiedGatePass.
+candidateBindingFindings :: AcquiredCandidateEvidence -> [Finding]
+candidateBindingFindings evidence = verificationFindings
   where
     captured = acquiredCandidateCapture evidence
     phase = capturePhase captured
@@ -153,13 +137,8 @@ verifyAcquiredGatePass published evidence =
                ]
 
 recheckVerifiedGatePassPublication :: VerifiedGatePass -> IO (Either [Finding] ())
-recheckVerifiedGatePassPublication verified = do
-    reacquired <- recheckPublishedCandidateEvidence (verifiedPublicationValue verified)
-    pure $ case reacquired of
-        Left problems -> Left problems
-        Right evidence
-            | acquiredCandidateDigest evidence == verifiedPassEvidenceDigest verified -> Right ()
-            | otherwise -> Left [gateFinding "GATE-PASS-PUBLICATION-DIGEST" "the re-acquired publication no longer binds the verified evidence digest"]
+recheckVerifiedGatePassPublication _ =
+    pure (Left (NonEmpty.toList certificationAdmissionRefusal))
 
 passedRow :: GateRowEvidence -> Bool
 passedRow = gateRowEvidencePassed

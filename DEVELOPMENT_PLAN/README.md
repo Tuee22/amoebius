@@ -120,9 +120,10 @@ The August 22 reset and subsequent recorded completions are historical. Commits 
 `66690f7`, and `d880196` recorded advancement through phases 0, 46, 49, and 52 respectively.
 Those status changes do not establish eligibility under the replacement contract.
 
-A typed generation identity, protected baseline admission, receipt eligibility, and dependency-impact rules
-must be implemented and independently qualified in Haskell. This date is a reader reference, not that identity.
-Old JSON or a prior Done marker must not admit a candidate in the replacement generation.
+The Haskell reset boundary identifies `amoebius-certification-generation-1` and refuses admission because its
+protected issuer is not qualified. Protected baseline admission, authenticated receipt eligibility, and
+dependency-impact rules remain to implement and qualify. This date is a reader reference, not the identity.
+Old JSON or a prior Done marker cannot clear the mandatory refusal.
 
 The reset retains target capabilities and source paths. An obligation may be refined or transferred only
 under the [scope-preservation procedure](development_plan_phase_model.md#n-reopening-and-amending-a-phase).
@@ -136,7 +137,7 @@ evidence, authenticated toolchain acquisition, or complete corpus coverage.
 
 | Owner | Observed footprint or known partial boundary | Required repair |
 |---|---|---|
-| [Phase 0](phase_00_documentation_suite.md) | Generation eligibility and protected acceptance custody are not established by the existing receipt machinery. | Implement the finite reset/admission boundary and preserve its explicit bootstrap assumptions. |
+| [Phase 0](phase_00_documentation_suite.md) | A mandatory Haskell refusal closes legacy admission, receipt publication, and status authority. The matching-copy receipt reader is removed. | Implement and qualify the protected issuer, accepted seed, and seven-case custody corpus; retain the explicit GenesisTrust assumptions. |
 | [Phases 1–2](phase_01_toolchain_spike.md) | Toolchain and source-graph machinery exists; this checkout lacks transferred authenticated inputs and gate receipts. | Reacquire authentic inputs and qualify source/dependency closure without treating file presence as evidence. |
 | [Phases 11–14](phase_11_formal_model_kernel.md) | Malformed guards can disappear; sets and name binding disagree; a commented function can receive a refinement proof. | Reject malformed semantics and establish interpreter, solver, and compiled-source correspondence. |
 | [Phases 18–34](phase_18_dsl_formal_model.md) | Capacity differentials and TLC machinery exist; several later projections represent fixture counts. | Preserve bounded results and establish correspondence of actual decoded, provisioned, rendered, and planned values. |
@@ -145,6 +146,18 @@ evidence, authenticated toolchain acquisition, or complete corpus coverage.
 | [Phases 50–52](phase_50_host_assert_cli.md) | Bootstrap and host implementations exist; mutation attribution and effect observation remain incomplete. | Require exact failures, unaffected controls, production-caller coverage, and independently observed effects. |
 | [Phase 53](phase_53_apple_engine_bringup.md) | Apple oracle changes distinguish assigned failure sets; native acquisition and predecessor custody remain open. | Preserve those tests and qualify the complete native path only after the reset frontier reaches it. |
 | [Phases 54–95](phase_54_windows_engine_bringup.md) | Retained plans and source are implementation inventory. | Implement and validate each preserved capability in numerical order. |
+
+**Phase-0 repair progress — Known partial.** Structural status parsing now admits only the three canonical
+lifecycle markers, with independent retired-marker negatives. Phase 46's structural Register metadata now
+matches its Register 2 plan. Their native direct-source component checks succeeded; no phase gate passed.
+Independent reset and admission regressions also succeeded, including a build without fixture hooks.
+Further Phase-0 components check strict signed seed acknowledgements and descriptor-relative authority-file
+metadata. Their independent native regressions passed; every result retains an explicit custody limitation.
+Direct bootstrap qualification also refuses before inherited-principal compilation. The protected launcher,
+issuer, and integrated seven-case custody corpus remain open in the [Phase-0 record](phase_00_documentation_suite.md#sprint-06-candidate-evidence-and-gate-pass-result-).
+The documentation diagnostic has no structural findings; `cabal check` fails on the existing missing `proto`
+source directory. The current macOS environment lacks Phase 0's pinned Linux GenesisTrust inputs and a
+protected verifier environment. Phase 0 remains Active; later phases remain Blocked.
 
 The symbolic diagnostic returned `Inductive` for a model whose explicit checker returned an invariant
 counterexample. The refinement diagnostic returned `Proved` while its compiled function returned `-1`

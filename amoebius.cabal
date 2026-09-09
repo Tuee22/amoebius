@@ -4232,6 +4232,9 @@ library
 
 library validation-kernel
     exposed-modules:
+        Amoebius.Validation.SeedReceipt
+        Amoebius.Validation.SeedCustodyPrerequisites
+        Amoebius.Validation.CertificationReset
         Amoebius.Validation.BootstrapPredicate
         Amoebius.Validation.GatePass
         Amoebius.Validation.CapabilityGraph
@@ -4268,6 +4271,8 @@ library validation-kernel
     visibility:       public
     hs-source-dirs:   src/validation-kernel
     other-modules:
+        Amoebius.Validation.SeedReceipt.Internal
+        Amoebius.Validation.SeedCustodyPrerequisites.Internal
         Amoebius.Validation.ArtifactCalculusRun.Internal
         Amoebius.Validation.BudgetCalculusRun.Internal
         Amoebius.Validation.LiftCalculusRun.Internal
@@ -4327,6 +4332,7 @@ library validation-kernel
         Amoebius.Validation.CompilerSourceGraph.Internal
         Amoebius.Validation.CompilerSubjectRegistry.Internal
         Amoebius.Validation.CompilerComponentPlan.Internal
+        Amoebius.Validation.CertificationReset.Internal
         Amoebius.Validation.Dispatch.Internal
         Amoebius.Validation.Documentation.Internal
         Amoebius.Validation.Evidence.Internal
@@ -4361,6 +4367,7 @@ library validation-kernel
         containers >=0.7 && <0.8,
         cryptohash-sha256 ==0.11.102.1,
         crypton ==1.0.6,
+        memory ==0.18.0,
         directory >=1.3 && <1.4,
         filepath >=1.5 && <1.6,
         ghc ==9.12.4,
@@ -6521,6 +6528,179 @@ test-suite validation-bootstrap-trust-internal-component
         ghc-paths ==0.1.0.12,
         text >=2.1 && <2.2
 
+test-suite validation-seed-receipt-component
+    type:             exitcode-stdio-1.0
+    main-is:          SeedReceiptOracle.hs
+    hs-source-dirs:   test/validation-kernel
+    default-language: GHC2024
+    ghc-options:
+        -main-is SeedReceiptOracle.main
+        -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+        -Werror=incomplete-uni-patterns
+    build-depends:
+        base >=4.21 && <4.22,
+        amoebius:validation-kernel,
+        bytestring >=0.12 && <0.13,
+        crypton ==1.0.6,
+        memory ==0.18.0,
+        text >=2.1 && <2.2
+
+test-suite validation-seed-custody-prerequisites-component
+    type:             exitcode-stdio-1.0
+    main-is:          SeedCustodyPrerequisitesOracle.hs
+    hs-source-dirs:   test/validation-kernel src/validation-kernel
+    other-modules:
+        Amoebius.Validation.SeedCustodyPrerequisites
+        Amoebius.Validation.SeedCustodyPrerequisites.Internal
+        Amoebius.Validation.Types
+    default-language: GHC2024
+    ghc-options:
+        -main-is SeedCustodyPrerequisitesOracle.main
+        -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+        -Werror=incomplete-uni-patterns
+    build-depends:
+        base >=4.21 && <4.22,
+        bytestring >=0.12 && <0.13,
+        directory >=1.3 && <1.4,
+        filepath >=1.5 && <1.6,
+        temporary ==1.3,
+        text >=2.1 && <2.2
+    if !os(windows)
+        build-depends: unix >=2.8.6 && <2.9
+
+test-suite validation-certification-reset-component
+    type:             exitcode-stdio-1.0
+    main-is:          CertificationResetOracle.hs
+    hs-source-dirs:   test/validation-kernel
+    default-language: GHC2024
+    ghc-options:
+        -main-is CertificationResetOracle.main
+        -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+        -Werror=incomplete-uni-patterns
+    build-depends:
+        base >=4.21 && <4.22,
+        amoebius:validation-kernel,
+        text >=2.1 && <2.2
+
+test-suite validation-certification-admission-internal-component
+    type:             exitcode-stdio-1.0
+    main-is:          CertificationAdmissionInternalOracle.hs
+    hs-source-dirs:   test/validation-kernel src/validation-kernel
+    other-modules:
+        Amoebius.Validation.AppleEngineBringupRun.Internal
+        Amoebius.Validation.ArtifactCalculusRun.Internal
+        Amoebius.Validation.BootstrapPredicate
+        Amoebius.Validation.BootstrapQualification.Internal
+        Amoebius.Validation.BootstrapTrust.Internal
+        Amoebius.Validation.BudgetCalculusRun.Internal
+        Amoebius.Validation.CalculusCompositionRun.Internal
+        Amoebius.Validation.CapabilityBindRun.Internal
+        Amoebius.Validation.CapabilityGraph
+        Amoebius.Validation.CertificationReset.Internal
+        Amoebius.Validation.ChainBoundaryRun.Internal
+        Amoebius.Validation.CompileFailHarnessRun.Internal
+        Amoebius.Validation.CompilerExpectationAuthority.Internal
+        Amoebius.Validation.CompilerSourceGraph.Internal
+        Amoebius.Validation.CompilerSubjectRegistry.Internal
+        Amoebius.Validation.ConformanceGateRun.Internal
+        Amoebius.Validation.DeterministicSimulationRun.Internal
+        Amoebius.Validation.DhallSchemaRun.Internal
+        Amoebius.Validation.Dispatch.Internal
+        Amoebius.Validation.Documentation.Internal
+        Amoebius.Validation.DslBarrierRun.Internal
+        Amoebius.Validation.DslFormalModelRun.Internal
+        Amoebius.Validation.EncryptedBrowserRuntimeRun.Internal
+        Amoebius.Validation.Evidence.Internal
+        Amoebius.Validation.EvidenceCalculusRun.Internal
+        Amoebius.Validation.ExecutionAcceleratorRun.Internal
+        Amoebius.Validation.ExplicitStateCheckerRun.Internal
+        Amoebius.Validation.ExtensionCompositionRun.Internal
+        Amoebius.Validation.ExtensionDeclarationRun.Internal
+        Amoebius.Validation.ExtensionLawsRun.Internal
+        Amoebius.Validation.ExtensionSecurityRun.Internal
+        Amoebius.Validation.FormalModelKernelRun.Internal
+        Amoebius.Validation.GadtDecodeRun.Internal
+        Amoebius.Validation.GatePass
+        Amoebius.Validation.GatePass.Internal
+        Amoebius.Validation.GatewayMigrationModelRun.Internal
+        Amoebius.Validation.HostEnsureKernelRun.Internal
+        Amoebius.Validation.IllegalStateCoveringRun.Internal
+        Amoebius.Validation.ImageRecipeRun.Internal
+        Amoebius.Validation.InferenceAcceleratorRun.Internal
+        Amoebius.Validation.Legacy.Internal
+        Amoebius.Validation.LiftCalculusRun.Internal
+        Amoebius.Validation.LinuxEngineBringupRun.Internal
+        Amoebius.Validation.MutationCoverage
+        Amoebius.Validation.OfflineLanguagePlanRun.Internal
+        Amoebius.Validation.PbBootstrapGrammar
+        Amoebius.Validation.PbBootstrapGrammar.Internal
+        Amoebius.Validation.PbBoundaryRun.Internal
+        Amoebius.Validation.PhaseContract.Evidence.Internal
+        Amoebius.Validation.PhaseContract.Internal
+        Amoebius.Validation.PhaseIdentity
+        Amoebius.Validation.PhaseRunner.Internal
+        Amoebius.Validation.PhaseSemanticContract
+        Amoebius.Validation.PhaseSemanticJoin
+        Amoebius.Validation.PhaseZeroRun.Internal
+        Amoebius.Validation.PolicyContract.Internal
+        Amoebius.Validation.ProvisionSealRun.Internal
+        Amoebius.Validation.ReconcileCoreRun.Internal
+        Amoebius.Validation.RefinementCheckerRun.Internal
+        Amoebius.Validation.RenderManifestRun.Internal
+        Amoebius.Validation.RepositoryLayoutRun
+        Amoebius.Validation.RepositoryLayoutRun.Internal
+        Amoebius.Validation.ResourceIndexRun.Internal
+        Amoebius.Validation.ResourceProvisionContract
+        Amoebius.Validation.ScopeIndexRun.Internal
+        Amoebius.Validation.SourceClosure.Internal
+        Amoebius.Validation.SourceConsumerGraph.Internal
+        Amoebius.Validation.SourceDebtBaseline.Internal
+        Amoebius.Validation.SourceSnapshot.Internal
+        Amoebius.Validation.StatusFrontier
+        Amoebius.Validation.StatusProjection.Internal
+        Amoebius.Validation.StorageGeometryRun.Internal
+        Amoebius.Validation.SymbolicCheckerRun.Internal
+        Amoebius.Validation.TestWorkflowAlgebraRun.Internal
+        Amoebius.Validation.ToolAndMutantGenerationRun.Internal
+        Amoebius.Validation.ToolchainSpikeRun
+        Amoebius.Validation.ToolchainSpikeRun.Internal
+        Amoebius.Validation.TransactionVocabularyRun.Internal
+        Amoebius.Validation.Types
+        Amoebius.Validation.UiAuthorizationRun.Internal
+        Amoebius.Validation.UiBrowserInterpreterRun.Internal
+        Amoebius.Validation.UiContractGenerationRun.Internal
+        Amoebius.Validation.UiEffectBindingRun.Internal
+        Amoebius.Validation.UiLocalCompositionRun.Internal
+        Amoebius.Validation.UiPlanCompilerRun.Internal
+        Amoebius.Validation.UiProgramSchemaRun.Internal
+        Amoebius.Validation.UiServerBoundaryRun.Internal
+        Amoebius.Validation.WorkflowCalculusRun.Internal
+
+    default-language: GHC2024
+    ghc-options:
+        -main-is CertificationAdmissionInternalOracle.main
+        -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+        -Werror=incomplete-uni-patterns
+    build-depends:
+        base >=4.21 && <4.22,
+        amoebius:dsl-core,
+        aeson ==2.2.5.0,
+        bytestring >=0.12 && <0.13,
+        Cabal-syntax ==3.16.1.0,
+        containers >=0.7 && <0.8,
+        cryptohash-sha256 ==0.11.102.1,
+        crypton ==1.0.6,
+        directory >=1.3 && <1.4,
+        filepath >=1.5 && <1.6,
+        ghc ==9.12.4,
+        ghc-boot-th ==9.12.4,
+        ghc-paths ==0.1.0.12,
+        process >=1.6 && <1.7,
+        text >=2.1 && <2.2,
+        time >=1.14 && <1.15
+    if !os(windows)
+        build-depends: unix >=2.8.6 && <2.9
+
 test-suite validation-phase-contract-component
     type:             exitcode-stdio-1.0
     main-is:          Main.hs
@@ -6618,6 +6798,7 @@ test-suite validation-phase-contract-internal-component
         Amoebius.Validation.CompilerSourceGraph.Internal
         Amoebius.Validation.CompilerSubjectRegistry.Internal
         Amoebius.Validation.Documentation.Internal
+        Amoebius.Validation.CertificationReset.Internal
         Amoebius.Validation.Evidence.Internal
         Amoebius.Validation.Gate.Internal
         Amoebius.Validation.GatePass
@@ -6654,6 +6835,7 @@ test-suite validation-phase-contract-internal-component
         -Werror=incomplete-uni-patterns
 
     build-depends:
+        amoebius:dsl-core,
         Cabal-syntax ==3.16.1.0,
         aeson ==2.2.5.0,
         base >=4.21 && <4.22,

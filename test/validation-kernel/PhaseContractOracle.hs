@@ -745,11 +745,11 @@ runPhaseContractOracle =
             (replaceIn (phasePath 10) blockedStatus (blockedStatus <> "\n\n**Status**: ✅ Done") validCorpus)
         , concat
             [ expectFinding
-                ("every independently enumerated current status form is recognized as a second claim: " <> Text.unpack form)
+                ("every current or retired status form is recognized as a second claim: " <> Text.unpack form)
                 "PLAN-PHASE-STATUS"
                 (phasePath 10)
                 (replaceIn (phasePath 10) blockedStatus (blockedStatus <> "\n\n" <> form) validCorpus)
-            | form <- expectedCurrentStatusForms
+            | form <- expectedCurrentStatusForms <> expectedRetiredStatusForms
             ]
         , expectFinding
             "tracker status reset"
@@ -1269,10 +1269,34 @@ runPhaseContractOracle =
             (phasePath 10)
             (replaceIn (phasePath 10) "## Sprint 10.1:" "## Sprint 9.1:" validCorpus)
         , expectFinding
-            "a sprint heading must carry one of the independently closed five status markers"
+            "a sprint heading must carry one of the independently closed three status markers"
             "PLAN-SPRINT-IDENTITY"
             (phasePath 10)
             (replaceIn (phasePath 10) "Synthetic seam ⏸️" "Synthetic seam ❌" validCorpus)
+        , concat
+            [ expectFinding
+                ("a retired sprint heading marker is refused: " <> Text.unpack marker)
+                "PLAN-SPRINT-IDENTITY"
+                (phasePath 10)
+                (replaceIn (phasePath 10) "Synthetic seam ⏸️" ("Synthetic seam " <> marker) validCorpus)
+            | marker <- ["📋", "🧪"]
+            ]
+        , concat
+            [ expectFinding
+                ("a retired sprint status field is refused: " <> Text.unpack status)
+                "PLAN-SPRINT-STATUS"
+                (phasePath 10)
+                (replaceIn (phasePath 10) (sprintFieldLine "Status" "Blocked — NOT VALIDATED") (sprintFieldLine "Status" status) validCorpus)
+            | status <- ["Planned — NOT VALIDATED", "Live-proof pending — NOT VALIDATED"]
+            ]
+        , concat
+            [ expectFinding
+                ("a retired bare sprint status remains a competing claim: " <> Text.unpack form)
+                "PLAN-SPRINT-STATUS"
+                (phasePath 10)
+                (replaceIn (phasePath 10) (sprintFieldLine "Status" "Blocked — NOT VALIDATED") (sprintFieldLine "Status" "Blocked — NOT VALIDATED" <> "\n\n" <> form) validCorpus)
+            | form <- expectedRetiredStatusForms
+            ]
         , expectFinding
             "a known sprint marker cannot contradict its recorded current Status field"
             "PLAN-SPRINT-STATUS"
@@ -2046,8 +2070,12 @@ expectedCurrentStatusForms :: [Text]
 expectedCurrentStatusForms =
   [ "✅ Done"
   , "🔄 Active — NOT VALIDATED"
-  , "📋 Planned — NOT VALIDATED"
   , "⏸️ Blocked — NOT VALIDATED"
+  ]
+
+expectedRetiredStatusForms :: [Text]
+expectedRetiredStatusForms =
+  [ "📋 Planned — NOT VALIDATED"
   , "🧪 Live-proof pending — NOT VALIDATED"
   ]
 
@@ -2957,7 +2985,8 @@ oracleUniverseProblems =
       , ("substrates", 5, expectedSubstrates)
       , ("lanes", 6, expectedLanes)
       , ("registers", 4, expectedRegisters)
-      , ("current statuses", 5, expectedCurrentStatusForms)
+      , ("current statuses", 3, expectedCurrentStatusForms)
+      , ("retired status claims", 2, expectedRetiredStatusForms)
       , ("sprint fields", 8, expectedSprintFieldNames)
       , ("sprint subsections", 4, expectedSprintSubsectionNames)
       , ("gate keys", 18, expectedGateKeys)

@@ -376,19 +376,17 @@ import Amoebius.Validation.Types (
     finding,
     observation,
  )
+import Amoebius.Validation.CertificationReset.Internal (certificationAdmissionRefusal)
+import Data.List.NonEmpty qualified as NonEmpty
 import Control.Exception (IOException, bracket, onException, try)
 import Control.Monad (foldM, unless, when)
 import Crypto.Hash.SHA256 qualified as SHA256
-import Data.Aeson (ToJSON (toJSON), Value (..), decodeStrict', encode, object, (.=))
-import Data.Aeson.Key qualified as AesonKey
-import Data.Aeson.KeyMap qualified as AesonKeyMap
+import Data.Aeson (ToJSON (toJSON), Value (..), encode, object, (.=))
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Char8 qualified as ByteString8
 import Data.ByteString.Lazy qualified as LazyByteString
 import Data.Char (intToDigit)
-import Data.Foldable qualified as Foldable
-import Data.List (sort)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
@@ -399,7 +397,6 @@ import System.Directory (
     doesDirectoryExist,
     doesPathExist,
     makeAbsolute,
-    listDirectory,
     pathIsSymbolicLink,
     removeFile,
  )
@@ -413,7 +410,6 @@ import System.FilePath (
     normalise,
     splitDirectories,
     takeDirectory,
-    takeExtension,
     takeFileName,
     (</>),
  )
@@ -4121,170 +4117,24 @@ writeAcquiredCandidateEvidence repositoryRoot evidence = do
             , publishedFileIdentityValue = fileIdentity
             }
 
--- | Install the exact already-published candidate bytes into the durable
--- predecessor store. The dispatcher calls this only after the hidden gate
--- verifier has accepted the publication. Content addressing and exact rereads
--- make a raced or replaced receipt refuse.
-installPublishedCandidateEvidenceReceipt :: PublishedCandidateEvidence -> IO FilePath
-installPublishedCandidateEvidenceReceipt published = do
-    let evidence = publishedCandidateEvidence published
-        root = publishedRootValue published
-        digest = acquiredCandidateDigest evidence
-        encoded = acquiredCandidateBytes evidence
-    directory <-
-        ensureDirectoryChain
-            root
-            [ canonicalGeneratedRoot
-            , "evidence-store"
-            , "phase-" <> Text.unpack (formatOrdinal (acquiredCandidatePhase evidence))
-            ]
-    let destination = directory </> Text.unpack digest <> ".json"
-    present <- doesPathExist destination
-    unless present (writeNewCandidateAtomically directory destination encoded)
-    _ <- readExactCandidateDurably directory destination encoded Nothing Nothing
-    pure destination
+-- | Refuse receipt publication until the protected issuer is qualified.
+-- Candidate bytes and content addressing cannot establish issuing authority.
+installPublishedCandidateEvidenceReceipt ::
+    PublishedCandidateEvidence -> IO (Either [Finding] FilePath)
+installPublishedCandidateEvidenceReceipt _ =
+    pure (Left (NonEmpty.toList certificationAdmissionRefusal))
 
--- | Re-acquire one deterministic member of the durable verified-receipt
--- equivalence class for the immediate predecessor.
--- The returned constructor is hidden, so downstream candidate construction
--- cannot substitute a caller-authored digest. Every file in the selected
--- predecessor directory is fail-closed: malformed or detached content makes
--- acquisition refuse rather than being ignored. A verified predecessor pass
--- is monotonic across later source snapshots: the current gate owns current-
--- source compatibility and may project that pass onto its opening snapshot.
+-- | Refuse predecessor admission before inspecting candidate-owned files.
+-- The retired matching-copy reader did not authenticate an issuer, generation,
+-- accepted baseline, or current dependency compatibility and is removed.
 acquireImmediatePredecessorEvidence ::
-    FilePath ->
-    Int ->
-    Text ->
-    IO (Either [Finding] PredecessorEvidence)
-acquireImmediatePredecessorEvidence root phase _opening
-    | phase <= policyDomainLower =
-        pure (Left [receiptFinding "EVIDENCE-PREDECESSOR-PHASE" "a numbered predecessor exists only above Phase 00"])
-    | otherwise = do
-        absoluteRoot <- makeAbsolute root >>= canonicalizePath
-        let predecessorPhase = phase - 1
-            directory =
-                absoluteRoot
-                    </> canonicalGeneratedRoot
-                    </> "evidence-store"
-                    </> ("phase-" <> Text.unpack (formatOrdinal predecessorPhase))
-        present <- doesDirectoryExist directory
-        if not present
-            then pure (Left [receiptFinding "EVIDENCE-PREDECESSOR-MISSING" "the durable predecessor receipt directory is absent"])
-            else do
-                leaves <- listDirectory directory
-                acquired <- traverse (acquireReceiptFile absoluteRoot predecessorPhase directory) (sort leaves)
-                let problems = concat [items | Left items <- acquired]
-                    matches = [digest | Right (Just digest) <- acquired]
-                pure $ case (problems, matches) of
-                    (items@(_ : _), _) -> Left items
-                    ([], []) -> Left [receiptFinding "EVIDENCE-PREDECESSOR-MISSING" "the immediate predecessor directory contains no verified receipt"]
-                    ([], digests) -> Right (ImmediatePredecessor predecessorPhase (minimum digests))
+    FilePath -> Int -> Text -> IO (Either [Finding] PredecessorEvidence)
+acquireImmediatePredecessorEvidence _ _ _ =
+    pure (Left (NonEmpty.toList certificationAdmissionRefusal))
 
-acquireReceiptFile ::
-    FilePath ->
-    Int ->
-    FilePath ->
-    FilePath ->
-    IO (Either [Finding] (Maybe Text))
-acquireReceiptFile root predecessorPhase directory leaf
-    | takeExtension leaf /= ".json" =
-        pure (Left [receiptFinding "EVIDENCE-PREDECESSOR-ENTRY" "the receipt directory contains a non-JSON entry"])
-    | otherwise = do
-        let path = directory </> leaf
-            claimedDigest = Text.pack (takeFileNameWithoutJson leaf)
-        bytesResult <- try (ByteString.readFile path) :: IO (Either IOException ByteString)
-        case bytesResult of
-            Left problem -> pure (Left [receiptFinding "EVIDENCE-PREDECESSOR-READ" (Text.pack (show problem))])
-            Right bytes -> do
-                let actualDigest = hex (SHA256.hash bytes)
-                    decoded = decodeStrict' bytes :: Maybe Value
-                    candidatePath =
-                        root
-                            </> canonicalGeneratedRoot
-                            </> "runs"
-                            </> ("phase-" <> Text.unpack (formatOrdinal predecessorPhase))
-                            </> "candidates"
-                            </> leaf
-                candidateBytesResult <- try (ByteString.readFile candidatePath) :: IO (Either IOException ByteString)
-                pure $ case (actualDigest == claimedDigest, decoded, candidateBytesResult) of
-                    (False, _, _) -> Left [receiptFinding "EVIDENCE-PREDECESSOR-CONTENT-ADDRESS" "the receipt filename does not match its exact bytes"]
-                    (_, Nothing, _) -> Left [receiptFinding "EVIDENCE-PREDECESSOR-SCHEMA" "the receipt is not valid JSON"]
-                    (_, _, Left _) -> Left [receiptFinding "EVIDENCE-PREDECESSOR-CANDIDATE" "the receipt has no matching original candidate publication"]
-                    (_, _, Right candidateBytes)
-                        | candidateBytes /= bytes -> Left [receiptFinding "EVIDENCE-PREDECESSOR-CANDIDATE" "the receipt bytes differ from the original candidate publication"]
-                    (_, Just value, Right _) ->
-                        case receiptValueProblems predecessorPhase value of
-                            problems@(_ : _) -> Left problems
-                            [] -> Right (Just actualDigest)
-
-receiptValueProblems :: Int -> Value -> [Finding]
-receiptValueProblems phase value =
-    [receiptFinding "EVIDENCE-PREDECESSOR-SCHEMA" detail | detail <- schemaProblems]
-  where
-    rows = jsonArrayField "rows" value
-    residue = jsonArrayField "residue" value
-    digestFields =
-        [ "contractDigest"
-        , "subjectDigest"
-        , "oracleDigest"
-        , "harnessDigest"
-        , "observerDigest"
-        , "qualificationDigest"
-        , "projectionDigest"
-        , "projectionPostimageDigest"
-        , "toolchainIdentity"
-        , "runIdentity"
-        ]
-    schemaProblems =
-        ["schema is not amoebius-validation-candidate-v3" | jsonTextField "schema" value /= Just "amoebius-validation-candidate-v3"]
-            <> ["phase does not match the receipt directory" | jsonTextField "phase" value /= Just (formatOrdinal phase)]
-            <> ["candidate gateResult is not green" | jsonTextField "gateResult" value /= Just "candidate-green; sealed gate verification required"]
-            <> ["opening and closing source digests are absent or unequal" | not (sameSource value)]
-            <> ["one or more required identity digests are malformed" | any (maybe True (not . sha256Text) . (`jsonTextField` value)) digestFields]
-            <> ["receipt residue is absent or nonempty" | residue /= Just []]
-            <> ["gate rows are not the exact ordered green inventory" | maybe True (not . validStoredRows) rows]
-
-sameSource :: Value -> Bool
-sameSource value =
-    case (jsonTextField "sourceOpeningDigest" value, jsonTextField "sourceClosingDigest" value) of
-        (Just opening, Just closing) -> sha256Text opening && opening == closing
-        _ -> False
-
-validStoredRows :: [Value] -> Bool
-validStoredRows rows =
-    length rows == length allGateRows
-        && zipWith validRow allGateRows rows == replicate (length allGateRows) True
-  where
-    validRow expected row =
-        jsonTextField "name" row == Just (renderGateRow expected)
-            && jsonTextField "outcome" row == Just "green"
-            && maybe False (not . null) (jsonArrayField "observations" row)
-
-jsonTextField :: Text -> Value -> Maybe Text
-jsonTextField key (Object objectValue) =
-    case AesonKeyMap.lookup (AesonKey.fromText key) objectValue of
-        Just (String value) -> Just value
-        _ -> Nothing
-jsonTextField _ _ = Nothing
-
-jsonArrayField :: Text -> Value -> Maybe [Value]
-jsonArrayField key (Object objectValue) =
-    case AesonKeyMap.lookup (AesonKey.fromText key) objectValue of
-        Just (Array values) -> Just (Foldable.toList values)
-        _ -> Nothing
-jsonArrayField _ _ = Nothing
-
-takeFileNameWithoutJson :: FilePath -> FilePath
-takeFileNameWithoutJson leaf = reverse (drop 5 (reverse leaf))
-
-receiptFinding :: Text -> Text -> Finding
-receiptFinding code = finding code "<predecessor-receipt>"
-
-{- | Re-acquire the publication boundary before gate verification.  The
-receipt constructor is hidden, but verification still checks its absolute,
-canonical, content-addressed path and exact regular-file bytes instead of
-trusting the in-memory value returned by the writer.
+{- | Re-acquire candidate publication bytes for consistency diagnostics.
+This checks the absolute canonical content-addressed path and exact regular-file
+bytes; it does not authenticate an issuer or authorize a gate pass.
 -}
 recheckPublishedCandidateEvidence ::
     PublishedCandidateEvidence ->

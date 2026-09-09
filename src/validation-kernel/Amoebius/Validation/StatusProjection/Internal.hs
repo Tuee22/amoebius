@@ -15,6 +15,7 @@ module Amoebius.Validation.StatusProjection.Internal (
     JournalCutpoint (..),
     StatusTarget (..),
     authorizeStatusProjection,
+    statusProjectionBindingFindings,
     prepareValidationProjection,
     prepareStatusProjection,
     projectionDigest,
@@ -40,6 +41,8 @@ module Amoebius.Validation.StatusProjection.Internal (
     statusProjectionInternalTestWritePlan,
 ) where
 
+import Amoebius.Validation.CertificationReset.Internal (certificationAdmissionRefusal)
+import Data.List.NonEmpty qualified as NonEmpty
 import Amoebius.Validation.GatePass.Internal (
     VerifiedGatePass,
     recheckVerifiedGatePassPublication,
@@ -489,15 +492,13 @@ authorizeStatusProjection ::
     VerifiedGatePass ->
     ProposedStatusProjection ->
     Either [Finding] AuthorizedStatusProjection
-authorizeStatusProjection verified projection =
-    case authorizationProblems of
-        [] ->
-            Right
-                AuthorizedStatusProjection
-                    { authorizedProjectionValue = projection
-                    , authorizedPassValue = verified
-                    }
-        problems -> Left problems
+-- No local field match can authorize a status transition under the reset.
+authorizeStatusProjection _ _ = Left (NonEmpty.toList certificationAdmissionRefusal)
+
+-- | Diagnostic field correspondence only; this cannot authorize a write.
+statusProjectionBindingFindings ::
+    VerifiedGatePass -> ProposedStatusProjection -> [Finding]
+statusProjectionBindingFindings verified projection = authorizationProblems
   where
     authorizationProblems =
         [ projectionFinding

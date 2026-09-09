@@ -31,7 +31,11 @@ import Amoebius.Validation.Evidence.Internal (
     recheckPublishedCandidateEvidence,
     writeAcquiredCandidateEvidence,
  )
-import Amoebius.Validation.GatePass.Internal (verifyPublishedGatePass)
+import Amoebius.Validation.GatePass.Internal
+  ( candidateBindingFindings
+  , recheckVerifiedGatePassPublication
+  , verifyPublishedGatePass
+  )
 import Amoebius.Validation.Legacy.Internal
   ( LegacyId (LtdBoot001)
   , LegacyObservedState (..)
@@ -60,7 +64,7 @@ import Amoebius.Validation.Types (
 import Control.Monad (unless)
 import Data.ByteString qualified as ByteString
 import Data.Text qualified as Text
-import System.Directory (renameFile)
+import System.Directory (removeFile, renameFile)
 import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 
@@ -98,6 +102,7 @@ runWithGenesisTrust trust mismatchedCompilerTrust =
         exactBytes <- ByteString.readFile (publishedCandidatePath firstPublication)
         ByteString.writeFile (publishedCandidatePath firstPublication) "tampered"
         tamperedReadback <- recheckPublishedCandidateEvidence firstPublication
+        tamperedVerification <- verifyPublishedGatePass firstPublication
         ByteString.writeFile (publishedCandidatePath firstPublication) exactBytes
         restoredReadback <- recheckPublishedCandidateEvidence firstPublication
         let replacementPath = publishedCandidatePath firstPublication <> ".replacement"
@@ -206,6 +211,14 @@ runWithGenesisTrust trust mismatchedCompilerTrust =
                     ["validate", "phase", "00"]
         finalizedPublication <- writeAcquiredCandidateEvidence root finalizedEvidence
         finalizedVerification <- verifyPublishedGatePass finalizedPublication
+        removeFile (publishedCandidatePath firstPublication)
+        missingPublicationVerification <- verifyPublishedGatePass firstPublication
+        -- There is no qualified issuer and therefore no constructible verified
+        -- pass. Reset refusal must precede even inspection of alleged authority;
+        -- evaluating this argument is an ordinary failing test, never success.
+        resetRecheck <-
+            recheckVerifiedGatePassPublication
+                (error "reset publication recheck inspected alleged verified authority")
         finishDiagnostics
             "EvidenceGatePassInternalOracle"
             ( expectEqual
@@ -220,10 +233,22 @@ runWithGenesisTrust trust mismatchedCompilerTrust =
                     "the published file contains the exact canonical candidate bytes"
                     (acquiredCandidateBytes evidence)
                     exactBytes
-                <> expectFindingCode
-                    "a published but deliberately incomplete dispatcher candidate cannot mint a pass"
+                <> expectBindingFindingCode
+                    "the incomplete dispatcher candidate retains its diagnostic row refusal"
                     "GATE-PASS-ROW-NOT-GREEN"
+                    evidence
+                <> expectResetRefusal
+                    "a published incomplete candidate cannot bypass reset admission"
                     verification
+                <> expectResetRefusal
+                    "a tampered publication cannot change the unconditional reset refusal"
+                    tamperedVerification
+                <> expectResetRefusal
+                    "an absent publication refuses reset admission before publication acquisition"
+                    missingPublicationVerification
+                <> expectResetRefusal
+                    "alleged verified authority refuses before it is inspected"
+                    resetRecheck
                 <> expectFindingCode
                     "verification re-acquisition rejects publication bytes changed after the receipt"
                     "GATE-PASS-PUBLICATION"
@@ -236,13 +261,16 @@ runWithGenesisTrust trust mismatchedCompilerTrust =
                     "an exact-byte replacement inode cannot impersonate the durably published object"
                     "GATE-PASS-PUBLICATION"
                     replacementReadback
-                <> expectFindingCode
-                    "a wrapper that omitted the public validate argv cannot impersonate the exact command"
+                <> expectBindingFindingCode
+                    "the local binding diagnostic rejects a wrapper's incomplete command row"
                     "GATE-PASS-ROW-NOT-GREEN"
-                    wrongArgvVerification
-                <> expectFindingCode
-                    "the verifier independently rejects the wrapper's observed argv"
+                    wrongArgvEvidence
+                <> expectBindingFindingCode
+                    "the local binding diagnostic independently rejects the wrapper's observed argv"
                     "GATE-PASS-COMMAND"
+                    wrongArgvEvidence
+                <> expectResetRefusal
+                    "a wrong-argv publication cannot bypass reset admission"
                     wrongArgvVerification
                 <> expectRowPassed
                     "a tab-framed raw Subject value remains one well-formed observation record"
@@ -392,9 +420,12 @@ runWithGenesisTrust trust mismatchedCompilerTrust =
                         ]
                     )
                     forcedDueLegacyCheck
-                <> expectFindingCode
-                    "a finalized current candidate with open prerequisites still cannot mint a pass"
+                <> expectBindingFindingCode
+                    "a finalized candidate retains the local diagnostic refusal for open prerequisites"
                     "GATE-PASS-ROW-NOT-GREEN"
+                    finalizedEvidence
+                <> expectResetRefusal
+                    "finalizing a candidate cannot mint authority in the reset generation"
                     finalizedVerification
             )
   where
@@ -447,6 +478,29 @@ expectedBootstrapPremiseDetail :: Text.Text
 expectedBootstrapPremiseDetail =
     "gate-completion prerequisites are not all execution-derived green: "
         <> Text.intercalate "," bootstrapPremiseFragments
+
+-- These independently literal expectations concern the current refusal-only
+-- authority surface. Local candidate checks above are diagnostics, never an
+-- alternative route to a verified pass or seed-custody qualification.
+expectedResetFindings :: [Finding]
+expectedResetFindings =
+    [ Finding
+        "CERTIFICATION-ISSUER-UNQUALIFIED"
+        "<certification-issuer>"
+        "The current certification generation has no qualified protected issuer; accepted-baseline admission and authenticated receipt custody are not implemented. Legacy candidates and receipts cannot authorize validation, status changes, or live effects."
+    ]
+
+expectResetRefusal :: String -> Either [Finding] value -> [String]
+expectResetRefusal label result = case result of
+    Left findings -> expectEqual label expectedResetFindings findings
+    Right _ -> [label <> ": unexpectedly supplied reset-generation authority"]
+
+expectBindingFindingCode :: String -> Text.Text -> AcquiredCandidateEvidence -> [String]
+expectBindingFindingCode label code evidence =
+    let findings = candidateBindingFindings evidence
+     in if any ((== code) . findingCode) findings
+            then []
+            else [label <> ": expected " <> Text.unpack code <> ", observed " <> show findings]
 
 expectFindingCode :: String -> Text.Text -> Either [Finding] value -> [String]
 expectFindingCode label code result = case result of

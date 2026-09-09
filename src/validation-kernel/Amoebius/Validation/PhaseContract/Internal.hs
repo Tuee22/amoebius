@@ -2013,13 +2013,18 @@ isBareCurrentStatusClaim line =
     ]
 
 currentStatusMarkers :: [Text]
-currentStatusMarkers = ["✅", "🔄", "📋", "⏸️", "🧪"]
+currentStatusMarkers = ["✅", "🔄", "⏸️"]
+
+-- Retired markers remain recognizable as competing status claims, but cannot
+-- become admissible sprint-heading markers through that broader detector.
+statusClaimMarkers :: [Text]
+statusClaimMarkers = currentStatusMarkers <> ["📋", "🧪"]
 
 stripStatusIcon :: Text -> Text
 stripStatusIcon value =
   case
       [ Text.stripStart rest
-      | icon <- currentStatusMarkers <> ["❌", "🟢", "🔴"]
+      | icon <- statusClaimMarkers <> ["❌", "🟢", "🔴"]
       , Just rest <- [Text.stripPrefix icon value]
       ] of
     stripped : _ -> stripped

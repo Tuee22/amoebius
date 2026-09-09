@@ -41,7 +41,7 @@ runGatePassOracle = do
       verify = verifyGatePass candidate
       problems =
         concat
-          [ check "a complete qualified passing test is sufficient" (Right ()) (verify passing)
+          [ check "matching supplied fields satisfy the diagnostic shape check only" (Right ()) (verify passing)
           , check "phase binding" (Left GatePassPhaseMismatch) (verify (passing {passPhase = "01"}))
           , check "source binding" (Left GatePassSourceMismatch) (verify (passing {passSourceDigest = digestText '6'}))
           , check "contract binding" (Left GatePassContractMismatch) (verify (passing {passContractDigest = digestText '7'}))

@@ -9,6 +9,7 @@ module Amoebius.Validation.Dispatch.Internal
   , validatePhase
   ) where
 
+import Amoebius.Validation.CertificationReset.Internal (certificationResetDiagnostic)
 import Amoebius.Validation.BootstrapQualification.Internal
   ( acquireQualifiedBootstrapProtocol
   , bootstrapQualificationCheck
@@ -414,7 +415,6 @@ import Amoebius.Validation.SourceClosure.Internal
   , acquiredSourceSnapshot
   , classifySnapshot
   , loadGitSnapshot
-  , mkGitExecutable
   , renderSnapshotProblem
   , sourceClosureCheck
   )
@@ -1010,16 +1010,13 @@ dispatchUnknownRejected canonical value = value `notElem` canonical
 dispatchOrdinalSubject :: Int -> FilePath
 dispatchOrdinalSubject ordinal = "<component-" <> show ordinal <> ">"
 
--- | Run the public validation argv against an exact local source capture.
+-- | Parse public validation argv and refuse before repository acquisition.
+-- The unqualified replacement issuer cannot authorize any integrated runner.
 runValidateCommand :: [String] -> IO ExitCode
 runValidateCommand arguments =
   case arguments of
     ["phase", ordinal]
-      | Just phase <- parseOrdinal ordinal -> do
-          capture <- acquireRepository
-          case capture of
-            Left detail -> emitResult (captureFailure detail)
-            Right (git, root) -> validatePhase git root phase >>= emitResult
+      | Just _ <- parseOrdinal ordinal -> emitResult certificationResetDiagnostic
     _ ->
       emitResult
         CheckResult
@@ -1036,7 +1033,7 @@ runValidateCommand arguments =
 -- | Git and the repository root are explicit so a test or caller cannot
 -- silently substitute PATH lookup or the current working directory.
 validatePhase :: FilePath -> FilePath -> Int -> IO CheckResult
-validatePhase gitPath root phase
+validatePhase _ _ phase
   | phase < policyDomainLower || phase > policyDomainUpper =
       pure
         CheckResult
@@ -1049,10 +1046,11 @@ validatePhase gitPath root phase
                   ("the phase ordinal must be in the closed repository range " <> policyDomainLabel)
               ]
           }
-  | otherwise =
-      case mkGitExecutable gitPath of
-        Left problem -> pure (snapshotFailure [problem])
-        Right git -> validatePhaseLocked git root phase
+  | otherwise = pure certificationResetDiagnostic
+
+-- The legacy integrated runners below cannot be entered by public validation
+-- during the reset. Reconnecting them requires protected baseline admission,
+-- authenticated issuance, and the complete seed-custody qualification.
 
 validatePhaseLocked :: GitExecutable -> FilePath -> Int -> IO CheckResult
 validatePhaseLocked git root phase = do
@@ -2591,17 +2589,11 @@ finishGateLifecycle git root phase opening finalizedRun closing projectionResult
                     then pure emitted
                     else do
                       receiptResult <-
-                        try (installPublishedCandidateEvidenceReceipt published) :: IO (Either IOException FilePath)
+                        installPublishedCandidateEvidenceReceipt published
                       pure $ case receiptResult of
-                        Left problem ->
+                        Left problems ->
                           emitted
-                            { checkFindings =
-                                checkFindings emitted
-                                  <> [ finding
-                                         "EVIDENCE-RECEIPT-WRITE"
-                                         "<predecessor-receipt>"
-                                         (Text.pack (show problem))
-                                     ]
+                            { checkFindings = checkFindings emitted <> problems
                             }
                         Right receiptPath ->
                           emitted

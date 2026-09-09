@@ -1670,7 +1670,7 @@ phaseMetadata =
   , metadata "ui_server_boundary" "Haskell UI-server boundary" NoSubstrate NoLane Register2
   , metadata "ui_local_composition" "Hardware-free Haskell UI composition" NoSubstrate NoLane Register2
   , metadata "encrypted_browser_runtime" "Haskell offline-state semantics and runtime projection" NoSubstrate NoLane Register1
-  , metadata "ui_contract_generation" "Haskell-generated browser contracts and bundle" NoSubstrate NoLane Register1
+  , metadata "ui_contract_generation" "Haskell-generated browser contracts and bundle" NoSubstrate NoLane Register2
   , metadata "tool_and_mutant_generation" "Foreign-source generator closure, checking tools, and mutants" NoSubstrate NoLane Register1
   , metadata "test_workflow_algebra" "The test-workflow algebra" NoSubstrate NoLane Register1
   , metadata "self_referential_gates" "No-hardware DSL gate barrier + self-referential gate suite" NoSubstrate NoLane Register2

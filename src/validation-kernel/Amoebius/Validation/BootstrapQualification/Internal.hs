@@ -1,13 +1,13 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- | Package-hidden execution authority for the finite Phase-0 mutation seed.
+-- | Refused acquisition and retained diagnostics for the Phase-0 mutation seed.
 --
--- The authority is minted only after exact source bytes from an acquired Git
--- snapshot are copied into an ignored run root, one production decision is
--- changed per mutant, all four binaries are compiled serially by the genesis
--- compiler, and the independent driver accepts only the clean binary.  The
--- generated leaf is removed before a successful value is returned.
+-- Production acquisition refuses before inspecting any input while the
+-- protected issuer is unqualified. The old inherited-principal compiler
+-- driver remains private and dormant; no exported acquisition route invokes
+-- it. Pure receipt, transcript, mutation, and conditional fixture diagnostics
+-- remain available without granting custody or issuer authority.
 module Amoebius.Validation.BootstrapQualification.Internal
   ( BootstrapCase (..)
   , QualifiedBootstrapProtocol
@@ -25,6 +25,7 @@ import Amoebius.Validation.BootstrapTrust.Internal
   ( GenesisTrust
   , genesisTrustCompilerExecutable
   )
+import Amoebius.Validation.CertificationReset.Internal (certificationAdmissionRefusal)
 import Amoebius.Validation.SourceClosure.Internal
   ( AcquiredSourceSnapshot
   , IndexEntry (indexPath)
@@ -45,6 +46,7 @@ import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Char8 qualified as ByteString8
 import Data.List (sortOn)
+import Data.List.NonEmpty qualified as NonEmpty
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
@@ -140,7 +142,20 @@ acquireQualifiedBootstrapProtocol
   -> GenesisTrust
   -> AcquiredSourceSnapshot
   -> IO (Either [Finding] QualifiedBootstrapProtocol)
-acquireQualifiedBootstrapProtocol repositoryRoot trust acquired = do
+acquireQualifiedBootstrapProtocol _ _ _ =
+  pure (Left (NonEmpty.toList certificationAdmissionRefusal))
+
+-- Retained implementation residue for migration to the real protected
+-- launcher. This helper is deliberately unexported and has no caller. Its
+-- inherited-principal process launches must be replaced before it can be
+-- reconnected; neither a reset diagnostic nor a cryptographic match supplies
+-- permission to execute candidate source under an issuer principal.
+legacyAcquireQualifiedBootstrapProtocol
+  :: FilePath
+  -> GenesisTrust
+  -> AcquiredSourceSnapshot
+  -> IO (Either [Finding] QualifiedBootstrapProtocol)
+legacyAcquireQualifiedBootstrapProtocol repositoryRoot trust acquired = do
   let snapshot = acquiredSourceSnapshot acquired
       compilerPath = genesisTrustCompilerExecutable trust
       inputProblems =

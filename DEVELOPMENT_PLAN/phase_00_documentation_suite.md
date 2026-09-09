@@ -319,6 +319,14 @@ cause a documentation correspondence finding but cannot construct a semantic con
 Until this sprint records Done, the Phase-0 typed/prose join and full integrated observation remain required.
 Later semantic contracts are not a Phase-0 completion condition.
 
+**2026-09-08 — Observed footprint.** The structural parser now admits only the three current sprint markers.
+Deprecated markers and status phrases remain recognizable as competing claims. Independent component controls
+cover rejection of both retired heading markers, retired status fields, and additional bare claims. Component
+diagnostics completed through `runPhaseContractOracle` in the `StructuralComponents` direct-source wrapper,
+compiled serially with native GHC `9.12.4`; the wrapper exited successfully. The build log is
+`.build/diagnostics/phase-zero/structural-build.txt`. This is neither authenticated `GenesisTrust` acquisition
+nor integrated gate evidence.
+
 ## Sprint 0.5: Gate-kernel qualification and spoof corpus ⏸️
 
 **Status**: Blocked — NOT VALIDATED
@@ -357,14 +365,23 @@ Until this sprint records Done, its receipt must be consumed by the same integra
 row. Phase 49, not this sprint, owns cumulative mutation completeness and validation of the validator against
 the full hardware-free surface.
 
+**2026-09-08 — Known partial.** `acquireQualifiedBootstrapProtocol` now returns the mandatory certification
+reset refusal before invoking the inherited-principal compiler path. That retained implementation has no
+caller and requires replacement by the protected launcher before reconnection. Component regression of this
+new acquisition guard completed through `CertificationAdmissionInternalOracle`, compiled serially with native
+GHC `9.12.4` and pinned `crypton` `1.0.6`, without fixture hooks. The component exited successfully;
+unevaluated root, trust, and source arguments did not prevent its exact reset refusal. Logs are
+`.build/diagnostics/phase-zero/admission-build.txt` and `.build/diagnostics/phase-zero/admission-component.txt`.
+This is refusal-regression evidence; the clean-plus-three integrated qualification remains required.
+
 ## Sprint 0.6: Candidate evidence and gate-pass result ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/validation-kernel/Amoebius/Validation/Evidence.hs`, `src/validation-kernel/Amoebius/Validation/Evidence/Internal.hs`, `src/validation-kernel/Amoebius/Validation/GatePass.hs`, `src/validation-kernel/Amoebius/Validation/GatePass/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PhaseRunner/Internal.hs`, `src/validation-kernel/Amoebius/Validation/StatusFrontier.hs`, and `src/validation-kernel/Amoebius/Validation/StatusProjection/Internal.hs`
+**Implementation**: `src/validation-kernel/Amoebius/Validation/Evidence.hs`, `src/validation-kernel/Amoebius/Validation/Evidence/Internal.hs`, `src/validation-kernel/Amoebius/Validation/GatePass.hs`, `src/validation-kernel/Amoebius/Validation/GatePass/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PhaseRunner/Internal.hs`, `src/validation-kernel/Amoebius/Validation/StatusFrontier.hs`, `src/validation-kernel/Amoebius/Validation/StatusProjection/Internal.hs`, `src/validation-kernel/Amoebius/Validation/CertificationReset.hs`, `src/validation-kernel/Amoebius/Validation/CertificationReset/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SeedReceipt.hs`, `src/validation-kernel/Amoebius/Validation/SeedReceipt/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SeedCustodyPrerequisites.hs`, and `src/validation-kernel/Amoebius/Validation/SeedCustodyPrerequisites/Internal.hs`
 **Blocked by**: Sprint 0.5
 **Forward-deferred**: universal evidence/gate-pass qualification and `LTD-VAL-003`/`LTD-VAL-004` retirement — Phase 49 `self_referential_gates`
 **Independent Validation**: One dispatcher-acquired, complete, ordered green bundle bound to the current source, contract, GenesisTrust, qualification, executable/argv, and exact frontier is the positive control; a missing, duplicate, reordered, red, stale, forged, or widened input is a paired negative. `digest-equality-bypass` and `snapshot-freshness-bypass` must red stale identity acceptance. Applying the emitted patch is explicitly outside the validator.
-**Oracle**: `test/validation-kernel/EvidenceGatePassInternalOracle.hs`, `test/validation-kernel/PhaseRunnerInternalOracle.hs`, `test/validation-kernel/StatusFrontierOracle.hs`, and `test/validation-kernel/StatusProjectionInternalOracle.hs` are bounded component diagnostics; their results are not integrated candidate oracle receipts. The independent Haskell seed-custody oracle still to implement supplies the integrated seven-case receipt.
+**Oracle**: `test/validation-kernel/EvidenceGatePassInternalOracle.hs`, `test/validation-kernel/PhaseRunnerInternalOracle.hs`, `test/validation-kernel/StatusFrontierOracle.hs`, `test/validation-kernel/StatusProjectionInternalOracle.hs`, `test/validation-kernel/CertificationResetOracle.hs`, `test/validation-kernel/CertificationAdmissionInternalOracle.hs`, `test/validation-kernel/SeedReceiptOracle.hs`, and `test/validation-kernel/SeedCustodyPrerequisitesOracle.hs` are bounded component diagnostics; their results are not integrated candidate oracle receipts. Receipt cryptography and leaf-metadata checks do not implement the independent seven-case seed-custody oracle, which remains required.
 **Legacy IDs**: `LTD-VAL-003`, `LTD-VAL-004` — finite seed references only; Phase 49 owns retirement
 **Docs to update**: `AGENTS.md`, `DEVELOPMENT_PLAN/development_plan_phase_model.md`, and `documents/engineering/testing_spoof_resistance.md`
 
@@ -399,6 +416,42 @@ tracked-tree immutability for the run; it is not a universal prior-run replay-de
 Replace unauthenticated receipt re-reading and blanket empty-residue acceptance before the seed gate runs.
 Exercise direct forgery, old-generation reuse, candidate baseline replacement, and custody denial through the
 accepted seed verifier. Record its remaining assumptions without claiming they were proved by its own token.
+
+**2026-09-08 — Known partial.** An interim mandatory `CertificationReset` refusal now guards inherited
+certification authority. The `ResetComponents` direct-source wrapper compiled serially with native GHC
+`9.12.4` and the required incompleteness errors enabled. It exited successfully after running
+`CertificationResetOracle`, `CertificationAdmissionInternalOracle`, `EvidenceGatePassInternalOracle`, and
+`GatePassOracle`. Build and execution diagnostics are recorded in
+`.build/diagnostics/phase-zero/reset-build.txt` and `.build/diagnostics/phase-zero/reset-components.txt`.
+
+These are component refusal and regression observations, not protected issuer implementation or custody
+qualification. Accepted-generation admission, authenticated receipt issuance, and the independently observed
+seven-case custody corpus remain implementation requirements. A separate build without internal fixture hooks
+also passed `CertificationAdmissionInternalOracle`; its logs are `admission-build.txt` and
+`admission-component.txt` in the same diagnostic directory.
+
+**2026-09-08 — Observed footprint.** `seedReceiptDiagnostic` checks one fixed 251-byte seed control
+acknowledgement. Its Ed25519 profile requires canonical, nonidentity, prime-order public-key and signature
+`R` points, plus a canonical scalar `S < L`. It compares generation, accepted-seed, source, session, and
+transcript identifiers with caller-supplied expectations. A matching signature retains the custody refusal;
+it cannot admit the expected key, establish a fresh session, or authenticate an actually observed OS transcript.
+
+The custody-prerequisite diagnostic checks bounded canonical paths, root-owned ancestors, and fixed seed
+inputs relative to held directory descriptors. It inspects leaf metadata with `fstatat` without opening the
+leaf endpoint. UID-zero supervision and a distinct candidate UID remain unqualified prerequisite conditions;
+the diagnostic does not establish credential separation, inherited-authority cleanup, or any candidate denial.
+
+`SeedComponents` compiled serially with native GHC `9.12.4`, pinned `crypton` `1.0.6` and `memory` `0.18.0`,
+ambient packages hidden, and the required incompleteness errors enabled. It exited successfully after running
+`runSeedReceiptOracle` and `runSeedCustodyPrerequisitesOracle`, including exact FIFO, symlink, and directory
+metadata refusals. Logs are `.build/diagnostics/phase-zero/seed-build.txt` and
+`.build/diagnostics/phase-zero/seed-components.txt`. These component observations do not qualify a protected
+issuer, the seven-case custody corpus, or the Phase-0 gate.
+
+The documentation diagnostic reports only its required `DOC-CORPUS-DIAGNOSTIC-ONLY` finding, with no structural
+findings. `cabal check` still fails because the existing Cabal configuration references a missing `proto`
+source directory; package-distribution metadata warnings also remain. Its report is
+`.build/diagnostics/phase-zero/cabal-check.txt`. Neither these checks nor the native wrappers establish a gate pass.
 
 The positive authority can be obtained only by the integrated Phase-0 run. External patch application occurs
 after validator exit and requires a fresh preimage check, irrespective of the recorded sprint status.
@@ -435,9 +488,12 @@ later contracts structurally, but do not make Phase 0 implement or validate thei
 Until this sprint records Done, the integrated gate must bind its observations to the opening source snapshot.
 Each later owner still has to replace its own semantic gaps before its own gate can pass.
 
-Reconcile compiled phase metadata and independently authored structural expectations with this reset.
-The existing Phase-46 projection still declares Register 1; its required generated-software execution uses
-Register 2. Correcting that metadata cannot certify the later implementation or derive semantics from Markdown.
+**2026-09-08 — Observed footprint.** The compiled Phase-46 projection and its independently authored
+structural expectation now declare Register 2 for generated-software execution. Component verification is
+recorded by `runPhaseSemanticContractOracle` completing in the same successful native direct-source
+`StructuralComponents` wrapper described in Sprint 0.4. This metadata alignment leaves Phase 46's semantic
+repairs and complete gate with its owning phase;
+it cannot certify the later implementation or derive semantics from Markdown.
 
 ## Sprint 0.8: Integrated Phase-0 candidate ⏸️
 
@@ -476,6 +532,21 @@ Any failed row returns refusal and emits no authorized patch.
 Until this sprint records Done, the complete integrated execution and its evidence remain required. Its pass
 finishes only the finite exit contract above; Phase-1, Phase-2, Phase-49, Phase-50, product, and hardware claims
 remain typed exclusions.
+
+**2026-09-08 — Known partial.** The current Darwin development host lacks the admissible `GenesisTrust`
+input set and protected verifier environment required by this contract. The pinned seed assumes Linux
+`x86_64`; native Darwin compilation cannot satisfy that assumption. Preparing the admitted execution
+environment is separate from implementing and qualifying the missing issuer, generation, and custody controls.
+The read-only `CustodyPreflight` diagnostic exited with failure and reported the non-Linux platform,
+non-root supervisor identity, and user-owned `/Users/matthewnowak` authority ancestor, plus its mandatory
+unqualified finding. The report is `.build/diagnostics/phase-zero/custody-preflight.txt`; no ownership or
+permission was changed, and this inspection supplies no candidate-denial receipt.
+The independent admission component checked mandatory refusal across all ninety-six phase ordinals and the
+other authority entry points. The wrapper also ran the existing diagnostic, tamper, and freshness controls.
+Those results check the interim refusal boundary; they supply no protected-issuer receipt or custody qualification.
+New Haskell source and oracle files remain unstaged. `AGENTS.md` reserves staging to the human user;
+those files must enter the tracked source boundary before exact-snapshot gate acquisition.
+No integrated Phase-0 gate attempt or pass is recorded by this progress update.
 
 ## Documentation Requirements
 

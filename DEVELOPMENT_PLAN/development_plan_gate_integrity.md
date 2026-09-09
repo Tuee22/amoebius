@@ -60,8 +60,9 @@ with the next phase in numeric order.
 
 The 2026-09-08 audit reset withdraws all earlier certification. A new Haskell-owned generation must reject
 pre-reset receipts before predecessor acquisition, compatibility reuse, status recording, or hardware authority.
-The existing implementation does not enforce this reset generation. This section specifies required work;
-editing Markdown cannot mint or implement the authority it describes.
+The interim Haskell boundary refuses every admission while the protected issuer is unqualified. It does not
+implement the acceptance authority specified here. The [tracker](README.md#current-implementation-audit)
+records implementation progress; editing Markdown cannot mint that authority.
 
 The accepted baseline contains Haskell requirement identities, acceptance predicates, oracle provenance,
 dependency and build closures, verifier identity, and qualification obligations. Candidate code and proposed

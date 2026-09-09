@@ -441,7 +441,7 @@ oraclePhases =
     , phase 43 "ui_server_boundary" "Haskell UI-server boundary" "none" "none" "2"
     , phase 44 "ui_local_composition" "Hardware-free Haskell UI composition" "none" "none" "2"
     , phase 45 "encrypted_browser_runtime" "Haskell offline-state semantics and runtime projection" "none" "none" "1"
-    , phase 46 "ui_contract_generation" "Haskell-generated browser contracts and bundle" "none" "none" "1"
+    , phase 46 "ui_contract_generation" "Haskell-generated browser contracts and bundle" "none" "none" "2"
     , phase 47 "tool_and_mutant_generation" "Foreign-source generator closure, checking tools, and mutants" "none" "none" "1"
     , phase 48 "test_workflow_algebra" "The test-workflow algebra" "none" "none" "1"
     , phase 49 "self_referential_gates" "No-hardware DSL gate barrier + self-referential gate suite" "none" "none" "2"
