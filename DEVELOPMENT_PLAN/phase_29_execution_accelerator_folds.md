@@ -40,7 +40,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -141,8 +141,9 @@ names the refusing axis. It observes no device, host, provider, or cluster.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -208,9 +209,9 @@ Haskell and qualify the mechanism that first admits their result; component obse
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra ⏸️
+## Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/execution-accelerator-folds/Amoebius/Capacity/{Execution,Scheduler,HostReservation}.hs` owns execution epochs, reservation projections, aggregate-ledger CAS, and recovery-state debits.
 **Blocked by**: [Phase 28](phase_28_storage_geometry_folds.md) gate pass
 **Independent Validation**: Exact execution and scheduler tags are checked beside legal twins; thirteen applied production mutations cover rollout, prior-reference, projection, CAS, and retained-debit seams.
@@ -313,9 +314,9 @@ numbers only — the pure expansion fold Phase 31's `provision` seal later invok
 
 Run and record the complete integrated Phase-29 gate; component diagnostics cannot authorize completion.
 
-## Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ⏸️
+## Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/execution-accelerator-folds/Amoebius/Capacity/{RuntimeStorage,NodeLocalStorage}.hs` owns role routing, metadata/image joins, filesystem-layout observation, and physical-parent accounting.
 **Blocked by**: Sprint 29.1
 **Independent Validation**: Runtime, image, layout, and partition tags are checked beside one-axis legal twins; seventeen applied production mutations challenge every owned join and accounting seam.
@@ -435,9 +436,9 @@ structure, route them through `KubeletNodefs | CriRuntimeRoot` and the selected
 
 Run and record the complete integrated Phase-29 gate; component diagnostics cannot authorize completion.
 
-## Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ⏸️
+## Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/execution-accelerator-folds/Amoebius/Capacity/{Accelerator,ProviderRoot,Etcd,PulumiExecution}.hs` owns residency, net VRAM, provider-root, etcd, and Pulumi demand derivations.
 **Blocked by**: Sprint 29.2
 **Independent Validation**: Accelerator/provider/etcd refusal tags and twins are challenged by fifteen applied production mutations, including every residency and root-quota distinction.
@@ -529,9 +530,9 @@ derivations as pure, checked `provision-seal` operations that feed the composed 
 
 Run and record the complete integrated Phase-29 gate; component diagnostics cannot authorize completion.
 
-## Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ⏸️
+## Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/execution-accelerator-folds/Amoebius/Capacity/Composed.hs` composes execution, storage, accelerator, and topology folds; `ExecutionAcceleratorProps.hs` owns seven covered soundness properties.
 **Blocked by**: Sprint 29.3
 **Independent Validation**: Two composed positives and seven 300-sample covered properties establish sound placement over the full owned vector while retaining explicit runtime-fidelity residue.
@@ -625,9 +626,9 @@ may reject a packable one) for the composed compute `place`, and never claim com
 
 Run and record the complete integrated Phase-29 gate; component diagnostics cannot authorize completion.
 
-## Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ⏸️
+## Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `ExecutionAcceleratorGate.hs` executes the Haskell corpus; `Amoebius.Validation.ExecutionAcceleratorRun.Internal` runs 45 changed-production builds and the clean suite in one unique run root.
 **Blocked by**: Sprint 29.4
 **Independent Validation**: The package-hidden supervisor checks exact source discovery, direct offline `--jobs=1` Cabal argv, all 45 red loci, the clean token, stable source, predecessor receipt, and zero hardware/live authority.

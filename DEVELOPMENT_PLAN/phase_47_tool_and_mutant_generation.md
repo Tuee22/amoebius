@@ -29,7 +29,7 @@ This plan owns the hardware-free Haskell support-material generation and tracked
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -56,8 +56,9 @@ families.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -87,9 +88,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 
 ## Sprints
 
-## Sprint 47.1: Generated repository support material ⏸️
+## Sprint 47.1: Generated repository support material ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/tool-and-mutant-generation/Amoebius/Generate/CheckingCorpus.hs` and the package-hidden acquired Phase-47 supervisor.
 **Blocked by**: [Phase 46](phase_46_ui_contract_generation.md) gate pass
 **Independent Validation**: exact two-way comparison of nine declarations and generated files; three minimally different build-root/refusal pairs; three applied production mutants at distinct loci; zero tracked tools, Pulumi, and non-Haskell test source; and zero authored-tree residue.

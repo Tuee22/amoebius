@@ -33,7 +33,7 @@ after the exact integrated gate succeeds for the current source. Current status 
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -70,8 +70,9 @@ negatives, and mutants. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -103,9 +104,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 22.1: The compositional laws C1-C7 ⏸️
+## Sprint 22.1: The compositional laws C1-C7 ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/extension-laws-compositional/Amoebius/Extension/Laws/Compositional.hs`; package-hidden `Amoebius.Validation.ExtensionCompositionRun.Internal`.
 **Blocked by**: [Phase 21](phase_21_extension_laws_per_extension.md) gate pass
 **Independent Validation**: Seven composition cases, 63 exact verdict cells, fourteen identity and seven association checks, seven resource sums, four independent hashes, a request-scope compile pair, and seven changed-production mutants.

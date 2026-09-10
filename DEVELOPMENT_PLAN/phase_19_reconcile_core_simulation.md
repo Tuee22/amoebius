@@ -36,7 +36,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -73,8 +73,9 @@ three-valued-observation behavior under deterministic modeled schedules. NOT VAL
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -109,9 +110,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 19.1: Pure typed decision core ⏸️
+## Sprint 19.1: Pure typed decision core ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/reconcile-core/Amoebius/Reconcile/Core.hs`; typed observations and actions, total planner, fixed points, and production mutation loci.
 **Blocked by**: [Phase 18](phase_18_dsl_formal_model.md) gate pass
 **Independent Validation**: Nine exact actual/reference rows, two fixed points, and the present/unreachable compile pair.
@@ -142,9 +143,9 @@ the observation type rather than a runtime flag.
 Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
 qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 19.2: Four deterministic reconcile schedules ⏸️
+## Sprint 19.2: Four deterministic reconcile schedules ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/reconcile-core/Amoebius/Reconcile/Sim.hs`; four schedule values, versioned snapshot tokens, and bounded deterministic execution.
 **Blocked by**: Sprint 19.1
 **Independent Validation**: Exact final inventories and transition counts, two fresh same-seed readings, changed-seed order, and four bounded POR runs.
@@ -175,9 +176,9 @@ convergent semantic evidence without committing trace bytes.
 Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
 qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 19.3: Protocol correspondence and sealed gate ⏸️
+## Sprint 19.3: Protocol correspondence and sealed gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/reconcile-core/Amoebius/Reconcile/Sim.hs`; `src/execution-accelerator-folds/Amoebius/Capacity/Scheduler.hs`; package-hidden `Amoebius.Validation.ReconcileCoreRun.Internal`.
 **Blocked by**: Sprint 19.2
 **Independent Validation**: Concurrent token and reservation controls, three recovery cuts, four exact formal links, five production mutations, source discovery, containment, and acquired evidence.

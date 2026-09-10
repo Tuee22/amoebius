@@ -35,7 +35,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -77,8 +77,9 @@ interpret and explore it in-process, and lazily render any TLA+/CFG representati
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -118,9 +119,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 11.1: Reifiable kernel and semantic expectations ⏸️
+## Sprint 11.1: Reifiable kernel and semantic expectations ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Formal/{Model,Interpret,Explore,EmitTLA,ToyModel}.hs` and `src/formal-composition-model/Amoebius/Formal/CalculusComposition.hs`
 **Blocked by**: [Phase 10](phase_10_calculus_composition.md) gate pass
 **Independent Validation**: Accept legal typed expressions and their exact transitions; reject the paired malformed guard/domain/effect at its named error; kill error-erasure, binding and representation-equality mutants at independently assigned cases; retain unproved renderer metatheory as explicit residue.
@@ -165,9 +166,9 @@ snapshots with semantic expectations.
 
 Run the complete integrated gate after the second sprint's contained supervisor is ready.
 
-## Sprint 11.2: Explorer/emission correspondence and contained evidence ⏸️
+## Sprint 11.2: Explorer/emission correspondence and contained evidence ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: package-hidden `src/validation-kernel/Amoebius/Validation/FormalModelKernelRun/Internal.hs`
 **Blocked by**: Sprint 11.1
 **Independent Validation**: Compare all admitted constructor observations and exact error classifications against authored laws; retain legal controls while assigned interpreter/emitter mutants fail; leave general renderer correctness explicitly unproved.

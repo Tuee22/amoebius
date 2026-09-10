@@ -34,7 +34,7 @@ owned by the exact integrated gate and the mechanical status projection that fol
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -101,8 +101,9 @@ offering has no deployable value. No device is queried and no runtime behavior i
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -174,9 +175,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 
 ## Sprints
 
-## Sprint 32.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ⏸️
+## Sprint 32.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/provision-seal/Amoebius/Capability/Engine.hs` owns the closed lane/family relations, target offering quotient, and provision-seal accelerator checks.
 **Blocked by**: [Phase 31](phase_31_provision_seal.md) gate pass
 **Independent Validation**: three inference fixtures, four offering quotients, twelve family/lane cells, eight paired provision negatives, and the closed no-URL union execute in `capability-spec`.
@@ -245,9 +246,9 @@ resolve.
 
 The complete integrated Phase-32 gate and its mechanical status projection remain.
 
-## Sprint 32.2: The accelerator-provision corpus + the Register-1 gate ⏸️
+## Sprint 32.2: The accelerator-provision corpus + the Register-1 gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `EngineAcceleratorGate.hs`, `EngineAcceleratorProps.hs`, and `EngineAcceleratorSpec.hs` own the Haskell corpus/property harness; the Phase-32 acquired runner owns the serial clean/mutant matrix.
 **Blocked by**: Sprint 32.1
 **Independent Validation**: the exact 17-row locus ledger, five-calculus/34-unit projection, sampled eight-branch property, and five production CPP mutations are acquired serially in fresh build roots.

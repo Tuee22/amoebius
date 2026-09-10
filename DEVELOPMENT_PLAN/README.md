@@ -120,10 +120,10 @@ The August 22 reset and subsequent recorded completions are historical. Commits 
 `66690f7`, and `d880196` recorded advancement through phases 0, 46, 49, and 52 respectively.
 Those status changes do not establish eligibility under the replacement contract.
 
-The Haskell reset boundary identifies `amoebius-certification-generation-1` and refuses admission because its
-protected issuer is not qualified. Protected baseline admission, authenticated receipt eligibility, and
-dependency-impact rules remain to implement and qualify. This date is a reader reference, not the identity.
-Old JSON or a prior Done marker cannot clear the mandatory refusal.
+The Haskell boundary identifies `amoebius-certification-generation-1`. Its protected path admits only the
+root-owned accepted verifier after the finite seven-case custody corpus, and issues signed phase receipts bound
+to the accepted baseline and current compatibility closure. Unprotected diagnostic paths remain refusal-only.
+This date is a reader reference, not the identity; old JSON or a prior Done marker cannot clear admission.
 
 The reset retains target capabilities and source paths. An obligation may be refined or transferred only
 under the [scope-preservation procedure](development_plan_phase_model.md#n-reopening-and-amending-a-phase).
@@ -137,7 +137,7 @@ evidence, authenticated toolchain acquisition, or complete corpus coverage.
 
 | Owner | Observed footprint or known partial boundary | Required repair |
 |---|---|---|
-| [Phase 0](phase_00_documentation_suite.md) | A mandatory Haskell refusal closes legacy admission, receipt publication, and status authority. The matching-copy receipt reader is removed. | Implement and qualify the protected issuer, accepted seed, and seven-case custody corpus; retain the explicit GenesisTrust assumptions. |
+| [Phase 0](phase_00_documentation_suite.md) | The generation-1 UID-zero supervisor protects the accepted seed and issuer, executes the seven-case custody corpus, verifies schema-v4 candidates, and stores canonical signed phase receipts. Unprotected entry points remain refusal-only. | Run the exact final-source Phase-0 gate and apply only its emitted status projection; retain the explicit GenesisTrust assumptions. |
 | [Phases 1–2](phase_01_toolchain_spike.md) | Toolchain and source-graph machinery exists; this checkout lacks transferred authenticated inputs and gate receipts. | Reacquire authentic inputs and qualify source/dependency closure without treating file presence as evidence. |
 | [Phases 11–14](phase_11_formal_model_kernel.md) | Malformed guards can disappear; sets and name binding disagree; a commented function can receive a refinement proof. | Reject malformed semantics and establish interpreter, solver, and compiled-source correspondence. |
 | [Phases 18–34](phase_18_dsl_formal_model.md) | Capacity differentials and TLC machinery exist; several later projections represent fixture counts. | Preserve bounded results and establish correspondence of actual decoded, provisioned, rendered, and planned values. |
@@ -147,17 +147,15 @@ evidence, authenticated toolchain acquisition, or complete corpus coverage.
 | [Phase 53](phase_53_apple_engine_bringup.md) | Apple oracle changes distinguish assigned failure sets; native acquisition and predecessor custody remain open. | Preserve those tests and qualify the complete native path only after the reset frontier reaches it. |
 | [Phases 54–95](phase_54_windows_engine_bringup.md) | Retained plans and source are implementation inventory. | Implement and validate each preserved capability in numerical order. |
 
-**Phase-0 repair progress — Known partial.** Structural status parsing now admits only the three canonical
-lifecycle markers, with independent retired-marker negatives. Phase 46's structural Register metadata now
-matches its Register 2 plan. Their native direct-source component checks succeeded; no phase gate passed.
-Independent reset and admission regressions also succeeded, including a build without fixture hooks.
-Further Phase-0 components check strict signed seed acknowledgements and descriptor-relative authority-file
-metadata. Their independent native regressions passed; every result retains an explicit custody limitation.
-Direct bootstrap qualification also refuses before inherited-principal compilation. The protected launcher,
-issuer, and integrated seven-case custody corpus remain open in the [Phase-0 record](phase_00_documentation_suite.md#sprint-06-candidate-evidence-and-gate-pass-result-).
-The documentation diagnostic has no structural findings; `cabal check` fails on the existing missing `proto`
-source directory. The current macOS environment lacks Phase 0's pinned Linux GenesisTrust inputs and a
-protected verifier environment. Phase 0 remains Active; later phases remain Blocked.
+**Phase-0 repair progress — Candidate ready.** Structural status parsing admits only the three canonical
+lifecycle markers, and Phase 46's structural Register metadata matches its Register 2 plan. The Linux
+generation-1 supervisor now owns the accepted verifier, baseline, custody oracle provenance, and private issuer
+behind a tested UID-zero boundary. Its schema-v4 candidate and canonical Ed25519 phase receipt bind generation,
+baseline, compatibility closure, source transition, predecessor, and process observations. The independent
+custody component and one end-to-end development gate run passed; subsequent hardening invalidated that run's
+source binding, so no status changed. The exact final-source Phase-0 gate remains required. The documentation
+diagnostic has no structural findings; `cabal check` still reports the pre-existing missing `proto` source
+directory. Phase 0 remains Active; later phases remain Blocked.
 
 The symbolic diagnostic returned `Inductive` for a model whose explicit checker returned an invariant
 counterexample. The refinement diagnostic returned `Proved` while its compiled function returned `-1`
@@ -188,56 +186,56 @@ inherits the universal postcondition above.
 
 | Phase | Name | Substrate | Lane | Register | Status | Validation contract |
 |---|---|---|---|---|---|---|
-| 0 | Documentation, source policy, and validation baseline | none | `none` | — | 🔄 Active — NOT VALIDATED | [Contract](phase_00_documentation_suite.md) |
-| 1 | Haskell toolchain and probe-source closure | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_01_toolchain_spike.md) |
-| 2 | Repository layout conformance and de-phased naming | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_02_repository_layout_conformance.md) |
-| 3 | The artifact calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_03_artifact_calculus.md) |
-| 4 | The budget calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_04_budget_calculus.md) |
-| 5 | The lift calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_05_lift_calculus.md) |
-| 6 | The workflow calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_06_workflow_calculus.md) |
-| 7 | The evidence calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_07_evidence_calculus.md) |
-| 8 | Scoped identity kernel | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_08_scope_index.md) |
-| 9 | Capacity core fold + topology relation | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_09_resource_index.md) |
-| 10 | Composition across the five calculi | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_10_calculus_composition.md) |
-| 11 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_11_formal_model_kernel.md) |
-| 12 | The amoebius explicit-state checker | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_12_explicit_state_checker.md) |
-| 13 | The amoebius symbolic checker | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_13_symbolic_checker.md) |
-| 14 | The amoebius refinement checker | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_14_refinement_checker.md) |
-| 15 | The compile-fail fixture harness | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_15_compile_fail_harness.md) |
-| 16 | Deterministic-simulation substrate | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_16_deterministic_sim_substrate.md) |
-| 17 | Gateway-migration model (both branches) | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_17_gateway_migration_model.md) |
-| 18 | DSL formal model | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_18_dsl_formal_model.md) |
-| 19 | Reconcile decision core under deterministic simulation | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_19_reconcile_core_simulation.md) |
-| 20 | The extension declaration | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_20_extension_declaration.md) |
-| 21 | The per-extension laws L1-L5 | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_21_extension_laws_per_extension.md) |
-| 22 | The compositional laws C1-C7 | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_22_extension_laws_compositional.md) |
-| 23 | The security laws S1-S6 | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_23_extension_security_laws.md) |
-| 24 | The generated conformance gate | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_24_conformance_gate_generator.md) |
-| 25 | Haskell-derived Dhall projection and smart-constructor prelude | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_25_dhall_schema_generation.md) |
-| 26 | Haskell protocol declarations, GADT-indexed IR, and total decoder | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_26_gadt_decode_ir.md) |
-| 27 | Illegal-state corpus + validation-locus ledger | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_27_illegal_state_covering.md) |
-| 28 | Logical→physical storage geometry folds | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_28_storage_geometry_folds.md) |
-| 29 | Execution-epoch + scheduler + accelerator + provider-root folds | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_29_execution_accelerator_folds.md) |
-| 30 | Capability union + representational bind | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_30_capability_bind.md) |
-| 31 | Whole-deployment provision seal + expansion | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_31_provision_seal.md) |
-| 32 | InferenceEngine capability + accelerator provision | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_32_inference_accelerator_provision.md) |
-| 33 | Pure `renderAll` + rendered-artifact oracles | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_33_render_manifest_oracles.md) |
-| 34 | chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_34_chain_kernel_boundary.md) |
-| 35 | The amoebius image recipe | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_35_image_recipe_generation.md) |
-| 36 | The closed transaction vocabulary | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_36_transaction_vocabulary.md) |
-| 37 | Bounded UI-program schema | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_37_ui_program_schema.md) |
-| 38 | UI authorization kernel | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_38_ui_authorization_kernel.md) |
-| 39 | UI effect binding | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_39_ui_effect_binding.md) |
-| 40 | UI plan compiler | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_40_ui_plan_compiler.md) |
-| 41 | Offline language and paired plans | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_41_offline_language_plan.md) |
-| 42 | Haskell browser-interpreter semantics and projection | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_42_ui_browser_interpreter.md) |
-| 43 | Haskell UI-server boundary | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_43_ui_server_boundary.md) |
-| 44 | Hardware-free Haskell UI composition | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_44_ui_local_composition.md) |
-| 45 | Haskell offline-state semantics and runtime projection | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_45_encrypted_browser_runtime.md) |
-| 46 | Haskell-generated browser contracts and bundle | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_46_ui_contract_generation.md) |
-| 47 | Foreign-source generator closure, checking tools, and mutants | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_47_tool_and_mutant_generation.md) |
-| 48 | The test-workflow algebra | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_48_test_workflow_algebra.md) |
-| 49 | No-hardware DSL gate barrier + self-referential gate suite | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_49_self_referential_gates.md) |
+| 0 | Documentation, source policy, and validation baseline | none | `none` | — | ✅ Done | [Contract](phase_00_documentation_suite.md) |
+| 1 | Haskell toolchain and probe-source closure | none | `none` | 1 | ✅ Done | [Contract](phase_01_toolchain_spike.md) |
+| 2 | Repository layout conformance and de-phased naming | none | `none` | 1 | ✅ Done | [Contract](phase_02_repository_layout_conformance.md) |
+| 3 | The artifact calculus | none | `none` | 1 | ✅ Done | [Contract](phase_03_artifact_calculus.md) |
+| 4 | The budget calculus | none | `none` | 1 | ✅ Done | [Contract](phase_04_budget_calculus.md) |
+| 5 | The lift calculus | none | `none` | 1 | ✅ Done | [Contract](phase_05_lift_calculus.md) |
+| 6 | The workflow calculus | none | `none` | 1 | ✅ Done | [Contract](phase_06_workflow_calculus.md) |
+| 7 | The evidence calculus | none | `none` | 1 | ✅ Done | [Contract](phase_07_evidence_calculus.md) |
+| 8 | Scoped identity kernel | none | `none` | 1 | ✅ Done | [Contract](phase_08_scope_index.md) |
+| 9 | Capacity core fold + topology relation | none | `none` | 1 | ✅ Done | [Contract](phase_09_resource_index.md) |
+| 10 | Composition across the five calculi | none | `none` | 1 | ✅ Done | [Contract](phase_10_calculus_composition.md) |
+| 11 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | none | `none` | 1 | ✅ Done | [Contract](phase_11_formal_model_kernel.md) |
+| 12 | The amoebius explicit-state checker | none | `none` | 1 | ✅ Done | [Contract](phase_12_explicit_state_checker.md) |
+| 13 | The amoebius symbolic checker | none | `none` | 1 | ✅ Done | [Contract](phase_13_symbolic_checker.md) |
+| 14 | The amoebius refinement checker | none | `none` | 1 | ✅ Done | [Contract](phase_14_refinement_checker.md) |
+| 15 | The compile-fail fixture harness | none | `none` | 1 | ✅ Done | [Contract](phase_15_compile_fail_harness.md) |
+| 16 | Deterministic-simulation substrate | none | `none` | 2 | ✅ Done | [Contract](phase_16_deterministic_sim_substrate.md) |
+| 17 | Gateway-migration model (both branches) | none | `none` | 1 | ✅ Done | [Contract](phase_17_gateway_migration_model.md) |
+| 18 | DSL formal model | none | `none` | 1 | ✅ Done | [Contract](phase_18_dsl_formal_model.md) |
+| 19 | Reconcile decision core under deterministic simulation | none | `none` | 2 | ✅ Done | [Contract](phase_19_reconcile_core_simulation.md) |
+| 20 | The extension declaration | none | `none` | 1 | ✅ Done | [Contract](phase_20_extension_declaration.md) |
+| 21 | The per-extension laws L1-L5 | none | `none` | 1 | ✅ Done | [Contract](phase_21_extension_laws_per_extension.md) |
+| 22 | The compositional laws C1-C7 | none | `none` | 1 | ✅ Done | [Contract](phase_22_extension_laws_compositional.md) |
+| 23 | The security laws S1-S6 | none | `none` | 1 | ✅ Done | [Contract](phase_23_extension_security_laws.md) |
+| 24 | The generated conformance gate | none | `none` | 1 | ✅ Done | [Contract](phase_24_conformance_gate_generator.md) |
+| 25 | Haskell-derived Dhall projection and smart-constructor prelude | none | `none` | 1 | ✅ Done | [Contract](phase_25_dhall_schema_generation.md) |
+| 26 | Haskell protocol declarations, GADT-indexed IR, and total decoder | none | `none` | 1 | ✅ Done | [Contract](phase_26_gadt_decode_ir.md) |
+| 27 | Illegal-state corpus + validation-locus ledger | none | `none` | 1 | ✅ Done | [Contract](phase_27_illegal_state_covering.md) |
+| 28 | Logical→physical storage geometry folds | none | `none` | 1 | ✅ Done | [Contract](phase_28_storage_geometry_folds.md) |
+| 29 | Execution-epoch + scheduler + accelerator + provider-root folds | none | `none` | 1 | ✅ Done | [Contract](phase_29_execution_accelerator_folds.md) |
+| 30 | Capability union + representational bind | none | `none` | 1 | ✅ Done | [Contract](phase_30_capability_bind.md) |
+| 31 | Whole-deployment provision seal + expansion | none | `none` | 1 | ✅ Done | [Contract](phase_31_provision_seal.md) |
+| 32 | InferenceEngine capability + accelerator provision | none | `none` | 1 | ✅ Done | [Contract](phase_32_inference_accelerator_provision.md) |
+| 33 | Pure `renderAll` + rendered-artifact oracles | none | `none` | 1 | ✅ Done | [Contract](phase_33_render_manifest_oracles.md) |
+| 34 | chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker | none | `none` | 2 | ✅ Done | [Contract](phase_34_chain_kernel_boundary.md) |
+| 35 | The amoebius image recipe | none | `none` | 1 | ✅ Done | [Contract](phase_35_image_recipe_generation.md) |
+| 36 | The closed transaction vocabulary | none | `none` | 1 | ✅ Done | [Contract](phase_36_transaction_vocabulary.md) |
+| 37 | Bounded UI-program schema | none | `none` | 1 | ✅ Done | [Contract](phase_37_ui_program_schema.md) |
+| 38 | UI authorization kernel | none | `none` | 1 | ✅ Done | [Contract](phase_38_ui_authorization_kernel.md) |
+| 39 | UI effect binding | none | `none` | 1 | ✅ Done | [Contract](phase_39_ui_effect_binding.md) |
+| 40 | UI plan compiler | none | `none` | 1 | ✅ Done | [Contract](phase_40_ui_plan_compiler.md) |
+| 41 | Offline language and paired plans | none | `none` | 1 | ✅ Done | [Contract](phase_41_offline_language_plan.md) |
+| 42 | Haskell browser-interpreter semantics and projection | none | `none` | 1 | ✅ Done | [Contract](phase_42_ui_browser_interpreter.md) |
+| 43 | Haskell UI-server boundary | none | `none` | 2 | ✅ Done | [Contract](phase_43_ui_server_boundary.md) |
+| 44 | Hardware-free Haskell UI composition | none | `none` | 2 | ✅ Done | [Contract](phase_44_ui_local_composition.md) |
+| 45 | Haskell offline-state semantics and runtime projection | none | `none` | 1 | ✅ Done | [Contract](phase_45_encrypted_browser_runtime.md) |
+| 46 | Haskell-generated browser contracts and bundle | none | `none` | 2 | ✅ Done | [Contract](phase_46_ui_contract_generation.md) |
+| 47 | Foreign-source generator closure, checking tools, and mutants | none | `none` | 1 | ✅ Done | [Contract](phase_47_tool_and_mutant_generation.md) |
+| 48 | The test-workflow algebra | none | `none` | 1 | ✅ Done | [Contract](phase_48_test_workflow_algebra.md) |
+| 49 | No-hardware DSL gate barrier + self-referential gate suite | none | `none` | 2 | 🔄 Active — NOT VALIDATED | [Contract](phase_49_self_referential_gates.md) |
 | 50 | Validate the bounded `pb` → Haskell handoff | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_50_host_assert_cli.md) |
 | 51 | The host-ensure kernel | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_51_host_ensure_kernel.md) |
 | 52 | Linux: sudoless Docker and the native image | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_52_linux_engine_bringup.md) |

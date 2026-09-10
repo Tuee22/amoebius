@@ -32,7 +32,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -71,8 +71,9 @@ relation, and consumed transition witness as one typed Haskell lift calculus. NO
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -108,9 +109,9 @@ prerequisite of this earlier gate. The local runner owns these pairs until Phase
 
 The sprint seam is bound to the same Haskell-only subject, oracle, and serial supervisor as the gate.
 
-## Sprint 5.1: The lift calculus ⏸️
+## Sprint 5.1: The lift calculus ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Calculus/Lift/{Layer,Transition,Witness,Compose}.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/LiftCalculusRun/Internal.hs`
 **Blocked by**: [Phase 4](phase_04_budget_calculus.md) gate pass
 **Independent Validation**: eleven clean predicates over nine pairs and twenty observations; two exact compile-negative pairs; seven assigned changed-production subjects; later effects remain residue

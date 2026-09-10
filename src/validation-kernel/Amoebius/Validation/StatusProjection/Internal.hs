@@ -15,6 +15,7 @@ module Amoebius.Validation.StatusProjection.Internal (
     JournalCutpoint (..),
     StatusTarget (..),
     authorizeStatusProjection,
+    authorizeProtectedStatusProjection,
     statusProjectionBindingFindings,
     prepareValidationProjection,
     prepareStatusProjection,
@@ -25,6 +26,8 @@ module Amoebius.Validation.StatusProjection.Internal (
     projectionPreimageDigest,
     projectionTargets,
     writeAuthorizedStatusProjection,
+    applyAuthorizedStatusProjection,
+    applyAuthorizedStatusProjectionReplica,
     statusProjectionInternalTestAtomicReplaceAtCutpoint,
     statusProjectionInternalTestAtomicReplaceExact,
     statusProjectionInternalTestDiscoverJournal,
@@ -494,6 +497,18 @@ authorizeStatusProjection ::
     Either [Finding] AuthorizedStatusProjection
 -- No local field match can authorize a status transition under the reset.
 authorizeStatusProjection _ _ = Left (NonEmpty.toList certificationAdmissionRefusal)
+
+-- | The protected supervisor's authorization path.  Only the hidden
+-- generation-qualified gate token can reach this constructor.
+authorizeProtectedStatusProjection ::
+    VerifiedGatePass -> ProposedStatusProjection -> Either [Finding] AuthorizedStatusProjection
+authorizeProtectedStatusProjection verified projection =
+    case statusProjectionBindingFindings verified projection of
+        [] -> Right AuthorizedStatusProjection
+                { authorizedProjectionValue = projection
+                , authorizedPassValue = verified
+                }
+        problems -> Left problems
 
 -- | Diagnostic field correspondence only; this cannot authorize a write.
 statusProjectionBindingFindings ::
@@ -1832,6 +1847,51 @@ applyAuthorizedStatusProjection git authorized = do
                                                 Right applied -> do
                                                     finalized <- finalizeJournal journal JournalApplied
                                                     pure (applied <$ finalized)
+
+-- | Apply an already authorized projection to a second repository carrying
+-- the identical acquired source snapshot.  This is the post-verifier
+-- operator-worktree handoff: the protected mirror remains the authority, and
+-- the replica may be either at the exact preimage or already at the exact
+-- postimage after an interrupted retry.  No plan bytes or caller-authored edit
+-- are decoded here.
+applyAuthorizedStatusProjectionReplica
+    :: GitExecutable
+    -> FilePath
+    -> AuthorizedStatusProjection
+    -> IO (Either [Finding] ())
+applyAuthorizedStatusProjectionReplica git replicaRoot authorized = do
+    publication <- recheckVerifiedGatePassPublication (authorizedPassValue authorized)
+    case publication of
+        Left problems -> pure (Left problems)
+        Right () -> do
+            opening <- loadGitSnapshot git replicaRoot
+            case opening of
+                Left problems -> pure (Left (map snapshotProblemFinding problems))
+                Right acquired
+                    | identity == proposedPostimageDigest projection -> pure (Right ())
+                    | identity /= proposedPreimageDigest projection ->
+                        pure (Left [projectionFinding "STATUS-PROJECTION-REPLICA-PREIMAGE" "<source-snapshot>" "the replica is neither the gate-bound status preimage nor its exact postimage"])
+                    | otherwise -> do
+                        applied <- applyFiles replicaRoot (proposedFiles projection)
+                        case applied of
+                            Left problems -> pure (Left problems)
+                            Right () -> do
+                                closing <- loadGitSnapshot git replicaRoot
+                                case closing of
+                                    Right observed
+                                        | snapshotIdentity (acquiredSourceSnapshot observed) == proposedPostimageDigest projection -> pure (Right ())
+                                    _ -> do
+                                        rollback <- rollbackFiles replicaRoot (proposedFiles projection)
+                                        pure $ case rollback of
+                                            Left rollbackProblems -> Left (replicaFailure closing <> rollbackProblems)
+                                            Right () -> Left (replicaFailure closing)
+                  where
+                    identity = snapshotIdentity (acquiredSourceSnapshot acquired)
+  where
+    projection = authorizedProjectionValue authorized
+    replicaFailure closing = case closing of
+        Left problems -> map snapshotProblemFinding problems
+        Right _ -> [projectionFinding "STATUS-PROJECTION-REPLICA-POSTIMAGE" "<source-snapshot>" "the replica did not reach the gate-bound source postimage"]
 
 rollbackAfterFailure ::
     GitExecutable ->

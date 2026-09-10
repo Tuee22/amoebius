@@ -1,11 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- | Mandatory refusal while the replacement certification issuer is absent.
+-- | Mandatory refusal at certification entry points lacking protected custody.
 --
--- This module implements only the interim stop required by the reset. It
--- does not implement accepted-baseline admission, protected OS custody,
--- authenticated issuance, dependency compatibility, or the seven-case
--- seed-custody qualification. It cannot establish a Phase-0 gate pass.
+-- This module is the deliberately non-authoritative public diagnostic seam.
+-- The qualified generation-1 supervisor is separate and package-hidden; no
+-- value exposed here can borrow its accepted-baseline or receipt authority.
 --
 -- The closed generation identifies which certification regime is required;
 -- it is not an acquired authority token. Neither generation nor issuer status
@@ -36,35 +35,35 @@ data CertificationGeneration
   = InitialAuditResetGeneration
 
 data CertificationIssuerStatus
-  = IssuerNotYetQualified
+  = IssuerUnavailableAtThisEntryPoint
 
 currentCertificationGeneration :: CertificationGeneration
 currentCertificationGeneration = InitialAuditResetGeneration
 
 currentCertificationIssuerStatus :: CertificationIssuerStatus
-currentCertificationIssuerStatus = IssuerNotYetQualified
+currentCertificationIssuerStatus = IssuerUnavailableAtThisEntryPoint
 
 renderCertificationGeneration :: CertificationGeneration -> Text
 renderCertificationGeneration InitialAuditResetGeneration =
   "amoebius-certification-generation-1"
 
 renderCertificationIssuerStatus :: CertificationIssuerStatus -> Text
-renderCertificationIssuerStatus IssuerNotYetQualified = "NOT YET QUALIFIED"
+renderCertificationIssuerStatus IssuerUnavailableAtThisEntryPoint = "UNAVAILABLE AT THIS ENTRY POINT"
 
 -- | An unavoidable refusal, not a report from which callers can extract
 -- admission. The type cannot represent an empty finding inventory.
 certificationAdmissionRefusal :: NonEmpty Finding
 certificationAdmissionRefusal =
   case currentCertificationIssuerStatus of
-    IssuerNotYetQualified ->
+    IssuerUnavailableAtThisEntryPoint ->
       finding
         "CERTIFICATION-ISSUER-UNQUALIFIED"
         "<certification-issuer>"
-        "The current certification generation has no qualified protected issuer; accepted-baseline admission and authenticated receipt custody are not implemented. Legacy candidates and receipts cannot authorize validation, status changes, or live effects."
+        "The unprotected certification entry point has no issuer authority. Only the root-owned generation-1 supervisor can qualify the accepted baseline and authenticated receipt custody; legacy candidates and receipts cannot authorize validation, status changes, or live effects."
         :| []
 
 -- | Always refused. The observations describe the required generation and
--- the absence of its issuer; they do not assert that custody was observed.
+-- the absence of authority at this entry point; they do not assert custody.
 certificationResetDiagnostic :: CheckResult
 certificationResetDiagnostic =
   CheckResult

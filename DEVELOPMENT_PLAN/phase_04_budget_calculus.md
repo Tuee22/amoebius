@@ -33,7 +33,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -72,8 +72,9 @@ NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -104,9 +105,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 
 The sprint seam is bound to the same Haskell-only subject, oracle, and serial supervisor as the gate.
 
-## Sprint 4.1: The budget calculus ⏸️
+## Sprint 4.1: The budget calculus ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Calculus/Budget/{Grant,Admission,Store,Retention}.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/BudgetCalculusRun/Internal.hs`
 **Blocked by**: [Phase 3](phase_03_artifact_calculus.md) gate pass
 **Independent Validation**: ten clean predicates and identical refusal store images; exact constructor/reaper compile negatives; five assigned changed-production mutants; composition and live free-space remain residue

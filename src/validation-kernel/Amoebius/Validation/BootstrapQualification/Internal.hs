@@ -12,6 +12,7 @@ module Amoebius.Validation.BootstrapQualification.Internal
   ( BootstrapCase (..)
   , QualifiedBootstrapProtocol
   , acquireQualifiedBootstrapProtocol
+  , acquireProtectedQualifiedBootstrapProtocol
   , bootstrapCaseCount
   , bootstrapQualificationCheck
   , foldQualifiedBootstrapProtocol
@@ -181,6 +182,16 @@ legacyAcquireQualifiedBootstrapProtocol repositoryRoot trust acquired = do
                 (Text.pack (show problem))
             ]
         Right qualified -> qualified
+
+-- | The retained finite compiler protocol is reachable only by the protected
+-- certification supervisor path.  The reset-facing entry point above remains
+-- refusal-only for ordinary package-internal callers.
+acquireProtectedQualifiedBootstrapProtocol
+  :: FilePath
+  -> GenesisTrust
+  -> AcquiredSourceSnapshot
+  -> IO (Either [Finding] QualifiedBootstrapProtocol)
+acquireProtectedQualifiedBootstrapProtocol = legacyAcquireQualifiedBootstrapProtocol
 
 runQualification
   :: FilePath

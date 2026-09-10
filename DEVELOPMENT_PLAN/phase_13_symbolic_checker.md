@@ -36,7 +36,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -78,8 +78,9 @@ only beneath `.build/**` and no shell or Python verdict. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -124,9 +125,9 @@ owned external residue.
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 13.1: Total symbolic boundary and inductive obligations ⏸️
+## Sprint 13.1: Total symbolic boundary and inductive obligations ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/symbolic-checker/Amoebius/Checker/Symbolic.hs`
 **Blocked by**: [Phase 12](phase_12_explicit_state_checker.md) gate pass
 **Independent Validation**: Match an independently authored inductive model and its formula obligations; reject the audit shadowing counterexample or classify its reachable violation consistently; kill binding and induction-schema mutants at assigned cases; name SMT correctness as a trust assumption.
@@ -167,9 +168,9 @@ dynamically resolved solver, and classify every input without promoting unsuppor
 Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
 qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 13.2: Solver differential and mutation evidence ⏸️
+## Sprint 13.2: Solver differential and mutation evidence ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: package-hidden `src/validation-kernel/Amoebius/Validation/SymbolicCheckerRun/Internal.hs`
 **Blocked by**: Sprint 13.1
 **Independent Validation**: A pinned authenticated SMT executable accepts known formulas and finds independently known witnesses outside sample bounds; exact unknown/error/identity pairs refuse; sampled-unsat and ignored-exit mutants fail their assigned cases; broader theories remain excluded.

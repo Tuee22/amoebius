@@ -40,6 +40,7 @@
 module Amoebius.Validation.SeedReceipt.Internal
   ( SeedReceiptExpectation (..)
   , seedReceiptDiagnostic
+  , verifySeedReceiptCryptography
   ) where
 
 import Amoebius.Validation.Types
@@ -153,6 +154,12 @@ checkReceiptCryptography expected encoded = do
     (identifierAt transcriptOffset encoded == expectedSeedReceiptTranscriptDigest expected)
     "SEED-RECEIPT-TRANSCRIPT"
     "The authenticated receipt names a different custody transcript."
+
+-- | Package-hidden cryptographic predicate for the OS-qualified supervisor.
+-- Caller-supplied expectations remain non-authoritative unless the caller has
+-- separately acquired the protected accepted seed and custody boundary.
+verifySeedReceiptCryptography :: SeedReceiptExpectation -> ByteString -> Either Finding ()
+verifySeedReceiptCryptography = checkReceiptCryptography
 
 -- crypton 1.0.6's Ed25519 publicKey constructor checks only byte length.
 -- Its Edwards25519 decoder supplies curve validation; the canonical encoder

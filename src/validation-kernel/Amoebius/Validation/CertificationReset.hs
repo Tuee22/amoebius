@@ -1,8 +1,8 @@
 -- | Public diagnostic for the mandatory certification reset refusal.
 --
--- This diagnostic cannot admit a candidate or receipt. The replacement
--- certification generation has no qualified protected issuer yet; its
--- identity is not evidence of accepted-baseline or receipt authority.
+-- This diagnostic cannot admit a candidate or receipt. The protected
+-- generation-1 supervisor is a separate OS-qualified path; naming its
+-- generation here is not evidence of accepted-baseline or receipt authority.
 module Amoebius.Validation.CertificationReset
   ( certificationResetDiagnostic
   ) where

@@ -33,7 +33,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -73,8 +73,9 @@ NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -111,9 +112,9 @@ prerequisite of this earlier gate. The local runner owns these pairs until Phase
 
 The sprint seam is bound to the same Haskell-only subject, oracle, and serial supervisor as the gate.
 
-## Sprint 7.1: The evidence calculus ⏸️
+## Sprint 7.1: The evidence calculus ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Calculus/Evidence/{Claim,Fixture,Mutant,Register}.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/EvidenceCalculusRun/Internal.hs`
 **Blocked by**: [Phase 6](phase_06_workflow_calculus.md) gate pass
 **Independent Validation**: twelve clean predicates over seven claims and three mutation records; two exact compile-negative pairs; eight assigned changed-production subjects; later effects remain residue

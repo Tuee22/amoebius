@@ -36,7 +36,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -77,8 +77,9 @@ obligation. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -119,9 +120,9 @@ the external observer, cleanup is run-root scoped, and no external owned residue
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 14.1: Compiled-source refinement boundary ⏸️
+## Sprint 14.1: Compiled-source refinement boundary ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/refinement-checker/Amoebius/Checker/Refinement.hs` and the six compiled Haskell fixture modules
 **Blocked by**: [Phase 13](phase_13_symbolic_checker.md) gate pass
 **Independent Validation**: Compile and prove the admitted source through one authenticated compiler identity; pair it with the commented-equation audit counterexample and require its actual violation or exact unsupported-source refusal; kill AST/source-substitution mutants; exclude unsupported Haskell.
@@ -162,9 +163,9 @@ while keeping compiler and solver responsibilities explicit.
 Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
 qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 14.2: Correspondence, negatives, and mutation evidence ⏸️
+## Sprint 14.2: Correspondence, negatives, and mutation evidence ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: package-hidden `src/validation-kernel/Amoebius/Validation/RefinementCheckerRun/Internal.hs`
 **Blocked by**: Sprint 14.1
 **Independent Validation**: Require independently registered preservation and model correspondence through the qualified real solver; matched weakening and wrong-model negatives fail specifically; assigned checker mutants are detected; each unregistered production obligation remains unverified.

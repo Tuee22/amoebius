@@ -127,10 +127,10 @@ Its vector contains one Done prefix, exactly one Active phase, and one Blocked s
 
 The reset requires a new Haskell-owned certification generation under
 [gate integrity §M.0](development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation).
-That authority is required implementation, not a capability supplied by this Markdown change. Pre-reset receipts
-cannot restore status, satisfy a predecessor, or authorize hardware work in the new generation.
-Retained phase rows still specify intended capabilities. Their new generation and accepted-baseline binding
-remain an unresolved Haskell specification obligation, distinct from an unavailable runtime receipt.
+That authority is implemented by the protected Haskell generation-1 supervisor, not supplied by this Markdown
+text. Pre-reset receipts cannot restore status, satisfy a predecessor, or authorize hardware work in the new
+generation. Retained phase rows still specify intended capabilities, while each phase must separately acquire
+its authenticated predecessor and produce current execution evidence.
 
 The current phase-status line is a raw, one-line, exact field and occurs once. The `**Gate:**` summary is a
 separate immutable command/link field: it never carries status or result prose, so recording a pass cannot make

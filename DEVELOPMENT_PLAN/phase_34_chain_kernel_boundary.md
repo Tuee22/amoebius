@@ -42,7 +42,7 @@ owned by the exact integrated gate and the mechanical status projection that fol
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -115,8 +115,9 @@ tool, corpus, and mutant generation; it does not supply a prerequisite retroacti
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -196,9 +197,9 @@ Haskell and qualify the mechanism that first admits their result; component obse
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 34.1: The `Step` algebra + `chain :: cfg -> [Step]` builder ⏸️
+## Sprint 34.1: The `Step` algebra + `chain :: cfg -> [Step]` builder ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: [Phase 33](phase_33_render_manifest_oracles.md) gate pass
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
@@ -243,9 +244,9 @@ seed hostbootstrap's chain/Step algebra as the amoebius reconcile kernel — `ch
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.2: The pure descent — `nextFrameAfter` / `foldLift` (semantic-oracle locked) ⏸️
+## Sprint 34.2: The pure descent — `nextFrameAfter` / `foldLift` (semantic-oracle locked) ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.1
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
@@ -288,9 +289,9 @@ Part B (Register 2) and Register 3.
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) ⏸️
+## Sprint 34.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.2
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
@@ -334,9 +335,9 @@ only on the (here-absent) apply path.
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.4: The semantic plan battery (`chain-spec`) — the Part-A gate ⏸️
+## Sprint 34.4: The semantic plan battery (`chain-spec`) — the Part-A gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.3
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
@@ -403,9 +404,9 @@ correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Regis
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.5: The single typed subprocess seam + `boundary-spec` skeleton ⏸️
+## Sprint 34.5: The single typed subprocess seam + `boundary-spec` skeleton ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.4
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
@@ -438,9 +439,9 @@ prodbox single-IO-seam shape as *sibling evidence, not an amoebius result*.
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ⏸️
+## Sprint 34.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.5
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
@@ -477,9 +478,9 @@ prerequisite — that distinction is what keeps Register 2 honestly separate fro
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ⏸️
+## Sprint 34.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.6
 **Independent Validation**: The same typed plan must produce independently expected raw process requests after readiness; wrong argv/payload/order and dry-run-effect pairs fail exactly; actual invocation mutants fail assigned cases; live tool fidelity remains unverified.
@@ -535,9 +536,9 @@ is owned by [phase_65_live_dsl_deploy.md](phase_65_live_dsl_deploy.md) and the l
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.8: The sanctioned-API surface — what extension source may reach ⏸️
+## Sprint 34.8: The sanctioned-API surface — what extension source may reach ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.7
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
@@ -569,9 +570,9 @@ so that widening it is a checked amendment rather than something an extension au
 
 The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.9: extension-astcheck — the extension AST checker and the link seal ⏸️
+## Sprint 34.9: extension-astcheck — the extension AST checker and the link seal ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.8
 **Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.

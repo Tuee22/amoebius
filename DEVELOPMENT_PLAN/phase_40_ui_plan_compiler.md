@@ -34,7 +34,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -71,8 +71,9 @@ publication, edge enforcement, and live authority freshness remain UNVERIFIED.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -109,9 +110,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 
 ## Sprints
 
-## Sprint 40.1: Paired semantic projection ⏸️
+## Sprint 40.1: Paired semantic projection ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Ui/Compile/{ClientPlan,ServerPlan,Manifest,Demand}.hs`; `test/spec/ui/UiPlanCompilerCases.hs`; production CPP mutation seams in the compiler modules.
 **Blocked by**: [Phase 39](phase_39_ui_effect_binding.md) gate pass
 **Independent Validation**: `ui-plan-compiler-spec` exact projection/parity/refusal checks plus isolated production-mutant rows in the acquired Phase-40 supervisor.
@@ -139,9 +140,9 @@ Adopt one compiler entry point whose only successful result contains both public
 
 The complete integrated Phase-40 gate and its mechanical status projection remain. Browser/server interpretation, offline packaging, publication, live authority enforcement, and hardware remain later-owned residue.
 
-## Sprint 40.2: Canonical artifacts, digests, and demand ⏸️
+## Sprint 40.2: Canonical artifacts, digests, and demand ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Ui/Compile/{ClientPlan,ServerPlan,Manifest,Demand}.hs`; typed artifact expectations in `test/spec/ui/UiPlanCompilerCases.hs`.
 **Blocked by**: Sprint 40.1
 **Independent Validation**: byte-exact typed artifacts, independent digest derivation, six demand cells, and two serial fresh-process order controls in `ui-plan-compiler-spec`.
@@ -174,9 +175,9 @@ semantic intent.
 
 The complete integrated Phase-40 gate and its mechanical status projection remain. Materialized JSON, digest tables, surface registries, and mutant descriptors are retired authorities; future projections remain lazy `.build/**` products.
 
-## Sprint 40.3: Calculus projection and phase seal ⏸️
+## Sprint 40.3: Calculus projection and phase seal ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/UiPlanCompilerRun/Internal.hs`, dispatcher/evidence integration, compiled Phase-40 semantic contract, and serial Cabal matrix.
 **Blocked by**: Sprint 40.2
 **Independent Validation**: exact source discovery, serial compiler receipts, source stability, cleanroom containment, legacy absence, and the eighteen-row acquired gate.

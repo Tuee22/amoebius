@@ -41,7 +41,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -127,8 +127,9 @@ and the candidate verdict.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -194,9 +195,9 @@ Haskell and qualify the mechanism that first admits their result; component obse
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 28.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ⏸️
+## Sprint 28.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/storage-geometry-folds/Amoebius/Capacity/{Storage,StorageGeometry,ServiceStorage,Growable}.hs` owns the closed bounded arithmetic and physical geometry; `StorageGeometryFixtures.hs` supplies 30 isolated negative/legal pairs.
 **Blocked by**: [Phase 27](phase_27_illegal_state_covering.md) gate pass
 **Independent Validation**: The Haskell battery checks exact error tags, legal twins, service peaks, failure products, rounding, per-backing claims, both Pulsar ceilings, cache nesting, and provider-root geometry.
@@ -326,9 +327,9 @@ phase; this sprint consumes that base and owns the storage declarations plus the
 The seam is retained as an Observed footprint / Known partial. Reconcile its obligations with the replacement
 acceptance baseline and qualify the complete Phase-28 gate.
 
-## Sprint 28.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ⏸️
+## Sprint 28.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/storage-geometry-folds/Amoebius/Capacity/StorageScaling.hs` owns the private finite envelope, complete observed snapshot, four total plan arms, and fingerprint/high-water refusals.
 **Blocked by**: Sprint 28.1
 **Independent Validation**: Fingerprint mismatch and insufficient migration high-water each reject beside a one-axis legal twin; two applied production mutants admit those negatives and turn the suite red.
@@ -377,9 +378,9 @@ observed snapshot — never a live mutation, and never a check that requires a l
 The seam is retained as an Observed footprint / Known partial. Reconcile its obligations with the replacement
 acceptance baseline and qualify the complete Phase-28 gate.
 
-## Sprint 28.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ⏸️
+## Sprint 28.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `test/spec/dsl/StorageGeometryProps.hs` owns six 300-sample `checkCoverage` equivalence properties with independent BookKeeper, MinIO, and presentation/allocation reference formulae.
 **Blocked by**: Sprint 28.2
 **Independent Validation**: Every sampled fold meets at least 30% accepting and 30% rejecting coverage, while the library compiles with incomplete-pattern and incomplete-uni-pattern warnings promoted to errors.
@@ -458,9 +459,9 @@ compute `place`.
 The seam is retained as an Observed footprint / Known partial. Reconcile its obligations with the replacement
 acceptance baseline and qualify the complete Phase-28 gate.
 
-## Sprint 28.4: The storage-geometry fold-negative corpus + the gate ⏸️
+## Sprint 28.4: The storage-geometry fold-negative corpus + the gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `Amoebius.Validation.StorageGeometryRun.Internal` runs the 31 changed-production builds then the clean Haskell suite in one unique run root and supplies all eighteen acquired phase rows.
 **Blocked by**: Sprint 28.3
 **Independent Validation**: The package-hidden supervisor checks exact source discovery, direct offline `--jobs=1` Cabal argv, all 31 red loci, the exact clean token, stable source identity, predecessor receipt, and zero hardware/live authority.

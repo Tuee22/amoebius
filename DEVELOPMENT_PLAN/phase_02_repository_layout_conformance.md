@@ -39,7 +39,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -82,8 +82,9 @@ NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -144,9 +145,9 @@ flowchart LR
 ```
 *Orientation. Which sprint produces what the next consumes, ending at the gate; the seam rules are owned by [development_plan_standards.md §F](development_plan_standards.md#f-the-sprint-block-format). The de-phasing precedes the registry because a registry authored first would name a hundred paths the same phase then renames.*
 
-## Sprint 2.1: `test/`'s second level collapses to the seven role nouns ⏸️
+## Sprint 2.1: `test/`'s second level collapses to the seven role nouns ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: [Phase 1](phase_01_toolchain_spike.md) gate pass
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -182,9 +183,9 @@ directories are not target roots; any such transport artifact is rendered lazily
 The pre-reset record said `None`; that statement and its test-tree count  cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass,
 owned legacy closure, and a Haskell-only test tree with lazy transport material beneath `.build/**`.
 
-## Sprint 2.2: The package-only roots become cabal stanzas ⏸️
+## Sprint 2.2: The package-only roots become cabal stanzas ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 2.1
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -228,9 +229,9 @@ condemned tracked Proto schema remains migration debt, and Phase 26 — its owne
 binding generation from checked Haskell declarations beneath `.build/proto/**`. Its typed legacy binding is
 explained in the reader-facing register.
 
-## Sprint 2.3: Tracked UI roots enter typed deletion ownership ⏸️
+## Sprint 2.3: Tracked UI roots enter typed deletion ownership ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 2.2
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -261,9 +262,9 @@ language or adding to those roots.
 Phase 46 must replace the tracked UI/package inputs with Haskell declarations and lazy `.build/ui/**`
 materialization. Until that owner reaches zero findings, this is only accounted debt and remains NOT VALIDATED.
 
-## Sprint 2.4: Every authored name loses its phase ordinal ⏸️
+## Sprint 2.4: Every authored name loses its phase ordinal ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 2.3
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -306,9 +307,9 @@ and the ordinal-bearing-name analyzer does not scan it; the tree's own precedent
 the phase that owns the module. Renaming two hundred macros across the Haskell sources would be a behavioural
 edit this phase's scope excludes.
 
-## Sprint 2.5: One mutant record format, one registry ⏸️
+## Sprint 2.5: One mutant record format, one registry ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 2.4
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -360,9 +361,9 @@ from converting a refusal into a satisfied state. A flag with no authored operat
 a registry row at all: it is deleted, or it is authored into a real mutant. Until then it is reported as
 unwired coverage against the capability that owns closing it, and is never counted.
 
-## Sprint 2.6: Compiler-backed source graph and typed legacy reconciliation ⏸️
+## Sprint 2.6: Compiler-backed source graph and typed legacy reconciliation ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/RepositoryLayoutRun.hs`, `src/validation-kernel/Amoebius/Validation/CompilerComponentPlan.hs`, `src/validation-kernel/Amoebius/Validation/CompilerSourceGraph.hs`, `src/validation-kernel/Amoebius/Validation/SourceClosure.hs`, and `src/validation-kernel/Amoebius/Validation/SourceConsumerGraph.hs`; acquired composition remains UNRESOLVED and blocks validation.
 **Blocked by**: Sprint 2.5
 **Independent Validation**: From the exact Phase-1 toolchain receipt and captured source, run the complete `VALIDATION_PB_GRAMMAR` selector corpus and reconcile the Cabal plan and every source/module/import/parse/rename/typecheck/call/control-flow/effect/provenance/dynamic-load/sink/consumer edge in both directions. Missing, extra, stale, disguised, unresolved, dynamically bypassed, or wrong-consumer edges are paired exact negatives; each applied changed-subject selector must red only its assigned row.

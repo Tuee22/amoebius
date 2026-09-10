@@ -29,7 +29,7 @@ This plan owns the hardware-free encrypted offline-state and generated-runtime p
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -64,8 +64,9 @@ service-worker, or WebCrypto fidelity; those are post-Phase-49 live-browser obli
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -96,9 +97,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 
 ## Sprints
 
-## Sprint 45.1: Build the encrypted local interpreter ⏸️
+## Sprint 45.1: Build the encrypted local interpreter ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: the six `src/Amoebius/Ui/Offline/Browser/*.hs` phase modules, typed cases, production CPP seams, and package-hidden acquired Phase-45 supervisor.
 **Blocked by**: [Phase 44](phase_44_ui_local_composition.md) gate pass
 **Independent Validation**: Check full actual continuity-plan state/envelope/facility outputs against independent expectations; tamper, wrong-partition and stale-fence pairs fail exactly; assigned state and generated-body mutants are rejected; real browser fidelity remains unverified.

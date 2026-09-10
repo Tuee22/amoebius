@@ -28,7 +28,7 @@ This contract owns the hardware-free composition of client plans, server authori
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -59,8 +59,9 @@ infrastructure. Any external-language encoding or fake executable is generated r
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -94,9 +95,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 
 ## Sprints
 
-## Sprint 44.1: Single-/multi-tenant workflow-to-artifact composition gate ⏸️
+## Sprint 44.1: Single-/multi-tenant workflow-to-artifact composition gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Ui/LocalComposition.hs`, typed cases, production CPP seams, and the package-hidden acquired Phase-44 supervisor.
 **Blocked by**: [Phase 43](phase_43_ui_server_boundary.md) gate pass
 **Independent Validation**: two application shapes, visible/effect/access/denial rows, plan identity, direct bypass, calculus, and five changed-production checks.

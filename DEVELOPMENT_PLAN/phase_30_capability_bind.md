@@ -36,7 +36,7 @@ evidence; only the complete qualified gate can authorize the status projection. 
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -104,8 +104,9 @@ graphs when deployment shape differs. Nothing is provisioned, rendered, or obser
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -189,9 +190,9 @@ at the wholly unprovisioned `BoundDeployment`.
 
 ## Sprints
 
-## Sprint 30.1: The closed capability union + the no-product-arm dhall-typecheck foreclosure ⏸️
+## Sprint 30.1: The closed capability union + the no-product-arm dhall-typecheck foreclosure ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/capability-bind/Amoebius/Capability/Types.hs` owns the closed union and Haskell-derived Dhall type projections; `src/capability-bind/Amoebius/Capability/Phase30Mutation.hs` owns the closed changed-production registry.
 **Blocked by**: [Phase 29](phase_29_execution_accelerator_folds.md) gate pass
 **Independent Validation**: Nine exact arms and app-surface projections are compared with an independent literal oracle; product, URL, and deployment-field Dhall expressions are paired with legal twins; catchall-arm and shared-app-surface production mutations turn red.
@@ -240,9 +241,9 @@ contains.
 
 Run and retain this seam inside the complete integrated Phase-30 gate.
 
-## Sprint 30.2: The `CapabilityBinding` + total representational `bind` ⏸️
+## Sprint 30.2: The `CapabilityBinding` + total representational `bind` ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/capability-bind/Amoebius/Capability/{Binding,Types}.hs` owns total binding, provider graphs, extension validation, and the unprovisioned deployment boundary.
 **Blocked by**: Sprint 30.1
 **Independent Validation**: All 18 arm×shape binds match independent object/execution/intent projections; seven tagged negative pairs and the copy-shape/provision-boundary production mutations exercise exact loci.
@@ -328,9 +329,9 @@ stopping at the wholly unprovisioned `BoundDeployment`.
 
 Run and retain this seam inside the complete integrated Phase-30 gate.
 
-## Sprint 30.3: The bind property/corpus + the Register-1 gate ⏸️
+## Sprint 30.3: The bind property/corpus + the Register-1 gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `test/spec/capability/{BindGate,BindProps,CapabilityBindOracle,ShapeOracle,CapabilityBindSpec}.hs` and `src/validation-kernel/Amoebius/Validation/CapabilityBindRun/Internal.hs` own the property/corpus and qualified integrated runner.
 **Blocked by**: Sprint 30.2
 **Independent Validation**: The clean corpus, 1,200-sample nine-constructor property, exact five-calculus projection, four selector-specific changed-production reds, source discovery, authority, freshness, and residue all join one candidate.

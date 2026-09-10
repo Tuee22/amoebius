@@ -33,7 +33,7 @@ and the Phase Status block below; only the complete integrated gate may authoriz
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -71,8 +71,9 @@ exchange. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -112,9 +113,9 @@ invocation, a minimally different positive control, and a separately authored ex
 
 The sprint seam is bound to the same Haskell-only subject, oracle, and serial supervisor as the gate.
 
-## Sprint 8.1: Rank-2 scope index and total flow checking ⏸️
+## Sprint 8.1: Rank-2 scope index and total flow checking ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Scope/{Index,Flow}.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/ScopeIndexRun/Internal.hs`
 **Blocked by**: [Phase 7](phase_07_evidence_calculus.md) gate pass
 **Independent Validation**: six owner rows, two exact swap errors, four flow decisions, four exact diagnostics, nine generated reject classes, five exact compile-negative pairs, and one assigned changed-production subject

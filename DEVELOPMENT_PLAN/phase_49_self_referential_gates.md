@@ -38,7 +38,7 @@ The target pipeline is defined by
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+🔄 Active — NOT VALIDATED.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -79,8 +79,9 @@ reopens Phase 0. The complete qualified Haskell gate pass is sufficient for the 
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -123,9 +124,9 @@ gate-ready, but only the complete integrated run may supply its evidence.
 
 ## Sprints
 
-## Sprint 49.1: Freeze the complete semantic surface ⏸️
+## Sprint 49.1: Freeze the complete semantic surface 🔄
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Active — NOT VALIDATED
 **Implementation**: `test/spec/workflow/DslBarrierOracle.hs`
 **Blocked by**: [Phase 48](phase_48_test_workflow_algebra.md) gate pass
 **Independent Validation**: Independently enumerate the full declared language and stage-value relations; a minimally omitted constructor/interaction fails exact discovery; registry and copied-oracle mutants fail assigned cases; each unproved assumption remains explicit.

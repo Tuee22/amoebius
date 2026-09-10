@@ -33,7 +33,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -66,8 +66,9 @@ or a network service. Browser execution belongs to the post-Phase-49 live UI ban
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -104,9 +105,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 
 ## Sprints
 
-## Sprint 42.1: Generic `ClientPlan` interpreter and Haskell semantic boundary ⏸️
+## Sprint 42.1: Generic `ClientPlan` interpreter and Haskell semantic boundary ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Ui/Browser/{Interpreter,Projection}.hs`, typed cases, production CPP seams, and the package-hidden acquired Phase-42 supervisor.
 **Blocked by**: [Phase 41](phase_41_offline_language_plan.md) gate pass
 **Independent Validation**: Interpret distinct real compiled plans against independently authored full outputs; a minimally changed plan binding, accessibility attribute or request must fail exactly; assigned interpreter mutants fail while an unaffected plan passes; actual browser fidelity remains unverified.

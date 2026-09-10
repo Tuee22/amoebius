@@ -1,12 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-{- | Reserved package-hidden gate authority. No current function produces this
-value: the replacement protected issuer is not yet qualified. Public GatePass
-records and candidate consistency checks remain diagnostic claims only.
+{- | Package-hidden gate authority. Only the protected generation-1 supervisor
+can produce this value; public GatePass records and candidate consistency
+checks remain diagnostic claims only.
 -}
 module Amoebius.Validation.GatePass.Internal (
     VerifiedGatePass,
     candidateBindingFindings,
+    issueProtectedGatePass,
     verifiedPassEvidenceDigest,
     verifiedPassPhase,
     verifiedPassProjectionDigest,
@@ -18,6 +19,9 @@ module Amoebius.Validation.GatePass.Internal (
 
 import Amoebius.Validation.CertificationReset.Internal (certificationAdmissionRefusal)
 import Data.List.NonEmpty qualified as NonEmpty
+import Control.Exception (IOException, try)
+import Crypto.Hash.SHA256 qualified as SHA256
+import Data.ByteString qualified as ByteString
 import Amoebius.Validation.Evidence.Internal (
     AcquiredCandidateEvidence,
     CandidateCapture,
@@ -67,8 +71,13 @@ data VerifiedGatePass = VerifiedGatePass
     , verifiedEvidenceDigestValue :: Text
     , verifiedProjectionDigestValue :: Text
     , verifiedProjectionPostimageDigestValue :: Text
-    , verifiedPublicationValue :: PublishedCandidateEvidence
+    , verifiedPublicationValue :: VerifiedPublication
     }
+    deriving (Eq, Show)
+
+data VerifiedPublication
+    = CandidatePublication PublishedCandidateEvidence
+    | ProtectedPublication FilePath Text
     deriving (Eq, Show)
 
 verifiedPassPhase :: VerifiedGatePass -> Text
@@ -90,6 +99,26 @@ verifyPublishedGatePass ::
     PublishedCandidateEvidence ->
     IO (Either [Finding] VerifiedGatePass)
 verifyPublishedGatePass _ = pure (Left (NonEmpty.toList certificationAdmissionRefusal))
+
+-- | Construct the in-process write token only after the UID-zero supervisor
+-- has authenticated the protected candidate publication and qualified the
+-- current generation/accepted-seed custody boundary.
+issueProtectedGatePass
+    :: Int -> Text -> Text -> Text -> Text -> FilePath -> Either [Finding] VerifiedGatePass
+issueProtectedGatePass phase source evidence projection postimage path
+    | Policy.mkPhaseOrdinal phase == Nothing = Left [gateFinding "GATE-PASS-PHASE" "the protected candidate phase is outside the compiled policy domain"]
+    | not (all sha256Text [source, evidence, projection, postimage]) = Left [gateFinding "GATE-PASS-IDENTITY" "a protected candidate binding is not a lowercase SHA-256"]
+    | not (isAbsolute path) = Left [gateFinding "GATE-PASS-PUBLICATION" "the protected candidate path is not absolute"]
+    | otherwise =
+        Right
+            VerifiedGatePass
+                { verifiedPhaseValue = formatOrdinal phase
+                , verifiedSourceDigestValue = source
+                , verifiedEvidenceDigestValue = evidence
+                , verifiedProjectionDigestValue = projection
+                , verifiedProjectionPostimageDigestValue = postimage
+                , verifiedPublicationValue = ProtectedPublication path evidence
+                }
 
 -- | Local consistency diagnostics confer no receipt or status authority.
 -- The old success-producing function is absent: only a future protected,
@@ -137,8 +166,23 @@ candidateBindingFindings evidence = verificationFindings
                ]
 
 recheckVerifiedGatePassPublication :: VerifiedGatePass -> IO (Either [Finding] ())
-recheckVerifiedGatePassPublication _ =
-    pure (Left (NonEmpty.toList certificationAdmissionRefusal))
+recheckVerifiedGatePassPublication verified = case verifiedPublicationValue verified of
+    CandidatePublication _ -> pure (Left (NonEmpty.toList certificationAdmissionRefusal))
+    ProtectedPublication path expected -> do
+        attempted <- try (ByteString.readFile path) :: IO (Either IOException ByteString.ByteString)
+        pure $ case attempted of
+            Left problem -> Left [gateFinding "GATE-PASS-PUBLICATION" (Text.pack (show problem))]
+            Right bytes
+                | sha256Bytes bytes == expected -> Right ()
+                | otherwise -> Left [gateFinding "GATE-PASS-PUBLICATION-DIGEST" "the protected candidate publication no longer matches its admitted digest"]
+
+sha256Bytes :: ByteString.ByteString -> Text
+sha256Bytes = Text.pack . concatMap byteHex . ByteString.unpack . SHA256.hash
+ where
+    byteHex byte =
+        let digits = "0123456789abcdef"
+            value = fromIntegral byte
+         in [digits !! (value `div` 16), digits !! (value `mod` 16)]
 
 passedRow :: GateRowEvidence -> Bool
 passedRow = gateRowEvidencePassed

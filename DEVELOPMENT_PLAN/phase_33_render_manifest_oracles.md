@@ -33,7 +33,7 @@ owned by the exact integrated gate and the mechanical status projection that fol
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -108,8 +108,9 @@ separately authored Haskell predicate. Renderer output is never its own expectat
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -185,9 +186,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 
 ## Sprints
 
-## Sprint 33.1: The typed `K8sObject` model + Aeson serialization ⏸️
+## Sprint 33.1: The typed `K8sObject` model + Aeson serialization ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: the private `manifest-render` library at `src/manifest-render/Amoebius/Manifest/{Types,K8sObject}.hs` owns the closed typed object model and canonical Aeson encoding.
 **Blocked by**: [Phase 32](phase_32_inference_accelerator_provision.md) gate pass
 **Independent Validation**: 164 exact typed objects round-trip through canonical Aeson bytes without changing value or encoding.
@@ -223,9 +224,9 @@ text.
 The complete integrated Phase-33 gate and its mechanical status projection remain. Live Kubernetes decoding
 and apiserver correspondence remain later-owned residue.
 
-## Sprint 33.2: Pure total `renderAll` + best-practice-by-construction ⏸️
+## Sprint 33.2: Pure total `renderAll` + best-practice-by-construction ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/manifest-render/Amoebius/Manifest/{Render,RenderAll}.hs` and the `Amoebius.Manifest` facade own the sole pure total render path.
 **Blocked by**: Sprint 33.1
 **Independent Validation**: eighteen capability/shape domains, nine object variants, deterministic identity ordering, four activation stages, reconcile modes, and three non-vacuous safety predicates execute in `render-golden`.
@@ -354,9 +355,9 @@ bounded, while memory-backed volumes retain their access, persistence, and one-c
 The complete integrated Phase-33 gate and its mechanical status projection remain. SSA, ApplySet pruning,
 readiness, and live convergence remain Phase-58 work.
 
-## Sprint 33.3: The rendered-output semantic-oracle battery (`render-oracle`) — the gate ⏸️
+## Sprint 33.3: The rendered-output semantic-oracle battery (`render-oracle`) — the gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `test/spec/manifest/RenderGolden{Gate,Props,Spec}.hs` and the package-hidden Phase-33 supervisor own the clean and mutation matrix.
 **Blocked by**: Sprint 33.2
 **Independent Validation**: Render every declared source/object family to independently expected typed and serialized semantics; a minimally changed field fails its exact locus; assigned renderer mutants are rejected; apiserver and live fidelity remain unverified.

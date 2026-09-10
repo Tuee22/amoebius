@@ -35,7 +35,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -76,8 +76,9 @@ Haskell model with deterministic replay and counterexample products generated on
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -113,9 +114,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 12.1: Independent bounded checker and replayable verdicts ⏸️
+## Sprint 12.1: Independent bounded checker and replayable verdicts ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/explicit-state-checker/Amoebius/Checker/ExplicitState.hs`
 **Blocked by**: [Phase 11](phase_11_formal_model_kernel.md) gate pass
 **Independent Validation**: Require exact safe/unsafe/bounded outcomes on hand-derived graphs; pair a legal action with the audit malformed action and require its exact error; kill error-swallowing and frontier mutants; exclude unbounded and live claims.
@@ -155,9 +156,9 @@ Adopt the amoebius-owned first proof-stack layer: implement bounded search indep
 Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
 qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 12.2: Differential oracle and mutation evidence ⏸️
+## Sprint 12.2: Differential oracle and mutation evidence ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: package-hidden `src/validation-kernel/Amoebius/Validation/ExplicitStateCheckerRun/Internal.hs`
 **Blocked by**: Sprint 12.1
 **Independent Validation**: serialized clean/three-mutant compiler matrix, exact failure loci, source discipline, discovery, and containment

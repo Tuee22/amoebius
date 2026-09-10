@@ -33,7 +33,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -72,8 +72,9 @@ and reap boundaries as one typed Haskell calculus. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -109,9 +110,9 @@ prerequisite of this earlier gate. This phase's local package-hidden runner owns
 
 The sprint seam below is bound to the same Haskell-only subject, oracle, and serial supervisor as the gate.
 
-## Sprint 3.1: The artifact calculus ⏸️
+## Sprint 3.1: The artifact calculus ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Calculus/Artifact/{Target,Recipe,Address,Region}.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/ArtifactCalculusRun/Internal.hs`
 **Blocked by**: [Phase 2](phase_02_repository_layout_conformance.md) gate pass
 **Independent Validation**: eleven clean predicates and equal clean seed reports; exact GHC-25897 paired negative; address-rendering, ambient-recipe, and region-escape production mutants; later calculi and effectful observations remain explicit residue

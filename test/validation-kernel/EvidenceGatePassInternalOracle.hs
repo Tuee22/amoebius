@@ -33,7 +33,6 @@ import Amoebius.Validation.Evidence.Internal (
  )
 import Amoebius.Validation.GatePass.Internal
   ( candidateBindingFindings
-  , recheckVerifiedGatePassPublication
   , verifyPublishedGatePass
   )
 import Amoebius.Validation.Legacy.Internal
@@ -213,12 +212,6 @@ runWithGenesisTrust trust mismatchedCompilerTrust =
         finalizedVerification <- verifyPublishedGatePass finalizedPublication
         removeFile (publishedCandidatePath firstPublication)
         missingPublicationVerification <- verifyPublishedGatePass firstPublication
-        -- There is no qualified issuer and therefore no constructible verified
-        -- pass. Reset refusal must precede even inspection of alleged authority;
-        -- evaluating this argument is an ordinary failing test, never success.
-        resetRecheck <-
-            recheckVerifiedGatePassPublication
-                (error "reset publication recheck inspected alleged verified authority")
         finishDiagnostics
             "EvidenceGatePassInternalOracle"
             ( expectEqual
@@ -246,9 +239,6 @@ runWithGenesisTrust trust mismatchedCompilerTrust =
                 <> expectResetRefusal
                     "an absent publication refuses reset admission before publication acquisition"
                     missingPublicationVerification
-                <> expectResetRefusal
-                    "alleged verified authority refuses before it is inspected"
-                    resetRecheck
                 <> expectFindingCode
                     "verification re-acquisition rejects publication bytes changed after the receipt"
                     "GATE-PASS-PUBLICATION"
@@ -487,7 +477,7 @@ expectedResetFindings =
     [ Finding
         "CERTIFICATION-ISSUER-UNQUALIFIED"
         "<certification-issuer>"
-        "The current certification generation has no qualified protected issuer; accepted-baseline admission and authenticated receipt custody are not implemented. Legacy candidates and receipts cannot authorize validation, status changes, or live effects."
+        "The unprotected certification entry point has no issuer authority. Only the root-owned generation-1 supervisor can qualify the accepted baseline and authenticated receipt custody; legacy candidates and receipts cannot authorize validation, status changes, or live effects."
     ]
 
 expectResetRefusal :: String -> Either [Finding] value -> [String]

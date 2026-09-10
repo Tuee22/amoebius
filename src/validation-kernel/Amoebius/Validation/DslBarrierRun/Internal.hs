@@ -107,7 +107,7 @@ acquire refresh root acquired trust = do
       authority = authorityCheck root runRoot cabal compiler store (cabalVersion : matrixReceipts matrix)
       observer = observerCheck matrix
       freshness = freshnessCheck root runRoot matrix
-      qualification = qualificationCheck root runRoot matrix
+      qualification = qualificationCheck root runRoot store matrix
       cleanroomWithoutLegacy = mergeChecks "dsl-barrier-cleanroom-boundaries" [cache, discipline, authority]
       legacy = legacyCheck acquired contract matrix toolchain oracle positives negatives mutants discovery authority observer freshness qualification cleanroomWithoutLegacy
       cleanroom = mergeChecks "dsl-barrier-cleanroom" [cleanroomWithoutLegacy, legacy]
@@ -730,15 +730,15 @@ selectorMatrixDigest (SelectorMatrix recacheReceipt registerReceipt suites) = di
   attemptPayload (SelectorAttempt selector target before after changedBinary compileReceipt runReceipt restored) =
     [selector, Text.pack target, before, after, changedBinary, receiptDigest compileReceipt, receiptDigest runReceipt, restored]
 
-qualificationCheck :: FilePath -> FilePath -> Matrix -> CheckResult
-qualificationCheck root runRoot (Matrix _ _ _ _ _ _ receipts selectors) = mergeChecks "dsl-barrier-universal-qualification"
+qualificationCheck :: FilePath -> FilePath -> FilePath -> Matrix -> CheckResult
+qualificationCheck root runRoot store (Matrix _ _ _ _ _ _ receipts selectors) = mergeChecks "dsl-barrier-universal-qualification"
   [ CheckResult "dsl-barrier-clean-selector-corpus"
       [observation "dsl-barrier.qualification.suite" (receiptSummary receipt) | receipt <- receipts]
       [finding "DSL-BARRIER-QUALIFICATION" (Text.unpack (receiptName receipt)) "a cumulative selector/oracle suite did not pass its complete clean corpus" |
         receipt <- receipts, receiptExit receipt /= ExitSuccess]
   , qualificationSabotageCheck receipts
   , selectorQualificationCheck selectors
-  , selectorAuthorityCheck root runRoot selectors
+  , selectorAuthorityCheck root runRoot store selectors
   ]
 
 qualificationSabotageCheck :: [Receipt] -> CheckResult
@@ -778,8 +778,8 @@ expectedQualificationSabotages =
   , "qualification-sabotage-observation\tchanged-subject-unassigned-row-red\tSABOTAGE-UNASSIGNED-ROW-RED"
   ]
 
-selectorAuthorityCheck :: FilePath -> FilePath -> SelectorMatrix -> CheckResult
-selectorAuthorityCheck root runRoot matrix = CheckResult "dsl-barrier-selector-authority"
+selectorAuthorityCheck :: FilePath -> FilePath -> FilePath -> SelectorMatrix -> CheckResult
+selectorAuthorityCheck root runRoot store matrix = CheckResult "dsl-barrier-selector-authority"
   [ observation "dsl-barrier.selector.authority-receipt-count" (Text.pack (show (length receipts)))
   , observation "dsl-barrier.selector.authority" "absolute compiler, package tool, and run-local Haskell subject paths only"
   ]
@@ -799,7 +799,7 @@ selectorAuthorityCheck root runRoot matrix = CheckResult "dsl-barrier-selector-a
     any (`isInfixOf` value) ["/pb", "docker", "podman", "kubectl", "kind", "ssh", "http://", "https://"]
       || value == "-j"
       || "-j" `isPrefixOf` value
-      || (isAbsolute value && not (pathBelow root value) && not ("/home/matt/.cabal/store/" `isPrefixOf` value))
+      || (isAbsolute value && not (pathBelow root value) && not (pathBelow store value))
 
 selectorMatrixReceipts :: SelectorMatrix -> [Receipt]
 selectorMatrixReceipts (SelectorMatrix recacheReceipt registerReceipt suites) =

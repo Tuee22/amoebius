@@ -36,7 +36,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -75,8 +75,9 @@ NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -111,9 +112,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 16.1: Polymorphic environment and interpreters ⏸️
+## Sprint 16.1: Polymorphic environment and interpreters ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Sim/{Env,Interp/Real,Interp/Sim,Reconcile}.hs` and the six modules under `src/Amoebius/Sim/Fakes/`
 **Blocked by**: [Phase 15](phase_15_compile_fail_harness.md) gate pass
 **Independent Validation**: one reference program green under injected `IO` clients and `IOSim`; exact ten-module polymorphism scan
@@ -143,9 +144,9 @@ Keep concurrency-bearing reconcile code independent of the interpreter used to e
 Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
 qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 16.2: Modeled contracts and semantic schedules ⏸️
+## Sprint 16.2: Modeled contracts and semantic schedules ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: the six typed fake modules, Haskell `scheduleCorpus`, and `test/harness/deterministic_simulation/CalculusProjection.hs`
 **Blocked by**: Sprint 16.1
 **Independent Validation**: four authored schedule outcomes, enabled/disabled fault pairs, and five exact composition facts
@@ -177,9 +178,9 @@ implementation snapshots.
 Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
 qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 16.3: Determinism, exploration, and mutation ⏸️
+## Sprint 16.3: Determinism, exploration, and mutation ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: CPP mutant loci in `Amoebius.Sim.{Reconcile,Interp.Sim}` and package-hidden `DeterministicSimulationRun.Internal`
 **Blocked by**: Sprint 16.2
 **Independent Validation**: same-seed byte equality, changed-seed inequality, four bounded POR runs, and three exact production-mutant deaths

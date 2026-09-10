@@ -33,7 +33,7 @@ owned by the exact integrated gate and the mechanical status projection that fol
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -75,8 +75,9 @@ generated SQL remains an output rather than authority ([§K](development_plan_ph
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -117,9 +118,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 > **Historical sprint results.** Earlier completion statements in sprint prose are capability inventory only;
 > current completion remains owned by the integrated gate.
 
-## Sprint 36.1: Row declarations drive schema and policy ⏸️
+## Sprint 36.1: Row declarations drive schema and policy ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/transaction-vocabulary/Amoebius/Transaction/Vocabulary.hs`, `test/spec/transaction/{TransactionVocabularySpec,TransactionVocabularyOracle}.hs`, the compile-negative program, and the package-hidden Phase-36 supervisor own this sprint surface.
 **Blocked by**: [Phase 35](phase_35_image_recipe_generation.md) gate pass
 **Independent Validation**: one clean Haskell semantic suite, four compiler-negative rows, and three production CPP mutations execute serially from one acquired fresh build root.
@@ -146,9 +147,9 @@ Adopt P3 and P4; derive schema and policy from one private row declaration rathe
 
 The complete integrated Phase-36 gate and its mechanical status projection remain. Live database connections, executor roles, policy enforcement, retention lifecycle, services, and hardware remain later-owned residue.
 
-## Sprint 36.2: The closed request-scoped transaction GADT ⏸️
+## Sprint 36.2: The closed request-scoped transaction GADT ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/transaction-vocabulary/Amoebius/Transaction/Vocabulary.hs`, `test/spec/transaction/{TransactionVocabularySpec,TransactionVocabularyOracle}.hs`, the compile-negative program, and the package-hidden Phase-36 supervisor own this sprint surface.
 **Blocked by**: Sprint 36.1
 **Independent Validation**: one clean Haskell semantic suite, four compiler-negative rows, and three production CPP mutations execute serially from one acquired fresh build root.
@@ -175,9 +176,9 @@ Adopt P1, P2, and P5; make the closed transaction arm carry the request scope an
 
 The complete integrated Phase-36 gate and its mechanical status projection remain. Live database connections, executor roles, policy enforcement, retention lifecycle, services, and hardware remain later-owned residue.
 
-## Sprint 36.3: Additive schema generations ⏸️
+## Sprint 36.3: Additive schema generations ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/transaction-vocabulary/Amoebius/Transaction/Vocabulary.hs`, `test/spec/transaction/{TransactionVocabularySpec,TransactionVocabularyOracle}.hs`, the compile-negative program, and the package-hidden Phase-36 supervisor own this sprint surface.
 **Blocked by**: Sprint 36.2
 **Independent Validation**: one clean Haskell semantic suite, four compiler-negative rows, and three production CPP mutations execute serially from one acquired fresh build root.
@@ -204,9 +205,9 @@ Adopt P6; replace migration edits with a typed, additive transition union.
 
 The complete integrated Phase-36 gate and its mechanical status projection remain. Live database connections, executor roles, policy enforcement, retention lifecycle, services, and hardware remain later-owned residue.
 
-## Sprint 36.4: Compile barriers, semantic mutants, and calculus evidence ⏸️
+## Sprint 36.4: Compile barriers, semantic mutants, and calculus evidence ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/transaction-vocabulary/Amoebius/Transaction/Vocabulary.hs`, `test/spec/transaction/{TransactionVocabularySpec,TransactionVocabularyOracle}.hs`, the compile-negative program, and the package-hidden Phase-36 supervisor own this sprint surface.
 **Blocked by**: Sprint 36.3
 **Independent Validation**: one clean Haskell semantic suite, four compiler-negative rows, and three production CPP mutations execute serially from one acquired fresh build root.

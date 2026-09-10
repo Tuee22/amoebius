@@ -34,7 +34,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -72,8 +72,9 @@ implementation, provider state, browser enforcement, and live tenant isolation r
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -111,9 +112,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 39.1: Exact port and capability binding ⏸️
+## Sprint 39.1: Exact port and capability binding ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`, `test/spec/ui/{EffectBindingCases,UiEffectBindingSpec,EffectBindingReference}.hs`, and the package-hidden Phase-39 supervisor own this sprint surface.
 **Blocked by**: [Phase 38](phase_38_ui_authorization_kernel.md) gate pass
 **Independent Validation**: one clean Haskell semantic suite and seven production CPP mutations execute serially from one acquired fresh build root.
@@ -142,9 +143,9 @@ Adopt one exact relation whose only successful result is a constructor-private `
 Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
 qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 39.2: Trusted links and negative controls ⏸️
+## Sprint 39.2: Trusted links and negative controls ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`, `test/spec/ui/{EffectBindingCases,UiEffectBindingSpec,EffectBindingReference}.hs`, and the package-hidden Phase-39 supervisor own this sprint surface.
 **Blocked by**: Sprint 39.1
 **Independent Validation**: one clean Haskell semantic suite and seven production CPP mutations execute serially from one acquired fresh build root.
@@ -174,9 +175,9 @@ Keep navigation names separate from effect transport and provider coordinates.
 Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
 qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 39.3: Calculus projection and phase seal ⏸️
+## Sprint 39.3: Calculus projection and phase seal ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`, `test/spec/ui/{EffectBindingCases,UiEffectBindingSpec,EffectBindingReference}.hs`, and the package-hidden Phase-39 supervisor own this sprint surface.
 **Blocked by**: Sprint 39.2
 **Independent Validation**: one clean Haskell semantic suite and seven production CPP mutations execute serially from one acquired fresh build root.

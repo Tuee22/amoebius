@@ -11,6 +11,7 @@ import Amoebius.Image.Build (runAdmittedBuildxOci, runBakeInventory, runRenderBa
 import Amoebius.Vault.Client (runVaultPromptWriteCommand, runVaultReadCommand, runVaultTransitCommand)
 import Amoebius.Vault.Seal (openUnlockMaterial, sealUnlockMaterialIO)
 import Amoebius.Validation.Dispatch (runValidateCommand)
+import Amoebius.Validation.SeedCustodySupervisor (runSeedCustodySupervisorContinuation)
 import Amoebius.Validation.PbBoundary (runPbHandoffContinuation)
 import Data.ByteString.Base64 qualified as Base64
 import Data.ByteString.Char8 qualified as StrictByteString
@@ -22,10 +23,14 @@ import Text.Read (readMaybe)
 main :: IO ()
 main = do
   arguments <- getArgs
-  continuation <- runPbHandoffContinuation arguments
-  case continuation of
+  seedContinuation <- runSeedCustodySupervisorContinuation arguments
+  case seedContinuation of
     Just result -> exitWith result
-    Nothing -> dispatch arguments
+    Nothing -> do
+      continuation <- runPbHandoffContinuation arguments
+      case continuation of
+        Just result -> exitWith result
+        Nothing -> dispatch arguments
 
 dispatch :: [String] -> IO ()
 dispatch arguments =

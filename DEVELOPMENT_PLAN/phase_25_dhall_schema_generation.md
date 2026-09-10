@@ -36,7 +36,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -69,8 +69,9 @@ the generated typechecker observations.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -142,9 +143,9 @@ Haskell and qualify the mechanism that first admits their result; component obse
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 25.1: Dhall prelude + typed surfaces + smart constructors ⏸️
+## Sprint 25.1: Dhall prelude + typed surfaces + smart constructors ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/dhall-schema-generation/Amoebius/Dhall/Schema/Generation.hs`; package-hidden `Amoebius.Validation.DhallSchemaRun.Internal`.
 **Blocked by**: [Phase 24](phase_24_conformance_gate_generator.md) gate pass
 **Independent Validation**: Eighteen exact module projections and the required/no-arm invariants for Resources, Image, Storage, Capability, topology, and SecretRef.
@@ -421,9 +422,9 @@ cache/registry/Vault storage cannot pass.
 The pre-reset record said `None`; that statement and its schema/mutant results cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass,
 owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 25.2: dhall-typecheck positive corpus ⏸️
+## Sprint 25.2: dhall-typecheck positive corpus ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: Haskell-declared cases in `Amoebius.Dhall.Schema.Generation`; `DhallSchemaConformanceSpec.hs` invokes the in-process Dhall 1.42.3 engine.
 **Blocked by**: Sprint 25.1
 **Independent Validation**: Four exact positive names, typechecker success, and generated-product presence.
@@ -478,9 +479,9 @@ the authoring-time demonstration that the schema *admits* every intended world.
 The pre-reset record said `None`; that statement and its positive-corpus result cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass,
 owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger ⏸️
+## Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: Fourteen Haskell-declared negative/pair/locus cases and a generated partial-foreclosure ledger in `Amoebius.Dhall.Schema.Generation`.
 **Blocked by**: Sprint 25.2
 **Independent Validation**: Fourteen refusals, fourteen passing siblings, four changed-production subjects, import-policy refusal, and explicit Gate-2/runtime residue.
@@ -548,9 +549,9 @@ at gadt-decode.
 The pre-reset record said `None`; that statement and its negative/mutant/ledger results cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass,
 owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative ⏸️
+## Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: Closed `Vault | TransitKey | Prompt` reference union in the Haskell generator; plaintext-arm production mutant and paired plaintext negative.
 **Blocked by**: Sprint 25.3
 **Independent Validation**: Required reference union locus, absence of `PlainText`, one failing plaintext case, and one changed-production arm-addition subject.

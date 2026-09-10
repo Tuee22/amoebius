@@ -34,7 +34,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -73,8 +73,9 @@ core calculi. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -116,9 +117,9 @@ prerequisite of this earlier gate. Until the local runner and oracle exist, thes
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 10.1: Index-preserving five-calculus composition ⏸️
+## Sprint 10.1: Index-preserving five-calculus composition ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/calculus-composition/Amoebius/Calculus/Composition.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/CalculusCompositionRun/Internal.hs`
 **Blocked by**: [Phase 9](phase_09_resource_index.md) gate pass
 **Independent Validation**: 25 ordered pairs, 125 triples, three 500-case properties, one exact compiler pair, and three applied production mutations

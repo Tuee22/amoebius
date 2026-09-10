@@ -32,7 +32,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -70,8 +70,9 @@ as one Haskell workflow algebra in which teardown remains a type-level obligatio
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -107,9 +108,9 @@ prerequisite of this earlier gate. The local runner owns these pairs until Phase
 
 The sprint seam is bound to the same Haskell-only subject, oracle, and serial supervisor as the gate.
 
-## Sprint 6.1: The workflow calculus ⏸️
+## Sprint 6.1: The workflow calculus ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Calculus/Workflow/{Arm,Ledger,Obligation,Run}.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/WorkflowCalculusRun/Internal.hs`
 **Blocked by**: [Phase 5](phase_05_lift_calculus.md) gate pass
 **Independent Validation**: ten clean predicates over eight obligations and five workflows; three exact compile-negative pairs; seven assigned changed-production subjects; later effects remain residue

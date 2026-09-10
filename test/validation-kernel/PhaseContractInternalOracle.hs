@@ -123,16 +123,16 @@ selectorIntegrityProblems =
 exactCaseProblems :: String -> [String]
 exactCaseProblems exactCase = case exactCase of
   "semantic-observation-composition" ->
-    expectCount "full-mode observation carrier" 1157 (length (checkObservations cleanResult))
+    expectCount "full-mode observation carrier" 1193 (length (checkObservations cleanResult))
   "semantic-finding-composition" ->
     expectCount "full-mode finding carrier" 482 (length (checkFindings cleanResult))
   "phase-semantic-contract-route" ->
     expectObservation "semantic phase count" "semantic.phase-count" "96" cleanResult
       <> expectObservation "semantic slot count" "semantic.slot-count" "1728" cleanResult
-      <> expectObservation "semantic gap count" "semantic.gap-count" "774" cleanResult
-      <> expectObservation "semantic bound count" "semantic.bound-count" "954" cleanResult
+      <> expectObservation "semantic gap count" "semantic.gap-count" "756" cleanResult
+      <> expectObservation "semantic bound count" "semantic.bound-count" "972" cleanResult
       <> expectObservation "semantic target phase" "semantic.target-phase" "00" cleanResult
-      <> expectObservation "semantic deferred gap count" "semantic.deferred-gap-count" "774" cleanResult
+      <> expectObservation "semantic deferred gap count" "semantic.deferred-gap-count" "756" cleanResult
       <> expectObservation "semantic legacy count" "semantic.legacy-count" "28" cleanResult
       <> expectFindingCount "semantic gap findings" "PLAN-SEMANTIC-CONTRACT-GAP" 0 cleanResult
       <> expectFindingCount "semantic diagnostic refusal" "PLAN-SEMANTIC-DIAGNOSTIC-ONLY" 0 cleanResult
@@ -205,7 +205,7 @@ recordedFrontierProblems =
     , expectFindingCount "terminal sprint statuses" "PLAN-SPRINT-STATUS" 0 allDoneResult
     , expectFindingCount "terminal tracker statuses" "PLAN-TRACKER-STATUS" 0 allDoneResult
     , expectObservation "terminal completed-prefix semantic target" "semantic.target-phase" "95" allDoneResult
-    , expectFindingCount "terminal unresolved contracts remain fail-closed" "PLAN-SEMANTIC-CONTRACT-GAP" 774 allDoneResult
+    , expectFindingCount "terminal unresolved contracts remain fail-closed" "PLAN-SEMANTIC-CONTRACT-GAP" 756 allDoneResult
     , expectObservation "explicit Phase-1 gate semantic target" "semantic.target-phase" "01" phaseOneGateResult
     , expectFindingCount "explicit Phase-1 gate has no Phase-1 semantic gaps" "PLAN-SEMANTIC-CONTRACT-GAP" 0 phaseOneGateResult
     ]

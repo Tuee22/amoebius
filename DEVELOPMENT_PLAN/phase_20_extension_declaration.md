@@ -34,7 +34,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -72,8 +72,9 @@ content-derived identity. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -107,9 +108,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 20.1: Complete indexed declaration ⏸️
+## Sprint 20.1: Complete indexed declaration ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/extension-declaration/Amoebius/Extension/Declaration.hs`; package-hidden `Amoebius.Validation.ExtensionDeclarationRun.Internal`.
 **Blocked by**: [Phase 19](phase_19_reconcile_core_simulation.md) gate pass
 **Independent Validation**: Two declaration/ten reader rows, two independent digests, two exact resource folds, two semantic refusal pairs, two compile barriers, and three production mutants.

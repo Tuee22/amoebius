@@ -4667,6 +4667,8 @@ runGit (GitExecutable executable) root arguments input = do
         , "core.untrackedCache=false"
         , "-c"
         , "core.excludesFile="
+        , "-c"
+        , "safe.directory=" <> root
         , "-C"
         , root
         ]

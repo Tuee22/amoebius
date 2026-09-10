@@ -1437,6 +1437,9 @@ slotFindings target contract = concatMap findingFor gateCategories
           category
           "the canonical eighteen-category map has no slot"
       ]
+#ifdef VALIDATION_PHASE_SEMANTIC_GAP_ACCEPTANCE_MUTANT
+    Just (ContractGap _) -> []
+#else
     Just (ContractGap gapIdentifier)
       | deferred -> []
       | otherwise ->
@@ -1446,6 +1449,7 @@ slotFindings target contract = concatMap findingFor gateCategories
               category
               ("gap=" <> renderGapId gapIdentifier)
           ]
+#endif
     Just (BoundSpecification _) -> []
 
 semanticFinding :: Text -> PhaseSemanticContract -> GateCategory -> Text -> Finding

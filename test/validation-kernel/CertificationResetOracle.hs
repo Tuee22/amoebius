@@ -43,12 +43,12 @@ expectedRefusal =
     { checkName = "certification-reset"
     , checkObservations =
         [ Observation "certification.generation" "amoebius-certification-generation-1"
-        , Observation "certification.issuer-status" "NOT YET QUALIFIED"
+        , Observation "certification.issuer-status" "UNAVAILABLE AT THIS ENTRY POINT"
         ]
     , checkFindings =
         [ Finding
             "CERTIFICATION-ISSUER-UNQUALIFIED"
             "<certification-issuer>"
-            "The current certification generation has no qualified protected issuer; accepted-baseline admission and authenticated receipt custody are not implemented. Legacy candidates and receipts cannot authorize validation, status changes, or live effects."
+            "The unprotected certification entry point has no issuer authority. Only the root-owned generation-1 supervisor can qualify the accepted baseline and authenticated receipt custody; legacy candidates and receipts cannot authorize validation, status changes, or live effects."
         ]
     }

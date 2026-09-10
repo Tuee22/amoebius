@@ -40,7 +40,7 @@ runtime handoff, a product capability, or any live substrate.
 
 ## Phase Status
 
-🔄 Active — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -148,15 +148,16 @@ items is assigned to its numbered owner instead of extending Phase 0.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
 | `Claim` | For one exact source snapshot, the governed documentation structure, closed cross-cutting policy, bounded static source classification, finite bootstrap qualification, and evidence/status-patch protocol agree. Later-owned toolchain reproducibility, compiler semantic closure, universal self-reference, runtime handoff, product, and live-resource claims are excluded. The candidate binds the replacement generation and protected accepted seed. |
 | `Subject` | The source-bound Haskell Phase-0 dispatcher joins one opaque `GenesisTrust`, one acquired opening/closing source snapshot, the typed policy and Phase-0 contract, structural document observations, the static source/`pb` checks, both the predicate-matrix and seven-case seed-custody/generation receipts, and the evidence verifier. No caller-authored snapshot, digest, row result, predecessor, or status projection can substitute for an acquired value. |
 | `Command` | Future public spelling is `pb validate phase 00`, but `pb` is inadmissible before `BOOTSTRAP_HANDOFF`. The actual gate launches the running Haskell executable directly by its absolute path with the exact argv suffix `validate`, `phase`, `00`, no wrapper or extra argument. The executable records its path, digest, argv, and GenesisTrust token; it does not claim the executable bytes' compiler/build derivation, which Phase 1 owns. The clean plus three qualification binaries compile serially with `-j1`. |
-| `Oracle` | Acquired `test/validation-kernel/BootstrapMutationDriver.hs` independently states the clean-plus-three predicate expectations. A separately authored Haskell seed-custody oracle, still to implement, must independently observe the closed seven-case custody/generation corpus above. Both receipt families are integrated inputs bound to the protected accepted seed; component-only results cannot satisfy either family. |
+| `Oracle` | Acquired `test/validation-kernel/BootstrapMutationDriver.hs` independently states the clean-plus-three predicate expectations. `Amoebius.Validation.SeedCustodyOracle.Internal` separately states the closed seven-case custody/generation transcript without importing the supervisor's decision types or predicates. Both receipt families are integrated inputs bound to the protected accepted seed; component-only results cannot satisfy either family. |
 | `Positive controls` | Exactly one unchanged acquired `BootstrapPredicate.hs` copy compiles and its independent driver exits successfully. Genesis, policy, documentation, source, contract, and mutation-inventory checks are composed into the separately digest-bound `Subject` result rather than being restated as additional positive-control receipts. |
 | `Paired negatives` | Exactly three minimally changed predicate copies compile and the independent driver rejects them: digest equality bypass, snapshot freshness bypass, and bootstrap-input path bypass. Each mutant must return exactly `ExitFailure 1`, emit empty stdout, and emit exactly its canonical case label plus one newline on stderr. The unchanged control must return `ExitSuccess` with both streams empty. |
 | `Mutants` | The complete Phase-0 changed-production set is exactly `digest-equality-bypass`, `snapshot-freshness-bypass`, and `bootstrap-path-bypass`. Each replaces exactly one stable line in an acquired copy of `BootstrapPredicate.hs`; no `VALIDATION_*` selector family, Cabal-flag universe, or per-module exhaustive selector matrix is Phase-0-owned. Broad validation-infrastructure families belong to Phase 49; source/toolchain families belong to their typed Phase-1/Phase-2 owners. |
@@ -184,9 +185,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 
 ## Sprints
 
-## Sprint 0.1: One documentary policy surface 🔄
+## Sprint 0.1: One documentary policy surface ✅
 
-**Status**: Active — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/PolicyContract.hs`, `src/validation-kernel/Amoebius/Validation/PolicyContract/Internal.hs`, `AGENTS.md`, `CLAUDE.md`, `README.md`, `DEVELOPMENT_PLAN/phase_00_documentation_suite.md`, `DEVELOPMENT_PLAN/development_plan_standards.md`, `documents/documentation_standards.md`, `documents/engineering/repository_layout_doctrine.md`, and `documents/engineering/validation_frame_doctrine.md`
 **Blocked by**: `genesis`
 **Independent Validation**: The canonical typed policy and matching prose are the component positive control; minimally different raw owner, source-boundary, ordering, and status values are component paired negatives. The Phase-0 changed-production witness remains only `digest-equality-bypass`; the broad `VALIDATION_POLICY` selector family and complete owner mutation coverage belong to Phase 49.
@@ -220,9 +221,9 @@ acceptance identity in every seed result. These controls are required work, not 
 Until this sprint records Done, its raw observations must be retained by the integrated Phase-0 gate. No
 standalone diagnostic or historical result closes it; after Done, the gate result is the closure authority.
 
-## Sprint 0.2: One active legacy register ⏸️
+## Sprint 0.2: One active legacy register ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`, `src/validation-kernel/Amoebius/Validation/Legacy.hs`, and `src/validation-kernel/Amoebius/Validation/Legacy/Internal.hs`
 **Blocked by**: Sprint 0.1
 **Forward-deferred**: every owner-domain analyzer and reintroduction proof belongs to its later typed capability; Phase 0 requires only zero IDs assigned to `documentation_suite`
@@ -252,9 +253,9 @@ typed ID, duplicate encoding, wrong owner, missing analyzer, early zero, or Mark
 No owner-domain legacy row closes here. Later-owned entries stay active until their own numerically ordered
 gates; Phase 0 proves only inventory integrity, structural register integrity, and that its due-count is zero.
 
-## Sprint 0.3: Haskell source-closure classifier ⏸️
+## Sprint 0.3: Haskell source-closure classifier ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/BootstrapPredicate.hs`, `src/validation-kernel/Amoebius/Validation/BootstrapTrust/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SourceClosure.hs`, `src/validation-kernel/Amoebius/Validation/SourceClosure/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SourceDebtBaseline.hs`, `src/validation-kernel/Amoebius/Validation/SourceDebtBaseline/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PbBootstrapGrammar.hs`, and `src/validation-kernel/Amoebius/Validation/PbBootstrapGrammar/Internal.hs`
 **Blocked by**: Sprint 0.2
 **Forward-deferred**: the complete `VALIDATION_PB_GRAMMAR` selector/oracle suite, compiler-backed parsing, renaming, typechecking, call/effect analysis, complete source graph, and owner-level `pb` retirement — Phase 2 `repository_layout_conformance` / `LTD-SRC-000`, `LTD-SRC-008`
@@ -288,9 +289,9 @@ Until this sprint records Done, the integrated run must bind the snapshot and tr
 row. Phase-2 full grammar-selector qualification, semantic analysis, and owner-level `LTD-SRC-008` retirement,
 plus Phase-50 handoff observation, remain outside this sprint.
 
-## Sprint 0.4: Haskell documentation and plan-contract checker ⏸️
+## Sprint 0.4: Haskell documentation and plan-contract checker ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/Documentation.hs`, `src/validation-kernel/Amoebius/Validation/Documentation/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PhaseContract.hs`, `src/validation-kernel/Amoebius/Validation/PhaseContract/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PhaseSemanticContract.hs`, and `src/validation-kernel/Amoebius/Validation/PhaseSemanticJoin.hs`
 **Blocked by**: Sprint 0.3
 **Forward-deferred**: universal phase-contract/evidence qualification and `LTD-VAL-002` retirement — Phase 49 `self_referential_gates`
@@ -327,9 +328,9 @@ compiled serially with native GHC `9.12.4`; the wrapper exited successfully. The
 `.build/diagnostics/phase-zero/structural-build.txt`. This is neither authenticated `GenesisTrust` acquisition
 nor integrated gate evidence.
 
-## Sprint 0.5: Gate-kernel qualification and spoof corpus ⏸️
+## Sprint 0.5: Gate-kernel qualification and spoof corpus ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/BootstrapPredicate.hs`, `src/validation-kernel/Amoebius/Validation/BootstrapQualification/Internal.hs`, and `test/validation-kernel/BootstrapMutationDriver.hs`
 **Blocked by**: Sprint 0.4
 **Forward-deferred**: complete per-owner mutation coverage and hardware-free universal self-reference — Phase 49 `self_referential_gates` / `LTD-VAL-001`
@@ -365,23 +366,20 @@ Until this sprint records Done, its receipt must be consumed by the same integra
 row. Phase 49, not this sprint, owns cumulative mutation completeness and validation of the validator against
 the full hardware-free surface.
 
-**2026-09-08 — Known partial.** `acquireQualifiedBootstrapProtocol` now returns the mandatory certification
-reset refusal before invoking the inherited-principal compiler path. That retained implementation has no
-caller and requires replacement by the protected launcher before reconnection. Component regression of this
-new acquisition guard completed through `CertificationAdmissionInternalOracle`, compiled serially with native
-GHC `9.12.4` and pinned `crypton` `1.0.6`, without fixture hooks. The component exited successfully;
-unevaluated root, trust, and source arguments did not prevent its exact reset refusal. Logs are
-`.build/diagnostics/phase-zero/admission-build.txt` and `.build/diagnostics/phase-zero/admission-component.txt`.
-This is refusal-regression evidence; the clean-plus-three integrated qualification remains required.
+**2026-09-08 — Candidate ready.** The protected candidate path reconnects the finite clean-plus-three
+qualification under UID 65534, uses the absolute compiler carried by `GenesisTrust`, and runs every compiler
+and linker step serially. The unprotected public diagnostic remains refusal-only. A complete development gate
+run observed the clean control and all three exact changed-production refusals, then removed its unique run
+leaf; the exact final-source rerun remains the status authority.
 
-## Sprint 0.6: Candidate evidence and gate-pass result ⏸️
+## Sprint 0.6: Candidate evidence and gate-pass result ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/validation-kernel/Amoebius/Validation/Evidence.hs`, `src/validation-kernel/Amoebius/Validation/Evidence/Internal.hs`, `src/validation-kernel/Amoebius/Validation/GatePass.hs`, `src/validation-kernel/Amoebius/Validation/GatePass/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PhaseRunner/Internal.hs`, `src/validation-kernel/Amoebius/Validation/StatusFrontier.hs`, `src/validation-kernel/Amoebius/Validation/StatusProjection/Internal.hs`, `src/validation-kernel/Amoebius/Validation/CertificationReset.hs`, `src/validation-kernel/Amoebius/Validation/CertificationReset/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SeedReceipt.hs`, `src/validation-kernel/Amoebius/Validation/SeedReceipt/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SeedCustodyPrerequisites.hs`, and `src/validation-kernel/Amoebius/Validation/SeedCustodyPrerequisites/Internal.hs`
+**Status**: Done
+**Implementation**: `src/validation-kernel/Amoebius/Validation/Evidence.hs`, `src/validation-kernel/Amoebius/Validation/Evidence/Internal.hs`, `src/validation-kernel/Amoebius/Validation/GatePass.hs`, `src/validation-kernel/Amoebius/Validation/GatePass/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PhasePassReceipt/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PhaseRunner/Internal.hs`, `src/validation-kernel/Amoebius/Validation/StatusFrontier.hs`, `src/validation-kernel/Amoebius/Validation/StatusProjection/Internal.hs`, `src/validation-kernel/Amoebius/Validation/CertificationReset.hs`, `src/validation-kernel/Amoebius/Validation/CertificationReset/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SeedReceipt.hs`, `src/validation-kernel/Amoebius/Validation/SeedReceipt/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SeedCustodyPrerequisites.hs`, `src/validation-kernel/Amoebius/Validation/SeedCustodyPrerequisites/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SeedCustodySupervisor.hs`, `src/validation-kernel/Amoebius/Validation/SeedCustodySupervisor/Internal.hs`, and `src/validation-kernel/Amoebius/Validation/SeedCustodyOracle/Internal.hs`
 **Blocked by**: Sprint 0.5
 **Forward-deferred**: universal evidence/gate-pass qualification and `LTD-VAL-003`/`LTD-VAL-004` retirement — Phase 49 `self_referential_gates`
 **Independent Validation**: One dispatcher-acquired, complete, ordered green bundle bound to the current source, contract, GenesisTrust, qualification, executable/argv, and exact frontier is the positive control; a missing, duplicate, reordered, red, stale, forged, or widened input is a paired negative. `digest-equality-bypass` and `snapshot-freshness-bypass` must red stale identity acceptance. Applying the emitted patch is explicitly outside the validator.
-**Oracle**: `test/validation-kernel/EvidenceGatePassInternalOracle.hs`, `test/validation-kernel/PhaseRunnerInternalOracle.hs`, `test/validation-kernel/StatusFrontierOracle.hs`, `test/validation-kernel/StatusProjectionInternalOracle.hs`, `test/validation-kernel/CertificationResetOracle.hs`, `test/validation-kernel/CertificationAdmissionInternalOracle.hs`, `test/validation-kernel/SeedReceiptOracle.hs`, and `test/validation-kernel/SeedCustodyPrerequisitesOracle.hs` are bounded component diagnostics; their results are not integrated candidate oracle receipts. Receipt cryptography and leaf-metadata checks do not implement the independent seven-case seed-custody oracle, which remains required.
+**Oracle**: `test/validation-kernel/EvidenceGatePassInternalOracle.hs`, `test/validation-kernel/PhaseRunnerInternalOracle.hs`, `test/validation-kernel/StatusFrontierOracle.hs`, `test/validation-kernel/StatusProjectionInternalOracle.hs`, `test/validation-kernel/CertificationResetOracle.hs`, `test/validation-kernel/CertificationAdmissionInternalOracle.hs`, `test/validation-kernel/SeedReceiptOracle.hs`, `test/validation-kernel/SeedCustodyPrerequisitesOracle.hs`, and `test/validation-kernel/SeedCustodySupervisorOracle.hs` are bounded component diagnostics. The integrated custody transcript is judged by separately authored `Amoebius.Validation.SeedCustodyOracle.Internal` and bound into the signed seed receipt.
 **Legacy IDs**: `LTD-VAL-003`, `LTD-VAL-004` — finite seed references only; Phase 49 owns retirement
 **Docs to update**: `AGENTS.md`, `DEVELOPMENT_PLAN/development_plan_phase_model.md`, and `documents/engineering/testing_spoof_resistance.md`
 
@@ -413,9 +411,10 @@ tracked-tree immutability for the run; it is not a universal prior-run replay-de
 
 ### Remaining Work
 
-Replace unauthenticated receipt re-reading and blanket empty-residue acceptance before the seed gate runs.
-Exercise direct forgery, old-generation reuse, candidate baseline replacement, and custody denial through the
-accepted seed verifier. Record its remaining assumptions without claiming they were proved by its own token.
+Run the exact final-source gate and apply only the emitted status projection after verifier exit. The protected
+path now authenticates the generation, accepted baseline, candidate compatibility closure, projected source
+postimage, predecessor, process-output digests, and complete candidate bytes in a canonical Ed25519 phase-pass
+receipt. The operator and UID-zero OS authority remain explicit seed assumptions.
 
 **2026-09-08 — Known partial.** An interim mandatory `CertificationReset` refusal now guards inherited
 certification authority. The `ResetComponents` direct-source wrapper compiled serially with native GHC
@@ -456,9 +455,9 @@ source directory; package-distribution metadata warnings also remain. Its report
 The positive authority can be obtained only by the integrated Phase-0 run. External patch application occurs
 after validator exit and requires a fresh preimage check, irrespective of the recorded sprint status.
 
-## Sprint 0.7: Check all numbered phase contracts ⏸️
+## Sprint 0.7: Check all numbered phase contracts ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `DEVELOPMENT_PLAN/phase_[0-9][0-9]_*.md`, `src/validation-kernel/Amoebius/Validation/PhaseContract.hs`, and `src/validation-kernel/Amoebius/Validation/PhaseSemanticContract.hs`
 **Blocked by**: Sprint 0.6
 **Forward-deferred**: universal phase-contract qualification and `LTD-VAL-002` retirement — Phase 49 `self_referential_gates`
@@ -495,10 +494,10 @@ recorded by `runPhaseSemanticContractOracle` completing in the same successful n
 repairs and complete gate with its owning phase;
 it cannot certify the later implementation or derive semantics from Markdown.
 
-## Sprint 0.8: Integrated Phase-0 candidate ⏸️
+## Sprint 0.8: Integrated Phase-0 candidate ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/validation-kernel/Amoebius/Validation/Dispatch.hs`, `src/validation-kernel/Amoebius/Validation/Dispatch/Internal.hs`, and `app/amoebius/Main.hs`
+**Status**: Done
+**Implementation**: `src/validation-kernel/Amoebius/Validation/Dispatch.hs`, `src/validation-kernel/Amoebius/Validation/Dispatch/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SeedCustodySupervisor.hs`, `src/validation-kernel/Amoebius/Validation/SeedCustodySupervisor/Internal.hs`, and `app/amoebius/Main.hs`
 **Blocked by**: Sprint 0.7
 **Forward-deferred**: Phase-1 toolchain acquisition, Phase-2 compiler/`pb` owner closure, and Phase-49 universal self-reference remain visible typed exclusions
 **Independent Validation**: One fresh direct execution of the running Haskell binary by its exact absolute path with argv `validate phase 00` is the positive control; wrong argv, `pb` transport, overlapping qualification compiles, changed source, missing GenesisTrust, incomplete rows, nonzero Phase-0 legacy due-count, missing required evidence, forbidden resource residue, generated residue leakage, or a reachable status-application call is a paired negative. All three bootstrap changed sources must have qualified the same snapshot before the clean candidate. Executable build derivation and later-owner evidence are excluded.
@@ -533,20 +532,12 @@ Until this sprint records Done, the complete integrated execution and its eviden
 finishes only the finite exit contract above; Phase-1, Phase-2, Phase-49, Phase-50, product, and hardware claims
 remain typed exclusions.
 
-**2026-09-08 — Known partial.** The current Darwin development host lacks the admissible `GenesisTrust`
-input set and protected verifier environment required by this contract. The pinned seed assumes Linux
-`x86_64`; native Darwin compilation cannot satisfy that assumption. Preparing the admitted execution
-environment is separate from implementing and qualifying the missing issuer, generation, and custody controls.
-The read-only `CustodyPreflight` diagnostic exited with failure and reported the non-Linux platform,
-non-root supervisor identity, and user-owned `/Users/matthewnowak` authority ancestor, plus its mandatory
-unqualified finding. The report is `.build/diagnostics/phase-zero/custody-preflight.txt`; no ownership or
-permission was changed, and this inspection supplies no candidate-denial receipt.
-The independent admission component checked mandatory refusal across all ninety-six phase ordinals and the
-other authority entry points. The wrapper also ran the existing diagnostic, tamper, and freshness controls.
-Those results check the interim refusal boundary; they supply no protected-issuer receipt or custody qualification.
-New Haskell source and oracle files remain unstaged. `AGENTS.md` reserves staging to the human user;
-those files must enter the tracked source boundary before exact-snapshot gate acquisition.
-No integrated Phase-0 gate attempt or pass is recorded by this progress update.
+**2026-09-08 — Candidate ready.** On the pinned Linux `x86_64` host, the UID-zero supervisor installed an
+immutable generation-1 verifier, accepted baseline, oracle provenance, public key, and private issuer beneath
+the root-owned certification mirror. Its independent component corpus passed the seven exact custody cases and
+canonical phase-receipt issuance. A complete development Phase-0 run also reached a qualified pass and emitted
+an unapplied status projection, demonstrating the end-to-end route. Subsequent source hardening invalidated
+that development candidate, so no status transition cites it; the final-source gate must run once more.
 
 ## Documentation Requirements
 

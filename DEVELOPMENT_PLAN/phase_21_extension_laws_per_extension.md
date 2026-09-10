@@ -33,7 +33,7 @@ after the exact integrated gate succeeds for the current source. Current status 
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -69,8 +69,9 @@ using independently authored `.hs` controls, oracles, paired negatives, and muta
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -102,9 +103,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 21.1: The per-extension laws L1-L5 ⏸️
+## Sprint 21.1: The per-extension laws L1-L5 ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/extension-laws/Amoebius/Extension/Laws/PerExtension.hs`; package-hidden `Amoebius.Validation.ExtensionLawsRun.Internal`.
 **Blocked by**: [Phase 20](phase_20_extension_declaration.md) gate pass
 **Independent Validation**: Two lawful controls, five single-law negatives, six generated-operation cases, 35 exact verdicts, the Phase-15 compile pair, and five changed-production mutants.

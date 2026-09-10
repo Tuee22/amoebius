@@ -60,9 +60,12 @@ with the next phase in numeric order.
 
 The 2026-09-08 audit reset withdraws all earlier certification. A new Haskell-owned generation must reject
 pre-reset receipts before predecessor acquisition, compatibility reuse, status recording, or hardware authority.
-The interim Haskell boundary refuses every admission while the protected issuer is unqualified. It does not
-implement the acceptance authority specified here. The [tracker](README.md#current-implementation-audit)
-records implementation progress; editing Markdown cannot mint that authority.
+The Haskell generation-1 supervisor admits only its root-owned accepted verifier, exact accepted seed, and
+separately authored custody oracle after the seven-case OS-boundary corpus passes. It emits canonical signed
+phase receipts binding candidate bytes, compatibility closure, predecessor, process observations, and projected
+source postimage. Unprotected diagnostic entry points remain refusal-only. The
+[tracker](README.md#current-implementation-audit) records implementation progress; editing Markdown cannot mint
+that authority.
 
 The accepted baseline contains Haskell requirement identities, acceptance predicates, oracle provenance,
 dependency and build closures, verifier identity, and qualification obligations. Candidate code and proposed

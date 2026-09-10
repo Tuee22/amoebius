@@ -11,7 +11,7 @@ module Amoebius.Validation.Dispatch.Internal
 
 import Amoebius.Validation.CertificationReset.Internal (certificationResetDiagnostic)
 import Amoebius.Validation.BootstrapQualification.Internal
-  ( acquireQualifiedBootstrapProtocol
+  ( acquireProtectedQualifiedBootstrapProtocol
   , bootstrapQualificationCheck
   )
 import Amoebius.Validation.BootstrapTrust.Internal
@@ -327,7 +327,8 @@ import Amoebius.Validation.Documentation.Internal (checkDocuments)
 import Amoebius.Validation.Evidence.Internal
   ( PublishedCandidateEvidence
   , PredecessorEvidence
-  , acquireImmediatePredecessorEvidence
+  , acquireProtectedImmediatePredecessorEvidence
+  , bindProtectedCertificationContext
   , acquiredCandidateDigest
   , acquiredCandidateLegacyClosureCheck
   , acquiredCandidatePassCriterionCheck
@@ -390,7 +391,21 @@ import Amoebius.Validation.Evidence.Internal
   , publishedCandidatePath
   , writeAcquiredCandidateEvidence
   )
-import Amoebius.Validation.GatePass.Internal (verifyPublishedGatePass)
+import Amoebius.Validation.GatePass.Internal
+  ( candidateBindingFindings
+  , issueProtectedGatePass
+  , verifyPublishedGatePass
+  )
+import Amoebius.Validation.SeedCustodySupervisor.Internal
+  ( SeedCustodyIssueRequest (..)
+  , QualifiedSeedCustody
+  , certificationMirrorRoot
+  , foldProtectedCandidateAdmission
+  , foldQualifiedSeedCustody
+  , issueQualifiedPhasePassReceipt
+  , qualifyAndIssueSeedCustody
+  , verifyProtectedCandidate
+  )
 import Amoebius.Validation.Legacy.Internal (legacyCheck)
 import Amoebius.Validation.PhaseContract.Internal (checkPhaseContractsForPhase)
 import Amoebius.Validation.PhaseRunner.Internal
@@ -415,6 +430,7 @@ import Amoebius.Validation.SourceClosure.Internal
   , acquiredSourceSnapshot
   , classifySnapshot
   , loadGitSnapshot
+  , mkGitExecutable
   , renderSnapshotProblem
   , sourceClosureCheck
   )
@@ -428,6 +444,9 @@ import Amoebius.Validation.SourceDebtBaseline.Internal
   )
 import Amoebius.Validation.StatusProjection.Internal
   ( ProposedStatusProjection
+  , applyAuthorizedStatusProjection
+  , applyAuthorizedStatusProjectionReplica
+  , authorizeProtectedStatusProjection
   , authorizeStatusProjection
   , prepareValidationProjection
   , projectionDigest
@@ -449,7 +468,7 @@ import Amoebius.Validation.ToolchainSpikeRun.Internal
   )
 import Amoebius.Validation.Types
 import Control.Exception (IOException, try)
-import Control.Monad (filterM)
+import Control.Monad (filterM, unless)
 import Crypto.Hash qualified as Crypto
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
@@ -460,16 +479,32 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 import Data.Text.IO qualified as TextIO
+import Data.Word (Word32)
 import System.Directory
   ( canonicalizePath
+  , copyFile
+  , createDirectoryIfMissing
+  , doesDirectoryExist
   , doesFileExist
   , doesPathExist
   , findExecutable
   , getCurrentDirectory
+  , listDirectory
+  , removePathForcibly
   )
-import System.Environment (getArgs, getExecutablePath)
+import System.Environment (getArgs, getExecutablePath, lookupEnv)
 import System.Exit (ExitCode (ExitFailure, ExitSuccess))
-import System.FilePath ((</>), isAbsolute, takeDirectory)
+import System.FilePath ((</>), dropExtension, isAbsolute, normalise, takeDirectory, takeExtension)
+import System.Process
+  ( CreateProcess (..)
+  , proc
+  , rawSystem
+  , readCreateProcessWithExitCode
+  )
+#if !defined(mingw32_HOST_OS)
+import System.Posix.Files (setFileMode, setOwnerAndGroup)
+import System.Posix.User (getEffectiveUserID)
+#endif
 import Text.Read (readMaybe)
 
 maximumDispatchPhaseBytes, maximumDispatchComponents :: Int
@@ -870,6 +905,14 @@ dispatchLengthText value =
 dispatchSha256 :: ByteString -> Text
 dispatchSha256 = Text.pack . show . Crypto.hashWith Crypto.SHA256
 
+dispatchHex :: ByteString -> Text
+dispatchHex = Text.pack . concatMap byteHex . ByteString.unpack
+ where
+  byteHex byte =
+    let digits = "0123456789abcdef"
+        value = fromIntegral byte
+     in [digits !! (value `div` 16), digits !! (value `mod` 16)]
+
 boundedDispatchPrefix :: Int -> [value] -> DispatchPrefix value
 boundedDispatchPrefix limit = go 0 []
  where
@@ -1011,12 +1054,20 @@ dispatchOrdinalSubject :: Int -> FilePath
 dispatchOrdinalSubject ordinal = "<component-" <> show ordinal <> ">"
 
 -- | Parse public validation argv and refuse before repository acquisition.
--- The unqualified replacement issuer cannot authorize any integrated runner.
+-- Unprotected calls delegate to the accepted verifier and cannot authorize a
+-- local in-process runner.
 runValidateCommand :: [String] -> IO ExitCode
-runValidateCommand arguments =
+runValidateCommand arguments = do
+  candidateStage <- lookupEnv "AMOEBIUS_CERTIFICATION_CANDIDATE_STAGE"
   case arguments of
+    ["__certification-supervise-v1", ordinal, originalRoot]
+      | Just phase <- parseOrdinal ordinal -> runProtectedSupervisorCommand originalRoot phase
+    ["__certification-apply-v1", ordinal, originalRoot]
+      | Just phase <- parseOrdinal ordinal -> runProtectedStatusApplyCommand originalRoot phase
     ["phase", ordinal]
-      | Just _ <- parseOrdinal ordinal -> emitResult certificationResetDiagnostic
+      | Just phase <- parseOrdinal ordinal
+      , candidateStage == Just "generation-1" -> runProtectedCandidate phase
+      | Just phase <- parseOrdinal ordinal -> invokeProtectedSupervisor phase
     _ ->
       emitResult
         CheckResult
@@ -1029,6 +1080,476 @@ runValidateCommand arguments =
                   ("expected exactly: validate phase NN, with a two-digit phase ordinal from " <> policyDomainLabel)
               ]
           }
+
+invokeProtectedSupervisor :: Int -> IO ExitCode
+invokeProtectedSupervisor phase = do
+  verifierPresent <- doesFileExist verifierPath
+  if not verifierPresent
+    then emitResult certificationResetDiagnostic
+    else do
+      repository <- discoverRepositoryRoot
+      case repository of
+        Left detail -> emitResult (captureFailure detail)
+        Right originalRoot ->
+          rawSystem
+            "/usr/bin/sudo"
+            [ "-n"
+            , verifierPath
+            , "validate"
+            , "__certification-supervise-v1"
+            , Text.unpack (formatOrdinal phase)
+            , originalRoot
+            ]
+
+runProtectedSupervisorCommand :: FilePath -> Int -> IO ExitCode
+#if defined(mingw32_HOST_OS)
+runProtectedSupervisorCommand _ _ = emitResult certificationResetDiagnostic
+#else
+runProtectedSupervisorCommand originalRoot phase = do
+  effectiveUid <- getEffectiveUserID
+  executable <- getExecutablePath >>= canonicalizePath
+  if effectiveUid /= 0 || executable /= verifierPath
+    then emitResult
+      CheckResult
+        { checkName = "certification-supervisor"
+        , checkObservations = []
+        , checkFindings =
+            [ finding
+                "CERTIFICATION-SUPERVISOR-AUTHORITY"
+                "<certification-supervisor>"
+                "The supervisor requires UID zero and the protected generation-1 verifier executable."
+            ]
+        }
+    else protectedSupervisorResult originalRoot phase >>= emitResult
+#endif
+
+runProtectedStatusApplyCommand :: FilePath -> Int -> IO ExitCode
+#if defined(mingw32_HOST_OS)
+runProtectedStatusApplyCommand _ _ = emitResult certificationResetDiagnostic
+#else
+runProtectedStatusApplyCommand originalRoot phase = do
+  effectiveUid <- getEffectiveUserID
+  executable <- getExecutablePath >>= canonicalizePath
+  if effectiveUid /= 0 || executable /= verifierPath
+    then emitResult
+      CheckResult
+        { checkName = "certification-status-application"
+        , checkObservations = []
+        , checkFindings = [finding "CERTIFICATION-STATUS-AUTHORITY" "<status-application>" "Status application requires UID zero and the protected generation-1 verifier executable."]
+        }
+    else protectedStatusApplyResult originalRoot phase >>= emitResult
+#endif
+
+protectedStatusApplyResult :: FilePath -> Int -> IO CheckResult
+protectedStatusApplyResult originalRoot phase = do
+  gitResult <- acquireSupervisorGit
+  case gitResult of
+    Left problems -> pure (statusLifecycleFailure phase problems)
+    Right git -> do
+      mirrorResult <- loadGitSnapshot git certificationMirrorRoot
+      case mirrorResult of
+        Left problems -> pure (statusLifecycleFailure phase (map supervisorSnapshotFinding problems))
+        Right mirrorOpening -> do
+          let sourceIdentity = snapshotIdentity (acquiredSourceSnapshot mirrorOpening)
+          custody <-
+            qualifyAndIssueSeedCustody
+              SeedCustodyIssueRequest
+                { seedIssueRepositoryRoot = certificationMirrorRoot
+                , seedIssueCandidateUid = certificationCandidateUid
+                , seedIssueCandidateGid = certificationCandidateGid
+                , seedIssueSourceIdentity = decodeDispatchSha256 sourceIdentity
+                }
+          case custody of
+            Left problems -> pure (statusLifecycleFailure phase problems)
+            Right qualified -> do
+              stored <- discoverStoredCandidate phase
+              case stored of
+                Left problems -> pure (statusLifecycleFailure phase problems)
+                Right candidatePath -> do
+                  admitted <- verifyProtectedCandidate qualified phase candidatePath
+                  case admitted of
+                    Left problems -> pure (statusLifecycleFailure phase problems)
+                    Right protected ->
+                      foldProtectedCandidateAdmission
+                        (finishProtectedStatusApply git mirrorOpening qualified originalRoot phase)
+                        protected
+
+finishProtectedStatusApply
+  :: GitExecutable
+  -> AcquiredSourceSnapshot
+  -> QualifiedSeedCustody
+  -> FilePath
+  -> Int
+  -> Int
+  -> Text
+  -> Text
+  -> Text
+  -> Text
+  -> Text
+  -> Text
+  -> FilePath
+  -> IO CheckResult
+finishProtectedStatusApply git mirrorOpening _qualified originalRoot expectedPhase admittedPhase source evidence projectionDigestValue postimage _compatibility _predecessor candidatePath
+  | admittedPhase /= expectedPhase = pure (statusLifecycleFailure expectedPhase [finding "CERTIFICATION-STATUS-PHASE" candidatePath "The stored candidate phase differs from the requested status transition."])
+  | otherwise = do
+      receipt <- acquireProtectedImmediatePredecessorEvidence certificationMirrorRoot (expectedPhase + 1) postimage
+      case receipt of
+        Left problems -> pure (statusLifecycleFailure expectedPhase problems)
+        Right _ -> case prepareValidationProjection expectedPhase mirrorOpening of
+          Left problems -> pure (statusLifecycleFailure expectedPhase problems)
+          Right proposed
+            | projectionDigest proposed /= projectionDigestValue || projectionPostimageDigest proposed /= postimage ->
+                pure (statusLifecycleFailure expectedPhase [finding "CERTIFICATION-STATUS-PROJECTION" "<status-projection>" "The stored candidate does not bind the freshly reconstructed status projection."])
+            | otherwise -> case issueProtectedGatePass admittedPhase source evidence projectionDigestValue postimage candidatePath of
+                Left problems -> pure (statusLifecycleFailure expectedPhase problems)
+                Right verified -> case authorizeProtectedStatusProjection verified proposed of
+                  Left problems -> pure (statusLifecycleFailure expectedPhase problems)
+                  Right authorized -> do
+                    replica <- applyAuthorizedStatusProjectionReplica git originalRoot authorized
+                    case replica of
+                      Left problems -> pure (statusLifecycleFailure expectedPhase problems)
+                      Right () -> do
+                        mirror <- applyAuthorizedStatusProjection git authorized
+                        pure $ case mirror of
+                          Left problems -> statusLifecycleFailure expectedPhase problems
+                          Right _ ->
+                            CheckResult
+                              { checkName = "certification-status-application-phase-" <> formatOrdinal expectedPhase
+                              , checkObservations =
+                                  [ observation "status.application" "exact-authorized-projection-applied"
+                                  , observation "status.operator-repository" (Text.pack originalRoot)
+                                  , observation "status.protected-repository" (Text.pack certificationMirrorRoot)
+                                  , observation "status.source.postimage.sha256" postimage
+                                  ]
+                              , checkFindings = []
+                              }
+
+discoverStoredCandidate :: Int -> IO (Either [Finding] FilePath)
+discoverStoredCandidate phase = do
+  let directory = certificationMirrorRoot </> ".build" </> "evidence-store" </> ("phase-" <> Text.unpack (formatOrdinal phase))
+  present <- doesDirectoryExist directory
+  if not present
+    then pure (Left [finding "CERTIFICATION-STATUS-RECEIPT" directory "The authenticated phase receipt directory is absent."])
+    else do
+      leaves <- sort <$> listDirectory directory
+      let candidates = [leaf | leaf <- leaves, takeExtension leaf == ".json"]
+          receipts = [leaf | leaf <- leaves, takeExtension leaf == ".receipt"]
+      pure $ case (candidates, receipts) of
+        ([candidate], [receipt])
+          | takeDirectory candidate == "."
+          , takeDirectory receipt == "."
+          , Text.pack (dropExtension candidate) == Text.pack (dropExtension receipt) -> Right (directory </> candidate)
+        _ -> Left [finding "CERTIFICATION-STATUS-RECEIPT-INVENTORY" directory "Status application requires exactly one same-stem candidate JSON and authenticated receipt."]
+
+acquireSupervisorGit :: IO (Either [Finding] GitExecutable)
+acquireSupervisorGit = do
+  gitCandidate <- findExecutable "git"
+  case gitCandidate of
+    Nothing -> pure (Left [finding "CERTIFICATION-GIT" "<git>" "Git is absent from the protected supervisor host floor."])
+    Just gitPath -> do
+      canonicalGit <- canonicalizePath gitPath
+      pure $ case mkGitExecutable canonicalGit of
+        Left problem -> Left [finding "CERTIFICATION-GIT" canonicalGit (renderSnapshotProblem problem)]
+        Right git -> Right git
+
+protectedSupervisorResult :: FilePath -> Int -> IO CheckResult
+protectedSupervisorResult originalRoot phase = do
+  snapshots <- acquireSupervisorSnapshots originalRoot
+  case snapshots of
+    Left problems -> pure (statusLifecycleFailure phase problems)
+    Right (git, opening) -> do
+      let sourceIdentity = snapshotIdentity (acquiredSourceSnapshot opening)
+      custody <-
+        qualifyAndIssueSeedCustody
+          SeedCustodyIssueRequest
+            { seedIssueRepositoryRoot = certificationMirrorRoot
+            , seedIssueCandidateUid = certificationCandidateUid
+            , seedIssueCandidateGid = certificationCandidateGid
+            , seedIssueSourceIdentity = decodeDispatchSha256 sourceIdentity
+            }
+      case custody of
+        Left problems -> pure (statusLifecycleFailure phase problems)
+        Right qualified -> do
+          prepared <- prepareCandidateRunDirectory phase
+          case prepared of
+            Left problems -> pure (statusLifecycleFailure phase problems)
+            Right candidateDirectory -> do
+              execution <-
+                foldQualifiedSeedCustody
+                  (\generation accepted _source _session _transcript _public _receipt _check ->
+                    runProtectedCandidateProcess phase generation accepted)
+                  qualified
+              freezeCandidateRunDirectory candidateDirectory
+              case execution of
+                Left problems -> pure (statusLifecycleFailure phase problems)
+                Right (stdoutDigest, stderrDigest) -> do
+                  candidates <- discoverProtectedCandidate candidateDirectory
+                  case candidates of
+                    Left problems -> pure (statusLifecycleFailure phase problems)
+                    Right candidatePath -> do
+                      admitted <- verifyProtectedCandidate qualified phase candidatePath
+                      case admitted of
+                        Left problems -> pure (statusLifecycleFailure phase problems)
+                        Right protected ->
+                          foldProtectedCandidateAdmission
+                            (finishProtectedSupervisor git opening qualified stdoutDigest stderrDigest)
+                            protected
+
+acquireSupervisorSnapshots
+  :: FilePath -> IO (Either [Finding] (GitExecutable, AcquiredSourceSnapshot))
+acquireSupervisorSnapshots originalRoot = do
+  gitCandidate <- findExecutable "git"
+  case gitCandidate of
+    Nothing -> pure (Left [finding "CERTIFICATION-GIT" "<git>" "Git is absent from the protected supervisor host floor."])
+    Just gitPath -> do
+      canonicalGit <- canonicalizePath gitPath
+      case mkGitExecutable canonicalGit of
+        Left problem -> pure (Left [finding "CERTIFICATION-GIT" canonicalGit (renderSnapshotProblem problem)])
+        Right git -> do
+          mirror <- loadGitSnapshot git certificationMirrorRoot
+          original <- loadGitSnapshot git originalRoot
+          pure $ case (mirror, original) of
+            (Left problems, _) -> Left (map supervisorSnapshotFinding problems)
+            (_, Left problems) -> Left (map supervisorSnapshotFinding problems)
+            (Right protected, Right current)
+              | snapshotIdentity (acquiredSourceSnapshot protected) == snapshotIdentity (acquiredSourceSnapshot current) -> Right (git, protected)
+              | otherwise -> Left [finding "CERTIFICATION-SOURCE-MISMATCH" "<source-snapshot>" "The operator worktree and protected certification mirror do not have the same exact source identity."]
+
+prepareCandidateRunDirectory :: Int -> IO (Either [Finding] FilePath)
+prepareCandidateRunDirectory phase = do
+  let phaseDirectory =
+        certificationMirrorRoot </> ".build" </> "runs" </> ("phase-" <> Text.unpack (formatOrdinal phase))
+      candidateDirectory = phaseDirectory </> "candidates"
+  attempted <- try $ do
+    present <- doesPathExist phaseDirectory
+    if present then removePathForcibly phaseDirectory else pure ()
+    createDirectoryIfMissing True candidateDirectory
+#if !defined(mingw32_HOST_OS)
+    setOwnerAndGroup phaseDirectory (fromIntegral certificationCandidateUid) (fromIntegral certificationCandidateGid)
+    setFileMode phaseDirectory 0o700
+    setOwnerAndGroup candidateDirectory (fromIntegral certificationCandidateUid) (fromIntegral certificationCandidateGid)
+    setFileMode candidateDirectory 0o700
+#endif
+    pure candidateDirectory
+  pure $ case attempted of
+    Left problem -> Left [finding "CERTIFICATION-CLEANROOM" phaseDirectory (Text.pack (show (problem :: IOException)))]
+    Right directory -> Right directory
+
+runProtectedCandidateProcess :: Int -> ByteString -> ByteString -> IO (Either [Finding] (Text, Text))
+runProtectedCandidateProcess phase generation accepted = do
+  let arguments = ["validate", "phase", Text.unpack (formatOrdinal phase)]
+      command =
+        (proc verifierPath arguments)
+          { cwd = Just certificationMirrorRoot
+          , env = Just (candidateEnvironment generation accepted)
+          , close_fds = True
+#if !defined(mingw32_HOST_OS)
+          , child_group = Just (fromIntegral certificationCandidateGid)
+          , child_user = Just (fromIntegral certificationCandidateUid)
+#endif
+          }
+  attempted <- try (readCreateProcessWithExitCode command "") :: IO (Either IOException (ExitCode, String, String))
+  pure $ case attempted of
+    Left problem -> Left [finding "CERTIFICATION-CANDIDATE-EXECUTION" verifierPath (Text.pack (show problem))]
+    Right (ExitFailure status, stdoutText, stderrText) ->
+      Left
+        [ finding
+            "CERTIFICATION-CANDIDATE-REFUSED"
+            verifierPath
+            ( "exit=" <> Text.pack (show status)
+                <> "; stdout-sha256=" <> dispatchSha256 (ByteString8.pack stdoutText)
+                <> "; stderr-sha256=" <> dispatchSha256 (ByteString8.pack stderrText)
+            )
+        ]
+    Right (ExitSuccess, stdoutText, stderrText) ->
+      Right
+        ( dispatchSha256 (ByteString8.pack stdoutText)
+        , dispatchSha256 (ByteString8.pack stderrText)
+        )
+
+candidateEnvironment :: ByteString -> ByteString -> [(String, String)]
+candidateEnvironment generation accepted =
+  [ ("AMOEBIUS_CERTIFICATION_CANDIDATE_STAGE", "generation-1")
+  , ("AMOEBIUS_CERTIFICATION_GENERATION_DIGEST", Text.unpack (dispatchHex generation))
+  , ("AMOEBIUS_CERTIFICATION_ACCEPTED_BASELINE_DIGEST", Text.unpack (dispatchHex accepted))
+  , ("HOME", "/nonexistent")
+  , ("LANG", "C.UTF-8")
+  , ("LC_ALL", "C.UTF-8")
+  , ("PATH", "/home/matt/.ghcup/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin")
+  , ("TMPDIR", "/tmp")
+  ]
+
+freezeCandidateRunDirectory :: FilePath -> IO ()
+freezeCandidateRunDirectory candidateDirectory = do
+#if !defined(mingw32_HOST_OS)
+  present <- doesDirectoryExist candidateDirectory
+  if present
+    then do
+      leaves <- listDirectory candidateDirectory
+      mapM_ (\leaf -> setOwnerAndGroup (candidateDirectory </> leaf) 0 0 >> setFileMode (candidateDirectory </> leaf) 0o444) leaves
+      setOwnerAndGroup candidateDirectory 0 0
+      setFileMode candidateDirectory 0o755
+      let phaseDirectory = takeDirectory candidateDirectory
+      setOwnerAndGroup phaseDirectory 0 0
+      setFileMode phaseDirectory 0o755
+    else pure ()
+#else
+  candidateDirectory `seq` pure ()
+#endif
+
+discoverProtectedCandidate :: FilePath -> IO (Either [Finding] FilePath)
+discoverProtectedCandidate candidateDirectory = do
+  present <- doesDirectoryExist candidateDirectory
+  if not present
+    then pure (Left [finding "CERTIFICATION-CANDIDATE-MISSING" candidateDirectory "The candidate publication directory is absent."])
+    else do
+      leaves <- sort <$> listDirectory candidateDirectory
+      pure $ case leaves of
+        [leaf] | takeExtension leaf == ".json" -> Right (candidateDirectory </> leaf)
+        _ -> Left [finding "CERTIFICATION-CANDIDATE-INVENTORY" candidateDirectory "The protected run must publish exactly one JSON candidate."]
+
+finishProtectedSupervisor
+  :: GitExecutable
+  -> AcquiredSourceSnapshot
+  -> QualifiedSeedCustody
+  -> Text
+  -> Text
+  -> Int
+  -> Text
+  -> Text
+  -> Text
+  -> Text
+  -> Text
+  -> Text
+  -> FilePath
+  -> IO CheckResult
+finishProtectedSupervisor git opening qualified stdoutDigest stderrDigest phase source evidence projectionDigestValue postimage compatibility predecessor candidatePath = do
+  closing <- loadGitSnapshot git certificationMirrorRoot
+  case closing of
+    Left problems -> pure (statusLifecycleFailure phase (map supervisorSnapshotFinding problems))
+    Right observed
+      | snapshotIdentity (acquiredSourceSnapshot observed) /= source ->
+          pure (statusLifecycleFailure phase [finding "CERTIFICATION-SOURCE-CHANGED" "<source-snapshot>" "The protected source changed during candidate execution."])
+      | otherwise -> case prepareValidationProjection phase opening of
+          Left problems -> pure (statusLifecycleFailure phase problems)
+          Right proposed
+            | projectionDigest proposed /= projectionDigestValue || projectionPostimageDigest proposed /= postimage ->
+                pure (statusLifecycleFailure phase [finding "CERTIFICATION-PROJECTION-MISMATCH" "<status-projection>" "The protected verifier and candidate did not bind the same exact status projection."])
+            | otherwise -> case issueProtectedGatePass phase source evidence projectionDigestValue postimage candidatePath of
+                Left problems -> pure (statusLifecycleFailure phase problems)
+                Right verified -> case authorizeProtectedStatusProjection verified proposed of
+                  Left problems -> pure (statusLifecycleFailure phase problems)
+                  Right authorized -> do
+                    projectionPublication <- writeAuthorizedStatusProjection authorized
+                    case projectionPublication of
+                      Left problems -> pure (statusLifecycleFailure phase problems)
+                      Right projectionPath -> do
+                        issued <-
+                          issueQualifiedPhasePassReceipt
+                            qualified phase source postimage evidence projectionDigestValue
+                            compatibility predecessor stdoutDigest stderrDigest
+                        case issued of
+                          Left problems -> pure (statusLifecycleFailure phase problems)
+                          Right receiptBytes -> do
+                            receipt <- installProtectedPredecessorReceipt phase evidence candidatePath receiptBytes
+                            pure $ case receipt of
+                              Left problems -> statusLifecycleFailure phase problems
+                              Right receiptPath ->
+                                CheckResult
+                                  { checkName = "certification-supervisor-phase-" <> formatOrdinal phase
+                                  , checkObservations =
+                                      [ observation "certification.generation" "amoebius-certification-generation-1"
+                                      , observation "certification.accepted-candidate.sha256" evidence
+                                      , observation "certification.compatibility.sha256" compatibility
+                                      , observation "certification.candidate.stdout.sha256" stdoutDigest
+                                      , observation "certification.candidate.stderr.sha256" stderrDigest
+                                      , observation "certification.source.sha256" source
+                                      , observation "status.projection.path" (Text.pack projectionPath)
+                                      , observation "evidence.receipt.path" (Text.pack receiptPath)
+                                      ]
+                                  , checkFindings = []
+                                  }
+
+installProtectedPredecessorReceipt :: Int -> Text -> FilePath -> ByteString -> IO (Either [Finding] FilePath)
+installProtectedPredecessorReceipt phase digest candidatePath receiptBytes = do
+  let directory =
+        certificationMirrorRoot </> ".build" </> "evidence-store" </> ("phase-" <> Text.unpack (formatOrdinal phase))
+      candidateDestination = directory </> Text.unpack digest <> ".json"
+      receiptDestination = directory </> Text.unpack digest <> ".receipt"
+  attempted <- try $ do
+    createDirectoryIfMissing True directory
+    present <- doesFileExist candidateDestination
+    if present
+      then do
+        existing <- ByteString.readFile candidateDestination
+        candidate <- ByteString.readFile candidatePath
+        unless (existing == candidate) (fail "protected-receipt-conflict")
+      else copyFile candidatePath candidateDestination
+    receiptPresent <- doesFileExist receiptDestination
+    if receiptPresent
+      then do
+        existingReceipt <- ByteString.readFile receiptDestination
+        unless (existingReceipt == receiptBytes) (fail "protected-authenticated-receipt-conflict")
+      else ByteString.writeFile receiptDestination receiptBytes
+#if !defined(mingw32_HOST_OS)
+    mapM_ (\path -> setOwnerAndGroup path 0 0 >> setFileMode path 0o444) [candidateDestination, receiptDestination]
+    setOwnerAndGroup directory 0 0
+    setFileMode directory 0o755
+#endif
+    pure receiptDestination
+  pure $ case attempted of
+    Left problem -> Left [finding "CERTIFICATION-RECEIPT-INSTALL" receiptDestination (Text.pack (show (problem :: IOException)))]
+    Right path -> Right path
+
+supervisorSnapshotFinding :: SnapshotProblem -> Finding
+supervisorSnapshotFinding problem = finding "CERTIFICATION-SNAPSHOT" "<source-snapshot>" (renderSnapshotProblem problem)
+
+decodeDispatchSha256 :: Text -> ByteString
+decodeDispatchSha256 value = ByteString.pack (go (Text.unpack value))
+ where
+  go (high : low : rest) = fromIntegral (digit high * 16 + digit low) : go rest
+  go _ = []
+  digit character
+    | character >= '0' && character <= '9' = ord character - ord '0'
+    | character >= 'a' && character <= 'f' = 10 + ord character - ord 'a'
+    | otherwise = 0
+
+verifierPath :: FilePath
+verifierPath = certificationMirrorRoot </> ".build" </> "validation-seed" </> "verifier"
+
+certificationCandidateUid, certificationCandidateGid :: Word32
+certificationCandidateUid = 65534
+certificationCandidateGid = 1000
+
+runProtectedCandidate :: Int -> IO ExitCode
+runProtectedCandidate phase = do
+  capture <- acquireRepository
+  case capture of
+    Left detail -> emitResult (captureFailure detail)
+    Right (gitPath, root)
+      | normalise root /= protectedCertificationMirror ->
+          emitResult
+            CheckResult
+              { checkName = "certification-candidate-stage"
+              , checkObservations = [observation "certification.candidate-root" (Text.pack root)]
+              , checkFindings =
+                  [ finding
+                      "CERTIFICATION-CANDIDATE-ROOT"
+                      root
+                      "The candidate stage may run only inside the root-owned generation-1 certification mirror."
+                  ]
+              }
+      | otherwise ->
+          case mkGitExecutable gitPath of
+            Left problem -> emitResult (snapshotFailure [problem])
+            Right git -> validatePhaseLocked git root phase >>= emitResult
+
+protectedCertificationMirror :: FilePath
+protectedCertificationMirror = "/var/lib/amoebius-certification/generation-1/repository"
+
+acquireImmediatePredecessorEvidence
+  :: FilePath -> Int -> Text -> IO (Either [Finding] PredecessorEvidence)
+acquireImmediatePredecessorEvidence = acquireProtectedImmediatePredecessorEvidence
 
 -- | Git and the repository root are explicit so a test or caller cannot
 -- silently substitute PATH lookup or the current working directory.
@@ -1120,7 +1641,7 @@ validatePhaseLocked git root phase = do
     case trustResult of
       Left problems -> pure (statusLifecycleFailure phase problems)
       Right trust -> do
-        qualificationResult <- acquireQualifiedBootstrapProtocol root trust acquired
+        qualificationResult <- acquireProtectedQualifiedBootstrapProtocol root trust acquired
         case qualificationResult of
           Left problems -> pure (bootstrapQualificationCheck (Left problems))
           Right qualification -> do
@@ -2105,6 +2626,9 @@ finishGateLifecycle
 finishGateLifecycle git root phase opening finalizedRun closing projectionResult gateResult = do
   executablePath <- getExecutablePath
   processArgv <- map Text.pack <$> getArgs
+  candidateStage <- lookupEnv "AMOEBIUS_CERTIFICATION_CANDIDATE_STAGE"
+  candidateGeneration <- lookupEnv "AMOEBIUS_CERTIFICATION_GENERATION_DIGEST"
+  candidateBaseline <- lookupEnv "AMOEBIUS_CERTIFICATION_ACCEPTED_BASELINE_DIGEST"
   executableDigestResult <- try (ByteString.readFile executablePath) :: IO (Either IOException ByteString)
   let executableDigest = either (const Nothing) (Just . dispatchSha256) executableDigestResult
       openingDigest = snapshotIdentity (acquiredSourceSnapshot opening)
@@ -2113,7 +2637,7 @@ finishGateLifecycle git root phase opening finalizedRun closing projectionResult
         gateResult
           { checkFindings = checkFindings gateResult <> projectionFindings
           }
-      candidate = case finalizedRun of
+      unboundCandidate = case finalizedRun of
         Just (FinalizedPhaseZero acquiredRun)
           | phase == policyDomainLower ->
             captureFinalizedDispatchCandidateEvidence
@@ -2512,6 +3036,10 @@ finishGateLifecycle git root phase opening finalizedRun closing projectionResult
               executableDigest
               processArgv
               subjectResult
+      candidate = case (candidateStage, candidateGeneration, candidateBaseline) of
+        (Just "generation-1", Just generation, Just accepted) ->
+          bindProtectedCertificationContext (Text.pack generation) (Text.pack accepted) unboundCandidate
+        _ -> unboundCandidate
       lifecycleResult =
         mergeChecks
           (checkName subjectResult)
@@ -2537,70 +3065,82 @@ finishGateLifecycle git root phase opening finalizedRun closing projectionResult
             [ observation "evidence.candidate.path" (Text.pack (publishedCandidatePath published))
             , observation "evidence.candidate.sha256" (acquiredCandidateDigest candidate)
             ]
-      passResult <- verifyPublishedGatePass published
-      case passResult of
-        Left passFindings ->
-          pure
+          stagedResult =
             lifecycleResult
-              { checkObservations = checkObservations lifecycleResult <> writeObservations
-              , checkFindings = checkFindings lifecycleResult <> passFindings
+              { checkObservations =
+                  checkObservations lifecycleResult
+                    <> writeObservations
+                    <> [observation "certification.candidate-stage" "awaiting-protected-verifier"]
+              , checkFindings =
+                  candidateBindingFindings candidate
               }
-        Right verified -> case projectionResult of
-          Left problems ->
-            pure
-              lifecycleResult
-                { checkObservations = checkObservations lifecycleResult <> writeObservations
-                , checkFindings = checkFindings lifecycleResult <> problems
-                }
-          Right projection -> case authorizeStatusProjection verified projection of
-            Left problems ->
+      if candidateStage == Just "generation-1" && normalise root == protectedCertificationMirror
+        then pure stagedResult
+        else do
+          passResult <- verifyPublishedGatePass published
+          case passResult of
+            Left passFindings ->
               pure
                 lifecycleResult
                   { checkObservations = checkObservations lifecycleResult <> writeObservations
-                  , checkFindings = checkFindings lifecycleResult <> problems
+                  , checkFindings = checkFindings lifecycleResult <> passFindings
                   }
-            Right authorized -> do
-              projectionPublication <- writeAuthorizedStatusProjection authorized
-              case projectionPublication of
+            Right verified -> case projectionResult of
+              Left problems ->
+                pure
+                  lifecycleResult
+                    { checkObservations = checkObservations lifecycleResult <> writeObservations
+                    , checkFindings = checkFindings lifecycleResult <> problems
+                    }
+              Right projection -> case authorizeStatusProjection verified projection of
                 Left problems ->
                   pure
                     lifecycleResult
                       { checkObservations = checkObservations lifecycleResult <> writeObservations
                       , checkFindings = checkFindings lifecycleResult <> problems
                       }
-                Right projectionPath -> do
-                  postEmission <- loadGitSnapshot git root
-                  let emitted =
-                        bindPostEmissionSourceSnapshot
-                          opening
-                          postEmission
-                          lifecycleResult
-                            { checkObservations =
-                                checkObservations lifecycleResult
-                                  <> writeObservations
-                                  <> [ observation "status.projection.path" (Text.pack projectionPath)
-                                     , observation
-                                         "status.projection"
-                                         "authorized-not-applied; a human, agent, or CI job may apply the exact verified status-only projection"
-                                     ]
-                            , checkFindings = checkFindings lifecycleResult
-                            }
-                  if not (checkPassed emitted)
-                    then pure emitted
-                    else do
-                      receiptResult <-
-                        installPublishedCandidateEvidenceReceipt published
-                      pure $ case receiptResult of
-                        Left problems ->
-                          emitted
-                            { checkFindings = checkFindings emitted <> problems
-                            }
-                        Right receiptPath ->
-                          emitted
-                            { checkObservations =
-                                checkObservations emitted
-                                  <> [observation "evidence.receipt.path" (Text.pack receiptPath)]
-                            }
+                Right authorized -> do
+                  projectionPublication <- writeAuthorizedStatusProjection authorized
+                  case projectionPublication of
+                    Left problems ->
+                      pure
+                        lifecycleResult
+                          { checkObservations = checkObservations lifecycleResult <> writeObservations
+                          , checkFindings = checkFindings lifecycleResult <> problems
+                          }
+                    Right projectionPath -> do
+                      postEmission <- loadGitSnapshot git root
+                      let emitted =
+                            bindPostEmissionSourceSnapshot
+                              opening
+                              postEmission
+                              lifecycleResult
+                                { checkObservations =
+                                    checkObservations lifecycleResult
+                                      <> writeObservations
+                                      <> [ observation "status.projection.path" (Text.pack projectionPath)
+                                         , observation
+                                             "status.projection"
+                                             "authorized-not-applied; a human, agent, or CI job may apply the exact verified status-only projection"
+                                         ]
+                                , checkFindings = checkFindings lifecycleResult
+                                }
+                      if not (checkPassed emitted)
+                        then pure emitted
+                        else do
+                          receiptResult <-
+                            installPublishedCandidateEvidenceReceipt published
+                          pure $ case receiptResult of
+                            Left problems ->
+                              emitted
+                                { checkFindings = checkFindings emitted <> problems
+                                }
+                            Right receiptPath ->
+                              emitted
+                                { checkObservations =
+                                    checkObservations emitted
+                                      <> [observation "evidence.receipt.path" (Text.pack receiptPath)]
+                                }
 
 bindPostEmissionSourceSnapshot
   :: AcquiredSourceSnapshot

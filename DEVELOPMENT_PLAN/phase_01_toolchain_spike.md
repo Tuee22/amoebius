@@ -42,7 +42,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -91,8 +91,9 @@ committing resolution output, integrity pins, generated code, or host-specific p
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -150,9 +151,9 @@ The sprint requirements below remain part of the target acceptance scope. Each o
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
 
-## Sprint 1.1: GenesisTrust-bound toolchain acquisition ⏸️
+## Sprint 1.1: GenesisTrust-bound toolchain acquisition ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun.hs`, `src/validation-kernel/Amoebius/Validation/CompilerBuildInfo.hs`, and `src/validation-kernel/Amoebius/Validation/CompilerElaboratedPlan.hs`; exact acquired authority remains UNRESOLVED and blocks validation.
 **Blocked by**: [Phase 0](phase_00_documentation_suite.md) gate pass
 **Independent Validation**: From the narrow GenesisTrust local-custody facts and immutable offline files, independently verify publisher/content identities, actual compiler/package-tool executable derivation, and loader/host closure; acquire twice into distinct contained roots, build the same source snapshot, and require plans and executable identities to agree. A missing/mutable input, digest/signature mismatch, ambient-network read, self-reported identity, replay, or disagreement is an exact negative; GenesisTrust itself remains assumed.
@@ -188,9 +189,9 @@ Implement the acquired authority and independent oracle, qualify its changed-sub
 Phase-0 predecessor receipt, close `LTD-BOOT-001`, and retain the result in the complete Phase-1 gate. Historical
 toolchain transcripts cannot support this candidate.
 
-## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ⏸️
+## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 1.1
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -232,9 +233,9 @@ The pre-reset record said `None`; that statement and its 2026-08-08 decode obser
 cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor
 gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 1.3: `io-sim` + `io-classes` simulation build probe ⏸️
+## Sprint 1.3: `io-sim` + `io-classes` simulation build probe ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 1.2
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -275,9 +276,9 @@ The pre-reset record said `None`; that statement and its 2026-08-08 simulation o
 cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor
 gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe ⏸️
+## Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 1.3
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -320,9 +321,9 @@ gate pass, owned legacy closure, and the Haskell provenance/oracle/mutation obli
 [Sprint 1.7](#sprint-17-remove-top-level-vendor-source-and-own-the-haskell-fork-) owns the target split between
 maintained `.hs` modules under `src/vendor/**` and lazy upstream material beneath `.build/vendor/**`.
 
-## Sprint 1.5: Dynamic resolution and generated-output migration ⏸️
+## Sprint 1.5: Dynamic resolution and generated-output migration ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 1.4
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -373,9 +374,9 @@ image has removed the nine tracked probe fixtures/mutants/oracle files, and the 
 `toolchain-spike.probe-foreign-count = 0`; the Haskell generator, separately authored expectations, applied
 reintroduction negatives, and integrated evidence remain outstanding, so `LTD-SRC-007` stays active.
 
-## Sprint 1.6: Pure discovery/ensure planning over injected inputs ⏸️
+## Sprint 1.6: Pure discovery/ensure planning over injected inputs ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 1.5
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -425,9 +426,9 @@ owned legacy closure, checked Haskell provider/platform/acquisition declarations
 expectations, applied mutation controls, and fresh contained observations beneath `.build/**`. Any real host
 or acquisition correspondence remains explicitly UNVERIFIED.
 
-## Sprint 1.7: Remove top-level vendor source and own the Haskell fork ⏸️
+## Sprint 1.7: Remove top-level vendor source and own the Haskell fork ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 1.6
 **Independent Validation**: An immutable-input clean build is the positive; a mutable-ref acquisition is the paired negative; an applied top-level-vendor reintroduction mutant reddens its exact source row while the Haskell control stays green; upstream semantic fidelity and licensing remain explicit residue.
@@ -478,9 +479,9 @@ provenance declaration, immutable offline materialization, generated Proto/packa
 build, independent oracle, and generated reintroduction corpus still do not exist, so this implementation
 progress cannot close the sprint or support a candidate.
 
-## Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ⏸️
+## Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 1.7
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.

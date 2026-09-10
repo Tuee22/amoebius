@@ -34,7 +34,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -73,8 +73,9 @@ NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -106,9 +107,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 23.1: The security laws S1-S6 ⏸️
+## Sprint 23.1: The security laws S1-S6 ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/extension-security-laws/Amoebius/Extension/Laws/Security.hs`; package-hidden `Amoebius.Validation.ExtensionSecurityRun.Internal`.
 **Blocked by**: [Phase 22](phase_22_extension_laws_compositional.md) gate pass
 **Independent Validation**: Fifteen operation controls, five refusal pairs, five namespaces, two authority policies, 42 verdicts, one fixture signature, four content addresses, four compiler barriers, and six changed-production mutants.

@@ -28,7 +28,7 @@ This plan owns the hardware-free Haskell browser-contract and bundle-recipe gene
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -59,8 +59,9 @@ Actual browser and live network/storage fidelity remain later-owned.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -89,9 +90,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 
 ## Sprints
 
-## Sprint 46.1: Generated browser contracts and bundle ⏸️
+## Sprint 46.1: Generated browser contracts and bundle ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/ui-contract-generation/Amoebius/Ui/Generate/BrowserContracts.hs`, typed cases, CPP seams, and package-hidden acquired Phase-46 supervisor.
 **Blocked by**: [Phase 45](phase_45_encrypted_browser_runtime.md) gate pass
 **Independent Validation**: Compile and execute actual generated exports with real compiled plans against independent Haskell expectations; missing bodies, ABI drift and altered semantic requests fail precisely; assigned generator mutants fail their exact artifact cases; live browser behavior remains unverified.

@@ -36,7 +36,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -75,8 +75,9 @@ must fail. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -117,9 +118,9 @@ scoped, and no external owned residue is permitted.
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 15.1: Structured diagnostic and twin contract ⏸️
+## Sprint 15.1: Structured diagnostic and twin contract ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/compile-fail-harness/Amoebius/Compiler/CompileFailHarness.hs` and the twenty Haskell twin fixtures
 **Blocked by**: [Phase 14](phase_14_refinement_checker.md) gate pass
 **Independent Validation**: ten legal-green prerequisites, ten exact structured illegal pins, source digests, and three specific wrong-reason refusals
@@ -152,9 +153,9 @@ claim names.
 Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
 qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 15.2: Claim inventory and mutation evidence ⏸️
+## Sprint 15.2: Claim inventory and mutation evidence ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: package-hidden `src/validation-kernel/Amoebius/Validation/CompileFailHarnessRun/Internal.hs`
 **Blocked by**: Sprint 15.1
 **Independent Validation**: serial clean/three-mutant matrix, exact red loci, discovery, containment, metrics, and process receipts

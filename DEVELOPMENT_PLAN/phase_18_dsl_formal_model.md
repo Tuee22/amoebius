@@ -36,7 +36,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -84,8 +84,9 @@ calver `2026.09.04.170753` jar SHA-256
 `b658b4e504fdf0b721caf7066320f6b6fe5805f4dd2f717d0e47baba4097205e`. Both are ignored local-custody
 inputs and both exact digests are rechecked by the Haskell supervisor.
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -121,9 +122,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 18.1: Actual bounded DSL projections ⏸️
+## Sprint 18.1: Actual bounded DSL projections ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/capacity-topology/Amoebius/Capacity/Fold.hs`, `test/harness/deterministic_simulation/CalculusProjection.hs`, and the capacity/calculus sections of `DslFormalModelSpec.hs`
 **Blocked by**: [Phase 17](phase_17_gateway_migration_model.md) gate pass
 **Independent Validation**: Observe real bounded DSL decisions and indexed values against independent expectations; pair a semantic value change with its exact correspondence failure; kill production-decision mutants; exclude unbounded and later-owned semantics.
@@ -170,9 +171,9 @@ qualify this phase's complete gate after its predecessor. Resolve owned legacy d
 carried as obligations on Phases 26 and 34 rather than as residue here, because this phase no longer claims
 them.
 
-## Sprint 18.2: Protocol models and correspondence ⏸️
+## Sprint 18.2: Protocol models and correspondence ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Formal/Dsl/Models.hs`, `Manifest/Authority.hs`, `Scheduler/Reservation.hs`, `Cluster/NodeProvisioner.hs`, and `DslFormalModelSpec.hs`
 **Blocked by**: Sprint 18.1
 **Independent Validation**: exact 18-state structure plus actual one-use token, reservation, and unreachable/present decision pairs
@@ -206,9 +207,9 @@ code correspondence explicitly bounded.
 Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
 qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure.
 
-## Sprint 18.3: Explorer, TLC, mutation, and gate ⏸️
+## Sprint 18.3: Explorer, TLC, mutation, and gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `DslFormalModelSpec.hs`, `DslFormalModelOracle.hs`, and package-hidden `DslFormalModelRun.Internal`
 **Blocked by**: Sprint 18.2
 **Independent Validation**: five explorer/TLC fingerprint comparisons, eight exact safety mutants, four fairness deletions, and three compiled production mutants

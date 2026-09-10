@@ -25,6 +25,7 @@ module Amoebius.Validation.Evidence.Internal (
     captureQualificationDigest,
     captureResidue,
     captureRows,
+    bindProtectedCertificationContext,
     captureRunIdentity,
     captureSourceClosing,
     captureSourceOpening,
@@ -108,6 +109,7 @@ module Amoebius.Validation.Evidence.Internal (
     captureFinalizedRepositoryLayoutCandidateEvidence,
     captureFinalizedToolchainSpikeCandidateEvidence,
     acquireImmediatePredecessorEvidence,
+    acquireProtectedImmediatePredecessorEvidence,
     installPublishedCandidateEvidenceReceipt,
     publishedCandidateEvidence,
     publishedCandidatePath,
@@ -377,11 +379,19 @@ import Amoebius.Validation.Types (
     observation,
  )
 import Amoebius.Validation.CertificationReset.Internal (certificationAdmissionRefusal)
+import Amoebius.Validation.PhasePassReceipt.Internal
+  ( certificationGenerationDigest
+  , foldVerifiedPhasePassReceipt
+  , verifyPhasePassReceipt
+  )
 import Data.List.NonEmpty qualified as NonEmpty
+import Data.List (sort)
 import Control.Exception (IOException, bracket, onException, try)
 import Control.Monad (foldM, unless, when)
 import Crypto.Hash.SHA256 qualified as SHA256
-import Data.Aeson (ToJSON (toJSON), Value (..), encode, object, (.=))
+import Data.Aeson (ToJSON (toJSON), Value (..), decodeStrict', encode, object, (.=))
+import Data.Aeson.Key qualified as AesonKey
+import Data.Aeson.KeyMap qualified as KeyMap
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Char8 qualified as ByteString8
@@ -396,6 +406,7 @@ import System.Directory (
     createDirectory,
     doesDirectoryExist,
     doesPathExist,
+    listDirectory,
     makeAbsolute,
     pathIsSymbolicLink,
     removeFile,
@@ -405,11 +416,13 @@ import System.Directory (renameFile)
 #endif
 import System.FilePath (
     dropTrailingPathSeparator,
+    dropExtension,
     isAbsolute,
     makeRelative,
     normalise,
     splitDirectories,
     takeDirectory,
+    takeExtension,
     takeFileName,
     (</>),
  )
@@ -554,6 +567,9 @@ data CandidateCapture = CandidateCapture
 data AcquiredCandidateEvidence = AcquiredCandidateEvidence
     { acquiredCapture :: CandidateCapture
     , acquiredSchema :: Text
+    , acquiredCertificationGeneration :: Maybe Text
+    , acquiredAcceptedBaseline :: Maybe Text
+    , acquiredCompatibilityClosure :: Maybe Text
     }
     deriving (Eq, Show)
 
@@ -631,7 +647,23 @@ captureCandidateEvidence :: CandidateCapture -> AcquiredCandidateEvidence
 captureCandidateEvidence captured =
     AcquiredCandidateEvidence
         { acquiredCapture = captured
-        , acquiredSchema = "amoebius-validation-candidate-v3"
+        , acquiredSchema = "amoebius-validation-candidate-v4"
+        , acquiredCertificationGeneration = Nothing
+        , acquiredAcceptedBaseline = Nothing
+        , acquiredCompatibilityClosure = Nothing
+        }
+
+-- | Attach the replacement-generation context observed by the protected
+-- candidate process.  These fields remain candidate claims until the
+-- UID-zero supervisor compares them with its independently acquired custody
+-- token and recomputes the closure from the canonical candidate fields.
+bindProtectedCertificationContext :: Text -> Text -> AcquiredCandidateEvidence -> AcquiredCandidateEvidence
+bindProtectedCertificationContext generation accepted evidence =
+    evidence
+        { acquiredCertificationGeneration = Just generation
+        , acquiredAcceptedBaseline = Just accepted
+        , acquiredCompatibilityClosure =
+            Just (candidateCompatibilityClosure generation accepted (acquiredCapture evidence))
         }
 
 {- | The current production dispatcher can capture an honest red candidate,
@@ -3981,6 +4013,9 @@ instance ToJSON AcquiredCandidateEvidence where
     toJSON evidence =
         object
             [ "schema" .= acquiredSchema evidence
+            , "certificationGenerationDigest" .= acquiredCertificationGeneration evidence
+            , "acceptedBaselineDigest" .= acquiredAcceptedBaseline evidence
+            , "compatibilityClosureDigest" .= acquiredCompatibilityClosure evidence
             , "phase" .= formatOrdinal (capturePhase captured)
             , "sourceOpeningDigest" .= captureSourceOpening captured
             , "sourceClosingDigest" .= captureSourceClosing captured
@@ -4011,6 +4046,33 @@ instance ToJSON AcquiredCandidateEvidence where
             ]
       where
         captured = acquiredCapture evidence
+
+candidateCompatibilityClosure :: Text -> Text -> CandidateCapture -> Text
+candidateCompatibilityClosure generation accepted captured =
+    digestTexts
+        [ "amoebius-candidate-compatibility-v1"
+        , generation
+        , accepted
+        , formatOrdinal (candidateCapturePhase captured)
+        , candidateCaptureSourceOpening captured
+        , maybe "" id (candidateCaptureContractDigest captured)
+        , maybe "" id (candidateCaptureSubjectDigest captured)
+        , maybe "" id (candidateCaptureOracleDigest captured)
+        , maybe "" id (candidateCaptureHarnessDigest captured)
+        , maybe "" id (candidateCaptureObserverDigest captured)
+        , maybe "" id (candidateCaptureQualificationDigest captured)
+        , predecessorCompatibilityField (candidateCapturePredecessor captured)
+        , orEmpty (candidateCaptureExecutableDigest captured)
+        , orEmpty (candidateCaptureToolchainIdentity captured)
+        ]
+  where
+    orEmpty = maybe "" id
+
+predecessorCompatibilityField :: PredecessorEvidence -> Text
+predecessorCompatibilityField predecessor = case predecessor of
+    GenesisPredecessor digest -> "genesis:" <> digest
+    ImmediatePredecessor phase digest -> "phase-" <> formatOrdinal phase <> ":" <> digest
+    UnverifiedPredecessor detail -> "unverified:" <> detail
 
 outcomeName :: RowOutcome -> Text
 outcomeName outcome = case outcome of
@@ -4131,6 +4193,135 @@ acquireImmediatePredecessorEvidence ::
     FilePath -> Int -> Text -> IO (Either [Finding] PredecessorEvidence)
 acquireImmediatePredecessorEvidence _ _ _ =
     pure (Left (NonEmpty.toList certificationAdmissionRefusal))
+
+-- | Reacquire the immediate predecessor only from the root-owned certification
+-- mirror.  The protected supervisor installs one immutable, content-addressed
+-- JSON candidate after authenticating its generation, accepted baseline, and
+-- projected source transition.  Candidate-owned working-tree copies are never
+-- searched by this path.
+acquireProtectedImmediatePredecessorEvidence ::
+    FilePath -> Int -> Text -> IO (Either [Finding] PredecessorEvidence)
+acquireProtectedImmediatePredecessorEvidence root phase opening
+    | phase <= policyDomainLower =
+        pure (Left [receiptFinding "EVIDENCE-PREDECESSOR-PHASE" "a numbered predecessor exists only above Phase 00"])
+    | not (sha256Text opening) =
+        pure (Left [receiptFinding "EVIDENCE-PREDECESSOR-SOURCE" "the current protected source identity is malformed"])
+    | otherwise = do
+        absoluteRoot <- makeAbsolute root >>= canonicalizePath
+        if not (protectedCertificationRoot absoluteRoot)
+            then pure (Left [receiptFinding "EVIDENCE-PREDECESSOR-CUSTODY" "the repository is not the root-owned certification mirror"])
+            else do
+                let predecessorPhase = phase - 1
+                    directory =
+                        absoluteRoot
+                            </> canonicalGeneratedRoot
+                            </> "evidence-store"
+                            </> ("phase-" <> Text.unpack (formatOrdinal predecessorPhase))
+                present <- doesDirectoryExist directory
+                if not present
+                    then pure (Left [receiptFinding "EVIDENCE-PREDECESSOR-MISSING" "the protected predecessor receipt directory is absent"])
+                    else do
+                        leaves <- sort <$> listDirectory directory
+                        case protectedReceiptPair leaves of
+                            Left problems -> pure (Left problems)
+                            Right digest -> acquireAuthenticatedPredecessor absoluteRoot directory predecessorPhase opening digest
+
+protectedReceiptPair :: [FilePath] -> Either [Finding] Text
+protectedReceiptPair leaves = case leaves of
+    [candidateLeaf, receiptLeaf]
+        | takeExtension candidateLeaf == ".json"
+        , takeExtension receiptLeaf == ".receipt"
+        , dropExtension candidateLeaf == dropExtension receiptLeaf
+        , let digest = Text.pack (dropExtension candidateLeaf)
+        , sha256Text digest -> Right digest
+    [] -> Left [receiptFinding "EVIDENCE-PREDECESSOR-MISSING" "the protected predecessor directory contains no receipt"]
+    _ -> Left [receiptFinding "EVIDENCE-PREDECESSOR-INVENTORY" "the protected predecessor directory must contain exactly one same-stem candidate JSON and authenticated receipt"]
+
+acquireAuthenticatedPredecessor :: FilePath -> FilePath -> Int -> Text -> Text -> IO (Either [Finding] PredecessorEvidence)
+acquireAuthenticatedPredecessor root directory predecessorPhase opening digest = do
+    candidateResult <- readProtectedReceiptBytes (directory </> Text.unpack digest <> ".json")
+    receiptResult <- readProtectedReceiptBytes (directory </> Text.unpack digest <> ".receipt")
+    acceptedResult <- readProtectedReceiptBytes (root </> canonicalGeneratedRoot </> "validation-seed" </> "accepted-seed")
+    publicResult <- readProtectedReceiptBytes (root </> canonicalGeneratedRoot </> "validation-seed" </> "issuer.pub")
+    pure $ do
+        candidateBytes <- candidateResult
+        receiptBytes <- receiptResult
+        acceptedBytes <- acceptedResult
+        publicBytes <- publicResult
+        unless (hex (SHA256.hash candidateBytes) == digest) $
+            Left [receiptFinding "EVIDENCE-PREDECESSOR-CONTENT-ADDRESS" "the protected candidate filename does not match its exact bytes"]
+        candidate <- maybe (Left [receiptFinding "EVIDENCE-PREDECESSOR-JSON" "the protected predecessor candidate is not valid JSON"]) Right (decodeStrict' candidateBytes)
+        verified <- case verifyPhasePassReceipt publicBytes receiptBytes of
+            Left problem -> Left [problem]
+            Right value -> Right value
+        foldVerifiedPhasePassReceipt
+            (checkAuthenticatedPredecessor candidateBytes candidate acceptedBytes predecessorPhase opening digest)
+            verified
+
+checkAuthenticatedPredecessor
+    :: ByteString -> Value -> ByteString -> Int -> Text -> Text
+    -> Int -> ByteString -> ByteString -> ByteString -> ByteString -> ByteString
+    -> ByteString -> ByteString -> ByteString -> ByteString -> ByteString -> ByteString
+    -> Either [Finding] PredecessorEvidence
+checkAuthenticatedPredecessor candidateBytes candidate acceptedBytes expectedPhase opening digest phase generation accepted sourcePreimage sourcePostimage evidence projection compatibility predecessor session stdoutDigest stderrDigest = do
+    let candidatePredecessor = predecessorDigestField candidate
+        problems =
+            [receiptFinding "EVIDENCE-PREDECESSOR-PHASE" "the authenticated receipt names the wrong predecessor phase" | phase /= expectedPhase]
+              <> [receiptFinding "EVIDENCE-PREDECESSOR-GENERATION" "the authenticated receipt belongs to another certification generation" | generation /= certificationGenerationDigest]
+              <> [receiptFinding "EVIDENCE-PREDECESSOR-BASELINE" "the authenticated receipt names a different accepted baseline" | accepted /= SHA256.hash acceptedBytes]
+              <> [receiptFinding "EVIDENCE-PREDECESSOR-SOURCE" "the current source is not the authenticated projected postimage" | hex sourcePostimage /= opening]
+              <> [receiptFinding "EVIDENCE-PREDECESSOR-CANDIDATE" "the authenticated receipt does not bind the protected candidate bytes" | evidence /= SHA256.hash candidateBytes || hex evidence /= digest]
+              <> [receiptFinding "EVIDENCE-PREDECESSOR-CANDIDATE-FIELD" "the candidate generation, baseline, phase, source, projection, compatibility, or predecessor field differs from its authenticated receipt" |
+                    any not
+                      [ receiptTextField "schema" candidate == Just "amoebius-validation-candidate-v4"
+                      , receiptTextField "phase" candidate == Just (formatOrdinal expectedPhase)
+                      , receiptTextField "certificationGenerationDigest" candidate == Just (hex generation)
+                      , receiptTextField "acceptedBaselineDigest" candidate == Just (hex accepted)
+                      , receiptTextField "sourceOpeningDigest" candidate == Just (hex sourcePreimage)
+                      , receiptTextField "projectionPostimageDigest" candidate == Just (hex sourcePostimage)
+                      , receiptTextField "projectionDigest" candidate == Just (hex projection)
+                      , receiptTextField "compatibilityClosureDigest" candidate == Just (hex compatibility)
+                      , candidatePredecessor == Just (hex predecessor)
+                      ]]
+              <> [receiptFinding "EVIDENCE-PREDECESSOR-RECEIPT-FIELD" "the authenticated receipt contains an invalid session or process-output identity" | any ((/= 32) . ByteString.length) [session, stdoutDigest, stderrDigest]]
+    case problems of
+        [] -> Right (ImmediatePredecessor expectedPhase digest)
+        _ -> Left problems
+
+readProtectedReceiptBytes :: FilePath -> IO (Either [Finding] ByteString)
+readProtectedReceiptBytes path = do
+    attempted <- try (ByteString.readFile path) :: IO (Either IOException ByteString)
+    pure $ case attempted of
+        Left problem -> Left [receiptFinding "EVIDENCE-PREDECESSOR-READ" (Text.pack (show problem))]
+        Right bytes -> Right bytes
+
+receiptField :: Text -> Value -> Maybe Value
+receiptField key (Object values) = KeyMap.lookup (AesonKey.fromText key) values
+receiptField _ _ = Nothing
+
+receiptTextField :: Text -> Value -> Maybe Text
+receiptTextField key value = case receiptField key value of
+    Just (String text) -> Just text
+    _ -> Nothing
+
+predecessorDigestField :: Value -> Maybe Text
+predecessorDigestField candidate = do
+    predecessor <- case receiptField "predecessor" candidate of
+        Just objectValue@(Object _) -> Just objectValue
+        _ -> Nothing
+    case receiptTextField "kind" predecessor of
+        Just "genesis-trust" -> receiptTextField "trustDigest" predecessor
+        Just "immediate-predecessor" -> receiptTextField "evidenceDigest" predecessor
+        _ -> Nothing
+
+protectedCertificationRoot :: FilePath -> Bool
+protectedCertificationRoot root =
+    case splitDirectories (normalise root) of
+        ["/", "var", "lib", "amoebius-certification", "generation-1", "repository"] -> True
+        _ -> False
+
+receiptFinding :: Text -> Text -> Finding
+receiptFinding code = finding code "<protected-predecessor-receipt>"
 
 {- | Re-acquire candidate publication bytes for consistency diagnostics.
 This checks the absolute canonical content-addressed path and exact regular-file

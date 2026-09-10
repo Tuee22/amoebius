@@ -36,7 +36,7 @@ owned by the exact integrated gate and the mechanical status projection that fol
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -113,8 +113,9 @@ inventory, provider realization, and engine resolution remain UNVERIFIED live-ba
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -185,9 +186,9 @@ binding has not been authored in Haskell. Retained rows specify intended scope a
 
 ## Sprints
 
-## Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ⏸️
+## Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/provision-seal/Amoebius/Capacity/Provision.hs` owns demand derivation, both planner arms, validation, readback enactment, replay protection, and the provision context.
 **Blocked by**: [Phase 30](phase_30_capability_bind.md) gate pass
 **Independent Validation**: Both planner paths, replay/readback negatives, exact receipt classifications, and two planner changed-production challenges execute in the Phase-31 matrix.
@@ -232,9 +233,9 @@ already materialized or returns exactly one non-renderable plan owning the close
 
 Integrated Phase-31 gate execution and its mechanical status projection remain.
 
-## Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ⏸️
+## Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/provision-seal/Amoebius/Capacity/Provision.hs` and `src/provision-seal/Amoebius/Capability/{Engine,Provisioned}.hs` own the whole-deployment fold and opaque successful result.
 **Blocked by**: Sprint 31.1
 **Independent Validation**: Eighteen inherited positive deployments, ten exact negatives, two properties, exact instance/runtime joins, and drop-execution/drop-runtime mutations execute in the matrix.
@@ -343,9 +344,9 @@ and an impossible target has no deployable value.
 
 Integrated Phase-31 gate execution and its mechanical status projection remain.
 
-## Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ⏸️
+## Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/provision-seal/Amoebius/Capacity/RenderSource.hs` owns the identity-keyed render-source seal and activation discipline; `Provision.hs` alone inserts it into `ProvisionedSpec`.
 **Blocked by**: Sprint 31.2
 **Independent Validation**: Exact key/domain/owner correspondence and all four independently classified activation stages execute in the clean Haskell candidate.
@@ -394,9 +395,9 @@ identity-keyed render-source set with per-field ownership and a four-stage activ
 
 Integrated Phase-31 gate execution and its mechanical status projection remain.
 
-## Sprint 31.4: The provision-seal property/corpus + the Register-1 gate ⏸️
+## Sprint 31.4: The provision-seal property/corpus + the Register-1 gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `test/spec/capability/{ProvisionSealGate,ProvisionSealSpec,ProvisionFixtures,ProvisionProps,RuntimeStorageBindingProps}.hs` and `Amoebius.Validation.ProvisionSealRun.Internal` own the serial qualified gate.
 **Blocked by**: Sprint 31.3
 **Independent Validation**: Compare complete actual provision values against independently authored demand/identity/resource expectations; exact-fit controls survive while one-over and substituted-value pairs refuse; each assigned production mutant fails its named case; live materialization remains unverified.

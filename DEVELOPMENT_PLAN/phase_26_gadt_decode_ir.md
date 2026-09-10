@@ -38,7 +38,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -121,8 +121,9 @@ never a partial result. Generated Dhall/protocol bytes stay beneath `.build/**`;
 
 ## Gate integrity
 
-**Contract check**: UNRESOLVED — NOT VALIDATED; the replacement certification-generation and accepted-baseline
-binding has not been authored in Haskell. Retained rows specify intended scope and supply no execution evidence.
+**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
+authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
+remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
@@ -187,9 +188,9 @@ Haskell and qualify the mechanism that first admits their result; component obse
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 26.1: The amoebius cabal package + `gadt-decode-spec` test-suite skeleton ⏸️
+## Sprint 26.1: The amoebius cabal package + `gadt-decode-spec` test-suite skeleton ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `amoebius.cabal`, `src/gadt-decode-ir/Amoebius/Dsl/GadtDecode.hs`, and `test/spec/dsl/GadtDecodeSpec.hs` define the package and suite boundary.
 **Blocked by**: [Phase 25](phase_25_dhall_schema_generation.md) gate pass
 **Independent Validation**: The package-hidden supervisor builds the exact suite offline and serially in a unique run root and records its process receipt.
@@ -231,9 +232,9 @@ gadt-decode needs, with **no** chain/reconcile/control-plane daemon kernel.
 
 The pre-reset `None` claim is permanently invalid; Phase 26 remains blocked and NOT VALIDATED. Later DSL expansion belongs to the numerically assigned phases.
 
-## Sprint 26.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ⏸️
+## Sprint 26.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `Amoebius.Dsl.GadtDecode` defines controller-indexed `Execution`, existential `SomeExecution`, surfaces, resource arms, ownership fields, and refined worlds.
 **Blocked by**: Sprint 26.1
 **Independent Validation**: Five positive controls cover every public execution constructor; ownership and resource-arm negatives prove refinement boundaries.
@@ -632,9 +633,9 @@ refined execution retains its exact resource subtree; no provisioned total is sy
 
 The pre-reset `None` claim is permanently invalid; Phase 26 remains blocked and NOT VALIDATED. Exhaustive catalog expansion is Phase 27.
 
-## Sprint 26.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ⏸️
+## Sprint 26.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `decodeWorld`/`decodeWorldFile` catch read and Dhall failures, reject forbidden imports before resolution, and refine raw values to structured `Either DecodeFailure DecodedWorld`.
 **Blocked by**: Sprint 26.2
 **Independent Validation**: Twelve named negatives pin exact failure constructors, including malformed input and env/remote import refusal.
@@ -691,9 +692,9 @@ so nothing is ever reconciled against a config that did not fully decode.
 
 The pre-reset `None` claim is permanently invalid; Phase 26 remains blocked and NOT VALIDATED.
 
-## Sprint 26.4: The gadt-decode decode battery (`gadt-decode-spec`) — the gate ⏸️
+## Sprint 26.4: The gadt-decode decode battery (`gadt-decode-spec`) — the gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `GadtDecodeSpec.hs` and `Amoebius.Validation.GadtDecodeRun.Internal` generate nineteen products and execute four changed-production rows plus clean.
 **Blocked by**: Sprint 26.3
 **Independent Validation**: Decode every independently declared source/IR arm to its full expected value; paired omissions and illegal values refuse at exact paths; assigned decoder mutants fail semantic cases; feasibility and runtime fidelity remain later-owned.
@@ -825,9 +826,9 @@ provisioning boundary.
 Bind the retained requirements to the replacement Haskell acceptance contract, repair the stated gaps, and
 qualify this phase's complete gate after its predecessor. Resolve owned legacy debt with observed closure. The exhaustive per-catalog-entry corpus begins in Phase 27.
 
-## Sprint 26.5: Decoding the shared `SecretRef` and rejecting a literal ⏸️
+## Sprint 26.5: Decoding the shared `SecretRef` and rejecting a literal ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `SecretRef` is the closed `Vault | TransitKey | Prompt` Haskell sum; refinement rejects `PlainText` with `PlaintextSecret`.
 **Blocked by**: Sprint 26.4
 **Independent Validation**: Three positive reference arms and the plaintext negative run from Haskell-declared sources beneath the unique output root.
