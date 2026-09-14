@@ -343,6 +343,8 @@ seedContainedToolchain root sourceRoot home = do
       compilerSource = home </> ".ghcup/ghc/9.12.4"
       packagesSource = home </> ".cabal/packages/hackage.haskell.org"
   copyTree compilerSource (ghcupRoot </> "ghc/9.12.4")
+  compilerOrigin <- canonicalizePath compilerSource
+  relocateContainedCompiler compilerOrigin (ghcupRoot </> "ghc/9.12.4")
   createDirectoryIfMissing True (ghcupRoot </> "bin")
   copyFile (home </> ".ghcup/bin/cabal-3.16.1.0") (ghcupRoot </> "bin/cabal-3.16.1.0")
   createFileLink "cabal-3.16.1.0" (ghcupRoot </> "bin/cabal")
@@ -424,6 +426,41 @@ prepareContainedDependencies sourceRoot toolchain = do
     let retainedBytes = ByteString.drop (max 0 (ByteString.length stderrBytes - 8192)) stderrBytes
     ioError (userError ("contained dependency preparation failed: " <> ByteString8.unpack retainedBytes))
 
+-- | The ghcup compiler wrappers embed the absolute prefix of the installation
+-- that generated them.  A copied tree that keeps those paths execs the
+-- operator's compiler instead of the contained one, so the copy is relocated
+-- to its own prefix before anything runs inside it.
+relocateContainedCompiler :: FilePath -> FilePath -> IO ()
+relocateContainedCompiler origin contained = do
+  let binDirectory = contained </> "bin"
+  entries <- sort <$> listDirectory binDirectory
+  forM_ entries $ \entry -> do
+    let path = binDirectory </> entry
+    link <- pathIsSymbolicLink path
+    regular <- doesFileExist path
+    unless (link || not regular) $ do
+      original <- ByteString.readFile path
+      let rewritten = replaceAll (ByteString8.pack origin) (ByteString8.pack contained) original
+      unless (rewritten == original) $ do
+#if !defined(mingw32_HOST_OS)
+        status <- System.Posix.Files.getFileStatus path
+        ByteString.writeFile path rewritten
+        System.Posix.Files.setFileMode path (System.Posix.Files.fileMode status)
+#else
+        ByteString.writeFile path rewritten
+#endif
+
+replaceAll :: ByteString -> ByteString -> ByteString -> ByteString
+replaceAll needle replacement source
+  | ByteString.null needle = source
+  | otherwise = go source
+ where
+  go rest =
+    let (before, after) = ByteString.breakSubstring needle rest
+     in if ByteString.null after
+          then before
+          else before <> replacement <> go (ByteString.drop (ByteString.length needle) after)
+
 copyMetadataFiles :: FilePath -> FilePath -> [FilePath] -> IO ()
 copyMetadataFiles source target names = forM_ names $ \name -> do
   present <- doesFileExist (source </> name)
@@ -453,12 +490,16 @@ executeConcreteHandoff python sourceRoot runRoot = do
       stderrPath = runRoot </> "concrete.stderr"
       opaque = ["validate", "phase", "50"]
       arguments = ["-I", "-S", "-B", sourceRoot </> "pb"] <> opaque
-      unit = "amoebius-phase-50-" <> takeFileName runRoot <> ".service"
+      unit = "amoebius-phase-50-" <> takeFileName runRoot <> ".scope"
       systemdRun = "/usr/bin/systemd-run"
       systemctl = "/usr/bin/systemctl"
+      -- A scope keeps the observed process in this supervisor's own process
+      -- tree and credentials.  A transient service would be started by the
+      -- user manager under its own group, and the kernel refuses to resolve
+      -- the live executable of a process whose group differs from the reader's,
+      -- so the external observation of the handoff would be unobtainable.
       supervisedArguments =
-        [ "--user", "--quiet", "--wait", "--pipe", "--collect", "--unit=" <> unit
-        , "--property=Type=exec"
+        [ "--user", "--quiet", "--scope", "--unit=" <> unit
         , "--property=MemoryAccounting=yes"
         , "--property=MemoryMax=8589934592"
         , "--property=MemorySwapMax=0"
@@ -541,6 +582,10 @@ executeConcreteHandoff python sourceRoot runRoot = do
     , concreteStderrPath = stderrPath
     }
 
+-- | A scope owns a set of processes rather than one main process, so the
+-- supervised child is identified through the unit's own control group instead
+-- of a main-process property.  The identity still comes from the operating
+-- system, never from anything the child reports about itself.
 awaitServiceMainPid :: FilePath -> String -> Int -> IO (Either Text String)
 awaitServiceMainPid systemctl unit attempts
   | attempts <= 0 = pure (Left "systemd-main-pid-timeout")
@@ -548,7 +593,26 @@ awaitServiceMainPid systemctl unit attempts
       observed <- readServiceProperty systemctl unit "MainPID"
       case observed of
         Right value | value /= "0" && not (Text.null value) -> pure (Right (Text.unpack value))
-        _ -> threadDelay 50000 >> awaitServiceMainPid systemctl unit (attempts - 1)
+        _ -> do
+          grouped <- readControlGroupPid systemctl unit
+          case grouped of
+            Just processId -> pure (Right processId)
+            Nothing -> threadDelay 50000 >> awaitServiceMainPid systemctl unit (attempts - 1)
+
+-- | The first process the operating system reports in the unit's control group.
+readControlGroupPid :: FilePath -> String -> IO (Maybe String)
+readControlGroupPid systemctl unit = do
+  observed <- readServiceProperty systemctl unit "ControlGroup"
+  case observed of
+    Right value | not (Text.null value) -> do
+      let procsPath = "/sys/fs/cgroup" <> Text.unpack value <> "/cgroup.procs"
+      attempt <- try (ByteString.readFile procsPath) :: IO (Either IOException ByteString)
+      pure $ case attempt of
+        Left _ -> Nothing
+        Right bytes -> case filter (not . null) (lines (ByteString8.unpack bytes)) of
+          entry : _ -> Just entry
+          [] -> Nothing
+    _ -> pure Nothing
 
 readServiceProperties :: FilePath -> String -> IO [(String, Text)]
 readServiceProperties systemctl unit = do

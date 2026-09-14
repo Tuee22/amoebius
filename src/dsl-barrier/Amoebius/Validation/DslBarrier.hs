@@ -4,6 +4,11 @@
 -- | The hardware-free composition boundary. Stage implementations remain in
 -- their owning libraries; this module checks the acquired observations that
 -- prove their values crossed the complete spine in one run.
+--
+-- Nothing here supplies a value it also checks. Every stage digest is computed
+-- by the caller from an actual stage output, and the application boundary is
+-- accepted only when the bytes a separate process was observed to receive are
+-- the bytes the render stage was observed to produce.
 module Amoebius.Validation.DslBarrier
   ( BarrierChallenge (..)
   , BarrierProblem (..)
@@ -17,7 +22,7 @@ module Amoebius.Validation.DslBarrier
 import Amoebius.Calculus.Workflow.Arm (Evidence (Evidence), everyArm)
 import Amoebius.Gate.SelfReferential
   ( GateRun (..), GateVerdict (GatePassed), evidenceObservation, evidenceVerdict, runEvidence )
-import Data.List (nub)
+import Data.List (find, nub)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import System.FilePath (isAbsolute)
@@ -47,7 +52,7 @@ newtype BarrierChallenge = BarrierChallenge { barrierChallengeText :: Text }
 data FakeBoundaryObservation = FakeBoundaryObservation
   { fakeExecutable :: FilePath
   , fakeArgv :: [Text]
-  , fakeRequestBytes :: Text
+  , fakeRequestDigest :: Text
   , fakeRecoveredChallenge :: Text
   , fakeEffectStage :: BarrierStage
   , fakeExternallyObserved :: Bool
@@ -96,7 +101,11 @@ validateDslBarrier stages challenge fake gateRun = do
   require (uniqueDigests stages) StageDigestCollision
   require (isAbsolute (fakeExecutable fake)) FakeExecutableNotAbsolute
   require (fakeArgv fake == ["apply", "--server-side=true", "-f", "-"]) FakeArgvMismatch
-  require (fakeRequestBytes fake == "phase-49:" <> barrierChallengeText challenge) FakeRequestMismatch
+  -- The applied request is accepted only when the bytes the separate child was
+  -- observed to receive digest to the bytes the render stage was observed to
+  -- produce. Neither side of this comparison is a constant in this module.
+  renderedDigest <- maybe (Left (StageInventoryMismatch (map observedStage stages))) Right (digestOf RenderAll stages)
+  require (fakeRequestDigest fake == renderedDigest) FakeRequestMismatch
   require (fakeRecoveredChallenge fake == barrierChallengeText challenge) FakeChallengeMismatch
 #if !defined(DSL_BARRIER_DRY_RUN_EXECUTION_MUTANT)
   require (fakeEffectStage fake == FakeApply) EffectBeforeFakeApply
@@ -123,6 +132,9 @@ validateDslBarrier stages challenge fake gateRun = do
 #else
     require (sha256Text (observedStageDigest observation)) (StageDigestMalformed (observedStage observation))
 #endif
+
+digestOf :: BarrierStage -> [StageObservation] -> Maybe Text
+digestOf stage = fmap observedStageDigest . find ((== stage) . observedStage)
 
 uniqueDigests :: [StageObservation] -> Bool
 #if defined(DSL_BARRIER_PROVISION_IDENTITY_COLLAPSE_MUTANT)

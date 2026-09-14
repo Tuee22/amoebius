@@ -38,7 +38,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+🔄 Active — NOT VALIDATED.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -149,9 +149,9 @@ remains phase-local and cannot be supplied by this prose.
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 52.1: The pristine guest and its recorded preflight ⏸️
+## Sprint 52.1: The pristine guest and its recorded preflight 🔄
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Active — NOT VALIDATED
 **Implementation**: `Amoebius.Validation.LinuxEngineBringupRun` owns unique Incus launch, pristine preflight, observation, and unconditional deletion.
 **Blocked by**: [Phase 51](phase_51_host_ensure_kernel.md) gate pass
 **Independent Validation**: Externally acquire and observe the pristine owned guest; each singly dirty surface refuses at its exact reason after successful setup; assigned preflight/observer mutants are detected; foreign hosts and other substrates remain excluded.

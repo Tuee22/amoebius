@@ -16,6 +16,10 @@ module Amoebius.Host.LinuxEngine
   , admitNativeBuild
   , daemonProbeArgv
   , futureSessionArgv
+  , unelevatedArgv
+  , dockerClientArgv
+  , guestDockerUser
+  , imageReference
   , runLinuxEngineGuestPass
   ) where
 
@@ -123,6 +127,33 @@ daemonProbeArgv = ["/usr/bin/docker", "info", "--format", "{{.ServerVersion}}"]
 futureSessionArgv :: String -> [String]
 futureSessionArgv user = ["/usr/bin/su", "-", user, "-c", unwords daemonProbeArgv]
 
+-- | The unprivileged guest account every Docker client call is made from.
+guestDockerUser :: String
+guestDockerUser = "ubuntu"
+
+-- | Run an argv as the designated unprivileged user under that user's current
+-- group set.  A sudoless claim is about the identity that reaches the daemon,
+-- so the identity travels with each call rather than with whoever happened to
+-- start the pass; @--init-groups@ is what re-reads the membership a mutation
+-- just wrote.
+unelevatedArgv :: [String] -> [String]
+#if defined(LINUX_ENGINE_ROOT_CLIENT_MUTANT)
+unelevatedArgv = id
+#else
+unelevatedArgv arguments =
+  [ "/usr/bin/setpriv"
+  , "--reuid=" <> guestDockerUser
+  , "--regid=" <> guestDockerUser
+  , "--init-groups"
+  ]
+    <> arguments
+#endif
+
+-- | A Docker client invocation: probe, inspect, version, build, or run.  There
+-- is one spelling, so no call site can quietly become the elevated one.
+dockerClientArgv :: [String] -> [String]
+dockerClientArgv arguments = unelevatedArgv ("/usr/bin/docker" : arguments)
+
 surfacePresent :: LinuxEngineSurface -> LinuxEngineObservation -> Bool
 surfacePresent surface observed = case surface of
   EnginePackage -> enginePackagePresent observed
@@ -159,10 +190,10 @@ observeLinuxEngine = do
   package <- succeeds "/usr/bin/dpkg-query" ["-W", "-f=${Status}", "docker.io"]
   group <- runAbsolute "/usr/bin/getent" ["group", "docker"]
   daemon <- if package
-    then succeeds "/usr/bin/setpriv" ["--reuid=ubuntu", "--regid=ubuntu", "--init-groups", "/usr/bin/docker", "info", "--format", "{{.ServerVersion}}"]
+    then toolSucceeded <$> runArgv (unelevatedArgv daemonProbeArgv)
     else pure False
-  image <- if package
-    then succeeds "/usr/bin/docker" ["image", "inspect", imageReference]
+  image <- if daemon
+    then toolSucceeded <$> runArgv (dockerClientArgv ["image", "inspect", imageReference])
     else pure False
   pure LinuxEngineObservation
     { enginePackagePresent = package
@@ -181,15 +212,15 @@ enactMutation outputRoot mutation = case mutation of
   StartDockerDaemon ->
     requireSuccess "start-docker" =<< runAbsolute "/usr/bin/systemctl" ["enable", "--now", "docker.service"]
   RefreshCurrentCredentials -> do
-    requireSuccess "current-process-credentials" =<< runAbsolute "/usr/bin/setpriv" ["--reuid=ubuntu", "--regid=ubuntu", "--init-groups", "/usr/bin/docker", "info", "--format", "{{.ServerVersion}}"]
-    requireSuccess "future-session-credentials" =<< runAbsolute "/usr/bin/su" ["-", "ubuntu", "-c", unwords daemonProbeArgv]
+    requireSuccess "current-process-credentials" =<< runArgv (unelevatedArgv daemonProbeArgv)
+    requireSuccess "future-session-credentials" =<< runArgv (futureSessionArgv guestDockerUser)
   BuildNativeImage -> buildNativeImage outputRoot
 
 buildNativeImage :: FilePath -> IO ()
 buildNativeImage outputRoot = do
   requested <- pure Amd64
   guest <- architectureFrom =<< stdoutOf "/usr/bin/uname" ["-m"]
-  engine <- architectureFrom =<< stdoutOf "/usr/bin/docker" ["version", "--format", "{{.Server.Arch}}"]
+  engine <- architectureFrom =<< stdoutOfArgv (dockerClientArgv ["version", "--format", "{{.Server.Arch}}"])
   either (fail . show) pure (admitNativeBuild requested guest engine)
   executable <- getExecutablePath
   let context = outputRoot </> "image-context"
@@ -203,13 +234,12 @@ buildNativeImage outputRoot = do
     , "USER 65532:65532"
     , "ENTRYPOINT [\"/usr/bin/amoebius\"]"
     ])
-  requireSuccess "native-image-build" =<< runAbsolute "/usr/bin/docker"
-    ["build", "--file", dockerfile, "--tag", imageReference, context]
+  requireSuccess "native-image-build" =<< runArgv
+    (dockerClientArgv ["build", "--file", dockerfile, "--tag", imageReference, context])
 
 containerVersion :: IO String
 containerVersion = do
-  result <- runAbsolute "/usr/bin/setpriv"
-    ["--reuid=ubuntu", "--regid=ubuntu", "--init-groups", "/usr/bin/docker", "run", "--rm", imageReference, "--version"]
+  result <- runArgv (dockerClientArgv ["run", "--rm", imageReference, "--version"])
   requireSuccess "container-version" result
   pure (ByteString.unpack (toolStdout result))
 
@@ -226,6 +256,17 @@ stdoutOf executable arguments = do
   result <- runAbsolute executable arguments
   requireSuccess executable result
   pure (ByteString.unpack (toolStdout result))
+
+stdoutOfArgv :: [String] -> IO String
+stdoutOfArgv argv = do
+  result <- runArgv argv
+  requireSuccess (unwords argv) result
+  pure (ByteString.unpack (toolStdout result))
+
+runArgv :: [String] -> IO ToolResult
+runArgv argv = case argv of
+  executable : arguments -> runAbsolute executable arguments
+  [] -> fail "linux-engine-empty-argv"
 
 succeeds :: FilePath -> [String] -> IO Bool
 succeeds executable arguments = toolSucceeded <$> runAbsolute executable arguments

@@ -503,7 +503,16 @@ import System.Process
   )
 #if !defined(mingw32_HOST_OS)
 import System.Posix.Files (setFileMode, setOwnerAndGroup)
-import System.Posix.User (getEffectiveUserID)
+import System.Posix.Types (CGid)
+import System.Posix.Process (executeFile)
+import System.Posix.User
+  ( getEffectiveUserID
+  , getGroupEntryForName
+  , groupID
+  , setGroupID
+  , setGroups
+  , setUserID
+  )
 #endif
 import Text.Read (readMaybe)
 
@@ -1064,6 +1073,8 @@ runValidateCommand arguments = do
       | Just phase <- parseOrdinal ordinal -> runProtectedSupervisorCommand originalRoot phase
     ["__certification-apply-v1", ordinal, originalRoot]
       | Just phase <- parseOrdinal ordinal -> runProtectedStatusApplyCommand originalRoot phase
+    ["__certification-candidate-v1", ordinal]
+      | Just phase <- parseOrdinal ordinal -> runProtectedCandidateLaunch phase
     ["phase", ordinal]
       | Just phase <- parseOrdinal ordinal
       , candidateStage == Just "generation-1" -> runProtectedCandidate phase
@@ -1100,6 +1111,63 @@ invokeProtectedSupervisor phase = do
             , Text.unpack (formatOrdinal phase)
             , originalRoot
             ]
+
+-- | Drop from the protected supervisor's privilege to the candidate identity,
+-- including the supplementary groups the candidate legitimately holds, and
+-- then run the candidate in this process.  Groups must be established while
+-- the process still holds privilege, so this happens before the user change.
+runProtectedCandidateLaunch :: Int -> IO ExitCode
+#if defined(mingw32_HOST_OS)
+runProtectedCandidateLaunch _ = emitResult certificationResetDiagnostic
+#else
+runProtectedCandidateLaunch phase = do
+  effectiveUid <- getEffectiveUserID
+  executable <- getExecutablePath >>= canonicalizePath
+  if effectiveUid /= 0 || executable /= verifierPath
+    then emitResult
+      CheckResult
+        { checkName = "certification-candidate-launch"
+        , checkObservations = []
+        , checkFindings =
+            [ finding
+                "CERTIFICATION-CANDIDATE-LAUNCH-AUTHORITY"
+                "<candidate-launch>"
+                "Dropping to the candidate identity requires UID zero and the protected generation-1 verifier executable."
+            ]
+        }
+    else do
+      supplementary <- candidateSupplementaryGroups
+      setGroups supplementary
+      setGroupID (fromIntegral certificationCandidateGid)
+      setUserID (fromIntegral certificationCandidateUid)
+      -- Replace this process with the candidate under its canonical argv, so
+      -- the candidate observes the exact public command rather than the
+      -- private launcher that dropped the privilege.
+      executeFile verifierPath False ["validate", "phase", Text.unpack (formatOrdinal phase)] Nothing
+#endif
+
+-- | The candidate's own group plus the host groups that own the resources a
+-- hardware-bearing phase must observe.  A group the host does not define is
+-- simply absent; nothing here invents membership.
+candidateSupplementaryGroups :: IO [CGid]
+#if defined(mingw32_HOST_OS)
+candidateSupplementaryGroups = pure []
+#else
+candidateSupplementaryGroups = do
+  resolved <- mapM resolveGroup candidateResourceGroups
+  pure (fromIntegral certificationCandidateGid : concat resolved)
+ where
+  resolveGroup name = do
+    attempted <- try (fmap groupID (getGroupEntryForName name)) :: IO (Either IOException CGid)
+    pure (either (const []) pure attempted)
+
+-- | Host groups that own a resource a candidate phase observes directly.  A
+-- hardware-bearing phase reaches its provider through a group-owned socket, so
+-- the group is the authority; naming it here is what lets the candidate observe
+-- the resource itself rather than a proxy's report of it.
+candidateResourceGroups :: [String]
+candidateResourceGroups = ["docker", "incus-admin", "incus"]
+#endif
 
 runProtectedSupervisorCommand :: FilePath -> Int -> IO ExitCode
 #if defined(mingw32_HOST_OS)
@@ -1337,16 +1405,16 @@ prepareCandidateRunDirectory phase = do
 
 runProtectedCandidateProcess :: Int -> ByteString -> ByteString -> IO (Either [Finding] (Text, Text))
 runProtectedCandidateProcess phase generation accepted = do
-  let arguments = ["validate", "phase", Text.unpack (formatOrdinal phase)]
+  -- The launcher drops privilege in the child itself.  Spawning with only a
+  -- user and group would leave the candidate without the supplementary groups
+  -- its phase needs to reach a host resource such as the container engine
+  -- socket, and a candidate that cannot reach the resource cannot observe it.
+  let arguments = ["validate", "__certification-candidate-v1", Text.unpack (formatOrdinal phase)]
       command =
         (proc verifierPath arguments)
           { cwd = Just certificationMirrorRoot
           , env = Just (candidateEnvironment generation accepted)
           , close_fds = True
-#if !defined(mingw32_HOST_OS)
-          , child_group = Just (fromIntegral certificationCandidateGid)
-          , child_user = Just (fromIntegral certificationCandidateUid)
-#endif
           }
   attempted <- try (readCreateProcessWithExitCode command "") :: IO (Either IOException (ExitCode, String, String))
   pure $ case attempted of
@@ -1377,6 +1445,11 @@ candidateEnvironment generation accepted =
   , ("LC_ALL", "C.UTF-8")
   , ("PATH", "/home/matt/.ghcup/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin")
   , ("TMPDIR", "/tmp")
+  -- The candidate's own user manager is how a phase enforces an operating-system
+  -- resource limit on a child it starts.  Naming the runtime directory is what
+  -- lets the candidate reach that manager; it grants no authority the candidate
+  -- uid does not already hold.
+  , ("XDG_RUNTIME_DIR", "/run/user/" <> show certificationCandidateUid)
   ]
 
 freezeCandidateRunDirectory :: FilePath -> IO ()

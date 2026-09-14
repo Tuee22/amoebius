@@ -38,7 +38,7 @@ The target pipeline is defined by
 
 ## Phase Status
 
-🔄 Active — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -124,9 +124,9 @@ gate-ready, but only the complete integrated run may supply its evidence.
 
 ## Sprints
 
-## Sprint 49.1: Freeze the complete semantic surface 🔄
+## Sprint 49.1: Freeze the complete semantic surface ✅
 
-**Status**: Active — NOT VALIDATED
+**Status**: Done
 **Implementation**: `test/spec/workflow/DslBarrierOracle.hs`
 **Blocked by**: [Phase 48](phase_48_test_workflow_algebra.md) gate pass
 **Independent Validation**: Independently enumerate the full declared language and stage-value relations; a minimally omitted constructor/interaction fails exact discovery; registry and copied-oracle mutants fail assigned cases; each unproved assumption remains explicit.
@@ -159,9 +159,9 @@ negative, or empty corpus at a distinct locus.
 
 Integrate the checked oracle into the acquired Phase-49 supervisor and qualified gate.
 
-## Sprint 49.2: Compose the production pipeline ⏸️
+## Sprint 49.2: Compose the production pipeline ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/dsl-barrier/Amoebius/Validation/DslBarrier.hs`
 **Blocked by**: Sprint 49.1
 **Independent Validation**: One real production pipeline yields independently expected typed outputs; a same-count value substitution or skipped handoff fails exactly; actual stage mutants fail their assigned case; live fidelity remains excluded.
@@ -194,9 +194,9 @@ copied output, ignored input, or live dependency refuses the run.
 
 Implement and qualify the composition.
 
-## Sprint 49.3: Qualify self-reference and fake apply ⏸️
+## Sprint 49.3: Qualify self-reference and fake apply ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/self-referential-gates/Amoebius/Gate/SelfReferential.hs`, `src/dsl-barrier/Amoebius/Validation/DslBarrier.hs`, `test/spec/workflow/SelfReferentialGatesSpec.hs`
 **Blocked by**: Sprint 49.2
 **Independent Validation**: Observe an actual derived apply request after readiness and compare workflow execution to the independent kernel; wrong argv, echoed-only payload, pre-issued challenge and wrong-case qualification pairs fail exactly; actual boundary/workflow/harness mutants are detected; live tools remain unverified.
@@ -234,9 +234,9 @@ receipt.
 
 Implement, qualify, and independently check self-reference and fake apply.
 
-## Sprint 49.4: Produce the documentation-gate candidate ⏸️
+## Sprint 49.4: Produce the documentation-gate candidate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/DslBarrierRun/Internal.hs`, `src/validation-kernel/Amoebius/Validation/Dispatch/Internal.hs`, `app/amoebius/Main.hs`
 **Blocked by**: Sprint 49.3
 **Independent Validation**: From a fresh generated-run tree plus the exact read-only Phase-48 receipt, a positive complete-pipeline control reaches fake apply, a minimally different forbidden-stage case is refused at its named locus, an applied production mutant reddens its named row, every source-debt query is zero, live-fidelity residue remains explicit, and the validator emits but does not apply the verified status patch.

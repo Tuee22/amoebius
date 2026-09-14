@@ -23,7 +23,17 @@ main = do
       dirtyRefused = and [admitPristineGuest value == Left (GuestNotPristine surface) | (surface, value) <- dirtyPairs]
       nativeAccepted = admitNativeBuild Amd64 Amd64 Amd64 == Right ()
       mismatchRefused = admitNativeBuild Arm64 Amd64 Amd64 == Left (ArchitectureMismatch Arm64 Amd64 Amd64)
+      architectureRows =
+        [ ((show requested, show guest, show engine), admitNativeBuild requested guest engine == Right ())
+        | requested <- [minBound .. maxBound] :: [NativeArchitecture]
+        , guest <- [minBound .. maxBound] :: [NativeArchitecture]
+        , engine <- [minBound .. maxBound] :: [NativeArchitecture]
+        ]
       noElevation = not (any ("sudo" `isInfixOf`) daemonProbeArgv)
+      unelevatedClient =
+        dockerClientArgv ["build"] == expectedDockerBuildClient
+          && take 4 (unelevatedArgv daemonProbeArgv) == expectedUnelevatedPrefix
+          && guestDockerUser == "ubuntu"
       problems =
         [label | (label, passed) <-
           [ ("first-pass-ledger", first == expectedFirstPass)
@@ -32,11 +42,14 @@ main = do
           , ("dirty-paired-negatives", dirtyRefused)
           , ("native-positive", nativeAccepted)
           , ("architecture-negative", mismatchRefused)
+          , ("architecture-table", architectureRows == architectureCases)
           , ("unelevated-probe", noElevation && daemonProbeArgv == expectedDaemonProbe)
           , ("future-session", futureSessionArgv "amoebius" == expectedFutureSession)
+          , ("unelevated-client", unelevatedClient)
+          , ("image-reference", imageReference == expectedImageReference)
           ], not passed]
   unless (null problems) (die (mutantToken <> "; differences=" <> show problems))
-  putStrLn "linux-engine-bringup-spec: PASS (4 pristine surfaces, 5 mutations, 2 ledgers, 4 dirty negatives, 1 architecture negative, 2 unelevated probes)"
+  putStrLn "linux-engine-bringup-spec: PASS (4 pristine surfaces, 5 mutations, 2 ledgers, 4 dirty negatives, 1 architecture negative, 8 architecture triples, 2 unelevated probes, 1 unelevated client, 1 image reference)"
 
 mutantToken :: String
 #if defined(LINUX_ENGINE_EPHEMERAL_MEMBERSHIP_MUTANT)
@@ -49,6 +62,8 @@ mutantToken = "linux-engine-bringup-mutant: RED elevated-retry unelevated-sessio
 mutantToken = "linux-engine-bringup-mutant: RED converge-without-probe second-pass-probes"
 #elif defined(LINUX_ENGINE_PLATFORM_OVERRIDE_MUTANT)
 mutantToken = "linux-engine-bringup-mutant: RED platform-override native-architecture"
+#elif defined(LINUX_ENGINE_ROOT_CLIENT_MUTANT)
+mutantToken = "linux-engine-bringup-mutant: RED root-client unelevated-docker-client"
 #else
 mutantToken = "linux-engine-bringup-spec: RED unexpected"
 #endif

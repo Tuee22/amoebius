@@ -570,6 +570,11 @@ flag linux-engine-platform-override-mutant
     default:     False
     manual:      True
 
+flag linux-engine-root-client-mutant
+    description: Enable the Phase-52 elevated Docker client production mutant
+    default:     False
+    manual:      True
+
 flag apple-engine-installs-floor-mutant
     description: Enable the Phase-53 operator-floor installation production mutant
     default:     False
@@ -5347,6 +5352,9 @@ library dsl-core
 
     if flag(linux-engine-platform-override-mutant)
         cpp-options: -DLINUX_ENGINE_PLATFORM_OVERRIDE_MUTANT
+
+    if flag(linux-engine-root-client-mutant)
+        cpp-options: -DLINUX_ENGINE_ROOT_CLIENT_MUTANT
 
     if flag(apple-engine-installs-floor-mutant)
         cpp-options: -DAPPLE_ENGINE_INSTALLS_FLOOR_MUTANT
@@ -10533,6 +10541,9 @@ test-suite linux-engine-bringup-spec
     if flag(linux-engine-platform-override-mutant)
         cpp-options: -DLINUX_ENGINE_PLATFORM_OVERRIDE_MUTANT
 
+    if flag(linux-engine-root-client-mutant)
+        cpp-options: -DLINUX_ENGINE_ROOT_CLIENT_MUTANT
+
 test-suite apple-engine-bringup-spec
     type:             exitcode-stdio-1.0
     main-is:          AppleEngineBringupSpec.hs
@@ -12849,9 +12860,19 @@ test-suite self-referential-gates-spec
 
     build-depends:
         base >=4.21 && <4.22,
+        bytestring >=0.12 && <0.13,
+        containers >=0.7 && <0.8,
+        cryptohash-sha256 ==0.11.102.1,
         directory >=1.3 && <1.4,
         filepath >=1.4 && <1.6,
+        amoebius:capability-bind,
+        amoebius:capacity-topology,
         amoebius:dsl-barrier,
+        amoebius:dsl-core,
+        amoebius:execution-accelerator-folds,
+        amoebius:gadt-decode-ir,
+        amoebius:manifest-render,
+        amoebius:provision-seal,
         amoebius:self-referential-gates,
         amoebius:workflow-calculus,
         process >=1.6 && <1.7,

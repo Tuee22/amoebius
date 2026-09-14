@@ -17,16 +17,18 @@ import Amoebius.Validation.PhaseContract.Internal
 import Amoebius.Validation.SourceClosure.Internal
   ( AcquiredSourceSnapshot, IndexEntry (indexPath), SourceSnapshot (snapshotEntries, snapshotIdentity)
   , TrackedEntry (trackedIndex), acquiredSourceSnapshot )
-import Amoebius.Validation.Types (CheckResult (..), finding, mergeChecks, observation)
+import Amoebius.Validation.Types (CheckResult (..), Finding, finding, mergeChecks, observation)
 import Control.Concurrent (threadDelay)
 import Control.Exception (SomeException, displayException, finally, try)
 import Control.Monad (forM_, unless)
 import Crypto.Hash.SHA256 qualified as SHA256
 import Data.ByteString qualified as ByteString
 import Data.List (isPrefixOf, sort)
+import Data.Maybe (listToMaybe)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
+import Data.Text.Read qualified as Text (decimal)
 import System.Directory
   ( copyFile, createDirectory, createDirectoryIfMissing, doesDirectoryExist
   , doesFileExist, getHomeDirectory, listDirectory, removeFile )
@@ -50,6 +52,8 @@ data LiveObservation = LiveObservation
   , liveSecondSurfaces :: Text
   , liveFirstVersion :: Text
   , liveSecondVersion :: Text
+  , liveFirstTrace :: Text
+  , liveSecondTrace :: Text
   , liveExternal :: Text
   , liveProviderBefore :: Text
   , liveProviderAfter :: Text
@@ -94,12 +98,13 @@ acquire refresh root acquired trust = do
       positives = positiveCheck matrix liveResult
       negatives = negativeCheck matrix
       mutants = mutantCheck matrix
-      discovery = discoveryCheck discipline liveResult
-      challenge = challengeCheck liveResult
-      observer = observerCheck liveResult
-      authority = authorityCheck root runRoot cabal compiler store matrix liveResult
+      discovery = mergeChecks "linux-engine-bringup-discovery" [discoveryCheck discipline liveResult, identity]
+      challenge = mergeChecks "linux-engine-bringup-challenge" [challengeCheck liveResult, identity]
+      identity = mergeChecks "linux-engine-bringup-client-identity" [clientIdentityCheck liveResult, handoffIdentityCheck liveResult]
+      observer = mergeChecks "linux-engine-bringup-observer" [observerCheck liveResult, identity]
+      authority = mergeChecks "linux-engine-bringup-authority" [authorityCheck root runRoot cabal compiler store matrix liveResult, identity]
       freshness = freshnessCheck root runRoot liveResult
-      qualification = mergeChecks "linux-engine-bringup-qualification" [toolchain, negatives, mutants]
+      qualification = mergeChecks "linux-engine-bringup-qualification" [toolchain, negatives, mutants, identity]
       cleanroom = mergeChecks "linux-engine-bringup-cleanroom" [cache, cleanupCheck liveResult]
       legacy = mergeChecks "linux-engine-bringup-legacy-closure" [discipline, mutants]
       prerequisite = mergeChecks "linux-engine-bringup-prerequisite"
@@ -144,6 +149,7 @@ mutantSpecifications =
   , row "elevated-retry" "linux-engine-elevated-retry-mutant" "daemon.unelevated-argv" "linux-engine-bringup-mutant: RED elevated-retry unelevated-session-read"
   , row "converge-without-probe" "linux-engine-converge-without-probe-mutant" "rerun.probe-set" "linux-engine-bringup-mutant: RED converge-without-probe second-pass-probes"
   , row "platform-override" "linux-engine-platform-override-mutant" "build.architecture-admission" "linux-engine-bringup-mutant: RED platform-override native-architecture"
+  , row "root-client" "linux-engine-root-client-mutant" "client.unelevated-identity" "linux-engine-bringup-mutant: RED root-client unelevated-docker-client"
   ]
  where row name flagName locus expected = (name, flagName, locus, expected)
 
@@ -156,6 +162,17 @@ executeLive root runRoot = do
       support = runRoot </> "toolchain-support.tar"
       guestRoot = "/root/amoebius"
       guestOutput = "/var/lib/amoebius-phase52"
+      passTracePath pass = "/root/phase52-pass-" <> show (pass :: Int) <> ".trace"
+      -- Follow forks across the whole pass.  The earlier trace covered only the
+      -- version handoff, so no Docker client call in either pass was observed
+      -- by anything but the runner that issued it.
+      passArgv pass =
+        [ "/usr/bin/strace", "-f", "-s", show traceStringLimit
+        , "-e", "trace=execve,execveat,clone,clone3,vfork,fork"
+        , "-o", passTracePath pass
+        , "/usr/bin/python3", "-I", "-S", "-B", guestRoot </> "pb"
+        , "dev", "linux-engine-guest-pass", show pass, guestOutput
+        ]
   unless (all safeInstanceCharacter instanceName && "amoebius-phase52-" `isPrefixOf` instanceName)
     (fail "phase52-unsafe-instance-name")
   incus <- requireExecutable "/usr/bin/incus"
@@ -165,19 +182,16 @@ executeLive root runRoot = do
   unless (Text.null (Text.strip (receiptStdout absent))) (fail "phase52-owner-marker-already-present")
   _ <- require "source-archive" =<< runProcess root "source-archive" "/usr/bin/tar"
     ["--exclude=.git", "--exclude=.build", "--exclude=.data", "--exclude=.test_data", "--exclude=dist-newstyle", "--exclude=node_modules", "-C", root, "-cf", archive, "."]
+  supportRoot <- prepareGuestToolchainSupport root runRoot
   _ <- require "support-archive" =<< runProcess root "support-archive" "/usr/bin/tar"
-    ["-C", root, "-cf", support
-    , ".build/toolchain/linux-amd64/bootstrap/ghcup"
-    , ".build/toolchain/linux-amd64/.ghcup/cache/ghcup-0.1.0.yaml"
-    , ".build/toolchain/linux-amd64/cache/cabal/config"
-    , ".build/toolchain/linux-amd64/dist-newstyle/src"]
-  receipts <- (`finally` cleanup incus instanceName) $ do
+    ["-C", supportRoot, "-cf", support, ".build"]
+  observed <- (`finally` cleanup incus instanceName) $ do
     launch <- require "incus-launch" =<< runProcess root "incus-launch" incus
       ["launch", "images:ubuntu/24.04/cloud", instanceName, "--vm"
       , "-c", "limits.cpu=4", "-c", "limits.memory=8GiB"
       , "-c", "user.amoebius.owner=phase-52", "-d", "root,size=80GiB"]
     toolchainDevice <- require "incus-device-toolchain" =<< runProcess root "incus-device-toolchain" incus
-      ["config", "device", "add", instanceName, "phase52-toolchain", "disk", "source=/home/matt", "path=/phase52-host", "readonly=true"]
+      ["config", "device", "add", instanceName, "phase52-toolchain", "disk", "source=" <> toolchainHostRoot, "path=/phase52-host", "readonly=true"]
     ready <- waitReady root incus instanceName
     preflight <- require "guest-preflight" =<< guestShell root incus instanceName "guest-preflight" preflightScript
     unless (receiptStdout preflight == expectedPreflight) (fail ("phase52-preflight-mismatch:" <> Text.unpack (receiptStdout preflight)))
@@ -189,13 +203,15 @@ executeLive root runRoot = do
     pushSupport <- require "guest-support-push" =<< runProcess root "guest-support-push" incus ["file", "push", support, instanceName <> "/root/toolchain-support.tar"]
     setup <- require "guest-source-setup" =<< guestShell root incus instanceName "guest-source-setup" setupScript
     handoff <- require "guest-pb-handoff" =<< guest root incus instanceName "guest-pb-handoff"
-      ["/usr/bin/strace", "-f", "-e", "trace=execve,execveat", "-o", "/root/phase52-handoff.trace", "/usr/bin/python3", "-I", "-S", "-B", guestRoot </> "pb", "--version"]
+      [ "/usr/bin/strace", "-f", "-s", show traceStringLimit, "-e", "trace=execve,execveat"
+      , "-o", "/root/phase52-handoff.trace"
+      , "/usr/bin/python3", "-I", "-S", "-B", guestRoot </> "pb", "--version"]
     unless ("amoebius 0.1.0.0" `Text.isInfixOf` receiptStdout handoff) (fail "phase52-pb-handoff-version-missing")
-    first <- require "guest-first-pass" =<< guest root incus instanceName "guest-first-pass"
-      ["/usr/bin/python3", "-I", "-S", "-B", guestRoot </> "pb", "dev", "linux-engine-guest-pass", "1", guestOutput]
-    second <- require "guest-second-pass" =<< guest root incus instanceName "guest-second-pass"
-      ["/usr/bin/python3", "-I", "-S", "-B", guestRoot </> "pb", "dev", "linux-engine-guest-pass", "2", guestOutput]
+    first <- require "guest-first-pass" =<< guest root incus instanceName "guest-first-pass" (passArgv 1)
+    second <- require "guest-second-pass" =<< guest root incus instanceName "guest-second-pass" (passArgv 2)
     handoffTrace <- require "guest-handoff-trace" =<< guest root incus instanceName "guest-handoff-trace" ["/usr/bin/cat", "/root/phase52-handoff.trace"]
+    firstTrace <- readGuest root incus instanceName "first-trace" (passTracePath 1)
+    secondTrace <- readGuest root incus instanceName "second-trace" (passTracePath 2)
     firstLedger <- readGuest root incus instanceName "first-ledger" (guestOutput </> "pass-1-ledger.tsv")
     secondLedger <- readGuest root incus instanceName "second-ledger" (guestOutput </> "pass-2-ledger.tsv")
     firstSurfaces <- readGuest root incus instanceName "first-surfaces" (guestOutput </> "pass-1-surfaces.tsv")
@@ -203,17 +219,32 @@ executeLive root runRoot = do
     firstVersion <- readGuest root incus instanceName "first-version" (guestOutput </> "pass-1-version.txt")
     secondVersion <- readGuest root incus instanceName "second-version" (guestOutput </> "pass-2-version.txt")
     external <- require "guest-external-observer" =<< guestShell root incus instanceName "guest-external-observer" externalObserverScript
-    pure ([launch, toolchainDevice, ready, preflight, prerequisites, packages, pushSource, pushSupport, setup, handoff, first, second, handoffTrace, firstLedger, secondLedger, firstSurfaces, secondSurfaces, firstVersion, secondVersion, external], preflight, handoffTrace, firstLedger, secondLedger, firstSurfaces, secondSurfaces, firstVersion, secondVersion, external)
+    pure LiveObservation
+      { liveInstance = instanceId
+      , livePreflight = receiptStdout preflight
+      , liveHandoff = receiptStdout handoffTrace
+      , liveFirstLedger = receiptStdout firstLedger
+      , liveSecondLedger = receiptStdout secondLedger
+      , liveFirstSurfaces = receiptStdout firstSurfaces
+      , liveSecondSurfaces = receiptStdout secondSurfaces
+      , liveFirstVersion = receiptStdout firstVersion
+      , liveSecondVersion = receiptStdout secondVersion
+      , liveFirstTrace = receiptStdout firstTrace
+      , liveSecondTrace = receiptStdout secondTrace
+      , liveExternal = receiptStdout external
+      , liveProviderBefore = before
+      , liveProviderAfter = Text.empty
+      , liveReceipts =
+          [ launch, toolchainDevice, ready, preflight, prerequisites, packages, pushSource, pushSupport
+          , setup, handoff, first, second, handoffTrace, firstTrace, secondTrace, firstLedger, secondLedger
+          , firstSurfaces, secondSurfaces, firstVersion, secondVersion, external
+          ]
+      }
   afterReceipt <- require "provider-inventory-after" =<< runProcess root "provider-inventory-after" incus ["list", "--format", "csv", "-c", "n,s,t"]
-  let after = receiptStdout afterReceipt
-  let (allReceipts, preflight, handoff, firstLedger, secondLedger, firstSurfaces, secondSurfaces, firstVersion, secondVersion, external) = receipts
-  pure LiveObservation
-    { liveInstance = instanceId, livePreflight = receiptStdout preflight, liveHandoff = receiptStdout handoff
-    , liveFirstLedger = receiptStdout firstLedger, liveSecondLedger = receiptStdout secondLedger
-    , liveFirstSurfaces = receiptStdout firstSurfaces, liveSecondSurfaces = receiptStdout secondSurfaces
-    , liveFirstVersion = receiptStdout firstVersion, liveSecondVersion = receiptStdout secondVersion
-    , liveExternal = receiptStdout external, liveProviderBefore = before, liveProviderAfter = after
-    , liveReceipts = allReceipts }
+  pure observed
+    { liveProviderAfter = receiptStdout afterReceipt
+    , liveReceipts = liveReceipts observed <> [afterReceipt]
+    }
 
 cleanup :: FilePath -> String -> IO ()
 cleanup incus instanceName = do
@@ -275,12 +306,21 @@ setupScript = unlines
 externalObserverScript :: String
 externalObserverScript = unlines
   [ "set -eu"
+  , "drop() { /usr/bin/setpriv --reuid=ubuntu --regid=ubuntu --init-groups \"$@\"; }"
   , "printf 'architecture\t'; uname -m"
-  , "printf 'engine-architecture\t'; /usr/bin/docker version --format '{{.Server.Arch}}'"
+  , "printf 'engine-architecture\t'; drop /usr/bin/docker version --format '{{.Server.Arch}}'"
   , "printf 'group-row\t'; /usr/bin/getent group docker"
   , "printf 'future-session\t'; /usr/bin/su - ubuntu -c '/usr/bin/docker info --format {{.ServerVersion}}'"
-  , "printf 'current-refresh\t'; /usr/bin/setpriv --reuid=ubuntu --regid=ubuntu --init-groups /usr/bin/docker info --format '{{.ServerVersion}}'"
-  , "printf 'image-architecture\t'; /usr/bin/docker image inspect --format '{{.Architecture}}' amoebius-phase52-cpu-amd64:local"
+  , "printf 'current-refresh\t'; drop /usr/bin/docker info --format '{{.ServerVersion}}'"
+  , "printf 'image-architecture\t'; drop /usr/bin/docker image inspect --format '{{.Architecture}}' amoebius-phase52-cpu-amd64:local"
+  , "printf 'client-uid\t'; drop /usr/bin/id -u"
+  , "printf 'client-groups\t'; drop /usr/bin/id -Gn"
+  , "printf 'daemon-endpoint\t'; drop /usr/bin/docker context inspect --format '{{.Endpoints.docker.Host}}'"
+  , "if [ -n \"${DOCKER_HOST:-}\" ]; then printf 'docker-host-env\tset\n'; else printf 'docker-host-env\t(unset)\n'; fi"
+  -- The control above reached the declared endpoint.  The same client, same
+  -- identity, pointed elsewhere must not: otherwise the run proves only that
+  -- some daemon answered, not that the owned guest daemon did.
+  , "printf 'endpoint-substitution\t'; if (DOCKER_HOST=unix:///nonexistent/phase52.sock drop /usr/bin/docker info --format '{{.ServerVersion}}' >/dev/null 2>&1); then printf 'accepted\n'; else printf 'refused\n'; fi"
   ]
 
 toolchainCheck :: FilePath -> FilePath -> FilePath -> Matrix -> CheckResult
@@ -335,9 +375,9 @@ discoveryCheck discipline liveResult = mergeChecks "linux-engine-bringup-discove
   [discipline, case liveResult of
     Left problem -> CheckResult "linux-engine-live-discovery" [] [finding "LINUX-ENGINE-LIVE-DISCOVERY" "phase-52-live" (Text.pack (displayException problem))]
     Right live -> CheckResult "linux-engine-live-discovery"
-      [observation "linux-engine.live-artifacts" "preflight;handoff;two ledgers;two surfaces;two versions;external observer"]
+      [observation "linux-engine.live-artifacts" "preflight;handoff;two pass traces;two ledgers;two surfaces;two versions;external observer"]
       [finding "LINUX-ENGINE-LIVE-DISCOVERY" "phase-52-live" "one or more mandatory live observations are empty" |
-        any Text.null [livePreflight live, liveHandoff live, liveFirstLedger live, liveSecondLedger live, liveFirstSurfaces live, liveSecondSurfaces live, liveFirstVersion live, liveSecondVersion live, liveExternal live]]]
+        any Text.null [livePreflight live, liveHandoff live, liveFirstLedger live, liveSecondLedger live, liveFirstSurfaces live, liveSecondSurfaces live, liveFirstVersion live, liveSecondVersion live, liveFirstTrace live, liveSecondTrace live, liveExternal live]]]
 
 challengeCheck :: Either SomeException LiveObservation -> CheckResult
 challengeCheck liveResult = CheckResult "linux-engine-bringup-challenge"
@@ -358,8 +398,205 @@ observerCheck liveResult = CheckResult "linux-engine-bringup-observer"
     Left problem -> [finding "LINUX-ENGINE-OBSERVER" "phase-52-live" (Text.pack (displayException problem))]
     Right live ->
       [finding "LINUX-ENGINE-OBSERVER" "phase-52-live" "external process/group/architecture observer did not prove the live boundary" |
-        not (all (`Text.isInfixOf` liveExternal live) ["architecture\tx86_64", "engine-architecture\tamd64", "group-row\tdocker:", "image-architecture\tamd64"]) ||
-        not ("execve(" `Text.isInfixOf` liveHandoff live) || not ("/amoebius" `Text.isInfixOf` liveHandoff live)])
+        not (all (`Text.isInfixOf` liveExternal live) expectedExternalRows) ||
+        not ("execve(" `Text.isInfixOf` liveHandoff live) || not ("/amoebius" `Text.isInfixOf` liveHandoff live)] <>
+      [finding "LINUX-ENGINE-CLIENT-ROOT" "phase-52-live" "the observed Docker client identity was root or lacked engine group membership" |
+        externalRow "client-uid" (liveExternal live) == Just "0" ||
+        maybe True (notElem "docker" . Text.words) (externalRow "client-groups" (liveExternal live))])
+
+-- | strace truncates recorded strings, and the executable a handoff becomes is
+-- named by a long path.  A default-width trace would therefore record a prefix
+-- that no longer identifies what ran, which is the one thing the trace is for.
+traceStringLimit :: Int
+traceStringLimit = 512
+
+-- | One process in a follow-forks trace: what it ran, and who spawned it.
+data TracedProcess = TracedProcess
+  { tracedPid :: Int
+  , tracedParent :: Maybe Int
+  , tracedExecs :: [[Text]]
+  }
+
+-- | Reconstruct process lineage from a trace the guest wrote, so the identity a
+-- Docker client call carried is observed rather than reported.  A call is
+-- admitted only where its own lineage already dropped to the guest user;
+-- root reaches the daemon through the same socket, so nothing else separates an
+-- unelevated client from an elevated one after the fact.
+clientIdentityCheck :: Either SomeException LiveObservation -> CheckResult
+clientIdentityCheck liveResult = case liveResult of
+  Left problem -> CheckResult "linux-engine-bringup-client-identity" []
+    [finding "LINUX-ENGINE-CLIENT-IDENTITY" "phase-52-live" (Text.pack (displayException problem))]
+  Right live ->
+    let firstPass = parseTrace (liveFirstTrace live)
+        secondPass = parseTrace (liveSecondTrace live)
+        offenders = secondPassMutations secondPass
+     in CheckResult "linux-engine-bringup-client-identity"
+          [ observation "linux-engine.trace.pass-1.docker-clients" (Text.pack (show (length (dockerClients firstPass))))
+          , observation "linux-engine.trace.pass-2.docker-clients" (Text.pack (show (length (dockerClients secondPass))))
+          , observation "linux-engine.trace.pass-2.mutating-executables" (Text.intercalate "," offenders)
+          ]
+          ( passIdentityFindings "pass-1" firstPass
+              <> passIdentityFindings "pass-2" secondPass
+              <> [ finding "LINUX-ENGINE-SECOND-PASS-MUTATION" "phase-52-live"
+                     ("the second pass ran a mutating executable: " <> Text.intercalate "," offenders)
+                 | not (null offenders)
+                 ]
+          )
+
+-- | The bootstrap must replace itself, not spawn a helper.  Read from the
+-- guest's own trace: exactly one process ever became the binary, and it is the
+-- process that was the interpreter a moment earlier.
+handoffIdentityCheck :: Either SomeException LiveObservation -> CheckResult
+handoffIdentityCheck liveResult = case liveResult of
+  Left problem -> CheckResult "linux-engine-bringup-handoff-identity" []
+    [finding "LINUX-ENGINE-HANDOFF-IDENTITY" "phase-52-live" (Text.pack (displayException problem))]
+  Right live ->
+    let traced = parseTrace (liveHandoff live)
+        replacements =
+          [ process
+          | process <- traced
+          , any (maybe False ("/amoebius" `Text.isSuffixOf`) . listToMaybe) (tracedExecs process)
+          ]
+        inPlace process =
+          any (maybe False ("/python3" `Text.isSuffixOf`) . listToMaybe) (tracedExecs process)
+     in CheckResult "linux-engine-bringup-handoff-identity"
+          [observation "linux-engine.handoff.replacements" (Text.pack (show (length replacements)))]
+          ( [ finding "LINUX-ENGINE-HANDOFF-IDENTITY" "phase-52-live"
+                ("the guest trace shows " <> Text.pack (show (length replacements)) <> " processes becoming the binary; exactly one must")
+            | length replacements /= 1
+            ]
+              <> [ finding "LINUX-ENGINE-HANDOFF-SPAWNED" "phase-52-live"
+                     "the binary was started as a separate process rather than replacing the bootstrap interpreter"
+                 | process <- replacements, not (inPlace process)
+                 ]
+          )
+
+passIdentityFindings :: Text -> [TracedProcess] -> [Finding]
+passIdentityFindings label traced =
+  [ finding "LINUX-ENGINE-ROOT-CLIENT" "phase-52-live"
+      (label <> ": a Docker client ran without a lineage that dropped to the guest user: " <> Text.unwords argv)
+  | (pid, argv) <- dockerClients traced, not (droppedPrivilege traced pid)
+  ]
+    <> [ finding "LINUX-ENGINE-ELEVATED-CLIENT" "phase-52-live" (label <> ": the pass executed an elevation helper")
+       | any (\process -> any (elem elevationHelper . take 1) (tracedExecs process)) traced
+       ]
+    <> [ finding "LINUX-ENGINE-UNOBSERVED-PASS" "phase-52-live" (label <> ": the pass trace recorded no Docker client call")
+       | null (dockerClients traced)
+       ]
+    <> [ finding "LINUX-ENGINE-CLIENT-DISCOVERY" "phase-52-live"
+           (label <> ": observed Docker client roles " <> Text.intercalate "," observed
+              <> " do not match the expected " <> Text.intercalate "," expected)
+       | let observed = dockerSubcommands traced
+       , let expected = expectedDockerSubcommands label
+       , observed /= expected
+       ]
+
+-- | Which Docker client roles each pass may exercise.  The first pass reaches
+-- the engine, reads the two architectures, builds and runs; the second may only
+-- re-read, because building or versioning again would be a mutation.
+expectedDockerSubcommands :: Text -> [Text]
+expectedDockerSubcommands label
+  | label == "pass-1" = ["build", "image", "info", "run", "version"]
+  | otherwise = ["image", "info", "run"]
+
+-- | The distinct client roles a trace actually contains, as the subcommand each
+-- invocation carried.
+dockerSubcommands :: [TracedProcess] -> [Text]
+dockerSubcommands traced = foldr insertOrdered [] [role | (_, argv) <- dockerClients traced, role <- take 1 (drop 2 argv)]
+ where
+  insertOrdered role seen = if role `elem` seen then seen else sort (role : seen)
+
+-- | Executables whose presence in the second pass would contradict the fixed
+-- point the phase claims: an install, a group write, a daemon restart.
+secondPassMutations :: [TracedProcess] -> [Text]
+secondPassMutations traced = sort
+  [ executable
+  | process <- traced, argv <- tracedExecs process, executable : _ <- [argv]
+  , executable `elem` mutatingExecutables
+  ]
+    <> ["docker build" | (_, argv) <- dockerClients traced, "build" `elem` argv]
+
+mutatingExecutables :: [Text]
+mutatingExecutables = ["/usr/bin/apt-get", "/usr/sbin/usermod", "/usr/bin/systemctl", "/usr/bin/dpkg"]
+
+elevationHelper :: Text
+elevationHelper = "/usr/bin/sudo"
+
+dockerClients :: [TracedProcess] -> [(Int, [Text])]
+dockerClients traced =
+  [ (tracedPid process, argv)
+  | process <- traced, argv <- tracedExecs process, dockerExecutable : _ <- [argv], dockerExecutable == dockerClientExecutable
+  ]
+
+dockerClientExecutable :: Text
+dockerClientExecutable = "/usr/bin/docker"
+
+-- | A process is unelevated when it, or an ancestor, replaced itself with a
+-- credential-dropping executable naming the guest user.  @setpriv@ drops in
+-- place, @su@ drops in a child, so the answer is a property of the lineage.
+droppedPrivilege :: [TracedProcess] -> Int -> Bool
+droppedPrivilege traced = go (64 :: Int)
+ where
+  go budget pid
+    | budget <= 0 = False
+    | otherwise = case [process | process <- traced, tracedPid process == pid] of
+        [] -> False
+        process : _ ->
+          any credentialDrop (tracedExecs process)
+            || maybe False (go (budget - 1)) (tracedParent process)
+  credentialDrop argv = case argv of
+    "/usr/bin/setpriv" : rest -> "--reuid=ubuntu" `elem` rest
+    "/usr/bin/su" : rest -> "ubuntu" `elem` rest
+    _ -> False
+
+parseTrace :: Text -> [TracedProcess]
+parseTrace body =
+  [ TracedProcess pid (lookup pid parents) [argv | (owner, argv) <- execs, owner == pid]
+  | pid <- pids
+  ]
+ where
+  entries = [(pid, rest) | line <- Text.lines body, Just (pid, rest) <- [splitTracePid line]]
+  parents = [(child, pid) | (pid, rest) <- entries, isSpawn rest, Just child <- [traceResult rest], child > 0]
+  execs = [(pid, argv) | (pid, rest) <- entries, isExec rest, execEntered rest, argv <- [quotedFields rest], not (null argv)]
+  pids = foldr insertUnique [] ([pid | (pid, _) <- entries] <> [child | (child, _) <- parents])
+  insertUnique pid seen = if pid `elem` seen then seen else pid : seen
+  isExec rest = "execve(" `Text.isPrefixOf` rest || "execveat(" `Text.isPrefixOf` rest
+  -- Under @-f@ the call is usually split: the line carrying the argument vector
+  -- ends in @<unfinished ...>@ and the result arrives on a later line that no
+  -- longer names the executable.  Reading only completed lines would therefore
+  -- miss almost every process the trace was taken to observe.
+  execEntered rest = traceResult rest == Just 0 || "<unfinished ...>" `Text.isSuffixOf` Text.stripEnd rest
+  isSpawn rest = any (`Text.isInfixOf` Text.takeWhile (/= '=') rest) ["clone", "fork"]
+
+splitTracePid :: Text -> Maybe (Int, Text)
+splitTracePid line = case Text.decimal (Text.stripStart line) of
+  Right (pid, rest) -> Just (pid, Text.stripStart rest)
+  Left _ -> Nothing
+
+traceResult :: Text -> Maybe Int
+traceResult rest = case Text.breakOnEnd "= " rest of
+  (_, tail') -> case Text.decimal (Text.stripStart tail') of
+    Right (value, _) -> Just value
+    Left _ -> Nothing
+
+-- | Every double-quoted field on a trace line, in order: the executed path
+-- first, then the argument vector strace recorded for it.  A backslash escapes
+-- the character after it, so a quote inside an argument does not end the field
+-- and shift every field after it.
+quotedFields :: Text -> [Text]
+quotedFields = go
+ where
+  go text = case Text.break (== '"') text of
+    (_, rest)
+      | Text.null rest -> []
+      | otherwise -> let (field, remainder) = readField (Text.drop 1 rest) Text.empty in field : go remainder
+  readField text acc = case Text.uncons text of
+    Nothing -> (acc, Text.empty)
+    Just ('"', remainder) -> (acc, remainder)
+    Just ('\\', remainder) -> case Text.uncons remainder of
+      Nothing -> (acc, Text.empty)
+      Just (escaped, rest) -> readField rest (Text.snoc acc escaped)
+    Just (character, remainder) -> readField remainder (Text.snoc acc character)
 
 authorityCheck :: FilePath -> FilePath -> FilePath -> FilePath -> FilePath -> Matrix -> Either SomeException LiveObservation -> CheckResult
 authorityCheck root runRoot cabal compiler store matrix liveResult = CheckResult "linux-engine-bringup-authority"
@@ -407,13 +644,32 @@ expectedSources = sort
   , "test/spec/host/LinuxEngineBringupOracle.hs", "test/spec/host/LinuxEngineBringupSpec.hs"
   ]
 
+-- | What the guest must say about itself once the run has converged.  These are
+-- authored against the declared boundary rather than derived from whatever the
+-- run happened to observe.
+expectedExternalRows :: [Text]
+expectedExternalRows =
+  [ "architecture\tx86_64"
+  , "engine-architecture\tamd64"
+  , "group-row\tdocker:"
+  , "image-architecture\tamd64"
+  , "daemon-endpoint\tunix:///var/run/docker.sock"
+  , "docker-host-env\t(unset)"
+  , "endpoint-substitution\trefused"
+  ]
+
+externalRow :: Text -> Text -> Maybe Text
+externalRow name body = case [value | line <- Text.lines body, Just value <- [Text.stripPrefix (name <> "\t") line]] of
+  value : _ -> Just (Text.strip value)
+  [] -> Nothing
+
 expectedFirstLedger, expectedSecondLedger, expectedSurfaces, qualificationAcceptance :: Text
 expectedFirstLedger = Text.unlines
   ["probe\tEnginePackage", "probe\tDockerGroup", "probe\tDaemonSocket", "probe\tNativeImage"
   ,"mutation\tInstallEngine", "mutation\tPersistDockerGroupMembership", "mutation\tStartDockerDaemon", "mutation\tRefreshCurrentCredentials", "mutation\tBuildNativeImage"]
 expectedSecondLedger = Text.unlines ["probe\tEnginePackage", "probe\tDockerGroup", "probe\tDaemonSocket", "probe\tNativeImage"]
 expectedSurfaces = Text.unlines ["EnginePackage\tpresent", "DockerGroup\tpresent", "DaemonSocket\tpresent", "NativeImage\tpresent"]
-qualificationAcceptance = "linux-engine-bringup-spec: PASS (4 pristine surfaces, 5 mutations, 2 ledgers, 4 dirty negatives, 1 architecture negative, 2 unelevated probes)"
+qualificationAcceptance = "linux-engine-bringup-spec: PASS (4 pristine surfaces, 5 mutations, 2 ledgers, 4 dirty negatives, 1 architecture negative, 8 architecture triples, 2 unelevated probes, 1 unelevated client, 1 image reference)"
 
 cleanReceipt :: Matrix -> Receipt
 cleanReceipt (Matrix _ receipt) = receipt
@@ -449,11 +705,70 @@ receiptSummary receipt@(Receipt name executable args status _ _ _) = Text.interc
 liveDigest :: Either SomeException LiveObservation -> Text
 liveDigest liveResult = case liveResult of
   Left problem -> digestTexts ["live-error", Text.pack (displayException problem)]
-  Right live -> digestTexts ([liveInstance live, livePreflight live, liveHandoff live, liveFirstLedger live, liveSecondLedger live, liveFirstSurfaces live, liveSecondSurfaces live, liveFirstVersion live, liveSecondVersion live, liveExternal live, liveProviderBefore live, liveProviderAfter live] <> map receiptDigest (liveReceipts live))
+  Right live -> digestTexts ([liveInstance live, livePreflight live, liveHandoff live, liveFirstLedger live, liveSecondLedger live, liveFirstSurfaces live, liveSecondSurfaces live, liveFirstVersion live, liveSecondVersion live, liveFirstTrace live, liveSecondTrace live, liveExternal live, liveProviderBefore live, liveProviderAfter live] <> map receiptDigest (liveReceipts live))
+
+-- | The Phase-0 acquisition is the only authenticated copy of the foreign
+-- source repositories.  Phase 50 reads the same tree, so a later phase that
+-- invented its own path would be trusting something nothing authenticated.
+sourceAcquisitionCache :: FilePath
+sourceAcquisitionCache = ".build/dist-newstyle/phase-00-baseline/src"
+
+-- | The minimal toolchain input the guest's bootstrap needs: the authenticated
+-- ghcup binary with its metadata, a cabal configuration naming the guest's own
+-- paths, and the acquired source repositories.  The compiler and the package
+-- store reach the guest through the read-only host mount, so nothing here
+-- copies either.
+prepareGuestToolchainSupport :: FilePath -> FilePath -> IO FilePath
+prepareGuestToolchainSupport root runRoot = do
+  home <- getHomeDirectory
+  let supportRoot = runRoot </> "guest-support"
+      toolchain = supportRoot </> guestToolchainRelative
+  createDirectoryIfMissing True (toolchain </> "bootstrap")
+  createDirectoryIfMissing True (toolchain </> ".ghcup/cache")
+  createDirectoryIfMissing True (toolchain </> "cache/cabal")
+  copyFile (home </> ".ghcup/bin/ghcup") (toolchain </> "bootstrap/ghcup")
+  forM_ ["ghcup-0.0.9.yaml", "ghcup-0.1.0.yaml"] $ \name -> do
+    present <- doesFileExist (home </> ".ghcup/cache" </> name)
+    if present then copyFile (home </> ".ghcup/cache" </> name) (toolchain </> ".ghcup/cache" </> name) else pure ()
+  configPresent <- doesFileExist (home </> ".ghcup/config.yaml")
+  if configPresent then copyFile (home </> ".ghcup/config.yaml") (toolchain </> ".ghcup/config.yaml") else pure ()
+  configured <- ByteString.readFile (toolchainHostRoot </> ".cabal/config")
+  ByteString.writeFile (toolchain </> "cache/cabal/config") (guestCabalConfig configured)
+  copyDirectoryRecursive (root </> sourceAcquisitionCache) (toolchain </> "dist-newstyle/src")
+  pure supportRoot
+
+-- | The host account whose authenticated compiler and package store the guest
+-- reads through its read-only mount.  One name, because the mount and the cabal
+-- configuration derived from it must not disagree about which account that is.
+toolchainHostRoot :: FilePath
+toolchainHostRoot = "/home/matt"
+
+-- | The guest resolves against the same configuration that produced the store
+-- it is handed.  A different configuration yields different unit identities, at
+-- which point the store holds nothing the plan asks for and every dependency is
+-- rebuilt from source.  Only the writable locations move, and the parallelism
+-- line is dropped because a build here is serial.
+guestCabalConfig :: ByteString.ByteString -> ByteString.ByteString
+guestCabalConfig =
+  TextEncoding.encodeUtf8 . Text.unlines . concatMap rewrite . Text.lines . TextEncoding.decodeUtf8
+ where
+  rewrite line
+    | "jobs:" `Text.isPrefixOf` line = []
+    | "build-summary:" `Text.isPrefixOf` line = ["build-summary: " <> guestPath "cache/cabal/logs/build.log"]
+    | "logs-dir:" `Text.isPrefixOf` line = ["logs-dir: " <> guestPath "cache/cabal/logs"]
+    | "installdir:" `Text.isPrefixOf` line = ["installdir: " <> guestPath "cache/cabal/bin"]
+    | otherwise = [line]
+  guestPath leaf = Text.pack (guestToolchainRoot </> leaf)
+
+guestToolchainRelative :: FilePath
+guestToolchainRelative = ".build/toolchain/linux-amd64"
+
+guestToolchainRoot :: FilePath
+guestToolchainRoot = "/root/amoebius" </> guestToolchainRelative
 
 prepareSourceRepositoryCache :: FilePath -> FilePath -> IO CheckResult
 prepareSourceRepositoryCache root runRoot = do
-  let source = root </> ".build/toolchain/linux-amd64/dist-newstyle/src"
+  let source = root </> sourceAcquisitionCache
       target = runRoot </> "dist/src"
   present <- doesDirectoryExist source
   if not present then pure (CheckResult "linux-engine-source-cache" [] [finding "LINUX-ENGINE-CACHE" (makeRelative root source) "authenticated source repository cache is absent"])

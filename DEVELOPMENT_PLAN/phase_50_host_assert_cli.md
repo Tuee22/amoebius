@@ -39,7 +39,7 @@ version logic into Python.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -136,9 +136,9 @@ remains phase-local and cannot be supplied by this prose.
 
 ## Sprints
 
-## Sprint 50.1: Bind the already-bounded bootstrap surface ⏸️
+## Sprint 50.1: Bind the already-bounded bootstrap surface ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/PbBoundary.hs`
 **Blocked by**: [Phase 49](phase_49_self_referential_gates.md) gate pass
 **Independent Validation**: A valid bounded module is accepted, a one-node forbidden dynamic-execution variant is refused at the grammar locus, a changed indexed-snapshot bypass mutant reddens only its named row, and runtime/toolchain behavior remains explicit residue.
@@ -175,9 +175,9 @@ Implement and independently check the Haskell snapshot/grammar binding. Any requ
 reopens its Phase-0 `LTD-SRC-008` owner and consequently invalidates and reruns the chain through Phase 49;
 Phase 50 cannot make that change or close a source row.
 
-## Sprint 50.2: Ensure and build in the contained root ⏸️
+## Sprint 50.2: Ensure and build in the contained root ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/PbBoundaryRun/Internal.hs`
 **Blocked by**: Sprint 50.1
 **Independent Validation**: Observe authenticated contained ensure/build succeeding; paired missing identity/offline/serial inputs refuse at their exact reason before exec; assigned build mutants fail only their mapped case; real host package-manager fidelity remains unverified.
@@ -214,9 +214,9 @@ Implement and qualify the external Haskell observation. A discovered bootstrap d
 reclassified inside this phase. The Haskell supervisor's incomplete child environment is Phase-50 work under
 `LTD-VAL-008`; it does not alter `pb/**`.
 
-## Sprint 50.3: Exec-only validation handoff ⏸️
+## Sprint 50.3: Exec-only validation handoff ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/PbBoundary.hs`, `src/validation-kernel/Amoebius/Validation/PbBoundaryRun/Internal.hs`
 **Blocked by**: Sprint 50.2
 **Independent Validation**: An externally observed exact binary replaces the bootstrap with unchanged argv; wrong binary, rewritten argv or no-exec pairs fail specifically; assigned handoff mutants require real process evidence; product behavior after handoff remains unverified.
@@ -250,9 +250,9 @@ Implement and independently check the external handoff observer. Any needed boot
 its Phase-0 `LTD-SRC-008` owner and consequently invalidates and reruns the chain through Phase 49 rather than
 becoming Phase-50 work.
 
-## Sprint 50.4: Bound entropy and supervisor resources ⏸️
+## Sprint 50.4: Bound entropy and supervisor resources ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/PbBoundaryRun/Internal.hs`
 **Blocked by**: Sprint 50.3
 **Independent Validation**: An exact 32-byte fixed-count challenge reaches the continuation within the declared budget; wrong-length and never-ending entropy cases refuse; a strict whole-stream changed-subject mutant is stopped inside the runner-owned envelope at its assigned row; cleanup leaves zero owned residue.
@@ -296,9 +296,9 @@ Implement the fixed-count entropy call, exact-length refusal, outer resource env
 cleanup, typed legacy binding, independent expectations, and changed-subject qualification. The 2026-09-07 OOM
 attempt is diagnostic evidence only and cannot satisfy any row.
 
-## Sprint 50.5: Bounded-bootstrap candidate ⏸️
+## Sprint 50.5: Bounded-bootstrap candidate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/PbBoundary.hs`, `src/validation-kernel/Amoebius/Validation/PbBoundaryRun/Internal.hs`, `app/amoebius/Main.hs`
 **Blocked by**: Sprint 50.4
 **Independent Validation**: The complete acquired handoff succeeds with exact custody; each minimally altered authority/argv/resource case refuses for its assigned reason; wrong-case and arbitrary-failure mutant classifiers are rejected; later host/runtime behavior remains unverified.

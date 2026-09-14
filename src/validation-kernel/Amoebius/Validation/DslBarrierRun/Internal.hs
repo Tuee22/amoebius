@@ -133,8 +133,8 @@ executeMatrix root runRoot cabal compiler store snapshot = do
   spine <- forM spineComponents $ \component ->
     runTest ("spine-" <> Text.pack component) [component] []
   mutants <- mapM runMutant mutantSpecifications
-  cleanFirst <- runTest "clean-first" ["self-referential-gates-spec"] ["--test-options=--challenge phase-49-first-challenge"]
-  cleanSecond <- runTest "clean-second" ["self-referential-gates-spec"] ["--test-options=--challenge phase-49-second-challenge"]
+  cleanFirst <- runTest "clean-first" ["self-referential-gates-spec"] [selfReferentialWork runRoot "clean-first"]
+  cleanSecond <- runTest "clean-second" ["self-referential-gates-spec"] [selfReferentialWork runRoot "clean-second"]
   legal <- runCompile "compile-legal" legalSource
   illegal <- runCompile "compile-teardown-leak" illegalSource
   qualification <- forM qualificationComponents $ \component ->
@@ -154,11 +154,17 @@ executeMatrix root runRoot cabal compiler store snapshot = do
   componentEnvironment _ = []
   runMutant (name, flagName) = Mutant name flagName <$> runProcess root ("mutant-" <> name) cabal
     (common <> ["test", "self-referential-gates-spec", "--offline", "--test-show-details=direct",
-      "--test-options=--challenge phase-49-mutant-" <> Text.unpack name] <> flags (Just flagName))
+      selfReferentialWork runRoot ("mutant-" <> Text.unpack name)] <> flags (Just flagName))
   runCompile name fixture = runProcess root name cabal
     (common <> flags Nothing <>
       ["exec", "--", compiler, "-fno-code", "-fforce-recomp", "-XGHC2024",
        "-isrc/self-referential-gates", "-isrc/workflow-calculus", "-package", "text", fixture])
+
+-- | Every self-referential row gets its own run-local work root beneath the
+-- Phase-49 run root. The suite draws its own bounded challenge there after the
+-- fake child announces readiness, so no challenge can be predeclared here.
+selfReferentialWork :: FilePath -> String -> String
+selfReferentialWork runRoot label = "--test-options=--work " <> (runRoot </> "self-referential" </> label)
 
 spineComponents :: [String]
 spineComponents = ["gadt-decode-spec", "capability-bind-spec", "provision-seal-spec", "render-golden", "chain-spec"]
@@ -832,9 +838,35 @@ observerCheck matrix@(Matrix _ _ first second _ _ _ selectors) = CheckResult "ds
 
 freshnessCheck :: FilePath -> FilePath -> Matrix -> CheckResult
 freshnessCheck root runRoot (Matrix _ _ first second _ _ _ _) = CheckResult "dsl-barrier-freshness"
-  [observation "dsl-barrier.fresh-build-root" (Text.pack (makeRelative root runRoot)), observation "dsl-barrier.challenge-count" "2"]
-  [finding "DSL-BARRIER-FRESHNESS" runRoot "two distinct post-start challenges did not pass in the unique run root" |
-    not (pathBelow (root </> ".build/runs/phase-49/work") runRoot) || receiptExit first /= ExitSuccess || receiptExit second /= ExitSuccess || receiptDigest first == receiptDigest second]
+  ( [ observation "dsl-barrier.fresh-build-root" (Text.pack (makeRelative root runRoot))
+    , observation "dsl-barrier.challenge-count" (Text.pack (show (length observedChallenges)))
+    ]
+    <> [observation "dsl-barrier.challenge" value | value <- observedChallenges]
+  )
+  ( [finding "DSL-BARRIER-FRESHNESS" runRoot "two distinct post-start challenges did not pass in the unique run root" |
+       not (pathBelow (root </> ".build/runs/phase-49/work") runRoot) || receiptExit first /= ExitSuccess || receiptExit second /= ExitSuccess || receiptDigest first == receiptDigest second]
+    <> [finding "DSL-BARRIER-CHALLENGE-FRESHNESS" specSource "each clean run must report one distinct bounded challenge drawn after its child announced readiness" |
+         length observedChallenges /= 2 || length (nub observedChallenges) /= 2 || not (all boundedChallenge observedChallenges)]
+  )
+ where
+  observedChallenges = concatMap reportedChallenges [first, second]
+
+-- | The challenge a clean run reports on its own standard output. It exists
+-- only after the run has started, so the harness cannot supply it.
+reportedChallenges :: Receipt -> [Text]
+reportedChallenges receipt =
+  [ Text.strip (Text.drop (Text.length challengePrefix) line)
+  | line <- nonemptyLines (receiptStdout receipt)
+  , challengePrefix `Text.isPrefixOf` line
+  ]
+
+challengePrefix :: Text
+challengePrefix = "dsl-barrier-challenge: "
+
+boundedChallenge :: Text -> Bool
+boundedChallenge value =
+  Text.length value == 24
+    && Text.all (\character -> character >= '0' && character <= '9' || character >= 'a' && character <= 'f') value
 
 legacyCheck :: AcquiredSourceSnapshot -> AcquiredPhaseContractEvidence -> Matrix -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult
 legacyCheck acquired contract matrix toolchain oracle positives negatives mutants discovery authority observer freshness qualification cleanroom = CheckResult "dsl-barrier-legacy-closure"

@@ -36,7 +36,7 @@ This document binds the Phase-51 capability and its still-open exact gate. Curre
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -142,9 +142,9 @@ remains phase-local and cannot be supplied by this prose.
 
 ## Sprints
 
-## Sprint 51.1: The closed substrate algebra ⏸️
+## Sprint 51.1: The closed substrate algebra ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `Amoebius.Host.Substrate` and `Amoebius.Host.Frame` own the wildcard-free closed mappings; `HostEnsureKernelSpec` enumerates every constructor.
 **Blocked by**: [Phase 50](phase_50_host_assert_cli.md) gate pass
 **Independent Validation**: exact four-substrate frame/engine/provider rows plus compiler exhaustiveness and the foreign-root negative.
@@ -183,9 +183,9 @@ member.
 
 Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.2: Install steps as typed data ⏸️
+## Sprint 51.2: Install steps as typed data ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `Amoebius.Host.HostTool`, `Amoebius.Host.Ensure`, and `Amoebius.Host.Reconciler` own the closed tool, requirement, resolver, and typed step data.
 **Blocked by**: Sprint 51.1
 **Independent Validation**: exact 26-row plan plus bare-path and missing-requirement paired refusals.
@@ -224,9 +224,9 @@ make an install step a value the driver executes rather than a label a reader in
 
 Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.3: The reconciler table ⏸️
+## Sprint 51.3: The reconciler table ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `Amoebius.Host.Reconciler` owns the single applicability/diagnostic/step table.
 **Blocked by**: Sprint 51.2
 **Independent Validation**: Drive an admitted reconciler through the real caller and observe requests; its minimally excluded counterpart refuses at the exact independently authored constructor/diagnostic before effects; assigned applicability mutants fail their exact case; real package-manager fidelity remains unverified.
@@ -262,9 +262,9 @@ express a reconciler as a row so its three views cannot disagree with each other
 
 Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.4: The probe-first ensure driver ⏸️
+## Sprint 51.4: The probe-first ensure driver ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `Amoebius.Host.Ensure.installAndVerify` and `Amoebius.Host.Context.ensureRequiredTools` provide the probe-first driver and production caller.
 **Blocked by**: Sprint 51.3
 **Independent Validation**: The production host-context entry point observes absent-to-present and a probe-only second pass on independent fake hosts; exhausted/stale/foreign-root pairs fail exactly; assigned driver/caller mutants fail their named assertion; live host behavior remains unverified.
@@ -304,9 +304,9 @@ pre-condition.
 
 Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.5: The lift fold to argv ⏸️
+## Sprint 51.5: The lift fold to argv ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `Amoebius.Host.Lift` owns the pure context-to-argv fold.
 **Blocked by**: Sprint 51.4
 **Independent Validation**: exact 15-row argv projection across host, frame, and container plus the frame-prefix changed subject.
