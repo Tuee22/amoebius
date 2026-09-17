@@ -20,18 +20,18 @@ five composable calculi. This page provides orientation. Architecture belongs to
 
 ## Target architecture
 
-The design composes artifact, budget, lift, workflow, and evidence values. An extension supplies the required
-semantics and satisfies independently specified laws. The
+The design composes artifact, budget, lift, workflow, and evidence values. An extension is specified to supply the
+required semantics and to satisfy independently specified laws. The
 [extension contract](./documents/engineering/extension_conformance_doctrine.md) owns admission and composition
 requirements; adding a declaration alone does not establish those laws.
 
 One Haskell runtime is specified to serve host, control-plane, scheduler, and worker responsibilities.
 External, untracked operator values describe deployments and bounded UI applications. Their checked
-representations feed binding, planning, provisioning, rendering, and effect execution. The
+representations are specified to feed binding, planning, provisioning, rendering, and effect execution. The
 [DSL doctrine](./documents/engineering/dsl_doctrine.md) and
 [daemon topology](./documents/engineering/daemon_topology_doctrine.md) own these boundaries.
 
-The target UI compiles one checked program into matching client and server plans. Generic interpretation,
+The target UI is specified to compile one checked program into matching client and server plans. Generic interpretation,
 authorization, typed effects, and offline behavior remain obligations of the
 [UI runtime](./documents/engineering/low_code_ui_runtime_doctrine.md) and
 [offline runtime](./documents/engineering/browser_offline_runtime_doctrine.md) doctrines.
@@ -49,8 +49,9 @@ or opaque Haskell value does not establish that its claimed operation occurred.
 
 The [formal-model doctrine](./documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not)
 defines proof scope. The [spoof-resistance doctrine](./documents/engineering/testing_spoof_resistance.md)
-defines acceptance and observation boundaries. Current certification and the reset's repair work are recorded
-only in the [tracker](./DEVELOPMENT_PLAN/README.md#current-implementation-audit).
+defines acceptance and observation boundaries. Current status is owned by the
+[phase overview](./DEVELOPMENT_PLAN/README.md#phase-overview); the dated audit beside it records what a named
+inspection observed rather than the present frontier.
 
 Development can progress automatically through ready sprints. A complete qualified phase run permits its exact
 status-only transition and the next numerical gate. Candidate changes must not redefine the accepted
@@ -74,8 +75,8 @@ Haskell executable, and replace itself with that executable while preserving eve
 commands and verdicts. The bootstrap cannot validate its own handoff.
 
 The [validation-execution doctrine](./documents/engineering/validation_frame_doctrine.md) owns bootstrap trust,
-tool authentication, and execution boundaries. Before handoff validation, gates invoke the source-bound
-Haskell executable directly. Required generated tools and artifacts stay beneath the repository roots defined
+tool authentication, and execution boundaries. Before handoff validation, a gate is specified to invoke the
+source-bound Haskell executable directly. Required generated tools and artifacts stay beneath the repository roots defined
 by the [layout doctrine](./documents/engineering/repository_layout_doctrine.md).
 
 ## Working agreement

@@ -169,17 +169,16 @@ selfReferentialWork runRoot label = "--test-options=--work " <> (runRoot </> "se
 spineComponents :: [String]
 spineComponents = ["gadt-decode-spec", "capability-bind-spec", "provision-seal-spec", "render-golden", "chain-spec"]
 
+-- | The clean run of every selector suite, in the order the selector matrix
+-- consumes it.
+--
+-- This is derived rather than restated.  'executeSelectorMatrix' pairs these
+-- receipts with 'selectorSuiteSpecifications' using 'zip', which truncates to
+-- the shorter list: a second hand-maintained spelling that fell one entry
+-- behind would silently drop the trailing suite from the matrix instead of
+-- refusing, and a dropped suite is a selector nothing executes.
 qualificationComponents :: [String]
-qualificationComponents =
-  [ "validation-phase-contract-component", "validation-phase-contract-internal-component"
-  , "validation-policy-contract-selector-component", "validation-legacy-selector-component"
-  , "validation-source-closure-selector-component", "validation-source-consumer-selector-component"
-  , "validation-documentation-selector-component", "validation-dispatch-selector-component"
-  , "validation-compiler-buildinfo-selector-component", "validation-compiler-elaborated-plan-selector-component"
-  , "validation-compiler-source-graph-selector-component", "validation-source-debt-selector-component"
-  , "validation-phase-semantic-selector-component", "validation-qualification-selector-component"
-  , "validation-documentation-internal-selector-component", "validation-source-consumer-internal-selector-component"
-  ]
+qualificationComponents = map selectorComponent selectorSuiteSpecifications
 
 selectorSuiteSpecifications :: [SelectorSuiteSpec]
 selectorSuiteSpecifications =
@@ -199,6 +198,7 @@ selectorSuiteSpecifications =
   , SelectorSuiteSpec "validation-qualification-selector-component" "test/validation-kernel/qualification-selector/Main.hs"
   , SelectorSuiteSpec "validation-documentation-internal-selector-component" "test/validation-kernel/documentation-internal-selector/Main.hs"
   , SelectorSuiteSpec "validation-source-consumer-internal-selector-component" "test/validation-kernel/source-consumer-internal-selector/Main.hs"
+  , SelectorSuiteSpec "validation-evidence-internal-selector-component" "test/validation-kernel/evidence-internal-selector/Main.hs"
   ]
 
 executeSelectorMatrix :: FilePath -> FilePath -> FilePath -> FilePath -> SourceSnapshot -> [Receipt] -> IO SelectorMatrix
@@ -301,7 +301,7 @@ executeSelectorSuite root runRoot snapshot environment specification cleanReceip
         , any ((== facade) . sourceModulePath) productionModules
         ]
       graphRoutes
-        | selectorComponent specification == "validation-phase-contract-internal-component" = targets
+        | selectorComponent specification `elem` directlyObservedSuites = targets
         | otherwise = selectorRoutePaths productionModules testModules (selectorMainPath specification) targets
       routes = nub (graphRoutes <> parentFacadePaths <> requiredHomePaths)
       suiteRoot = runRoot </> "qualification" </> selectorComponent specification
@@ -430,6 +430,28 @@ selectorCppOptions specification
       ["-DVALIDATION_LEGACY_INTERNAL_SELECTOR_QUALIFICATION"]
   | otherwise = []
 
+-- | Suites whose oracle imports the mutated module directly, so the overlay is
+-- exactly the target and its facade.
+--
+-- The routed alternative walks from some module the test closure imports to the
+-- target and compiles every module on that path as a home module. A module
+-- compiled as a home module while its own dependencies come from the installed
+-- package sees two distinct copies of every type they share, and GHC reports
+-- that as a type error rather than as a mutation result -- so a route that
+-- reaches the target through an unrelated module makes the suite unbuildable.
+--
+-- The routing that produces those paths starts from the module named @Main@,
+-- and every suite's entry module is named @Main@; the lookup is by name, so it
+-- resolves to whichever entry module the snapshot lists first rather than to
+-- this suite's own. Naming the suites that need no route is the bounded repair;
+-- the ambiguous lookup itself is a separate defect in
+-- 'productionImportsFromTestClosure'.
+directlyObservedSuites :: [String]
+directlyObservedSuites =
+  [ "validation-phase-contract-internal-component"
+  , "validation-evidence-internal-selector-component"
+  ]
+
 selectorRequiredHomeModules :: SelectorSuiteSpec -> [Text]
 selectorRequiredHomeModules _ = []
 
@@ -482,6 +504,17 @@ selectorRoutePaths productionModules testModules mainPath targets = nub (concatM
     path : _ -> Just path
     [] -> Nothing
 
+-- | The production modules a suite's test closure imports.
+--
+-- The walk resolves a module by name, and every selector suite's entry module
+-- is named @Main@, so the recursion re-enters whichever @Main@ the snapshot
+-- lists first instead of the one at @mainPath@. Suites whose target is
+-- unreachable from that foreign closure are unaffected, because an absent route
+-- falls back to the target itself; a suite whose target is reachable gets an
+-- overlay built from the wrong module's imports. 'directlyObservedSuites' names
+-- the suites that must not be routed at all; repairing the lookup so the walk
+-- starts from the entry module at @mainPath@ would remove the need for that
+-- list, and would change the overlay of every suite at once.
 productionImportsFromTestClosure :: [SourceModule] -> FilePath -> [Text]
 productionImportsFromTestClosure testModules mainPath = nub (walk [] starts)
  where
@@ -633,7 +666,11 @@ discoveryCheck discipline (Matrix spine mutants _ _ _ _ qualification selectors)
       , observation "dsl-barrier.runtime.qualification-suite-count" (Text.pack (show (length qualification))) ]
       ([finding "DSL-BARRIER-STAGE-INVENTORY" "<dsl-spine>" "the exact five owning stage suites were not executed" | length spine /= 5] <>
        [finding "DSL-BARRIER-MUTANT-INVENTORY" "<dsl-barrier-mutants>" "the exact twelve Phase-49 mutants were not executed" | length mutants /= 12] <>
-       [finding "DSL-BARRIER-QUALIFICATION-INVENTORY" "<validation-selector-suites>" "the exact sixteen cumulative selector suites were not executed" | length qualification /= 16])
+       [ finding "DSL-BARRIER-QUALIFICATION-INVENTORY" "<validation-selector-suites>"
+           ("the exact " <> Text.pack (show (length expectedSelectorSuiteCounts))
+              <> " cumulative selector suites were not executed")
+       | length qualification /= length expectedSelectorSuiteCounts
+       ])
   , selectorDiscoveryCheck selectors
   ]
 
@@ -649,8 +686,11 @@ selectorDiscoveryCheck matrix@(SelectorMatrix _ _ suites) = CheckResult "dsl-bar
   ( [finding "DSL-BARRIER-SELECTOR-SUITE-INVENTORY" "<selector-suite-registry>"
        ("expected=" <> Text.pack (show expectedSelectorSuiteCounts) <> "; actual=" <> Text.pack (show actualCounts)) |
        map suiteNameAndCount suites /= expectedSelectorSuiteCounts]
-    <> [finding "DSL-BARRIER-SELECTOR-CARDINALITY" "<selector-registry>" "the cumulative hardware-free selector inventory must contain exactly 4444 unique selectors" |
-         length allSelectors /= 4444 || length (nub allSelectors) /= 4444]
+    <> [ finding "DSL-BARRIER-SELECTOR-CARDINALITY" "<selector-registry>"
+           ("the cumulative hardware-free selector inventory must contain exactly "
+              <> Text.pack (show expectedSelectorTotal) <> " unique selectors")
+       | length allSelectors /= expectedSelectorTotal || length (nub allSelectors) /= expectedSelectorTotal
+       ]
     <> concatMap suiteProblems suites
   )
  where
@@ -677,7 +717,7 @@ expectedSelectorSuiteCounts =
   [ ("validation-phase-contract-component", 134)
   , ("validation-phase-contract-internal-component", 8)
   , ("validation-policy-contract-selector-component", 194)
-  , ("validation-legacy-selector-component", 1317)
+  , ("validation-legacy-selector-component", 1320)
   , ("validation-source-closure-selector-component", 415)
   , ("validation-source-consumer-selector-component", 476)
   , ("validation-documentation-selector-component", 64)
@@ -690,7 +730,14 @@ expectedSelectorSuiteCounts =
   , ("validation-qualification-selector-component", 1)
   , ("validation-documentation-internal-selector-component", 88)
   , ("validation-source-consumer-internal-selector-component", 292)
+  , ("validation-evidence-internal-selector-component", 3)
   ]
+
+-- | The cumulative selector count, summed from the per-suite registry above
+-- rather than restated beside it. The two have to agree, and a literal that has
+-- to agree with a computed cardinality is a defect waiting for the next suite.
+expectedSelectorTotal :: Int
+expectedSelectorTotal = sum (map snd expectedSelectorSuiteCounts)
 
 selectorQualificationCheck :: SelectorMatrix -> CheckResult
 selectorQualificationCheck matrix@(SelectorMatrix recacheReceipt registerReceipt suites) = CheckResult "dsl-barrier-selector-qualification"

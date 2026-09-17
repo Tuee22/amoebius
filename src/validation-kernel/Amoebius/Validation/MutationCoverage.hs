@@ -96,6 +96,7 @@ drivenSuites =
   , DrivenSuite "validation-dispatch-selector-component" "VALIDATION_DISPATCH" "self_referential_gates"
   , DrivenSuite "validation-compiler-buildinfo-selector-component" "VALIDATION_COMPILER_BUILDINFO" "toolchain_spike"
   , DrivenSuite "validation-compiler-elaborated-plan-selector-component" "VALIDATION_COMPILER_ELABORATED" "toolchain_spike"
+  , DrivenSuite "validation-evidence-internal-selector-component" "VALIDATION_EVIDENCE" "self_referential_gates"
   ]
 
 

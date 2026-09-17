@@ -6,6 +6,7 @@ module RenderGoldenOracle
   , expectedCalculusProjection
   , expectedLocusEntries
   , expectedRenderMutants
+  , expectedKubernetesWireFields
   ) where
 
 import Data.Text (Text)
@@ -17,6 +18,13 @@ data RenderMutantOracle = RenderMutantOracle
   , renderMutantExpectedFailure :: Text
   }
   deriving stock (Eq, Show)
+
+-- The top-level fields a Kubernetes API server requires of every object. These
+-- are authored from the Kubernetes object contract, not from the renderer: the
+-- phase claims a serialized manifest, and this is what makes that claim decidable
+-- rather than a statement about the renderer's source text.
+expectedKubernetesWireFields :: [Text]
+expectedKubernetesWireFields = ["apiVersion", "kind", "metadata", "spec"]
 
 -- Independently frozen semantic meanings for every capability/shape pair.
 -- The oracle imports neither production nor fixture modules.

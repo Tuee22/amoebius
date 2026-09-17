@@ -36,6 +36,10 @@ module Amoebius.Validation.Evidence.Internal (
     GateRowEvidence,
     capturedRow,
     gateRowEvidencePassed,
+    RowOutcome (..),
+    rowOutcomeFromCheck,
+    outcomeName,
+    validObservation,
     PublishedCandidateEvidence,
     PredecessorEvidence,
     predecessorEvidenceMatchesPhase,
@@ -3704,11 +3708,49 @@ bootstrapGateRows phase opening closing contractDigest trust subject snapshotDig
             && sha256Text sourceDigest
             && sha256Text binaryDigest
 
+-- | The single definition of a passing row. It must agree with
+-- 'gateRowEvidencePassed', which computes the verdict: a row that publishes
+-- "green" while the verdict predicate rejects it is a self-contradicting
+-- artifact. A malformed record therefore refuses here, loudly and by name,
+-- rather than passing silently and being counted as not-passed later.
 rowOutcomeFromCheck :: Text -> CheckResult -> RowOutcome
+#if defined(VALIDATION_EVIDENCE_ROW_OUTCOME_SKIP_VALID_OBSERVATION_MUTANT)
+-- Restores the defect that shipped: the row admits a malformed observation that
+-- 'gateRowEvidencePassed' will later reject, so the artifact publishes green for
+-- a row the verdict counts as not-passed.
 rowOutcomeFromCheck code result
-    | checkPassed result && not (null (checkObservations result)) = RowPassed (checkObservations result)
-    | checkPassed result = RowRefused [] [bootstrapRowFinding code "a passing check supplied no observation"]
+    | checkPassed result && not (null (checkObservations result)) =
+        RowPassed (checkObservations result)
+    | checkPassed result =
+        RowRefused [] [bootstrapRowFinding code "a passing check supplied no observation"]
     | otherwise = RowRefused (checkObservations result) (checkFindings result)
+#elif defined(VALIDATION_EVIDENCE_ROW_OUTCOME_ADMIT_EMPTY_MUTANT)
+-- Admits an evidence-free row, so a check that observed nothing passes. The
+-- malformed-record refusal is left intact so this selector is attributable to
+-- exactly one case.
+rowOutcomeFromCheck code result
+    | checkPassed result
+        && all validObservation (checkObservations result) =
+        RowPassed (checkObservations result)
+    | checkPassed result =
+        RowRefused
+            (checkObservations result)
+            [bootstrapRowFinding code "a passing check supplied a malformed observation record"]
+    | otherwise = RowRefused (checkObservations result) (checkFindings result)
+#else
+rowOutcomeFromCheck code result
+    | checkPassed result
+        && not (null (checkObservations result))
+        && all validObservation (checkObservations result) =
+        RowPassed (checkObservations result)
+    | checkPassed result && null (checkObservations result) =
+        RowRefused [] [bootstrapRowFinding code "a passing check supplied no observation"]
+    | checkPassed result =
+        RowRefused
+            (checkObservations result)
+            [bootstrapRowFinding code "a passing check supplied a malformed observation record"]
+    | otherwise = RowRefused (checkObservations result) (checkFindings result)
+#endif
 
 bootstrapRowFinding :: Text -> Text -> Finding
 bootstrapRowFinding code = finding code "<finite-bootstrap-gate>"
@@ -4074,11 +4116,24 @@ predecessorCompatibilityField predecessor = case predecessor of
     ImmediatePredecessor phase digest -> "phase-" <> formatOrdinal phase <> ":" <> digest
     UnverifiedPredecessor detail -> "unverified:" <> detail
 
+-- | Derived from the same predicate that decides the verdict, so a published
+-- artifact can never name a row "green" that 'gateRowEvidencePassed' rejects.
 outcomeName :: RowOutcome -> Text
+#if defined(VALIDATION_EVIDENCE_OUTCOME_NAME_ALWAYS_GREEN_MUTANT)
+-- Renders a passed row green without re-deciding it, so a published artifact can
+-- contradict the verdict computed from the same rows.
 outcomeName outcome = case outcome of
     RowPassed _ -> "green"
     RowRefused _ _ -> "red"
     RowUnverified _ _ -> "unverified"
+#else
+outcomeName outcome = case outcome of
+    RowPassed observations
+        | not (null observations) && all validObservation observations -> "green"
+        | otherwise -> "red"
+    RowRefused _ _ -> "red"
+    RowUnverified _ _ -> "unverified"
+#endif
 
 outcomeObservations :: RowOutcome -> [Value]
 outcomeObservations outcome = case outcome of
@@ -4621,13 +4676,17 @@ validObservation item =
         && not (unsafeObservationValue (observationValue item))
 
 -- | Observation keys occupy one TSV field. Values are the raw payload and may
--- deliberately contain tabs (for example, the source-snapshot path rows), but
--- they may not terminate/inject a record or carry an empty/NUL payload. JSON
--- publication escapes the admitted tabs without changing their bytes.
+-- deliberately contain tabs (for example, the source-snapshot path rows). A
+-- value may also be empty: a rendered empty collection is a claim, not a
+-- missing payload -- an idempotent second pass mutates nothing, and "nothing"
+-- is precisely what the row must be able to say. Values may not terminate or
+-- inject a record. JSON publication escapes the admitted tabs without changing
+-- their bytes, and the canonical digest frames every field netstring-style, so
+-- the empty value encodes unambiguously. An evidence-free row is still refused,
+-- at the list level in 'rowOutcomeFromCheck', which is where that rule belongs.
 unsafeObservationValue :: Text -> Bool
 unsafeObservationValue value =
-    Text.null (Text.strip value)
-        || Text.any (`elem` ['\r', '\n', '\0']) value
+    Text.any (`elem` ['\r', '\n', '\0']) value
 
 unsafeText :: Text -> Bool
 unsafeText value =

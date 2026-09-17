@@ -120,13 +120,15 @@ plan and qualified gate.
 [Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md) is limited to hardware-free Haskell
 browser-interpreter semantics and lazy projection. It must not start a browser, fake server, network service,
 or OS-policy observer before the Phase-49 gate barrier. Live same-origin WebSocket behavior belongs to a
-later phase. Phase 42 is **NOT VALIDATED**.
+later phase. Phase 42's status is owned by the plan's mechanical status projection
+([`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md)).
 
 [Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) is limited to a Haskell server-boundary model
 and Haskell-owned fakes. Its eventual contract must admit the exact signed-credential/current-scope case and
 refuse minimally different twins without starting a browser, network service, or OS observer. Live server
 admission, Redis routing, resume, durable receipts, cross-pod dispatch, replica drain, and failover belong
-after the Phase-49 barrier. Phase 43 is **NOT VALIDATED**.
+after the Phase-49 barrier. Phase 43's status is owned by the plan's mechanical status projection
+([`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md)).
 
 Every routed frame carries an envelope equivalent to:
 

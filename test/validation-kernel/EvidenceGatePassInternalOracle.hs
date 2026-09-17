@@ -132,6 +132,17 @@ runWithGenesisTrust trust mismatchedCompilerTrust =
                     (Just digest)
                     ["validate", "phase", "00"]
                     (CheckResult "phase-00" [observation "subject" "two\nrecords"] [])
+        let emptyValueObservationEvidence =
+                captureDispatchCandidateEvidence
+                    0
+                    digest
+                    digest
+                    (Just digest)
+                    (Just digest)
+                    (root </> "source-bound-validator")
+                    (Just digest)
+                    ["validate", "phase", "00"]
+                    (CheckResult "phase-00" [observation "subject" ""] [])
         let acquireFixture identity =
                 sourceClosureInternalTestAcquire
                     SourceSnapshot
@@ -272,6 +283,11 @@ runWithGenesisTrust trust mismatchedCompilerTrust =
                     SubjectRow
                     False
                     newlineObservationEvidence
+                <> expectRowPassed
+                    "an empty Subject value is a well-formed record for an empty collection"
+                    SubjectRow
+                    True
+                    emptyValueObservationEvidence
                 <> expectCheckFindingCode
                     "the incomplete capture API cannot manufacture legacy-closure authority"
                     "GATE-LEGACY-CLOSURE-UNVERIFIED"

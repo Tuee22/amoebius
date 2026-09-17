@@ -37,7 +37,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+🔄 Active — NOT VALIDATED.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -148,9 +148,9 @@ remains phase-local and cannot be supplied by this prose.
 The sprint contracts below own the current implementation seams. Their component diagnostics do not close
 any sprint; the complete acquired phase gate remains the required validation boundary.
 
-## Sprint 53.1: The Homebrew floor is verified, never installed ⏸️
+## Sprint 53.1: The Homebrew floor is verified, never installed 🔄
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Active — NOT VALIDATED
 **Implementation**: `Amoebius.Host.AppleEngine.admitAppleFloor` and the acquired live supervisor verify physical Apple Silicon, Homebrew, and Xcode before any mutation.
 **Blocked by**: [Phase 52](phase_52_linux_engine_bringup.md) gate pass
 **Independent Validation**: one green floor and three exact missing-prerequisite pairs, plus the installs-floor production mutant.

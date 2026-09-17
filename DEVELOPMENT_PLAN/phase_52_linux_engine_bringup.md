@@ -38,7 +38,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-🔄 Active — NOT VALIDATED.
+✅ Done.
 
 The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
 implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
@@ -149,9 +149,9 @@ remains phase-local and cannot be supplied by this prose.
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 52.1: The pristine guest and its recorded preflight 🔄
+## Sprint 52.1: The pristine guest and its recorded preflight ✅
 
-**Status**: Active — NOT VALIDATED
+**Status**: Done
 **Implementation**: `Amoebius.Validation.LinuxEngineBringupRun` owns unique Incus launch, pristine preflight, observation, and unconditional deletion.
 **Blocked by**: [Phase 51](phase_51_host_ensure_kernel.md) gate pass
 **Independent Validation**: Externally acquire and observe the pristine owned guest; each singly dirty surface refuses at its exact reason after successful setup; assigned preflight/observer mutants are detected; foreign hosts and other substrates remain excluded.
@@ -191,9 +191,9 @@ installed.
 
 Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.2: The pre-binary leg on a host that carries nothing ⏸️
+## Sprint 52.2: The pre-binary leg on a host that carries nothing ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: the live runner installs only guest build prerequisites, mounts the authenticated contained toolchain read-only, and invokes `pb` under an external `execve` trace.
 **Blocked by**: Sprint 52.1
 **Independent Validation**: guest `pb --version` output and `execve` trace must identify the source-bound Haskell binary after the Python child.
@@ -231,9 +231,9 @@ and observe the handoff from outside the process that performs it.
 
 Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.3: The engine, and sudoless access as three proofs ⏸️
+## Sprint 52.3: The engine, and sudoless access as three proofs ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `Amoebius.Host.LinuxEngine` owns typed probes/mutations and the live absolute-path interpreter.
 **Blocked by**: Sprint 52.2
 **Independent Validation**: Observe durable membership and actual non-root Docker access in current and future sessions; root/elevated/endpoint-substituted variants fail specifically; assigned access mutants fail their exact cases; no other substrate is claimed.
@@ -274,9 +274,9 @@ install the container engine and make it usable without elevation as three prope
 
 Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.4: The native build and the version verdict ⏸️
+## Sprint 52.4: The native build and the version verdict ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `Amoebius.Host.LinuxEngine.admitNativeBuild` and its live image builder own three-way architecture admission and the run-local smoke image.
 **Blocked by**: Sprint 52.3
 **Independent Validation**: all agreeing architectures admit, each singly mismatched triple refuses, the platform-override mutant reddens, and live container stdout equals the recorded version.
@@ -317,9 +317,9 @@ a verdict.
 
 Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.5: The second run that changes nothing ⏸️
+## Sprint 52.5: The second run that changes nothing ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `planLinuxEnginePass` derives each ledger from a fresh live observation and the runner invokes it twice in one guest.
 **Blocked by**: Sprint 52.4
 **Independent Validation**: The actual first and second complete guest passes have externally derived full action ledgers; the second retains required probes and no mutations; hidden-action/root-client/plan-only-ledger pairs and assigned mutants fail exactly; all owned resources are externally absent after teardown.

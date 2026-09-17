@@ -90,10 +90,17 @@ dhall"*. It gets there by a hard split between two languages:
   ([`lift_and_compose_doctrine.md` §5](./lift_and_compose_doctrine.md#5-the-re-derivation-map)).
 
 **The schema is generated; the value is external.** The split above says Dhall carries the data, and it leaves
-open where the *type* of that data comes from. It is reflected from the Haskell checked-IR types rather than
-authored beside them: the schema, the prelude of smart constructors, and the examples are all rendered from the
-same types the decoder is written against. This removes a second maintained schema; generation and decoding
-can still be wrong. Independent semantic correspondence remains required
+open where the *type* of that data comes from. It is specified to be reflected from the Haskell checked-IR
+types rather than authored beside them, so that the schema, the prelude of smart constructors, and the examples
+all render from the same types the decoder is written against; that relation is what would remove a second
+maintained schema, and its fixture is owed by
+[Phase 25](../../DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md).
+
+> **Observed implementation.** The Phase-25 projection is a set of Haskell-declared Dhall module *sources*
+> with no derived correspondence to the decoder's types; see the dated progress audit in
+> [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
+
+Generation and decoding can still be wrong. Independent semantic correspondence remains required
 ([`generated_artifacts_doctrine.md` §2](./generated_artifacts_doctrine.md#2-what-is-generated-and-from-what),
 [`jit_artifact_doctrine.md`](./jit_artifact_doctrine.md)). An operator's `InForceSpec` and an application's
 `UiSource` are external or untracked inputs. Repository tests construct Haskell values and render temporary
@@ -605,7 +612,9 @@ choice:
 The eventual [Phase-30 gate](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) must establish the first
 sentence with independently authored Haskell controls: every closed need must pass the total binder under both
 shapes, while product/URL/shape authoring escapes and unbuilt, unbound, cyclic, or shadowed values must fail at
-their named Haskell boundary. Phase 30 is **NOT VALIDATED** and cannot establish the infrastructure or
+their named Haskell boundary. Phase 30's status is owned by the plan's mechanical status projection
+([`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md)); until that projection reports the phase
+complete, the doctrine below states a target and cannot establish the infrastructure or
 provision steps described below.
 
 - `NoInfrastructureRequired` supplies the witness for an explicit

@@ -117,8 +117,8 @@ remains phase-local and cannot be supplied by this prose.
 | `Claim` | Pure total `renderAll` consumes the actual opaque `ProvisionedSpec` and preserves its complete identity, security, resources, storage, image, accelerator and activation semantics in typed objects and serialized manifests. |
 | `Subject` | `acquired-render-manifest-supervisor` |
 | `Command` | `pb validate phase 33` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
-| `Oracle` | `test/spec/manifest/RenderGoldenOracle.hs` independently authors full object and serialized semantic expectations derived from declared contracts; it must not call production renderers or reduce objects to counts. |
-| `Positive controls` | Every render-source/object variant and capability shape declared below preserves its exact provisioned fields, object identity set, resource/security/storage/image meaning and encode/decode semantics. |
+| `Oracle` | `test/spec/manifest/RenderGoldenOracle.hs` independently authors full object and serialized semantic expectations derived from declared contracts, including the Kubernetes wire fields every serialized object must carry; it must not call production renderers or reduce objects to counts. Asserting that the renderer's source text contains an identifier is evidence about presentation and does not establish this claim ([behavioural verification](../documents/engineering/behavioural_verification_doctrine.md#2-rule-a--a-gate-verifies-behaviour-not-presentation), [LTD-VAL-002](legacy_tracking_for_deletion.md#3-validation-integrity-violations)). |
+| `Positive controls` | Every render-source/object variant and capability shape declared below preserves its exact provisioned fields, object identity set, resource/security/storage/image meaning and encode/decode semantics. The serialized form is compared against the independently authored Kubernetes wire fields, so a manifest no API server would accept cannot pass. |
 | `Paired negatives` | A minimally changed resource, identity, image digest, mount, access/ownership field, controller shape or activation frame is rejected by its exact object-field correspondence while the matched legal input/output passes. |
 | `Mutants` | Mutate actual rendering and serialization at each declared semantic obligation; every selector is assigned to its independent exact object/field case, including same-object-count omissions or substitutions. |
 | `Discovery` | Reconcile all provisioned render-source arms, object constructors/fields, serializer projections, independent semantic obligations and production mutation assignments in both directions. |
@@ -130,7 +130,7 @@ remains phase-local and cannot be supplied by this prose.
 | `Cleanroom` | `render-manifest-products-contained-below-build` |
 | `Legacy closure` | `retired-render-manifest-authorities-absent` |
 | `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 32 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
-| `Residue` | `later-actions-dry-run-runtime-live-owners-explicit` |
+| `Residue` | `later-actions-dry-run-runtime-live-owners-explicit`. The serialized object envelope is the Kubernetes wire form and its controller intent travels as annotations; the wire shape of `spec` itself — a real `PodSpec`, a real `NetworkPolicySpec` — is owned by [Phase 58](phase_58_object_reconciler.md), which applies these objects to a live cluster, and is explicitly UNVERIFIED here. |
 | `Pass criterion` | `qualified-gate-pass` |
 
 ## Doctrine adopted

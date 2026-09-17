@@ -113,7 +113,8 @@ This documentation refactor is not a qualified gate run. It closes no phase and 
 ## Reopened numeric sequence
 
 **Certification reset — 2026-09-08.** All earlier phase and sprint certification is invalidated for the
-replacement validation generation. Phase 0 is Active; phases 1–95 are Blocked. Existing implementation and
+replacement validation generation. The reset set Phase 0 Active and phases 1–95 Blocked; the table below
+alone reports the current frontier. Existing implementation and
 diagnostics remain available for inspection and repair.
 
 The August 22 reset and subsequent recorded completions are historical. Commits `f260c29`, `e6ce05c`,
@@ -155,7 +156,8 @@ baseline, compatibility closure, source transition, predecessor, and process obs
 custody component and one end-to-end development gate run passed; subsequent hardening invalidated that run's
 source binding, so no status changed. The exact final-source Phase-0 gate remains required. The documentation
 diagnostic has no structural findings; `cabal check` still reports the pre-existing missing `proto` source
-directory. Phase 0 remains Active; later phases remain Blocked.
+directory. This audit is dated: it records what that inspection observed, and the frontier it implied has
+since moved. The table below reports the current status.
 
 The symbolic diagnostic returned `Inductive` for a model whose explicit checker returned an invariant
 counterexample. The refinement diagnostic returned `Proved` while its compiled function returned `-1`
@@ -238,8 +240,8 @@ inherits the universal postcondition above.
 | 49 | No-hardware DSL gate barrier + self-referential gate suite | none | `none` | 2 | ✅ Done | [Contract](phase_49_self_referential_gates.md) |
 | 50 | Validate the bounded `pb` → Haskell handoff | none | `none` | 2 | ✅ Done | [Contract](phase_50_host_assert_cli.md) |
 | 51 | The host-ensure kernel | none | `none` | 2 | ✅ Done | [Contract](phase_51_host_ensure_kernel.md) |
-| 52 | Linux: sudoless Docker and the native image | linux-cpu | `linux-cpu/amd64` | 3 | 🔄 Active — NOT VALIDATED | [Contract](phase_52_linux_engine_bringup.md) |
-| 53 | Apple: Homebrew, Colima, and the native image | apple | `linux-cpu/arm64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_53_apple_engine_bringup.md) |
+| 52 | Linux: sudoless Docker and the native image | linux-cpu | `linux-cpu/amd64` | 3 | ✅ Done | [Contract](phase_52_linux_engine_bringup.md) |
+| 53 | Apple: Homebrew, Colima, and the native image | apple | `linux-cpu/arm64` | 3 | 🔄 Active — NOT VALIDATED | [Contract](phase_53_apple_engine_bringup.md) |
 | 54 | Windows: WSL2 and the lifted Linux engine | windows | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_54_windows_engine_bringup.md) |
 | 55 | Haskell substrate coordinator + single kind cluster | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_55_bootstrap_coordinator_kind.md) |
 | 56 | The base image, the jit-build resolver, and the in-cluster registry | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_56_base_image_registry.md) |

@@ -221,4 +221,5 @@ expectedOwnerAssignments =
   , ("VALIDATION_DISPATCH", "self_referential_gates")
   , ("VALIDATION_COMPILER_BUILDINFO", "toolchain_spike")
   , ("VALIDATION_COMPILER_ELABORATED", "toolchain_spike")
+  , ("VALIDATION_EVIDENCE", "self_referential_gates")
   ]

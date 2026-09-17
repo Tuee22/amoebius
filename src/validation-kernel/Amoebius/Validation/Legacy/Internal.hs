@@ -1901,10 +1901,11 @@ legacyRawDiagnosticBindings =
     )
 #endif
 
--- The refusal-only public wire predates the handoff-specific validation rows
--- and has a deliberately fixed 25-row carrier.  Keep deriving its values from
--- the typed register while excluding the two rows that are observed only by
--- the package-hidden Phase-50 projection.
+-- The refusal-only public wire predates the handoff-specific validation rows.
+-- Its carrier is the canonical universe minus the two rows observed only by
+-- the package-hidden Phase-50 projection, derived here rather than restated as
+-- a row count: a literal that has to agree with a computed cardinality is the
+-- defect that dropped a trailing binding once the enum grew past it.
 legacyRawDiagnosticUniverse :: [LegacyId]
 legacyRawDiagnosticUniverse =
   filter (`notElem` [LtdVal007, LtdVal008]) canonicalLegacyUniverse

@@ -310,35 +310,35 @@ satisfied and gate-passed.
 
 | Phase | Name | Substrate | Lane | Substrate rationale; any outcome is historical and invalidated |
 |-------|------|-----------|------|--------------------|
-| 0 | Documentation suite (whole DSL) | `none` | `none` | Planned lane only — NOT VALIDATED. Phase 0 is active for documentation, validation, and source-boundary redesign |
-| 1 | Haskell toolchain and probe-source closure | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 0 |
-| 2 | Repository layout conformance and de-phased naming | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 1 |
-| 3 | The artifact calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 2 |
-| 4 | The budget calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 3 |
-| 5 | The lift calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 4 |
-| 6 | The workflow calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 5 |
-| 7 | The evidence calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 6 |
-| 8 | Scoped identity kernel | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 7 |
-| 9 | Capacity core fold + topology relation | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 8 |
-| 10 | Composition across the five calculi | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 9 |
-| 11 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 10 |
-| 12 | The amoebius explicit-state checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 11 |
-| 13 | The amoebius symbolic checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 12 |
-| 14 | The amoebius refinement checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 13 |
-| 15 | The compile-fail fixture harness | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 14 |
-| 16 | Deterministic-simulation substrate | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 15 |
-| 17 | Gateway-migration model (both branches) | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 16 |
-| 18 | DSL formal model | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 17 |
-| 19 | Reconcile decision core under deterministic simulation | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 18 |
-| 20 | The extension declaration | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 19 |
-| 21 | The per-extension laws L1-L5 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 20 |
-| 22 | The compositional laws C1-C7 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 21 |
-| 23 | The security laws S1-S6 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 22 |
-| 24 | The generated conformance gate | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 23 |
-| 25 | Haskell-derived Dhall projection and smart-constructor prelude | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 24 |
-| 26 | Haskell protocol declarations, GADT-indexed IR, and total decoder | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 25 |
-| 27 | Illegal-state corpus + validation-locus ledger | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 26 |
-| 28 | Logical→physical storage geometry folds | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and gate pass of redesigned Phase 27 |
+| 0 | Documentation suite (whole DSL) | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 1 | Haskell toolchain and probe-source closure | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 2 | Repository layout conformance and de-phased naming | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 3 | The artifact calculus | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 4 | The budget calculus | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 5 | The lift calculus | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 6 | The workflow calculus | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 7 | The evidence calculus | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 8 | Scoped identity kernel | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 9 | Capacity core fold + topology relation | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 10 | Composition across the five calculi | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 11 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 12 | The amoebius explicit-state checker | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 13 | The amoebius symbolic checker | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 14 | The amoebius refinement checker | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 15 | The compile-fail fixture harness | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 16 | Deterministic-simulation substrate | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 17 | Gateway-migration model (both branches) | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 18 | DSL formal model | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 19 | Reconcile decision core under deterministic simulation | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 20 | The extension declaration | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 21 | The per-extension laws L1-L5 | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 22 | The compositional laws C1-C7 | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 23 | The security laws S1-S6 | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 24 | The generated conformance gate | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 25 | Haskell-derived Dhall projection and smart-constructor prelude | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 26 | Haskell protocol declarations, GADT-indexed IR, and total decoder | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 27 | Illegal-state corpus + validation-locus ledger | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
+| 28 | Logical→physical storage geometry folds | `none` | `none` | No host, cluster, provider, or hardware authority; the gate decides in-process |
 | 29 | [Execution-epoch + scheduler + accelerator + provider-root folds](phase_29_execution_accelerator_folds.md) | `none` | `none` | Register-1 Haskell gate; no host, cluster, provider, or hardware authority |
 | 30 | [Capability union + representational bind](phase_30_capability_bind.md) | `none` | `none` | Register-1 Haskell gate; no host, cluster, provider, or hardware authority |
 | 31 | [Whole-deployment provision seal + expansion](phase_31_provision_seal.md) | `none` | `none` | Register-1 Haskell gate; no host, cluster, provider, or hardware authority |
@@ -364,48 +364,48 @@ satisfied and gate-passed.
 | 51 | The host-ensure kernel | `none` | `none` | Required Register-2 Haskell fake-boundary gate; live host/provider behavior remains owned by later substrate phases |
 | 52 | Linux: sudoless Docker and the native image | `linux-cpu` | `linux-cpu/amd64` | Register-3 gate on one pristine Ubuntu Incus VM: exact bootstrap handoff, sudoless current/future Docker access, a native run-local smoke image, container version output, zero-mutation second pass, and exact teardown inventory |
 | 53 | Apple: Homebrew, Colima, and the native image | `apple` | `linux-cpu/arm64` | Required Register-3 lane on physical Apple Silicon macOS; component diagnostics do not establish live qualification |
-| 54 | Windows: WSL2 and the lifted Linux engine | `windows` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 53, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 55 | Haskell substrate coordinator and single kind cluster | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 54, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 56 | The base image, the jit-build resolver, and the in-cluster registry | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 55, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 57 | The complementary-architecture base image | `apple` | `linux-cpu/arm64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 56, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 58 | Typed renderer + object reconciler | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 57, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 59 | amoebius-capacity scheduler + bootstrap cutover | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 58, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 60 | No-provisioner retained storage + lossless rebind | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 59, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 61 | Root Vault + PKI + built-in Haskell Vault client | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 60, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 62 | Platform backbone (MetalLB + MinIO + Pulsar HA) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 61, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 63 | Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 62, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 64 | Keycloak-owned ingress | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 63, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 65 | Live DSL deploy via the replicas=1 control-plane daemon | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 64, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 66 | Tenant/provider provisioning | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 65, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 67 | Native Pulsar client (CBOR) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 66, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 68 | Live subject/tenant isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 67, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 69 | Content store + workflow runtime (Pulsar-Failover single-writer) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 68, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 70 | Owner-scoped UI projection runtime | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 69, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 71 | Release lifecycle | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 70, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 72 | Atomic immutable UI-program release | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 71, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 73 | WireGuard network fabric | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 72, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 74 | Multi-cluster spawn + geo-replication | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 73, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 75 | Gateway-migration drills + model-correspondence | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 74, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 76 | Haskell-derived provider Pulumi program and enveloped checkpoint | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 75, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 77 | Hostless provider child + convergence + Lease handoff | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 76, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 78 | Per-PV EBS decoupling + create-vs-delete credential | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 77, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 79 | Dynamic node provisioning by signal + leak-free provider gate | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 78, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 80 | Determinism kernel + jit-build CacheBudget cache | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 79, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 81 | Single-tenant low-code UI live path | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 80, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 82 | Multi-tenant low-code UI isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 81, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 83 | UI rollout, projection catch-up, and reconnect | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 82, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 84 | Initial online UI multi-zone high availability | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 83, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 85 | Offline replay and durable receipts | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 84, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 86 | Offline blobs and partition isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 85, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 87 | Offline release and schema evolution | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 86, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 88 | Offline multi-zone continuity | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 87, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 89 | Apple-Metal host compute daemon | `apple` | `metal` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 88, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 90 | The live test topology and elevated harness | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 89, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 91 | The infernix inference core, re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 90, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 92 | The infernix workflow and artifact contracts, re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 91, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 93 | The jitML numerical core, re-derived | `linux-cuda` | `cuda` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 92, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 94 | The jitML training and checkpoint contracts, re-derived | `linux-cuda` | `cuda` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 93, gate pass, and the independently satisfied hardware-free DSL barrier |
-| 95 | The multi-tenant web application re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 94, gate pass, and the independently satisfied hardware-free DSL barrier |
+| 54 | Windows: WSL2 and the lifted Linux engine | `windows` | `linux-cpu/amd64` | Required Register-3 lane on Windows; the lifted Linux engine runs through WSL2 |
+| 55 | Haskell substrate coordinator and single kind cluster | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 56 | The base image, the jit-build resolver, and the in-cluster registry | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 57 | The complementary-architecture base image | `apple` | `linux-cpu/arm64` | Required Register-3 lane on physical Apple Silicon macOS; no other substrate can carry the claim |
+| 58 | Typed renderer + object reconciler | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 59 | amoebius-capacity scheduler + bootstrap cutover | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 60 | No-provisioner retained storage + lossless rebind | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 61 | Root Vault + PKI + built-in Haskell Vault client | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 62 | Platform backbone (MetalLB + MinIO + Pulsar HA) | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 63 | Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG) | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 64 | Keycloak-owned ingress | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 65 | Live DSL deploy via the replicas=1 control-plane daemon | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 66 | Tenant/provider provisioning | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 67 | Native Pulsar client (CBOR) | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 68 | Live subject/tenant isolation | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 69 | Content store + workflow runtime (Pulsar-Failover single-writer) | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 70 | Owner-scoped UI projection runtime | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 71 | Release lifecycle | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 72 | Atomic immutable UI-program release | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 73 | WireGuard network fabric | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 74 | Multi-cluster spawn + geo-replication | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 75 | Gateway-migration drills + model-correspondence | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 76 | Haskell-derived provider Pulumi program and enveloped checkpoint | `linux-cpu` | `provider` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 77 | Hostless provider child + convergence + Lease handoff | `linux-cpu` | `provider` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 78 | Per-PV EBS decoupling + create-vs-delete credential | `linux-cpu` | `provider` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 79 | Dynamic node provisioning by signal + leak-free provider gate | `linux-cpu` | `provider` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 80 | Determinism kernel + jit-build CacheBudget cache | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 81 | Single-tenant low-code UI live path | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 82 | Multi-tenant low-code UI isolation | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 83 | UI rollout, projection catch-up, and reconnect | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 84 | Initial online UI multi-zone high availability | `linux-cpu` | `provider` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 85 | Offline replay and durable receipts | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 86 | Offline blobs and partition isolation | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 87 | Offline release and schema evolution | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 88 | Offline multi-zone continuity | `linux-cpu` | `provider` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 89 | Apple-Metal host compute daemon | `apple` | `metal` | Required Register-3 lane on physical Apple Silicon macOS; no other substrate can carry the claim |
+| 90 | The live test topology and elevated harness | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 91 | The infernix inference core, re-derived | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 92 | The infernix workflow and artifact contracts, re-derived | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
+| 93 | The jitML numerical core, re-derived | `linux-cuda` | `cuda` | Required Register-3 lane on an NVIDIA accelerator host; the baseline cannot supply the specialized claim |
+| 94 | The jitML training and checkpoint contracts, re-derived | `linux-cuda` | `cuda` | Required Register-3 lane on an NVIDIA accelerator host; the baseline cannot supply the specialized claim |
+| 95 | The multi-tenant web application re-derived | `linux-cpu` | `linux-cpu/amd64` | Register-3 lane on the always-available `linux-cpu` baseline, native or through Incus/Lima/WSL2 at the Lane architecture |
 
 The provider/host-side details under three of these rows are owned elsewhere: the cloud-LB and provider-cluster
 provisioning behind Phases 76–79, 84, 88 by the Pulumi IaC doctrine; the host-worker wire behind Phase 89 by the

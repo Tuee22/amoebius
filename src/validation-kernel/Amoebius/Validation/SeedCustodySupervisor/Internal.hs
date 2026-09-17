@@ -104,6 +104,7 @@ import System.Posix.Files
   , getFileStatus
   , rename
   , setFileMode
+  , setOwnerAndGroup
   )
 import System.Posix.IO
   ( OpenMode (ReadOnly, WriteOnly)
@@ -187,6 +188,8 @@ installMirror git executable originalRoot candidateUid candidateGid opening = do
   setFileMode (certificationMirrorRoot </> ".build") 0o755
   setFileMode (certificationMirrorRoot </> ".build" </> "bootstrap-inputs") 0o755
   copyBootstrapInputs originalRoot
+  mapM_ (copyBootstrapInputTree originalRoot) bootstrapInputTrees
+  mapM_ (createCandidateScratchRoot candidateUid candidateGid) candidateScratchRoots
   closing <- loadGitSnapshot git originalRoot
   mirrored <- loadGitSnapshot git certificationMirrorRoot
   case (closing, mirrored) of
@@ -293,8 +296,99 @@ copyBootstrapInputs originalRoot =
   copyOne leaf = do
     let source = originalRoot </> ".build" </> "bootstrap-inputs" </> leaf
         destination = certificationMirrorRoot </> ".build" </> "bootstrap-inputs" </> leaf
+    createDirectoryIfMissing True (takeDirectory destination)
     copyFile source destination
     setFileMode destination 0o444
+
+-- | Every operator-supplied bootstrap input a phase reads inside the protected
+-- mirror.
+--
+-- The publisher keyring belongs here for the same reason the archives do: a
+-- detached signature is verifiable only against the key that made it, so a
+-- mirror holding the signatures but not the keyring cannot check one. Omitting
+-- it turned a missing input into a failed signature, which reads as a
+-- provenance failure rather than as the transfer gap it was.
+-- | Operator-supplied input trees the mirror needs whole.
+--
+-- Acquiring either one needs the network, which no gate is allowed to reach, so
+-- both are transferred here beside the archives rather than fetched later. The
+-- first is the authenticated copy of the foreign source repositories every
+-- @--offline@ resolution resolves against; the second is the pinned external
+-- runtime a model-checking gate executes. An absent tree refuses at
+-- installation, where the reason is legible, rather than many phases later as a
+-- dependency that will not resolve or a runtime that is not there.
+bootstrapInputTrees :: [FilePath]
+bootstrapInputTrees =
+  [ ".build" </> "dist-newstyle" </> "phase-00-baseline" </> "src"
+  , ".build" </> "toolchain"
+  ]
+
+copyBootstrapInputTree :: FilePath -> FilePath -> IO ()
+copyBootstrapInputTree originalRoot relative = do
+  let source = originalRoot </> relative
+      destination = certificationMirrorRoot </> relative
+  present <- doesDirectoryExist source
+  unless
+    present
+    (ioError (userError ("operator-supplied bootstrap input tree is absent: " <> source)))
+  copyInputTree source destination
+
+-- | Copy an input tree into the protected mirror, preserving each file's own
+-- mode.
+--
+-- The mode is not flattened to read-only the way the seed material is. What
+-- protects this tree is that root owns it and the candidate does not, and the
+-- mode has to survive two further copies: a gate copies the source cache into
+-- its own run root, where the build tool writes into the tree it resolves
+-- against, and the pinned runtime contains an executable that has to stay one.
+-- A read-only input tree reaches the gate as a build that fails in a second
+-- with no explanation.
+--
+-- A leaf that is neither a regular file nor a directory refuses: these are
+-- acquired source and runtime trees, and anything else in them is not something
+-- this installer is entitled to reproduce.
+copyInputTree :: FilePath -> FilePath -> IO ()
+copyInputTree source destination = do
+  createDirectoryIfMissing True destination
+  setFileMode destination 0o755
+  leaves <- listDirectory source
+  mapM_ copyLeaf leaves
+ where
+  copyLeaf leaf = do
+    let from = source </> leaf
+        to = destination </> leaf
+    isDirectory <- doesDirectoryExist from
+    isFile <- doesFileExist from
+    if isDirectory
+      then copyInputTree from to
+      else
+        if isFile
+          then copyFile from to
+          else ioError (userError ("unsupported input-tree entry: " <> from))
+
+-- | Scratch roots inside the mirror's contained state root that the candidate
+-- owns.
+--
+-- @.build@ itself stays root-owned, because a candidate able to write there
+-- could rename the custody material beneath it; but a candidate that owns
+-- nothing under @.build@ cannot write the scratch a subject legitimately
+-- produces. These are the named subtrees where that scratch goes, created with
+-- the candidate as owner so the subject finds them rather than failing on a
+-- directory it is not allowed to make.
+candidateScratchRoots :: [FilePath]
+candidateScratchRoots =
+  [ ".build" </> "tmp"
+  , ".build" </> "tools"
+  , ".build" </> "test-corpora"
+  , ".build" </> "pulumi"
+  ]
+
+createCandidateScratchRoot :: Word32 -> Word32 -> FilePath -> IO ()
+createCandidateScratchRoot candidateUid candidateGid relative = do
+  let path = certificationMirrorRoot </> relative
+  createDirectoryIfMissing True path
+  setOwnerAndGroup path (fromIntegral candidateUid) (fromIntegral candidateGid)
+  setFileMode path 0o770
 
 bootstrapInputLeaves :: [FilePath]
 bootstrapInputLeaves =
@@ -305,6 +399,7 @@ bootstrapInputLeaves =
   , "cabal-install-3.16.1.0-x86_64-linux-ubuntu22_04.tar.xz"
   , "cabal-SHA256SUMS"
   , "cabal-SHA256SUMS.sig"
+  , "gnupg" </> "pubring.kbx"
   ]
 
 writeTrackedEntry :: FilePath -> TrackedEntry -> IO ()

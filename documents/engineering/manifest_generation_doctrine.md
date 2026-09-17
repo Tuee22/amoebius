@@ -218,7 +218,8 @@ Three properties make this the right shape:
   the edge," "the rendered RBAC grants exactly these verbs" — by inspecting the returned `[K8sObject]`. No kind
   cluster, apiserver, or golden-YAML diff of templated strings is required.
 - **Composable per the dependency graph.** `renderAll` must map every service/global render source in the
-  unique source inventory that Phase 31 will eventually seal. Phase 31 is **NOT VALIDATED**. Ordering and
+  unique source inventory that Phase 31 will eventually seal. Phase 31's status is owned by the plan's
+  mechanical status projection ([`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md)). Ordering and
   connectivity are derived from the declared dependency graph, not hand-authored
   ([§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)). One spec value renders the
   whole cluster, and duplicate ownership cannot be hidden by list order.

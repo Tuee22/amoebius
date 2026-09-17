@@ -433,7 +433,12 @@ clientIdentityCheck liveResult = case liveResult of
      in CheckResult "linux-engine-bringup-client-identity"
           [ observation "linux-engine.trace.pass-1.docker-clients" (Text.pack (show (length (dockerClients firstPass))))
           , observation "linux-engine.trace.pass-2.docker-clients" (Text.pack (show (length (dockerClients secondPass))))
-          , observation "linux-engine.trace.pass-2.mutating-executables" (Text.intercalate "," offenders)
+          , -- An idempotent second pass is this phase's claim, so the clean case
+            -- says so rather than rendering an empty list and hoping a reader
+            -- infers it. The empty collection is the result, not a missing one.
+            observation
+              "linux-engine.trace.pass-2.mutating-executables"
+              (if null offenders then "none" else Text.intercalate "," offenders)
           ]
           ( passIdentityFindings "pass-1" firstPass
               <> passIdentityFindings "pass-2" secondPass

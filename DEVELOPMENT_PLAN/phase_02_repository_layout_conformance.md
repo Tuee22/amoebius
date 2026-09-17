@@ -148,12 +148,12 @@ flowchart LR
 ## Sprint 2.1: `test/`'s second level collapses to the seven role nouns ✅
 
 **Status**: Done
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Implementation**: `src/validation-kernel/Amoebius/Validation/SourceClosure/Internal.hs` — behavioural-language classification (`UnregisteredBehavioralSource` → `SRC-UNREGISTERED` :4086–4092; `SourceTest` → `LTD-SRC-006` :4228) and the portable-name predicates `SOURCE-CLOSURE-PORTABLE-CASE-COLLISION` :2102 / `…-PREFIX-CONFLICT` :2104 — bound into this gate as `sourceClosureCheckAcquired` (`RepositoryLayoutRun/Internal.hs:129`). No module decides that `test/`'s second level equals the seven role nouns; the tree satisfies it but nothing enforces it, so that predicate remains UNRESOLVED and blocks validation.
 **Blocked by**: [Phase 1](phase_01_toolchain_spike.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: `test/validation-kernel/SourceClosureOracle.hs` supplies the independently authored cases and selector registry (`test/validation-kernel/source-closure-selector/Main.hs:15–22`). The two mutants this sprint names, `target-tree-clean` and `collision-free-tree`, do not exist under those names in any `.hs` or `.cabal`, and remain UNRESOLVED and blocking.
+**Oracle**: `test/validation-kernel/SourceClosureOracle.hs`, compiled into `validation-source-closure-selector-component` (`amoebius.cabal:7173`) and executed by the **Phase-49** DSL-barrier selector suite (`src/validation-kernel/Amoebius/Validation/DslBarrierRun/Internal.hs:176`, `:190`). This gate binds only the production `sourceClosureCheckAcquired` (`RepositoryLayoutRun/Internal.hs:129`); executing a separately authored oracle for this sprint inside its own gate remains UNRESOLVED.
+**Legacy IDs**: `None` — the test-tree family `LTD-SRC-006` is owned by Phase 47 (`src/validation-kernel/Amoebius/Validation/PhaseSemanticContract.hs:3067`); this phase's closure set is `LTD-SRC-000, LTD-SRC-008, LTD-META-001, LTD-NAME-001` (`Evidence/Internal.hs:1041`).
+**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md:404`); this sprint declares no owner of its own.
 
 ### Objective
 
@@ -186,12 +186,12 @@ owned legacy closure, and a Haskell-only test tree with lazy transport material 
 ## Sprint 2.2: The package-only roots become cabal stanzas ✅
 
 **Status**: Done
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Implementation**: `src/validation-kernel/Amoebius/Validation/CompilerSubjectRegistry/Internal.hs`, which joins every tracked source path to its owning Cabal component and refuses at `SRC-COMPILER-SUBJECT-REGISTRY` (:351); it is compiled into this gate's oracle component (`amoebius.cabal:6976`). `src/validation-kernel/Amoebius/Validation/CompilerComponentPlan/Internal.hs` parses the stanza fields including `hs-source-dirs:` (:2515–2518) but is **not** in this gate — it is declared only in `library validation-kernel` and no import edge reaches the phase-02 binary. Binding the stanza parser to this gate remains UNRESOLVED and blocks validation.
 **Blocked by**: Sprint 2.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
+**Independent Validation**: `test/validation-kernel/CompilerSubjectRegistryOracle.hs`, executed in-gate (`test/validation-kernel/compiler-source-graph-acquired/Main.hs:21`). The stanza-rename-without-source-directory mutant is not bound: the only stanza-scan mutant is the cpp macro `VALIDATION_COMPILER_PLAN_SCAN_HS_SOURCE_DIRS_PREFIX_DROP_MUTANT` (`CompilerComponentPlan/Internal.hs:2515`), in a module this gate does not compile. That leg remains UNRESOLVED and blocks validation.
+**Oracle**: `test/validation-kernel/CompilerSubjectRegistryOracle.hs` (`amoebius.cabal:6971`), executed by this gate at `test/validation-kernel/compiler-source-graph-acquired/Main.hs:21`. `test/validation-kernel/CompilerComponentPlanOracle.hs` exists but lives in `validation-compiler-component-plan-component` (`amoebius.cabal:7008`), which no phase runner builds — it is named only in the Phase-0 selector inventory (`src/validation-kernel/Amoebius/Validation/MutationCoverage.hs:85`), and `PhaseZeroRun/Internal.hs` executes no build. That half remains UNRESOLVED.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md:404`); this sprint declares no owner of its own.
 
 ### Objective
 
@@ -232,12 +232,12 @@ explained in the reader-facing register.
 ## Sprint 2.3: Tracked UI roots enter typed deletion ownership ✅
 
 **Status**: Done
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Implementation**: `src/validation-kernel/Amoebius/Validation/SourceClosure/Internal.hs:4226` (`SourceUi → LTD-SRC-004`) joined to the typed binding in `src/validation-kernel/Amoebius/Validation/Legacy/Internal.hs` — `AnalyzeSourceUi` :154, `ObserveSourceUi` :185, `CloseSourceUi` :216, `"LTD-SRC-004"` :663.
 **Blocked by**: Sprint 2.2
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: binding-integrity scenarios `("owner-missing", …)` / `("owner-mismatch", …)` at `src/validation-kernel/Amoebius/Validation/Legacy/Internal.hs:3316–3317`, and the changed-subject mutant `VALIDATION_LEGACY_JOIN_SOURCE_UI_TARGET_MUTANT` at :7179, checked against `test/validation-kernel/LegacyOracle.hs` under the Phase-49 selector suite (`test/validation-kernel/legacy-selector/Main.hs:15–22`).
+**Oracle**: `test/validation-kernel/LegacyOracle.hs`, compiled into `validation-legacy-selector-component` (`amoebius.cabal:7144`) and executed by the **Phase-49** DSL-barrier selector suite (`DslBarrierRun/Internal.hs:175`, `:189`). This gate does not execute it; that binding remains UNRESOLVED.
+**Legacy IDs**: `LTD-SRC-004`, owned by Phase 46 (`src/validation-kernel/Amoebius/Validation/PhaseSemanticContract.hs:3065`); it is not in this phase's closure set (`Evidence/Internal.hs:1041`).
+**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md:404`); this sprint declares no owner of its own.
 
 ### Objective
 
@@ -265,12 +265,12 @@ materialization. Until that owner reaches zero findings, this is only accounted 
 ## Sprint 2.4: Every authored name loses its phase ordinal ✅
 
 **Status**: Done
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Implementation**: `src/validation-kernel/Amoebius/Validation/RepositoryLayoutRun.hs` — `phaseOrdinalLiterals` :142–143, `runtimeIdentitySourcePath` :158–159, refusal `REPOSITORY-LAYOUT-PHASE-ORDINAL-IN-SOURCE` :95, joined at :81–82 — bound into this gate as `repositoryLayoutRunCheck` (`RepositoryLayoutRun/Internal.hs:128`).
 **Blocked by**: Sprint 2.3
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: the fixed corpus `repositoryLayoutQualificationDiagnostic` (`RepositoryLayoutRun.hs:104–115`) carries the mutant case `runtime-phase-ordinal` (:113) and the near-miss control `validation-phase-label` (:114), compared against the independently authored expectation at `test/validation-kernel/RepositoryLayoutRunOracle.hs:62–68` and re-checked in-gate at `RepositoryLayoutRun/Internal.hs:180–186`.
+**Oracle**: `test/validation-kernel/RepositoryLayoutRunOracle.hs`, compiled into `validation-compiler-source-graph-acquired-component` (`amoebius.cabal:6972`) and **executed by this gate** — built at `src/validation-kernel/Amoebius/Validation/RepositoryLayoutRun/Internal.hs:118`, located at :123, run at :126, entered at `test/validation-kernel/compiler-source-graph-acquired/Main.hs:23`.
+**Legacy IDs**: `LTD-NAME-001` (`src/validation-kernel/Amoebius/Validation/Evidence/Internal.hs:1041`).
+**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md:404`); this sprint declares no owner of its own.
 
 ### Objective
 
@@ -310,12 +310,12 @@ edit this phase's scope excludes.
 ## Sprint 2.5: One mutant record format, one registry ✅
 
 **Status**: Done
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Implementation**: `src/validation-kernel/Amoebius/Validation/MutationCoverage.hs` — `DrivenSuite` :37–47, `drivenSuites` :77–98, `mutationCoverageCheck` :108 — consumed by the **Phase-0** runner (`src/validation-kernel/Amoebius/Validation/PhaseZeroRun/Internal.hs:204`), not by this one (`RepositoryLayoutRun/Internal.hs` imports no `MutationCoverage`); plus one selector record and CLI per suite at `test/validation-kernel/SelectorCli.hs`. The closed mutation-record registry carrying operator, production locus, changed-subject witness and application mode is not bound: mutations are still cabal-flag/cpp (e.g. `SourceClosure/Internal.hs:313`, `Legacy/Internal.hs:7179`, `CompilerComponentPlan/Internal.hs:2515`), which is the condition this sprint exists to replace. It remains UNRESOLVED and blocks validation.
 **Blocked by**: Sprint 2.4
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: `test/validation-kernel/MutationCoverageOracle.hs` covers inventory well-formedness only (`MutationCoverage.hs:78–84` documents the deliberate absence of a corpus total). The registry's two-way applied-mutant resolution is not bound and remains UNRESOLVED.
+**Oracle**: `test/validation-kernel/MutationCoverageOracle.hs`, compiled only into `validation-kernel-component` (`amoebius.cabal:6467`), which no phase runner builds — `grep -rn "validation-kernel-component" --include=*.hs src/` returns nothing. No gate executes this oracle; that binding remains UNRESOLVED and blocks validation.
+**Legacy IDs**: `None` — this phase's closure set is `LTD-SRC-000, LTD-SRC-008, LTD-META-001, LTD-NAME-001` (`Evidence/Internal.hs:1041`), none owned by this sprint.
+**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md:404`); this sprint declares no owner of its own.
 
 ### Objective
 
@@ -364,10 +364,10 @@ unwired coverage against the capability that owns closing it, and is never count
 ## Sprint 2.6: Compiler-backed source graph and typed legacy reconciliation ✅
 
 **Status**: Done
-**Implementation**: `src/validation-kernel/Amoebius/Validation/RepositoryLayoutRun.hs`, `src/validation-kernel/Amoebius/Validation/CompilerComponentPlan.hs`, `src/validation-kernel/Amoebius/Validation/CompilerSourceGraph.hs`, `src/validation-kernel/Amoebius/Validation/SourceClosure.hs`, and `src/validation-kernel/Amoebius/Validation/SourceConsumerGraph.hs`; acquired composition remains UNRESOLVED and blocks validation.
+**Implementation**: the acquired composition is `src/validation-kernel/Amoebius/Validation/RepositoryLayoutRun/Internal.hs:110–152` — layout (:128), source closure (:129), pb-grammar (:130), a contained `cabal build` of `exe:amoebius` and the oracle suite (:118–121), and the executed oracle (:126) — folded into eighteen rows (:153–171). `CompilerSourceGraph.Internal`, `CompilerSubjectRegistry.Internal`, `CompilerExpectationAuthority.Internal`, `SourceClosure.Internal` and `SourceConsumerGraph.Internal` reach this gate through that compiled test component (`amoebius.cabal:6974–6983`), not through the runner's imports. `CompilerComponentPlan.Internal` is not in the component and does not reach this gate; that leg remains UNRESOLVED and blocks validation.
 **Blocked by**: Sprint 2.5
 **Independent Validation**: From the exact Phase-1 toolchain receipt and captured source, run the complete `VALIDATION_PB_GRAMMAR` selector corpus and reconcile the Cabal plan and every source/module/import/parse/rename/typecheck/call/control-flow/effect/provenance/dynamic-load/sink/consumer edge in both directions. Missing, extra, stale, disguised, unresolved, dynamically bypassed, or wrong-consumer edges are paired exact negatives; each applied changed-subject selector must red only its assigned row.
-**Oracle**: `test/validation-kernel/PbBootstrapGrammarOracle.hs` owns the complete `VALIDATION_PB_GRAMMAR` expectation surface; planned separate Haskell `test/validation-kernel/RepositoryCompilerGraphOracle.hs` is authored from the remaining repository/source requirements rather than the production graph. Integrated provenance remains UNRESOLVED.
+**Oracle**: the oracle this gate executes is `test/validation-kernel/CompilerSourceGraphAcquiredOracle.hs` together with `CompilerSubjectRegistryOracle.hs`, `RepositoryLayoutRunOracle.hs` and `ToolchainSpikeRunOracle.hs`, linked as one binary (`amoebius.cabal:6970–6973`; `test/validation-kernel/compiler-source-graph-acquired/Main.hs:21–31`) and run at `RepositoryLayoutRun/Internal.hs:126`. `test/validation-kernel/RepositoryCompilerGraphOracle.hs` does not exist and is withdrawn from this field. `test/validation-kernel/PbBootstrapGrammarOracle.hs` exists but lives in `validation-pb-bootstrap-grammar-component` (`amoebius.cabal:7049`), which no phase runner builds; only the production `pbBootstrapGrammarCandidate` (`RepositoryLayoutRun/Internal.hs:130`) is bound, so the `VALIDATION_PB_GRAMMAR` expectation surface remains UNRESOLVED.
 **Legacy IDs**: `LTD-SRC-000`, `LTD-SRC-008`, `LTD-META-001`, `LTD-NAME-001`
 **Docs to update**: `documents/engineering/repository_layout_doctrine.md`, `DEVELOPMENT_PLAN/development_plan_gate_integrity.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`
 

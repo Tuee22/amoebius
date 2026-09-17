@@ -4,6 +4,8 @@
 
 module Amoebius.Manifest.Types
   ( K8sObjectKind (..)
+  , kubernetesKindName
+  , kindFromKubernetesName
   , WorkloadKind (..)
   , ObjectMetadata (..)
   , SecurityContext (..)
@@ -64,6 +66,54 @@ data K8sObjectKind
   | SecretReferenceKind
   deriving stock (Bounded, Enum, Eq, Generic, Ord, Show)
   deriving anyclass (FromJSON, NFData, ToJSON)
+
+-- | The name a Kubernetes API server reads out of an object's @kind@ field.
+--
+-- This is the one site that decides it. The constructor name is not the wire
+-- name -- @SecretReferenceKind@ names amoebius's reference to a @Secret@, and
+-- the object a cluster receives is a @Secret@ -- so a derived spelling would be
+-- wrong for exactly the case a reader would not check. The case is total, and
+-- @-Werror=incomplete-patterns@ makes a new kind name itself here rather than
+-- silently inheriting a spelling.
+kubernetesKindName :: K8sObjectKind -> Text
+kubernetesKindName kind = case kind of
+  NamespaceKind -> "Namespace"
+  NodeKind -> "Node"
+  DeploymentKind -> "Deployment"
+  StatefulSetKind -> "StatefulSet"
+  DaemonSetKind -> "DaemonSet"
+  JobKind -> "Job"
+  ServiceKind -> "Service"
+  PersistentVolumeKind -> "PersistentVolume"
+  PersistentVolumeClaimKind -> "PersistentVolumeClaim"
+  StorageClassKind -> "StorageClass"
+  LeaseKind -> "Lease"
+  ServiceAccountKind -> "ServiceAccount"
+  RoleKind -> "Role"
+  RoleBindingKind -> "RoleBinding"
+  ClusterRoleKind -> "ClusterRole"
+  ClusterRoleBindingKind -> "ClusterRoleBinding"
+  NetworkPolicyKind -> "NetworkPolicy"
+  HTTPRouteKind -> "HTTPRoute"
+  GatewayKind -> "Gateway"
+  ConfigMapKind -> "ConfigMap"
+  CustomResourceDefinitionKind -> "CustomResourceDefinition"
+  CustomResourceKind -> "CustomResource"
+  ResourceQuotaKind -> "ResourceQuota"
+  LimitRangeKind -> "LimitRange"
+  ValidatingWebhookConfigurationKind -> "ValidatingWebhookConfiguration"
+  MutatingWebhookConfigurationKind -> "MutatingWebhookConfiguration"
+  ClusterIssuerKind -> "ClusterIssuer"
+  CertificateKind -> "Certificate"
+  SecretReferenceKind -> "Secret"
+
+-- | The inverse of 'kubernetesKindName', derived from it rather than restated,
+-- so the two directions cannot disagree.
+kindFromKubernetesName :: Text -> Maybe K8sObjectKind
+kindFromKubernetesName name =
+  case [kind | kind <- [minBound .. maxBound], kubernetesKindName kind == name] of
+    [kind] -> Just kind
+    _ -> Nothing
 
 data WorkloadKind = DeploymentWorkload | StatefulSetWorkload | DaemonSetWorkload | JobWorkload
   deriving stock (Bounded, Enum, Eq, Generic, Ord, Show)

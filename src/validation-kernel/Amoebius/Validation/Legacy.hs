@@ -31,9 +31,9 @@ maximumLegacyPhaseBytes = 1
 maximumLegacyPhaseBytes = 2
 #endif
 #if defined(VALIDATION_LEGACY_BOUND_BINDINGS_MUTANT)
-maximumLegacyBindings = 24
-#else
 maximumLegacyBindings = 25
+#else
+maximumLegacyBindings = 26
 #endif
 #if defined(VALIDATION_LEGACY_BOUND_JOINS_MUTANT)
 maximumLegacyJoins = 8
@@ -99,9 +99,9 @@ maximumLegacyJoinTargetBytes = 11
 maximumLegacyJoinTargetBytes = 12
 #endif
 #if defined(VALIDATION_LEGACY_BOUND_AGGREGATE_BYTES_MUTANT)
-maximumLegacyAggregateBytes = 2714
+maximumLegacyAggregateBytes = 2839
 #else
-maximumLegacyAggregateBytes = 2706
+maximumLegacyAggregateBytes = 2831
 #endif
 
 data LegacyPrefix value
@@ -3181,8 +3181,18 @@ legacyBindingCardinalityValid :: [RawLegacyBinding] -> Bool
 #if defined(VALIDATION_LEGACY_RAW_BINDING_CARDINALITY_BYPASS_MUTANT)
 legacyBindingCardinalityValid _ = True
 #else
-legacyBindingCardinalityValid values = length values == maximumLegacyBindings
+legacyBindingCardinalityValid values =
+    length values == maximumLegacyBindings && canonicalBindingArityExact
 #endif
+
+-- | The key list and the raw universe are maintained in separate declarations,
+-- and 'zipWith' truncates to the shorter one: a key list that falls behind the
+-- universe silently drops the trailing binding rather than refusing. This makes
+-- the mismatch a verdict instead of a disappearance. (LTD-BOOT-001 was dropped
+-- exactly this way once the enum grew past the hand-written carrier.)
+canonicalBindingArityExact :: Bool
+canonicalBindingArityExact =
+    length canonicalBindingKeysInOrder == length Internal.legacyRawDiagnosticBindings
 
 legacyBindingOrderValid :: [Text] -> Bool
 #if defined(VALIDATION_LEGACY_RAW_BINDING_ORDER_BYPASS_MUTANT)
@@ -3380,6 +3390,7 @@ data LegacyBindingKey
   | KeyLtdRun001
   | KeyLtdSeed001
   | KeyLtdSeed002
+  | KeyLtdBoot001
   deriving (Eq, Ord, Show)
 
 data CanonicalLegacyBinding = CanonicalLegacyBinding
@@ -3413,6 +3424,7 @@ canonicalBindingKeysInOrder =
   , KeyLtdMeta001, KeyLtdVal001, KeyLtdVal002, KeyLtdVal003, KeyLtdVal004
   , KeyLtdVal005, KeyLtdVal006, KeyLtdDoc001, KeyLtdName001, KeyLtdHost001
   , KeyLtdHost002, KeyLtdImg001, KeyLtdRun001, KeyLtdSeed001, KeyLtdSeed002
+  , KeyLtdBoot001
   ]
 
 canonicalBindingFromRaw :: LegacyBindingKey -> RawLegacyBinding -> CanonicalLegacyBinding
@@ -3576,6 +3588,12 @@ canonicalBindingSelected binding = case canonicalBindingKey binding of
 #else
     True
 #endif
+  KeyLtdBoot001 ->
+#if defined(VALIDATION_LEGACY_SELECT_LTD_BOOT001_DROP_MUTANT)
+    False
+#else
+    True
+#endif
 
 
 canonicalBindingObservationRetained :: CanonicalLegacyBinding -> Bool
@@ -3730,6 +3748,12 @@ canonicalBindingObservationRetained binding = case canonicalBindingKey binding o
 #else
     True
 #endif
+  KeyLtdBoot001 ->
+#if defined(VALIDATION_LEGACY_BINDING_OBSERVATION_LTD_BOOT001_DROP_MUTANT)
+    False
+#else
+    True
+#endif
 
 canonicalBindingExecutionFindingRetained :: CanonicalLegacyBinding -> Bool
 canonicalBindingExecutionFindingRetained binding = case canonicalBindingKey binding of
@@ -3879,6 +3903,12 @@ canonicalBindingExecutionFindingRetained binding = case canonicalBindingKey bind
 #endif
   KeyLtdSeed002 ->
 #if defined(VALIDATION_LEGACY_BINDING_EXECUTION_LTD_SEED002_DROP_MUTANT)
+    False
+#else
+    True
+#endif
+  KeyLtdBoot001 ->
+#if defined(VALIDATION_LEGACY_BINDING_EXECUTION_LTD_BOOT001_DROP_MUTANT)
     False
 #else
     True

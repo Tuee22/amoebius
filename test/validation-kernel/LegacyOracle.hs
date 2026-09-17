@@ -35,7 +35,7 @@ type RawJoin = (Text, Text)
 
 maximumPhaseBytes, maximumBindings, maximumJoins, maximumIdBytes, maximumDispositionBytes :: Int
 maximumPhaseBytes = 2
-maximumBindings = 25
+maximumBindings = 26
 maximumJoins = 9
 maximumIdBytes = 12
 maximumDispositionBytes = 8
@@ -51,7 +51,7 @@ maximumReintroductionValues = 4
 maximumReintroductionBytes = 64
 maximumJoinSourceBytes = 32
 maximumJoinTargetBytes = 12
-maximumAggregateBytes = 2706
+maximumAggregateBytes = 2831
 
 data ExactCase = ExactCase
   { exactLabel :: String
@@ -291,6 +291,7 @@ legacySelectorIntents =
   , ("VALIDATION_LEGACY_SELECT_LTD_RUN001_DROP_MUTANT", "LTD-RUN-001 binding composition", "canonical legacy wire")
   , ("VALIDATION_LEGACY_SELECT_LTD_SEED001_DROP_MUTANT", "LTD-SEED-001 binding composition", "canonical legacy wire")
   , ("VALIDATION_LEGACY_SELECT_LTD_SEED002_DROP_MUTANT", "LTD-SEED-002 binding composition", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_SELECT_LTD_BOOT001_DROP_MUTANT", "LTD-BOOT-001 binding composition", "canonical legacy wire")
   , ("VALIDATION_LEGACY_SELECT_JOIN_SOURCE_TOOLS_DROP_MUTANT", "source-tools join composition", "canonical legacy wire")
   , ("VALIDATION_LEGACY_SELECT_JOIN_SOURCE_DHALL_DROP_MUTANT", "source-dhall join composition", "canonical legacy wire")
   , ("VALIDATION_LEGACY_SELECT_JOIN_SOURCE_PROTO_DROP_MUTANT", "source-proto join composition", "canonical legacy wire")
@@ -418,6 +419,8 @@ legacySelectorIntents =
   , ("VALIDATION_LEGACY_BINDING_EXECUTION_LTD_SEED001_DROP_MUTANT", "LTD-SEED-001 execution-refusal retention", "canonical legacy wire")
   , ("VALIDATION_LEGACY_BINDING_OBSERVATION_LTD_SEED002_DROP_MUTANT", "LTD-SEED-002 observation retention", "canonical legacy wire")
   , ("VALIDATION_LEGACY_BINDING_EXECUTION_LTD_SEED002_DROP_MUTANT", "LTD-SEED-002 execution-refusal retention", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_BINDING_OBSERVATION_LTD_BOOT001_DROP_MUTANT", "LTD-BOOT-001 observation retention", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_BINDING_EXECUTION_LTD_BOOT001_DROP_MUTANT", "LTD-BOOT-001 execution-refusal retention", "canonical legacy wire")
   , ("VALIDATION_LEGACY_JOIN_OBSERVATION_SOURCE_TOOLS_DROP_MUTANT", "source-tools observation retention", "canonical legacy wire")
   , ("VALIDATION_LEGACY_JOIN_EXECUTION_SOURCE_TOOLS_DROP_MUTANT", "source-tools execution-refusal retention", "canonical legacy wire")
   , ("VALIDATION_LEGACY_JOIN_OBSERVATION_SOURCE_DHALL_DROP_MUTANT", "source-dhall observation retention", "canonical legacy wire")
@@ -1567,8 +1570,8 @@ sequenceDifferences label expected actual =
 
 literalIntegrityProblems :: [String]
 literalIntegrityProblems =
-  [ "selector intent cardinality changed: expected=1317; observed=" <> show (length legacySelectorIntents)
-  | length legacySelectorIntents /= 1317
+  [ "selector intent cardinality changed: expected=1320; observed=" <> show (length legacySelectorIntents)
+  | length legacySelectorIntents /= 1320
   ]
     <> ["duplicate selector intent: " <> value | value <- duplicateStrings legacySelectorNames]
     <> ["duplicate atomic requirement: " <> value | value <- duplicateStrings requirements]
@@ -1644,35 +1647,35 @@ exactCases =
       (literalResource "LEGACY-PHASE-BYTE-LIMIT" "<candidate-phase>" 2 3)
   , completeCase "binding count maximum" "00" canonicalBindings canonicalJoins Nothing False
   , resourceCase "binding count maximum plus one" "00" (canonicalBindings <> [extraBinding]) canonicalJoins
-      "00" "26+" "unavailable" "binding-limit:25:26"
-      (literalResource "LEGACY-BINDING-LIMIT" "<bindings>" 25 26)
+      "00" "27+" "unavailable" "binding-limit:26:27"
+      (literalResource "LEGACY-BINDING-LIMIT" "<bindings>" 26 27)
   , completeCase "join count maximum" "00" canonicalBindings canonicalJoins Nothing False
   , resourceCase "join count maximum plus one" "00" canonicalBindings (canonicalJoins <> [("source-extra", "LTD-SRC-999")])
-      "00" "25" "10+" "join-limit:9:10"
+      "00" "26" "10+" "join-limit:9:10"
       (literalResource "LEGACY-JOIN-LIMIT" "<joins>" 9 10)
   , aggregateFailureCase "stable ID bytes maximum" (mapFirstBinding (setBindingId maximumId) canonicalBindings) canonicalJoins
   , resourceCase "stable ID bytes maximum plus one" "00" (mapFirstBinding (setBindingId excessiveId) canonicalBindings) canonicalJoins
-      "00" "25" "9" "id-byte-limit:1:12:13"
+      "00" "26" "9" "id-byte-limit:1:12:13"
       (literalResource "LEGACY-ID-BYTE-LIMIT" "<binding-1>" 12 13)
   , aggregateFailureCase "disposition bytes maximum" (mapFirstBinding (setBindingDisposition maximumDisposition) canonicalBindings) canonicalJoins
   , resourceCase "disposition bytes maximum plus one" "00" (mapFirstBinding (setBindingDisposition excessiveDisposition) canonicalBindings) canonicalJoins
-      "00" "25" "9" "disposition-byte-limit:1:8:9"
+      "00" "26" "9" "disposition-byte-limit:1:8:9"
       (literalResource "LEGACY-DISPOSITION-BYTE-LIMIT" "<binding-1>" 8 9)
   , completeCase "owner bytes maximum" "00" canonicalBindings canonicalJoins Nothing False
   , resourceCase "owner bytes maximum plus one" "00" (mapFirstBinding (setBindingOwner excessiveOwner) canonicalBindings) canonicalJoins
-      "00" "25" "9" "owner-byte-limit:1:2:3"
+      "00" "26" "9" "owner-byte-limit:1:2:3"
       (literalResource "LEGACY-OWNER-BYTE-LIMIT" "<binding-1>" 2 3)
   , aggregateFailureCase "analyzer bytes maximum" (mapFirstBinding (setBindingAnalyzer maximumAnalyzer) canonicalBindings) canonicalJoins
   , resourceCase "analyzer bytes maximum plus one" "00" (mapFirstBinding (setBindingAnalyzer excessiveAnalyzer) canonicalBindings) canonicalJoins
-      "00" "25" "9" "analyzer-byte-limit:1:64:65"
+      "00" "26" "9" "analyzer-byte-limit:1:64:65"
       (literalResource "LEGACY-ANALYZER-BYTE-LIMIT" "<binding-1>" 64 65)
   , aggregateFailureCase "observation bytes maximum" (mapFirstBinding (setBindingObservation maximumObservation) canonicalBindings) canonicalJoins
   , resourceCase "observation bytes maximum plus one" "00" (mapFirstBinding (setBindingObservation excessiveObservation) canonicalBindings) canonicalJoins
-      "00" "25" "9" "observation-byte-limit:1:64:65"
+      "00" "26" "9" "observation-byte-limit:1:64:65"
       (literalResource "LEGACY-OBSERVATION-BYTE-LIMIT" "<binding-1>" 64 65)
   , aggregateFailureCase "closure bytes maximum" (mapFirstBinding (setBindingClosure maximumClosure) canonicalBindings) canonicalJoins
   , resourceCase "closure bytes maximum plus one" "00" (mapFirstBinding (setBindingClosure excessiveClosure) canonicalBindings) canonicalJoins
-      "00" "25" "9" "closure-byte-limit:1:64:65"
+      "00" "26" "9" "closure-byte-limit:1:64:65"
       (literalResource "LEGACY-CLOSURE-BYTE-LIMIT" "<binding-1>" 64 65)
   , completeCase "reintroduction count maximum" "00"
       (mapFirstBinding (setBindingReintroduction ["r", "s", "t", "u"]) canonicalBindings) canonicalJoins
@@ -1681,21 +1684,21 @@ exactCases =
           <> "; observed=" <> Text.pack (show (["r", "s", "t", "u"] :: [Text]))))) False
   , resourceCase "reintroduction count maximum plus one" "00"
       (mapFirstBinding (setBindingReintroduction ["r", "s", "t", "u", "v"]) canonicalBindings) canonicalJoins
-      "00" "25" "9" "reintroduction-count-limit:1:4:5"
+      "00" "26" "9" "reintroduction-count-limit:1:4:5"
       (literalResource "LEGACY-REINTRODUCTION-COUNT-LIMIT" "<binding-1>" 4 5)
   , aggregateFailureCase "reintroduction bytes maximum"
       (mapFirstBinding (setBindingReintroduction [maximumReintroduction]) canonicalBindings) canonicalJoins
   , resourceCase "reintroduction bytes maximum plus one" "00"
       (mapFirstBinding (setBindingReintroduction [excessiveReintroduction]) canonicalBindings) canonicalJoins
-      "00" "25" "9" "reintroduction-byte-limit:1:1:64:65"
+      "00" "26" "9" "reintroduction-byte-limit:1:1:64:65"
       (literalResource "LEGACY-REINTRODUCTION-BYTE-LIMIT" "<binding-1>-reintroduction-1" 64 65)
   , aggregateFailureCase "join source bytes maximum" canonicalBindings (mapFirstJoin (setJoinSource maximumJoinSource) canonicalJoins)
   , resourceCase "join source bytes maximum plus one" "00" canonicalBindings (mapFirstJoin (setJoinSource excessiveJoinSource) canonicalJoins)
-      "00" "25" "9" "join-source-byte-limit:1:32:33"
+      "00" "26" "9" "join-source-byte-limit:1:32:33"
       (literalResource "LEGACY-JOIN-SOURCE-BYTE-LIMIT" "<join-1>" 32 33)
   , aggregateFailureCase "join target bytes maximum" canonicalBindings (mapFirstJoin (setJoinTarget maximumJoinTarget) canonicalJoins)
   , resourceCase "join target bytes maximum plus one" "00" canonicalBindings (mapFirstJoin (setJoinTarget excessiveJoinTarget) canonicalJoins)
-      "00" "25" "9" "join-target-byte-limit:1:12:13"
+      "00" "26" "9" "join-target-byte-limit:1:12:13"
       (literalResource "LEGACY-JOIN-TARGET-BYTE-LIMIT" "<join-1>" 12 13)
   , completeCase "aggregate bytes maximum" "00" canonicalBindings canonicalJoins Nothing False
   , aggregateFailureCase "aggregate bytes maximum plus one" canonicalBindings aggregateExcessJoins
@@ -1707,10 +1710,10 @@ exactCases =
       (Just (literalGrammar "LEGACY-PHASE-ALPHABET" "<candidate-phase>" "expected ASCII decimal characters only")) False
   , completeCase "phase range maximum plus one" "96" canonicalBindings canonicalJoins
       (Just (literalGrammar "LEGACY-PHASE-RANGE" "<candidate-phase>" "expected a phase in the closed range 00 through 95")) False
-  , completeCase "binding cardinality negative" "00" (take 24 canonicalBindings) canonicalJoins
-      (Just (literalGrammar "LEGACY-BINDING-CARDINALITY" "<bindings>" "expected=25; observed=24")) False
+  , completeCase "binding cardinality negative" "00" (take 25 canonicalBindings) canonicalJoins
+      (Just (literalGrammar "LEGACY-BINDING-CARDINALITY" "<bindings>" "expected=26; observed=25")) False
   , completeCase "binding duplicate negative" "00" duplicateBindings canonicalJoins
-      (Just (literalGrammar "LEGACY-BINDING-DUPLICATE" "LTD-SEED-001" "stable ID occurs more than once")) False
+      (Just (literalGrammar "LEGACY-BINDING-DUPLICATE" "LTD-SEED-002" "stable ID occurs more than once")) False
   , completeCase "binding unknown negative" "00" unknownBindings canonicalJoins
       (Just (literalGrammar "LEGACY-BINDING-UNKNOWN" "LTD-SEED-999" "stable ID is outside the closed binding universe")) False
   , completeCase "binding order negative" "00" outOfOrderBindings canonicalJoins
@@ -1746,34 +1749,34 @@ exactCases =
       (mapFirstBinding (setBindingId (Text.replicate 6 "é")) canonicalBindings) canonicalJoins
   , resourceCase "stable ID two-byte maximum plus one" "00"
       (mapFirstBinding (setBindingId (Text.replicate 6 "é" <> "a")) canonicalBindings) canonicalJoins
-      "00" "25" "9" "id-byte-limit:1:12:13"
+      "00" "26" "9" "id-byte-limit:1:12:13"
       (literalResource "LEGACY-ID-BYTE-LIMIT" "<binding-1>" 12 13)
   , aggregateFailureCase "stable ID three-byte maximum"
       (mapFirstBinding (setBindingId (Text.replicate 4 "€")) canonicalBindings) canonicalJoins
   , resourceCase "stable ID three-byte maximum plus one" "00"
       (mapFirstBinding (setBindingId (Text.replicate 4 "€" <> "a")) canonicalBindings) canonicalJoins
-      "00" "25" "9" "id-byte-limit:1:12:13"
+      "00" "26" "9" "id-byte-limit:1:12:13"
       (literalResource "LEGACY-ID-BYTE-LIMIT" "<binding-1>" 12 13)
   , aggregateFailureCase "stable ID four-byte maximum"
       (mapFirstBinding (setBindingId (Text.replicate 3 "😀")) canonicalBindings) canonicalJoins
   , resourceCase "stable ID four-byte maximum plus one" "00"
       (mapFirstBinding (setBindingId (Text.replicate 3 "😀" <> "a")) canonicalBindings) canonicalJoins
-      "00" "25" "9" "id-byte-limit:1:12:13"
+      "00" "26" "9" "id-byte-limit:1:12:13"
       (literalResource "LEGACY-ID-BYTE-LIMIT" "<binding-1>" 12 13)
   , resourceCase "resource binding row precedence" "00" resourceBindingRowPrecedence canonicalJoins
-      "00" "25" "9" "id-byte-limit:1:12:13"
+      "00" "26" "9" "id-byte-limit:1:12:13"
       (literalResource "LEGACY-ID-BYTE-LIMIT" "<binding-1>" 12 13)
   , resourceCase "resource join row precedence" "00" canonicalBindings resourceJoinRowPrecedence
-      "00" "25" "9" "join-source-byte-limit:1:32:33"
+      "00" "26" "9" "join-source-byte-limit:1:32:33"
       (literalResource "LEGACY-JOIN-SOURCE-BYTE-LIMIT" "<join-1>" 32 33)
   , resourceCase "resource class precedence" "00" resourceBindingClassPrecedence resourceJoinClassPrecedence
-      "00" "25" "9" "id-byte-limit:1:12:13"
+      "00" "26" "9" "id-byte-limit:1:12:13"
       (literalResource "LEGACY-ID-BYTE-LIMIT" "<binding-1>" 12 13)
   , resourceCase "resource binding field precedence" "00" resourceBindingFieldPrecedence canonicalJoins
-      "00" "25" "9" "id-byte-limit:1:12:13"
+      "00" "26" "9" "id-byte-limit:1:12:13"
       (literalResource "LEGACY-ID-BYTE-LIMIT" "<binding-1>" 12 13)
   , resourceCase "resource join field precedence" "00" canonicalBindings resourceJoinFieldPrecedence
-      "00" "25" "9" "join-source-byte-limit:1:32:33"
+      "00" "26" "9" "join-source-byte-limit:1:32:33"
       (literalResource "LEGACY-JOIN-SOURCE-BYTE-LIMIT" "<join-1>" 32 33)
   , completeCase "grammar phase precedence" "a" canonicalBindings canonicalJoins
       (Just (literalGrammar "LEGACY-PHASE-WIDTH" "<candidate-phase>" "expected exactly two ASCII decimal characters")) False
@@ -1812,9 +1815,9 @@ resourceCase label phase bindings joins safePhase bindingCount joinCount problem
 
 aggregateFailureCase :: String -> [RawBinding] -> [RawJoin] -> ExactCase
 aggregateFailureCase label bindings joins =
-  resourceCase label "00" bindings joins "00" "25" "9"
-    ("aggregate-byte-limit:2706:" <> Text.pack (show actual))
-    (literalResource "LEGACY-AGGREGATE-BYTE-LIMIT" "<legacy-input>" 2706 actual)
+  resourceCase label "00" bindings joins "00" "26" "9"
+    ("aggregate-byte-limit:2831:" <> Text.pack (show actual))
+    (literalResource "LEGACY-AGGREGATE-BYTE-LIMIT" "<legacy-input>" 2831 actual)
  where
   actual = aggregateBytes bindings joins
 
@@ -1830,7 +1833,7 @@ expectedResult phase bindings joins safePhase bindingCount joinCount commitment 
         , Observation "legacy.input.candidate-phase" safePhase
         , Observation "legacy.input.binding-count" bindingCount
         , Observation "legacy.input.join-count" joinCount
-        , Observation "legacy.derived.selected-binding-count" "25"
+        , Observation "legacy.derived.selected-binding-count" "26"
         , Observation "legacy.derived.selected-join-count" "9"
         , Observation "legacy.diagnostic-status" "refused"
         ]
@@ -1951,6 +1954,7 @@ canonicalBindings =
   , ("LTD-RUN-001", "Active", "55", "executable-identity", "cabal-executable-graph", "executable-identity", ["reject-second-executable-identity"])
   , ("LTD-SEED-001", "Active", "91", "infernix-seed-dependency", "infernix-dependency-graph", "infernix-seed-dependency", ["reject-infernix-seed-dependency"])
   , ("LTD-SEED-002", "Active", "93", "jitml-seed-dependency", "jitml-dependency-graph", "jitml-seed-dependency", ["reject-jitml-seed-dependency"])
+  , ("LTD-BOOT-001", "Active", "01", "bootstrap-toolchain", "bootstrap-toolchain-provenance", "bootstrap-toolchain", ["reject-unverified-bootstrap-toolchain"])
   ]
 
 canonicalJoins :: [RawJoin]
@@ -2001,10 +2005,10 @@ aggregateExcessJoins :: [RawJoin]
 aggregateExcessJoins = mapLastJoin (\(source, target) -> (source <> "x", target)) canonicalJoins
 
 duplicateBindings, unknownBindings, outOfOrderBindings :: [RawBinding]
-duplicateBindings = take 24 canonicalBindings
-  <> [("LTD-SEED-001", "Active", "93", "jitml-seed-dependency", "jitml-dependency-graph",
+duplicateBindings = take 25 canonicalBindings
+  <> [("LTD-SEED-002", "Active", "93", "jitml-seed-dependency", "jitml-dependency-graph",
        "jitml-seed-dependency", ["reject-jitml-seed-dependency"])]
-unknownBindings = take 24 canonicalBindings
+unknownBindings = take 25 canonicalBindings
   <> [("LTD-SEED-999", "Active", "93", "jitml-seed-dependency", "jitml-dependency-graph",
        "jitml-seed-dependency", ["reject-jitml-seed-dependency"])]
 outOfOrderBindings = swapFirstTwo canonicalBindings

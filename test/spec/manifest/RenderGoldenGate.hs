@@ -39,7 +39,9 @@ import Amoebius.Scope.Index
   )
 import BindFixtures (CapabilityFixture (..), capabilityFixtures)
 import Control.Monad (forM, forM_, unless)
-import Data.Aeson (eitherDecode)
+import Data.Aeson (Value (Object), eitherDecode)
+import Data.Aeson.Key qualified as Key
+import Data.Aeson.KeyMap qualified as KeyMap
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
@@ -50,6 +52,7 @@ import ProvisionFixtures (provisionFixture)
 import RenderGoldenProps (renderInvariantFailures, runRenderGoldenProps)
 import RenderGoldenOracle
   ( expectedCalculusProjection
+  , expectedKubernetesWireFields
   , expectedLocusEntries
   , expectedRenderMutants
   , expectedSemanticProjection
@@ -79,6 +82,19 @@ runRenderGoldenGate = do
       objectCount = length objects
       mutantCount = length expectedRenderMutants
   roundTripCount <- checkRoundTrip objects
+  -- Rule A: this phase claims a serialized manifest, so an independently
+  -- authored expectation of the Kubernetes wire fields decides that claim. A
+  -- token match against the renderer's own source cannot establish it.
+  let renderedWireFields = case objects of
+        [] -> Set.empty
+        (object : _) -> case eitherDecode (encodeK8sObjects [object]) :: Either String [Value] of
+          Right (Object keyMap : _) -> Set.fromList (fmap Key.toText (KeyMap.keys keyMap))
+          _ -> Set.empty
+  assert
+    (renderedWireFields == Set.fromList expectedKubernetesWireFields)
+    ( "serialized manifest top-level fields are not the Kubernetes wire fields; observed "
+        <> show (Set.toList renderedWireFields)
+    )
   assert (Map.size oracle == 18 && deploymentCount == 18) "semantic oracle no longer covers exactly nine arms in two shapes"
   assert (variants == expectedVariants) "render corpus no longer covers the exact nine emitted object variants"
   assert (podCount > 0 && policyCount > 0) "render safety predicates became vacuous"

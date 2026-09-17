@@ -113,7 +113,7 @@ remains phase-local and cannot be supplied by this prose.
 | `Cleanroom` | Generated fixtures, applied mutants, plans, transcripts, and build products exist only beneath the candidate's `.build/runs/phase-01/**` roots; the Haskell owner marker bounds cleanup and the final observer reports zero out-of-scope writes and zero temporary residue. |
 | `Legacy closure` | The acquired analyzer reports zero for `LTD-BOOT-001`, `LTD-SRC-007`, and `LTD-SRC-009`; generated reintroduction cases independently redden their exact loci. GenesisTrust remains the explicit bootstrap assumption rather than a legacy binding. |
 | `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 0 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
-| `Residue` | Explicit assumptions are the irreducible GenesisTrust local-custody root and the ordinary OS execution substrate used to run the independently pinned verifier and archive tools. Phase-2 compiler-wide source semantics and every later runtime, service, hardware, and correspondence claim remain unverified; no Phase-1 claim row is residue. |
+| `Residue` | Explicit assumptions are the irreducible GenesisTrust local-custody root, the publisher keyring the signature check is made against — an operator-supplied input that the seed installer transfers but `GenesisTrust` does not yet pin by size and digest, so it is trusted rather than authenticated here — and the ordinary OS execution substrate used to run the independently pinned verifier and archive tools. Phase-2 compiler-wide source semantics and every later runtime, service, hardware, and correspondence claim remain unverified; no Phase-1 claim row is residue. |
 | `Pass criterion` | `qualified-gate-pass`: all eighteen rows above must be execution-derived green in one candidate for one stable source, with exact predecessor receipt and empty mandatory residue; that complete pass alone authorizes the status-only transition. |
 
 ## Resource provision
@@ -154,10 +154,10 @@ Haskell and qualify the mechanism that first admits their result; component obse
 ## Sprint 1.1: GenesisTrust-bound toolchain acquisition ✅
 
 **Status**: Done
-**Implementation**: `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun.hs`, `src/validation-kernel/Amoebius/Validation/CompilerBuildInfo.hs`, and `src/validation-kernel/Amoebius/Validation/CompilerElaboratedPlan.hs`; exact acquired authority remains UNRESOLVED and blocks validation.
+**Implementation**: `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun/Internal.hs` — gpgv publisher verification :170–171, dual contained extraction :172–173, two `--offline --jobs=1` builds :181–182, eighteen gate rows :230–247 — and `src/validation-kernel/Amoebius/Validation/BootstrapTrust/Internal.hs` — `GenesisTrust` :58, `acquireGenesisTrust` :138, `genesisTrustCheck` :168, `genesisTrustCompilerExecutable` :194. `CompilerBuildInfo` and `CompilerElaboratedPlan` are withdrawn from this field: neither is reached by this runner. The elaborated-plan and executable-derivation agreement legs remain UNRESOLVED and block validation.
 **Blocked by**: [Phase 0](phase_00_documentation_suite.md) gate pass
 **Independent Validation**: From the narrow GenesisTrust local-custody facts and immutable offline files, independently verify publisher/content identities, actual compiler/package-tool executable derivation, and loader/host closure; acquire twice into distinct contained roots, build the same source snapshot, and require plans and executable identities to agree. A missing/mutable input, digest/signature mismatch, ambient-network read, self-reported identity, replay, or disagreement is an exact negative; GenesisTrust itself remains assumed.
-**Oracle**: planned separate Haskell `test/validation-kernel/ToolchainAcquisitionOracle.hs`, authored from the declared root and expected acquisition relation rather than subject output; provenance remains UNRESOLVED.
+**Oracle**: `test/validation-kernel/ToolchainAcquisitionOracle.hs` (36 lines) authors the seven expected refusal loci independently at :28–36 and imports only the refusal projection `toolchainSpikeInternalQualificationDiagnostic` (`src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun/Internal.hs:473`). It is compiled into `validation-phase-contract-internal-component` (`amoebius.cabal:6796`) and executed by the Phase-49 DSL-barrier selector suite (`src/validation-kernel/Amoebius/Validation/DslBarrierRun/Internal.hs:187`; `test/validation-kernel/phase-contract-internal/Main.hs:38`), not by this gate: `probeTargets` builds no test component (`ToolchainSpikeRun/Internal.hs:305`). Binding a separately authored oracle inside the Phase-1 gate remains UNRESOLVED and blocks validation.
 **Legacy IDs**: `LTD-BOOT-001`
 **Docs to update**: `DEVELOPMENT_PLAN/README.md`, `documents/engineering/validation_frame_doctrine.md`, `documents/engineering/repository_layout_doctrine.md`
 
@@ -192,12 +192,12 @@ toolchain transcripts cannot support this candidate.
 ## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ✅
 
 **Status**: Done
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Implementation**: `probe/app/Decode.hs`, declared `executable decode` at `probe/probe.cabal:32`, built into both contained roots by `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun/Internal.hs:181–184` (`probeTargets` :305) and executed on a run-generated positive and negative fixture at :189–190.
 **Blocked by**: Sprint 1.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
+**Independent Validation**: Positive — the decoded value must contain exactly `ProbeConfig {name = "phase-one", count = 3}` (`ToolchainSpikeRun/Internal.hs:426`, `PHASE-01-DECODE-VALUE`). Paired negative — the one-field-mistyped fixture (:188) must fail and emit `DHALL_TYPE_ERROR:` (:435–436). Changed-subject mutant — `("missing-dependency", …)` drops `dhall` from the closed set and reds exactly `PHASE-01-POLICY-DEPENDENCY` (:493, :509). Residue — the decoded-value expectation is a literal inside the production runner, so this leg is self-adjudicating; an independently authored oracle for it remains UNRESOLVED.
 **Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Legacy IDs**: `None` — the phase's closure set is `LTD-BOOT-001,LTD-SRC-007,LTD-SRC-009` (`src/validation-kernel/Amoebius/Validation/Evidence/Internal.hs:944`), owned by Sprints 1.1, 1.5 and 1.7.
+**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_01_toolchain_spike.md:549`); this sprint declares no owner of its own.
 
 ### Objective
 Adopt [`dsl_doctrine.md §9 — Toolchain note`](../documents/engineering/dsl_doctrine.md#9-toolchain-note) with
@@ -236,12 +236,12 @@ gate pass, owned legacy closure, and phase-specific obligation in the redesigned
 ## Sprint 1.3: `io-sim` + `io-classes` simulation build probe ✅
 
 **Status**: Done
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Implementation**: `probe/app/Sim.hs` (IOSimPOR two-writer schedule; `--perturbed` arm), declared `executable sim` at `probe/probe.cabal:42`, built by `ToolchainSpikeRun/Internal.hs:181–184` and executed clean and perturbed at :191–192.
 **Blocked by**: Sprint 1.2
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
+**Independent Validation**: Positive — exact stdout `schedule=two-writer-fair;terminal=3` (`ToolchainSpikeRun/Internal.hs:427`, `PHASE-01-SIM-TERMINAL`). Paired negative — the `--perturbed` run must emit exactly `schedule=two-writer-fair;terminal=1` (:437). Changed-subject mutant — `("wrong-terminal", …)` reds exactly `PHASE-01-POLICY-TERMINAL` (:494, :510). Residue — the terminal-state expectation is a literal inside the production runner; an independently authored oracle for it remains UNRESOLVED.
 **Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Legacy IDs**: `None` — the phase's three IDs (`Evidence/Internal.hs:944`) are owned by Sprints 1.1, 1.5 and 1.7.
+**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_01_toolchain_spike.md:549`); this sprint declares no owner of its own.
 
 ### Objective
 Adopt [`gateway_migration_model_doctrine.md §4 — Simulate and prove`](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove):
@@ -279,12 +279,12 @@ gate pass, owned legacy closure, and phase-specific obligation in the redesigned
 ## Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe ✅
 
 **Status**: Done
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Implementation**: the `proto-lens` link leg — `probe/probe.cabal:23`, `probe/app/ProbeDeps.hs:7` (`import Data.ProtoLens qualified ()`), and the closed `requiredDependencies` set at `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun/Internal.hs:308` — plus the maintained Haskell fork under `src/vendor/**`. No executed `proto-lens` codegen is bound: the only `proto-lens-protoc` declaration is `amoebius.cabal:5533` (`library pulsar-client`), `proto/` does not exist, and `pulsar-client` is not in `probeTargets` (:305). The codegen leg remains UNRESOLVED and blocks validation.
 **Blocked by**: Sprint 1.3
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
+**Independent Validation**: Positive — exact stdout `phase-1-dependency-surface-linked` (`ToolchainSpikeRun/Internal.hs:428`; `probe/app/ProbeDeps.hs:22`). No fork-identity or codegen paired negative and no resolution mutant exists; `qualificationMatrix` (:490–498) carries no such case. Those legs remain UNRESOLVED and block validation.
 **Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Legacy IDs**: `None` — the phase's three IDs (`Evidence/Internal.hs:944`) are owned by Sprints 1.1, 1.5 and 1.7.
+**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_01_toolchain_spike.md:549`); this sprint declares no owner of its own.
 
 ### Objective
 De-risk the native Pulsar client's `supernova` fork plus its `proto-lens` codegen — clause (v) of the
@@ -324,12 +324,12 @@ maintained `.hs` modules under `src/vendor/**` and lazy upstream material beneat
 ## Sprint 1.5: Dynamic resolution and generated-output migration ✅
 
 **Status**: Done
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Implementation**: `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun.hs` — `resolutionOutput` :64 and `isResolutionOutput` :101–102 decide tracked resolution output, refusal `TOOLCHAIN-SPIKE-RESOLUTION-OUTPUT-TRACKED` :84, observation `toolchain-spike.resolution-output-count` :36; `probeForeign` :47 with `TOOLCHAIN-SPIKE-PROBE-DEBT-OPEN` :68 closes `LTD-SRC-007`. Containment is enforced by `authorityCheck` (`ToolchainSpikeRun/Internal.hs:451`) and `cleanroomCheck` (:517).
 **Blocked by**: Sprint 1.4
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
+**Independent Validation**: The in-runner mutant `("resolution-output", …)` reds exactly `PHASE-01-POLICY-RESOLUTION-OUTPUT` (`ToolchainSpikeRun/Internal.hs:498`, `:514`). The independent case is authored separately in `test/validation-kernel/ToolchainSpikeRunOracle.hs:46–49` (`cabal.project.freeze` → `["TOOLCHAIN-SPIKE-RESOLUTION-OUTPUT-TRACKED"]`), against the public `toolchainSpikeRunCheck` rather than the runner's own matrix.
+**Oracle**: `test/validation-kernel/ToolchainSpikeRunOracle.hs`, whose expectations are authored from the capability's claim (:37–49) and never restated from a run. It is compiled into `validation-compiler-source-graph-acquired-component` (`amoebius.cabal:6973`) and executed by the **Phase-2** gate (`test/validation-kernel/compiler-source-graph-acquired/Main.hs:22`; built and run at `src/validation-kernel/Amoebius/Validation/RepositoryLayoutRun/Internal.hs:118`, `:123`, `:126`). The Phase-1 gate does not execute it.
 **Legacy IDs**: `LTD-SRC-007`
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_01_toolchain_spike.md:549`); this sprint declares no owner of its own.
 
 ### Objective
 
@@ -429,7 +429,7 @@ or acquisition correspondence remains explicitly UNVERIFIED.
 ## Sprint 1.7: Remove top-level vendor source and own the Haskell fork ✅
 
 **Status**: Done
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Implementation**: `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun.hs` — `vendorTracked` :58, refusal `TOOLCHAIN-SPIKE-VENDOR-DEBT-OPEN` :76, observation `toolchain-spike.vendor-tracked-count` :35 — closing `LTD-SRC-009`; the in-runner mutant `("top-level-vendor", …)` reds exactly `PHASE-01-POLICY-VENDOR-SOURCE` (`ToolchainSpikeRun/Internal.hs:497`, `:513`); the independent case is `test/validation-kernel/ToolchainSpikeRunOracle.hs:42–45`; the maintained fork modules are `src/vendor/**`. The Haskell provenance declaration, immutable upstream identity, and `.build/vendor/**` materialization are not bound, and remain UNRESOLVED and blocking. (This sprint's Oracle field at line 435 names `test/Amoebius/Vendor/ProvenanceOracle.hs`, which does not exist; `test/`'s second level is `compile-negative fixture harness mutant negative spec validation-kernel`.)
 **Blocked by**: Sprint 1.6
 **Independent Validation**: An immutable-input clean build is the positive; a mutable-ref acquisition is the paired negative; an applied top-level-vendor reintroduction mutant reddens its exact source row while the Haskell control stays green; upstream semantic fidelity and licensing remain explicit residue.
 **Oracle**: planned separately authored `test/Amoebius/Vendor/ProvenanceOracle.hs`; provenance and independence boundary unresolved
@@ -482,12 +482,12 @@ progress cannot close the sprint or support a candidate.
 ## Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ✅
 
 **Status**: Done
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Implementation**: `probe/app/ProbeDeps.hs` with `probe/probe.cabal:7–30`; the closed thirteen-package `requiredDependencies` at `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun/Internal.hs:308`; `discoveryCheck` (:393–419) requires every name present in `probe/probe.cabal` and one absolute binary from both builds. The closed set contains no `supernova`, so the Representative clause covering the fork is not covered and remains UNRESOLVED.
 **Blocked by**: Sprint 1.7
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
+**Independent Validation**: `discoveryCheck` :393, byte-identical dual-build `reproducibilityCheck` :440–450, `qualificationCheck` :459. Not bound: a "drop the compatibility allowance → version-resolution locus reds" mutant; `qualificationMatrix` (:490–498) has no compatibility-allowance case. That leg remains UNRESOLVED and blocks validation.
 **Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Legacy IDs**: `None` — the phase's three IDs (`Evidence/Internal.hs:944`) are owned by Sprints 1.1, 1.5 and 1.7.
+**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_01_toolchain_spike.md:549`); this sprint declares no owner of its own.
 
 ### Objective
 Adopt [`content_addressing_determinism.md §4.5 — the ML-asset lifecycle`](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
