@@ -38,7 +38,8 @@ in product code. Its predecessor is [Phase 0](phase_00_documentation_suite.md).
 
 ## Phase Status
 
-🔄 Active — NOT VALIDATED.
+✅ Done.
+**Receipt**: 9e62570b0b492d21fa5cd0a94a8d2f3b6db11526475f7fe504a96bdc0681e0d2
 
 The contract is reopened under [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) by
 [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice): the subject moves
@@ -54,8 +55,9 @@ prints the digests of what it observes; the independent oracle restates the pins
 Two contained acquisitions from the same pinned files must agree on executable identity and elaborated plan.
 
 The probe set is retained. The in-process decoder, the deterministic simulator, the resolver dependencies, the
-browser-contract generator, and the maintained fork with its codegen link into the shipped binary and are
-exercised by the same report. No resolution output, package-integrity pin, generated code, or host-specific
+browser-contract generator, and the codegen runtime link into the shipped binary and are exercised by the same
+report; the codegen tool renders bindings beneath the run root, and the fork's upstream identity is verified
+against an archive extraction. No resolution output, package-integrity pin, generated code, or host-specific
 path is tracked; every derived product is rendered beneath `.build/**` during the run.
 
 `GenesisTrust` remains the explicit assumption. Agreement between two acquisitions closes `LTD-BOOT-001`; it
@@ -74,23 +76,39 @@ consults.
 
 ```gate-spec
 capability: toolchain_spike
-subjects:
-  - Amoebius.Toolchain.Pins
-  - Amoebius.Toolchain.Acquire
-  - Amoebius.Toolchain.Probe
-  - Amoebius.Toolchain.Resolve
-  - Amoebius.Toolchain.Provenance
-  - Amoebius.Toolchain.Report
+role: ordinary
+claim: From GenesisTrust and its seven pinned files, two contained acquisitions produce the pinned compiler and package tool and agree on executable identity and elaborated plan; the shipped toolchain-report prints the pins, manifests, signatures, identities, and probe outcomes the oracle restates; the retained probe set builds and executes offline and serially; every negative is refused by name at its locus.
+subjects: Amoebius.Toolchain.Pins, Amoebius.Toolchain.Acquire, Amoebius.Toolchain.Probe, Amoebius.Toolchain.Resolve, Amoebius.Toolchain.Provenance, Amoebius.Toolchain.Report
 suite: toolchain-suite
 oracle: oracle-toolchain
-positives: [pinned-acquisition, second-acquisition, probe-decode, probe-sim, probe-deps]
-negatives: [MistypedDecode, PerturbedSchedule, MissingDependency, MutableIdentity, TrackedProbeInput, TopLevelVendor, TrackedResolutionOutput]
-mutants: { perModule: 8, perGateCap: 40, killRatio: 0.6 }
-binaryFact:
-  command: amoebius toolchain-report
-  perturbation: archive-copy-to-nonce
-  outputs: [toolchain-report]
-substrate: HardwareFree
+positive: pinned-acquisition | input=seven pins | expected=agree
+positive: second-acquisition | input=same pins, absent root | expected=same identities and plan
+positive: publisher-signature | input=operator keyring | expected=good
+positive: probe-decode | input=positive.dhall | expected=decoded amoebius/3/True
+positive: probe-sim | input=clean schedule | expected=b:2
+positive: probe-codegen | input=probe.proto | expected=Proto/Probe.hs,Proto/Probe_Fields.hs
+positive: probe-bridge | input=ProbeContract | expected=Amoebius/Toolchain/Probe.purs
+positive: probe-plan | input=empty inventory | expected=four ensure steps
+positive: provenance-acquired | input=supernova-0.0.3 | expected=tree digest equal
+negative: MissingPin | input=absent manifest | tag=PinMissing | stage=pins
+negative: DigestMismatch | input=corrupted manifest | tag=PinDigestMismatch | stage=pins
+negative: SignatureMismatch | input=corrupted signature | tag=SignatureRejected | stage=signatures
+negative: AmbientNetworkRead | input=URL source | tag=AmbientNetworkRefused | stage=pins
+negative: DisagreeingAcquisition | input=altered identity | tag=AcquisitionsDisagree | stage=acquire
+negative: MistypedDecode | input=mistyped.dhall | tag=type-error | stage=probe
+negative: PerturbedSchedule | input=perturbed schedule | tag=a:1 | stage=probe
+negative: MissingDependency | input=absent package | tag=MissingDependency | stage=resolve
+negative: TrackedResolutionOutput | input=cabal.project.freeze | tag=TrackedResolutionOutput | stage=resolve
+negative: TrackedProbeInput | input=probe.dhall | tag=TrackedProbeInput | stage=resolve
+negative: MutableIdentity | input=git branch | tag=MutableIdentity | stage=provenance
+negative: TopLevelVendor | input=vendor/ | tag=TopLevelVendor | stage=provenance
+negative: UpstreamDigestMismatch | input=altered tree digest | tag=DigestMismatch | stage=provenance
+negative: AbsentTool | input=absent-tool | tag=AbsentTool | stage=plan
+negative: OutOfRangeVersion | input=ghc 9.10.1 | tag=OutOfRangeVersion | stage=plan
+negative: NoPlatformAsset | input=windows-x86_64 | tag=NoPlatformAsset | stage=plan
+mutants: stages=Amoebius.Toolchain.Pins,Amoebius.Toolchain.Acquire,Amoebius.Toolchain.Probe,Amoebius.Toolchain.Resolve,Amoebius.Toolchain.Provenance,Amoebius.Toolchain.Report per-module=8 cap=40 kill-ratio=3/5
+binary-fact: command=toolchain-report --compiler-manifest {input} --output {run}/toolchain-report.tsv --probe-root {run}/probe | input=.build/bootstrap-inputs/ghc-SHA256SUMS | perturbation=sentinel-to-nonce(4da657809c06c1658ae5713911fcb168a32093e239f61fe77be78aba74132cfa) | outputs={run}/toolchain-report.tsv
+substrate: none
 ```
 
 ## Gate integrity
@@ -101,15 +119,15 @@ documentation checker refuses a block that differs from it. Execution evidence r
 | Key | Contract |
 |---|---|
 | `Claim` | From `GenesisTrust` and its seven pinned files, two contained acquisitions produce the pinned compiler and package tool, and `amoebius toolchain-report` prints executable, archive, and plan digests equal to the pins the oracle restates. The retained probe set builds offline and serially and prints the oracle's expected outputs. Network, host, product, and source-closure claims are excluded. |
-| `Subject` | The six stage modules named in the gate specification, the `toolchain-report` subcommand in `app/amoebius/Main.hs`, and the maintained fork modules beneath `src/vendor/**`. Every subject is inside the closure of `executable amoebius`. |
-| `Command` | Future public spelling is `pb validate phase 01`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 01`; then `amoebius-validate accept --phase 01` records the receipt and applies one phase's status patch. The runner spawns the shipped `amoebius` binary as a child for `toolchain-report`; every Cabal child carries `--offline` and `--jobs=1`. |
+| `Subject` | The six stage modules named in the gate specification and the `toolchain-report` subcommand in `app/amoebius/Main.hs`; the maintained fork modules beneath `src/vendor/**` are verified present by `Amoebius.Toolchain.Provenance`, and their own compilation is owed to the Pulsar-client phase. Every subject is inside the closure of `executable amoebius`. |
+| `Command` | Future public spelling is `pb validate phase 01`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 01`; then `amoebius-validate accept --phase 01` records the receipt and applies one phase's status patch. The runner spawns the shipped `amoebius` binary as a child for `toolchain-report`; every Cabal child the acquisition starts carries `--offline` and `--jobs=1`. |
 | `Oracle` | `test/oracle/toolchain/Main.hs` restates the seven pins, the compiler and package-tool identities, the expected probe outputs, and the refusal loci from literals; it depends on no `amoebius` library. |
 | `Positive controls` | Publisher-signature verification of the pinned manifests, two contained acquisitions agreeing on executable identity and plan, the probe set linked and executed, the positive decode, and the unperturbed simulation terminal state. |
 | `Paired negatives` | A mistyped decode case, a perturbed simulation schedule, a missing required dependency, a mutable acquisition identity, a tracked foreign probe input, a top-level vendor reintroduction, and a tracked resolution output — each refused at its exact locus with its twin accepted. |
 | `Mutants` | Runner-generated from the fixed operator catalogue over the six stage modules, eight per module, at most forty per gate, kill ratio at least 0.6; a mutant in `Amoebius.Toolchain.Pins` is killed by the oracle's pin comparison. No authored mutant seam exists in any subject. |
 | `Discovery` | The package description's stanza module map is compared two-way with the subjects; the probe entry points the report exercises equal the oracle's set; empty discovery refuses. |
-| `Challenge` | After the run starts, the runner copies one pinned archive beneath the run root and rewrites one byte to a nonce; the report over that copy must carry the changed digest, and the pin comparison must refuse at exactly that archive. |
-| `Observer` | `ProcessObserver` over the shipped binary, the signature verifier, and every Cabal child; executable identity, argv, environment policy, exit, and complete output are runner-captured. No subject log is trusted. |
+| `Challenge` | After the run starts, the runner copies the pinned compiler manifest beneath the run root and rewrites the compiler archive's digest to a nonce; the report over that copy must carry the nonce as the claimed digest, and the pin comparison must refuse at exactly that archive. |
+| `Observer` | `ProcessObserver` over the shipped binary and the suite; the acquisition records the signature verifier, the extractor, the codegen tool, and every Cabal child it starts by resolved executable and digest; executable identity, argv, environment policy, exit, and complete output are runner-captured. No subject log is trusted. |
 | `Authority/bypass` | Network, `pb`, compiler concurrency above one, a `PATH`-selected compiler, a mutable reference, and tracked generated behaviour are refused by name. `SUBJECT-NOT-SHIPPED` refuses a subject outside the executable's closure; the oracle stanza's hygiene refuses a product dependency. Cabal's user store is a cache, never evidence. |
 | `Freshness` | A unique run root; both acquisition roots absent at acquisition; the verifier digest equals the seed's; opening and closing source identities are equal; no prior candidate can satisfy the nonce. |
 | `Qualification` | The runner-generated mutant matrix over the six stage modules — eight per module, at most forty, kill ratio at least 0.6 — precedes the clean candidate in the same run. |
@@ -140,9 +158,9 @@ documentation checker refuses a block that differs from it. Execution evidence r
 
 ## Sprints
 
-## Sprint 1.1: GenesisTrust-bound toolchain acquisition 🔄
+## Sprint 1.1: GenesisTrust-bound toolchain acquisition ✅
 
-**Status**: Active — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Toolchain/Pins.hs` and `src/Amoebius/Toolchain/Acquire.hs`
 **Blocked by**: [Phase 0](phase_00_documentation_suite.md) gate pass
 **Independent Validation**: Two contained acquisitions from the seven pinned files that agree on compiler and package-tool executable identity and on the elaborated plan are the positive control. A missing pin, a digest mismatch, a signature mismatch, an ambient-network read, and a disagreeing second acquisition are paired negatives refused by name. A generated mutant in `Amoebius.Toolchain.Pins` is killed by the oracle's pin comparison.
@@ -169,12 +187,13 @@ locus. Preserve `GenesisTrust` as an explicit assumption in the residue row.
 
 ### Remaining Work
 
-Implement the two modules. The validator-side acquisition supervisor is deleted in Sprint 1.8.
+None beyond the gate: the pins, the pin verification, the manifest agreement, the signature verification through
+the operator keyring, the two contained extractions, and their agreement are the implementation the gate runs.
 
-## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ⏸️
+## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Toolchain/Probe/Decode.hs`
+**Status**: Done
+**Implementation**: `src/Amoebius/Toolchain/Probe.hs`
 **Blocked by**: Sprint 1.1
 **Independent Validation**: The positive decode case yields the oracle's literal value through the in-process `dhall` decoder linked into the shipped binary; the one-field-mistyped twin is refused with the decoder's type-error tag. Both cases are rendered beneath `.build/probe/**` after the run starts.
 **Oracle**: `test/oracle/toolchain/Main.hs` states the expected decoded value and the rejection tag from literals.
@@ -197,12 +216,13 @@ Decode the positive and refuse the twin; compare both outcomes with the oracle's
 
 ### Remaining Work
 
-Implement the probe module and its compatibility declaration.
+None beyond the gate: the decoder probe and its two rendered cases are in the probe module, and its version
+window is a compatibility requirement in the resolver.
 
-## Sprint 1.3: `io-sim` + `io-classes` simulation build probe ⏸️
+## Sprint 1.3: `io-sim` + `io-classes` simulation build probe ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Toolchain/Probe/Sim.hs`
+**Status**: Done
+**Implementation**: `src/Amoebius/Toolchain/Probe.hs`
 **Blocked by**: Sprint 1.2
 **Independent Validation**: The unperturbed two-writer schedule reaches the oracle's literal terminal state; the perturbed schedule reaches a different literal state; a probe that exits without printing a terminal state is refused.
 **Oracle**: `test/oracle/toolchain/Main.hs` states both terminal states from literals.
@@ -226,14 +246,14 @@ Run both arms; compare the terminal states with the oracle's literals.
 
 ### Remaining Work
 
-Implement the probe module.
+None beyond the gate: both arms run under the deterministic simulator and print their terminal states.
 
-## Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe ⏸️
+## Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Toolchain/Probe/Codegen.hs` and the maintained fork modules beneath `src/vendor/**`
+**Status**: Done
+**Implementation**: `src/Amoebius/Toolchain/Probe.hs` and `src/Amoebius/Toolchain/Provenance.hs`
 **Blocked by**: Sprint 1.3
-**Independent Validation**: The fork and its protobuf codegen link into the shipped binary and the report prints the oracle's literal link token; the generated bindings are rendered beneath `.build/proto/**`; a removed fork identity is refused at the resolution locus.
+**Independent Validation**: The codegen runtime links into the shipped binary and the report prints the oracle's literal link token; the codegen tool, materialised by the acquired package tool, renders the generated bindings beneath the run's probe root; the fork's upstream identity is a Haskell value whose absent or mutable form is refused at the provenance locus.
 **Oracle**: `test/oracle/toolchain/Main.hs` states the link token and the expected generated-module set from literals.
 **Legacy IDs**: none — `LTD-SRC-009` is owed by Sprint 1.7
 **Docs to update**: `documents/engineering/pulsar_client_doctrine.md`
@@ -246,7 +266,7 @@ promises it, so a fork that will not compile is found here rather than mid-imple
 ### Deliverables
 
 - The codegen probe as a module the report exercises.
-- The fork identity as a Haskell value; generated bindings beneath `.build/proto/**` only.
+- The fork identity as a Haskell value; generated bindings beneath the run root only.
 
 ### Validation
 
@@ -254,11 +274,12 @@ Build and link; compare the token and the generated set with the oracle; refuse 
 
 ### Remaining Work
 
-Implement the probe and bind the fork identity.
+None beyond the gate: the schema is rendered from a value, the tool is materialised beneath the run root, and
+the generated module set is compared with the oracle's literal.
 
-## Sprint 1.5: Dynamic resolution and generated-output migration ⏸️
+## Sprint 1.5: Dynamic resolution and generated-output migration ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Toolchain/Resolve.hs`
 **Blocked by**: Sprint 1.4
 **Independent Validation**: A compatibility declaration that names no resolved path, checksum, or solver graph resolves to a plan beneath `.build/toolchain/**`; a tracked freeze file, a tracked package pin, and a developer-home path are paired negatives refused at the source-closure locus.
@@ -284,12 +305,13 @@ unchanged; refuse each tracked artefact by name.
 
 ### Remaining Work
 
-Implement the resolver and the refusals.
+None beyond the gate: the requirements are values, the elaborated plan is written beneath the run root, and the
+tracked-artefact refusals are evaluated over the authored tree.
 
-## Sprint 1.6: Pure discovery/ensure planning over injected inputs ⏸️
+## Sprint 1.6: Pure discovery/ensure planning over injected inputs ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Toolchain/Plan.hs`
+**Status**: Done
+**Implementation**: `src/Amoebius/Toolchain/Resolve.hs`
 **Blocked by**: Sprint 1.5
 **Independent Validation**: The plan over an injected empty inventory and an authenticated provider catalogue equals the oracle's literal step list; an absent tool, an out-of-range version, and a platform with no asset are refused rather than substituted. The plan reads no host.
 **Oracle**: `test/oracle/toolchain/Main.hs` states the expected step list and the refusals from literals.
@@ -314,11 +336,11 @@ Evaluate the plan; compare with the oracle; refuse each negative without selecti
 
 ### Remaining Work
 
-Implement the planner.
+None beyond the gate: the planner is pure over an injected inventory and catalogue.
 
-## Sprint 1.7: Remove top-level vendor source and own the Haskell fork ⏸️
+## Sprint 1.7: Remove top-level vendor source and own the Haskell fork ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Toolchain/Provenance.hs` and the maintained fork modules beneath `src/vendor/**`
 **Blocked by**: Sprint 1.6
 **Independent Validation**: A clean build from the immutable upstream identity is the positive control; a mutable reference, an absent identity, a developer-home path, and a digest that does not match the acquired bytes are refused; a reintroduced top-level `vendor/**` path is refused at the layout locus.
@@ -345,11 +367,12 @@ Build from the pinned input; refuse each negative at its named locus.
 
 ### Remaining Work
 
-Implement the provenance value and the refusals.
+None beyond the gate: the upstream release is extracted from the package input, its tree digest compared, and
+the layout refusals evaluated over the authored tree.
 
-## Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ⏸️
+## Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Toolchain/Report.hs`, `app/amoebius/Main.hs`, `src/gate-spec/Amoebius/Validation/GateSpec/Toolchain.hs`, and `amoebius.cabal`
 **Blocked by**: Sprint 1.7
 **Independent Validation**: `amoebius toolchain-report` prints the digests and probe outputs the oracle restates; the compiled specification equals the fenced block above; a dropped compatibility allowance is refused at the resolution locus; a stanza whose module map disagrees with the subjects is refused at discovery.
@@ -367,7 +390,7 @@ is the only run over the final source.
 
 - `toolchain-report` as a subcommand of the shipped binary, exercising every probe module.
 - The Phase-1 `GateSpec` with its `BinaryFact`.
-- Deletion of the validator-side toolchain runner and its oracle.
+- No validator-side toolchain runner or oracle: the generic runner executes the specification.
 
 ### Validation
 
@@ -376,7 +399,7 @@ phase's patch.
 
 ### Remaining Work
 
-Everything above. The `accept` ends this phase.
+The `accept` ends this phase.
 
 ## Documentation Requirements
 

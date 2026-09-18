@@ -37,7 +37,7 @@ validator that judges every later phase, so nothing product-facing is a Phase-0 
 ## Phase Status
 
 ✅ Done.
-**Receipt**: 9312f8fa772e0c84333a884db73ff13aab3dc74a797b3721c51049f3337122c4
+**Receipt**: e2d57899b2640cdcb535c78059dd8a032fd7824146f9c9db786680a3cb065225
 
 The generation-2 reset ([DL-0007](../documents/decision_log.md#dl-0007--certification-generation-2-replaces-the-validation-kernel),
 [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice)) withdraws every

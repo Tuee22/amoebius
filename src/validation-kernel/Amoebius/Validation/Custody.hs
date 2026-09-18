@@ -32,7 +32,7 @@ import Amoebius.Validation.Runner
 import Amoebius.Validation.Runner.Capture
 import Amoebius.Validation.Runner.Hygiene (hygieneProblems, hygieneRow)
 import Amoebius.Validation.Runner.Mutants (renderKillTable)
-import Amoebius.Validation.Runner.Observer (observe, runExit, runStdout, sha256Hex)
+import Amoebius.Validation.Runner.Observer (observe, runExit, runStderr, runStdout, sha256Hex)
 import Amoebius.Validation.Runner.Spec (loadPackageGraph, verifySpec)
 import Control.Monad (foldM)
 import Data.List (sortOn)
@@ -96,11 +96,40 @@ runnerConfig config ordinal =
     }
 
 -- | Run the gate in a fresh run root.
-runFresh :: CustodyConfig -> Int -> GateSpec -> IO (Either RunnerRefusal GateOutcome)
-runFresh config ordinal spec = do
-  let runnerSettings = runnerConfig config ordinal
+runFresh :: CustodyConfig -> Int -> GateSpec -> Maybe Text -> IO (Either RunnerRefusal GateOutcome)
+runFresh config ordinal spec predecessor = do
+  let runnerSettings = (runnerConfig config ordinal) {runnerPredecessorDigest = predecessor}
   removePathForcibly (runnerRunRoot runnerSettings)
-  runGate runnerSettings spec
+  binary <- case gateBinaryFact spec of
+    Nothing -> pure (Right Nothing)
+    Just _ -> fmap Just <$> productBinary config
+  case binary of
+    Left problem -> pure (Left (ProductBinaryUnavailable problem))
+    Right path -> runGate runnerSettings {runnerProductBinary = path} spec
+
+-- | Build the shipped executable serially and locate it; a specification with a
+-- binary fact runs its public command through this exact file.
+productBinary :: CustodyConfig -> IO (Either Text FilePath)
+productBinary config = do
+  let root = custodyRoot config
+      cabal = fromMaybe "cabal" (custodyCabal config)
+      compiler = maybe [] (\path -> ["--with-compiler=" <> path]) (custodyCompiler config)
+  build <- observe root cabal (["build", "-v0", "--jobs=1"] <> compiler <> ["exe:amoebius"])
+  if runExit build /= ExitSuccess
+    then pure (Left ("exe:amoebius did not build: " <> Text.take 400 (runStderr build)))
+    else do
+      located <- observe root cabal (["list-bin", "--jobs=1"] <> compiler <> ["exe:amoebius"])
+      let path = Text.unpack (Text.strip (runStdout located))
+      present <- doesFileExist path
+      pure (if runExit located == ExitSuccess && present then Right path else Left ("exe:amoebius not located: " <> Text.take 200 (runStderr located)))
+
+-- | The predecessor's recorded reproducible digest among the receipts, when the
+-- phase has a predecessor.
+predecessorDigestFrom :: Int -> [Receipt] -> Maybe Text
+predecessorDigestFrom ordinal receipts =
+  case [receiptReproducible receipt | Just p <- [PhaseIdentity.predecessorOrdinal ordinal], receipt <- receipts, receiptPhase receipt == p, isNothing (receiptResetCause receipt)] of
+    (digest : _) -> Just digest
+    [] -> Nothing
 
 -- | The reproducible digest of a run: the candidate's core plus the closure,
 -- verifier, and governance digests.
@@ -215,9 +244,9 @@ previewPhase config ordinal = case resolveSpec ordinal of
     gathered <- gatherFacts config ordinal spec
     case gathered of
       Left problem -> pure (refuse [problem])
-      Right (facts, _, _, _) -> do
+      Right (facts, _, _, receipts) -> do
         let refusals = preflight facts
-        runOutcome <- runFresh config ordinal spec
+        runOutcome <- runFresh config ordinal spec (predecessorDigestFrom ordinal receipts)
         pure $ case runOutcome of
           Left refusal -> CommandOutcome (ExitFailure 1) (map renderPreflightRefusal refusals <> ["RUNNER: " <> renderRefusal refusal])
           Right outcome ->
@@ -241,12 +270,12 @@ acceptPhase config ordinal = case resolveSpec ordinal of
     gathered <- gatherFacts config ordinal spec
     case gathered of
       Left problem -> pure (refuse [problem])
-      Right (facts, recorded, _, _) -> case preflight facts of
+      Right (facts, recorded, _, receipts) -> case preflight facts of
         refusals@(_ : _) -> pure (refuse (map renderPreflightRefusal refusals))
         [] -> case recordedFrontier recorded >>= \frontier -> Status.frontierAfterPass frontier ordinal of
           Nothing -> pure (refuse ["the recorded frontier is not open at phase " <> Text.pack (show ordinal)])
           Just next -> do
-            runOutcome <- runFresh config ordinal spec
+            runOutcome <- runFresh config ordinal spec (predecessorDigestFrom ordinal receipts)
             case runOutcome of
               Left refusal -> pure (refuse ["RUNNER: " <> renderRefusal refusal])
               Right outcome
@@ -349,7 +378,8 @@ replayOne config seed existing recorded verifier (Right done) phase =
       | otherwise -> case resolveSpec phase of
           Left problems -> pure (Left (reverse done <> problems))
           Right (row, spec) -> do
-            runOutcome <- runFresh config phase spec
+            replayed <- readReceipts (custodyStore config) (seedGeneration seed)
+            runOutcome <- runFresh config phase spec (predecessorDigestFrom phase (existing <> replayed))
             case runOutcome of
               Left refusal -> pure (Left (reverse done <> ["RUNNER: " <> renderRefusal refusal]))
               Right outcome -> do
@@ -395,6 +425,9 @@ replayOne config seed existing recorded verifier (Right done) phase =
                               Right frontier -> do
                                 patch <- patchToFrontier (custodyRoot config) frontier (Map.insert phase reproducible (Map.fromList (surfaceReceipts recorded)))
                                 mapM_ (\(path, contents) -> TextIO.writeFile (custodyRoot config </> path) contents) patch
+                                -- The postimage the receipt names is the surface after the refresh.
+                                after <- statusSurface (custodyRoot config)
+                                _ <- writeReceipt (custodyStore config) receipt {receiptStatusPostimage = either (const (surfaceDigest recorded)) surfaceDigest after}
                                 pure (Right (("phase " <> Text.pack (show phase) <> "\trefreshed (" <> Text.take 16 recordedDigest <> " -> " <> Text.take 16 reproducible <> ")") : done))
 
 -- | The receipt-bearing reset: a receipt at the frontier's phase whose reset

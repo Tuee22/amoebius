@@ -8,6 +8,7 @@ import Amoebius.Exec.Boundary (mkBoundaryTools, runBoundaryCorpus)
 import Amoebius.Image.Resolver (runResolverCommand)
 import Amoebius.Host.LinuxEngine (runLinuxEngineGuestPass)
 import Amoebius.Image.Build (runAdmittedBuildxOci, runBakeInventory, runRenderBakeDockerfile)
+import Amoebius.Toolchain.Report (runToolchainReport)
 import Amoebius.Vault.Client (runVaultPromptWriteCommand, runVaultReadCommand, runVaultTransitCommand)
 import Amoebius.Vault.Seal (openUnlockMaterial, sealUnlockMaterialIO)
 import Data.ByteString.Base64 qualified as Base64
@@ -38,6 +39,7 @@ dispatch arguments =
     "vault-transit-decrypt" : options -> runVaultTransitCommand options
     "vault-prompt-write" : options -> runVaultPromptWriteCommand options
     "validate" : options -> delegateValidate options
+    "toolchain-report" : options -> runToolchainReport options
     ["--version"] -> putStrLn "amoebius 0.1.0.0"
     ["dev", "linux-engine-guest-pass", passText, outputRoot]
       | Just pass <- readMaybe passText -> runLinuxEngineGuestPass pass outputRoot

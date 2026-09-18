@@ -33,6 +33,7 @@ import Amoebius.Validation.Runner.Observer
 import Amoebius.Validation.Runner.Spec
 import Control.Monad (forM, forM_, unless)
 import Data.Map.Strict qualified as Map
+import Data.List (transpose)
 import Data.Maybe (isJust, isNothing)
 import Data.Set qualified as Set
 import Data.Text (Text)
@@ -80,6 +81,7 @@ data RunnerRefusal
   | HygieneRefused HygieneReport
   | HardwareBeforeBarrier Substrate
   | RunRootNotFresh FilePath
+  | ProductBinaryUnavailable Text
   deriving (Eq, Show)
 
 renderRefusal :: RunnerRefusal -> Text
@@ -88,6 +90,7 @@ renderRefusal refusal = case refusal of
   HygieneRefused report -> Text.intercalate "; " (hygieneProblems report)
   HardwareBeforeBarrier substrate -> "HARDWARE-BEFORE-BARRIER: " <> renderSubstrate substrate
   RunRootNotFresh path -> "RUN-ROOT-NOT-FRESH: " <> Text.pack path
+  ProductBinaryUnavailable detail -> "PRODUCT-BINARY-UNAVAILABLE: " <> detail
 
 data GateOutcome = GateOutcome
   { outcomeCandidate :: Candidate
@@ -303,7 +306,9 @@ mutantMatrix config spec vspec graph digest = do
         source <- TextIO.readFile (root </> file)
         let loci = concat [enumerateLoci (productionModuleName stage) file operator source | operator <- allOperators]
         pure (sampleLoci (digest <> productionModuleName stage) (perModule policy) loci)
-  let selected = take (maybe (perGateCap policy) (min (perGateCap policy)) (runnerMutantLimit config)) (concat perModuleLoci)
+  -- The per-gate cap is spread across the stage modules in rounds, so a cap
+  -- smaller than the per-module total never starves the last module.
+  let selected = take (maybe (perGateCap policy) (min (perGateCap policy)) (runnerMutantLimit config)) (concat (transpose perModuleLoci))
   tracked <- trackedFiles root
   results <- forM (zip [1 :: Int ..] selected) $ \(index, locus) -> do
     let copyRoot = runnerRunRoot config </> "mutants" </> show index
@@ -320,10 +325,13 @@ mutantMatrix config spec vspec graph digest = do
         pure ((locus, Just witness, outcome), runs)
   pure (killTable (map fst results), concatMap snd results)
 
+-- | The authored tree: every tracked file plus every untracked file the ignore
+-- rules admit, so a candidate's new modules are copied and digested before the
+-- human commits them; ignored generated material is never part of it.
 trackedFiles :: FilePath -> IO [FilePath]
 trackedFiles root = do
   absolute <- makeAbsolute root
-  listing <- observe root "git" ["-c", "safe.directory=" <> absolute, "ls-files", "-z"]
+  listing <- observe root "git" ["-c", "safe.directory=" <> absolute, "ls-files", "-z", "--cached", "--others", "--exclude-standard"]
   pure (filter (not . null) (map Text.unpack (Text.splitOn "\0" (runStdout listing))))
 
 copyTree :: FilePath -> FilePath -> [FilePath] -> IO ()

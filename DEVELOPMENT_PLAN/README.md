@@ -151,8 +151,8 @@ also inherits the universal postcondition above.
 | Phase | Name | Substrate | Lane | Register | Status | Validation contract |
 |---|---|---|---|---|---|---|
 | 0 | Documentation, governance, and the validation seed | none | `none` | — | ✅ Done | [Contract](phase_00_documentation_suite.md) |
-| 1 | Haskell toolchain and probe-source closure | none | `none` | 2 | 🔄 Active — NOT VALIDATED | [Contract](phase_01_toolchain_spike.md) |
-| 2 | Repository layout conformance and source closure | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_02_repository_layout_conformance.md) |
+| 1 | Haskell toolchain and probe-source closure | none | `none` | 2 | ✅ Done | [Contract](phase_01_toolchain_spike.md) |
+| 2 | Repository layout conformance and source closure | none | `none` | 2 | 🔄 Active — NOT VALIDATED | [Contract](phase_02_repository_layout_conformance.md) |
 | 3 | The typed spine from one spec to fake-applied bytes | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_03_typed_spine.md) |
 | 4 | Witness-driven manifests, capacity, and storage | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_04_witness_manifests_capacity_storage.md) |
 | 5 | Substrates, lanes, rke2 quorum, and the image recipe | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_05_substrates_lanes_image_recipe.md) |

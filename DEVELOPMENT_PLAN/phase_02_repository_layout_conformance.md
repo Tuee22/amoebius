@@ -35,7 +35,7 @@ from literals. Its predecessor is [Phase 1](phase_01_toolchain_spike.md).
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+🔄 Active — NOT VALIDATED.
 
 The contract is reopened under [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) by
 [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice): the subject moves
@@ -126,9 +126,9 @@ documentation checker refuses a block that differs from it. Execution evidence r
 
 ## Sprints
 
-## Sprint 2.1: `test/**` is Haskell modules only ⏸️
+## Sprint 2.1: `test/**` is Haskell modules only 🔄
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Active — NOT VALIDATED
 **Implementation**: `src/Amoebius/Layout/Classify.hs`
 **Blocked by**: [Phase 1](phase_01_toolchain_spike.md) gate pass
 **Independent Validation**: Every path beneath `test/**` classifying as a Haskell module is the positive control; a tracked script, table, golden, patch, or mutant body beneath `test/**` is a paired negative refused by name. A generated mutant that widens the test-tree arm is killed by the planted negatives.
