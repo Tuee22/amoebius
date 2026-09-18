@@ -131,7 +131,7 @@ prefix, exactly one Active phase, and one Blocked suffix in table order, or the 
 
 The reset requires the generation-2 certification authority under
 [gate integrity §M.0](development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation):
-a content-addressed verifier seeded by the human, not supplied by this Markdown text. Generation-1 receipts
+a content-addressed verifier entered by `accept` or `replay`, not supplied by this Markdown text. Generation-1 receipts
 cannot restore status, satisfy a predecessor, or authorize hardware work. Retained phase rows still specify
 intended capabilities, while each phase must separately acquire its authenticated predecessor and produce
 current execution evidence. This change is the last hand-applied status edit
@@ -158,8 +158,9 @@ gate binds the source snapshot it tested and permits only the tracker, phase, an
 that result to change. The one contiguous frontier advances with the pass: the closing phase and all of its
 sprints become Done, and its immediate successor plus that successor's first sprint become Active when one
 exists; every later phase remains Blocked. The validator emits the verified patch only beneath `.build/**` and
-never changes a tracked file. After that process exits, the human's `accept` rechecks the bound preimage and
-applies the exact patch; an agent's `preview` applies nothing. Any other byte change creates a new candidate
+never changes a tracked file. `accept` applies the exact patch and writes the receipt's reproducible digest as
+`**Receipt**: <digest>` on the line after the Done status; `preview` applies nothing
+([DL-0013](../documents/decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible)). Any other byte change creates a new candidate
 and requires the gate to run again.
 
 A later edit preserves an earlier run as a historical fact, but current reuse requires an authenticated
@@ -174,9 +175,9 @@ reopening procedure. Receipt age, filename hashes, copied candidate bytes, and a
 compatibility supply no reuse authority.
 
 Within accepted scope, implementation and qualification continue through sprint seams without confirmation.
-Recording and numerical progression happen one phase per human `accept`; an agent stops at the phase
-boundary. Contract or verifier changes follow the separately qualified baseline-revision procedure; the
-candidate cannot weaken its own acceptance.
+Recording and numerical progression happen one phase per `accept`, which the agent runs; a receipt that does
+not reproduce under `replay` is void. Contract or verifier changes follow the separately qualified
+baseline-revision procedure; the candidate cannot weaken its own acceptance.
 
 ---
 
@@ -389,10 +390,10 @@ the ordinal minus one: Phase 50's first sprint names Phase 9. Appended candidate
 or additional-sprint prose is a second edge and refuses the schema even when the immediate edge also appears.
 
 Validation is consolidated at the phase gate. The qualified parent gate must rerun and retain every sprint
-seam in one complete candidate run. When that gate passes under the agent's `preview`, the agent stops; the
-human's `accept` applies the emitted status patch after the validator exits and the bound preimage is
-rechecked. Where `Blocked by` names an earlier phase rather than an earlier sprint, that dependency is the
-earlier gate pass. An agent may preview several phases in one run; recording is one human `accept` per phase.
+seam in one complete candidate run. When that gate passes under `preview`, the agent runs `accept`, which
+applies the emitted status patch after the bound preimage is rechecked and records the reproducible receipt.
+Where `Blocked by` names an earlier phase rather than an earlier sprint, that dependency is the
+earlier gate pass. An agent may preview several phases in one run; recording is one `accept` per phase.
 
 The `Oracle` field declares the independence boundary exercised by the consolidated phase gate. It is not an
 intermediate confirmation request. An agent continues through implementation-ready sprint seams while the

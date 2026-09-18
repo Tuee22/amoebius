@@ -121,7 +121,7 @@ lives in its own sibling folder, [`../illegal_state/`](../illegal_state/illegal_
 
 | Document | Purpose | Document role |
 |----------|---------|--|
-| [gate_runner_doctrine.md](./gate_runner_doctrine.md) | **The generic gate runner.** One runner consumes one typed `GateSpec` per phase, holds every verdict, generates every mutant, perturbs the shipped binary's input after the run starts, and records the kernel budget; the agent's `preview` mints nothing and the human's `accept` records one phase | Authoritative source |
+| [gate_runner_doctrine.md](./gate_runner_doctrine.md) | **The generic gate runner.** One runner consumes one typed `GateSpec` per phase, holds every verdict, generates every mutant, perturbs the shipped binary's input after the run starts, and records the kernel budget; `preview` mints nothing and `accept` records one phase with a reproducible receipt | Authoritative source |
 | [conformance_harness_doctrine.md](./conformance_harness_doctrine.md) | **Superseded** — a redirect stub to [gate_runner_doctrine.md](./gate_runner_doctrine.md), kept so inbound anchors resolve | Deprecated |
 | [validation_frame_doctrine.md](./validation_frame_doctrine.md) | Native Haskell validation precedes hardware and container parity replay; the Phase-50 `pb` observer uses exact-length challenge entropy and a runner-owned memory/deadline envelope. | Supporting slice |
 | [generated_artifacts_doctrine.md](./generated_artifacts_doctrine.md) | Every non-Haskell behavioral artifact is emitted lazily from Haskell beneath `.build/**` and never committed | Authoritative target |

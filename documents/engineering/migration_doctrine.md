@@ -159,7 +159,7 @@ confirmation. Each owning sprint implements and qualifies its
 domain observation/closure analyzer and reintroduction negative in numerical order; an unavailable analyzer
 cannot report closure and refuses at or beyond its owner, while an earlier active binding remains explicit
 later-owned debt rather than a deferred pass. All Phase-0-owned legacy queries may jointly reach zero only at the
-[Sprint-0.7 gate specification and reset](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-07-phase-0-gate-specification-first-reseed-and-receipt-bearing-reset-),
+[Sprint-0.7 gate specification and reset](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-07-phase-0-gate-specification-first-generation-and-receipt-bearing-reset-),
 under the [gate-integrity contract](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate).
 This sequencing statement records target responsibility only; every sprint and phase remains NOT VALIDATED
 until the prescribed owning gate passes.

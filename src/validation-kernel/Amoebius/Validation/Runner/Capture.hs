@@ -38,6 +38,7 @@ data Candidate = Candidate
   , candidateSpecDigest :: Text
   , candidateChallenge :: Text
   , candidateChain :: Text
+  , candidateReproducibleCore :: Text
   , candidateRows :: [CandidateRow]
   }
   deriving (Eq, Show)
@@ -58,6 +59,7 @@ renderCandidate candidate =
       , "spec-digest\t" <> candidateSpecDigest candidate
       , "challenge\t" <> candidateChallenge candidate
       , "chain\t" <> candidateChain candidate
+      , "reproducible-core\t" <> candidateReproducibleCore candidate
       ]
         <> concat
           [ ("row\t" <> renderGateCategory (rowCategory row) <> "\t" <> renderVerdict (rowVerdict row))

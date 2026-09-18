@@ -22,16 +22,16 @@ predicateCases =
   , PairedNegative "bootstrap-path-bypass" "bootstrapInputPathAllowed" "bootstrap-path-bypass" "predicate"
   ]
 
--- | The custody probes the runner suite states from literals.
+-- | The custody probes the runner suite states from literals (DL-0013: no
+-- signature, no issuer; a record is trusted only when it re-derives).
 custodyProbes :: [ExactCase]
 custodyProbes =
   [ PositiveControl "store-seed-roundtrip" "SeedRecord" "equal"
   , PositiveControl "store-receipt-roundtrip" "Receipt" "equal"
-  , PairedNegative "store-tampered-receipt" "receipt payload" "signature does not verify" "custody"
-  , PairedNegative "tripwire-agent-shell" "CLAUDECODE,AI_AGENT" "ISSUER-AGENT-SESSION" "custody"
+  , PairedNegative "store-tampered-receipt" "receipt payload" "record digest does not match its sidecar" "custody"
+  , PositiveControl "receipt-reproducible-digest-stable" "candidate rows" "same digest"
   , PairedNegative "preflight-status-surface-dirty" "surface digest" "StatusSurfaceDirty" "preflight"
-  , PairedNegative "preflight-verifier-diverged" "verifier digest" "KERNEL-VERIFIER-DIVERGED" "preflight"
-  , PairedNegative "preflight-generation-absent" "seed" "GENERATION-ABSENT" "preflight"
+  , PairedNegative "preflight-predecessor-not-reproduced" "receipt digest" "PredecessorNotReproduced" "preflight"
   ]
 
 phaseZeroSpecInput :: GateSpecInput

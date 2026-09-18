@@ -208,7 +208,7 @@ expectedLegacy =
   ]
 
 expectedDecisions :: [Text]
-expectedDecisions = ["DL-0001", "DL-0002", "DL-0003", "DL-0004", "DL-0005", "DL-0006", "DL-0007", "DL-0008", "DL-0009", "DL-0010", "DL-0011", "DL-0012"]
+expectedDecisions = ["DL-0001", "DL-0002", "DL-0003", "DL-0004", "DL-0005", "DL-0006", "DL-0007", "DL-0008", "DL-0009", "DL-0010", "DL-0011", "DL-0012", "DL-0013", "DL-0014"]
 
 -- | The frozen set of documentation_standards.md section 17: every governed document under
 -- documents/ except the decision log, AGENTS.md, the three plan rulebooks, and the register.

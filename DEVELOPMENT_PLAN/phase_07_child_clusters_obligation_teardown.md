@@ -101,7 +101,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 |---|---|
 | `Claim` | For every corpus example with children, `amoebius compile` over the projected child subtree byte-equals `amoebius compile` over the root for the child's deployment; `chain` is typed `ProvisionedSpec -> Workflow '[] '[] [Step]`, so a chain provisioning without release does not compile; the test-topology ledger balances. Live children, multi-cluster spawn, and UI are excluded. |
 | `Subject` | `Amoebius.Dsl.Children`, `Amoebius.Dsl.Lower`, `Amoebius.Kernel.Chain`, and `Amoebius.Calculus.Workflow.Obligation`, all inside the closure of `executable amoebius`. |
-| `Command` | Future public spelling is `pb validate phase 07`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 07`; the human runs `sudo amoebius-validate accept --phase 07`. The runner spawns the shipped binary for `compile` over the root and over each projected child. |
+| `Command` | Future public spelling is `pb validate phase 07`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 07`; then `amoebius-validate accept --phase 07` records the receipt and applies one phase's status patch. The runner spawns the shipped binary for `compile` over the root and over each projected child. |
 | `Oracle` | `test/oracle/dsl/Main.hs` compares the child and root manifests and reads the release ledger; it depends on no `amoebius` library. |
 | `Positive controls` | The forest example: child and root compilation byte-equal; the test-topology example: the ledger reports zero owned resources and the release steps appear in reverse provisioning order. |
 | `Paired negatives` | `ReleaseLessChain` is a compile-negative twin at the obligation index; `ChildNamesUnknownParent` and `CyclicForest` are refused at the forest stage with their exact tags, each with an accepted twin. |
@@ -116,7 +116,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 | `Legacy closure` | No new identifier closes here; the due-count for every identifier is zero. The workflow calculus is consumed as a linked library. |
 | `Predecessor` | The Phase-6 receipt in certification generation 2, chained by the digest of Phase 6's product closure plus the verifier and governance digests. |
 | `Residue` | Phases 8 and 9 and every phase from 50 onward remain explicit limitations. |
-| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and the human's `accept` records it. |
+| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and `accept` records it. |
 
 ## Doctrine adopted
 
@@ -191,7 +191,7 @@ Implement the index and the twin.
 **Independent Validation**: The compiled specification equals the fenced block above; `verifySpec` accepts it; the corpus contains the Phase-6 corpus and at least two new pairs.
 **Oracle**: `test/oracle/runner/Main.hs` states the expected specification digest from literals.
 **Legacy IDs**: none
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through the human's `accept`
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through `accept`
 
 ### Objective
 
@@ -203,7 +203,7 @@ Author the specification the runner executes for this phase.
 
 ### Validation
 
-Run `preview phase 07` and require every row green; require the human's `accept` to record exactly one
+Run `preview phase 07` and require every row green; require `accept` to record exactly one
 phase's patch.
 
 ### Remaining Work

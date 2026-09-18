@@ -1,7 +1,7 @@
 # Gate-Runner Doctrine
 
-> **Purpose**: Specify the one generic gate runner that judges every numbered phase, the gate specification it consumes, and the human commands through which a result becomes status.
-> **Read this if**: a phase gate must be specified, the validator's mechanics must be changed, or the boundary between an agent's `preview` and the human's `accept` must be settled.
+> **Purpose**: Specify the one generic gate runner that judges every numbered phase, the gate specification it consumes, and the commands through which a reproducible result becomes status.
+> **Read this if**: a phase gate must be specified, the validator's mechanics must be changed, or the boundary between `preview`, `accept`, and `replay` must be settled.
 
 This document owns the validator's mechanics: the gate-specification vocabulary, the runner, the oracle
 protocol, preflight refusals, commands, and receipts. It does not own the eighteen-row contract shape, which
@@ -81,8 +81,8 @@ describe a gate the runner will not execute.
 
 ## 3. The runner
 
-The runner is one library, `Amoebius.Validation.Runner`, owed by
-[Phase 0](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md), with these stages in order:
+**Observed implementation** ([GateSpec:documentation_suite]). The runner is one library,
+`Amoebius.Validation.Runner`, with these stages in order:
 
 1. **`verifySpec`.** Map every `ProductionModule` to exactly one library stanza, compute the executable's
    closure from the package description, and refuse any subject outside it. Check the oracle stanza's hygiene:
@@ -111,14 +111,14 @@ every Haskell line under `src/validation-kernel` and `src/gate-spec`. The docume
 
 ## 4. Runner-held verdicts and the oracle protocol
 
-A suite is a byte producer. The oracle executable for an area reads those bytes and prints a ledger derived
-from literals in its own source; it imports no product module, so it cannot regenerate an expectation from
+**Observed implementation** ([GateSpec:documentation_suite]). A suite is a byte producer. The oracle
+executable for an area reads those bytes and prints a ledger derived from literals in its own source; it imports no product module, so it cannot regenerate an expectation from
 the subject. Each area has one exclusive source directory whose entry module is named exactly, for example
 `test/oracle/dsl/Main.hs`; the directory is never named alone. A suite receives the run's suite directory as
 its one argument and writes its bytes there; the oracle receives the same directory and prints its ledger to
 standard output. The runner digests the suite output, the
 oracle ledger, and the kill table into the receipt. A `PASS` token, a count, or a matching substring in a
-suite's output is not a verdict. Owed by [Phase 0](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md).
+suite's output is not a verdict.
 
 Oracle rows are authored from the requirement before the pipeline stage exists. A row derived from subject
 output, or added after a stage was written to match it, is a contract change under
@@ -132,9 +132,8 @@ Before any subject runs, the runner refuses with a typed reason when:
 |---|---|
 | `StatusSurfaceDirty` | The tracker, phase, or sprint status surface differs from the postimage of the last accepted receipt. |
 | `PredecessorNotCommitted` | The immediate predecessor's receipt names a postimage that is not an ancestor of the current tree. |
-| `STATUS-WITHOUT-RECEIPT` | A status line is Done without a receipt in the current generation. |
-| `KERNEL-VERIFIER-DIVERGED` | The tree's verifier digest differs from the accepted seed's. |
-| `GOVERNANCE-UNACCEPTED` | A frozen document changed without a decision-log entry, or the governance digest differs from the seed's. |
+| `STATUS-WITHOUT-RECEIPT` | A status line is Done without a receipt digest beside it in the phase document. |
+| `PredecessorNotReproduced` | A Done phase's recorded receipt digest has no store record for the current generation and governance digest; `replay` re-runs that gate and a green re-run refreshes the record, so a verifier or doctrine change costs a replay, never a re-accept, while a red re-run voids the receipt ([DL-0013](../decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible)). |
 | `HARDWARE-BEFORE-BARRIER` | The specification names a hardware substrate and no `DSL_BARRIER` receipt exists. |
 | `SUBSTRATE-ABSENT` | The declared substrate is not the host's natural substrate. |
 | `KernelOverBudget` | The hygiene row would fail. |
@@ -146,26 +145,35 @@ predecessor. A receipt refresh is an identity projection that cannot weaken a sp
 
 ## 6. Commands, generations, and receipts
 
-The agent command is `amoebius-validate preview phase NN`. It runs the complete gate, prints the would-be
-receipt, and mints nothing. The human commands are:
+Every command is agent-run; none requires a privilege the agent lacks
+([DL-0013](../decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible)). They are:
 
-- `sudo amoebius-validate accept --phase NN` — prints the Claim, specification digest, kill table, spine
-  outcome, and corpus delta, then signs the receipt and applies exactly one phase's status patch;
-- `sudo amoebius-validate reset --decision DL-NNNN --product-gap LTD-XXX-NNN` — issues a receipt-bearing reset
-  whose `ResetCause` names a validator gap and a product-gap legacy identifier with an owning phase;
-- `sudo amoebius-validate govern --decision DL-NNNN` — accepts a governance change and re-seals the frozen
-  baseline;
-- `sudo amoebius-validate demo --file <path>` — signs an operator-authored input for the barrier's
-  `OperatorDemonstration`;
-- the reseed continuation, which archives the current generation and installs the next.
+- `amoebius-validate preview phase NN` — runs the complete gate, prints the would-be receipt, and mints
+  nothing;
+- `amoebius-validate accept --phase NN` — runs the complete gate again and, when every row is green, prints
+  the Claim, specification digest, kill table, spine outcome, and corpus delta, records the receipt, writes
+  its reproducible digest beside the Done status in the phase document, and applies exactly one phase's
+  status patch;
+- `amoebius-validate replay [--through NN]` — re-runs each Done phase in table order whose store record is
+  absent or was recorded under another verifier or governance digest; a green re-run records the receipt anew
+  and refreshes the digest beside the Done status as an identity status projection, and a red re-run voids
+  that receipt and every later one;
+- `amoebius-validate reset --decision DL-NNNN --product-gap LTD-XXX-NNN` — records a receipt-bearing reset
+  whose `ResetCause` names a validator gap and a product-gap legacy identifier with an owning phase, and moves
+  the frontier no higher than that phase;
+- `amoebius-validate demo --file <path>` — records the digest of an operator-authored input for the barrier's
+  `OperatorDemonstration`.
 
-A generation identifier is the content address of the verifier. A reseed requires a decision identifier,
-archives the prior store, and never deletes it. The supervisor refuses to issue when agent environment
-markers are present ([DL-0010](../decision_log.md#dl-0010--host-precondition-for-agent-sessions)).
+A generation identifier is the content address of the verifier; a generation is entered by the first
+`accept` or `replay` under that verifier, and the store beneath `.build/certification/**` keeps one directory
+per generation. A governance change needs no separate act: the governance digest is part of every
+reproducible digest, so receipts recorded under an older baseline fail to reproduce until replayed.
 
-A receipt carries the verifier digest, the governance digest, the `SubjectChangeWitness` for every mutant,
-the `ResetCause` when it is a reset, the `OperatorDemonstration` when it is the barrier, and the status
-postimage.
+A receipt carries the reproducible digest (specification digest, closure digest, verifier digest, governance
+digest, ordered row verdicts, oracle ledger digest, kill-table loci and outcomes), the run-specific chain of
+observed process digests, the `SubjectChangeWitness` for every mutant, the `ResetCause` when it is a reset,
+the `OperatorDemonstration` when it is the barrier, and the status postimage. Its authority is that any run
+can re-derive it by re-running the gate, not that anyone signed it.
 
 ## 7. The example corpus and the hardware rule
 
@@ -190,7 +198,7 @@ subject. Hardware evidence that does not consume a barrier example is refused as
 
 ## 9. Planning ownership
 
-The runner, the gate-specification library, the custody edits, and the human commands are owed by
+The runner, the gate-specification library, the custody edits, and the commands are owed by
 [Phase 0](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md). The first product specification is owed by
 [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md). The `SpineFact` and `OperatorDemonstration` are owed
 by [Phase 9](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md).
@@ -202,4 +210,4 @@ by [Phase 9](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md).
 - [Testing spoof resistance](./testing_spoof_resistance.md) — the threat model the refusals answer
 - [Testing doctrine](./testing_doctrine.md) — registers and the example corpus
 - [Conformance harness doctrine](./conformance_harness_doctrine.md) — superseded by this document
-- [Decision log](../decision_log.md) — DL-0007, DL-0009, DL-0010
+- [Decision log](../decision_log.md) — DL-0007, DL-0009, DL-0012, DL-0013

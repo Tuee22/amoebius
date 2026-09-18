@@ -10,14 +10,14 @@ module Main (main) where
 
 import Amoebius.Doc.Check (checkTree, discoverDocuments)
 import Amoebius.Doc.Types (CheckResult (..), Finding (..))
+import Amoebius.Plan.PhaseIdentity qualified as Identity
 import Amoebius.Plan.StatusFrontier qualified as Status
 import Amoebius.Validation.Custody.Preflight
 import Amoebius.Validation.Custody.Status
 import Amoebius.Validation.Custody.Store
 import Amoebius.Validation.GateSpec
 import Amoebius.Validation.Runner.Capture
-import Crypto.PubKey.Ed25519 qualified as Ed25519
-import Data.ByteArray (convert)
+import Amoebius.Validation.Runner (reproducibleCore)
 import Data.ByteString qualified as ByteString
 import Amoebius.Validation.Runner.Hygiene
 import Amoebius.Validation.Runner.Mutants
@@ -40,7 +40,7 @@ main = do
         [path] -> path
         _ -> ".build/runs/phase-00/runner"
   createDirectoryIfMissing True output
-  rows <- concat <$> sequence [constructorRows, verifyRows output, operatorRows output, killRows', hygieneRows output, captureRows, preflightRows, storeRows output, statusRows output, tripwireRows, packageRows]
+  rows <- concat <$> sequence [constructorRows, verifyRows output, operatorRows output, killRows', hygieneRows output, captureRows, preflightRows, storeRows output, statusRows output, reproducibleRows, packageRows]
   TextIO.writeFile (output </> "runner.tsv") (Text.unlines (map (Text.intercalate "\t") rows))
   putStrLn ("runner projection written: " <> (output </> "runner.tsv"))
 
@@ -301,7 +301,7 @@ hygieneRows output = do
 
 captureRows :: IO [[Text]]
 captureRows = do
-  let green = Candidate 3 "typed_spine" "d" "n" "c" [CandidateRow category Green [("k", "v")] | category <- allGateCategories]
+  let green = Candidate 3 "typed_spine" "d" "n" "c" "" [CandidateRow category Green [("k", "v")] | category <- allGateCategories]
       oneRed = green {candidateRows = [CandidateRow category (if category == Mutants then Red else Green) [("k", "v")] | category <- allGateCategories]}
       emptyObservation = green {candidateRows = [CandidateRow category Green [] | category <- allGateCategories]}
       reordered = green {candidateRows = reverse (candidateRows green)}
@@ -322,13 +322,9 @@ cleanFacts spec =
     { factsSpec = spec
     , factsSurfaceDigest = "surface"
     , factsAcceptedPostimage = Just "surface"
-    , factsGenerationPresent = True
     , factsPredecessorCommitted = Just True
     , factsDoneWithoutReceipt = []
-    , factsVerifierDigest = "verifier"
-    , factsSeedVerifierDigest = Just "verifier"
-    , factsGovernanceDigest = "governance"
-    , factsSeedGovernanceDigest = Just "governance"
+    , factsPredecessorsNotReproduced = []
     , factsFrozenFindings = []
     , factsBarrierReceipt = False
     , factsHost = HostFacts [HardwareFree, LinuxCpu]
@@ -346,8 +342,7 @@ preflightRows = case (mkGateSpec OrdinaryGate legalInput, mkGateSpec HardwareGat
           , row "status-surface-dirty" clean {factsSurfaceDigest = "other"}
           , row "predecessor-not-committed" clean {factsPredecessorCommitted = Just False}
           , row "status-without-receipt" clean {factsDoneWithoutReceipt = [1]}
-          , row "verifier-diverged" clean {factsVerifierDigest = "other"}
-          , row "governance-unaccepted" clean {factsGovernanceDigest = "other"}
+          , row "predecessor-not-reproduced" clean {factsPredecessorsNotReproduced = [0]}
           , row "frozen-finding" clean {factsFrozenFindings = ["DOC-FROZEN-BODY-CHANGED"]}
           , row "hardware-before-barrier" (cleanFacts hardware) {factsBarrierReceipt = False}
           , row "hardware-after-barrier" (cleanFacts hardware) {factsBarrierReceipt = True}
@@ -355,7 +350,7 @@ preflightRows = case (mkGateSpec OrdinaryGate legalInput, mkGateSpec HardwareGat
           , row "kernel-over-budget" clean {factsHygieneProblems = ["KernelOverBudget: 15000 lines against a cap of 14000"]}
           , row "spec-weakened" (cleanFacts weaker) {factsPreviousSpec = Just spec}
           , row "spec-unchanged" clean {factsPreviousSpec = Just spec}
-          , row "generation-absent" clean {factsGenerationPresent = False, factsAcceptedPostimage = Nothing, factsSeedVerifierDigest = Nothing, factsSeedGovernanceDigest = Nothing}
+          , row "first-run" clean {factsAcceptedPostimage = Nothing, factsPredecessorCommitted = Nothing}
           , ["preflight", "weakened-detail", Text.intercalate ";" (specWeakened spec weaker)]
           ]
   _ -> pure [["preflight", "fixtures", "refused"]]
@@ -364,10 +359,8 @@ storeRows :: FilePath -> IO [[Text]]
 storeRows output = do
   let store = Store (output </> "fixture-store")
   createDirectoryIfMissing True (storeRoot store)
-  secret <- Ed25519.generateSecretKey
-  ByteString.writeFile (storeRoot store </> "issuer.key") (convert secret)
-  let seed = SeedRecord "abc123" "DL-0007" "abc123" "gov" "surface" "commit" "now"
-      receipt = Receipt 0 "documentation_suite" "abc123" "spec" "rendered\nspec" "cand" "kill" "closure" "abc123" "gov" "post" "commit" ["w1", "w2"] Nothing Nothing "2026-09-18 00:00:01 UTC"
+  let seed = SeedRecord "abc123" "accept phase 0" "abc123" "gov" "surface" "commit" "now"
+      receipt = Receipt 0 "documentation_suite" "abc123" "spec" "rendered\nspec" "cand" "kill" "closure" "repro" "abc123" "gov" "post" "commit" ["w1", "w2"] Nothing Nothing "2026-09-18 00:00:01 UTC"
       resetReceipt = receipt {receiptResetCause = Just ("gap", "LTD-DSL-001"), receiptIssuedAt = "2026-09-18 00:00:00 UTC"}
   wroteSeed <- writeSeed store seed
   wroteReceipt <- writeReceipt store receipt
@@ -376,11 +369,12 @@ storeRows output = do
   receipts <- readReceipts store "abc123"
   latest <- latestGeneration store "abc123"
   other <- latestGeneration store "zzz"
-  -- tamper with the receipt payload and read again
+  -- corrupt the receipt payload and read again
   let receiptPath = generationDirectory store "abc123" </> "receipts" </> "phase-00.tsv"
   original <- TextIO.readFile receiptPath
   TextIO.writeFile receiptPath (Text.replace "documentation_suite" "documentation_suitx" original)
   tampered <- readReceipts store "abc123"
+  corrupted <- readRecord receiptPath
   TextIO.writeFile receiptPath original
   restored <- readReceipts store "abc123"
   pure
@@ -389,9 +383,10 @@ storeRows output = do
     , ["store", "seed-roundtrip", either id (\s -> if s == seed then "equal" else "differs") readBack]
     , ["store", "receipt-roundtrip", if [r | r <- receipts, receiptResetCause r == Nothing] == [receipt] then "equal" else "differs:" <> Text.pack (show (length receipts))]
     , ["store", "reset-receipt", either id (const (if resetReceipt `elem` receipts then "kept-beside-pass" else "lost")) wroteReset]
-    , ["store", "latest-generation", maybe "absent" seedDecision latest]
-    , ["store", "other-generation", maybe "absent" seedDecision other]
+    , ["store", "latest-generation", maybe "absent" seedEnteredBy latest]
+    , ["store", "other-generation", maybe "absent" seedEnteredBy other]
     , ["store", "tampered-receipt", Text.pack (show (length tampered))]
+    , ["store", "corrupted-record", either (Text.takeWhile (/= ':')) (const "accepted") corrupted]
     , ["store", "restored-receipt", Text.pack (show (length restored))]
     , ["store", "generation-directory", Text.pack (generationDirectory (Store "/s") "abcdef0123456789zzzz")]
     ]
@@ -406,25 +401,37 @@ statusRows output = do
     Left problem -> pure [["status", "surface", problem]]
     Right recorded -> do
       let frontier = recordedFrontier recorded
-          next = frontier >>= \f -> Status.frontierAfterPass f 0
-      patch <- maybe (pure []) (patchToFrontier copyRoot) next
-      mapM_ (\(path, contents) -> TextIO.writeFile (copyRoot </> path) contents) patch
-      after <- statusSurface copyRoot
-      result <- checkTree [] copyRoot
-      let afterFrontier = either (const Nothing) recordedFrontier after
-          afterTracker = either (const []) (\s -> [Text.pack (show phase) <> "=" <> status | (phase, _, status) <- surfaceTracker s, phase `elem` [0, 1, 2]]) after
-          afterPhase0 = either (const "") (\s -> maybe "" (\(_, _, line) -> line) (lookupPhase 0 (surfacePhaseLines s))) after
-          afterSprint = either (const []) (\s -> [Text.pack (show sprint) <> "=" <> heading <> "|" <> status | (phase, sprint, _, heading, status) <- surfaceSprints s, phase == 0, sprint `elem` [1, 2]]) after
-      pure
-        [ ["status", "recorded-frontier", Text.pack (show (fmap (\f -> Status.phaseStatusAt f 0) frontier))]
-        , ["status", "surface-digest-stable", if surfaceDigest recorded == either (const "") surfaceDigest after then "same" else "changed"]
-        , ["status", "patched-files", Text.pack (show (length patch))]
-        , ["status", "after-tracker", Text.intercalate ";" afterTracker]
-        , ["status", "after-phase-0", afterPhase0]
-        , ["status", "after-sprints", Text.intercalate ";" afterSprint]
-        , ["status", "after-frontier", Text.pack (show (fmap (\f -> Status.phaseStatusAt f 1) afterFrontier))]
-        , ["status", "doc-check-findings", Text.intercalate "," (nubText (map findingCode (checkFindings result)))]
-        ]
+          active = case frontier of
+            Just f -> [phase | phase <- Identity.phaseOrdinals, Status.phaseStatusAt f phase == Status.ActiveNotValidated]
+            Nothing -> []
+      case (frontier, active) of
+        (Just f, [current]) | Just next <- Status.frontierAfterPass f current -> do
+          let digest = Text.replicate 64 "b"
+              existing = Map.fromList (surfaceReceipts recorded)
+              successor = Identity.successorOrdinal current
+          bare <- patchToFrontier copyRoot next existing
+          mapM_ (\(path, contents) -> TextIO.writeFile (copyRoot </> path) contents) bare
+          bareResult <- checkTree [] copyRoot
+          patch <- patchToFrontier copyRoot next (Map.insert current digest existing)
+          mapM_ (\(path, contents) -> TextIO.writeFile (copyRoot </> path) contents) patch
+          after <- statusSurface copyRoot
+          result <- checkTree [] copyRoot
+          let statusOf phase s = maybe "absent" id (lookup phase [(p, status) | (p, _, status) <- surfaceTracker s])
+              codes r = nubText (map findingCode (checkFindings r))
+          pure
+            [ ["status", "recorded-frontier", "one-frontier"]
+            , ["status", "surface-digest-stable", if surfaceDigest recorded == either (const "") surfaceDigest after then "same" else "changed"]
+            , ["status", "patched-files", Text.pack (show (length bare))]
+            , ["status", "bare-receipt-missing", Text.pack (show ("PLAN-STATUS-RECEIPT-MISSING" `elem` codes bareResult))]
+            , ["status", "receipted-receipt-missing", Text.pack (show ("PLAN-STATUS-RECEIPT-MISSING" `elem` codes result))]
+            , ["status", "receipted-structural-findings", Text.intercalate "," (filter (\c -> not ("DOC-HONESTY" `Text.isPrefixOf` c)) (codes result))]
+            , ["status", "after-active", either (const "") (statusOf current) after]
+            , ["status", "after-successor", either (const "") (\s -> maybe "none" (\n -> statusOf n s) successor) after]
+            , ["status", "after-active-sprints", either (const "") (\s -> if and [status == "**Status**: Done" && "✅" `Text.isSuffixOf` heading | (phase, _, _, heading, status) <- surfaceSprints s, phase == current] then "done" else "not-done") after]
+            , ["status", "receipt-recorded", either (const "") (\s -> maybe "absent" id (lookup current (surfaceReceipts s))) after]
+            , ["status", "receipt-line", either (const "") (\s -> maybe "" (\(_, _, line) -> line) (lookupPhase current (surfacePhaseLines s))) after]
+            ]
+        _ -> pure [["status", "recorded-frontier", "no-single-active-frontier"]]
  where
   lookupPhase phase entries = case [entry | entry@(p, _, _) <- entries, p == phase] of
     (entry : _) -> Just entry
@@ -435,12 +442,18 @@ statusRows output = do
   takeDirectoryText path = reverse (drop 1 (dropWhile (/= '/') (reverse path)))
   nubText = foldr (\item seen -> if item `elem` seen then seen else item : seen) []
 
-tripwireRows :: IO [[Text]]
-tripwireRows =
+reproducibleRows :: IO [[Text]]
+reproducibleRows = do
+  let candidate = Candidate 3 "typed_spine" "d" "nonce-1" "chain-1" "" [CandidateRow category Green [("k", "v")] | category <- allGateCategories]
+      sameRowsDifferentRun = candidate {candidateChallenge = "nonce-2", candidateChain = "chain-2", candidateRows = [CandidateRow category Green [("k", "other")] | category <- allGateCategories]}
+      oneRed = candidate {candidateRows = [CandidateRow category (if category == Mutants then Red else Green) [("k", "v")] | category <- allGateCategories]}
+      table = killTable []
+      core = reproducibleCore "spec" candidate "ledger" table
   pure
-    [ ["tripwire", "agent-shell", Text.intercalate "," (markersIn [("CLAUDECODE", "1"), ("HOME", "/h"), ("AI_AGENT", "x")])]
-    , ["tripwire", "human-shell", Text.intercalate "," (markersIn [("HOME", "/h"), ("PATH", "/usr/bin")])]
-    , ["tripwire", "markers", Text.intercalate "," (map Text.pack agentMarkers)]
+    [ ["reproducible", "stable-across-runs", if core == reproducibleCore "spec" sameRowsDifferentRun "ledger" table then "same" else "differs"]
+    , ["reproducible", "verdict-sensitive", if core /= reproducibleCore "spec" oneRed "ledger" table then "differs" else "same"]
+    , ["reproducible", "ledger-sensitive", if core /= reproducibleCore "spec" candidate "ledger-2" table then "differs" else "same"]
+    , ["reproducible", "spec-sensitive", if core /= reproducibleCore "spec-2" candidate "ledger" table then "differs" else "same"]
     ]
 
 -- * The package description

@@ -11,6 +11,7 @@ module Amoebius.Validation.Runner
   , RunnerRefusal (..)
   , compiledBlocks
   , defaultRunnerConfig
+  , reproducibleCore
   , renderRefusal
   , runGate
   , specDigest
@@ -154,13 +155,37 @@ execute config spec vspec hygiene = do
       seedRuns = maybe [] (\outcome -> maybe [] pure (seedCleanRun outcome) <> [run | (_, Just run, _) <- seedMutantRuns outcome]) seed
       allRuns = seedRuns <> mutantRuns <> cleanRuns <> maybe [] (maybe [] pure . binaryRun) binary
       chain = foldl chainDigest challengeSeed allRuns
-      candidate = capture config spec vspec hygiene digest nonceText chain (opening, closing) table ledger binary spine allRuns seed documentation productClosure
+      captured = capture config spec vspec hygiene digest nonceText chain (opening, closing) table ledger binary spine allRuns seed documentation productClosure
+      candidate = captured {candidateReproducibleCore = reproducibleCore digest captured (ledgerDigest ledger) table}
   TextIO.writeFile (runRoot </> "candidate.tsv") (renderCandidate candidate)
   TextIO.writeFile (runRoot </> "kill-table.tsv") (Text.unlines (renderKillTable table))
   TextIO.writeFile
     (runRoot </> "outcome.tsv")
-    (Text.unlines ["green\t" <> Text.pack (show (candidateGreen candidate)), "spec-digest\t" <> digest, "chain\t" <> chain, "capability\t" <> gateCapability spec, "claim\t" <> gateClaim spec])
+    (Text.unlines ["green\t" <> Text.pack (show (candidateGreen candidate)), "spec-digest\t" <> digest, "chain\t" <> chain, "reproducible-core\t" <> candidateReproducibleCore candidate, "capability\t" <> gateCapability spec, "claim\t" <> gateClaim spec])
   pure GateOutcome {outcomeCandidate = candidate, outcomeHygiene = hygiene, outcomeKillTable = table, outcomeRuns = allRuns}
+
+-- | The reproducible core of a candidate (DL-0013): the specification digest, the
+-- ordered row verdicts, the oracle ledger digest, and every mutant's locus and
+-- outcome. Nonces, chains, timestamps, and process digests are excluded, so a
+-- later run of the same gate on the same tree re-derives the same core.
+reproducibleCore :: Text -> Candidate -> Text -> KillTable -> Text
+reproducibleCore digest candidate ledgerDigestValue table =
+  sha256Hex
+    ( Text.unlines
+        ( ["spec\t" <> digest]
+            <> [renderGateCategory (rowCategory row) <> "\t" <> renderVerdict (rowVerdict row) | row <- candidateRows candidate]
+            <> ["ledger\t" <> ledgerDigestValue]
+            <> [ locusModule locus <> "\t" <> Text.pack (locusFile locus) <> ":" <> Text.pack (show (locusLine locus)) <> "\t" <> renderOperator (locusOperator locus) <> "\t" <> outcomeText outcome
+               | (locus, _, outcome) <- killRows table
+               ]
+        )
+    )
+ where
+  outcomeText outcome = case outcome of
+    Killed stage -> "killed@" <> stage
+    Survived -> "survived"
+    Stillborn _ -> "stillborn"
+    Unapplied _ -> "unapplied"
 
 -- | The seed's documentation claim: zero findings over the corpus and the named
 -- finding on every rendered negative, judged against the compiled specification
@@ -342,6 +367,7 @@ capture config spec vspec hygiene digest nonce chain (opening, closing) table le
     , candidateSpecDigest = digest
     , candidateChallenge = nonce
     , candidateChain = chain
+    , candidateReproducibleCore = ""
     , candidateRows = map row allGateCategories
     }
  where

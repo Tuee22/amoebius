@@ -109,7 +109,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 |---|---|
 | `Claim` | `checkExpr`, `bindUiProgram`, and the plan compiler on the approval-threshold example produce client and server plans equal to the oracle's rows over every `EffectClass` arm; the `ui-server` Deployment and the program ConfigMap render on the wire through `amoebius compile`; the six refusals are refused by name at their stage. The browser runtime, the server process, and live tenants are excluded. |
 | `Subject` | `Amoebius.Ui.Effect.Catalog`, `Amoebius.Ui.Expr`, `Amoebius.Ui.Check`, `Amoebius.Ui.Bind`, `Amoebius.Ui.Plan`, and `Amoebius.Dsl.Lower`, all inside the closure of `executable amoebius`. |
-| `Command` | Future public spelling is `pb validate phase 08`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 08`; the human runs `sudo amoebius-validate accept --phase 08`. The runner spawns the shipped binary for `compile` and reads the two plans and the manifest. |
+| `Command` | Future public spelling is `pb validate phase 08`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 08`; then `amoebius-validate accept --phase 08` records the receipt and applies one phase's status patch. The runner spawns the shipped binary for `compile` and reads the two plans and the manifest. |
 | `Oracle` | `test/oracle/dsl/Main.hs` holds the expected plans as literal rows over `[minBound..maxBound] :: [EffectClass]` — dispatch row, permission, audit class each — and depends on no `amoebius` library. |
 | `Positive controls` | The approval-threshold program and its parameter sibling: plans equal to the oracle rows; the `ui-server` Deployment and ConfigMap present in the manifest with the program digest. |
 | `Paired negatives` | `UnboundPort`, `RequirementWithoutPort`, `GuardGap`, `TypeMismatch`, `UnboundedFuel`, and `UnknownFunction`, each refused at its exact stage and name with the accepted twin; `Apply CmpNat` over a text value is a compile-negative twin. |
@@ -124,7 +124,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 | `Legacy closure` | `LTD-DSL-006` closes here. `LTD-SRC-004` closes its language share here; its generated-artifact share is re-homed to Phase 72 under `LTD-UI-001`. |
 | `Predecessor` | The Phase-7 receipt in certification generation 2, chained by the digest of Phase 7's product closure plus the verifier and governance digests. |
 | `Residue` | Phase 9 and every phase from 50 onward remain explicit limitations; `LTD-UI-001` is visible residue until Phases 70 and 72. |
-| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and the human's `accept` records it. |
+| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and `accept` records it. |
 
 ## Doctrine adopted
 
@@ -227,7 +227,7 @@ Implement the three edits.
 **Independent Validation**: The compiled specification equals the fenced block above; `verifySpec` accepts it; the corpus contains the Phase-7 corpus and at least two new pairs.
 **Oracle**: `test/oracle/runner/Main.hs` states the expected specification digest from literals.
 **Legacy IDs**: none
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through the human's `accept`
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through `accept`
 
 ### Objective
 
@@ -239,7 +239,7 @@ Author the specification the runner executes for this phase.
 
 ### Validation
 
-Run `preview phase 08` and require every row green; require the human's `accept` to record exactly one
+Run `preview phase 08` and require every row green; require `accept` to record exactly one
 phase's patch.
 
 ### Remaining Work

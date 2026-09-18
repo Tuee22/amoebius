@@ -73,7 +73,7 @@ ignored `.build/**` paths. Operator values are external or untracked inputs; the
 ## Validation Outcome and Ordering
 
 A complete qualified phase-gate pass is sufficient to mark that phase and its sprints Done.
-Recording the result is the human's `accept`, a mechanical status-only update after the exact current gate
+Recording the result is `accept`, a mechanical status-only update after the exact current gate
 passes. Missing independent oracles, paired negatives, changed-production-subject mutants, complete discovery,
 required external observation, explicit residue, or the immediate predecessor's gate pass must make the gate
 fail rather than be represented as a pass. A smaller component check, fixture count, digest, or partial run is
@@ -83,12 +83,14 @@ status procedure.
 
 Within one phase, a sprint's `Blocked by` edge declares implementation order, not a request for intermediate
 user confirmation. Agents continue through implementation-ready sprint seams and run
-`amoebius-validate preview phase NN`, which runs the complete gate and mints nothing. An agent never edits a
-status line, never applies a status patch, and stops at the phase boundary. The human runs
-`sudo amoebius-validate accept --phase NN`; one phase advances per accept. A reset is receipt-bearing and
-names both a validator gap and a product-gap legacy identifier. A component diagnostic or partial candidate
-must never be presented as a pass
-([DL-0009](documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition)).
+`amoebius-validate preview phase NN`, which runs the complete gate and mints nothing, then
+`amoebius-validate accept --phase NN`, which runs the same gate and, when every row is green, records the
+receipt and applies exactly one phase's status patch. An agent never edits a status line by hand; only the
+verifier's `accept` and `reset` write status, and one phase advances per accept. A reset is receipt-bearing
+and names both a validator gap and a product-gap legacy identifier. A component diagnostic or partial
+candidate must never be presented as a pass
+([DL-0009](documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition),
+([DL-0013](documents/decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible))).
 
 Four ordering barriers are named by role, never by ordinal. `DSL_BARRIER` is the hardware-free end-to-end DSL
 gate; `BOOTSTRAP_HANDOFF` validates the bounded `pb`-to-Haskell handoff; `HOST_ENSURE` is the hardware-free
@@ -115,7 +117,7 @@ validate its own handoff. `HOST_ENSURE` remains a hardware-free Haskell host-ens
 boundaries; `FIRST_HARDWARE` is the first hardware-bearing validation phase.
 
 Validation must follow numeric phase order and fail closed when a predecessor gate result or any required test
-boundary is absent. One `accept` closes one phase. Repeated accepts are separate human acts; none skips a
+boundary is absent. One `accept` closes one phase. Repeated accepts are separate runs; none skips a
 phase, shares one candidate across phases, or treats a later result as evidence for an earlier one.
 
 Numeric order governs integrated gate execution and status transitions. Hardware-free implementation for a
@@ -123,13 +125,15 @@ later phase may be prepared ahead of the validated frontier only after that phas
 independent oracle exist; such work yields component diagnostics only, must not use `pb`, and cannot begin live
 or hardware-bearing effects or mint phase evidence before its predecessor gate passes.
 
-## Host Precondition
+## Reproducibility
 
-Agent sessions run under a user identity with no sudoers entry and no read access to the receipt-issuer key.
-Receipt issuance, reseed, reset, govern, and demo are human acts from a password-sudo account. An LLM must not
-run `sudo`, must not rely on a cached sudo timestamp, and must report a shell in which `sudo -n true` succeeds
-as a host defect before any gate is accepted
-([DL-0010](documents/decision_log.md#dl-0010--host-precondition-for-agent-sessions)).
+A receipt is not a signature; it is a content-addressed record of one runner execution whose reproducible
+digest any later run must re-derive. `amoebius-validate replay` re-runs a recorded gate at the current
+verifier and governance digests: a green re-run refreshes the record, a red one voids the receipt, and the
+next gate refuses `PredecessorNotReproduced` until the replay is green. The verifier never requires or uses `sudo`, holds no issuer key,
+and keeps its store beneath the ignored `.build/**` tree; the receipt digest that justifies a Done status is
+committed beside that status in the phase document, so a wiped store is re-established by replay, never by
+trust ([DL-0013](documents/decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible)).
 
 ## Doctrine Freeze
 

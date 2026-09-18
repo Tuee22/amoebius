@@ -31,7 +31,7 @@ The complete language pipeline belongs to
   - [2.1 GenesisTrust is an irreducible root](#21-genesistrust-is-an-irreducible-root)
   - [2.2 The bounded `pb` handoff](#22-the-bounded-pb-handoff)
   - [2.3 The handoff supervisor is resource-bounded](#23-the-handoff-supervisor-is-resource-bounded)
-  - [2.4 The host precondition](#24-the-host-precondition)
+  - [2.4 The reproducibility rule](#24-the-reproducibility-rule)
 
 ---
 
@@ -141,14 +141,13 @@ The [legacy register](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md#3-v
 records the historical resource failure under `LTD-VAL-007`. This rule states required behaviour and does not
 attribute a passing handoff or completed repair.
 
-### 2.4 The host precondition
+### 2.4 The reproducibility rule
 
-Agent sessions run under a user identity with no sudoers entry and no read access to the receipt-issuer key.
-Receipt issuance, reseed, reset, govern, and demo are human acts from a password-sudo account, and the
-supervisor refuses to issue when agent environment markers are present
-([DL-0010](../decision_log.md#dl-0010--host-precondition-for-agent-sessions)). A cached sudo timestamp in an
-agent shell is a host defect the human corrects before any gate is accepted; the rule is stated for agents in
-[`AGENTS.md`](../../AGENTS.md#host-precondition) and enforced by the runner's tripwire, owed by
+A receipt carries no signature and needs no privileged identity. Its authority is that any later run of the
+verifier re-derives its reproducible digest; `amoebius-validate replay` does so for every Done phase whose
+store record is absent or belongs to another generation, and a receipt that does not reproduce is void
+([DL-0013](../decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible)). The rule is stated for agents in
+[`AGENTS.md`](../../AGENTS.md#reproducibility) and enforced by the runner's preflight, owed by
 [Phase 0](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md).
 
 ---
@@ -221,9 +220,9 @@ are data to validate, not authority to mint observations. Qualification must exp
 executable replacement, expectation edits, fabricated process identities, and missing dependency observations.
 
 Every validator leaves tracked files unchanged. After a qualified success, it emits the exact status-only
-patch beneath the protected run root. The human's `accept` applies that patch after checking its bound
-preimage. Implementation and preview then continue through sprint seams; each phase transition is one human
-`accept`.
+patch beneath the run root. `accept` applies that patch after checking its bound preimage and records the
+reproducible receipt. Implementation and preview then continue through sprint seams; each phase transition is
+one `accept`.
 
 **What it forecloses.** A current source digest cannot compensate for an untrusted tool or a candidate-owned
 oracle. File containment cannot compensate for missing privilege separation. Even an enforced boundary still

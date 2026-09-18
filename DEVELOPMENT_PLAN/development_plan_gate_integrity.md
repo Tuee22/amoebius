@@ -39,8 +39,9 @@ Two test responsibilities remain deliberately distinct:
 2. the **oracle and harness** attempt to falsify that behaviour without importing its decision logic.
 
 The gate remains **NOT VALIDATED** until every required row passes in one qualified run under the accepted
-verifier. That complete pass is recorded as ✅ Done by the human's `accept`; an agent's `preview` records
-nothing ([DL-0009](../documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition)).
+verifier. That complete pass is recorded as ✅ Done by `accept`, which the agent runs; `preview` records
+nothing ([DL-0009](../documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition),
+([DL-0013](../documents/decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible))).
 The required `VerifiedGatePass` binds certification generation, accepted baseline, phase, source preimage,
 acquired evidence, status patch, and projected source postimage. Its authenticated custody receipt binds the
 execution context, predecessor, ordered observations, and scoped limitations. Package visibility and hashes
@@ -54,20 +55,20 @@ the pre-edit snapshot.
 
 Independent oracle expectations, changed-subject qualification, and raw observations keep the test meaningful.
 They are test requirements. The validator emits the verified patch beneath `.build/**` and leaves the tracked
-tree unchanged; only after it exits may the human's `accept` recheck the preimage and apply it. One phase
-advances per accept.
+tree unchanged; only `accept` applies it, and writes the receipt's reproducible digest beside the Done status.
+One phase advances per accept.
 
 ### M.0 Accepted baseline and certification generation
 
 The generation-2 reset
 ([DL-0007](../documents/decision_log.md#dl-0007--certification-generation-2-replaces-the-validation-kernel))
 withdraws all generation-1 certification. A generation identifier is the content address of the verifier;
-a reseed is a human root act that requires a decision-log identifier, archives the prior store, and never
-deletes it. The supervisor admits only its root-owned accepted verifier, exact accepted seed, and separately
-authored custody oracle after the seven-case OS-boundary corpus passes. It emits canonical signed phase
-receipts binding candidate bytes, the verifier digest, the governance digest, the closure-based predecessor
-binding, process observations, and the projected source postimage. Unprotected diagnostic entry points remain
-refusal-only, and the supervisor refuses to issue when agent environment markers are present. The
+a generation is entered by the first `accept` or `replay` under that verifier, and the store beneath
+`.build/certification/**` keeps one directory per generation, never deleting an earlier one. The verifier
+records phase receipts binding candidate bytes, the verifier digest, the governance digest, the closure-based
+predecessor binding, process observations, and the projected source postimage; each receipt's reproducible
+digest is written beside the Done status it justifies, and `replay` re-derives it
+([DL-0013](../documents/decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible)). The
 [tracker](README.md#generation-2-reset) records the reset; editing Markdown cannot mint that authority.
 
 The accepted baseline contains Haskell requirement identities, acceptance predicates, oracle provenance,
@@ -97,8 +98,8 @@ remove, weaken, reassign, or forward-defer an accepted obligation. A changed cla
 mapping, preserved consumer obligations, and qualification of the replacement before promotion.
 
 Within accepted scope, agents implement, qualify, and preview without confirmation at sprint boundaries.
-Recording, refresh, reopening, reset, and advance are the human's acts: one `accept` per phase, and every
-reset carries a typed cause. An unresolved semantic change to accepted scope must be settled as a baseline
+Recording, refresh, reopening, reset, and advance are the verifier's acts, agent-run: one `accept` per phase,
+and every reset carries a typed cause. An unresolved semantic change to accepted scope must be settled as a baseline
 revision; it cannot become a passing candidate by editing its own expectations. Independent authorship remains
 an explicit assurance boundary, not a conclusion inferred from import names.
 
@@ -118,7 +119,7 @@ evidence cannot populate authored contract fields.
 |---|---|
 | `Claim` | One falsifiable capability statement and its explicit exclusions. |
 | `Subject` | The production `.hs` module and entry point exercised; a wrapper, manifest, or gate runner alone is not a subject. |
-| `Command` | Future public target: `pb validate phase NN`. Before the `BOOTSTRAP_HANDOFF` gate passes, the candidate command is the exact source-bound verifier invoked directly: `amoebius-validate preview phase NN` by the agent, which mints nothing, and `sudo amoebius-validate accept --phase NN` by the human, which signs and applies one phase's patch; invoking `pb` is inadmissible evidence. The runner spawns the shipped `amoebius` binary as a child for every product command. Phase 0 binds the narrow non-numbered `GenesisTrust` local-custody token, which does not authenticate the actual compiler executable bytes, derivation, loader, broader host, or reproducibility. Phase 1 owns those acquisition/provenance claims for subsequent builds; neither claim lets a binary prove its own compiler. Phase 50 starts the verifier directly and has it invoke `pb` as the externally observed child subject; the public spelling cannot supervise its own handoff. Phase 51 onward may use `pb` only while binding the current Phase-50 gate pass. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
+| `Command` | Future public target: `pb validate phase NN`. Before the `BOOTSTRAP_HANDOFF` gate passes, the candidate command is the exact source-bound verifier invoked directly: `amoebius-validate preview phase NN`, which mints nothing, and `amoebius-validate accept --phase NN`, which records the reproducible receipt and applies one phase's patch, both agent-run; invoking `pb` is inadmissible evidence. The runner spawns the shipped `amoebius` binary as a child for every product command. Phase 0 binds the narrow non-numbered `GenesisTrust` local-custody token, which does not authenticate the actual compiler executable bytes, derivation, loader, broader host, or reproducibility. Phase 1 owns those acquisition/provenance claims for subsequent builds; neither claim lets a binary prove its own compiler. Phase 50 starts the verifier directly and has it invoke `pb` as the externally observed child subject; the public spelling cannot supervise its own handoff. Phase 51 onward may use `pb` only while binding the current Phase-50 gate pass. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
 | `Oracle` | A separately authored `.hs` oracle module, its accepted baseline identity, independence boundary, and provenance. The candidate cannot substitute its own expectations. |
 | `Positive controls` | A closed named corpus and the exact observations expected for each member. |
 | `Paired negatives` | For every foreclosed dimension, a minimally different positive/negative pair and the exact rejection locus and reason. |
@@ -301,8 +302,8 @@ independently acquired build graph; candidate declarations cannot remove modules
 edges, unknown impact, a changed verifier, or a changed governance baseline refuses reuse.
 
 Unchanged closures may reuse authenticated evidence. Changed closures and affected consumers must run their
-acceptance and qualification again, in table order. A verifier change is a new generation and invalidates
-every receipt until the human reseeds. An unrelated edit does not force full-prefix replay.
+acceptance and qualification again, in table order. A verifier change is a new generation and voids every
+receipt until `replay` re-derives it. An unrelated edit does not force full-prefix replay.
 
 A Done phase has one additional legal execution mode: **receipt refresh**. It reruns the complete
 qualified gate against the exact current source, changes no tracked status, emits an identity status projection,
@@ -339,8 +340,9 @@ The required `verifyPublishedGatePass` authenticates custody, generation, accept
 qualification, and complete raw observations before accepting a publication. It also reacquires the canonical
 non-symlink file and exact bytes. Neither a copied file nor a package-hidden constructor proves execution.
 
-Only the accepted verifier may issue `VerifiedGatePass`. Source must remain unchanged during execution, every
-required identity and context must be canonical, and all eighteen rows must satisfy their accepted predicates.
+Only a runner execution whose reproducible digest is recorded may advance a phase. Source must remain
+unchanged during execution, every required identity and context must be canonical, and all eighteen rows must
+satisfy their accepted predicates.
 The typed predecessor is `GenesisTrust` for Phase 0 or the compatible immediate-predecessor receipt otherwise.
 The token binds the exact proposed patch and projected source postimage.
 
@@ -382,18 +384,18 @@ reachable only through a direct-source test seam. The validator does not acquire
 the repository, write a status journal, exchange tracked files, roll back a partial tracked edit, or recover one.
 After emission it re-acquires the Git source snapshot and refuses if that capture is unavailable or differs
 from the opening source identity. A successful gate therefore satisfies tracked-tree immutability for that run.
-After the process exits, the human's `accept` re-acquires the tracked preimage, prints the Claim, the
+`accept` re-acquires the tracked preimage, prints the Claim, the
 specification digest, the kill table, the spine outcome, and the corpus delta, and applies the exact emitted
 patch. A stale preimage, symlink, unexpected target bytes, widened target set, patch tamper, or postimage
-mismatch refuses that application and requires a fresh candidate. An agent's `preview` performs everything
-up to the signature and applies nothing. Cross-platform crash recovery belongs to the actor's ordinary
+mismatch refuses that application and requires a fresh candidate. `preview` performs everything
+up to the receipt and applies nothing. Cross-platform crash recovery belongs to the actor's ordinary
 source-control workflow, not to Phase 0's validation subject.
 
 The gate therefore compares the contract, qualification observations, clean observations, source diff,
 unverified residue, predecessor result, and exact proposed status-only patch before the token can exist.
 When every required row is green and every required refusal was observed, the verified result is sufficient to
-authorize that patch for the human's `accept`. These structural paths do not themselves prove that any current
-phase qualified or passed. The human repeats the accept once per phase; no other actor records a transition.
+authorize that patch for `accept`. These structural paths do not themselves prove that any current
+phase qualified or passed. `accept` records one phase per run; no other path records a transition.
 
 ### M.7 Representative corpora and partitions
 
@@ -627,11 +629,12 @@ normative tree and the mechanical file classification. The development plan adds
    product/runtime identities.
 4. Every root is justified by what its contents are and who consumes them, not by the phase or build target
    that first needed it.
-5. The validator's roots are `src/gate-spec`, `src/plan-decisions`, `src/doc-check`, and the retained
-   `src/validation-kernel`; the product gains `src/vocabulary`, `src/ui-core`, and `src/extension-spec`; each
-   oracle area has one exclusive directory whose entry module is named exactly, for example
-   `test/oracle/dsl/Main.hs`; and there are two executables, `amoebius` and `amoebius-validate`, with no
-   product-to-validator dependency edge. Owed by [Phase 0](phase_00_documentation_suite.md).
+5. **Observed implementation** ([GateSpec:documentation_suite]). The validator's roots are `src/gate-spec`,
+   `src/plan-decisions`, `src/doc-check`, and the retained `src/validation-kernel`; the product gains
+   `src/vocabulary`, `src/ui-core`, and `src/extension-spec` as later phases deliver them; each oracle area
+   has one exclusive directory whose entry module is named exactly, for example `test/oracle/dsl/Main.hs`;
+   and there are two executables, `amoebius` and `amoebius-validate`, with no product-to-validator
+   dependency edge.
 
 These rules make repository closure a prerequisite to evidence. A gate cannot certify behaviour while
 silently consuming a condemned source language, a pre-generated artifact, or a legacy fallback.

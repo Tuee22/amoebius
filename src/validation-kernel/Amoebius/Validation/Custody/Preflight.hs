@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- | The preflight refusals (gate_runner_doctrine.md section 5). The facts are
--- gathered from the tree, the store, and the host; the decision is a pure
+-- | The preflight refusals (gate_runner_doctrine.md section 5; DL-0013). The facts
+-- are gathered from the tree, the store, and the host; the decision is a pure
 -- function of them so every refusal has a paired negative the runner suite can
 -- state as a value.
 module Amoebius.Validation.Custody.Preflight
@@ -26,27 +26,25 @@ data PreflightRefusal
   = StatusSurfaceDirty
   | PredecessorNotCommitted
   | StatusWithoutReceipt [Int]
-  | KernelVerifierDiverged
+  | PredecessorNotReproduced [Int]
   | GovernanceUnaccepted Text
   | HardwareBeforeBarrier
   | SubstrateAbsent Substrate
   | KernelOverBudget Text
   | SpecWeakened [Text]
-  | GenerationAbsent
   deriving (Eq, Ord, Show)
 
 renderPreflightRefusal :: PreflightRefusal -> Text
 renderPreflightRefusal refusal = case refusal of
-  StatusSurfaceDirty -> "StatusSurfaceDirty: the status surface differs from the last accepted postimage"
-  PredecessorNotCommitted -> "PredecessorNotCommitted: the predecessor receipt's postimage is not an ancestor of the current tree"
+  StatusSurfaceDirty -> "StatusSurfaceDirty: the status surface differs from the last recorded postimage"
+  PredecessorNotCommitted -> "PredecessorNotCommitted: the predecessor receipt's tree is not an ancestor of the current tree"
   StatusWithoutReceipt phases -> "STATUS-WITHOUT-RECEIPT: " <> Text.intercalate "," (map (Text.pack . show) phases)
-  KernelVerifierDiverged -> "KERNEL-VERIFIER-DIVERGED: the tree's verifier digest differs from the accepted seed's"
+  PredecessorNotReproduced phases -> "PredecessorNotReproduced: no store record of this generation re-derives the receipt digest recorded for phase " <> Text.intercalate "," (map (Text.pack . show) phases) <> "; run `amoebius-validate replay`"
   GovernanceUnaccepted detail -> "GOVERNANCE-UNACCEPTED: " <> detail
   HardwareBeforeBarrier -> "HARDWARE-BEFORE-BARRIER: no DSL_BARRIER receipt exists"
   SubstrateAbsent substrate -> "SUBSTRATE-ABSENT: " <> renderSubstrate substrate
   KernelOverBudget detail -> "KernelOverBudget: " <> detail
   SpecWeakened dropped -> "SPEC-WEAKENED: " <> Text.intercalate "; " dropped
-  GenerationAbsent -> "GENERATION-ABSENT: no accepted seed names this verifier"
 
 data HostFacts = HostFacts
   { hostSubstrates :: [Substrate]
@@ -74,13 +72,9 @@ data PreflightFacts = PreflightFacts
   { factsSpec :: GateSpec
   , factsSurfaceDigest :: Text
   , factsAcceptedPostimage :: Maybe Text
-  , factsGenerationPresent :: Bool
   , factsPredecessorCommitted :: Maybe Bool
   , factsDoneWithoutReceipt :: [Int]
-  , factsVerifierDigest :: Text
-  , factsSeedVerifierDigest :: Maybe Text
-  , factsGovernanceDigest :: Text
-  , factsSeedGovernanceDigest :: Maybe Text
+  , factsPredecessorsNotReproduced :: [Int]
   , factsFrozenFindings :: [Text]
   , factsBarrierReceipt :: Bool
   , factsHost :: HostFacts
@@ -93,12 +87,10 @@ data PreflightFacts = PreflightFacts
 preflight :: PreflightFacts -> [PreflightRefusal]
 preflight facts =
   concat
-    [ [GenerationAbsent | not (factsGenerationPresent facts)]
-    , [StatusSurfaceDirty | Just accepted <- [factsAcceptedPostimage facts], accepted /= factsSurfaceDigest facts]
+    [ [StatusSurfaceDirty | Just accepted <- [factsAcceptedPostimage facts], accepted /= factsSurfaceDigest facts]
     , [PredecessorNotCommitted | factsPredecessorCommitted facts == Just False]
     , [StatusWithoutReceipt (factsDoneWithoutReceipt facts) | not (null (factsDoneWithoutReceipt facts))]
-    , [KernelVerifierDiverged | Just seed <- [factsSeedVerifierDigest facts], seed /= factsVerifierDigest facts]
-    , [GovernanceUnaccepted "the governance digest differs from the seed's" | Just seed <- [factsSeedGovernanceDigest facts], seed /= factsGovernanceDigest facts]
+    , [PredecessorNotReproduced (factsPredecessorsNotReproduced facts) | not (null (factsPredecessorsNotReproduced facts))]
     , [GovernanceUnaccepted (Text.intercalate "," (factsFrozenFindings facts)) | not (null (factsFrozenFindings facts))]
     , [HardwareBeforeBarrier | gateRole spec == HardwareGate, not (factsBarrierReceipt facts)]
     , [SubstrateAbsent (gateSubstrate spec) | gateSubstrate spec `notElem` hostSubstrates (factsHost facts)]

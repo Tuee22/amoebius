@@ -110,7 +110,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 |---|---|
 | `Claim` | The infernix corpus example, rewritten by the runner with a nonce, passes through `amoebius compile` and `amoebius apply --executor fake` with infernix as one `ExtensionSpec` in `LinkedExtensions`. The unlinked twin is refused as `UnboundCapability` at the exact app; the Cuda-on-cpu twin is refused as `LaneUnavailable`; every evasion form is rejected by AST node; every object carries an attested scope. Children and UI are excluded. |
 | `Subject` | The six modules named in the gate specification, every one inside the closure of `executable amoebius`. `Amoebius.Dsl.Lower` is re-subjected because binding now resolves needs against the linked set. |
-| `Command` | Future public spelling is `pb validate phase 06`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 06`; the human runs `sudo amoebius-validate accept --phase 06`. The runner spawns the shipped `amoebius` binary as a child for `render-examples`, `compile`, `astcheck`, and `apply --executor fake`. |
+| `Command` | Future public spelling is `pb validate phase 06`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 06`; then `amoebius-validate accept --phase 06` records the receipt and applies one phase's status patch. The runner spawns the shipped `amoebius` binary as a child for `render-examples`, `compile`, `astcheck`, and `apply --executor fake`. |
 | `Oracle` | `test/oracle/dsl/Main.hs` parses the decoded dump, the manifest, the astcheck verdict, and the fake's stdin; it states the provider objects, the scope labels, and the per-node verdict from literal rows and depends on no `amoebius` library. |
 | `Positive controls` | Every accepted corpus example renders provider objects equal to its oracle row; the fake's stdin byte-equals the compile output; the nonce is recovered from all outputs; the admitted extension surface passes the AST checker with an empty rejection list. |
 | `Paired negatives` | `UnboundCapability` refused at the exact app with the linked twin accepted; `LaneUnavailable` refused at lowering with the cuda sibling accepted; each named evasion form rejected at its AST node with the admitted twin accepted; `UnattestedScope` refused at the constructor with the attested twin accepted. |
@@ -125,7 +125,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 | `Legacy closure` | `LTD-DSL-005`, `LTD-DSL-007`, and `LTD-DSL-008` close here. |
 | `Predecessor` | The Phase 5 receipt in certification generation 2, chained by the digest of Phase 5's product closure plus the verifier and governance digests. |
 | `Residue` | Phases 7 through 9 and every phase from 50 onward remain explicit limitations; the parked calculi that no subject links remain visible under `LTD-LIB-001` until Phase 9 decides them; `LTD-HELPER-001` remains visible until Phase 50. |
-| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and the human's `accept` records it. |
+| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and `accept` records it. |
 
 ## Doctrine adopted
 
@@ -264,7 +264,7 @@ Implement the import site and the closure check.
 **Independent Validation**: The compiled specification equals the fenced block above; `verifySpec` accepts it; the corpus module contains the Phase 5 corpus. A specification whose negatives omit `AstEvasion` is refused as `SPEC-WEAKENED`.
 **Oracle**: `test/oracle/runner/Main.hs` states the expected specification digest and closure from literals.
 **Legacy IDs**: none
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through the human's `accept`
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through `accept`
 
 ### Objective
 
@@ -277,7 +277,7 @@ Author the specification the runner executes for this phase.
 
 ### Validation
 
-Run `preview phase 06` and require every row green; require the human's `accept` to record exactly one
+Run `preview phase 06` and require every row green; require `accept` to record exactly one
 phase's patch.
 
 ### Remaining Work

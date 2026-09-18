@@ -80,7 +80,7 @@ remains phase-local and cannot be supplied by this prose.
 |---|---|
 | `Claim` | Given the Phase 9 receipt digest, `pb` launched by the runner makes only the platform distinction, establishes the contained toolchain offline and serially, builds the exact source-bound `amoebius`, and execs it with `compile <corpus example>` unchanged. The compile output byte-equals the barrier's recorded output for that example, and the SHA-256 of the `pb` bytes equals the pin in `Amoebius.Host.Handoff`. Python never interprets a command, policy, result, or verdict. |
 | `Subject` | `Amoebius.Host.Handoff` in `src/Amoebius/Host/Handoff.hs` — the pin, the adapter contract, the challenge length, and the resource envelope — the exact `pb/__main__.py` bytes with their single injected `BootstrapAdapter`, and the `validate` exec-delegation in `app/amoebius/Main.hs`. No other tracked `pb/**` path is admitted. |
-| `Command` | Future public spelling is `pb validate phase 50`, which cannot supervise its own handoff. The agent runs `amoebius-validate preview phase 50`; the human runs `sudo amoebius-validate accept --phase 50`. The runner's `ProcessObserver` launches `pb` as the child with `compile <corpus example>`; `pb` forwards it unchanged; `amoebius validate` delegates by exec to `amoebius-validate`. |
+| `Command` | Future public spelling is `pb validate phase 50`, which cannot supervise its own handoff. The agent runs `amoebius-validate preview phase 50`; then `amoebius-validate accept --phase 50` records the receipt and applies one phase's status patch. The runner's `ProcessObserver` launches `pb` as the child with `compile <corpus example>`; `pb` forwards it unchanged; `amoebius validate` delegates by exec to `amoebius-validate`. |
 | `Oracle` | `test/oracle/host/Main.hs` restates the pin, the expected argv, the process-replacement transcript, the challenge length, the resource envelope, and the corpus example's compile digest from literals; it depends on no `amoebius` library. |
 | `Positive controls` | The clean handoff on the host platform; absent and present verified acquisition; the contained environment; the exact serial offline build; the corpus compile through the handoff; empty, help, version, and unknown argv forwarded unchanged. |
 | `Paired negatives` | A changed `pb` byte, an ambient `PATH`, a network read, a rewritten argv, a return instead of exec, a wrong-length challenge, an endless entropy source, and a missing resource limit — each refused with its exact constructor and zero forbidden effects, with the twin accepted. |
@@ -95,7 +95,7 @@ remains phase-local and cannot be supplied by this prose.
 | `Legacy closure` | `LTD-VAL-007`, `LTD-VAL-008`, and `LTD-HELPER-001` close here through the compiled inventory; the gate consumes the Phase 9 receipt whose source snapshot has zero source-migration queries. |
 | `Predecessor` | The Phase 9 receipt in certification generation 2, chained by the digest of Phase 9's product closure plus the verifier and governance digests. |
 | `Residue` | Other native platforms, real package-manager and permission fidelity, Phase-51 host ensure, container engines, VMs, clusters, images, registry, hardware, and every product claim after the handoff remain explicit limitations. |
-| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and the human's `accept` records it. |
+| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and `accept` records it. |
 
 ## Resource provision
 
@@ -244,7 +244,7 @@ Implement the envelope declaration.
 **Independent Validation**: The compiled specification verifies and its `BinaryFact` names `amoebius compile` through the handoff; the complete handoff succeeds with exact custody; the corpus compile digest equals the barrier's; no interpreter other than `pb` appears on the control-plane deploy path in the observer's trace.
 **Oracle**: `test/oracle/runner/Main.hs` for the specification; `test/oracle/host/Main.hs` for the compile digest.
 **Legacy IDs**: `LTD-HELPER-001` — the untracked helper on the control-plane deploy path
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through the human's `accept`
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through `accept`
 
 ### Objective
 
@@ -259,7 +259,7 @@ retire the untracked helper by reaching the deploy path only through the shipped
 
 ### Validation
 
-Run `preview phase 50` and require every row green; require the human's `accept` to record exactly one
+Run `preview phase 50` and require every row green; require `accept` to record exactly one
 phase's patch.
 
 ### Remaining Work

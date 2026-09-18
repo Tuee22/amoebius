@@ -27,7 +27,7 @@ import Amoebius.Doc.Types
   )
 import Amoebius.Plan.PhaseIdentity qualified as PhaseIdentity
 import Amoebius.Plan.StatusFrontier qualified as Status
-import Data.Char (isAlpha, isAlphaNum, isDigit, isSpace)
+import Data.Char (isAlpha, isAlphaNum, isDigit, isHexDigit, isSpace, isUpper)
 import Data.List (findIndex, sortOn)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
@@ -901,6 +901,7 @@ checkPhaseStructure :: SemanticScope -> PhaseDocument -> [Finding]
 checkPhaseStructure scope phase =
   titleFindings
     <> statusFindings
+    <> receiptFindings
     <> summaryFindings
     <> sectionShapeFindings phase
     <> contentsStatusFindings phase
@@ -933,6 +934,22 @@ checkPhaseStructure scope phase =
     , "**Status**:" `Text.isPrefixOf` Text.stripStart line
     ]
   rawExpectedStatusCount = length (filter (== expectedStatus) (phaseRawLines phase))
+  expectedDone = Status.phaseStatusAt (statusFrontier scope) number == Status.Done
+  statusNonBlank = [Text.strip line | body <- statusBodies, (_, line) <- body, not (Text.null (Text.strip line))]
+  receiptLines = [line | line <- statusNonBlank, "**Receipt**:" `Text.isPrefixOf` line]
+  wellFormedReceipt line = case Text.stripPrefix "**Receipt**: " line of
+    Just digest -> Text.length digest == 64 && Text.all isHexDigit digest && Text.all (not . isUpper) digest
+    Nothing -> False
+  receiptDirectlyAfterStatus = case statusNonBlank of
+    (_ : second : _) -> "**Receipt**: " `Text.isPrefixOf` second
+    _ -> False
+  receiptFindings =
+    [ finding "PLAN-STATUS-RECEIPT-MISSING" path "a Done phase carries exactly one `**Receipt**: <sha256>` line directly after its status line"
+    | expectedDone, length receiptLines /= 1 || not (all wellFormedReceipt receiptLines) || not receiptDirectlyAfterStatus
+    ]
+      <> [ finding "PLAN-STATUS-RECEIPT-UNEXPECTED" path "only a Done phase carries a `**Receipt**:` line"
+         | not expectedDone, not (null receiptLines)
+         ]
   statusFindings =
     guardedStatusFindings
   guardedStatusFindings =

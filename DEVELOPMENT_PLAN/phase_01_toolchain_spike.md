@@ -38,7 +38,7 @@ in product code. Its predecessor is [Phase 0](phase_00_documentation_suite.md).
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+🔄 Active — NOT VALIDATED.
 
 The contract is reopened under [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) by
 [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice): the subject moves
@@ -102,7 +102,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 |---|---|
 | `Claim` | From `GenesisTrust` and its seven pinned files, two contained acquisitions produce the pinned compiler and package tool, and `amoebius toolchain-report` prints executable, archive, and plan digests equal to the pins the oracle restates. The retained probe set builds offline and serially and prints the oracle's expected outputs. Network, host, product, and source-closure claims are excluded. |
 | `Subject` | The six stage modules named in the gate specification, the `toolchain-report` subcommand in `app/amoebius/Main.hs`, and the maintained fork modules beneath `src/vendor/**`. Every subject is inside the closure of `executable amoebius`. |
-| `Command` | Future public spelling is `pb validate phase 01`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 01`; the human runs `sudo amoebius-validate accept --phase 01`. The runner spawns the shipped `amoebius` binary as a child for `toolchain-report`; every Cabal child carries `--offline` and `--jobs=1`. |
+| `Command` | Future public spelling is `pb validate phase 01`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 01`; then `amoebius-validate accept --phase 01` records the receipt and applies one phase's status patch. The runner spawns the shipped `amoebius` binary as a child for `toolchain-report`; every Cabal child carries `--offline` and `--jobs=1`. |
 | `Oracle` | `test/oracle/toolchain/Main.hs` restates the seven pins, the compiler and package-tool identities, the expected probe outputs, and the refusal loci from literals; it depends on no `amoebius` library. |
 | `Positive controls` | Publisher-signature verification of the pinned manifests, two contained acquisitions agreeing on executable identity and plan, the probe set linked and executed, the positive decode, and the unperturbed simulation terminal state. |
 | `Paired negatives` | A mistyped decode case, a perturbed simulation schedule, a missing required dependency, a mutable acquisition identity, a tracked foreign probe input, a top-level vendor reintroduction, and a tracked resolution output — each refused at its exact locus with its twin accepted. |
@@ -117,7 +117,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 | `Legacy closure` | `LTD-BOOT-001`, `LTD-SRC-007`, and `LTD-SRC-009` close here through the compiled inventory; the due-count for every other identifier is zero. |
 | `Predecessor` | The Phase-0 receipt in certification generation 2, chained by the digest of Phase 0's product closure plus the verifier and governance digests. |
 | `Residue` | `GenesisTrust` remains the explicit local-custody assumption, and the publisher keyring is an operator-supplied input that is trusted rather than authenticated. Phase-2 source closure and every product and hardware claim remain explicit limitations. |
-| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and the human's `accept` records it. |
+| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and `accept` records it. |
 
 ## Resource provision
 
@@ -140,9 +140,9 @@ documentation checker refuses a block that differs from it. Execution evidence r
 
 ## Sprints
 
-## Sprint 1.1: GenesisTrust-bound toolchain acquisition ⏸️
+## Sprint 1.1: GenesisTrust-bound toolchain acquisition 🔄
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Active — NOT VALIDATED
 **Implementation**: `src/Amoebius/Toolchain/Pins.hs` and `src/Amoebius/Toolchain/Acquire.hs`
 **Blocked by**: [Phase 0](phase_00_documentation_suite.md) gate pass
 **Independent Validation**: Two contained acquisitions from the seven pinned files that agree on compiler and package-tool executable identity and on the elaborated plan are the positive control. A missing pin, a digest mismatch, a signature mismatch, an ambient-network read, and a disagreeing second acquisition are paired negatives refused by name. A generated mutant in `Amoebius.Toolchain.Pins` is killed by the oracle's pin comparison.
@@ -353,7 +353,7 @@ Implement the provenance value and the refusals.
 **Independent Validation**: `amoebius toolchain-report` prints the digests and probe outputs the oracle restates; the compiled specification equals the fenced block above; a dropped compatibility allowance is refused at the resolution locus; a stanza whose module map disagrees with the subjects is refused at discovery.
 **Oracle**: `test/oracle/toolchain/Main.hs` for the report; `test/oracle/runner/Main.hs` for the specification digest.
 **Legacy IDs**: none due here beyond the closures recorded above
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through the human's `accept`
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through `accept`
 
 ### Objective
 
@@ -369,7 +369,7 @@ is the only run over the final source.
 
 ### Validation
 
-Run `preview phase 01` and require every row green; require the human's `accept` to record exactly one
+Run `preview phase 01` and require every row green; require `accept` to record exactly one
 phase's patch.
 
 ### Remaining Work

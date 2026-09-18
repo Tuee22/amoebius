@@ -242,7 +242,13 @@ checkHonestyCitations corpus =
  where
   statuses = Map.fromList [(path, phaseStatusOf contents) | (path, contents) <- corpus, "DEVELOPMENT_PLAN/phase_" `isPrefixOf` path]
   paragraphFindings path paragraph
-    | observed = [finding "DOC-HONESTY-CITATION" location "an observed-implementation paragraph carries exactly one [GateSpec:<id>] or [example:<name>] citation" | citationCount /= 1]
+    | observed =
+        [finding "DOC-HONESTY-CITATION" location "an observed-implementation paragraph carries exactly one [GateSpec:<id>] or [example:<name>] citation" | citationCount /= 1]
+          <> [ finding "DOC-HONESTY-CITATION-UNBACKED" location ("the cited gate is not a Done phase's specification: " <> cited)
+             | citationCount == 1
+             , cited <- gateSpecCitations text
+             , not (citationBacked cited)
+             ]
     | historical =
         [finding "DOC-HONESTY-HISTORICAL" location "a historical paragraph links exactly one decision-log entry" | decisionLinkCount /= 1]
           <> [finding "DOC-HONESTY-HISTORICAL" location "a historical paragraph names no identifier and no digit" | Text.any (== '`') stripped || Text.any isDigit stripped]
@@ -261,7 +267,11 @@ checkHonestyCitations corpus =
     location = path <> ":" <> show (paragraphLine paragraph)
     observed = "Observed implementation" `Text.isPrefixOf` stripMarkers text
     historical = "Historical result (invalidated)" `Text.isPrefixOf` stripMarkers text
-    citationCount = length (filter (\t -> "GateSpec:" `Text.isPrefixOf` t || "example:" `Text.isPrefixOf` t) (Text.splitOn "[" text)) - 0
+    citationCount = length (filter (\t -> "GateSpec:" `Text.isPrefixOf` t || "example:" `Text.isPrefixOf` t) (Text.splitOn "[" text))
+    citationBacked capability =
+      case [PhaseIdentity.phaseIdentityPath row | row <- PhaseIdentity.allPhaseIdentities, PhaseIdentity.phaseIdentityCapability row == capability] of
+        (path : _) -> Map.lookup path statuses == Just "✅ Done."
+        [] -> False
     decisionLinkCount = length (filter ("decision_log.md#dl-" `Text.isInfixOf`) (linkTargets text))
     stripped = withoutLinkTargets text
     owedPhases = mapMaybe phaseLinkPath (linkTargets text)
@@ -271,6 +281,10 @@ checkHonestyCitations corpus =
             then Just ("DEVELOPMENT_PLAN/" <> Text.unpack file)
             else Nothing
 
+-- | The capabilities cited as @[GateSpec:<capability>]@ in a paragraph.
+gateSpecCitations :: Text -> [Text]
+gateSpecCitations text = [Text.takeWhile (/= ']') rest | piece <- drop 1 (Text.splitOn "[GateSpec:" text), let rest = piece]
+
 phaseStatusOf :: Text -> Text
 phaseStatusOf contents =
   case dropWhile (/= "## Phase Status") (Text.lines contents) of
@@ -279,8 +293,15 @@ phaseStatusOf contents =
       [] -> ""
     [] -> ""
 
+-- | Drop list bullets, ordinals, emphasis, and blockquote markers so the mood
+-- label is judged at the start of the paragraph's prose.
 stripMarkers :: Text -> Text
-stripMarkers = Text.dropWhile (`elem` ("*_> -" :: String))
+stripMarkers text =
+  let trimmed = Text.dropWhile (`elem` ("*_> -" :: String)) text
+      (digits, rest) = Text.span isDigit trimmed
+   in if not (Text.null digits) && ". " `Text.isPrefixOf` rest
+        then Text.dropWhile (`elem` ("*_> -" :: String)) (Text.drop 2 rest)
+        else trimmed
 
 -- | A paragraph names machinery when a backticked span is a module of this
 -- repository (@Amoebius.X…@) or a concrete repository source file (a path under

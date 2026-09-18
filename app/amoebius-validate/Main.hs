@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- | The verifier executable (gate_runner_doctrine.md section 6). It owns no
--- product command. The agent command is @preview@; @accept@, @reset@, @govern@,
--- @demo@, and @reseed@ are human acts from a root account without agent
--- environment markers (DL-0009, DL-0010). The documentation checker and its
--- rendered negatives are exposed for component diagnostics.
+-- | The verifier executable (gate_runner_doctrine.md section 6; DL-0013). It owns
+-- no product command. Every command is agent-run: @preview@ mints nothing,
+-- @accept@ records one phase, @replay@ re-derives recorded receipts, @reset@ and
+-- @demo@ record their receipts. The documentation checker and its rendered
+-- negatives are exposed for component diagnostics.
 module Main (main) where
 
 import Amoebius.Doc.Check (checkTree, discoverDocuments)
@@ -33,7 +33,7 @@ main = do
   let (options, positional) = splitOptions arguments
       config =
         (defaultCustodyConfig (option "root" "." options))
-          { custodyStore = Store (option "store" "/var/lib/amoebius-certification" options)
+          { custodyStore = Store (option "store" ".build/certification" options)
           , custodyMutantLimit = readMaybe =<< lookup "mutant-limit" options
           , custodyCabal = lookup "cabal" options
           , custodyCompiler = lookup "ghc" options
@@ -46,9 +46,8 @@ main = do
     ["spec", "phase", ordinal] | Just phase <- readMaybe ordinal -> renderSpec phase
     ["accept"] | Just phase <- readMaybe =<< lookup "phase" options -> acceptPhase config phase >>= finish
     ["reset"] | Just decision <- lookup "decision" options, Just gap <- lookup "product-gap" options -> resetGeneration config (Text.pack decision) (Text.pack (option "validator-gap" "gates measured the harness" options)) (Text.pack gap) >>= finish
-    ["govern"] | Just decision <- lookup "decision" options -> govern config (Text.pack decision) >>= finish
     ["demo"] | Just file <- lookup "file" options -> demoFile config file >>= finish
-    ["reseed"] | Just decision <- lookup "decision" options -> reseed config (Text.pack decision) >>= finish
+    ["replay"] -> replayThrough config (readMaybe =<< lookup "through" options) >>= finish
     _ -> do
       mapM_ putStrLn usage
       exitFailure
@@ -59,11 +58,10 @@ usage :: [String]
 usage =
   [ "usage: amoebius-validate <command> [--root DIR] [--store DIR] [--cabal PATH] [--ghc PATH]"
   , "  preview phase NN                      run the complete gate; mint nothing (agent)"
-  , "  accept --phase NN                     sign the receipt and apply one phase's status patch (human, root)"
+  , "  accept --phase NN                     run the gate, record the receipt, apply one phase's status patch"
+  , "  replay [--through NN]                 re-derive every Done phase's receipt for this verifier"
   , "  reset --decision DL-NNNN --product-gap LTD-XXX-NNN [--validator-gap TEXT]"
-  , "  govern --decision DL-NNNN             re-seal the frozen baseline (human, root)"
-  , "  demo --file PATH                      sign an operator-authored input (human, root)"
-  , "  reseed --decision DL-NNNN             install the generation at the verifier's content address (human, root)"
+  , "  demo --file PATH                      record the digest of an operator-authored input"
   , "  doc-check | doc-negatives [--out DIR] the documentation checker and its rendered negatives"
   , "  spec phase NN                         print the registered specification's rendering (the gate-spec block)"
   ]

@@ -119,7 +119,7 @@ implicitly discovered evidence is not a cleanroom input.
 A status transition is also generated output before it is applied. The validator gives a sealed authorized
 projection to its production writer, writes the canonical patch and its preimage/postimage identities beneath
 `.build/runs/**`, never a tracked file, and re-acquires Git source after emission. Only after the validator exits
-may the human's `accept` recheck the preimage and apply exactly that patch through the ordinary source-
+may `accept` recheck the preimage and apply exactly that patch through the ordinary source-
 control workflow.
 
 ## 2. Complete repository structure
@@ -304,8 +304,8 @@ A gate emits candidate evidence beneath `.build/runs/**` and may install a conte
 `.build/evidence-store/**`. Git contains neither. A digest establishes provenance only; it does not establish
 correctness or change phase status.
 
-Only a complete qualified phase gate may move a phase or sprint to Done or Validated. The human's `accept`
-records that result after the gate's oracle-independence checks, sabotage controls, predecessor chain, typed
+Only a complete qualified phase gate may move a phase or sprint to Done or Validated. `accept`
+records that result with a reproducible receipt ([DL-0013](../decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible)) after the gate's oracle-independence checks, sabotage controls, predecessor chain, typed
 Haskell legacy closures, and reader-facing correspondence have all been
 inspected. Doctrine does not record current validation results.
 

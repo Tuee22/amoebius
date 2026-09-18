@@ -1,19 +1,20 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- | The command surface of the verifier (gate_runner_doctrine.md section 6). The
--- agent command @preview@ runs the complete gate and mints nothing. The human
--- commands @accept@, @reset@, @govern@, @demo@, and @reseed@ issue signed records
--- into the generation store and, for @accept@, apply exactly one phase's status
--- patch. Every command reports its refusals as typed values rendered here.
+-- | The command surface of the verifier (gate_runner_doctrine.md section 6;
+-- DL-0013). Every command is agent-run. @preview@ runs the complete gate and
+-- mints nothing; @accept@ runs it again and, when every row is green, records
+-- the receipt, writes its reproducible digest beside the Done status, and
+-- applies exactly one phase's status patch; @replay@ re-derives recorded
+-- receipts; @reset@ records a receipt-bearing reset; @demo@ records an
+-- operator-authored input's digest. A receipt's authority is that it reproduces.
 module Amoebius.Validation.Custody
   ( CommandOutcome (..)
   , CustodyConfig (..)
   , acceptPhase
   , defaultCustodyConfig
   , demoFile
-  , govern
   , previewPhase
-  , reseed
+  , replayThrough
   , resetGeneration
   ) where
 
@@ -33,19 +34,17 @@ import Amoebius.Validation.Runner.Hygiene (hygieneProblems, hygieneRow)
 import Amoebius.Validation.Runner.Mutants (renderKillTable)
 import Amoebius.Validation.Runner.Observer (observe, runExit, runStdout, sha256Hex)
 import Amoebius.Validation.Runner.Spec (loadPackageGraph, verifySpec)
-import Data.List (intercalate, sortOn)
-import Data.Maybe (fromMaybe, isJust, isNothing)
+import Control.Monad (foldM)
+import Data.List (sortOn)
+import Data.Map.Strict qualified as Map
+import Data.Maybe (fromMaybe, isNothing)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as TextIO
 import Data.Time.Clock (getCurrentTime)
-import System.Directory (createDirectoryIfMissing, doesFileExist, makeAbsolute, renamePath)
-import System.Environment (lookupEnv, setEnv, unsetEnv)
-import System.Exit (ExitCode (..), exitWith)
-import System.FilePath (takeDirectory, (</>))
-import System.Posix.Process (ProcessStatus (..), forkProcess, getProcessStatus)
-import System.Posix.User (getUserEntryForName, homeDirectory, setGroupID, setUserID)
-import Text.Read (readMaybe)
+import System.Directory (doesFileExist, makeAbsolute, removePathForcibly)
+import System.Exit (ExitCode (..))
+import System.FilePath ((</>))
 
 data CustodyConfig = CustodyConfig
   { custodyRoot :: FilePath
@@ -69,22 +68,67 @@ data CommandOutcome = CommandOutcome
 refuse :: [Text] -> CommandOutcome
 refuse = CommandOutcome (ExitFailure 1)
 
--- | Resolve an ordinal to its role and specification.
+roleFor :: Int -> GateRole
+roleFor ordinal
+  | ordinal == PhaseIdentity.phaseDomainLowerOrdinal = SeedGate
+  | Just ordinal == PhaseIdentity.roleOrdinal PhaseIdentity.DslBarrier = BarrierGate
+  | maybe False (ordinal >=) (PhaseIdentity.roleOrdinal PhaseIdentity.FirstHardware) = HardwareGate
+  | otherwise = OrdinaryGate
+
+-- | Resolve an ordinal to its identity row and specification.
 resolveSpec :: Int -> Either [Text] (PhaseIdentity.PhaseIdentity, GateSpec)
 resolveSpec ordinal = do
   row <- maybe (Left ["PHASE-ABSENT: " <> Text.pack (show ordinal)]) Right (PhaseIdentity.lookupPhaseIdentity ordinal)
   let capability = PhaseIdentity.phaseIdentityCapability row
-      role
-        | ordinal == PhaseIdentity.phaseDomainLowerOrdinal = SeedGate
-        | Just ordinal == PhaseIdentity.roleOrdinal PhaseIdentity.DslBarrier = BarrierGate
-        | maybe False (ordinal >=) (PhaseIdentity.roleOrdinal PhaseIdentity.FirstHardware) = HardwareGate
-        | otherwise = OrdinaryGate
   input <- maybe (Left ["SPEC-ABSENT: no gate specification is registered for " <> capability]) Right (specInputFor capability)
-  spec <- either (Left . map renderSpecRefusal) Right (mkGateSpec role input)
+  spec <- either (Left . map renderSpecRefusal) Right (mkGateSpec (roleFor ordinal) input)
   pure (row, spec)
 
+runnerConfig :: CustodyConfig -> Int -> RunnerConfig
+runnerConfig config ordinal =
+  (defaultRunnerConfig (custodyRoot config) ordinal)
+    { runnerHygienePreflight = False
+    , runnerDocCheckCap = custodyDocCheckCap config
+    , runnerMutantLimit = custodyMutantLimit config
+    , runnerProductBinary = Nothing
+    , runnerCabal = fromMaybe "cabal" (custodyCabal config)
+    , runnerCompiler = custodyCompiler config
+    }
+
+-- | Run the gate in a fresh run root.
+runFresh :: CustodyConfig -> Int -> GateSpec -> IO (Either RunnerRefusal GateOutcome)
+runFresh config ordinal spec = do
+  let runnerSettings = runnerConfig config ordinal
+  removePathForcibly (runnerRunRoot runnerSettings)
+  runGate runnerSettings spec
+
+-- | The reproducible digest of a run: the candidate's core plus the closure,
+-- verifier, and governance digests.
+reproducibleDigest :: Text -> Text -> Text -> Text -> Text
+reproducibleDigest core closure verifier governance =
+  sha256Hex (Text.unlines ["core\t" <> core, "closure\t" <> closure, "verifier\t" <> verifier, "governance\t" <> governance])
+
+closureFor :: CustodyConfig -> GateSpec -> Text -> IO Text
+closureFor config spec verifier = do
+  graph <- loadPackageGraph (custodyRoot config)
+  verified <- verifySpec (custodyRoot config) spec
+  case (graph, verified) of
+    (Right g, Right v) -> closureDigest (custodyRoot config) g v verifier governanceDigest
+    _ -> pure "closure-unavailable"
+
+isAncestor :: FilePath -> Text -> IO Bool
+isAncestor root commit = do
+  absolute <- makeAbsolute root
+  run <- observe root "git" ["-c", "safe.directory=" <> absolute, "merge-base", "--is-ancestor", Text.unpack commit, "HEAD"]
+  pure (runExit run == ExitSuccess)
+
+headCommit :: FilePath -> IO Text
+headCommit root = do
+  absolute <- makeAbsolute root
+  Text.strip . runStdout <$> observe root "git" ["-c", "safe.directory=" <> absolute, "rev-parse", "HEAD"]
+
 -- | Gather the preflight facts for a phase.
-gatherFacts :: CustodyConfig -> Int -> GateSpec -> IO (Either Text (PreflightFacts, Maybe SeedRecord, [Receipt]))
+gatherFacts :: CustodyConfig -> Int -> GateSpec -> IO (Either Text (PreflightFacts, StatusSurface, Maybe SeedRecord, [Receipt]))
 gatherFacts config ordinal spec = do
   let root = custodyRoot config
       store = custodyStore config
@@ -99,11 +143,18 @@ gatherFacts config ordinal spec = do
       host <- hostFacts
       hygiene <- hygieneRow root Nothing (custodyDocCheckCap config)
       let frontier = recordedFrontier recorded
-          doneWithout = [phase | Just f <- [frontier], phase <- PhaseIdentity.phaseOrdinals, Status.phaseStatusAt f phase == Status.Done, phase `notElem` map receiptPhase receipts]
-          lastReceipt = case sortOn receiptIssuedAt allReceipts of
+          donePhases = [phase | Just f <- [frontier], phase <- PhaseIdentity.phaseOrdinals, Status.phaseStatusAt f phase == Status.Done]
+          doneWithout = [phase | phase <- donePhases, phase `notElem` map fst (surfaceReceipts recorded)]
+          notReproduced =
+            [ phase
+            | phase <- donePhases
+            , Just digest <- [lookup phase (surfaceReceipts recorded)]
+            , not (any (\receipt -> receiptPhase receipt == phase && receiptReproducible receipt == digest && receiptGovernanceDigest receipt == governanceDigest) receipts)
+            ]
+          lastRecord = case sortOn receiptIssuedAt allReceipts of
             [] -> Nothing
             sorted -> Just (last sorted)
-          acceptedPostimage = maybe (seedStatusPostimage <$> seed) (Just . receiptStatusPostimage) lastReceipt
+          acceptedPostimage = maybe (seedStatusPostimage <$> seed) (Just . receiptStatusPostimage) lastRecord
           predecessorReceipt = [receipt | Just p <- [PhaseIdentity.predecessorOrdinal ordinal], receipt <- receipts, receiptPhase receipt == p]
       committed <- case predecessorReceipt of
         (receipt : _) -> Just <$> isAncestor root (receiptTreeCommit receipt)
@@ -114,37 +165,49 @@ gatherFacts config ordinal spec = do
                 { factsSpec = spec
                 , factsSurfaceDigest = surfaceDigest recorded
                 , factsAcceptedPostimage = acceptedPostimage
-                , factsGenerationPresent = isJust seed
                 , factsPredecessorCommitted = committed
                 , factsDoneWithoutReceipt = doneWithout
-                , factsVerifierDigest = verifier
-                , factsSeedVerifierDigest = seedVerifierDigest <$> seed
-                , factsGovernanceDigest = governanceDigest
-                , factsSeedGovernanceDigest = seedGovernanceDigest <$> seed
+                , factsPredecessorsNotReproduced = notReproduced
                 , factsFrozenFindings = []
                 , factsBarrierReceipt = any (\receipt -> Just (receiptPhase receipt) == PhaseIdentity.roleOrdinal PhaseIdentity.DslBarrier) receipts
                 , factsHost = host
                 , factsHygieneProblems = hygieneProblems hygiene
                 , factsPreviousSpec = Nothing
                 }
+            , recorded
             , seed
             , receipts
             )
         )
 
-isAncestor :: FilePath -> Text -> IO Bool
-isAncestor root commit = do
-  absolute <- makeAbsolute root
-  run <- observe root "git" ["-c", "safe.directory=" <> absolute, "merge-base", "--is-ancestor", Text.unpack commit, "HEAD"]
-  pure (runExit run == ExitSuccess)
+-- | Ensure the generation record for the running verifier exists.
+ensureGeneration :: CustodyConfig -> Text -> Text -> StatusSurface -> IO (Either Text SeedRecord)
+ensureGeneration config verifier enteredBy recorded = do
+  let store = custodyStore config
+  existing <- latestGeneration store verifier
+  case existing of
+    Just seed -> pure (Right seed)
+    Nothing -> do
+      commit <- headCommit (custodyRoot config)
+      now <- getCurrentTime
+      let seed =
+            SeedRecord
+              { seedGeneration = verifier
+              , seedEnteredBy = enteredBy
+              , seedVerifierDigest = verifier
+              , seedGovernanceDigest = governanceDigest
+              , seedStatusPostimage = surfaceDigest recorded
+              , seedTreeCommit = commit
+              , seedIssuedAt = Text.pack (show now)
+              }
+      written <- writeSeed store seed
+      pure (either Left (const (Right seed)) written)
 
-headCommit :: FilePath -> IO Text
-headCommit root = do
-  absolute <- makeAbsolute root
-  Text.strip . runStdout <$> observe root "git" ["-c", "safe.directory=" <> absolute, "rev-parse", "HEAD"]
+renderRows :: Candidate -> [Text]
+renderRows candidate = ["row\t" <> renderGateCategory (rowCategory r) <> "\t" <> renderVerdict (rowVerdict r) | r <- candidateRows candidate]
 
--- | The agent command: preflight, the complete gate, the would-be receipt; nothing
--- is written outside the run root.
+-- | The agent command that mints nothing: preflight, the complete gate, the
+-- would-be receipt.
 previewPhase :: CustodyConfig -> Int -> IO CommandOutcome
 previewPhase config ordinal = case resolveSpec ordinal of
   Left problems -> pure (refuse problems)
@@ -152,12 +215,11 @@ previewPhase config ordinal = case resolveSpec ordinal of
     gathered <- gatherFacts config ordinal spec
     case gathered of
       Left problem -> pure (refuse [problem])
-      Right (facts, seed, _) -> do
+      Right (facts, _, _, _) -> do
         let refusals = preflight facts
-        runOutcome <- runGate (runnerConfig config ordinal seed) spec
+        runOutcome <- runFresh config ordinal spec
         pure $ case runOutcome of
-          Left refusal ->
-            CommandOutcome (ExitFailure 1) (map renderPreflightRefusal refusals <> ["RUNNER: " <> renderRefusal refusal])
+          Left refusal -> CommandOutcome (ExitFailure 1) (map renderPreflightRefusal refusals <> ["RUNNER: " <> renderRefusal refusal])
           Right outcome ->
             let candidate = outcomeCandidate outcome
                 green = null refusals && candidateGreen candidate
@@ -165,280 +227,247 @@ previewPhase config ordinal = case resolveSpec ordinal of
                   (if green then ExitSuccess else ExitFailure 1)
                   ( ["preview phase " <> Text.pack (show ordinal) <> " (" <> PhaseIdentity.phaseIdentityCapability row <> "): " <> (if green then "would pass; nothing minted" else "would not pass")]
                       <> map renderPreflightRefusal refusals
-                      <> ["row\t" <> renderGateCategory (rowCategory r) <> "\t" <> renderVerdict (rowVerdict r) | r <- candidateRows candidate]
-                      <> ["claim\t" <> gateClaim spec, "spec-digest\t" <> candidateSpecDigest candidate]
+                      <> renderRows candidate
+                      <> ["claim\t" <> gateClaim spec, "spec-digest\t" <> candidateSpecDigest candidate, "reproducible-core\t" <> candidateReproducibleCore candidate]
                       <> renderKillTable (outcomeKillTable outcome)
                   )
 
-runnerConfig :: CustodyConfig -> Int -> Maybe SeedRecord -> RunnerConfig
-runnerConfig config ordinal _ =
-  (defaultRunnerConfig (custodyRoot config) ordinal)
-    { runnerHygienePreflight = False
-    , runnerDocCheckCap = custodyDocCheckCap config
-    , runnerMutantLimit = custodyMutantLimit config
-    , runnerProductBinary = Nothing
-    , runnerCabal = fromMaybe "cabal" (custodyCabal config)
-    , runnerCompiler = custodyCompiler config
-    }
-
--- | Run the gate as the human who invoked sudo, never as root: fork, drop to the
--- caller's identity with the caller's home and tool paths, run the gate, and
--- leave the candidate, kill table, and outcome beneath the run root for the
--- privileged parent to read. Root never compiles, and the caller's build store
--- is the one the preview used.
-runGateAsCaller :: CustodyConfig -> Int -> GateSpec -> IO (Either Text (Text, Text, Text, Text))
-runGateAsCaller config ordinal spec = do
-  uidText <- lookupEnv "SUDO_UID"
-  gidText <- lookupEnv "SUDO_GID"
-  user <- lookupEnv "SUDO_USER"
-  case (uidText >>= readMaybe, gidText >>= readMaybe, user) of
-    (Just uid, Just gid, Just name) -> do
-      entry <- getUserEntryForName name
-      let home = homeDirectory entry
-          runRoot = runnerRunRoot (runnerConfig config ordinal Nothing)
-          toolDirs = concat [[takeDirectory path] | Just path <- [custodyCabal config, custodyCompiler config]]
-          pathValue = intercalate ":" (toolDirs <> [home </> ".ghcup" </> "bin", home </> ".cabal" </> "bin", "/usr/local/bin", "/usr/bin", "/bin"])
-      child <- forkProcess $ do
-        setGroupID (fromIntegral (gid :: Int))
-        setUserID (fromIntegral (uid :: Int))
-        setEnv "HOME" home
-        setEnv "PATH" pathValue
-        unsetEnv "CABAL_DIR"
-        unsetEnv "XDG_CACHE_HOME"
-        outcome <- runGate (runnerConfig config ordinal Nothing) spec
-        case outcome of
-          Left refusal -> do
-            createDirectoryIfMissing True runRoot
-            TextIO.writeFile (runRoot </> "outcome.tsv") ("refused\t" <> renderRefusal refusal <> "\n")
-            exitWith (ExitFailure 1)
-          Right result -> exitWith (if candidateGreen (outcomeCandidate result) then ExitSuccess else ExitFailure 1)
-      status <- getProcessStatus True False child
-      outcomeExists <- doesFileExist (runRoot </> "outcome.tsv")
-      if not outcomeExists
-        then pure (Left ("the gate run as " <> Text.pack name <> " left no outcome; status " <> Text.pack (show status)))
-        else do
-          fields <- map (Text.breakOn "\t") . Text.lines <$> TextIO.readFile (runRoot </> "outcome.tsv")
-          let field key = Text.drop 1 <$> lookup key fields
-          case (field "refused", field "green", field "spec-digest", field "chain") of
-            (Just refusal, _, _, _) -> pure (Left ("RUNNER: " <> refusal))
-            (_, Just "True", Just digest, Just chain) | status == Just (Exited ExitSuccess) -> do
-              candidate <- TextIO.readFile (runRoot </> "candidate.tsv")
-              table <- TextIO.readFile (runRoot </> "kill-table.tsv")
-              pure (Right (digest, candidate, table, chain))
-            _ -> do
-              candidate <- TextIO.readFile (runRoot </> "candidate.tsv")
-              pure (Left ("the candidate is not green:\n" <> Text.unlines [line | line <- Text.lines candidate, "row\t" `Text.isPrefixOf` line, not ("\tgreen" `Text.isSuffixOf` line)]))
-    _ -> pure (Left "ISSUER-NO-SUDO-CALLER: accept runs the gate as the user who invoked sudo; SUDO_UID, SUDO_GID, and SUDO_USER are required")
-
--- | The human command: everything preview does, then a signed receipt and exactly
--- one phase's status patch. Refuses from an agent session or a non-root identity.
+-- | The command that records a phase: the complete gate, then the receipt and
+-- exactly one phase's status patch.
 acceptPhase :: CustodyConfig -> Int -> IO CommandOutcome
-acceptPhase config ordinal = do
-  issuer <- issuerRefusal
-  case (issuer, resolveSpec ordinal) of
-    (Just problem, _) -> pure (refuse [problem])
-    (_, Left problems) -> pure (refuse problems)
-    (Nothing, Right (row, spec)) -> do
-      gathered <- gatherFacts config ordinal spec
-      case gathered of
-        Left problem -> pure (refuse [problem])
-        Right (facts, Nothing, _) -> pure (refuse (map renderPreflightRefusal (preflight facts) <> ["GENERATION-ABSENT"]))
-        Right (facts, Just seed, _) ->
-          case preflight facts of
-            refusals@(_ : _) -> pure (refuse (map renderPreflightRefusal refusals))
-            [] -> do
-              runOutcome <- runGateAsCaller config ordinal spec
-              case runOutcome of
-                Left problem -> pure (refuse [problem])
-                Right (digest, candidate, table, chain) -> issueAccept config ordinal row spec seed digest candidate table chain
+acceptPhase config ordinal = case resolveSpec ordinal of
+  Left problems -> pure (refuse problems)
+  Right (row, spec) -> do
+    gathered <- gatherFacts config ordinal spec
+    case gathered of
+      Left problem -> pure (refuse [problem])
+      Right (facts, recorded, _, _) -> case preflight facts of
+        refusals@(_ : _) -> pure (refuse (map renderPreflightRefusal refusals))
+        [] -> case recordedFrontier recorded >>= \frontier -> Status.frontierAfterPass frontier ordinal of
+          Nothing -> pure (refuse ["the recorded frontier is not open at phase " <> Text.pack (show ordinal)])
+          Just next -> do
+            runOutcome <- runFresh config ordinal spec
+            case runOutcome of
+              Left refusal -> pure (refuse ["RUNNER: " <> renderRefusal refusal])
+              Right outcome
+                | not (candidateGreen (outcomeCandidate outcome)) ->
+                    pure (refuse ("the candidate is not green" : [line | line <- renderRows (outcomeCandidate outcome), not ("\tgreen" `Text.isSuffixOf` line)]))
+                | otherwise -> issueAccept config ordinal row spec recorded next outcome
 
-issueAccept :: CustodyConfig -> Int -> PhaseIdentity.PhaseIdentity -> GateSpec -> SeedRecord -> Text -> Text -> Text -> Text -> IO CommandOutcome
-issueAccept config ordinal row spec seed specDigestValue candidateText tableText chain = do
+issueAccept :: CustodyConfig -> Int -> PhaseIdentity.PhaseIdentity -> GateSpec -> StatusSurface -> Status.StatusFrontier -> GateOutcome -> IO CommandOutcome
+issueAccept config ordinal row spec recorded next outcome = do
   let root = custodyRoot config
-  surface <- statusSurface root
-  case surface >>= maybe (Left "the tracker does not record one frontier") Right . recordedFrontier of
-    Left problem -> pure (refuse [problem])
-    Right frontier -> case Status.frontierAfterPass frontier ordinal of
-      Nothing -> pure (refuse ["the recorded frontier is not open at this phase"])
-      Just next -> do
-        patch <- patchToFrontier root next
-        graph <- loadPackageGraph root
-        verified <- verifySpec root spec
-        closure <- case (graph, verified) of
-          (Right g, Right v) -> closureDigest root g v (seedVerifierDigest seed) governanceDigest
-          _ -> pure "closure-unavailable"
-        commit <- headCommit root
-        now <- getCurrentTime
-        let postimage = sha256Hex (Text.unlines [Text.pack path <> "\n" <> contents | (path, contents) <- patch])
-            witnessRows = [Text.intercalate " " (take 2 (drop 1 fields) <> drop 3 (take 4 fields)) | line <- Text.lines tableText, let fields = Text.splitOn "\t" line, length fields >= 5, fields !! 3 /= "no-witness"]
-            receipt =
-              Receipt
-                { receiptPhase = ordinal
-                , receiptCapability = PhaseIdentity.phaseIdentityCapability row
-                , receiptGeneration = seedGeneration seed
-                , receiptSpecDigest = specDigestValue
-                , receiptSpecRendered = renderGateSpec spec
-                , receiptCandidateDigest = sha256Hex candidateText
-                , receiptKillTableDigest = sha256Hex tableText
-                , receiptClosureDigest = closure
-                , receiptVerifierDigest = seedVerifierDigest seed
-                , receiptGovernanceDigest = governanceDigest
-                , receiptStatusPostimage = postimage
-                , receiptTreeCommit = commit
-                , receiptWitnesses = witnessRows
-                , receiptResetCause = Nothing
-                , receiptDemonstration = Nothing
-                , receiptIssuedAt = Text.pack (show now)
-                }
-        written <- writeReceipt (custodyStore config) receipt
-        case written of
-          Left problem -> pure (refuse ["receipt not issued: " <> problem])
-          Right () -> do
-            mapM_ (\(path, contents) -> TextIO.writeFile (root </> path) contents) patch
-            pure
-              ( CommandOutcome
-                  ExitSuccess
-                  ( ["accepted phase " <> Text.pack (show ordinal) <> " (" <> PhaseIdentity.phaseIdentityCapability row <> ")", "claim\t" <> gateClaim spec, "spec-digest\t" <> specDigestValue, "chain\t" <> chain]
-                      <> Text.lines tableText
-                      <> ["status patch\t" <> Text.pack path | (path, _) <- patch]
-                      <> ["receipt\t" <> Text.pack (generationDirectory (custodyStore config) (seedGeneration seed))]
-                  )
-              )
+      candidate = outcomeCandidate outcome
+      table = outcomeKillTable outcome
+  verifier <- verifierDigest
+  closure <- closureFor config spec verifier
+  let reproducible = reproducibleDigest (candidateReproducibleCore candidate) closure verifier governanceDigest
+  generation <- ensureGeneration config verifier ("accept phase " <> Text.pack (show ordinal)) recorded
+  case generation of
+    Left problem -> pure (refuse ["generation not recorded: " <> problem])
+    Right seed -> do
+      let receipts = Map.insert ordinal reproducible (Map.fromList (surfaceReceipts recorded))
+      patch <- patchToFrontier root next receipts
+      commit <- headCommit root
+      now <- getCurrentTime
+      let postimage = sha256Hex (Text.unlines [Text.pack path <> "\n" <> contents | (path, contents) <- patch])
+          tableText = Text.unlines (renderKillTable table)
+          witnessRows = [Text.intercalate " " (take 2 (drop 1 fields) <> drop 3 (take 4 fields)) | line <- Text.lines tableText, let fields = Text.splitOn "\t" line, length fields >= 5, fields !! 3 /= "no-witness"]
+          receipt =
+            Receipt
+              { receiptPhase = ordinal
+              , receiptCapability = PhaseIdentity.phaseIdentityCapability row
+              , receiptGeneration = seedGeneration seed
+              , receiptSpecDigest = candidateSpecDigest candidate
+              , receiptSpecRendered = renderGateSpec spec
+              , receiptCandidateDigest = sha256Hex (renderCandidate candidate)
+              , receiptKillTableDigest = sha256Hex tableText
+              , receiptClosureDigest = closure
+              , receiptReproducible = reproducible
+              , receiptVerifierDigest = verifier
+              , receiptGovernanceDigest = governanceDigest
+              , receiptStatusPostimage = postimage
+              , receiptTreeCommit = commit
+              , receiptWitnesses = witnessRows
+              , receiptResetCause = Nothing
+              , receiptDemonstration = Nothing
+              , receiptIssuedAt = Text.pack (show now)
+              }
+      written <- writeReceipt (custodyStore config) receipt
+      case written of
+        Left problem -> pure (refuse ["receipt not recorded: " <> problem])
+        Right () -> do
+          mapM_ (\(path, contents) -> TextIO.writeFile (root </> path) contents) patch
+          -- The postimage the receipt must name is the surface after the patch.
+          after <- statusSurface root
+          let postimageAfter = either (const postimage) surfaceDigest after
+          _ <- writeReceipt (custodyStore config) receipt {receiptStatusPostimage = postimageAfter}
+          pure
+            ( CommandOutcome
+                ExitSuccess
+                ( ["accepted phase " <> Text.pack (show ordinal) <> " (" <> PhaseIdentity.phaseIdentityCapability row <> ")", "claim\t" <> gateClaim spec, "spec-digest\t" <> candidateSpecDigest candidate, "reproducible-digest\t" <> reproducible, "chain\t" <> candidateChain candidate]
+                    <> Text.lines tableText
+                    <> ["status patch\t" <> Text.pack path | (path, _) <- patch]
+                    <> ["receipt\t" <> Text.pack (generationDirectory (custodyStore config) (seedGeneration seed))]
+                )
+            )
 
--- | The human root act that installs a generation at the verifier's content
--- address, archiving any prior generation directory and never deleting it.
-reseed :: CustodyConfig -> Text -> IO CommandOutcome
-reseed config decision = do
-  issuer <- issuerRefusal
-  case (issuer, Decisions.parseDecisionId decision) of
-    (Just problem, _) -> pure (refuse [problem])
-    (_, Nothing) -> pure (refuse ["DECISION-UNKNOWN: " <> decision])
-    (Nothing, Just _) -> do
-      let root = custodyRoot config
-          store = custodyStore config
-      verifier <- verifierDigest
-      surface <- statusSurface root
-      case surface of
-        Left problem -> pure (refuse [problem])
-        Right recorded -> do
-          existing <- listGenerations store
-          now <- getCurrentTime
-          archived <- mapM (\name -> do
-            let stamp = filter (`notElem` (" :" :: String)) (show now)
-            renamePath (storeRoot store </> name) (storeRoot store </> ("archived-" <> name <> "-" <> stamp))
-            pure (Text.pack name)) existing
-          commit <- headCommit root
-          keyExists <- doesFileExist (storeRoot store </> "issuer.key")
-          let seed =
-                SeedRecord
-                  { seedGeneration = verifier
-                  , seedDecision = decision
-                  , seedVerifierDigest = verifier
-                  , seedGovernanceDigest = governanceDigest
-                  , seedStatusPostimage = surfaceDigest recorded
-                  , seedTreeCommit = commit
-                  , seedIssuedAt = Text.pack (show now)
-                  }
-          if not keyExists
-            then pure (refuse ["ISSUER-KEY-ABSENT: " <> Text.pack (storeRoot store </> "issuer.key")])
-            else do
-              createDirectoryIfMissing True (takeDirectory (generationDirectory store verifier))
-              written <- writeSeed store seed
-              pure $ case written of
-                Left problem -> refuse ["seed not written: " <> problem]
-                Right () -> CommandOutcome ExitSuccess (["reseeded generation " <> Text.take 16 verifier <> " under " <> decision] <> ["archived\t" <> name | name <- archived])
+-- | Re-derive the receipt of every Done phase in table order (up to the given
+-- ordinal) whose store record is absent or belongs to another generation. A
+-- phase whose gate re-derives the digest recorded in its document gets a store
+-- record; one that does not stops the replay.
+replayThrough :: CustodyConfig -> Maybe Int -> IO CommandOutcome
+replayThrough config through = do
+  let root = custodyRoot config
+      store = custodyStore config
+  surface <- statusSurface root
+  case surface of
+    Left problem -> pure (refuse [problem])
+    Right recorded -> case recordedFrontier recorded of
+      Nothing -> pure (refuse ["the tracker does not record one frontier"])
+      Just frontier -> do
+        verifier <- verifierDigest
+        let donePhases = [phase | phase <- PhaseIdentity.phaseOrdinals, Status.phaseStatusAt frontier phase == Status.Done, maybe True (phase <=) through]
+        generation <- ensureGeneration config verifier "replay" recorded
+        case generation of
+          Left problem -> pure (refuse ["generation not recorded: " <> problem])
+          Right seed -> do
+            existing <- readReceipts store (seedGeneration seed)
+            result <- foldM (replayOne config seed existing recorded verifier) (Right []) donePhases
+            pure $ case result of
+              Left problem -> refuse problem
+              Right lines' -> CommandOutcome ExitSuccess ("replay complete for " <> Text.intercalate "," (map (Text.pack . show) donePhases) : reverse lines')
+
+replayOne :: CustodyConfig -> SeedRecord -> [Receipt] -> StatusSurface -> Text -> Either [Text] [Text] -> Int -> IO (Either [Text] [Text])
+replayOne _ _ _ _ _ (Left problem) _ = pure (Left problem)
+replayOne config seed existing recorded verifier (Right done) phase =
+  case lookup phase (surfaceReceipts recorded) of
+    Nothing -> pure (Left (reverse done <> ["STATUS-WITHOUT-RECEIPT: phase " <> Text.pack (show phase) <> " is Done without a receipt line"]))
+    Just recordedDigest
+      | any (\receipt -> receiptPhase receipt == phase && receiptReproducible receipt == recordedDigest && receiptGovernanceDigest receipt == governanceDigest && isNothing (receiptResetCause receipt)) existing ->
+          pure (Right (("phase " <> Text.pack (show phase) <> "\treproduced (stored)") : done))
+      | otherwise -> case resolveSpec phase of
+          Left problems -> pure (Left (reverse done <> problems))
+          Right (row, spec) -> do
+            runOutcome <- runFresh config phase spec
+            case runOutcome of
+              Left refusal -> pure (Left (reverse done <> ["RUNNER: " <> renderRefusal refusal]))
+              Right outcome -> do
+                closure <- closureFor config spec verifier
+                let candidate = outcomeCandidate outcome
+                    reproducible = reproducibleDigest (candidateReproducibleCore candidate) closure verifier governanceDigest
+                if not (candidateGreen candidate)
+                  then pure (Left (reverse done <> ["PredecessorNotReproduced: phase " <> Text.pack (show phase) <> " recorded " <> recordedDigest <> " but its gate is red on the current tree:"] <> [line | line <- renderRows candidate, not ("\tgreen" `Text.isSuffixOf` line)]))
+                  else do
+                    commit <- headCommit (custodyRoot config)
+                    now <- getCurrentTime
+                    let tableText = Text.unlines (renderKillTable (outcomeKillTable outcome))
+                        receipt =
+                          Receipt
+                            { receiptPhase = phase
+                            , receiptCapability = PhaseIdentity.phaseIdentityCapability row
+                            , receiptGeneration = seedGeneration seed
+                            , receiptSpecDigest = candidateSpecDigest candidate
+                            , receiptSpecRendered = renderGateSpec spec
+                            , receiptCandidateDigest = sha256Hex (renderCandidate candidate)
+                            , receiptKillTableDigest = sha256Hex tableText
+                            , receiptClosureDigest = closure
+                            , receiptReproducible = reproducible
+                            , receiptVerifierDigest = verifier
+                            , receiptGovernanceDigest = governanceDigest
+                            , receiptStatusPostimage = surfaceDigest recorded
+                            , receiptTreeCommit = commit
+                            , receiptWitnesses = []
+                            , receiptResetCause = Nothing
+                            , receiptDemonstration = Nothing
+                            , receiptIssuedAt = Text.pack (show now)
+                            }
+                    written <- writeReceipt (custodyStore config) receipt
+                    case written of
+                      Left problem -> pure (Left (reverse done <> ["receipt not recorded: " <> problem]))
+                      Right ()
+                        | reproducible == recordedDigest -> pure (Right (("phase " <> Text.pack (show phase) <> "\treproduced (re-derived " <> Text.take 16 reproducible <> ")") : done))
+                        | otherwise -> do
+                            -- An identity status projection: only the receipt line changes.
+                            surface <- statusSurface (custodyRoot config)
+                            case surface >>= maybe (Left "the tracker does not record one frontier") Right . recordedFrontier of
+                              Left problem -> pure (Left (reverse done <> [problem]))
+                              Right frontier -> do
+                                patch <- patchToFrontier (custodyRoot config) frontier (Map.insert phase reproducible (Map.fromList (surfaceReceipts recorded)))
+                                mapM_ (\(path, contents) -> TextIO.writeFile (custodyRoot config </> path) contents) patch
+                                pure (Right (("phase " <> Text.pack (show phase) <> "\trefreshed (" <> Text.take 16 recordedDigest <> " -> " <> Text.take 16 reproducible <> ")") : done))
 
 -- | The receipt-bearing reset: a receipt at the frontier's phase whose reset
 -- cause names a validator gap and a product-gap legacy identifier with an owner.
 resetGeneration :: CustodyConfig -> Text -> Text -> Text -> IO CommandOutcome
-resetGeneration config decision validatorGap productGap = do
-  issuer <- issuerRefusal
-  case (issuer, Decisions.parseDecisionId decision, Legacy.parseLegacyId productGap) of
-    (Just problem, _, _) -> pure (refuse [problem])
-    (_, Nothing, _) -> pure (refuse ["DECISION-UNKNOWN: " <> decision])
-    (_, _, Nothing) -> pure (refuse ["PRODUCT-GAP-UNKNOWN: " <> productGap])
-    (Nothing, Just _, Just identifier) -> case Legacy.legacyOwnerOrdinal identifier of
+resetGeneration config decision validatorGap productGap =
+  case (Decisions.parseDecisionId decision, Legacy.parseLegacyId productGap) of
+    (Nothing, _) -> pure (refuse ["DECISION-UNKNOWN: " <> decision])
+    (_, Nothing) -> pure (refuse ["PRODUCT-GAP-UNKNOWN: " <> productGap])
+    (Just _, Just identifier) -> case Legacy.legacyOwnerOrdinal identifier of
       Nothing -> pure (refuse ["PRODUCT-GAP-UNOWNED: " <> productGap])
       Just owner -> do
         let root = custodyRoot config
-            store = custodyStore config
-        verifier <- verifierDigest
-        seed <- latestGeneration store verifier
         surface <- statusSurface root
-        case (seed, surface) of
-          (Nothing, _) -> pure (refuse ["GENERATION-ABSENT"])
-          (_, Left problem) -> pure (refuse [problem])
-          (Just record, Right recorded) -> case recordedFrontier recorded of
-           Nothing -> pure (refuse ["the tracker does not record one frontier"])
-           Just frontier -> do
-            let phase = Status.completedPrefixDueOrdinal frontier
-            commit <- headCommit root
-            now <- getCurrentTime
-            let receipt =
-                  Receipt
-                    { receiptPhase = phase
-                    , receiptCapability = maybe "" PhaseIdentity.phaseIdentityCapability (PhaseIdentity.lookupPhaseIdentity phase)
-                    , receiptGeneration = seedGeneration record
-                    , receiptSpecDigest = "reset"
-                    , receiptSpecRendered = ""
-                    , receiptCandidateDigest = "reset"
-                    , receiptKillTableDigest = "reset"
-                    , receiptClosureDigest = "reset"
-                    , receiptVerifierDigest = verifier
-                    , receiptGovernanceDigest = governanceDigest
-                    , receiptStatusPostimage = surfaceDigest recorded
-                    , receiptTreeCommit = commit
-                    , receiptWitnesses = []
-                    , receiptResetCause = Just (validatorGap, productGap)
-                    , receiptDemonstration = Nothing
-                    , receiptIssuedAt = Text.pack (show now)
-                    }
-            written <- writeReceipt store receipt
-            pure $ case written of
-              Left problem -> refuse ["reset receipt not issued: " <> problem]
-              Right () -> CommandOutcome ExitSuccess ["reset recorded under " <> decision <> " naming " <> productGap <> " (owner phase " <> Text.pack (show owner) <> ") at frontier phase " <> Text.pack (show phase)]
+        case surface of
+          Left problem -> pure (refuse [problem])
+          Right recorded -> case recordedFrontier recorded of
+            Nothing -> pure (refuse ["the tracker does not record one frontier"])
+            Just frontier -> do
+              verifier <- verifierDigest
+              generation <- ensureGeneration config verifier ("reset " <> decision) recorded
+              case generation of
+                Left problem -> pure (refuse ["generation not recorded: " <> problem])
+                Right seed -> do
+                  let phase = Status.completedPrefixDueOrdinal frontier
+                  commit <- headCommit root
+                  now <- getCurrentTime
+                  let receipt =
+                        Receipt
+                          { receiptPhase = phase
+                          , receiptCapability = maybe "" PhaseIdentity.phaseIdentityCapability (PhaseIdentity.lookupPhaseIdentity phase)
+                          , receiptGeneration = seedGeneration seed
+                          , receiptSpecDigest = "reset"
+                          , receiptSpecRendered = ""
+                          , receiptCandidateDigest = "reset"
+                          , receiptKillTableDigest = "reset"
+                          , receiptClosureDigest = "reset"
+                          , receiptReproducible = "reset"
+                          , receiptVerifierDigest = verifier
+                          , receiptGovernanceDigest = governanceDigest
+                          , receiptStatusPostimage = surfaceDigest recorded
+                          , receiptTreeCommit = commit
+                          , receiptWitnesses = []
+                          , receiptResetCause = Just (validatorGap, productGap)
+                          , receiptDemonstration = Nothing
+                          , receiptIssuedAt = Text.pack (show now)
+                          }
+                  written <- writeReceipt (custodyStore config) receipt
+                  pure $ case written of
+                    Left problem -> refuse ["reset receipt not recorded: " <> problem]
+                    Right () -> CommandOutcome ExitSuccess ["reset recorded under " <> decision <> " naming " <> productGap <> " (owner phase " <> Text.pack (show owner) <> ") at frontier phase " <> Text.pack (show phase)]
 
--- | Accept a governance change: re-seal the frozen baseline under a decision by
--- writing a governance record into the current generation.
-govern :: CustodyConfig -> Text -> IO CommandOutcome
-govern config decision = do
-  issuer <- issuerRefusal
-  case (issuer, Decisions.parseDecisionId decision) of
-    (Just problem, _) -> pure (refuse [problem])
-    (_, Nothing) -> pure (refuse ["DECISION-UNKNOWN: " <> decision])
-    (Nothing, Just _) -> do
-      let store = custodyStore config
-      verifier <- verifierDigest
-      seed <- latestGeneration store verifier
-      case seed of
-        Nothing -> pure (refuse ["GENERATION-ABSENT"])
-        Just record -> do
-          now <- getCurrentTime
-          written <- writeSigned store (generationDirectory store (seedGeneration record) </> "governance.tsv") (Text.unlines ["decision\t" <> decision, "governance-digest\t" <> governanceDigest, "issued-at\t" <> Text.pack (show now)])
-          pure $ case written of
-            Left problem -> refuse ["governance not recorded: " <> problem]
-            Right () -> CommandOutcome ExitSuccess ["governance re-sealed under " <> decision <> ": " <> Text.take 16 governanceDigest]
-
--- | Sign an operator-authored input for the barrier's demonstration.
+-- | Record the digest of an operator-authored input for the barrier's
+-- demonstration.
 demoFile :: CustodyConfig -> FilePath -> IO CommandOutcome
 demoFile config path = do
-  issuer <- issuerRefusal
   exists <- doesFileExist path
-  case (issuer, exists) of
-    (Just problem, _) -> pure (refuse [problem])
-    (_, False) -> pure (refuse ["DEMO-FILE-ABSENT: " <> Text.pack path])
-    (Nothing, True) -> do
-      let store = custodyStore config
-      verifier <- verifierDigest
-      seed <- latestGeneration store verifier
-      contents <- TextIO.readFile path
-      case seed of
-        Nothing -> pure (refuse ["GENERATION-ABSENT"])
-        Just record -> do
-          now <- getCurrentTime
-          let digest = sha256Hex contents
-          written <- writeSigned store (generationDirectory store (seedGeneration record) </> "demonstration.tsv") (Text.unlines ["file\t" <> Text.pack path, "digest\t" <> digest, "issued-at\t" <> Text.pack (show now)])
-          pure $ case written of
-            Left problem -> refuse ["demonstration not signed: " <> problem]
-            Right () -> CommandOutcome ExitSuccess ["operator demonstration signed: " <> Text.take 16 digest]
-
+  if not exists
+    then pure (refuse ["DEMO-FILE-ABSENT: " <> Text.pack path])
+    else do
+      surface <- statusSurface (custodyRoot config)
+      case surface of
+        Left problem -> pure (refuse [problem])
+        Right recorded -> do
+          verifier <- verifierDigest
+          generation <- ensureGeneration config verifier "demo" recorded
+          case generation of
+            Left problem -> pure (refuse ["generation not recorded: " <> problem])
+            Right seed -> do
+              contents <- TextIO.readFile path
+              now <- getCurrentTime
+              let digest = sha256Hex contents
+              written <- writeRecord (generationDirectory (custodyStore config) (seedGeneration seed) </> "demonstration.tsv") (Text.unlines ["file\t" <> Text.pack path, "digest\t" <> digest, "issued-at\t" <> Text.pack (show now)])
+              pure $ case written of
+                Left problem -> refuse ["demonstration not recorded: " <> problem]
+                Right () -> CommandOutcome ExitSuccess ["operator demonstration recorded: " <> Text.take 16 digest]

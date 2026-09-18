@@ -97,7 +97,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 |---|---|
 | `Claim` | `amoebius layout-report` classifies every tracked path exactly once against the closed rule: behavioural source is `.hs` outside `pb/**`, the admitted non-Haskell set is exactly six files, the bounded bootstrap admits through the deny-by-default grammar, and the source query for every Phase-2 identifier is zero. Compiler call and effect semantics, product behaviour, and hardware are excluded. |
 | `Subject` | The three stage modules named in the gate specification and the `layout-report` subcommand in `app/amoebius/Main.hs`. Every subject is inside the closure of `executable amoebius`. |
-| `Command` | Future public spelling is `pb validate phase 02`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 02`; the human runs `sudo amoebius-validate accept --phase 02`. The runner spawns the shipped `amoebius` binary as a child for `layout-report` over the tracked tree and over each planted copy. |
+| `Command` | Future public spelling is `pb validate phase 02`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 02`; then `amoebius-validate accept --phase 02` records the receipt and applies one phase's status patch. The runner spawns the shipped `amoebius` binary as a child for `layout-report` over the tracked tree and over each planted copy. |
 | `Oracle` | `test/oracle/layout/Main.hs` restates the classification rule, the six-file set by class, the grammar's refused node families, and the expected finding per planted negative from literals; it depends on no `amoebius` library. |
 | `Positive controls` | The tracked tree classifies with zero findings; the bootstrap admits through the grammar; the admitted non-Haskell set matches the oracle's six classes; the ordinal-identity query is zero. |
 | `Paired negatives` | A tracked `.py` outside `pb/`, a tracked `.dhall`, a tracked Pulumi YAML, a tracked mutant body, a retired generated root re-admitted in an ignore file, an ordinal-bearing runtime identity, and one forbidden node per grammar family — each refused at its exact locus with the positive twin accepted. |
@@ -112,7 +112,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 | `Legacy closure` | `LTD-SRC-000`, `LTD-SRC-001`, `LTD-SRC-005`, `LTD-SRC-006`, `LTD-SRC-008`, `LTD-META-001`, and `LTD-NAME-001` close here through the compiled inventory. `LTD-SRC-002` and `LTD-SRC-003` are reported as owed by Phase 3 and `LTD-SRC-004` as owed by Phase 72; none is closed here. |
 | `Predecessor` | The Phase-1 receipt in certification generation 2, chained by the digest of Phase 1's product closure plus the verifier and governance digests. |
 | `Residue` | The runtime handoff of the bootstrap remains Phase 50's claim; consumer, effect, and call-graph semantics are not classified here, and the stanza module map is the only compiler-facing relation; Phases 3 through 9 and every phase from 50 onward remain explicit limitations. |
-| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and the human's `accept` records it. |
+| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and `accept` records it. |
 
 ## Doctrine adopted
 
@@ -277,7 +277,7 @@ Implement the arm.
 **Independent Validation**: `amoebius layout-report` classifies every tracked path exactly once and reports the admitted non-Haskell set as exactly six files by class; `pb/__main__.py` admits through the deny-by-default grammar; one forbidden node per family and a seventh non-Haskell file are refused; the compiled specification equals the fenced block above.
 **Oracle**: `test/oracle/layout/Main.hs` for the report and the grammar; `test/oracle/runner/Main.hs` for the specification digest.
 **Legacy IDs**: `LTD-SRC-000`, `LTD-SRC-008`
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through the human's `accept`
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through `accept`
 
 ### Objective
 
@@ -293,7 +293,7 @@ the bootstrap so that Phase 50 can observe its runtime handoff.
 
 ### Validation
 
-Run `preview phase 02` and require every row green; require the human's `accept` to record exactly one
+Run `preview phase 02` and require every row green; require `accept` to record exactly one
 phase's patch.
 
 ### Remaining Work

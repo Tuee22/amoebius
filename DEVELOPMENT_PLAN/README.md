@@ -86,7 +86,7 @@ locally available compiler supports only the diagnostics that actually used it.
 | [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) | The sole reader-facing explanation of active typed Haskell divergence bindings and the audit map of every re-sequence; never executable contract |
 | [Decision log](../documents/decision_log.md) | The append-only register of decisions that changed frozen doctrine or this plan |
 | [Repository Layout and Artifact Provenance](../documents/engineering/repository_layout_doctrine.md) | Complete authored/generated tree, dynamic resolution, and ignore/context contract |
-| [Gate-runner doctrine](../documents/engineering/gate_runner_doctrine.md) | The one generic runner, its gate-specification vocabulary, refusals, and the human commands |
+| [Gate-runner doctrine](../documents/engineering/gate_runner_doctrine.md) | The one generic runner, its gate-specification vocabulary, refusals, and the agent-run commands |
 | [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) | Register-2.5 scheduling and replay discipline |
 | `phase_00_*.md` … `phase_09_*.md`, `phase_50_*.md` … `phase_95_*.md` | One independently authored capability and validation contract per phase |
 | [later_phases.md](later_phases.md) | In-scope work not yet assigned an integer document, including the proof-assistant track |
@@ -104,9 +104,9 @@ owns acceptance. A complete qualified run must demonstrate the accepted capabili
 product binary, independent expectations, runner-generated mutants, authentic observation, and
 generation-2 evidence.
 
-An accepted run emits its exact status-only patch. After the verifier exits, only the human's `accept`
-applies that patch, one phase per accept
-([DL-0009](../documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition)).
+An accepted run emits its exact status-only patch. Only the verifier's `accept` applies that patch, one phase
+per accept, and the receipt it records must reproduce under `replay`
+([DL-0013](../documents/decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible))).
 Implementation, oracle, policy, or contract changes require the eligibility checks defined by the
 [revalidation procedure](development_plan_phase_model.md#n-reopening-and-amending-a-phase).
 
@@ -117,11 +117,14 @@ This documentation change is not a qualified gate run. It closes no phase and re
 1. The agent runs one gate serially (`--jobs=1`) with `amoebius-validate preview phase NN`, which runs the
    complete gate, prints the would-be receipt, and mints nothing.
 2. The agent stops at the phase boundary and reports the preview.
-3. The human runs `sudo amoebius-validate accept --phase NN`, reads the printed Claim, specification digest,
-   kill table, spine outcome, and corpus delta, reads `git diff` (status lines only), and commits with the
-   receipt identifier.
-4. The next gate's preflight compares HEAD's status surface with the receipt's postimage and refuses
-   `StatusSurfaceDirty` or `PredecessorNotCommitted` on any difference.
+3. The agent runs `amoebius-validate accept --phase NN`, which runs the gate again, records the receipt, writes
+   its reproducible digest beside the Done status, and applies exactly one phase's status patch; the agent
+   reports the printed Claim, specification digest, kill table, spine outcome, and corpus delta.
+4. The human reads `git diff` (status lines and the receipt line only) and commits.
+5. The next gate's preflight compares HEAD's status surface with the receipt's postimage and requires every
+   predecessor receipt to reproduce; it refuses `StatusSurfaceDirty`, `PredecessorNotCommitted`, or
+   `PredecessorNotReproduced` on any difference. A wiped store is re-established by
+   `amoebius-validate replay`.
 
 ## Generation-2 reset
 
@@ -129,7 +132,7 @@ Certification generation 2 replaces the generation-1 validator with the custody 
 ([DL-0007](../documents/decision_log.md#dl-0007--certification-generation-2-replaces-the-validation-kernel)).
 The plan is re-sequenced into a vertical slice, Phases 3 through 9 over one growing corpus, with 10 through 49
 reserved ([DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice)). The
-frontier is Phase 0; every other phase is Blocked. Generation-1 stores are archived as historical observations
+reset started the frontier at Phase 0 with every other phase Blocked; the table below records the current frontier. Generation-1 stores are archived as historical observations
 and supply no authority. The typed reset cause is
 `ResetCause { validatorGap = "gates measured the harness", productGap = LTD-DSL-001 }`.
 
@@ -147,8 +150,8 @@ also inherits the universal postcondition above.
 
 | Phase | Name | Substrate | Lane | Register | Status | Validation contract |
 |---|---|---|---|---|---|---|
-| 0 | Documentation, governance, and the validation seed | none | `none` | — | 🔄 Active — NOT VALIDATED | [Contract](phase_00_documentation_suite.md) |
-| 1 | Haskell toolchain and probe-source closure | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_01_toolchain_spike.md) |
+| 0 | Documentation, governance, and the validation seed | none | `none` | — | ✅ Done | [Contract](phase_00_documentation_suite.md) |
+| 1 | Haskell toolchain and probe-source closure | none | `none` | 2 | 🔄 Active — NOT VALIDATED | [Contract](phase_01_toolchain_spike.md) |
 | 2 | Repository layout conformance and source closure | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_02_repository_layout_conformance.md) |
 | 3 | The typed spine from one spec to fake-applied bytes | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_03_typed_spine.md) |
 | 4 | Witness-driven manifests, capacity, and storage | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_04_witness_manifests_capacity_storage.md) |

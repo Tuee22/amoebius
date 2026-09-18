@@ -48,7 +48,7 @@ operator-authored value reaches fake-applied bytes through the shipped `amoebius
 it. The union corpus of Phases 3 through 8 re-runs green on the current source, so no later slice regressed an
 earlier one. The control-plane endpoint compiles through `compileDeployment`, so the shipped binary's only
 consumer of the decoder consumes its result. An untracked Dhall file, authored by the operator outside the
-corpus and signed by the human with `amoebius-validate demo`, adds a tag not in the corpus tag set and reaches
+corpus and recorded with `amoebius-validate demo`, adds a tag not in the corpus tag set and reaches
 fake-applied bytes whose digest equals the render digest.
 
 Every hardware specification from Phase 50 onward binds this phase's receipt digest and runs a corpus example
@@ -103,7 +103,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 |---|---|
 | `Claim` | On the current source, every member of the union corpus reaches fake-applied bytes through the shipped binary with the runner's nonce recovered from the decoded dump, the manifest, and the fake's stdin; the control-plane endpoint returns the digest `compileDeployment` produces for the same input; the human-signed operator file with a tag outside the corpus tag set reaches fake-applied bytes whose digest equals the render digest. Hardware, containers, clusters, and live hosts are excluded. |
 | `Subject` | `Amoebius.Dsl.Pipeline`, `Amoebius.Dsl.Examples.Union`, and `Amoebius.Entry.ControlPlane` in `app/amoebius/Amoebius/Entry/ControlPlane.hs`, all inside the closure of `executable amoebius`; the stage modules of Phases 3 through 8 are re-mutated through their own specifications. |
-| `Command` | Future public spelling is `pb validate phase 09`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 09`; the human runs `sudo amoebius-validate demo --file <path>` and then `sudo amoebius-validate accept --phase 09`. The runner spawns the shipped binary for `render-examples`, `compile`, and `apply --executor fake`, and drives the endpoint in-process through the shipped binary's control-plane entry. |
+| `Command` | Future public spelling is `pb validate phase 09`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 09`; then `amoebius-validate demo --file <path>` records the operator input and `amoebius-validate accept --phase 09` records the receipt and applies one phase's status patch. The runner spawns the shipped binary for `render-examples`, `compile`, and `apply --executor fake`, and drives the endpoint in-process through the shipped binary's control-plane entry. |
 | `Oracle` | `test/oracle/dsl/Main.hs` parses every output and prints the ledger from literal rows for the whole union; it depends on no `amoebius` library. |
 | `Positive controls` | Every union member equal to its oracle row; the endpoint digest equal to the pipeline digest; the operator file's applied digest equal to its render digest. |
 | `Paired negatives` | `EndpointDiscardsDecodedValue` (a build in which the endpoint ignores the decoded value is refused by the digest comparison), `DemoInsideCorpusTagSet` (a demonstration whose tags are all in the corpus set is refused), and `DemoUnsigned` (a demonstration without the human's signature is refused). |
@@ -111,14 +111,14 @@ documentation checker refuses a block that differs from it. Execution evidence r
 | `Discovery` | The union's member count equals the sum of the six corpus modules' counts; the stanza module map is compared two-way; empty discovery refuses. |
 | `Challenge` | The runner rewrites the rendered `root.dhall` of every member and the operator file after the run starts; the nonce must be recovered from all three outputs of every member. |
 | `Observer` | `ProcessObserver` over the shipped binary and the fake `kubectl`; the endpoint digest is read from the binary's response bytes. |
-| `Authority/bypass` | `SUBJECT-NOT-SHIPPED`; oracle stanza hygiene; the demonstration is signed only by the human account through the supervisor, which refuses agent environment markers. |
+| `Authority/bypass` | `SUBJECT-NOT-SHIPPED`; oracle stanza hygiene; the demonstration's digest is recorded by `demo` in the generation store and must reproduce under `replay`. |
 | `Freshness` | A unique run root; a fresh render of every member; the verifier digest equals the seed's; every `LTD-SRC-*` query is zero. |
 | `Qualification` | The generated-mutant matrix over the union precedes the clean candidate in the same run. |
 | `Cleanroom` | `.build/runs/phase-09/**`, absent afterward; the kernel ratchet is recorded; the hygiene row records no `_MUTANT` symbol, no conditional compilation, and one definition per vocabulary type. |
 | `Legacy closure` | Every `LTD-DSL-*` identifier is closed or listed in Residue; every `LTD-SRC-*` query is zero; `LTD-LIB-001` is decided here — each parked calculus library is either linked into the executable or deleted, and the decision is recorded in the receipt. |
 | `Predecessor` | The Phase-8 receipt in certification generation 2, chained by the digest of Phase 8's product closure plus the verifier and governance digests. |
 | `Residue` | Every phase from 50 onward; `LTD-HELPER-001` until Phase 50; `LTD-UI-001` until Phases 70 and 72; `LTD-LIB-002` until the proof-assistant track is promoted. |
-| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, the `OperatorDemonstration` is present, and the human's `accept` records it. |
+| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, the `OperatorDemonstration` is present, and `accept` records it. |
 
 ## Doctrine adopted
 
@@ -194,7 +194,7 @@ Implement the endpoint driver in the specification.
 
 ### Objective
 
-Show the spine on an input the corpus never saw, signed by the human.
+Show the spine on an input the corpus never saw, recorded with `demo`.
 
 ### Deliverables
 
@@ -218,7 +218,7 @@ Implement the specification and the demonstration path.
 **Independent Validation**: Every `LTD-SRC-*` query is zero; every `LTD-DSL-*` identifier is closed or named in Residue; each parked calculus library is linked or deleted and the decision is in the receipt; the hygiene row is green at the ratchet.
 **Oracle**: `test/oracle/runner/Main.hs` states the expected inventory join and closure from literals.
 **Legacy IDs**: `LTD-LIB-001` — parked calculi decided here; `LTD-DSL-002` through `LTD-DSL-008` confirmed closed
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through the human's `accept`
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through `accept`
 
 ### Objective
 
@@ -231,7 +231,7 @@ Close the pre-hardware ledger.
 
 ### Validation
 
-Run `preview phase 09` and require every row green; require the human's `accept` to record exactly one
+Run `preview phase 09` and require every row green; require `accept` to record exactly one
 phase's patch, after which `HARDWARE-BEFORE-BARRIER` lifts.
 
 ### Remaining Work

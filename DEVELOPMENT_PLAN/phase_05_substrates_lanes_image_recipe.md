@@ -113,7 +113,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 |---|---|
 | `Claim` | The rke2 corpus example, rewritten by the runner with a nonce and a taint moved to a different host, passes through `amoebius compile` and `amoebius apply --executor fake`. Every node row carries the lane `lanesOf` derives from its `Detected` value; placement respects the moved taint; the rendered `ImageRecipe` steps equal the substrates oracle. The Apple example is decoded and lowered only. `Detected Apple Amd64` and `rke2_two_servers` do not compile. Extensions, children, and UI are excluded. |
 | `Subject` | The seven modules named in the gate specification, every one inside the closure of `executable amoebius`. `Amoebius.Vocabulary` is re-subjected because `Detected` and `Lane` now reach the wire. |
-| `Command` | Future public spelling is `pb validate phase 05`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 05`; the human runs `sudo amoebius-validate accept --phase 05`. The runner spawns the shipped `amoebius` binary as a child for `render-examples`, `compile`, and `apply --executor fake`. |
+| `Command` | Future public spelling is `pb validate phase 05`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 05`; then `amoebius-validate accept --phase 05` records the receipt and applies one phase's status patch. The runner spawns the shipped `amoebius` binary as a child for `render-examples`, `compile`, and `apply --executor fake`. |
 | `Oracle` | `test/oracle/dsl/Main.hs` parses the decoded dump, the manifest, the rendered recipe, and the fake's stdin; it states the lane table, the taint-respecting placement, and the recipe steps from literal rows and depends on no `amoebius` library. |
 | `Positive controls` | Every accepted corpus example yields lane labels equal to its oracle row; the fake's stdin byte-equals the compile output for the two Linux examples; the Apple example's lowered dump equals its row; the recipe steps equal the oracle's ordered list. |
 | `Paired negatives` | `DetectedAppleAmd64` and `Rke2TwoServers` as compile-negative twins of the accepted arm64 and three-server values; `DuplicateHostId` refused at lowering with the distinct-id twin accepted; `TaintedOnlyHost` refused at provision with the untainted sibling accepted — each at its exact tag and stage. |
@@ -128,7 +128,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 | `Legacy closure` | `LTD-DSL-004` closes its substrate-enum share here, the last of its three shares. |
 | `Predecessor` | The Phase 4 receipt in certification generation 2, chained by the digest of Phase 4's product closure plus the verifier and governance digests. |
 | `Residue` | Phases 6 through 9 and every phase from 50 onward remain explicit limitations. Until the human rebuilds and repushes the four `amoebius-base-{cpu,cuda}-{amd64,arm64}` tags from the rendered recipe, this row states that the rendered recipe is not the published one. `LTD-HELPER-001` remains visible until Phase 50. |
-| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and the human's `accept` records it. |
+| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and `accept` records it. |
 
 ## Doctrine adopted
 
@@ -242,7 +242,7 @@ tags once the rendered recipe lands.
 **Independent Validation**: The compiled specification equals the fenced block above; `verifySpec` accepts it; the corpus module contains the Phase-4 corpus; the substrate token is `HardwareFree` and a catalog member in its place is refused before the barrier receipt exists.
 **Oracle**: `test/oracle/runner/Main.hs` states the expected specification digest and closure from literals.
 **Legacy IDs**: none
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through the human's `accept`
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through `accept`
 
 ### Objective
 
@@ -255,7 +255,7 @@ Author the specification the runner executes for this phase.
 
 ### Validation
 
-Run `preview phase 05` and require every row green; require the human's `accept` to record exactly one
+Run `preview phase 05` and require every row green; require `accept` to record exactly one
 phase's patch.
 
 ### Remaining Work

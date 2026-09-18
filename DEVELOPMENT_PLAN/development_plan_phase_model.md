@@ -86,7 +86,7 @@ the next row and its first sprint become Active when a successor exists; the res
 upper bound every phase and sprint is Done. A missing Done predecessor, two Active phases, a Done gap, or
 tracker/phase/sprint disagreement refuses validation.
 The same projection rules apply after reopening an affected claim. Compatible historical receipts may
-support restoration under the human's `accept` only after the accepted verifier establishes their current
+support restoration under `accept` only after the accepted verifier establishes their current
 applicability.
 
 ---
@@ -114,8 +114,8 @@ applicability.
   status, and cannot be proved by the Phase-0 binary it compiled; Phase 1 owns those broader claims.
 - The accepted seed verifier and its custody boundary are explicit bootstrap assumptions. Phase 0 qualifies
   only its finite seed; it does not depend on the full language, later host transport, or the DSL barrier's
-  union corpus. A later verifier is a new content-addressed generation seeded by the human with a
-  decision-log identifier.
+  union corpus. A later verifier is a new content-addressed generation entered by the first `accept` or
+  `replay` under it.
 - `pb/**` is a pre-phase bootstrap boundary, not a delivered language, test framework, or source of validation
   verdicts. It may ensure the Haskell toolchain, build the binary, and hand off; the Haskell binary owns all
   numbered-phase behaviour and verdicts.
@@ -265,8 +265,9 @@ unknown impact is an unresolved validation dependency.
    while any `LTD-DSL-*` row is open.
 
 Reopening, qualification, and previewing are agent work within accepted scope and need no intermediate
-confirmation. The reset itself, and every status transition it or a pass implies, is the human's act
-([DL-0009](../documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition)).
+confirmation. The reset itself, and every status transition it or a pass implies, is written only by the
+verifier's `reset` or `accept`, whose receipts must reproduce under `replay`
+([DL-0013](../documents/decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible))).
 Baseline revision cannot authorize a candidate to discard the requirement that made its own gate fail.
 
 An `Invalidated historical record` block may preserve minimal audit context inside `## Phase Status`. It ends
@@ -308,8 +309,8 @@ change no status and cannot substitute for the complete candidate run or parent-
 `Substrate: none` sprint may likewise be prepared ahead of the gate frontier after its exact typed contract and
 independent oracle exist. It may perform only hardware-free implementation and component diagnostics: no later
 gate, candidate evidence, predecessor consumption, pre-handoff `pb` transport, or live-resource interaction is
-admissible. Once a complete phase candidate passes under the agent's `preview`, the agent stops at the phase
-boundary; the human's `accept` applies the emitted narrow status patch, one phase per accept.
+admissible. Once a complete phase candidate passes under `preview`, the agent runs `accept`, which applies the
+emitted narrow status patch and records the reproducible receipt digest, one phase per accept.
 
 A large file is not automatically a large phase, and many files are not automatically several phases. The
 unit is the falsifiable seam and its final register.
@@ -330,8 +331,8 @@ unit is the falsifiable seam and its final register.
 | Test registers and runtime test topology | [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md) |
 | Spoof-resistance threat model | [`testing_spoof_resistance.md`](../documents/engineering/testing_spoof_resistance.md) |
 | The gate runner, its specification vocabulary, refusals, and commands | [`gate_runner_doctrine.md`](../documents/engineering/gate_runner_doctrine.md) |
-| One transition per human act; agents preview, the human accepts | [DL-0009](../documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition) and [`AGENTS.md`](../AGENTS.md#validation-outcome-and-ordering) |
-| Host precondition: agent identity without sudo or issuer-key access | [DL-0010](../documents/decision_log.md#dl-0010--host-precondition-for-agent-sessions) and [`AGENTS.md`](../AGENTS.md#host-precondition) |
+| One transition per `accept`, written only by the verifier and reproducible by `replay` | [DL-0013](../documents/decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible) and [`AGENTS.md`](../AGENTS.md#validation-outcome-and-ordering) |
+| Reproducibility: no signature, no `sudo`, no issuer key; a receipt that does not re-derive is void | [DL-0013](../documents/decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible) and [`AGENTS.md`](../AGENTS.md#reproducibility) |
 | Kernel budget and hygiene: at most 14,000 lines, ratcheting, no conditional compilation, no per-phase runner | [`AGENTS.md`](../AGENTS.md#kernel-budget) and [gate integrity §S](development_plan_gate_integrity.md#s-universal-source-and-artifact-hygiene-gate) |
 | Subjects are shipped code inside the product executable's closure | [`gate_runner_doctrine.md` §2](../documents/engineering/gate_runner_doctrine.md#2-the-gate-specification-vocabulary) |
 | Runner-held verdicts and independent oracle executables | [`gate_runner_doctrine.md` §4](../documents/engineering/gate_runner_doctrine.md#4-runner-held-verdicts-and-the-oracle-protocol) |

@@ -130,7 +130,7 @@ downstream evidence. Later replay checks portability; it cannot stand in for the
 - [Accepted baseline and certification generation](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation) — separate acceptance authority, contract revision, and protected receipt custody.
 - [Candidate evidence and gate pass](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass) — dependency-based compatibility and authenticated evidence reuse.
 - [`development_plan_standards.md` §K](../DEVELOPMENT_PLAN/development_plan_standards.md#k-honesty-proven--tested--assumed) — how stop 5's discipline binds a phase before it may be marked done.
-- [`development_plan_standards.md` §C](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — a complete qualified gate pass is sufficient for status; the human's `accept` records it, one phase per accept.
+- [`development_plan_standards.md` §C](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — a complete qualified gate pass is sufficient for status; `accept` records it with a reproducible receipt, one phase per accept.
 - [`development_plan_standards.md` §L](../DEVELOPMENT_PLAN/development_plan_standards.md#l-one-substrate-discipline) — later hardware evidence stays scoped to the one natural substrate actually exercised and cannot be generalized to an untested substrate.
 
 Work proceeds in numerical phase order. A later hardware-dependent gate does not compensate for an open or

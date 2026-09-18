@@ -1,45 +1,39 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- | The generation-2 certification store (gate_runner_doctrine.md section 6). A
--- generation is the content address of the verifier; its directory holds the
--- signed seed record, the signed receipts, and nothing the agent identity can
--- write. Signing needs the issuer key, which only the human's root account can
--- read, and refuses whenever an agent environment marker is present (DL-0010).
+-- | The generation-2 certification store (gate_runner_doctrine.md section 6;
+-- DL-0013). A generation is the content address of the verifier; its directory
+-- beneath the ignored @.build/certification@ tree holds the generation record and
+-- the receipts. A record carries no signature: its authority is that any later run
+-- re-derives its reproducible digest. The @.sha256@ sidecar beside every record
+-- detects corruption, nothing more.
 module Amoebius.Validation.Custody.Store
   ( GenerationId
   , Receipt (..)
   , SeedRecord (..)
   , Store (..)
-  , agentMarkers
-  , agentMarkersPresent
   , defaultStore
   , generationDirectory
   , governanceDigest
-  , issuerRefusal
   , latestGeneration
   , listGenerations
-  , markersIn
   , parseReceipt
   , parseSeed
   , readReceipts
+  , readRecord
   , readSeed
-  , readSigned
   , renderReceipt
   , renderSeed
   , verifierDigest
   , writeReceipt
+  , writeRecord
   , writeSeed
-  , writeSigned
   ) where
 
 import Amoebius.Plan.Decisions qualified as Decisions
 import Amoebius.Validation.Runner.Observer (sha256Hex)
 import Control.Exception (IOException, try)
 import Control.Monad (filterM, forM)
-import Crypto.Error (CryptoFailable (..))
 import Crypto.Hash.SHA256 qualified as SHA256
-import Crypto.PubKey.Ed25519 qualified as Ed25519
-import Data.ByteArray (convert)
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
 import Data.Char (intToDigit)
@@ -48,11 +42,9 @@ import Data.Maybe (mapMaybe)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
-import Data.Text.IO qualified as TextIO
 import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, listDirectory)
-import System.Environment (getExecutablePath, lookupEnv)
+import System.Environment (getExecutablePath)
 import System.FilePath (takeExtension, (</>))
-import System.Posix.User (getEffectiveUserID)
 
 type GenerationId = Text
 
@@ -60,7 +52,7 @@ newtype Store = Store {storeRoot :: FilePath}
   deriving (Eq, Show)
 
 defaultStore :: Store
-defaultStore = Store "/var/lib/amoebius-certification"
+defaultStore = Store ".build/certification"
 
 generationDirectory :: Store -> GenerationId -> FilePath
 generationDirectory store generation = storeRoot store </> ("generation-" <> Text.unpack (Text.take 16 generation))
@@ -82,9 +74,11 @@ governanceDigest =
         ]
     )
 
+-- | The generation record: written by the first accept, replay, reset, or demo
+-- under a verifier.
 data SeedRecord = SeedRecord
   { seedGeneration :: GenerationId
-  , seedDecision :: Text
+  , seedEnteredBy :: Text
   , seedVerifierDigest :: Text
   , seedGovernanceDigest :: Text
   , seedStatusPostimage :: Text
@@ -102,6 +96,7 @@ data Receipt = Receipt
   , receiptCandidateDigest :: Text
   , receiptKillTableDigest :: Text
   , receiptClosureDigest :: Text
+  , receiptReproducible :: Text
   , receiptVerifierDigest :: Text
   , receiptGovernanceDigest :: Text
   , receiptStatusPostimage :: Text
@@ -122,9 +117,9 @@ parseFields contents = [(key, Text.replace "\\n" "\n" (Text.intercalate "\t" res
 renderSeed :: SeedRecord -> Text
 renderSeed seed =
   renderFields
-    [ ("record", "amoebius-certification-seed.v2")
+    [ ("record", "amoebius-certification-generation.v2")
     , ("generation", seedGeneration seed)
-    , ("decision", seedDecision seed)
+    , ("entered-by", seedEnteredBy seed)
     , ("verifier-digest", seedVerifierDigest seed)
     , ("governance-digest", seedGovernanceDigest seed)
     , ("status-postimage", seedStatusPostimage seed)
@@ -135,10 +130,10 @@ renderSeed seed =
 parseSeed :: Text -> Either Text SeedRecord
 parseSeed contents = do
   let fields = parseFields contents
-      field key = maybe (Left ("seed record lacks " <> key)) Right (lookup key fields)
+      field key = maybe (Left ("generation record lacks " <> key)) Right (lookup key fields)
   record <- field "record"
-  if record /= "amoebius-certification-seed.v2" then Left ("unknown seed record: " <> record) else Right ()
-  SeedRecord <$> field "generation" <*> field "decision" <*> field "verifier-digest" <*> field "governance-digest" <*> field "status-postimage" <*> field "tree-commit" <*> field "issued-at"
+  if record /= "amoebius-certification-generation.v2" then Left ("unknown generation record: " <> record) else Right ()
+  SeedRecord <$> field "generation" <*> field "entered-by" <*> field "verifier-digest" <*> field "governance-digest" <*> field "status-postimage" <*> field "tree-commit" <*> field "issued-at"
 
 renderReceipt :: Receipt -> Text
 renderReceipt receipt =
@@ -152,6 +147,7 @@ renderReceipt receipt =
       , ("candidate-digest", receiptCandidateDigest receipt)
       , ("kill-table-digest", receiptKillTableDigest receipt)
       , ("closure-digest", receiptClosureDigest receipt)
+      , ("reproducible-digest", receiptReproducible receipt)
       , ("verifier-digest", receiptVerifierDigest receipt)
       , ("governance-digest", receiptGovernanceDigest receipt)
       , ("status-postimage", receiptStatusPostimage receipt)
@@ -181,6 +177,7 @@ parseReceipt contents = do
     <*> field "candidate-digest"
     <*> field "kill-table-digest"
     <*> field "closure-digest"
+    <*> field "reproducible-digest"
     <*> field "verifier-digest"
     <*> field "governance-digest"
     <*> field "status-postimage"
@@ -190,57 +187,45 @@ parseReceipt contents = do
     <*> pure (lookup "operator-demonstration" fields)
     <*> field "issued-at"
 
--- * Signing
+-- * Records
 
-issuerKeyPath, issuerPublicPath :: Store -> FilePath
-issuerKeyPath store = storeRoot store </> "issuer.key"
-issuerPublicPath store = storeRoot store </> "issuer.pub"
+-- | Write a record and its digest sidecar.
+writeRecord :: FilePath -> Text -> IO (Either Text ())
+writeRecord path payload = do
+  attempt <- try (do
+    let bytes = TextEncoding.encodeUtf8 payload
+    ByteString.writeFile path bytes
+    ByteString.writeFile (path <> ".sha256") (TextEncoding.encodeUtf8 (hex (SHA256.hash bytes)))) :: IO (Either IOException ())
+  pure (either (\problem -> Left ("record not written: " <> Text.pack (show problem))) Right attempt)
 
--- | Sign a payload with the issuer key and write payload and signature.
-writeSigned :: Store -> FilePath -> Text -> IO (Either Text ())
-writeSigned store path payload = do
-  keyBytes <- try (ByteString.readFile (issuerKeyPath store)) :: IO (Either IOException ByteString)
-  case keyBytes of
-    Left problem -> pure (Left ("issuer key unreadable: " <> Text.pack (show problem)))
-    Right seedBytes -> case Ed25519.secretKey seedBytes of
-      CryptoFailed _ -> pure (Left "issuer key is not a valid Ed25519 seed")
-      CryptoPassed secret -> do
-        let public = Ed25519.toPublic secret
-            bytes = TextEncoding.encodeUtf8 payload
-            signature = convert (Ed25519.sign secret public bytes) :: ByteString
-        ByteString.writeFile path bytes
-        ByteString.writeFile (path <> ".sig") signature
-        ByteString.writeFile (issuerPublicPath store) (convert public)
-        pure (Right ())
-
--- | Read a payload and verify its signature against the issuer public key.
-readSigned :: Store -> FilePath -> IO (Either Text Text)
-readSigned store path = do
-  attempt <- try ((,,) <$> ByteString.readFile path <*> ByteString.readFile (path <> ".sig") <*> ByteString.readFile (issuerPublicPath store)) :: IO (Either IOException (ByteString, ByteString, ByteString))
+-- | Read a record and refuse it when its sidecar digest does not match.
+readRecord :: FilePath -> IO (Either Text Text)
+readRecord path = do
+  attempt <- try ((,) <$> ByteString.readFile path <*> ByteString.readFile (path <> ".sha256")) :: IO (Either IOException (ByteString, ByteString))
   pure $ case attempt of
-    Left problem -> Left ("signed record unreadable: " <> Text.pack (show problem))
-    Right (payload, signatureBytes, publicBytes) -> case (Ed25519.publicKey publicBytes, Ed25519.signature signatureBytes) of
-      (CryptoPassed public, CryptoPassed signature)
-        | Ed25519.verify public payload signature -> Right (TextEncoding.decodeUtf8 payload)
-        | otherwise -> Left ("signature does not verify: " <> Text.pack path)
-      _ -> Left ("malformed public key or signature for " <> Text.pack path)
+    Left problem -> Left ("record unreadable: " <> Text.pack (show problem))
+    Right (payload, sidecar)
+      | TextEncoding.decodeUtf8 sidecar == hex (SHA256.hash payload) -> Right (TextEncoding.decodeUtf8 payload)
+      | otherwise -> Left ("record digest does not match its sidecar: " <> Text.pack path)
 
 writeSeed :: Store -> SeedRecord -> IO (Either Text ())
 writeSeed store seed = do
   let directory = generationDirectory store (seedGeneration seed)
   createDirectoryIfMissing True (directory </> "receipts")
-  writeSigned store (directory </> "seed.tsv") (renderSeed seed)
+  writeRecord (directory </> "generation.tsv") (renderSeed seed)
 
 readSeed :: Store -> GenerationId -> IO (Either Text SeedRecord)
 readSeed store generation = do
-  signed <- readSigned store (generationDirectory store generation </> "seed.tsv")
-  pure (signed >>= parseSeed)
+  record <- readRecord (generationDirectory store generation </> "generation.tsv")
+  pure (record >>= parseSeed)
 
 -- | A pass receipt is @phase-NN.tsv@; a reset receipt is @reset-phase-NN-<issued>.tsv@
 -- so a later pass never overwrites the reset that preceded it.
 writeReceipt :: Store -> Receipt -> IO (Either Text ())
-writeReceipt store receipt =
-  writeSigned store (generationDirectory store (receiptGeneration receipt) </> "receipts" </> name) (renderReceipt receipt)
+writeReceipt store receipt = do
+  let directory = generationDirectory store (receiptGeneration receipt) </> "receipts"
+  createDirectoryIfMissing True directory
+  writeRecord (directory </> name) (renderReceipt receipt)
  where
   pad n = let s = show n in if length s < 2 then '0' : s else s
   stamp = Text.unpack (Text.filter (\c -> c /= ' ' && c /= ':') (receiptIssuedAt receipt))
@@ -257,8 +242,8 @@ readReceipts store generation = do
     else do
       names <- sort . filter ((== ".tsv") . takeExtension) <$> listDirectory directory
       parsed <- forM names $ \name -> do
-        signed <- readSigned store (directory </> name)
-        pure (either (const Nothing) (either (const Nothing) Just . parseReceipt) signed)
+        record <- readRecord (directory </> name)
+        pure (either (const Nothing) (either (const Nothing) Just . parseReceipt) record)
       pure (mapMaybe id parsed)
 
 -- | Generations present in the store, by directory name.
@@ -269,47 +254,20 @@ listGenerations store = do
     then pure []
     else do
       names <- listDirectory (storeRoot store)
-      sort <$> filterM (\name -> doesFileExist (storeRoot store </> name </> "seed.tsv")) [name | name <- names, "generation-" `Text.isPrefixOf` Text.pack name]
+      sort <$> filterM (\name -> doesFileExist (storeRoot store </> name </> "generation.tsv")) [name | name <- names, "generation-" `Text.isPrefixOf` Text.pack name]
 
--- | The generation whose seed names the running verifier, if any.
+-- | The generation whose record names the running verifier, if any.
 latestGeneration :: Store -> Text -> IO (Maybe SeedRecord)
 latestGeneration store verifier = do
   names <- listGenerations store
   seeds <- forM names $ \name -> do
-    signed <- readSigned store (storeRoot store </> name </> "seed.tsv")
-    pure (either (const Nothing) (either (const Nothing) Just . parseSeed) signed)
+    record <- readRecord (storeRoot store </> name </> "generation.tsv")
+    pure (either (const Nothing) (either (const Nothing) Just . parseSeed) record)
   pure (case [seed | Just seed <- seeds, seedVerifierDigest seed == verifier] of
     (seed : _) -> Just seed
     [] -> Nothing)
-
--- * The issuer context
-
-agentMarkers :: [String]
-agentMarkers = ["CLAUDECODE", "CLAUDE_CODE_SESSION_ID", "CLAUDE_CODE_CHILD_SESSION", "CLAUDE_PID", "AI_AGENT"]
-
-agentMarkersPresent :: IO [Text]
-agentMarkersPresent = do
-  values <- mapM lookupEnv agentMarkers
-  pure (markersIn [(name, value) | (name, Just value) <- zip agentMarkers values])
-
--- | The markers present in an environment; pure so a suite can state it.
-markersIn :: [(String, String)] -> [Text]
-markersIn environment = [Text.pack name | name <- agentMarkers, name `elem` map fst environment]
-
--- | Why this process may not issue: not root, or an agent session.
-issuerRefusal :: IO (Maybe Text)
-issuerRefusal = do
-  markers <- agentMarkersPresent
-  uid <- getEffectiveUserID
-  pure $ case (markers, uid) of
-    (present@(_ : _), _) -> Just ("ISSUER-AGENT-SESSION: " <> Text.intercalate "," present)
-    ([], 0) -> Nothing
-    ([], _) -> Just "ISSUER-NOT-ROOT"
 
 hex :: ByteString -> Text
 hex = Text.pack . concatMap byteHex . ByteString.unpack
  where
   byteHex value = [intToDigit (fromIntegral value `div` 16), intToDigit (fromIntegral value `mod` 16)]
-
-_unusedTextIO :: FilePath -> IO Text
-_unusedTextIO = TextIO.readFile

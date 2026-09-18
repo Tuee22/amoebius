@@ -119,7 +119,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 |---|---|
 | `Claim` | A `RootInForceSpec` rendered from the corpus, rewritten by the runner with a nonce and a changed replica count, passes through `amoebius compile` and `amoebius apply --executor fake`; the fake `kubectl` stdin byte-equals the compile output and, parsed by the independent oracle executable, carries the authored identities, namespace, and the nonce. One generated mutant per stage module is killed at the following stage. Witness-driven fields, substrates, extensions, children, and UI are excluded. |
 | `Subject` | The eight stage modules named in the gate specification, the product subcommands in `app/amoebius/Main.hs`, and the control-plane endpoint in `app/amoebius/Amoebius/Entry/ControlPlane.hs`. Every subject is inside the closure of `executable amoebius`. |
-| `Command` | Future public spelling is `pb validate phase 03`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 03`; the human runs `sudo amoebius-validate accept --phase 03`. The runner spawns the shipped `amoebius` binary as a child for `render-examples`, `compile`, and `apply --executor fake`. |
+| `Command` | Future public spelling is `pb validate phase 03`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 03`; then `amoebius-validate accept --phase 03` records the receipt and applies one phase's status patch. The runner spawns the shipped `amoebius` binary as a child for `render-examples`, `compile`, and `apply --executor fake`. |
 | `Oracle` | `test/oracle/dsl/Main.hs` parses the decoded dump, the manifest, and the fake's stdin and prints the ledger from literal rows; it depends on no `amoebius` library. |
 | `Positive controls` | Every accepted corpus example decodes to a value equal to its oracle row; the fake's stdin byte-equals the compile output; the nonce is recovered from all three outputs. |
 | `Paired negatives` | `UnboundNeed`, `DanglingBinding`, `UnknownDeployment`, four `ForbiddenImport` twins (`env:`, remote, `?` fallback wrapping remote, transitive local `env:`), requests above limits, and empty needs — each refused at its exact tag and stage with the positive twin accepted. |
@@ -134,7 +134,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 | `Legacy closure` | `LTD-DSL-001`, `LTD-DSL-002`, `LTD-DSL-009`, `LTD-SRC-002`, `LTD-SRC-003`, `LTD-DOC-001`, and `LTD-VAL-005` close here; `LTD-DSL-004` closes its vocabulary share here and its unit share in Phase 4. |
 | `Predecessor` | The Phase-2 receipt in certification generation 2, chained by the digest of Phase 2's product closure plus the verifier and governance digests. |
 | `Residue` | Phases 4 through 9 and every phase from 50 onward remain explicit limitations; `LTD-HELPER-001` remains visible residue until Phase 50. |
-| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and the human's `accept` records it. |
+| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and `accept` records it. |
 
 ## Doctrine adopted
 
@@ -324,7 +324,7 @@ as `LTD-HELPER-001` until Phase 50.
 **Independent Validation**: The compiled specification equals the fenced block above; `verifySpec` accepts it; the old front half — the structural node tree, the toy decoder, the hand-written schema strings, the covering fixture library, the barrier report checker — is absent from the package description; re-adding any one is refused at the closure or hygiene locus.
 **Oracle**: `test/oracle/runner/Main.hs` states the expected specification digest and closure from literals.
 **Legacy IDs**: `LTD-VAL-005` — the barrier's hand-built bind, closed here for the spine and re-run at Phase 9
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through the human's `accept`
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through `accept`
 
 ### Objective
 
@@ -337,7 +337,7 @@ Author the specification the runner executes and delete what it replaces.
 
 ### Validation
 
-Run `preview phase 03` and require every row green; require the human's `accept` to record exactly one
+Run `preview phase 03` and require every row green; require `accept` to record exactly one
 phase's patch.
 
 ### Remaining Work

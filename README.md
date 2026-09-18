@@ -52,9 +52,10 @@ defines proof scope. The [spoof-resistance doctrine](./documents/engineering/tes
 defines acceptance and observation boundaries. Current status is owned by the
 [phase overview](./DEVELOPMENT_PLAN/README.md#phase-overview).
 
-An agent implements sprint seams and runs a gate preview that mints nothing. The human's `accept` records one
-complete qualified phase run as its exact status-only transition; one phase advances per accept
-([DL-0009](./documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition)). Candidate
+An agent implements sprint seams, runs a gate preview that mints nothing, and then runs `accept`, which records
+one complete qualified phase run as its exact status-only transition with a reproducible receipt; one phase
+advances per accept
+([DL-0013](./documents/decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible)). Candidate
 changes must not redefine the accepted requirements used to judge that run. The
 [gate-integrity contract](./DEVELOPMENT_PLAN/development_plan_gate_integrity.md) owns this procedure.
 
@@ -83,10 +84,10 @@ by the [layout doctrine](./documents/engineering/repository_layout_doctrine.md).
 ## Working agreement
 
 [`AGENTS.md`](./AGENTS.md) owns agent conduct, including serial compiler execution and the prohibition on
-agent staging, committing, or pushing. [`CLAUDE.md`](./CLAUDE.md) imports that file mechanically. Agents run
-under a user identity with no sudo, and every governed document is frozen behind the
+agent staging, committing, or pushing. [`CLAUDE.md`](./CLAUDE.md) imports that file mechanically. The verifier
+never needs `sudo`, and every governed document is frozen behind the
 [decision log](./documents/decision_log.md), as
-[`AGENTS.md`](./AGENTS.md#host-precondition) and
+[`AGENTS.md`](./AGENTS.md#reproducibility) and
 [`documentation_standards.md` §17](./documents/documentation_standards.md#17-the-doctrine-freeze) specify.
 
 ## Related Documents
