@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -40,9 +40,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-55 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -91,7 +90,7 @@ exception. `provisionBootstrapRegistry` binds the complete registry/proxy execut
 import demand against the Phase-55 topology and returns an opaque `ProvisionedBootstrapRegistry`. A fresh
 read-only snapshot may then mint exactly one `BootstrapRegistryAction`: side-load the image and initialize
 only the registry/proxy Kubernetes objects from that provision's identity-keyed sources. The action uses the
-same package-private Phase-33 source serializer, but neither constructs a minimal `ProvisionedServiceSpec` nor
+same package-private Phase 3 source serializer, but neither constructs a minimal `ProvisionedServiceSpec` nor
 exposes public per-service render/apply; public manifest generation remains only
 `renderAll :: ProvisionedSpec -> [K8sObject]`.
 
@@ -181,7 +180,7 @@ remains phase-local and cannot be supplied by this prose.
   image is rebuilt and republished at [Phase 91](phase_91_infernix_rederivation.md) /
   [Phase 93](phase_93_jitml_rederivation.md), never here), so Phase 56 carries no forward dependency on the
   extension lifts. The amoebius binary's own UI-server surface travels with it: the generic client source and
-  bundle generated lazily from Haskell by [Phase 46](phase_46_ui_contract_generation.md) are a **baked asset of this
+  bundle generated lazily from Haskell by [Phase 72](phase_72_ui_program_release.md) are a **baked asset of this
   image**, not a second image — the UI server is a worker responsibility of the same executable, and a UI
   release is release *data* ([Phase 72](phase_72_ui_program_release.md)), never an image build. That is
   inside "the amoebius binary alone": it is product surface, not an ML engine payload.
@@ -376,7 +375,7 @@ stand up Distribution `registry:2` as the sole in-cluster pull source. Because t
 reconciler (Phase 58), retained storage (Phase 60), and MinIO (Phase 62) do not yet exist, the registry comes up
 through the resource-provisioned, snapshot-bound `ProvisionedBootstrapRegistry` → `BootstrapRegistryAction`
 cycle-break against bounded interim node-local blob storage. The action initializes only the exact
-registry/proxy object domain through Phase 33's package-private serializer; it is not a minimal
+registry/proxy object domain through Phase 3's package-private serializer; it is not a minimal
 whole-deployment spec and creates no public service-render boundary.
 [§9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)'s dissolution holds — the sole registry implementation is the preloaded Distribution `registry:2` image, so there is no pre-registry public-pull window.
 
@@ -405,7 +404,7 @@ whole-deployment spec and creates no public service-render boundary.
   into the `kind` node's containerd (no public pull).
 - A `ProvisionedBootstrapRegistry` whose `BootstrapRegistryAction` side-loads the selected image and initializes
   only the provisioned registry/mutation-proxy object domain through the same private serializer used by
-  Phase 33. There is no public `render :: ProvisionedServiceSpec -> …` or bootstrap `ProvisionedSpec`; public
+  Phase 3. There is no public `render :: ProvisionedServiceSpec -> …` or bootstrap `ProvisionedSpec`; public
   manifests still cross only `renderAll :: ProvisionedSpec -> [K8sObject]`. The registry is reachable at the
   host-only registry endpoint via per-distro registry plumbing generated lazily from Haskell beneath
   `.build/**` and materialized only at the host-node runtime destination owned by

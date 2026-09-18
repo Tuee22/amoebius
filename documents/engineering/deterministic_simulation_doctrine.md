@@ -17,7 +17,7 @@ is an activity rather than a phase gate, and the registers that are gates are ow
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -42,7 +42,7 @@ Current certification and evidence are recorded in the [development plan](../../
 The concurrency-and-failover method ([chaos_failover_doctrine.md §10](./chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim))
 offers the io-sim lift as a **conditional** move — taken "where the in-process concurrency is intricate enough
 that Extract's purity boundary still leaves real schedule-dependent behaviour." The plan assigns the
-*pure-decision-core* target against hand-built peer stubs to Tier-1 Phase 17, while leaving the daemon's real
+*pure-decision-core* target against hand-built peer stubs to Tier-1 Phase 75, while leaving the daemon's real
 concurrent schedule and every interaction with the real environment (apiserver
 admission, Pulsar redelivery/partition, DNS propagation, clock skew), to Register-3 live chaos. This doctrine
 makes the move **standing rather than conditional**, and points it at the production daemon. Register-3 chaos is the strongest *empirical* instrument but the weakest *logical* one:
@@ -83,18 +83,18 @@ carried to completion: not only the decision, but the whole concurrent program.
 The standing cost is named honestly: making the concurrency-touching signatures polymorphic in `m` is a **tax on all future change**, not a one-time edit. It is paid deliberately, in exchange for [§5](#5-what-dst-establishes-and-the-one-premise-it-buys).
 
 The first substrate instance belongs to
-[Phase 16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md). Its source-bound gate runs one
+[Phase 75](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md). Its source-bound gate runs one
 reference reconciler under the injected real-client interface and `IOSim`, while a source gate
 excludes bare `IO` signatures and raw concurrency primitives from the simulation surface. The gate must also
-construct the actual Phase-10 artifact/budget/lift/workflow/evidence `Composition`, project its ordered names
+construct the actual artifact/budget/lift/workflow/evidence `Composition` parked under `LTD-LIB-001`, project its ordered names
 and exact resource fold, and feed those names to the same reference reconciler under `IOSim`. An independently
 authored Haskell semantic oracle checks that projection; the adapter does not invent a parallel calculus
 vocabulary. The schedule corpus and expectations are Haskell values, traces are dynamic run products rather
 than serialized behavioral expectations, and CPP-selected production mutations challenge stale-partition handling, seed
 sensitivity, and fault coverage. Later phases must run their own production reconcilers on this interface;
-Phase 16 cannot pre-claim any later production reconciler or live-substrate result.
+Phase 75 cannot pre-claim any later production reconciler or live-substrate result.
 
-[Phase 19](../../DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md) owns the first amoebius pre-cluster
+[Phase 75](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md) owns the first amoebius pre-cluster
 subject rather than another substrate demonstration. Its bound standalone pure planner runs one
 three-action world under exactly four authored schedules: baseline, duplicate delivery, crash before apply,
 and stale snapshot. All four must converge to the authored inventory under `IOSim` and bounded `IOSimPOR`;
@@ -140,7 +140,7 @@ environment provides deterministic, in-`IOSim` fakes of:
 Each fake models an **interface contract**, not the vendor's internals; the faults are the ones the R1–R9 rules
 name as the hazards amoebius's code must survive.
 
-Phase 16 must implement and test the six model contracts: Pulsar partition/heal/redelivery/dedup/reorder,
+Phase 75 must implement and test the six model contracts: Pulsar partition/heal/redelivery/dedup/reorder,
 MinIO `If-None-Match` 412, apiserver version-conflict/watch-gap/crash, route53 stale propagation with no CAS,
 Vault sealed rejection, and simulated clock delay. Fidelity to the corresponding real systems remains the
 explicit assumed premise of [§5](#5-what-dst-establishes-and-the-one-premise-it-buys).
@@ -162,17 +162,17 @@ substrate behaviour.
 
 The register *definitions* are owned by [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing);
 this doctrine owns the **shape** of the deterministic-simulation register and how it extends the pre-cluster
-spine ([conformance_harness_doctrine.md §4](./conformance_harness_doctrine.md#4-the-spine-decode--legality--bindexpand--planresolve--provision--renderall--plan--dry-run--fake-apply)).
+spine ([gate_runner_doctrine.md §4](./gate_runner_doctrine.md)).
 
 - **Registers 1, 2, and 3** — pure/semantic-oracle, boundary-integration-with-fakes, and live-infrastructure — are
   defined by [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing); the
-  pre-cluster spine they run on is [conformance_harness_doctrine.md §4](./conformance_harness_doctrine.md#4-the-spine-decode--legality--bindexpand--planresolve--provision--renderall--plan--dry-run--fake-apply).
+  pre-cluster spine they run on is [gate_runner_doctrine.md §4](./gate_runner_doctrine.md).
 - **Register 2.5 — deterministic simulation (this doctrine).** The real daemon/reconciler code under
   `IOSim`/`IOSimPOR` against the [§3](#3-the-simulated-environment-and-its-fault-model) modeled environment —
   exercising **concurrent schedules and injected environment faults**, which Registers 1 and 2 structurally
   cannot reach, and which Register 3 reaches only by sampling. Deterministically replayable, no cluster.
 
-Phase 16 owns the no-cluster substrate serving this activity. Its target Register-2 gate must exercise a
+Phase 75 owns the no-cluster substrate serving this activity. Its target Register-2 gate must exercise a
 reference reconciler across four oracle-pinned schedules plus an independent semantic projection from the
 five-calculus composition; this criterion is scoped to the substrate and cannot pre-claim later Register-2.5
 production-code results. Same-seed encoded traces must be compared between two fresh executions and a changed seed must differ.
@@ -263,7 +263,7 @@ assumed and requires a separate Register-3 live Failover challenge on the `linux
 natural architecture ([substrate_doctrine.md §1.1](./substrate_doctrine.md#11-the-natural-architecture-rule)).
 
 Phase 75 must add a second Register-2.5 instance: `GatewayMigrationSimSpec` must drive both migration traces
-through the Phase-17 `interpret` function, validate every edge against the pinned action sequence, check all
+through the Phase 75 `interpret` function, validate every edge against the pinned action sequence, check all
 five safety predicates, and explore 256 positive-lag schedules. The live companion must cover all sixteen
 migration actions in real child clusters. Route53 and WAN fidelity remain named assumptions rather than being
 inferred from the simulated delay model.
@@ -272,9 +272,9 @@ inferred from the simulated delay model.
 
 This document is normative doctrine. The io-classes environment substrate is assigned to the pre-cluster
 deterministic-simulation phase
-([phase_16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md)); the bounded pure reconcile-core
+([phase_16](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md)); the bounded pure reconcile-core
 subject is assigned to
-[phase_19](../../DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md). Each concurrency-bearing
+[phase_19](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md). Each concurrency-bearing
 live-band phase adds its Register-2.5 validation sprint before its Register-3 gate; the determinism seams are the
 [phase_80](../../DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md) kernel's. Phase order, status, and gates live
 only in [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Phases 58 and 59 own the target
@@ -289,7 +289,7 @@ claims remain design intent unless the complete qualified gate passes and the tr
 - [Formal Model Doctrine](./formal_model_doctrine.md) — [§8](./formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge) trace validation, which first runs against the simulated daemon here
 - [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the one model whose runtime fidelity DST bridges before Register 3
 - [Testing Doctrine](./testing_doctrine.md) — [§2](./testing_doctrine.md#2-the-registers-of-amoebius-testing) owns the register definitions, including Register 2.5
-- [Conformance Harness Doctrine](./conformance_harness_doctrine.md) — the pre-cluster spine this register extends
+- [Conformance Harness Doctrine](./gate_runner_doctrine.md) — the pre-cluster spine this register extends
 - [Content Addressing & Determinism Doctrine](./content_addressing_doctrine.md) — the shared determinism substrate (seeds + clock seams)
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine) the structured-concurrency daemon spine that lifts cleanly onto io-classes
 - [Documentation Standards](../documentation_standards.md)

@@ -23,7 +23,7 @@ exist for the entries below. The tenant model itself is owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_08_scope_index.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -52,7 +52,7 @@ matrix**, the **three foreclosure layers**, and the **validation-locus axis** ar
 [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced here, not restated. Each entry
 below names its owning doctrine, which remains the SSoT for the normative rule.
 
-Everything below states the target type discipline. [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md)
+Everything below states the target type discipline. [Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md)
 owns its lexical request-index kernel; authentication, persisted re-entry, provider enforcement, replay,
 and other entry-specific residues remain with their delivery owners. Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
@@ -63,7 +63,7 @@ and other entry-specific residues remain with their delivery owners. Status and 
 
 ### 3.91 An unauthenticated route whose scope comes from the request
 
-**Delivery-owner:** `Phase-43`
+**Delivery-owner:** `Phase 70`
 
 **Case-family:** `security`
 
@@ -106,7 +106,7 @@ must turn the matrix red before any response body is produced.
 
 ### 3.92 A scope filter whose absent value means every scope
 
-**Delivery-owner:** `Phase-36`
+**Delivery-owner:** `Phase 8`
 
 **Case-family:** `security`
 
@@ -147,7 +147,7 @@ filters on.
 
 ### 3.93 A locally reconstructed session bearing the type of an attested one
 
-**Delivery-owner:** `Phase-41`
+**Delivery-owner:** `Phase 8`
 
 **Case-family:** `security`
 
@@ -188,7 +188,7 @@ current.
 
 ### 3.94 Two same-typed scope identifiers exchangeable at a call site
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase 6`
 
 **Case-family:** `security`
 
@@ -221,15 +221,15 @@ oracle independent of the API walks every exported scoped function and requires 
 share a type. Mutants collapse two identifier newtypes into one, export a raw constructor, and add a coercion
 between scopes.
 
-**Phase-8 bounded evidence contract.** The Register-1 kernel gives tenant and subject distinct private types and introduces a
+**Phase 6 bounded evidence contract.** The Register-1 kernel gives tenant and subject distinct private types and introduces a
 fresh request index through one rank-2 eliminator. Legal twins compile; scope retagging, request-index escape,
 and forged scope construction fail at pinned reasons. Constructor scans reject a second introduction or
 retagging rule. Live authentication and persisted-value re-entry remain `UNVERIFIED`. See
-[Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md).
+[Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md).
 
 ### 3.95 A replay key that does not name its scope
 
-**Delivery-owner:** `Phase-41`
+**Delivery-owner:** `Phase 8`
 
 **Case-family:** `security`
 
@@ -302,7 +302,7 @@ application role.
 
 ### 3.97 A scope key whose rendering is not injective
 
-**Delivery-owner:** `Phase-36`
+**Delivery-owner:** `Phase 8`
 
 **Case-family:** `security`
 

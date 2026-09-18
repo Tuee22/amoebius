@@ -310,7 +310,7 @@ this doc specifies the single-node-root answer the plan adopts and does not sett
 This document is normative bootstrap-sequence + admin-control-plane doctrine only. Delivery sequencing,
 status, and gates are owned by [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), never
 restated here. For orientation only (the plan is authoritative): the **chain/Step kernel** the ordered sequence
-is enacted through rides **Phase 34**, and the **bootstrap coordinator + single-node kind bring-up** rides **Phase 55**; the
+is enacted through rides **Phase 3**, and the **bootstrap coordinator + single-node kind bring-up** rides **Phase 55**; the
 **host→control-plane daemon handoff** itself is assigned to **Phase 65** (the control-plane daemon). The **whole admin REST surface** — `vault init/unseal`, `dhall update`, and secret KV-CRUD alike — is assigned to **Phase 65 Sprint 65.4**,
 because [§3](#3-the-ordered-bootstrap-sequence) step 8 exposes the surface *at* the handoff point: there is no
 control-plane daemon to host an endpoint before it. **Phase 61** (root Vault/PKI) owns the Vault, the

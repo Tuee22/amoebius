@@ -36,9 +36,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-72 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -68,8 +67,8 @@ topology-expanded node/peer graph and derives finite per-node kernel/listener CP
 reservation+ceiling plus nodefs bytes before any interface, peer, queue, or listener mutation.
 
 The design half of the render obligation depends on gate-passed pre-cluster work (Registers 1–2, substrate
-`none`): the typed decoder (Phase 26), the illegal-state corpus (Phase 27), and the pure `renderAll` manifest oracles
-(Phase 33) must establish, in-process, that a keyless peer will not construct and an overlapping-IP peer set
+`none`): the typed decoder (Phase 3), the illegal-state corpus (Phase 3), and the pure `renderAll` manifest oracles
+(Phase 3) must establish, in-process, that a keyless peer will not construct and an overlapping-IP peer set
 will not decode. Once those gate passes exist, Phase 73 must add the **runtime residue**: a real `wg0` interface on each node, brought up by the
 control-plane daemon reconcile, over which a spoke actually reaches the hub at its VPN IP. VPN-IP allocation is by disjoint
 per-cluster sub-ranges of the fabric CIDR — the same disjoint-namespace allocation the failover doctrine uses,

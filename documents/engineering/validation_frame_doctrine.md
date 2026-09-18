@@ -6,7 +6,7 @@
 
 This document owns execution placement, tool acquisition, privilege separation, and run-state containment.
 The complete language pipeline belongs to
-[`conformance_harness_doctrine.md`](./conformance_harness_doctrine.md); observation adequacy belongs to
+[`gate_runner_doctrine.md`](./gate_runner_doctrine.md); observation adequacy belongs to
 [`testing_spoof_resistance.md`](./testing_spoof_resistance.md).
 
 <details>
@@ -14,7 +14,7 @@ The complete language pipeline belongs to
 
 **Status**: Authoritative source
 **Supersedes**: the image-first validation-frame rule previously carried by this file
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, README.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, README.md, documents/engineering/README.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gate_runner_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -28,9 +28,10 @@ The complete language pipeline belongs to
 - [5. Container execution is later parity evidence](#5-container-execution-is-later-parity-evidence)
 - [Related Documents](#related-documents)
 
-- [2.1 GenesisTrust is an irreducible root](#21-genesistrust-is-an-irreducible-root)
+  - [2.1 GenesisTrust is an irreducible root](#21-genesistrust-is-an-irreducible-root)
   - [2.2 The bounded `pb` handoff](#22-the-bounded-pb-handoff)
   - [2.3 The handoff supervisor is resource-bounded](#23-the-handoff-supervisor-is-resource-bounded)
+  - [2.4 The host precondition](#24-the-host-precondition)
 
 ---
 
@@ -47,8 +48,8 @@ GenesisTrust records exact prepared local-custody bytes plus narrow compile-time
   → Phase 0 qualifies a finite governance, source-classification, and gate seed
   → Phase 1 authenticates and reproduces the toolchain acquisition derived from that root
   → Phase 2 closes the compiler-backed semantic source graph
-  → Haskell DSL/proof/generator validation
-  → Phase 49 no-hardware gate barrier
+  → Phases 3–8 build the typed DSL slices over one growing corpus
+  → Phase 9, DSL_BARRIER, re-runs the union corpus through the shipped binary
   → Phase 50 externally observes the already source-bounded pb handoff
   → Phase 51 Haskell host-ensure against fake boundaries
   → Phase 52 first hardware work
@@ -102,17 +103,15 @@ or host-floor policy, implement help/version or another public command, perform 
 after establish/build, the exact argv reaches Haskell by exec. A Python exit-code wrapper around another gate
 is prohibited.
 
-Phase 0 requires the exact current captured bootstrap bytes to pass the non-empty, deny-by-default Haskell-owned
-admission predicate. Its scoped `SourcePb` result must be zero for that snapshot, but the finite seed does not
-qualify the complete `VALIDATION_PB_GRAMMAR` selector/oracle suite, run the Phase-2 owner analyzer, or retire
-`LTD-SRC-008`. Phase 2 owns that full grammar qualification together with compiler-backed source closure. This
-static source-admission result does not establish that an effect or exec occurred.
-Phase 49 invokes Haskell directly; the Phase-50 candidate starts the exact source-built Haskell OS supervisor
-directly, which invokes `pb` as its observed child and records the adapter plus ensure/build/executable-identity/
-unchanged-argv/exec runtime handoff. The future public spelling cannot supervise itself. A keyword scan or
-command listing cannot establish semantic scope. Any
-new `pb/**` behaviour outside the four admitted operations is a source-closure failure even if its extension
-remains `.py`.
+Phase 0 requires the exact current captured bootstrap bytes; Phase 2 pins `pb/__main__.py` by its SHA-256 as
+the one admitted non-Haskell behavioral file and owns compiler-backed source closure. That static admission
+does not establish that an effect or exec occurred. Every phase through the DSL barrier (Phase 9) invokes the
+verifier directly; the Phase-50 candidate has the runner's `ProcessObserver` launch `pb` as the observed
+child ([`gate_runner_doctrine.md` §3](./gate_runner_doctrine.md#3-the-runner)) and records the adapter plus
+ensure/build/executable-identity/unchanged-argv/exec runtime handoff. The future public spelling cannot
+supervise itself. A keyword scan or command listing cannot establish semantic scope. Any new `pb/**`
+behaviour outside the four admitted operations changes the pin and is a source-closure failure even if its
+extension remains `.py`.
 
 ### 2.3 The handoff supervisor is resource-bounded
 
@@ -137,9 +136,19 @@ also rejects the former strict-read-then-truncate expression, wrong-length entro
 omitted containment, and retained processes or files after forced termination. The limits are independently
 restated Haskell values bound into candidate evidence; host defaults cannot choose or widen them.
 
-The [development-plan audit](../../DEVELOPMENT_PLAN/README.md#current-implementation-audit) owns historical
-resource failures and current repair progress. This rule states required behaviour and does not attribute a
-passing handoff or completed repair.
+The [legacy register](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md#3-validation-integrity-violations)
+records the historical resource failure under `LTD-VAL-007`. This rule states required behaviour and does not
+attribute a passing handoff or completed repair.
+
+### 2.4 The host precondition
+
+Agent sessions run under a user identity with no sudoers entry and no read access to the receipt-issuer key.
+Receipt issuance, reseed, reset, govern, and demo are human acts from a password-sudo account, and the
+supervisor refuses to issue when agent environment markers are present
+([DL-0010](../decision_log.md#dl-0010--host-precondition-for-agent-sessions)). A cached sudo timestamp in an
+agent shell is a host defect the human corrects before any gate is accepted; the rule is stated for agents in
+[`AGENTS.md`](../../AGENTS.md#host-precondition) and enforced by the runner's tripwire, owed by
+[Phase 0](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md).
 
 ---
 
@@ -148,7 +157,7 @@ passing handoff or completed repair.
 `Substrate: none` means that the claim does not depend on a hardware-specific or live-infrastructure fact.
 For Phase 0, the compiler version/path and platform carried by the narrow GenesisTrust token are assumed build
 facts, not authenticated toolchain provenance; Phase 1 makes subsequent acquisition authenticated and
-reproducible. Through Phase 49 that toolchain remains a build prerequisite, not
+reproducible. Through the DSL barrier (Phase 9) that toolchain remains a build prerequisite, not
 evidence about Linux, Apple, Windows, CUDA, Metal, a container engine, or a published image. Phase 50 separately observes the
 bounded `pb` runtime handoff; it cannot retroactively strengthen an earlier semantic result.
 
@@ -211,8 +220,9 @@ are data to validate, not authority to mint observations. Qualification must exp
 executable replacement, expectation edits, fabricated process identities, and missing dependency observations.
 
 Every validator leaves tracked files unchanged. After a qualified success, it emits the exact status-only
-patch beneath the protected run root. A human, agent, or CI job may apply that patch after checking its bound
-preimage. Automated progression then continues without routine sprint or phase approval.
+patch beneath the protected run root. The human's `accept` applies that patch after checking its bound
+preimage. Implementation and preview then continue through sprint seams; each phase transition is one human
+`accept`.
 
 **What it forecloses.** A current source digest cannot compensate for an untrusted tool or a candidate-owned
 oracle. File containment cannot compensate for missing privilege separation. Even an enforced boundary still
@@ -245,7 +255,7 @@ execution order and makes no current image, host, or phase-result claim.
 
 ## Related Documents
 
-- [No-cluster conformance harness](./conformance_harness_doctrine.md)
+- [No-cluster conformance harness](./gate_runner_doctrine.md)
 - [Testing doctrine](./testing_doctrine.md)
 - [Testing spoof resistance](./testing_spoof_resistance.md)
 - [Image-build doctrine](./image_build_doctrine.md)

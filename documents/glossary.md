@@ -42,6 +42,7 @@ as the set its first-use rule ranges over.
 
 - [tracked source boundary](./engineering/repository_layout_doctrine.md#1-classification-rule) — behavioral/runtime/test/gate/generator source is Haskell; bounded Python under `pb/**` is the sole source-language exception and may only bootstrap, build, and `exec` Haskell.
 - [operator input](./engineering/repository_layout_doctrine.md#1-classification-rule) — an external or local-untracked value supplied at a trust boundary; it is not repository source and its format does not create a tracked-language exception.
+- [`RootInForceSpec` and `DeploymentRules`](./engineering/dsl_doctrine.md#the-typed-spec-records) — the typed records spelled once: the root every stage consumes, and the six dials that say how an app runs.
 - [`InForceSpec`](./engineering/cluster_lifecycle_doctrine.md#4-the-root-inforcespec-is-the-persistent-contract) — the typed whole-cluster desired-state value decoded from external operator input and from which effects are derived; the central noun of the system.
 - [`renderAll`](./engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) — the sole public pure function from a sealed spec to Kubernetes objects.
 - [`ProvisionedSpec`](./engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) — the constructor-private seal that `renderAll` alone accepts.
@@ -61,8 +62,8 @@ as the set its first-use rule ranges over.
 - [validation-locus](./illegal_state/illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer) — the six-valued axis naming where a state is actually caught; orthogonal to the layer.
 - [the typing techniques](./illegal_state/illegal_state_techniques.md#4-the-typing-techniques) — the nine construction patterns by which the catalog's entries are foreclosed.
 - [dhall-typecheck](./engineering/dsl_doctrine.md#dhall-typecheck--the-dhall-typechecker) — the authoring-time Dhall typecheck, total and pure, before any effect.
-- [gadt-decode](./engineering/dsl_doctrine.md#gadt-decode--the-haskell-typed-decoder) — the total Haskell decoder that rejects a well-typed but incoherent value.
-- [extension-astcheck](./engineering/dsl_doctrine.md#extension-astcheck--the-extension-ast-checker) — the syntax-tree check over extension source, run at build time before link.
+- [gadt-decode](./engineering/dsl_doctrine.md#gadt-decode--the-haskell-typed-decoder) — the total Haskell decoder specified to reject a well-typed but incoherent value; owed by Phase 3.
+- [extension-astcheck](./engineering/dsl_doctrine.md#extension-astcheck--the-extension-ast-checker) — the parse-tree check over extension source, specified to run at build time before link; owed by Phase 6.
 
 ## 3. Evidence, testing, and the plan
 
@@ -72,6 +73,12 @@ as the set its first-use rule ranges over.
 - [derivation](./engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) — the rule that Haskell generates coverage enumeration while a separately authored Haskell module supplies the semantic expectation.
 - [spoof-resistant gate](./engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence) — a gate required to distinguish actual subject behavior from fabricated observations under its declared threat model.
 - [mutant](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject) — a Haskell-declared production change tested at its exact assigned failure set with unaffected controls; disposable materializations remain beneath `.build/**`.
+- [decision log](./decision_log.md#1-entry-contract) — the append-only register of decisions that changed frozen doctrine or the plan.
+- [frozen doctrine](./documentation_standards.md#17-the-doctrine-freeze) — the governed set whose bodies change only through a decision-log entry.
+- [gate runner and `GateSpec`](./engineering/gate_runner_doctrine.md#2-the-gate-specification-vocabulary) — the one runner and the typed specification it consumes per phase.
+- [`BinaryFact` and `SpineFact`](./engineering/gate_runner_doctrine.md#2-the-gate-specification-vocabulary) — the runner-perturbed command through the shipped binary, and the barrier's end-to-end digest fact.
+- [example corpus](./engineering/testing_doctrine.md#the-example-corpus) — Haskell example values linked by the executable, growing phase by phase, re-run at the barrier.
+- [`preview` and `accept`](./engineering/gate_runner_doctrine.md#6-commands-generations-and-receipts) — the agent's gate run that mints nothing, and the human's act that records one phase.
 - [gate integrity](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the eighteen-row acceptance contract and required execution boundaries; a completed table alone establishes no pass.
 - [accepted baseline](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation) — the required protected Haskell acceptance specification and verifier identity against which a candidate is judged.
 - [certification generation](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation) — the required Haskell authority separating admitted certification from receipts withdrawn by a reset.
@@ -85,6 +92,7 @@ as the set its first-use rule ranges over.
 
 ## 4. Clusters, hosts, and topology
 
+- [`SubstrateProfile`](./engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob) — the one site mapping each of the four catalog substrates to its natural architecture, lanes, and host frame.
 - [amoebic spawning](./engineering/cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest) — a parent cluster creating a child, producing the recursive cluster forest.
 - [`ComputeEngine`](./engineering/cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm) — the closed union of cluster engines, declared rather than detected.
 - [`Topology`](./engineering/cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction) — a cluster as a fold over its nodes, with cardinality fixed by construction.
@@ -138,6 +146,7 @@ as the set its first-use rule ranges over.
 
 ## 8. Applications, tenancy, and the UI surface
 
+- [business logic](./engineering/app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is) — tenant-parameterised, total, first-order rules over typed state and events, expressed as `UiSource` update rules.
 - [deployment rules and application logic](./engineering/app_vs_deployment_doctrine.md#1-two-surfaces-one-app-written-once) — the split letting one application be written once and run many ways.
 - [tenant](./engineering/tenancy_doctrine.md#3-what-a-tenant-is) — the isolation unit on an axis orthogonal to the cluster axis.
 - [`TenantSpec` / `SubjectSpec` / `Membership`](./engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--subjectspec--membership--owner--rolebinding) — the typed shapes from which access control is derived rather than authored.
@@ -152,7 +161,7 @@ as the set its first-use rule ranges over.
 - [`PromotionGate`](./engineering/release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable) — the evidence requirement making an unverified promotion to production unrepresentable.
 - [lift and compose](./engineering/lift_and_compose_doctrine.md#1-why-this-doctrine-exists) — amoebius depends on no seed project and re-derives what it must prove.
 - [the re-derivation map](./engineering/lift_and_compose_doctrine.md#5-the-re-derivation-map) — one row per seed: the structure re-derived, and the guarantee amoebius must add.
-- [the lift calculus](./engineering/lift_and_compose_doctrine.md#7-the-lift-calculus) — the closed layer set, the total transition relation, and the witness each transition consumes.
+- [the lift calculus](./engineering/substrate_doctrine.md#10-the-lift-calculus) — the closed layer set, the total transition relation, and the witness each transition consumes.
 - [a calculus](./engineering/extension_conformance_doctrine.md#3-the-obligation-surface-one-component-per-calculus) — one of the five components of the core algebra: artifact, budget, lift, workflow, evidence.
 - [conformance, and the verdict seal](./engineering/extension_conformance_doctrine.md#6-the-verdict-seal) — the value a generated gate mints, and the only thing that admits an extension to a link set.
 - [a law family](./engineering/extension_conformance_doctrine.md#4-the-four-law-families) — L1–L5 per extension, C1–C7 over composition, S1–S6 for security, P1–P6 for transactions.

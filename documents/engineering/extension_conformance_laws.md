@@ -16,7 +16,7 @@ discharges them, and the closure argument that consumes C1 are owned by the hub,
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md, DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -41,32 +41,32 @@ to the hub, and the security and transaction families — which are *instances* 
 seams — belong to [`extension_conformance_security.md`](./extension_conformance_security.md) and
 [`extension_conformance_transactions.md`](./extension_conformance_transactions.md).
 
-[Phase 10](../../DEVELOPMENT_PLAN/phase_10_calculus_composition.md) owns the target base five-calculus operation
+[`LTD-LIB-001`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md#5-dsl-divergence) owns the target base five-calculus operation
 and finite Register-1 instances of C2, C3, C5, and C6: five component arms, 25 ordered pairs, 125 kind triples,
 exact resource addition, and a request-scope compiler barrier. That result is not an extension-law verdict.
 [The implementation](../../src/calculus-composition/Amoebius/Calculus/Composition.hs) keeps constructors
 private, uses exact `Natural` addition, and makes scope weakening, saturation, and transform-index loss three
 separate changed-production challenges. Exhaustion applies to the finite kind surface only; the numeric
 properties remain sampled at their declared 500-case bounds.
-[Phase 20](../../DEVELOPMENT_PLAN/phase_20_extension_declaration.md) owns the complete five-component
+[Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) owns the complete five-component
 declaration that law observations name.
 
-[Phase 21](../../DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md) owns the bound pure L1–L5 evaluator
+[Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) owns the bound pure L1–L5 evaluator
 over explicit operation, artifact, budget, flow, and claim observations joined to that declaration. Its bounded
 Register-1 suite covers two declaration shapes, six authored operation inputs, two independently seeded child-
 process render comparisons, actual budget and evidence values, and five single-law negative subjects. Finite
-source scanners and the Phase-15 pinned claim/fixture compiler negative supplement those observations. This
+source scanners and the Phase 3 pinned claim/fixture compiler negative supplement those observations. This
 does not prove termination or scanner completeness, generate a gate for an arbitrary declaration, certify a
 runtime extension, or mint a conformance verdict.
 
-[Phase 22](../../DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md) owns the bound separate normalized
+[Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) owns the bound separate normalized
 composite value and a bounded C1–C7 evaluator. Seven ordered identity/link cases over the two declaration
 fixtures yield 49 accepted pair-law cells; a separate Haskell-owned 63-cell inventory covers two lawful address controls
-and seven exact negative subjects. Composition must preserve one request-scope index, union Phase-21
+and seven exact negative subjects. Composition must preserve one request-scope index, union Phase 6
 vocabularies, and fold exact resource vectors. An independent Haskell oracle must check pair sums and four
 SHA-256 addresses. These samples
 do not prove universal C1, arbitrary-link closure, scanner completeness, collision absence, or runtime
-correspondence. Gate generation, verdict sealing, and the universal C1 proof remain owned by Phase 24 and
+correspondence. Gate generation, verdict sealing, and the universal C1 proof remain owned by Phase 6 and
 later proof work. Current status lives only in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -166,10 +166,10 @@ extension.
 
 ### Bound discharge boundary — NOT VALIDATED
 
-The Phase-21 evaluator in `src/extension-laws/Amoebius/Extension/Laws/PerExtension.hs` makes each L-law a
+The Phase 6 evaluator in `src/extension-laws/Amoebius/Extension/Laws/PerExtension.hs` makes each L-law a
 separate typed verdict. Before deciding a verdict, it requires the
 observed operation, artifact, budget, flow, or claim names to cover the corresponding sets derived from the
-Phase-20 declaration. The executable case inventory and expected outcomes are a separately authored Haskell
+Phase 6 declaration. The executable case inventory and expected outcomes are a separately authored Haskell
 oracle in `test/spec/extension/ExtensionLawsPerExtensionOracle.hs`; neither this list nor an encoded table
 supplies a verdict. The spec joins actual results to the independent inventory and refuses missing, duplicate,
 or extra cases. Any serialized result is generated only beneath the acquired `.build/runs/phase-21/**` root.
@@ -183,7 +183,7 @@ Its executable corpus is deliberately finite:
   reapers.
 - L4 evaluates the closed test relation `RequestFlow < TenantFlow < GlobalFlow` and rejects the seeded widening
   from request to tenant flow.
-- L5 constructs two real evidence claims bound to fixtures and reuses the Phase-15 legal/illegal compiler pair
+- L5 constructs two real evidence claims bound to fixtures and reuses the Phase 3 legal/illegal compiler pair
   for a claim with its fixture argument omitted.
 
 The Haskell `LawVerdictCase` inventory must project a 7-by-5 reader-facing verdict table with two all-green
@@ -305,10 +305,10 @@ address with a content comparison.
 
 ### Target compositional discharge boundary — NOT VALIDATED
 
-The Phase-22 evaluator must return one typed verdict per C-law over a scope-preserving composite of complete
-Phase-20 declarations:
+The Phase 6 evaluator must return one typed verdict per C-law over a scope-preserving composite of complete
+Phase 6 declarations:
 
-- C1 evaluates Phase-21 L1–L5 over each operand and the composite vocabulary. Its current seven cases are a
+- C1 evaluates Phase 6 L1–L5 over each operand and the composite vocabulary. Its current seven cases are a
   counterexample search, not the universal implication [C1](#c1-closure) requires.
 - C2 compares both empty-composite identities by value; C3 compares both groupings after declaration-key
   normalization.

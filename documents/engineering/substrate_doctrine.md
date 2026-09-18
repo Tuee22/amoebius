@@ -19,7 +19,7 @@ does not own the cluster engine that runs on it, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md, DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/decision_log.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -36,10 +36,11 @@ does not own the cluster engine that runs on it, owned by
 - [7. The LoadBalancer backend follows the materialized compute engine and provider](#7-the-loadbalancer-backend-follows-the-materialized-compute-engine-and-provider)
 - [8. The node inventory: the single owner of hosts, capacity, and taints](#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)
 - [9. Planning ownership](#9-planning-ownership)
+- [10. The lift calculus](#10-the-lift-calculus)
 - [Related Documents](#related-documents)
 
 **Target inventory read-side boundary — NOT VALIDATED.** The eventual
-[Phase-29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) must validate closed kubelet
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) must validate closed kubelet
 filesystem layouts, OCI/runtime metadata routing, provider-root template identities, accelerator
 family/profile ownership, peer-graph requirements, and raw/reserved/allocatable VRAM arithmetic in Register 1.
 Former reseals and external-run references are permanently invalid evidence. Detection, materialization,
@@ -362,16 +363,16 @@ own `PATH`, which is legitimate because it is that guest's environment, not the 
 > package-manager prefix/permission fidelity remains deliberately unverified until the native host phases;
 > the gate proves the algebra and its fake boundary, not `brew`, `winget`, or `apt` behavior on hardware.
 >
-> **Observed implementation.** [Phase 51](../../DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md) has a
-> implementation covering the algebra, whose status is recorded in the
-> [tracker](../../DEVELOPMENT_PLAN/README.md) and nowhere here: an install step is a typed `Performer` plus an argument vector in which a
+> The algebra is specified as follows and is owed by
+> [Phase 51](../../DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md): an install step is a typed `Performer` plus an argument vector in which a
 > version is a requirement reference rather than a literal, so a pin has one home; `HostTool` carries the
 > container engine, so it is ensured through the one closed enum instead of resolved beside it; a
 > reconciler is a row whose applicability column is the single statement of its set, with the diagnostic
 > rendered from that column; and the driver re-resolves after every step and verifies with the predicate
 > it probed with. `Context` reaches that driver before admitting bootstrap.
 >
-> `Amoebius.Host.LinuxEngine` is the Phase-52 native Linux implementation boundary. It separately records
+> `Amoebius.Host.LinuxEngine` is specified as the Phase-52 native Linux boundary, owed by
+> [Phase 52](../../DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md). It is specified to record separately
 > durable Docker-group membership, current-process and future-session unelevated daemon access, native
 > architecture agreement, the run-local smoke-image result, and a freshly observed zero-mutation second
 > pass. The acquired supervisor owns the pristine Incus guest and external observations; the tracker records
@@ -408,11 +409,15 @@ modules and re-derives the shape under its own obligations
 ([`lift_and_compose_doctrine.md` §5](./lift_and_compose_doctrine.md#5-the-re-derivation-map)).
 
 **This section is one instance of the lift calculus.** The algebra — a closed layer set, a total transition
-relation, and a witness per transition — is owned by
-[`lift_and_compose_doctrine.md` §7](./lift_and_compose_doctrine.md#7-the-lift-calculus); what this doctrine owns
-is which layers exist on which hardware and which provider supplies each. The distinction matters because a
-new substrate is then an *extension* satisfying a contract rather than an edit to a union
-([`extension_conformance_doctrine.md` §8](./extension_conformance_doctrine.md#8-a-hardware-substrate-is-an-extension-too)).
+relation, and a witness per transition — is owned by [§10](#10-the-lift-calculus); what this doctrine owns
+is which layers exist on which hardware and which provider supplies each. A new substrate is a catalog edit,
+never an extension: the substrate axis is a closed four-member catalog with one `SubstrateProfile` site that
+maps each member to its natural architecture, its lanes, and its host frame, and an extension declares only
+the lane it requires through `extRequiresLane`
+([`extension_conformance_doctrine.md` §8](./extension_conformance_doctrine.md#8-a-hardware-substrate-is-a-catalog-member-with-a-profile),
+[DL-0001](../decision_log.md#dl-0001--substrates-are-a-closed-catalog-with-one-profile-site)). Adding a family
+is a catalog edit plus a decision-log entry, owed by
+[Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md) for the profile site.
 
 **Target frame boundary — NOT VALIDATED.** The plan must establish the three-constructor frame set, total
 wildcard-free substrate/frame/engine relations, and observation-only transition witnesses through the
@@ -616,10 +621,10 @@ gate input. Current third-party dependencies and packaging machinery remain `LTD
 target installation contract. A running invocation cannot update itself: doing so would make the run's own
 provenance unanswerable.
 
-**Observed implementation.** The tracked `pb/**` footprint is statically admitted only by the exact,
-non-empty, deny-by-default Haskell-owned AST/import/resolved-call/control-flow/potential-effect graph. That
-source admission does not establish runtime handoff behavior. Phase 49 invokes the source-bound Haskell binary
-directly and cannot use `pb` as evidence. [Phase 50](../../DEVELOPMENT_PLAN/phase_50_host_assert_cli.md) alone
+The tracked `pb/**` footprint is specified to be admitted by the SHA-256 pin of `pb/__main__.py`, owed by
+[Phase 2](../../DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md). That source admission does not
+establish runtime handoff behavior. Every phase through the DSL barrier (Phase 9) invokes the source-bound
+verifier directly and cannot use `pb` as evidence. [Phase 50](../../DEVELOPMENT_PLAN/phase_50_host_assert_cli.md) alone
 owns runtime adapter effects, executable identity, unchanged argv, exec replacement, and exit propagation for
 the already-bounded handoff. The [tracker](../../DEVELOPMENT_PLAN/README.md) is the sole status authority for
 those phases.
@@ -747,8 +752,46 @@ Incus, Apple uses Lima, and Windows uses WSL2.
 
 ---
 
+<a id="7-the-lift-calculus"></a>
+
+## 10. The lift calculus
+
+"Lift" survives the inversion as a technical term, and this section is its owner. A lift is not a decision to
+reuse code; it is the answer to a question with a closed set of answers: **where does an effect run, and what
+does the caller have to hold to make it run there?**
+
+The calculus has three parts:
+
+- **A closed layer set.** Every effect executes at exactly one layer — on the host, inside a frame the host
+  provides, inside a container that frame runs, and so on outward. The set is closed, so "somewhere else" has
+  no constructor, and the layer at which a step runs is part of its type rather than part of its documentation.
+- **A total transition relation.** Moving an effect from one layer to another is a relation over the layer set,
+  and it is total: every pair either has a constructor that performs the transition or has no inhabitant at
+  all. There is no fallback arm, which is the guarantee
+  [`lift_and_compose_doctrine.md` §5](./lift_and_compose_doctrine.md#5-the-re-derivation-map) records against
+  `hostbootstrap`.
+- **A witness for each transition.** A transition consumes evidence that its precondition holds — that the
+  frame exists, that the engine is present, that the image is resolved. The witness is produced by observation
+  and cannot be asserted, so a step cannot claim to have crossed a boundary it did not cross.
+
+Composition follows from the three: two lifts compose exactly when the inner one's target layer is the outer
+one's source layer, which is a type equation rather than a check. The substrate-specific instances of this
+calculus — which frames exist on which hardware, and which engine each frame provides — are
+[§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux) of this document.
+
+The calculus is specified to be realised as pure values with the layer set closed at three members, the
+relation total over all nine ordered pairs with no fallback arm, a witness per transition that only an
+observation produces, and composition as the type equation above. It is owed by
+[Phase 51](../../DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md) as a library dependency of the host-ensure
+kernel; the live observation that produces a witness is owned by the hardware phases from
+[Phase 52](../../DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md) onward. Status lives only in the
+[tracker](../../DEVELOPMENT_PLAN/README.md).
+
+---
+
 ## Related Documents
 - [Engineering Doctrine Index](./README.md)
+- [Lift and Compose Doctrine](./lift_and_compose_doctrine.md) — the self-containment rule this calculus once lived beside
 - [Apple Metal Headless Builds](./apple_metal_headless_builds.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md)

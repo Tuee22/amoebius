@@ -15,7 +15,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/substrate_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -38,11 +38,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-51 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -97,13 +96,13 @@ remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
-| `Claim` | One pristine natural-architecture Ubuntu Linux guest installs its engine and runs the native source-bound smoke image through a designated non-root Docker client. Complete external observations cover the whole run; the identical second complete guest pass issues required probes and zero mutations. |
-| `Subject` | `Amoebius.Host.LinuxEngine`, the `dev linux-engine-guest-pass` entry point, and the acquired `Amoebius.Validation.LinuxEngineBringupRun` supervisor. |
-| `Command` | `pb validate phase 52`; the validated bootstrap hands off unchanged to Haskell, which serially qualifies the production subject and then owns one live Incus guest from launch through destruction. |
-| `Oracle` | `test/spec/host/LinuxEngineBringupOracle.hs`, importing no `Amoebius.*` module and separately authoring the exact surfaces, ledgers, refusal cases, architecture rule, and unelevated argv. |
+| `Claim` | One pristine natural-architecture Ubuntu Linux guest installs its engine and runs the native source-bound smoke image through a designated non-root Docker client. Complete external observations cover the whole run; the identical second complete guest pass issues required probes and zero mutations. The smoke image is built inside the guest by `Amoebius.Kernel.Interpret` from the corpus's rendered `ImageRecipe` build step, and the candidate binds the DSL-barrier (Phase 9) receipt digest. |
+| `Subject` | `Amoebius.Host.LinuxEngine` in `src/Amoebius/Host/LinuxEngine.hs`, which carries the observation logic the deleted per-phase runner held, and the `dev linux-engine-guest-pass` entry point; both inside the closure of `executable amoebius`. The runner owns the Incus guest and the process-trace observer. |
+| `Command` | Future public spelling is `pb validate phase 52`, admissible while binding the Phase-50 receipt. The agent runs `amoebius-validate preview phase 52`; the human runs `sudo amoebius-validate accept --phase 52`. The runner serially qualifies the production subject, then owns one live Incus guest from launch through destruction and recovers its nonce through the observer. |
+| `Oracle` | `test/oracle/host/Main.hs`, importing no `amoebius` library and separately authoring the exact surfaces, ledgers, refusal cases, architecture rule, unelevated argv, and the corpus recipe's expected image identity from literals. |
 | `Positive controls` | Acquire the pristine guest and complete successful install, durable membership, current/future-session access, native smoke build/run and second complete guest pass. Independently observe every process, daemon endpoint, credential context, surface and owned resource involved. |
 | `Paired negatives` | Pair each dirty-surface, architecture, credential, root-client, endpoint, missing-probe and unexpected-mutation refusal with a successful observed control. Require the exact independent error and zero forbidden effects, including unrelated-failure and untraced-action regressions. |
-| `Mutants` | Mutate actual membership, credential refresh, elevation, architecture, probing, process observation or ledger derivation. Each must fail its independently assigned exact semantic/authority case; any assertion failure printed as the active selector token is rejected. |
+| `Mutants` | Runner-generated from the fixed operator catalogue over `Amoebius.Host.LinuxEngine`, eight per module, at most forty per gate, kill ratio at least 0.6. A mutant that changes membership, credential refresh, elevation, architecture, probing, process observation, or ledger derivation is killed at its assigned observation while unrelated controls stay green; no authored mutant seam exists. |
 | `Discovery` | Join every process and effect-producing call site, typed action, Docker invocation, observed UID/groups/environment/endpoint and resource to an independent expected role and case. Planned rows or a fixed four-surface list cannot conceal unobserved actions. |
 | `Challenge` | A uniquely named guest is observed pristine after acquisition, both passes execute against that same live guest, and the second pass must freshly observe every surface while issuing zero mutations. |
 | `Observer` | An external supervisor continuously records both actual guest passes and smoke work, including executable/argv/environment, UID/effective UID/groups, Docker endpoint/context, syscall/process outcomes, package/group/daemon/image effects, version output and teardown. The earlier version-only trace cannot supply this coverage. |
@@ -149,13 +148,13 @@ remains phase-local and cannot be supplied by this prose.
 The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
 Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
 
-## Sprint 52.1: The pristine guest and its recorded preflight ✅
+## Sprint 52.1: The pristine guest and its recorded preflight ⏸️
 
-**Status**: Done
-**Implementation**: `Amoebius.Validation.LinuxEngineBringupRun` owns unique Incus launch, pristine preflight, observation, and unconditional deletion.
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Host/LinuxEngine.hs` owns unique Incus launch, pristine preflight, observation, and unconditional deletion as product-side host logic; the runner's observer records them.
 **Blocked by**: [Phase 51](phase_51_host_ensure_kernel.md) gate pass
 **Independent Validation**: Externally acquire and observe the pristine owned guest; each singly dirty surface refuses at its exact reason after successful setup; assigned preflight/observer mutants are detected; foreign hosts and other substrates remain excluded.
-**Oracle**: `test/spec/host/LinuxEngineBringupOracle.hs`, importing no production module.
+**Oracle**: `test/oracle/host/Main.hs`, importing no production module.
 **Legacy IDs**: none.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/substrates.md`.
 
@@ -191,13 +190,13 @@ installed.
 
 Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.2: The pre-binary leg on a host that carries nothing ✅
+## Sprint 52.2: The pre-binary leg on a host that carries nothing ⏸️
 
-**Status**: Done
-**Implementation**: the live runner installs only guest build prerequisites, mounts the authenticated contained toolchain read-only, and invokes `pb` under an external `execve` trace.
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Host/LinuxEngine.hs` installs only guest build prerequisites and mounts the authenticated contained toolchain read-only; the runner invokes `pb` under its `ProcessObserver`.
 **Blocked by**: Sprint 52.1
-**Independent Validation**: guest `pb --version` output and `execve` trace must identify the source-bound Haskell binary after the Python child.
-**Oracle**: the outer runner independently reads the process trace and exact version token.
+**Independent Validation**: the runner's `ProcessObserver` trace must show `pb` replacing itself with the source-bound `amoebius` binary carrying `compile <corpus example>` unchanged, as the Phase-50 handoff observation specifies; a rewritten argv or a surviving Python parent is refused.
+**Oracle**: `test/oracle/host/Main.hs` reads the process trace and states the expected argv from literals.
 **Legacy IDs**: none.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`.
 
@@ -231,13 +230,13 @@ and observe the handoff from outside the process that performs it.
 
 Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.3: The engine, and sudoless access as three proofs ✅
+## Sprint 52.3: The engine, and sudoless access as three proofs ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.LinuxEngine` owns typed probes/mutations and the live absolute-path interpreter.
 **Blocked by**: Sprint 52.2
 **Independent Validation**: Observe durable membership and actual non-root Docker access in current and future sessions; root/elevated/endpoint-substituted variants fail specifically; assigned access mutants fail their exact cases; no other substrate is claimed.
-**Oracle**: `LinuxEngineBringupOracle.expectedFirstLedger`, `expectedUnelevatedProbe`, and `expectedFutureSession`.
+**Oracle**: `test/oracle/host/Main.hs` (`expectedFirstLedger` rows), `expectedUnelevatedProbe`, and `expectedFutureSession`.
 **Legacy IDs**: none.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -274,20 +273,20 @@ install the container engine and make it usable without elevation as three prope
 
 Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.4: The native build and the version verdict ✅
+## Sprint 52.4: The native build and the version verdict ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.LinuxEngine.admitNativeBuild` and its live image builder own three-way architecture admission and the run-local smoke image.
 **Blocked by**: Sprint 52.3
 **Independent Validation**: all agreeing architectures admit, each singly mismatched triple refuses, the platform-override mutant reddens, and live container stdout equals the recorded version.
-**Oracle**: `LinuxEngineBringupOracle.architectureCases` and the outer container-output observer.
+**Oracle**: `test/oracle/host/Main.hs` (`architectureCases` rows) and the outer container-output observer.
 **Legacy IDs**: none.
 **Docs to update**: `documents/engineering/image_build_doctrine.md`.
 
 ### Objective
 
 Adopt [`image_build_doctrine.md` §3 — one image per architecture](../documents/engineering/image_build_doctrine.md#3-one-image-per-architecture--the-tag-carries-the-architecture-not-an-index);
-build the exact run-local binary smoke recipe on this guest, at this guest's architecture, and run the result far enough to produce
+build the corpus's rendered `ImageRecipe` — the smoke image of the DSL barrier's example — on this guest, at this guest's architecture, and run the result far enough to produce
 a verdict.
 
 ### Deliverables
@@ -317,13 +316,13 @@ a verdict.
 
 Run the complete acquired Phase-52 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 52.5: The second run that changes nothing ✅
+## Sprint 52.5: The second run that changes nothing ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `planLinuxEnginePass` derives each ledger from a fresh live observation and the runner invokes it twice in one guest.
 **Blocked by**: Sprint 52.4
 **Independent Validation**: The actual first and second complete guest passes have externally derived full action ledgers; the second retains required probes and no mutations; hidden-action/root-client/plan-only-ledger pairs and assigned mutants fail exactly; all owned resources are externally absent after teardown.
-**Oracle**: `LinuxEngineBringupOracle.expectedSecondLedger` and `expectedSurfaces`.
+**Oracle**: `test/oracle/host/Main.hs` (`expectedSecondLedger` rows) and `expectedSurfaces`.
 **Legacy IDs**: none.
 **Docs to update**: `documents/engineering/testing_doctrine.md`.
 
@@ -349,7 +348,7 @@ run the whole sequence a second time against the same guest and require that it 
 ### Validation
 
 - Reproduce a plan-only second ledger with an injected actual install, root Docker call, image rebuild or smoke mutation; the external action join must identify and reject the hidden event.
-- Trace both actual guest passes, not only an earlier `pb --version` call. Compare exact observed probes/mutations, credential contexts, surfaces and endpoints before claiming idempotence.
+- Trace both actual guest passes, not only the earlier handoff observation. Compare exact observed probes/mutations, credential contexts, surfaces and endpoints before claiming idempotence.
 - Require each qualification failure to identify its exact independent case/reason and observed event. The active CPP selector cannot determine a generic red label for any failed assertion.
 
 1. The second pass records at least one probe per assertion and no mutation.
@@ -386,5 +385,5 @@ Run the complete acquired Phase-52 gate; only its exact pass can authorize the m
 - [Image Build & Registry](../documents/engineering/image_build_doctrine.md)
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md)
 - [Phase 50](phase_50_host_assert_cli.md)
-- [Phase 35](phase_35_image_recipe_generation.md)
+- [Phase 5](phase_05_substrates_lanes_image_recipe.md)
 - [Development Plan](README.md)

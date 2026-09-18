@@ -17,7 +17,7 @@ into, owned by [manifest_generation_doctrine.md](./manifest_generation_doctrine.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_03_typed_spine.md, DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md, DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md, DEVELOPMENT_PLAN/phase_07_child_clusters_obligation_teardown.md, DEVELOPMENT_PLAN/phase_09_dsl_barrier.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/decision_log.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -93,12 +93,9 @@ dhall"*. It gets there by a hard split between two languages:
 open where the *type* of that data comes from. It is specified to be reflected from the Haskell checked-IR
 types rather than authored beside them, so that the schema, the prelude of smart constructors, and the examples
 all render from the same types the decoder is written against; that relation is what would remove a second
-maintained schema, and its fixture is owed by
-[Phase 25](../../DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md).
-
-> **Observed implementation.** The Phase-25 projection is a set of Haskell-declared Dhall module *sources*
-> with no derived correspondence to the decoder's types; see the dated progress audit in
-> [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
+maintained schema, and its example corpus is owed by
+[Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md)
+([DL-0006](../decision_log.md#dl-0006--the-honesty-backlog-is-struck-or-re-mooded)).
 
 Generation and decoding can still be wrong. Independent semantic correspondence remains required
 ([`generated_artifacts_doctrine.md` §2](./generated_artifacts_doctrine.md#2-what-is-generated-and-from-what),
@@ -330,27 +327,114 @@ flowchart TD
 
 *Design intent. InForceSpec import and subtree projection composition is Tier-1 amoebius design intent.*
 
+### The typed spec records
+
+One decoded `RootInForceSpec` is the value every later stage consumes. Its records are spelled here once and
+linked from every other document
+([DL-0004](../decision_log.md#dl-0004--the-typed-spec-records-are-spelled-once)). The spelling below is
+specification: `RootInForceSpec`, `ClusterSpec`, `TopologySpec`, and `AppSpec` are owed by
+[Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md); the witness-bearing `DeploymentRules` dials by
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md); the `Rke2Quorum` arms and
+the substrate profile a `HostSpec` names by
+[Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md).
+
+```haskell
+data RootInForceSpec = RootInForceSpec
+  { rootClusters    :: NonEmpty ClusterSpec
+  , rootApps        :: [AppSpec]
+  , rootDeployments :: [DeploymentRules]
+  , rootExtensions  :: [ExtensionSpec]
+  , rootChildren    :: [ChildInForceSpec]
+  }
+
+data ClusterSpec = ClusterSpec
+  { clusterName     :: ClusterName
+  , clusterTopology :: TopologySpec
+  , clusterHosts    :: NonEmpty HostSpec
+  }
+
+data TopologySpec
+  = KindTopology       HostSpec KindReplicas
+  | Rke2Topology       Rke2Quorum [HostSpec]
+  | ManagedEksTopology EksSpec
+
+data Rke2Quorum
+  = One   HostSpec
+  | Three HostSpec HostSpec HostSpec
+  | Five  HostSpec HostSpec HostSpec HostSpec HostSpec
+
+data AppSpec = AppSpec
+  { appName  :: AppName
+  , needs    :: NonEmpty CapabilityNeed
+  , workload :: WorkloadSpec
+  }                                    -- no shape, provider, or replica field
+
+data DeploymentRules = DeploymentRules
+  { deploymentOf :: AppName
+  , transition   :: TransitionRule
+  , bindings     :: NonEmpty CapabilityBinding
+  , monitoring   :: NonEmpty MonitoringSurface
+  , storage      :: [StorageBinding]
+  , distribution :: DistributionRule
+  , promotion    :: PromotionRule
+  }
+```
+
+An `rke2` control plane is `Rke2Quorum = One h | Three h h h | Five h h h h h` over control-plane hosts `h`;
+an even quorum has no constructor. `AppSpec` carries what an application *is* — its needs and its workload —
+and no shape, provider, or replica field. `DeploymentRules` carries the six dials that say how that same
+application runs: transition, bindings, monitoring, storage bindings, distribution, and promotion. Which
+record a concern belongs on is owned by [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md); the
+topologies these constructors leave unspellable are catalogued in
+[illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md). `ChildInForceSpec` is the projection
+of [§5](#recursion-a-childs-spec-is-a-typed-subtree-projection).
+
 ### The v1 extension seam: `ExtensionSpec` (linked, not loaded)
 
 The Extension-lib-in-app axis has a precise **registration seam**. A `.dhall` cannot nest an arbitrary
 foreign product; what it nests is an **`ExtensionSpec`** — the one typed handle by which a linked extension
-plugs into the surface:
+plugs into the surface. The record is spelled here once, with exactly ten fields, and every other document
+links this subsection
+([DL-0002](../decision_log.md#dl-0002--one-extensionspec-record-is-the-extension-seam)). It is owed by
+[Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md).
 
-    ExtensionSpec :
-      { extDhall        : <a typed Dhall sub-catalog nested inside the InForceSpec>
-      , extChain        : cfg -> [Step] , extCapabilities : List Capability , extUiHandlers   : List TrustedUiHandler , extMonitoring   : NonEmpty MonitoringSurface }
+```haskell
+data ExtensionSpec = ExtensionSpec
+  { extId           :: ExtensionId                 -- identity: a newtype, never a closed enumeration
+  , extConfig       :: ExtensionConfig             -- the typed sub-catalog nested inside the InForceSpec
+  , extProvides     :: [Capability]                -- PROVIDES into the capability surface
+  , extRequires     :: [Capability]                -- REQUIRES from a peer extension or the core
+  , extRequiresLane :: Lane                        -- the catalog lane the extension needs
+  , extChain        :: cfg -> [Step]               -- its slice of the chain/Step algebra
+  , extUiHandlers   :: [TrustedUiHandler]          -- the trusted server catalog UI ports bind against
+  , extMonitoring   :: NonEmpty MonitoringSurface  -- mandatory, non-optional
+  , extDeclaration  :: ExtensionDeclaration        -- one component per calculus
+  , extSourceSeal   :: CheckedExtensionSource      -- extension-astcheck's opaque verdict
+  }
+```
 
-    MonitoringSurface =
-      < Slo : WorkflowMonitor | TensorBoard : { backing : ObjectStoreRef, access : AccessScope } >
+Each field is owned where it is load-bearing:
 
-Four parts, each already load-bearing above:
-- `extDhall` is a nested typed Dhall sub-catalog ([§4](#4-total-composability)'s composition)
-- `extChain :: cfg -> [Step]` is the extension's slice of the chain/Step algebra ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) — an extension carries *no* logic the DSL does not already carry as `[Step]`) - `extCapabilities` are the capability declarations it exports into the capability surface ([service_capability_doctrine.md](./service_capability_doctrine.md))
-- `extUiHandlers` is the closed trusted Haskell handler catalog against which low-code UI ports bind ([low_code_ui_runtime_doctrine.md §8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations))
-- and `extMonitoring` is the **mandatory, non-optional** `NonEmpty` list of monitoring surfaces the
-  extension stands up — a closed union of the generic `Slo` (Prometheus/Grafana) and jitML's `TensorBoard`
-  (backed by MinIO), with no open "other service" arm, so an extension that declares no monitoring has no
-  inhabitant ([monitoring_doctrine.md](./monitoring_doctrine.md)).
+- `extId` is the `ExtensionId` newtype. Identity is derived, never enumerated
+  ([capability_extension_doctrine.md §6](./capability_extension_doctrine.md#6-the-merge-total-acyclic-anti-shadow)).
+- `extConfig` is a nested typed sub-catalog ([§4](#4-total-composability)'s composition), qualified by `extId`.
+- `extProvides` and `extRequires` are the edges of the PROVIDE/REQUIRE graph
+  ([capability_extension_doctrine.md §3](./capability_extension_doctrine.md#3-the-provide-and-require-contract)).
+- `extRequiresLane` names one lane of the closed substrate catalog; an extension never introduces a substrate
+  ([substrate_doctrine.md §1](./substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob)).
+- `extChain :: cfg -> [Step]` is the extension's slice of the chain/Step algebra of
+  [§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic); an extension carries *no*
+  logic the DSL does not already carry as `[Step]`.
+- `extUiHandlers` is the closed trusted Haskell handler catalog against which low-code UI ports bind
+  ([low_code_ui_runtime_doctrine.md §8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations)).
+- `extMonitoring` is the **mandatory** `NonEmpty` list of monitoring surfaces the extension stands up, drawn
+  from the closed `MonitoringSurface` union owned by
+  [monitoring_doctrine.md §2.3](./monitoring_doctrine.md#23-per-extension-surfaces--extensionspecextmonitoring);
+  an extension that declares no monitoring has no inhabitant.
+- `extDeclaration` is the obligation surface, one component per calculus
+  ([extension_conformance_doctrine.md §3](./extension_conformance_doctrine.md#3-the-obligation-surface-one-component-per-calculus)).
+- `extSourceSeal` is the opaque verdict of extension-astcheck
+  ([§5](#5-the-illegal-state-unrepresentable-contract)); unchecked source has no linkable representation.
 
 **Linked, not loaded.** A **link set** is the finite set of extensions compiled into one binary; it is finite
 because linking is, not because the extension set is closed
@@ -363,44 +447,29 @@ ids or constructors; but it **drops hostbootstrap's packaging** (no per-project 
 This is *sibling evidence, not an amoebius result*: hostbootstrap proves the `ProjectSpec` algebra and the
 anti-shadow validator; amoebius re-derives the algebra and discards the packaging.
 
-**A nested `extDhall` is not privileged.** It faces exactly the two gates of [§5](#5-the-illegal-state-unrepresentable-contract) and the catalog's total
+**A nested `extConfig` is not privileged.** It faces exactly the two gates of [§5](#5-the-illegal-state-unrepresentable-contract) and the catalog's total
 folds — no unbounded arm, capacity accounted, topology relations satisfied — like any other fragment. In
 particular it introduces **no second secret store**: an extension names its secrets as `SecretRef`s ([§6](#6-secrets-are-names-never-values)) and
 may **not** carry a key/secret store of its own. (infernix's k8s-`Secret` store is exactly the divergence
 this forbids — *sibling evidence of an anti-pattern*, corrected here, not a shipped amoebius behavior.)
 
-### v1 vs v2: linked extensions vs the third-party extension DSL
+<a id="v1-vs-v2-linked-extensions-vs-the-third-party-extension-dsl"></a>
 
-**Superseded.** This subsection recorded a closed set of two named extensions as the v1 mechanism, with a
-third-party path deferred to v2. amoebius is an **open core**, so the closed set is not the shape: an extension
-is admitted by satisfying a contract, not by being on a list, and the contract is the same one a hardware
-substrate satisfies ([`extension_conformance_doctrine.md`](./extension_conformance_doctrine.md)). What survives
-is the mechanism and the boundary, restated:
-
-- **Every extension links.** An extension is compiled into the one binary through its declaration, which is why
-  the link set is finite and the closure argument is an induction over it
-  ([`extension_conformance_doctrine.md` §7](./extension_conformance_doctrine.md#7-link-time-union-closure)).
-  There is no dynamic plugin and no loaded code.
-- **Admission is a sealed verdict, not membership.** An extension enters the link set by holding a verdict from
-  the gate generated out of its own declaration
-  ([`extension_conformance_doctrine.md` §6](./extension_conformance_doctrine.md#6-the-verdict-seal)). Naming two
-  particular projects here was a way of saying "only ones we have checked"; the verdict says that directly and
-  without a list to maintain.
-
-The boundary remains closed: **there is no arbitrary application container and no arbitrary browser-code extension**. An application can be composed without linking app-specific code by supplying bounded `UiSource`
-and binding its ports to the existing trusted handler catalog
+**Admission is a verdict, not membership.** amoebius is an open core: an extension enters the link set by
+holding a verdict from the gate generated out of its own `extDeclaration`
+([`extension_conformance_doctrine.md` §6](./extension_conformance_doctrine.md#6-the-verdict-seal)), never by
+appearing on a list. The boundary remains closed: **there is no arbitrary application container and no
+arbitrary browser-code extension**. An application can be composed without linking app-specific code by
+supplying bounded `UiSource` and binding its ports to the existing trusted handler catalog
 ([app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is)).
-If it requires a new server effect or workflow semantic, that implementation enters only as a extension-astcheck-admitted
-Haskell adapter. extension-astcheck admits linked implementation; the UI-specific gadt-decode admits declarative interaction
-data. Neither route admits an unreviewed image, dynamic plugin, raw browser callback, or provider endpoint.
-
-A future ML family still enters via Path 1 once its math is re-derived as a conforming extension, or via the
-constrained surface of [§8](#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits). A new low-code
-application does not become a new ML extension merely by consuming its typed workflow or artifact ports.
+A new server effect or workflow semantic enters only as an extension-astcheck-admitted Haskell adapter through
+the constrained surface of
+[§8](#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits). Neither route admits an
+unreviewed image, dynamic plugin, raw browser callback, or provider endpoint.
 
 ### The ML-asset types an extension `.dhall` carries: `EngineRuntime` vs `ModelArtifact`
 
-Because infernix and jitML nest as `ExtensionSpec`s, their `extDhall` carries two ML-asset types the surface
+Because infernix and jitML nest as `ExtensionSpec`s, their `extConfig` carries two ML-asset types the surface
 must hold apart — and, per [§1](#1-why-this-doctrine-exists), *carries but does not define*:
 
 - **`EngineRuntime`** — a **closed** union of substrate-tagged **named catalog identities**. It has **no `Url`/`Download`/`Fetch` arm**: an engine is *selected by substrate* and named, never fetched from an
@@ -432,7 +501,7 @@ fields — how a run is initialized, fed, and bounded:
 - **`TrainData`** — a content-addressed dataset, or a Pulsar **`Feed`** consumed from a cursor.
 - **`TrainBudget`** — a bounded step/epoch count, or a **`Continuous`** run committing a checkpoint every cadence.
 
-As with `EngineRuntime`/`ModelArtifact`, the DSL *carries* these fields on an extension's `extDhall`; what
+As with `EngineRuntime`/`ModelArtifact`, the DSL *carries* these fields on an extension's `extConfig`; what
 makes an unbounded, un-checkpointed, or non-deterministically-ordered run **unrepresentable** — the closed
 union shapes, the no-bare-unbounded-`Continuous` foreclosure, and the fold that keeps a `Feed`'s consumed
 prefix content-addressed rather than cursor-keyed — is owned by
@@ -487,12 +556,17 @@ GADT-indexed state machines, ownership indices, content-address totality, the ca
 topology relations over a collection) are owned in full by
 [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) — do not look for them restated here.
 
-The bounded formal bridge does not pull later DSL artifacts forward. Phase 18 must compare the Phase-9 capacity
-fold against separately authored componentwise subtraction over the complete `0..2` four-axis domain and
-project the five-calculus composition into the shared formal model. Its required token,
-reservation, Lease, and reconcile models cover temporal protocol obligations, not decoder totality or live
-runtime behavior. `decodeCluster`, `provision`, `renderAll`, and `chain` acquire their own correspondence
-evidence only in the phases that own those artifacts.
+The bounded formal bridge does not pull later DSL artifacts forward. The comparison of the capacity fold
+against separately authored componentwise subtraction over the complete `0..2` four-axis domain is a
+component row owed by
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md). The token, reservation,
+Lease, and reconcile models are parked with
+[Phase 75](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md); they cover temporal protocol
+obligations, not decoder totality or live runtime behavior. The calculi composition those models once
+projected is parked under `LTD-LIB-001` in the
+[legacy register](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md). The decoder, `provision`,
+`renderAll`, and `chain` acquire their own correspondence evidence only in the phases that own those
+artifacts.
 
 ### dhall-typecheck — the Dhall typechecker
 
@@ -508,20 +582,21 @@ Its oracle is an separately authored Haskell classification of the required clos
 types, and diagnostics. Missing generated cases, a no-op typecheck, or a retained tracked `.dhall` copy must
 make the gate fail.
 
-The bounded Phase-25 implementation is
-`src/dhall-schema-generation/Amoebius/Dhall/Schema/Generation.hs`. It owns eighteen Haskell-declared module
-projections, four representative positives, fourteen paired structural/import refusals, and four
-changed-production projection mutations. The in-process `dhall-1.42.3` engine observes the generated cases;
-the separately authored Haskell oracle owns names, pairs, and loci. This establishes only Gate-1 shape.
-Binding, indexed decode, arithmetic feasibility, effects, and runtime enforcement remain later-owned.
+The schema projection — Haskell-declared module projections, representative positives, and paired
+structural/import refusals rendered beneath `.build/**` — is owed by
+[Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md)
+([DL-0006](../decision_log.md#dl-0006--the-honesty-backlog-is-struck-or-re-mooded)). It establishes only
+this gate's shape; binding, indexed decode, arithmetic feasibility, effects, and runtime enforcement remain
+later-owned.
 
 ### gadt-decode — the Haskell typed decoder
 
-The bounded Phase-26 implementation is `Amoebius.Dsl.GadtDecode`: Haskell owns the protocol-field table,
-controller-indexed execution GADT, resource-arm refinement, tenant/owner check, closed secret-reference sum,
-and total file/in-memory decoder. Its independent Haskell oracle declares five positive controller values and
-twelve structured refusals. Dhall cases, the protocol projection, and the inventory are generated only beneath
-the unique `.build/runs/phase-26/**` root; tracked Proto and serialized decoder authorities are forbidden.
+The typed decoder — the protocol-field table, the controller-indexed execution GADT, resource-arm
+refinement, the tenant/owner check, the closed secret-reference sum, and one total file/in-memory decoder
+into the records of [§4](#the-typed-spec-records) — is owed by
+[Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md) (`LTD-DSL-001`, `LTD-DSL-002`). Dhall cases, the
+protocol projection, and the inventory are generated only beneath `.build/runs/**`; tracked Proto and
+serialized decoder authorities are forbidden.
 
 A well-typed Dhall value still has to become a Haskell value before the chain ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)) can use it. The
 local `amoebius.dhall` `FrameConfig` is decoded from the sibling file; the uploaded `InForceSpec` is
@@ -543,24 +618,22 @@ negative classifications, and compile-fail pairs. It must prove that each negati
 constructor after a valid generated Dhall precondition, and that no normalized byte snapshot or legacy
 Python gate decides the result.
 
-Phase 27 closes the bounded catalogue relation around these two gates. The production Haskell catalogue
-contains 121 named subcases across all 97 reader-facing entries; its independent Haskell oracle fixes the
-catalogue digest and exact Phase-9 two-way join. Seven structural pairs, thirteen decode pairs, and five
-indexed compiler-refusal pairs exercise the 43 currently reached rows. Four covered QuickCheck properties
-remain `TESTED (sampled)`, while only the exhausted three-arm `Rke2Servers` domain is `PROVEN`. The generated
-catalogue and locus ledger explicitly defer the other 78 rows to their fold, render, or live-effect owners;
-none is promoted by this Register-1 gate.
+The covering relation between the illegal-state catalogue and these two gates — every reader-facing entry
+joined two ways to its positive twin, its exact refusal, or its named later owner — is owed by
+[Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md). Rows whose foreclosure is a fold, a render, or a
+live effect are deferred to those owners and never promoted by the decode gate.
 
 ### extension-astcheck — the extension AST checker
 
 Gates 1 and 2 prove things about a *value*. Neither says anything about the Haskell linked beside it: an
-`ExtensionSpec`'s `extChain` carries a `stepRun :: cfg -> IO ()`, and `IO ()` is a type, not a bound. Before
-trusted app-specific workflow or effect adapters were admitted, that gap was covered by closing the set
-was closed at two admitted ML libraries ([§4](#4-total-composability)) — and review is not a mechanism. extension-astcheck
-replaces the review with a check.
+`ExtensionSpec`'s `extChain` carries a `stepRun :: cfg -> IO ()`, and `IO ()` is a type, not a bound. A
+closed list of reviewed libraries is not a mechanism; extension-astcheck is specified to replace review with
+a check, and it is owed by
+[Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) (`LTD-DSL-007`,
+[DL-0006](../decision_log.md#dl-0006--the-honesty-backlog-is-struck-or-re-mooded)).
 
-**Extension source is admitted by a custom AST checker against a closed sanctioned API.** The checker runs at
-build time, before link, over the module set an `ExtensionSpec` contributes:
+**Extension source is admitted by a custom AST checker against a closed sanctioned API.** The checker is
+specified to run at build time, before link, over the module set an `ExtensionSpec` contributes:
 
 ```text
 SanctionedApi = -- the closed set of amoebius library entry points extension source may reference
@@ -585,9 +658,9 @@ ExtensionSourceVerdict =
   >
 ```
 
-**`CheckedExtensionSource` is the seal, and it is the same seal `ProvisionedSpec` already is.** Its
-constructor is private, the checker is its only producer, and the linker accepts nothing else — so "link
-unchecked source" has no more syntax than "render an unprovisioned spec"
+**`CheckedExtensionSource` is the seal — the `extSourceSeal` field of the record — and it has the shape
+`ProvisionedSpec` has.** Its constructor is private, the checker is its only producer, and the linker accepts
+nothing else — so "link unchecked source" has no more syntax than "render an unprovisioned spec"
 ([§5](#5-the-illegal-state-unrepresentable-contract)'s post-gate seal, below). The symmetry is the argument
 for putting this here rather than in a build script: a lint that a build can skip is not a gate.
 
@@ -603,19 +676,19 @@ themselves.
 
 ### Post-gate seal — bind/expand, conditionally materialize infrastructure, provision
 
-The pure Phase-30 binder expands the complete source inventory and produces an unprovisioned
+The pure binder, owed by [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md), lowers the decoded
+`RootInForceSpec` of [§4](#the-typed-spec-records) over the complete source inventory into an unprovisioned
 `BoundDeployment`. `planInfrastructure :: ProvisionTargetSupply -> BoundDeployment -> Either ProvisionError
 InfrastructurePlanningResult` derives the whole demand from that value and the declared standalone supply or
-opaque forest-member budget; it never accepts a second caller-authored demand vector. The result is a closed
-choice:
+opaque forest-member budget; it never accepts a second caller-authored demand vector.
 
-The eventual [Phase-30 gate](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) must establish the first
-sentence with independently authored Haskell controls: every closed need must pass the total binder under both
-shapes, while product/URL/shape authoring escapes and unbuilt, unbound, cyclic, or shadowed values must fail at
-their named Haskell boundary. Phase 30's status is owned by the plan's mechanical status projection
-([`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md)); until that projection reports the phase
-complete, the doctrine below states a target and cannot establish the infrastructure or
-provision steps described below.
+Phase 3 must establish the binder with independently authored Haskell controls: every closed need must pass
+the total binder under both shapes, while product/URL/shape authoring escapes and unbuilt, unbound, cyclic, or
+shadowed values must fail at their named Haskell boundary. The witness-driven planning and provision steps
+below are owed by [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md); until
+that gate passes, this subsection states a target
+([DL-0006](../decision_log.md#dl-0006--the-honesty-backlog-is-struck-or-re-mooded)). The planning result
+is a closed choice:
 
 - `NoInfrastructureRequired` supplies the witness for an explicit
   `ObservedInfrastructureMaterialization.AlreadyMaterialized` state and proves that no initial provider or
@@ -631,7 +704,8 @@ Either authenticated materialization arm constructs `ProvisionContext`. `provisi
 to the exact `BoundDeployment`, checks CPU, memory, storage, slots, accelerators, VRAM, quotas, controller
 multiplicity, materialized identities, and every other whole-deployment demand, and returns `Either
 ProvisionError ProvisionedSpec`. Its success arm is opaque and constructor-private. Only that
-`ProvisionedSpec` can cross the Phase-33 deployment-level `renderAll` boundary. Thus a capacity sum is a
+`ProvisionedSpec` can cross the deployment-level `renderAll` boundary owed by
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md). Thus a capacity sum is a
 checked rejection of constructible input, never a dependent-type inhabitance proof, and a promised
 infrastructure identity cannot be smuggled into a manifest before provider/host readback.
 
@@ -684,8 +758,12 @@ flowchart TD
 Haskell-rendered schema, Haskell decoding and binding, pure infrastructure-plan construction, modeled
 materialization, whole-deployment provisioning, and the opaque `ProvisionedSpec -> renderAll` boundary. Its
 expectations and negative controls are separately authored Haskell, and its generated Dhall/manifests live
-only beneath `.build/**`. This tier must be accepted before any live container, cluster, provider, browser, or
-accelerator replay begins; pure browser semantics and lazy projection remain inside this tier.
+only beneath `.build/**`. The tier opens with [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md),
+which carries one typed spine from an authored spec to fake-applied bytes, and closes at the `DSL_BARRIER`,
+[Phase 9](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md), which re-runs the union corpus through the shipped
+binary ([gate_runner_doctrine.md §7](./gate_runner_doctrine.md#7-the-example-corpus-and-the-hardware-rule)).
+This tier must be accepted before any live container, cluster, provider, browser, or accelerator replay
+begins; pure browser semantics and lazy projection remain inside this tier.
 
 Live compare-and-swap enactment and provider/host readback form a later runtime-enforcement tier. They can
 show that a particular admitted plan was enacted on the observed target; they cannot retroactively validate
@@ -720,8 +798,9 @@ and WireGuard hub role are the parent's — the same relations-owned-by-the-encl
 graph uses ([network_fabric_doctrine.md §4](./network_fabric_doctrine.md#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)).
 The migration *protocols* this relation drives are owned by
 [gateway_migration_doctrine.md](./gateway_migration_doctrine.md); this doc owns only the relation's DSL shape
-and its parent-minted projection, which — like the rest of the extension surface — is **design intent** for
-its building phase, not yet built.
+and its parent-minted projection, which is owed by
+[Phase 7](../../DEVELOPMENT_PLAN/phase_07_child_clusters_obligation_teardown.md) with the rest of the
+child-cluster surface.
 
 > **Honesty.** The *strength* of this contract is a property of the type designs catalogued in
 > [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md). This doc states the contract and the decode
@@ -815,7 +894,7 @@ Haskell carries the logic, and extension-astcheck bounds what that Haskell may r
 - **The constrained surface is the `SanctionedApi` of [§5](#5-the-illegal-state-unrepresentable-contract).**
   Extension source may name the sanctioned modules and route effects through sanctioned constructors; raw
   `IO`, FFI, `unsafe*`, Template Haskell, and orphan instances are rejected with a located diagnostic.
-- **Both extension paths run through it.** Path 1 (a linked extension in the binary's link set) and an optional trusted
+- **Both extension paths run through it.** A linked extension in the binary's link set and an optional trusted
   `App` adapter
   ([capability_extension_doctrine.md §2](./capability_extension_doctrine.md#2-three-extension-kinds-workload-capability-and-app))
   are admitted by the same checker. Generic `UiSource` view, state, and transition logic does not enter extension-astcheck;
@@ -852,10 +931,21 @@ does not serve as a message-payload format).
 ## 10. Planning ownership
 
 This document is normative DSL doctrine only. Delivery sequencing, completion status, validation gates, and
-remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). In-process,
-hardware-free validation must cover Dhall generation/typecheck, decode, bind/expand, provision, `renderAll`,
-and dry-run planning before any hardware or container-engine phase can begin. Live enaction and provider
-readback are later correspondence checks and cannot validate the earlier DSL semantics.
+remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). The
+hardware-free slice phases own the DSL in numeric order, each consuming the example corpus of its predecessor
+([testing_doctrine.md — the example corpus](./testing_doctrine.md#the-example-corpus)):
+
+- [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md) — the typed spine from one spec to fake-applied bytes;
+- [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) — witness-driven manifests, capacity, and storage;
+- [Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md) — substrates, lanes, rke2 quorum, and the image recipe;
+- [Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) — extension admission and attested scope;
+- [Phase 7](../../DEVELOPMENT_PLAN/phase_07_child_clusters_obligation_teardown.md) — child clusters and obligation-indexed teardown;
+- [Phase 8](../../DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md) — the UI program language, binding, and plans;
+- [Phase 9](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md) — the `DSL_BARRIER` through the shipped binary.
+
+In-process, hardware-free validation must cover Dhall generation/typecheck, decode, bind/expand, provision,
+`renderAll`, and dry-run planning before any hardware or container-engine phase can begin. Live enaction and
+provider readback are later correspondence checks and cannot validate the earlier DSL semantics.
 
 Every DSL gate consumes Haskell subjects and separately authored Haskell expectations. Non-Haskell inputs
 are materialized into a fresh `.build/**` tree during the gate. This document records no current validation
@@ -878,6 +968,7 @@ result; sibling implementations remain design evidence only.
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the capacity/budget/scaling types the surface carries
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology types the surface carries
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — [§3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor) runtime message payloads are CBOR, not Dhall
-- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — later-phases candidate Haskell extension DSL ([§4](#4-total-composability)/[§8](#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits) Path 2 for third parties)
+- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the later-phases candidate third-party Haskell extension DSL beyond the linked seam of [§4](#4-total-composability)/[§8](#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits)
+- [Gate-Runner Doctrine](./gate_runner_doctrine.md) — the runner that judges each slice phase over the example corpus
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

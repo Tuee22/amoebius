@@ -17,7 +17,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md
 **Generated sections**: none
 
 </details>
@@ -39,9 +39,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-78 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -67,12 +66,12 @@ CNI/IP `cniSlots`, driver-indexed `attachableVolumes`, a `PerInstanceDiskTemplat
 `ProviderUsableDiskCarveTemplate.requiredUsableBytes` system/layout carves, OCI content/snapshot model and
 image-pull policy, accelerator-slot templates, zones, price, provider-vCPU cost, and base/maximum counts — can
 host the pending `ResourceEnvelope`. The step re-runs the full placement/storage/capability fold against the
-grown bound ([Phase 9](phase_09_resource_index.md) placement, [Phase 28](phase_28_storage_geometry_folds.md) storage geometry, [Phase 29](phase_29_execution_accelerator_folds.md) execution/accelerator residency) and proves
+grown bound ([Phase 4](phase_04_witness_manifests_capacity_storage.md) placement, [Phase 4](phase_04_witness_manifests_capacity_storage.md) storage geometry, [Phase 4](phase_04_witness_manifests_capacity_storage.md) execution/accelerator residency) and proves
 the policy's worst-case instance count, vCPU, ephemeral node-root EBS bytes/count, durable bytes/count, and
 accelerator allocation remain inside **both** the declared node-class maxima and the freshly observed provider
 account residual. The cloud quota is the outer ceiling, so a bounded budget grows only through the policy and
 never to "unbounded." Enaction — `Amoebius.Pulumi.NodeGroup` add/drain under the control-plane daemon against the encrypted
-MinIO backend — runs through the [Phase 31](phase_31_provision_seal.md) post-bind observe-then-plan boundary and
+MinIO backend — runs through the [Phase 3](phase_03_typed_spine.md) post-bind observe-then-plan boundary and
 seals nothing until receipt-bound provider readback. Join is quarantined behind the `ManagedCapacity` taint,
 full supply/layout/device observation, and a [Phase 59](phase_59_capacity_scheduler.md) scheduler-generation CAS;
 an `Unreachable` node observation **refuses** rather than stranding an EC2 instance.
@@ -97,7 +96,7 @@ Diagram vocabulary: [diagram_conventions.md](../documents/engineering/diagram_co
 ```mermaid
 flowchart LR
 %% register: algebra
-  signal["declared ScalingPolicy signal: load / workflow-completion"]:::intent --> fold{{"re-run Phase 9/15/16 fold against grown bound + provider-quota + account residual"}}:::gate
+  signal["declared ScalingPolicy signal: load / workflow-completion"]:::intent --> fold{{"re-run Phase 4/15/16 fold against grown bound + provider-quota + account residual"}}:::gate
   fold -->|inside carve and quota| enact[/"Amoebius.Pulumi.NodeGroup add under the control-plane daemon"/]:::effect
   fold -->|over quota / no fitting class / Unreachable| refuse>"structured reject, zero cloud mutation"]:::refuse
   enact --> join[/"tainted quarantine → supply/layout/device readback → scheduler-generation CAS → node-scoped authority"/]:::effect
@@ -111,7 +110,7 @@ flowchart LR
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
   classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
 ```
-*Design intent for a Register-3 live gate. The ScalingPolicy signal value and the Phase 9/15/16 capacity fold reject over-quota in-process at Tier-1; the future gate must test enactment, live-join readback, no-op re-observe, teardown, and independent run-owned sweep on the live EKS target. No result is current, and a runtime observation is never proof.*
+*Design intent for a Register-3 live gate. The ScalingPolicy signal value and the Phase 4/15/16 capacity fold reject over-quota in-process at Tier-1; the future gate must test enactment, live-join readback, no-op re-observe, teardown, and independent run-owned sweep on the live EKS target. No result is current, and a runtime observation is never proof.*
 
 **Phase scope:** one cohesive target claim — *a node set must be grown and shrunk by a typed signal as an ordinary
 reconcile*. The quota bound must be checked before any cloud mutation, and the arm must close leak-free.
@@ -181,7 +180,7 @@ remains phase-local and cannot be supplied by this prose.
   class declares its complete capacity/capability shape, the workload is provisioned against the worst-case
   elastic count, and the provider quota is the outer ceiling. A bounded budget grows only through the policy and
   never to "unbounded"; failure of any CPU, memory, pod-ephemeral (including the in-cluster cache-owner
-  `emptyDir` as a **[Phase 9](phase_09_resource_index.md) logical local-ephemeral debit** — see below),
+  `emptyDir` as a **[Phase 4](phase_04_witness_manifests_capacity_storage.md) logical local-ephemeral debit** — see below),
   pod/CSI slot, durable-storage, accelerator, VRAM, or provider-quota obligation rejects before cloud mutation.
 - [`pulumi_iac_doctrine.md` §4 — What Pulumi provisions (the resource catalog)](../documents/engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)
   (*the resource catalog* — the dynamic-node entry) with
@@ -263,7 +262,7 @@ cloud effect.
   backend) and drains+releases one when demand or the workflow recedes; node lifetime is the per-run/ephemeral
   class. Its optional root EBS is an explicitly quota-debited **ephemeral node-root** class destroyed with the
   node; it is distinct from [Phase 78](phase_78_provider_ebs_credential.md)'s retained durable class. Every
-  add/drain runs through the [Phase 31](phase_31_provision_seal.md) observe-then-plan boundary and seals nothing
+  add/drain runs through the [Phase 3](phase_03_typed_spine.md) observe-then-plan boundary and seals nothing
   until receipt-bound provider readback; a fresh-observation change after a fitting `ValidatedCloudProviderAction`
   is minted invalidates it on the immediate token recheck with zero node-group/instance mutation.
 - A staged managed-node join/leave protocol. Provider launch data makes the kubelet register with the exact
@@ -371,7 +370,7 @@ cloud effect.
     surface is enumerated rather than sampled: `baseCount > maxCount`, aggregate base supply outside quota,
     worst-case growth outside the declared maximum-count/provider-quota envelope, and any demand for which no
     class offers the required CPU, memory, logical pod-ephemeral capacity (including the in-cluster
-    cache-owner `emptyDir`'s [Phase 9](phase_09_resource_index.md) local-ephemeral debit), layout-routed
+    cache-owner `emptyDir`'s [Phase 4](phase_04_witness_manifests_capacity_storage.md) local-ephemeral debit), layout-routed
     nodefs/imagefs physical capacity, pod slots, driver-specific CSI attach slots, accelerator family/device
     count, or net-allocatable-memory residency capacity, or whose node-root EBS or durable demand exceeds its
     distinct provider storage quota.
@@ -417,7 +416,7 @@ correctly left retained.
   `.build/test-corpora/dhall/phase_69_provider_provision.dhall`: spin up the EKS provider cluster
   ([Phase 76](phase_76_provider_deploy_checkpoint.md)), first derive the complete app/platform demand and
   provision it against the named base/elastic node classes, the bounded cache demand charged within local
-  ephemeral supply (the cache-owner `emptyDir` charged **once** inside the [Phase 9](phase_09_resource_index.md) logical local-ephemeral fold — **not** a second supply pool and **not** the [Phase 80](phase_80_determinism_jitcache.md) typed `CacheBudget`/jit-build construct, which is out of this phase's scope), parent executor Jobs and
+  ephemeral supply (the cache-owner `emptyDir` charged **once** inside the [Phase 4](phase_04_witness_manifests_capacity_storage.md) logical local-ephemeral fold — **not** a second supply pool and **not** the [Phase 80](phase_80_determinism_jitcache.md) typed `CacheBudget`/jit-build construct, which is out of this phase's scope), parent executor Jobs and
   plugin/workspace volumes, exact checkpoint object demand / storage budget / mutation-gateway envelope, pod/CSI
   slots, durable EBS backing, and distinct provider root/durable bytes+count quotas; then converge its stateless
   in-cluster control plane ([Phase 77](phase_77_provider_child_bringup.md)), provision an extra node by a declared
@@ -461,7 +460,7 @@ correctly left retained.
      must also expose distinct concrete backing/carve/device ids for their globally scoped provider-instance
      and complete template-path slots (checked against the independent Haskell identity-map expectation, whose
      text view is generated lazily at `.build/test-corpora/provider_two_instance_identity_map.txt`).
-   - The bounded cache-owner `emptyDir` is charged **once** inside that [Phase 9](phase_09_resource_index.md) local-ephemeral demand, not as a second supply pool.
+   - The bounded cache-owner `emptyDir` is charged **once** inside that [Phase 4](phase_04_witness_manifests_capacity_storage.md) local-ephemeral demand, not as a second supply pool.
    - Write a fresh run-unique marker through `<ns>/sts0/pv_0` after asserting its static PV uses `driver:
      ebs.csi.aws.com`, `volumeHandle: <that EBS volume ID>`, and matching zone affinity; record the EBS
      volume ID and Availability Zone, then re-run the reconcile against that still-standing stack and assert
@@ -529,7 +528,7 @@ correctly left retained.
 
 With valid AWS authority, run the declared EKS topology through both full cycles and independently observe the
 AWS node/audit/sweep surfaces, ephemeral leak freedom, and sole durable-EBS survivor. Durable-EBS reclamation
-remains Phase 48 work.
+remains Phase 7 work.
 
 ## Documentation Requirements
 
@@ -550,7 +549,7 @@ remains Phase 48 work.
   [`§3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
   (the systematic provision matrix) gain the live node-scaling enaction: dynamic node provisioning is the runtime
   realization of a typed `ScalingPolicy` against the worst-case elastic count under the provider-quota ceiling;
-  note that the in-cluster cache-owner `emptyDir` is a Phase-9 logical local-ephemeral debit here, distinct from
+  note that the in-cluster cache-owner `emptyDir` is a Phase 4 logical local-ephemeral debit here, distinct from
   the Phase-80 typed `CacheBudget`.
 - `documents/engineering/app_vs_deployment_doctrine.md` — record that
   [`§3`](../documents/engineering/app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)
@@ -558,7 +557,7 @@ remains Phase 48 work.
   DSL surface, never in app logic.
 - `documents/engineering/testing_doctrine.md` — record the Phase 79 per-run ledger artifact, the **broadened run-owned OS-boundary leak-free sweep** (run-tag + VPC id + `eks:cluster-name` / `kubernetes.io/cluster/<name>`,
   catching untagged provider-spawned orphans), and the explicit deferral of elevated durable-EBS reclamation to
-  [Phase 48](phase_48_test_workflow_algebra.md).
+  [Phase 7](phase_07_child_clusters_obligation_teardown.md).
 
 **Cross-references to add:**
 
@@ -588,15 +587,15 @@ remains Phase 48 work.
 - [phase_78_provider_ebs_credential.md](phase_78_provider_ebs_credential.md) — per-PV durable EBS decoupled from
   the node lifecycle, the static `ebs.csi.aws.com` CSI PV, and the create-vs-delete credential the gate's marker
   rebind rides on
-- [phase_09_resource_index.md](phase_09_resource_index.md) — the `fits`/`carve`/`place` fold re-run
+- [Phase 4](phase_04_witness_manifests_capacity_storage.md) — the `fits`/`carve`/`place` fold re-run
   against the grown bound (and the logical local-ephemeral debit the cache-owner `emptyDir` charges)
-- [phase_31_provision_seal.md](phase_31_provision_seal.md) — the post-bind observe-then-plan cloud batch and
+- [Phase 3](phase_03_typed_spine.md) — the post-bind observe-then-plan cloud batch and
   opaque `ProvisionedSpec` seal each node-group enaction runs through
 - [phase_58_object_reconciler.md](phase_58_object_reconciler.md) — the `discover → diff → enact → re-observe`
   reconciler that makes provisioning a node just another reconcile
 - [phase_59_capacity_scheduler.md](phase_59_capacity_scheduler.md) — the `amoebius-capacity`
   scheduler-generation CAS / reservation / exclusive Binding at node join
-- [phase_48_test_workflow_algebra.md](phase_48_test_workflow_algebra.md) — the elevated-harness durable-EBS reclamation
+- [Phase 7](phase_07_child_clusters_obligation_teardown.md) — the elevated-harness durable-EBS reclamation
   that completes the full leak-free test cycle, deferred and never depended on here
 - [Cluster Lifecycle Doctrine](../documents/engineering/cluster_lifecycle_doctrine.md) — dynamic node
   provisioning and the reconciler teardown this phase implements

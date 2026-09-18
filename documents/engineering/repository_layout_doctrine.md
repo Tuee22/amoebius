@@ -17,7 +17,7 @@ that active inventory to readers.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -63,7 +63,7 @@ The non-source input set is also closed:
 gate verdict, host an oracle, select phase status, or remain in control after the Haskell binary exists. Phase
 0 requires the exact current captured bytes to satisfy the bounded Haskell admission predicate; Phase 2 owns
 the complete `VALIDATION_PB_GRAMMAR` selector/oracle suite and owner-level source-closure proof. Phase 0 through
-Phase 49 invoke Haskell directly; Phase 50 alone uses Haskell tests and an independent OS-boundary observer to
+the DSL barrier (Phase 9) invoke Haskell directly; Phase 50 alone uses Haskell tests and an independent OS-boundary observer to
 validate `pb` as an external process.
 
 Governance prose is not an executable registry. A checker may inspect Markdown structure, links, and status
@@ -113,13 +113,13 @@ under `.build/evidence-store/**`; that receipt is an explicit predecessor input 
 equals the candidate's opening source. Phase 0 has one finite exception: it reads the seven exact GenesisTrust
 files beneath `.build/bootstrap-inputs/**`, creates a unique `.build/runs/phase-00/bootstrap-qualification-*`
 leaf, and requires that exact leaf to be absent after qualification. It does not claim the whole `.build/**`
-tree was initially empty or universally detect prior runs; Phase 49 owns that closure. Ambiguous, stale, mutable, or
+tree was initially empty or universally detect prior runs; the DSL barrier (Phase 9) owns that closure. Ambiguous, stale, mutable, or
 implicitly discovered evidence is not a cleanroom input.
 
 A status transition is also generated output before it is applied. The validator gives a sealed authorized
 projection to its production writer, writes the canonical patch and its preimage/postimage identities beneath
 `.build/runs/**`, never a tracked file, and re-acquires Git source after emission. Only after the validator exits
-may a human, agent, or CI job recheck the preimage and apply exactly that patch through the ordinary source-
+may the human's `accept` recheck the preimage and apply exactly that patch through the ordinary source-
 control workflow.
 
 ## 2. Complete repository structure
@@ -304,7 +304,7 @@ A gate emits candidate evidence beneath `.build/runs/**` and may install a conte
 `.build/evidence-store/**`. Git contains neither. A digest establishes provenance only; it does not establish
 correctness or change phase status.
 
-Only a complete qualified phase gate may move a phase or sprint to Done or Validated. A human, agent, or CI job
+Only a complete qualified phase gate may move a phase or sprint to Done or Validated. The human's `accept`
 records that result after the gate's oracle-independence checks, sabotage controls, predecessor chain, typed
 Haskell legacy closures, and reader-facing correspondence have all been
 inspected. Doctrine does not record current validation results.

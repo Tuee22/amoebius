@@ -18,7 +18,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -43,9 +43,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-58 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -91,7 +90,7 @@ every other Pod tolerating the managed-capacity taint must name `amoebius-capaci
 
 For a Pending guarded Pod, the scheduler authenticates Pod UID, provenance, the kind-indexed owner chain,
 prior/desired source generation, child discriminator, and template digest; re-folds the static/foreign/
-resident/whole-root/candidate resource algebra (over Phase 9's `place` fold) under one aggregate CAS;
+resident/whole-root/candidate resource algebra (over Phase 4's `place` fold) under one aggregate CAS;
 CAS-creates `Reserved`; CASes `Reserved → BindingInFlight`; **only then** submits Kubernetes Binding; and
 confirms exact UID/node before CAS to `Bound`. Same-UID identical retry reuses an identical record; only
 `Reserved` may retarget; any generation/child/node/axis/model/backing mismatch rejects. Recovery is
@@ -154,7 +153,7 @@ remains phase-local and cannot be supplied by this prose.
 
 > **UNRESOLVED — blocks validation.** No live mutation may begin. Before check this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
-`CapacitySchedulerSystemDemand` is the scheduler's own explicit, pure-first provision, fitted by the Phase-9
+`CapacitySchedulerSystemDemand` is the scheduler's own explicit, pure-first provision, fitted by the Phase 4
 `place` fold before any effect, so the scheduler is never silently free overhead:
 - **Image** — the Phase-56 side-loaded/preloaded native-architecture amoebius base image (never a public-registry pull),
   so the scheduler does not depend on the registry controller it must cut over.
@@ -191,7 +190,7 @@ remains phase-local and cannot be supplied by this prose.
   another desired source; a `PlannedExecutionSlotId` is never a Pod UID.
 - [`resource_capacity_doctrine.md` §8 — Where the numbers come from: declared in pure input, provisioned before render, cross-checked at runtime](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)
   — **declared at decode, cross-checked at runtime.** Before each reservation CAS the scheduler re-folds the
-  static/foreign/resident/whole-ledger/candidate resource algebra over the Phase-9 `place` fold and re-observes
+  static/foreign/resident/whole-ledger/candidate resource algebra over the Phase 4 `place` fold and re-observes
   residual capacity; two concurrent candidates cannot reserve the same residual, and a stale or false witness
   is refused with zero writes.
 - [`readiness_ordering_doctrine.md` §6 — The runtime enactor: the reconciler observes, never sleeps](../documents/engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps)
@@ -385,7 +384,7 @@ failure — so a Pod is never bound before its reservation CAS and never double-
 - The scheduler loop for `schedulerName=amoebius-capacity` (`Scheduler/Loop.hs`): authenticate Pod UID,
   protected annotations, the kind-indexed owner chain, exact prior/desired source generation, child
   discriminator, and template digest (`Admission/ExecutionIdentity.hs` authentication path); re-fold the
-  static/foreign/resident + whole-root + candidate resource algebra (`Scheduler/Placement.hs` over the Phase-9
+  static/foreign/resident + whole-root + candidate resource algebra (`Scheduler/Placement.hs` over the Phase 4
   `place` fold); CAS-create `Reserved` (`Scheduler/Reservation.hs`); CAS `Reserved → BindingInFlight`; submit
   Kubernetes Binding (`Scheduler/Binding.hs`); confirm exact UID/node and CAS to `Bound`. Same-UID identical
   retry is idempotent; only `Reserved` can retarget; any generation/child/node/axis/model/backing mismatch
@@ -577,9 +576,9 @@ this run's bundle under `.build/runs/`.
   then alone binds the Pod
 - [phase_58_object_reconciler.md](phase_58_object_reconciler.md) — the object reconciler (observe → diff → scoped-SSA → staged-enact → delete → wait, and the `ValidatedLiveTarget` + mandatory `Lease`) this phase is
   layered on
-- [phase_09_resource_index.md](phase_09_resource_index.md) — the `place`/`fits`/`carve` resource
+- [Phase 4](phase_04_witness_manifests_capacity_storage.md) — the `place`/`fits`/`carve` resource
   algebra the scheduler placement re-folds under aggregate CAS
-- [phase_33_render_manifest_oracles.md](phase_33_render_manifest_oracles.md) — the Haskell `renderAll` expectation corpus
+- [Phase 3](phase_03_typed_spine.md) — the Haskell `renderAll` expectation corpus
   the pinned reconcile corpus is a subset of
 - [phase_55_bootstrap_coordinator_kind.md](phase_55_bootstrap_coordinator_kind.md) — the live single-node `kind`
   cluster this phase's scheduler binds on
@@ -587,9 +586,9 @@ this run's bundle under `.build/runs/`.
   preloaded/side-loaded amoebius image the bootstrap scheduler Pod uses
 - [phase_65_live_dsl_deploy.md](phase_65_live_dsl_deploy.md) — the Deployment-`replicas=1` control-plane daemon that
   stands the reconciler and its scheduling role up in-cluster
-- [phase_34_chain_kernel_boundary.md](phase_34_chain_kernel_boundary.md) — the `io-classes` seams / modeled
+- [Phase 3](phase_03_typed_spine.md) — the `io-classes` seams / modeled
   apiserver the Register-2.5 scheduler sim (Sprint 59.5) drives the real modules on
-- [phase_16_deterministic_sim_substrate.md](phase_16_deterministic_sim_substrate.md) — the deterministic-
+- [Phase 75](phase_75_gateway_migration_drills.md) — the deterministic-
   simulation substrate the Register-2.5 scheduler battery runs in
 - [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) the apply/
   reconcile engine (scheduler CAS/Binding + bootstrap cutover slice); [§6](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) the observed scheduler-ledger state

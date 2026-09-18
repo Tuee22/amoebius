@@ -39,7 +39,7 @@ not own the capacity types that cost passes through, owned by
 - [Related Documents](#related-documents)
 
 **Pure cost-model target — NOT VALIDATED.** The
-[Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) must execute the finite
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) must execute the finite
 `MonitoringWorkBudget` evaluation, query/proxy compute, and TSDB temporary-plus-resident storage derivation in
 Register 1. It must pair a direct one-axis volume-over-budget case with its exact-fit twin. Prometheus behavior
 and rendered/live correspondence remain unverified; no current fold ledger is asserted here.
@@ -169,15 +169,18 @@ kinds, whose membership is fixed by the binary's link set
 `TensorBoard` exists because jitML does. The open `App` tier does not widen it — an app draws from the same
 fixed arms, and since `extMonitoring` is `NonEmpty`, an app that declares no monitoring has no inhabitant:
 
-```text
-ExtensionSpec = { extDhall, extChain, extCapabilities, extMonitoring : NonEmpty MonitoringSurface }
+The `ExtensionSpec` record is spelled once in
+[dsl_doctrine.md §4](./dsl_doctrine.md#the-v1-extension-seam-extensionspec-linked-not-loaded)
+([DL-0002](../decision_log.md#dl-0002--one-extensionspec-record-is-the-extension-seam)); this section owns
+only the `MonitoringSurface` union its `extMonitoring` field carries:
 
+```text
 MonitoringSurface =
   < Slo         : WorkflowMonitor
   | TensorBoard : { backing : ObjectStoreRef, access : AccessScope } >
 ```
 
-`extMonitoring` is `NonEmpty` and mandatory, so an extension's `extDhall` cannot be constructed without at
+`extMonitoring` is `NonEmpty` and mandatory, so an `ExtensionSpec` cannot be constructed without at
 least one declared surface — jitML's is a `TensorBoard` surface backed by MinIO
 ([§5](#5-extensible-surfaces-tensorboard)), so an unmonitored jitML run has no inhabitant. infernix and
 jitML declare at least the generic `Slo` surface. A low-code app need not contribute an `App` extension at
@@ -559,7 +562,7 @@ not a flat "type-foreclosed":
   represent, and therefore does not claim at any layer.
 
 > **Honesty.** Type-foreclosed and decode-foreclosed statements here are target properties; current delivery
-> and revalidation progress live in the [tracker](../../DEVELOPMENT_PLAN/README.md#current-implementation-audit).
+> and revalidation progress live in the [tracker](../../DEVELOPMENT_PLAN/README.md#generation-2-reset).
 > Runtime-checked residues remain explicit. Reused sibling behavior, including Pulsar Failover subscriptions
 > and Keycloak ext-authz, is evidence from another system, not amoebius proof.
 
@@ -567,11 +570,9 @@ not a flat "type-foreclosed":
 
 ### Permanently invalidated Phase-63 observability history
 
-A pre-reset Phase-63 report described a descriptor-derived Prometheus provision with finite evaluation,
-retention, query concurrency, series, sample, range, timeout, and retained-storage operands. It also reported
-bounded proxy responses, a NetworkPolicy denial, active platform targets, loaded derived rules, bounded TSDB
-high-water, and completed Grafana migrations. This history is diagnostic only and permanently invalidated; it
-does not establish a current `linux-cpu` result or satisfy any future SLO.
+A pre-reset report described an observability provision for this phase in detail. It is permanently
+invalidated and establishes no current result
+([DL-0006](../decision_log.md#dl-0006--the-honesty-backlog-is-struck-or-re-mooded)).
 
 ---
 
@@ -579,17 +580,17 @@ does not establish a current `linux-cpu` result or satisfy any future SLO.
 
 Phase order, status, and validation gates live only in
 [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). The monitoring obligation types — including
-the `UnitMonitor` of [§2.4](#24-per-execution-unit-obligation--boundexecutionunitmonitor) — are assigned to **Phase 25**,
-their decoder and non-vacuity refinements in **Phase 26**, and the
+the `UnitMonitor` of [§2.4](#24-per-execution-unit-obligation--boundexecutionunitmonitor) — are assigned to **Phase 3**,
+their decoder and non-vacuity refinements in **Phase 3**, and the
 `validateTopology` fold in **Phase 67**; the execution-set monitoring fold rides the whole-deployment seal in
-**Phase 31**; rendered monitoring shapes and baked binaries (including the alert receiver) are assigned to
+**Phase 3**; rendered monitoring shapes and baked binaries (including the alert receiver) are assigned to
 **Phases 33 and 56**;
 the bounded Prometheus/Grafana projection and derived rules/panels are assigned to **Phase 63**, while the receiver,
 the `AccessScope`-behind-Keycloak obligation, and any optional local Thanos companion remain owned by their
 respective later delivery surfaces; the `workflow-health` TableView
 projection in **Phase 65** and the orchestrator/worker SLO-status event in **Phase 69**; the extension surfaces in **Phase 91**
 (infernix) and **Phase 93** (jitML → TensorBoard); the peer-cluster posture and the forest foreclosure in
-**Phase 74**; and the decode-rejection tests in **Phase 48**. This doc never maintains a competing status
+**Phase 74**; and the decode-rejection tests in **Phase 7**. This doc never maintains a competing status
 ledger; it states the target shape and links back for status, per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 

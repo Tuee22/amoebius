@@ -14,7 +14,7 @@ numbers entering them come from, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/resource_capacity_types.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/resource_capacity_types.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -72,18 +72,18 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Implemented fold and honesty boundary. Phase 9 owns Register-1 validation of the base subset; the physical
+*Implemented fold and honesty boundary. Phase 4 owns Register-1 validation of the base subset; the physical
 residue that the kernel and kubelet honour the caps remains runtime-checked. Gate status remains owned by the
 development-plan tracker.*
 
 **Base-fold bound contract.** The
-[Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) builds `Amoebius.Capacity.Types`,
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) builds `Amoebius.Capacity.Types`,
 `Amoebius.Capacity.Fold`, and `Amoebius.Dsl.Topology` with exhaustive-pattern warnings promoted to errors.
 Fifteen direct negative/twin pairs, two Haskell topology positives, four sampled properties with independent
 witness recomputation, and 19 compiled production mutants challenge the base CPU, memory,
 logical ephemeral, pod-slot, CSI-attach, finite CPU-policy, eligibility, and fixed/elastic placement axes.
 The storage, execution/runtime, accelerator, and provider-root extensions described below remain
-**UNVERIFIED** until Phases 28–29; live enforcement is not established by this result.
+**UNVERIFIED** until Phase 9 decides the parked calculi (`LTD-LIB-001`); live enforcement is not established by this result.
 
 ### The four total functions
 
@@ -513,7 +513,7 @@ ProvisionedKubernetesObjectKind =
   >
 
 CanonicalProvisionedKubernetesFields =
-  private Phase-31 object-source AST containing only fields copied from provisioned identities and witnesses
+  private Phase 3 object-source AST containing only fields copied from provisioned identities and witnesses
 
 RenderReconcileMode =
   < DeclarativeApply :
@@ -549,7 +549,7 @@ ProvisionedRenderSource identity =
   , sourceEquality : RenderSourceProvisionedPartEqualityWitness
   }
 
-ProvisionedRenderSourceSet = -- constructed in Phase 31; does not depend on Phase-33 K8sObject/Aeson types
+ProvisionedRenderSourceSet = -- constructed in Phase 3; does not depend on Phase 3 K8sObject/Aeson types
   { sources      : Map K8sObjectIdentity (ProvisionedRenderSource K8sObjectIdentity)
   , keyEquality  : RenderSourceMapKeyEmbeddedIdentityEqualityWitness
   , sourceDomain : WholeDeploymentRenderSourceDomainWitness
@@ -643,12 +643,12 @@ compatibility and every capacity/storage fold,
   deployment-global scheduler/admission/quota/RBAC/Lease/CRD sources), and constructs the new opaque
   `ProvisionedSpec`. Namespace, scheduler, quota, admission, RBAC, Lease, or CRD objects needed by multiple
   services have one global source owner and therefore render once; a second source for the same identity
-  rejects in Phase 31 without depending on Phase-33 renderer bytes or list order. Missing, stale, wrong-arm, or
+  rejects in Phase 3 without depending on Phase 3 renderer bytes or list order. Missing, stale, wrong-arm, or
   wrong-generation prior refs reject; an execution projection with mismatched deployment, source-unit,
   revision, ordinal, or resource identity also rejects. `FirstDeployment` denotes an exact empty prior
   execution map and cannot smuggle an implicit latest generation or non-empty predecessor. No authored field
-  can supply a prior envelope, prior rounded bytes, or a prior witness. Phase 33 defines the `K8sObject` model
-  and total private `renderSourcePrivate`; only deployment-level `renderAll` crosses the seal. Thus Phase 31
+  can supply a prior envelope, prior rounded bytes, or a prior witness. Phase 3 defines the `K8sObject` model
+  and total private `renderSourcePrivate`; only deployment-level `renderAll` crosses the seal. Thus Phase 3
   does not depend on a later renderer, and per-service callers cannot independently duplicate shared objects.
 `BoundDeployment` contains no `Provisioned*` record: it contains only normalized intents, unprovisioned demands,
 opaque prior refs, and execution envelopes. Every **deployable/render-source** `Provisioned*` record lives

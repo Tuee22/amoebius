@@ -18,7 +18,7 @@ knowledge of amoebius; every term it uses about amoebius itself is routed throug
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/behavioural_verification_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md, documents/reading_order.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/decision_log.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/behavioural_verification_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -41,6 +41,7 @@ knowledge of amoebius; every term it uses about amoebius itself is routed throug
 - [14. Navigation and canonical section names](#14-navigation-and-canonical-section-names)
 - [15. Splitting a document into a family](#15-splitting-a-document-into-a-family)
 - [16. The illegal-state catalogue is a covering, not a list](#16-the-illegal-state-catalogue-is-a-covering-not-a-list)
+- [17. The doctrine freeze](#17-the-doctrine-freeze)
 - [Related Documents](#related-documents)
 
 The conventions draw on the sibling `prodbox` project. The Phase 0 documentation suite and all later doctrine
@@ -92,8 +93,12 @@ and line wrapping cannot suppress it. It does not infer behavioral meaning from 
 Governed Markdown is a reader-facing normative explanation, not an executable policy language. Automated
 documentation checks may parse only closed structural facts: governed path inventory, orientation metadata,
 headings, links, anchors, backlinks, exact status and canonical-command syntax, numerical dependencies,
-explicit unresolved markers, fixed gate-table shape, retired repository-path/extension syntax, and literal
-equality of designated repeated presentation fields. Repeated values remain opaque text; matching two
+explicit unresolved markers, fixed gate-table shape, retired repository-path/extension syntax, literal
+equality of designated repeated presentation fields, decision-log entry structure (identifiers, field order,
+and backlinks per [`decision_log.md` §1](./decision_log.md#1-entry-contract)), frozen-document digest equality
+against the accepted baseline of [§17](#17-the-doctrine-freeze), equality of a phase document's
+gate-specification block with its compiled specification, and comparison of the recorded status vector with the
+receipt-backed frontier. Repeated values remain opaque text; matching two
 projections does not establish their meaning. The
 checks must not derive a product choice, source classification, provider selection, semantic expectation,
 coverage verdict, generator input, legacy closure, or validation result from prose, a table cell, or keyword
@@ -186,6 +191,11 @@ Vague status values (e.g. "doctrine / notes") are forbidden. `Generated sections
 reads `none`. Generated Markdown and generated sections live only under ignored `.build/docs/` and are never
 version-controlled. A governed document is an authored input, not a generated view.
 
+`Frozen` is not a `Status` value. The frozen set of [§17](#17-the-doctrine-freeze) is a Haskell list owned by
+the implementing plan-decisions module and is orthogonal to `Status`: a `Reference only` document can be
+frozen, and an `Authoritative source` document changes its body only through the
+[decision log](./decision_log.md).
+
 ---
 
 ## 4. Cross-referencing
@@ -255,6 +265,10 @@ is promoted into reader-facing prose it takes the anchor-link form.
 - Never copy configuration examples, invariant catalogs, or proofs between docs — link to the owner.
 - A worked example may *illustrate* a subsystem owned elsewhere, but must name the owning SSoT doc and not
   restate its normative content.
+- A type record the corpus names as a seam — `RootInForceSpec`, `DeploymentRules`, `ExtensionSpec`,
+  `SubstrateProfile` — is spelled in exactly one document. Every other document links that spelling and
+  restates no field ([DL-0002](./decision_log.md#dl-0002--one-extensionspec-record-is-the-extension-seam),
+  [DL-0004](./decision_log.md#dl-0004--the-typed-spec-records-are-spelled-once)).
 
 ---
 
@@ -265,14 +279,25 @@ subject, acceptance boundary, and supporting observation. Anything outside that 
 assumption or limitation. See
 [`engineering/chaos_failover_doctrine.md`](./engineering/chaos_failover_doctrine.md) (Phase 0).
 
-Doctrine states the target design; it does not maintain a second implementation-status ledger. A statement
-about existing code or a prior run is permitted only when it is labelled **Observed implementation** or
-**Historical result (invalidated)** and links to the dated progress audit in
-[`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md). File presence establishes only an observed
-footprint. A historical pass remains diagnostic after reopening and cannot be phrased as current validation.
-Historical text is permanently invalidated: it must not contain a condition such as “unless the phase is
-Done” that could reactivate it. Doctrine never records a current pass, green count, or validation ledger.
-Those belong to retrievable run evidence and the plan's mechanical status projection.
+Doctrine states the target design; it does not maintain a second implementation-status ledger. Every
+non-fenced paragraph that names a Haskell module, a source path, or a top-level identifier is written in
+exactly one of three moods, and the mood is visible from the paragraph alone
+([DL-0006](./decision_log.md#dl-0006--the-honesty-backlog-is-struck-or-re-mooded)):
+
+1. **Observed implementation.** The paragraph opens with that label and carries exactly one citation of the
+   form `[GateSpec:<id>]` or `[example:<name>]` that resolves to a receipt-backed gate in the accepted
+   certification generation. Without such a receipt the mood is unavailable.
+2. **Historical result (invalidated).** The paragraph opens with that label, links exactly one
+   [decision log](./decision_log.md) entry, names no identifier and no digit, and is at most two sentences.
+   It is permanently invalidated: it must not contain a condition such as “unless the phase is Done” that
+   could reactivate it.
+3. **Specification voice.** The paragraph contains "owed by" and links the phase document that owes the
+   machinery, and that phase's status is not Done.
+
+File presence establishes only an observed footprint. A historical pass remains diagnostic after reopening
+and cannot be phrased as current validation. Doctrine never records a current pass, green count, or
+validation ledger. Those belong to retrievable run evidence and the plan's mechanical status projection.
+Historical text links the decision log, never a dated audit narrative in the tracker.
 
 A documentation revision preserves the accepted scope of a requirement until a separately qualified
 baseline revision replaces it. A correction may withdraw unsupported certification while retaining the
@@ -313,11 +338,12 @@ everywhere the indicative is not. What remains forbidden in every mood is the un
 does not compile", "there is no back door" — about machinery no gate has run against, because a reader cannot
 tell it from a result.
 
-Every required row of the qualified phase gate must pass before a phase or sprint becomes Done.
-A human, agent, or CI job may then record that result as a mechanical status-only projection. Documentation may
-describe a target contract, candidate evidence, or an observed footprint, but prose alone cannot turn any of
-them into validation status. The development-plan standards own
-the gate-pass procedure; this rule prevents doctrine prose from bypassing it.
+Every required row of the qualified phase gate must pass before a phase or sprint becomes Done. The human's
+`accept` then records that result as a mechanical status-only projection; an agent runs `preview` and edits
+no status line ([DL-0009](./decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition)).
+Documentation may describe a target contract, candidate evidence, or an observed footprint, but prose alone
+cannot turn any of them into validation status. The development-plan standards own the gate-pass procedure;
+this rule prevents doctrine prose from bypassing it.
 
 ---
 
@@ -648,7 +674,7 @@ default. The fix has to route without defining.
 forty-five words across 195 governed documents; 128 exceeded ninety, and 650 paragraphs exceeded six
 sentences. The longest observed sentence contained 667 words. These figures are mutable-worktree diagnostics
 recorded by
-[`phase_00_documentation_suite.md` Sprint 0.4](../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-04-haskell-documentation-and-plan-contract-checker-),
+[`phase_00_documentation_suite.md` Sprint 0.3](../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-03-documentation-checker-extraction-),
 not acceptance evidence. At that length a sentence stops being parseable in one pass. A reader holds an
 unresolved subject across several subordinate clauses and re-reads to find it. Most cases are
 semicolon-chained enumerations, so the defect lies in arrangement rather than subject complexity.
@@ -674,13 +700,13 @@ tone.
    Terminal `.`, `!`, or `?` followed by whitespace ends a sentence, except for the closed abbreviation set
    and dotted initialisms. A final non-empty fragment also counts as a sentence.
 
-   **The rule is 45 words; the conforming check reports and does not yet block.** Sprint 0.4 must implement
+   **The rule is 45 words; the conforming check reports and does not yet block.** Sprint 0.3 must implement
    paragraph-spanning measurement in Haskell. A foreign-language lint or line-length proxy is not admissible
    evidence. The Haskell check remains **advisory** until the backlog reaches a value the corpus meets; it then
    tightens toward forty-five on the same ratchet [§10](#10-document-shape) uses. Enforcing a threshold the
    corpus cannot meet would hold the gate permanently red. Declining to measure would leave the rule
    unenforced. The backlog and implementation residue remain recorded in
-   [`phase_00_documentation_suite.md` Sprint 0.4](../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-04-haskell-documentation-and-plan-contract-checker-).
+   [`phase_00_documentation_suite.md` Sprint 0.3](../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-03-documentation-checker-extraction-).
 2. **Table cells** are exempt from the mechanical cap but not from its intent. A cell needing more than 45
    words is a section that was compressed into a table.
 3. **Paragraph cap.** A paragraph carries at most **six sentences**.
@@ -788,8 +814,43 @@ than a page of entries, because somebody had to make a claim to write it.
 
 ---
 
+## 17. The doctrine freeze
+
+> **Purpose**: make a change to a normative sentence a recorded decision rather than an edit, so that the
+> corpus cannot drift under the agents that implement it.
+
+**The problem.** A doctrine sentence can be rewritten by whoever last found it inconvenient, and the rewrite
+looks like any other edit. Across six validation cycles the same doctrines were amended to match the
+validator rather than the product, and no document recorded which sentence changed, why, or what it replaced.
+The defect surfaces only at the next reset, when the amended sentence is quoted as if it had always held.
+
+**Why the obvious alternative fails.** Git history records every byte but no decision. Reading a diff shows
+that a sentence changed; it cannot show which alternatives were rejected or which other documents the change
+obligates. A `Status` value cannot carry the distinction either, because a `Reference only` document can be
+as load-bearing as an authoritative one.
+
+**The rule.**
+
+1. **The frozen set** is every governed path under `documents/**` regardless of `Status`, `AGENTS.md`, the
+   three plan rulebooks under `DEVELOPMENT_PLAN/`, and `legacy_tracking_for_deletion.md`. The set is a Haskell
+   list owned by the plan-decisions module owed by
+   [Phase 0](../DEVELOPMENT_PLAN/phase_00_documentation_suite.md).
+2. **The baseline** is one row per frozen path: the path, the SHA-256 of its bytes with the `Referenced by`
+   line removed, and the [decision log](./decision_log.md) identifier that last amended it.
+3. **A body change** to a frozen path without an entry naming that path in the same change is a defect, and
+   the amended passage links the entry. A `Referenced by` reconciliation is not a body change.
+4. **Creating a governed document** is a decision-log event: the entry names the new path and the document
+   it supersedes or the section family it joins.
+5. **The log is exempt** from whole-file comparison because its entries are digested individually.
+
+**What it forecloses.** Quiet correction. A wrong sentence stays wrong until someone writes down why it is
+wrong, which is slower than fixing it in place and is the point.
+
+---
+
 ## Related Documents
 - [Development Plan](../DEVELOPMENT_PLAN/README.md)
+- [Decision Log](./decision_log.md) — the register [§17](#17-the-doctrine-freeze) requires
 - [Engineering Doctrine Index](./engineering/README.md)
 - [Glossary](./glossary.md) — the term and acronym registry [§12](#12-naming-what-the-reader-does-not-know) governs
 - [Reading Order](./reading_order.md) — the sequenced path through the corpus these rules shape

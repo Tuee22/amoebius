@@ -17,7 +17,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -41,9 +41,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-64 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -51,9 +50,9 @@ Live effects also require the preceding named barriers in [the phase model](deve
 ## Phase Summary
 
 **Target capability — NOT VALIDATED.** This phase is to make the DSL **run live** only after every predecessor
-and the Phase-49 hardware-free barrier have required predecessor gate passes. It may consume the Phase-25/26 typed
-projection and decoder, Phase-27 illegal-state corpus, Phase-9 capacity/topology folds, Phase-30/31 binding and
-provision seal, Phase-33 `renderAll`, and Phase-34 chain/dry-run semantics only through those exact gate passes;
+and the DSL barrier (Phase 9) have required predecessor gate passes. It may consume the Phase 3 typed
+projection and decoder, Phase 3 illegal-state corpus, Phase 4 capacity/topology folds, Phase 3/31 binding and
+provision seal, Phase 3 `renderAll`, and Phase 3 chain/dry-run semantics only through those exact gate passes;
 none is currently discharged. The live target is the in-cluster **control-plane daemon** — the
 `ControlPlaneDaemon` arm of `InClusterRole`
 ([daemon_topology_doctrine.md §2](../documents/engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)) — deployed as a Kubernetes
@@ -69,7 +68,7 @@ etcd-backed client-go leader-election
 object) — **never a bespoke amoebius election, no ranked-failover rule, no warm-standby candidate population,
 no signed-commit-log protocol**. The target daemon is **stateless at the pod level** — it holds no PVC; its
 durable state is exclusively the Vault-enveloped MinIO bucket. As a regression guard, the future gate must
-re-run the passed Phase-27 Haskell negative corpus through this live deploy path and require every case to
+re-run the passed Phase 3 Haskell negative corpus through this live deploy path and require every case to
 fail at its pinned type/decode locus. That is a live inheritance check, not a new proof. Full app tenancy (own namespace, `<app>/<bucket>` ObjectStore,
 in-namespace Sql) is deliberately deferred to Phase 66; the app here is trivial.
 
@@ -284,7 +283,7 @@ bootstrap-host-to-control-plane Lease handoff, and no amoebius election.
   the six `phase32-`/`phase33-` object names, and the `amoebius-phase33-singleton` field manager minted at
   `ControlPlane/Daemon.hs:138`
   ([legacy_tracking_for_deletion.md §4](legacy_tracking_for_deletion.md#4-host-image-and-lift-violations)).
-  Closing this also retires the transitional half of Phase 43's search-path gate check, which can only fail by
+  Closing this also retires the transitional half of Phase 70's search-path gate check, which can only fail by
   the tree regaining a second executable.
 - A control-plane daemon deployed as a **generated typed `Deployment replicas=1`** by the Phase-58
   reconciler, **stateless** (no PVC; its durable `InForceSpec` state is the Vault-Transit-enveloped MinIO
@@ -301,7 +300,7 @@ bootstrap-host-to-control-plane Lease handoff, and no amoebius election.
   version/failure/orphan bounds, and mutation admission, merged through the closed six-arm object-producer
   inventory before a state write can occur. The sole gateway has its own complete Pod envelope.
 - The `discover → diff → enact → re-observe` reconcile loop that decodes the `InForceSpec` in-process
-  (Phase-26 decoder), binds capabilities (Phase-30 binder), and applies the resulting manifests through the
+  (Phase 3 decoder), binds capabilities (Phase 3 binder), and applies the resulting manifests through the
   Phase-58 typed reconciler — idempotently, driven only by observed cluster state.
 - Single-writer authority **delegated to k8s/etcd**: the Deployment controller converges desired `replicas=1`
   while old/terminating/replacement UIDs may overlap; a Kubernetes `Lease` (the
@@ -429,7 +428,7 @@ itself was proven in-process in the pre-cluster band; here it is exercised, not 
    equals the second-pass Haskell expectation. Any JSON view is generated lazily beneath `.build/**`.
 2. Teardown leaves no leaked resources. The postflight sweep is scoped to this run's provisioned objects,
    identified by the run-unique label `amoebius.dev/phase33-run=<run-id>` the control-plane daemon stamps on every object
-   it creates — that label set is authored here, and Phase-48 flag-at-creation machinery is not assumed — and
+   it creates — that label set is authored here, and Phase 7 flag-at-creation machinery is not assumed — and
    the sweep is empty over it. Separately, every platform component the harness perturbed is asserted back at
    Ready so the shared Phase-62/42 stack is left as found, and the apiserver audit log records that **every**
    platform/app write was issued by the control-plane daemon's in-cluster ServiceAccount and none by the harness
@@ -461,7 +460,7 @@ Adopt [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-ill
 assemble the phase's single live acceptance gate — one Haskell-declared topology, rendered lazily as Dhall
 beneath `.build/**`, deploys the platform + a trivial app on
 linux-cpu and the live apiserver admits the rendered manifests — and, as a regression guard, re-run the
-pre-cluster (Phase-27) Haskell negative corpus so each lazily generated illegal Dhall projection still fails to type-check or decode
+pre-cluster (Phase 3) Haskell negative corpus so each lazily generated illegal Dhall projection still fails to type-check or decode
 against the live path, and the positive fixtures still decode. That type/decode result was proven in-process in
 the pre-cluster band; here the guard confirms the live deploy path never admits an illegal spec.
 
@@ -470,7 +469,7 @@ the pre-cluster band; here the guard confirms the live deploy path never admits 
 - The positive gate: the Sprint-60.2 platform + trivial-app deploy driven to ready by the control-plane daemon
   and torn down leak-free, declared in Haskell with any Dhall test-topology transport rendered lazily beneath
   `.build/**` and left untracked.
-- The negative regression guard: the Phase-27 corpus (a bad PVC↔PV pairing, a Keycloak-bypassing open ingress, a
+- The negative regression guard: the Phase 3 corpus (a bad PVC↔PV pairing, a Keycloak-bypassing open ingress, a
   product named in application logic, and the capacity/topology/bounded-storage set) **re-run** against the
   live deploy path (the same control-plane daemon `Deploy.hs` entry the positive fixture used), each asserted to fail at
   dhall-typecheck or gadt-decode **with its specific foreclosure tag matching a separately authored Haskell
@@ -501,7 +500,7 @@ the pre-cluster band; here the guard confirms the live deploy path never admits 
    is reachable through the Keycloak edge, and teardown leaves no leaked resources over the run-unique label
    set; the applied Haskell `enact-noop` mutant turns this red.
 2. "The live deploy path" is pinned to the identical entry point the positive fixture used, foreclosing the
-   host-side re-run cheat (§M.3): every Phase-27 negative fixture is submitted through the exact same control-plane daemon
+   host-side re-run cheat (§M.3): every Phase 3 negative fixture is submitted through the exact same control-plane daemon
    spec-ingestion/`Deploy.hs` entry, never a separate host-side CorpusSpec decoder, and each yields a
    structured dhall-typecheck (`dhall type` error) or gadt-decode (`DecodeError` tag) rejection whose emitted
    tag equals the separately authored Haskell expectation for that case (§M.8) — a bare "it failed" does not satisfy

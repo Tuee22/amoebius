@@ -39,9 +39,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-63 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -79,7 +78,7 @@ host, recorded in [substrates.md](substrates.md). The future gate does not exerc
 
 **Register:** 3 (live infrastructure) — the gate drives a real edge on a real cluster and re-exercises a live
 delete + recreate; a Register-1/2 in-process check cannot discharge it (though the *render-time*
-impossibility of a self-published ingress must first receive Phase-33 and Phase-49 gate pass).
+impossibility of a self-published ingress must first receive Phase 3 and the DSL barrier (Phase 9) gate pass).
 
 **Depends on:** [Phase 63](phase_63_platform_services_2.md)
 **Gate:** `pb validate phase 64`; see [Gate integrity](#gate-integrity).
@@ -283,7 +282,7 @@ one carve-out really is a *different type* of endpoint, not a wild one.
 
 - A live audit proving there is no non-Keycloak wild path: no chart opens a backdoor NodePort to the wild, and
   no workload publishes its own `Ingress` — the `WildIngress` constructor is reachable only from the Keycloak
-  edge, per the Haskell render invariant owned by Phase 33.
+  edge, per the Haskell render invariant owned by Phase 3.
 - The sole carve-out exercised as a distinct `HostLocalPeer` endpoint (host-origin, localhost-only NodePort, no
   mTLS, no WAN/LAN reach) — owned in full by [`host_cluster_comms_doctrine.md`](../documents/engineering/host_cluster_comms_doctrine.md)
   and referenced here, not re-specified.
@@ -447,7 +446,7 @@ candidate must receive the Phase-56 identity directly as authenticated run input
   in the plan); the east-west-derived-NetworkPolicy subsection gains its first live amoebius realization.
 - `documents/illegal_state/illegal_state_catalog.md` — record that §3.7 (backdoor ingress) and §3.6 (blocking
   NetworkPolicy) gain their first *live* confirmation here, complementing the Haskell render-time invariant
-  from Phase 33.
+  from Phase 3.
 - `documents/engineering/ui_realtime_coordination_doctrine.md` — record the live edge proof for authenticated
   WebSocket upgrade routing; cross-pod routing and Redis failure behavior remain later gates.
 - `documents/engineering/pulumi_iac_doctrine.md` — note that the §5 public-edge TLS (ZeroSSL/route53)

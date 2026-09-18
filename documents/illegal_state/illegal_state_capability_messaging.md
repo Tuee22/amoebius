@@ -17,7 +17,7 @@ or put an untyped payload on the wire. The numbering belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, documents/engineering/pulsar_client_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, documents/engineering/pulsar_client_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -54,7 +54,7 @@ Runtime layers and their enforcement is deferred on purpose (see [`illegal_state
 
 ### 3.12 An app that names a product instead of a capability
 
-**Delivery-owner:** `Phase-25`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `capability-provision`
 
@@ -73,7 +73,7 @@ residue: the illegal shape is unrepresentable, not merely rejected downstream.
 
 ### 3.23 A non-CBOR Pulsar payload
 
-**Delivery-owner:** `Phase-27`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `messaging`
 
@@ -108,11 +108,11 @@ diagnostic, or transport bytes are generated lazily beneath `.build/**`. A malfo
 
 ### 3.82 A browser effect or provider call escaping the server-mediated capability boundary
 
-Phase 42 forecloses the pure escape arms with typed stale-plan, hostile-text, foreign-origin, hardcoded-
+Phase 70 forecloses the pure escape arms with typed stale-plan, hostile-text, foreign-origin, hardcoded-
 challenge, and unsafe-projection cases plus changed-production mutations. Browser packet observation and
 server/provider enforcement remain explicit post-barrier obligations.
 
-**Delivery-owner:** `Phase-39`
+**Delivery-owner:** `Phase 8`
 
 **Case-family:** `ui`
 
@@ -158,21 +158,21 @@ reuse a catalog link as fetch, add direct network access to a trusted component,
 HTML sink; compile/check, artifact scan, CSP, or the network oracle must turn red before the provider accepts an
 effect.
 
-**Permanently invalidated Phase-39 run report.** The Register-1 binder matches seven port tuples and two canonical fixed-HTTPS link joins
+**Permanently invalidated Phase 8 run report.** The Register-1 binder matches seven port tuples and two canonical fixed-HTTPS link joins
 against independent string relations. Eight pinned failures, eight link-catalog failures, and three bounded
 input failures occur before a bound program can emit its pure binding trace; all seven guard/escape mutants turn
 red at exact loci. Thirteen generated classes meet their floor, the real five-calculus projection composes
 `7,2,19,13,7` to `5,48,0,0`, all 16 metrics match, and 61 surfaces join to 91 items. Browser traffic, handler
 behavior, provider authentication, and live isolation remain UNVERIFIED. See
-[Phase 39](../../DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md).
+[Phase 8](../../DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md).
 
-**Permanently invalidated Phase-42 run report.** The Register-2 generic bundle renders untrusted values through `textContent`, accepts
+**Permanently invalidated Phase 70 run report.** The Register-2 generic bundle renders untrusted values through `textContent`, accepts
 only its closed PureScript event arms, and emits same-origin HTTP/WebSocket requests in real Chrome. An
 independent bundle scanner, browser-enforced CSP canary, fresh request nonce, navigation-only link observation,
 and OS-enforced loopback-only network observer all pass; raw-sink, direct-provider, stale-plan,
 sequential-write, focus, CSP, and canned-response mutants turn red. The real five-calculus projection accounts
 for 72 units. Server authorization, provider authentication, and live isolation remain
-UNVERIFIED. See [Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md).
+UNVERIFIED. See [Phase 70](../../DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md).
 
 ---
 

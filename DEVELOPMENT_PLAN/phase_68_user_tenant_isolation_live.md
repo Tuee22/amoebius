@@ -35,9 +35,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-67 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -54,7 +53,7 @@ multi-tenant UI scope switching.
 `user-tenant-isolation-live` Haskell component suite can supply supporting observations only; the sole acceptance command is `pb
 validate phase 68`. Split if a browser interaction, UI-plan rollout, HA failure, second substrate, or
 independently useful provider feature is required.
-**Substrate:** `linux-cpu` — future live cluster observation only after the Phase-49 barrier and every predecessor gate pass.
+**Substrate:** `linux-cpu` — future live cluster observation only after the DSL barrier (Phase 4) and every predecessor gate pass.
 **Lane:** `linux-cpu/amd64`.
 **Register:** 3 — live real-authority isolation; NOT VALIDATED.
 **Depends on:** [Phase 67](phase_67_pulsar_client.md)
@@ -133,7 +132,7 @@ Haskell and qualify the mechanism that first admits their result; component obse
 
 ### Objective
 
-Connect authenticated identity to the Phase-8/27 scoped authorization values and test that provider effects
+Connect authenticated identity to the Phase 6/27 scoped authorization values and test that provider effects
 remain tenant- and subject-confined even when a hostile caller swaps identifiers, headers, handles, or grants.
 
 ### Deliverables

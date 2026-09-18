@@ -14,7 +14,7 @@ promoted into [README.md](README.md), which remains the sole tracker.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/dsl_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -34,9 +34,10 @@ promoted into [README.md](README.md), which remains the sole tracker.
 - [Assigned — *not* a later phase: capacity / topology / bounded-storage type discipline](#assigned--not-a-later-phase-capacity--topology--bounded-storage-type-discipline)
 - [Related Documents](#related-documents)
 
-Phases 0–95 each own a dedicated `phase_NN_<slug>.md`. Everything past Phase 95 is *in scope* but not yet
-detailed: the README phase index lists it as the single row **`96+ — Later phases`**. This document is that
-row, expanded into a candidate pool.
+Phases 0–9 and 50–95 each own a dedicated `phase_NN_<slug>.md`; ordinals 10–49 are a reserved gap
+([DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice)). The tracker ends
+at Phase 95. Everything past it is *in scope* but not yet detailed, and this document is that backlog,
+expanded into a candidate pool.
 
 Read it as a **backlog of confirmed-but-unscheduled work**, governed by the same disciplines as the rest of
 the suite:
@@ -54,8 +55,9 @@ the suite:
   *seed evidence*, not amoebius proof ([`lift_and_compose_doctrine.md` §3](../documents/engineering/lift_and_compose_doctrine.md#3-a-seed-is-a-reference-implementation)).
 - **Promotion means a contiguous number.** When a candidate is picked up, it is appended as the next
   `phase_NN_<slug>.md` with a full skeleton ([development_plan_standards.md §D](development_plan_standards.md#d-the-per-phase-document-skeleton)),
-  a concrete single-substrate gate ([§L](development_plan_standards.md#l-one-substrate-discipline)), and a contiguous id — Phase 96, 97,
-  … with no gaps or fractional ids ([§E](development_plan_standards.md#e-one-canonical-phase-model)). The provisional numbers below are
+  a concrete single-substrate gate ([§L](development_plan_standards.md#l-one-substrate-discipline)), and the next id after
+  Phase 95 — 96, 97, … with no fractional ids; the reserved gap 10–49 is occupiable only by a decision-log entry
+  ([§E](development_plan_standards.md#e-one-canonical-phase-model)). The provisional numbers below are
   *ordering hints only*; the real id is assigned at promotion.
 - **No forward dependencies.** A later phase consumes earlier phases; nothing in Phases 0–95 is allowed to
   declare a `Blocked by` that points here ([§E](development_plan_standards.md#e-one-canonical-phase-model)). These candidates sit strictly
@@ -127,8 +129,8 @@ only for a gate-admitted trusted Haskell adapter that the closed handler catalog
 adapter surface and its custom AST checker** are specified in
 [`dsl_doctrine.md` §5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
 and [§8](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits),
-and assigned to [Phase 34](phase_34_chain_kernel_boundary.md); the bounded UI schema and port binder targets in
-[Phase 37](phase_37_ui_program_schema.md) and [Phase 39](phase_39_ui_effect_binding.md) are to consume only
+and assigned to [Phase 6](phase_06_extension_admission_attested_scope.md); the bounded UI schema and port binder targets in
+[Phase 8](phase_08_ui_program_language_binding.md) are to consume only
 admitted handler catalogs. All are **NOT VALIDATED** and remain separate from the native-JIT work here.
 
 What remains here is the **JIT** — a new capability rather than a discipline, and still a later-phase target.
@@ -295,7 +297,13 @@ neither belongs in this candidate's gate.
 ## Candidate phase: Surgical proof-assistant track (`emitTLA` faithfulness + fold-closure)
 
 **Status**: 📋 Planned — NOT VALIDATED (unscheduled; the tail opens at Phase 96) **Provisional substrate**: none (a pure-proof track, validated
-by the proof checker + the existing suite) **Scope** (one line): discharge — machine-checked — the **two**
+by the proof checker + the existing suite) **Entry conditions** (generation 2, `LTD-LIB-002` in the
+[legacy register](legacy_tracking_for_deletion.md#5-dsl-divergence)): the three audit defects of the parked
+checkers — interpreter error erasure, name-resolution precedence between parameters and state, and raw-line
+refinement-equation selection — are repaired with each former defect as a paired negative; an authenticated
+real decision procedure is a pinned, network-independent toolchain input, or the fake solver reports only
+`Inconclusive`; and the parked libraries `formal-model`, `explicit-state-checker`, `symbolic-checker`, and
+`refinement-checker` are linked by this track's subject or deleted. **Scope** (one line): discharge — machine-checked — the **two**
 load-bearing meta-properties the rest of the suite currently only *tests*: (a) the `emitTLA`/`interpret`
 **faithfulness meta-theorem** (each `Expr`/`Temporal` constructor's `interpret`-denotation equals the TLA+
 denotation `emitTLA` targets), and (b) the **fold-closure** laws (commutativity/associativity/idempotence)
@@ -310,7 +318,7 @@ faithfulness claim may move from **tested** to **proven**.
 
 This is a **surgical** track, not a broad proof-assistant layer — those two properties are the only places a
 proof assistant earns its keep, precisely because they are small, closed, and load-bearing, and are today only
-property-tested ([`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence); the confluence ledger's own rule that a closure claim "is proof only when its closure argument is shown"). It is explicitly deferred because it *hardens* claims the Phase-11/10/14
+property-tested ([`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence); the confluence ledger's own rule that a closure claim "is proof only when its closure argument is shown"). It is explicitly deferred because it *hardens* claims the the proof-assistant track/10/14
 differential and closure property-tests already exercise; the property tests are the affordable first line, and
 this candidate upgrades them to proof only where the payoff is a genuine ledger promotion. A first sprint is an
 **evaluation**: **Liquid Haskell vs Lean** — Liquid Haskell checks refinement types on the *actual* Haskell and
@@ -350,9 +358,9 @@ from a `Manual` air-gap medium, and a delete-a-backup attempt each perform zero 
 
 The **representation** half of backup is **not** a later phase — like the capacity / bounded-storage discipline
 below, it is folded into the pure band: the closed `BackupPolicy` / `BackupMedium` / `WriteRegime` /
-`BackupRetention` shapes and the `freshnessBound ≥ cadence` fold land in **Phase 25/12**, the no-overcommit sizing
-fold in **Phase 9/17**, the illegal-state corpus (`illegal_state_storage.md` [§3.53](../documents/illegal_state/illegal_state_storage.md#353-a-backup-larger-than-its-bounded-medium)–[§3.68](../documents/illegal_state/illegal_state_storage.md#368-two-conflicting-backup-policies-on-one-coordinate) / `illegal_state_multicluster.md` [§3.69](../documents/illegal_state/illegal_state_multicluster.md#369-a-cold-seeded-secondary-taking-the-gateway-without-proven-freshness)–[§3.71](../documents/illegal_state/illegal_state_multicluster.md#371-a-freshness-watermark-asserted-rather-than-derived-from-captured-content)) in **Phase 27**, and the `FreshnessWitness` /
-`NoTakeWithoutProvenFreshness` guard extending the one formal obligation in **Phase 17**
+`BackupRetention` shapes and the `freshnessBound ≥ cadence` fold land in **Phase 3**, the no-overcommit sizing
+fold in **Phase 4**, the illegal-state corpus (`illegal_state_storage.md` [§3.53](../documents/illegal_state/illegal_state_storage.md#353-a-backup-larger-than-its-bounded-medium)–[§3.68](../documents/illegal_state/illegal_state_storage.md#368-two-conflicting-backup-policies-on-one-coordinate) / `illegal_state_multicluster.md` [§3.69](../documents/illegal_state/illegal_state_multicluster.md#369-a-cold-seeded-secondary-taking-the-gateway-without-proven-freshness)–[§3.71](../documents/illegal_state/illegal_state_multicluster.md#371-a-freshness-watermark-asserted-rather-than-derived-from-captured-content)) in **Phase 3**, and the `FreshnessWitness` /
+`NoTakeWithoutProvenFreshness` guard extending the one formal obligation in **Phase 75**
 ([`gateway_migration_model_doctrine.md`](../documents/engineering/gateway_migration_model_doctrine.md)). Only
 the **live** enactment is this candidate, and its runtime residues distribute to the phases that already own
 each substrate: the Vault-Transit envelope to Phase 61, the MinIO remote target to Phase 62, the cross-cluster
@@ -372,9 +380,9 @@ capacity growth — is **not** a new phase. Two honesty layers apply. Closed uni
 illegal constructor are type-foreclosed; quantitative capacity sums, placements, and inventory-dependent
 compatibility are total decode/provision checks, never dependent-type proofs. Raw incompatible values may
 exist, but `provision` returns `Left` and therefore cannot construct the opaque `ProvisionedSpec`, the sole
-deployable representation. The discipline is **folded into Phase 25** for source/schema shapes, **Phase 9** for
-the pure fold implementation and generated properties, **Phase 30** for full bind/expansion plus the opaque
-provision seal, and **Phase 33** for the closed `renderAll` consumer. None requires an external effect or a
+deployable representation. The discipline is **folded into Phase 3** for source/schema shapes, full bind/expansion, the opaque
+provision seal, and the closed `renderAll` consumer, and into **Phase 4** for the pure fold implementation,
+the witness-driven render, and generated properties. None requires an external effect or a
 forward live-phase dependency ([development_plan_standards.md §E](development_plan_standards.md#e-one-canonical-phase-model) one-canonical-phase). Its **runtime**
 residues distribute only to post-barrier live owners: Pulsar offload observation to Phase 67, the Lima
 `LinuxHost` witness and host/VM capacity cross-check to Phase 89, first live kind topology to Phase 55, the

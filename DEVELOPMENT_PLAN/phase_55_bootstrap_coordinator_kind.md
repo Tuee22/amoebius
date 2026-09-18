@@ -7,7 +7,7 @@
 
 This phase never expands `pb`: `pb validate phase 55` only ensures, builds, and replaces itself with the
 Haskell binary. Substrate detection, planning, tool resolution, effects, observation, and candidate verdict
-are Haskell responsibilities. The live gate remains forbidden until Phase 49 and every intervening phase have
+are Haskell responsibilities. The live gate remains forbidden until the DSL barrier (Phase 9) and every intervening phase have
 separate gate passs.
 
 <details>
@@ -25,7 +25,7 @@ separate gate passs.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
+- [Resource provision](#resource-provision)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 55.1: Substrate observation and classification](#sprint-551-substrate-observation-and-classification-)
@@ -39,9 +39,8 @@ separate gate passs.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-54 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -71,30 +70,29 @@ remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: On one natural `linux-cpu/amd64` host, the Haskell subject rejects incompatible declarations before mutation, reconciles exactly one empty single-node kind cluster, repairs named partial states, repeats with an empty diff, and tears down without owned residue. No later platform behavior is claimed. |
-| `Subject` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Planned Haskell entry points `Amoebius.Substrate.observe`, `Amoebius.Cluster.Kind.preflight`, `plan`, and `reconcile`; exact production call graph remains `UNRESOLVED` and blocks validation. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 55`; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged. The Haskell binary owns discovery, plan, effects, observation, cleanup, and verdict. |
-| `Oracle` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: A separately authored Haskell capacity/reconcile oracle plus an outside process/resource observer. Module, authorship boundary, and observation seam are `UNRESOLVED` and block validation. |
-| `Positive controls` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Closed Haskell values for one fitting declaration, already-converged state, stopped-node repair, and missing-context repair, with exact plans and observations independently pinned. Live success requires one Ready node and no platform workload. |
-| `Paired negatives` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Minimally different declarations cover CPU, memory, node storage, engine reserve, backing identity, architecture, and forbidden accelerator mismatch; each must refuse at its named preflight locus with zero cluster mutation. |
-| `Mutants` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Changed-subject operators skip preflight, use a bare executable name, turn reconcile into create-only, ignore a damaged node, suppress a diff, or skip teardown. Applied Haskell-source witnesses and unaffected controls are mandatory. |
-| `Discovery` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Expected cluster/container/context/resource sets are derived independently and compared in both directions with live discovery. Empty, partial, duplicate, or extra discovery refuses the candidate. |
-| `Challenge` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: After initial convergence the harness introduces one run-local, named repairable divergence selected after startup; the same subject must observe and repair it, then re-observe an empty diff. |
-| `Observer` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: An outside observer reads raw process execution, container identity/state, kind membership, kubeconfig bytes, node readiness/capacity, writes, and owned residue; subject-emitted summaries are not authoritative. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: All external tools are invoked through the prior Haskell `AbsExe` boundary. Bare-name, alternate socket/context, foreign-cluster, over-capacity, direct-create, and `pb`-implemented behavior probes must fail at distinct loci. |
-| `Freshness` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Use a fresh `.build/**` run root and a marker-owned cluster identity bound to the current source, contract, predecessor receipt, host observation, and run challenge. Stale kubeconfig, observations, plans, or evidence are unusable. |
-| `Qualification` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Before live mutation, the same harness must reject the fixed sabotage corpus: constant success, no-op subject, wrong output, empty discovery, missing subject/oracle, skipped/no-op mutant, wrong-locus failure, stale evidence, self-observer, authority bypass, residue, and smuggled generated/legacy input. |
-| `Cleanroom` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Begin with generated outputs absent and no owned cluster. Generate configuration, cases, plans, and observations lazily beneath one `.build/**` run root; refuse repository-retained generated behavioral transport material and writes beside source. |
-| `Legacy closure` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: The typed Haskell binding explained to readers as `LTD-RUN-001` must have zero findings and its second-executable/obsolete-identity reintroduction negatives must fail. The source classifier must also report exact accounting and zero due bindings owned by Phase 55 or earlier. Markdown row content is not an input. |
-| `Predecessor` | UNRESOLVED — blocks validation: the typed generation/compatibility binding still requires implementation. Require authenticated `ImmediatePredecessorPass` for Phase 54 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `UNVERIFIED`: all Phase-55 behavior until the contract is implemented and checked; every registry, image publication, platform service, storage service, workload, GPU, multi-node, provider, and second-substrate claim remains outside scope. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | On one natural `linux-cpu/amd64` host, `amoebius apply --executor real` applies a corpus deployment from the DSL barrier's union corpus to one marker-owned single-node kind cluster: the subject rejects incompatible declarations before mutation, reconciles the empty cluster to the applied deployment, and `kubectl get -o json`, compared by the oracle, equals the Phase-3 rows for that example. The real-apply input digest equals the Phase-3 fake-apply digest. Live platform workloads, registries, storage services, and multi-node clusters are excluded. |
+| `Subject` | `Amoebius.Substrate.observe`, `Amoebius.Cluster.Kind.preflight`, `plan`, and `reconcile` in `src/Amoebius/Cluster/Kind.hs`, plus the real executor arm of `Amoebius.Kernel.Interpret`; every subject is inside the closure of `executable amoebius`, and the runner owns the cluster's lifecycle. |
+| `Command` | Future public spelling is `pb validate phase 55`, admissible only while binding the Phase-50 receipt. The agent runs `amoebius-validate preview phase 55`; the human runs `sudo amoebius-validate accept --phase 55`. The runner spawns the shipped binary for `apply --executor real` with a corpus example and owns the kind cluster from creation through destruction. |
+| `Oracle` | `test/oracle/cluster/Main.hs` compares `kubectl get -o json` with the Phase-3 rows for the corpus example and states the expected preflight refusals, reconcile plans, and teardown ledger from literals; it depends on no `amoebius` library. |
+| `Positive controls` | Closed Haskell values for one fitting declaration, already-converged state, stopped-node repair, and missing-context repair, with exact plans and observations independently pinned. Live success requires one Ready node and no platform workload. |
+| `Paired negatives` | Minimally different declarations cover CPU, memory, node storage, engine reserve, backing identity, architecture, and forbidden accelerator mismatch; each must refuse at its named preflight locus with zero cluster mutation. |
+| `Mutants` | Runner-generated from the fixed operator catalogue over `Amoebius.Cluster.Kind` and `Amoebius.Substrate`, eight per module, at most forty per gate, kill ratio at least 0.6. A mutant that skips preflight, uses a bare executable name, turns reconcile into create-only, ignores a damaged node, or suppresses a diff is killed at its assigned observation while unrelated controls stay green; no authored mutant seam exists. |
+| `Discovery` | Expected cluster/container/context/resource sets are derived independently and compared in both directions with live discovery. Empty, partial, duplicate, or extra discovery refuses the candidate. |
+| `Challenge` | After initial convergence the harness introduces one run-local, named repairable divergence selected after startup; the same subject must observe and repair it, then re-observe an empty diff. |
+| `Observer` | An outside observer reads raw process execution, container identity/state, kind membership, kubeconfig bytes, node readiness/capacity, writes, and owned residue; subject-emitted summaries are not authoritative. |
+| `Authority/bypass` | All external tools are invoked through the prior Haskell `AbsExe` boundary. Bare-name, alternate socket/context, foreign-cluster, over-capacity, direct-create, and `pb`-implemented behavior probes must fail at distinct loci. |
+| `Freshness` | Use a fresh `.build/**` run root and a marker-owned cluster identity bound to the current source, contract, predecessor receipt, host observation, and run challenge. Stale kubeconfig, observations, plans, or evidence are unusable. |
+| `Qualification` | The generated-mutant matrix precedes the clean candidate in the same run; the runner refuses a candidate whose matrix misses the kill ratio before any live mutation begins. |
+| `Cleanroom` | Begin with generated outputs absent and no owned cluster. Generate configuration, cases, plans, and observations lazily beneath one `.build/**` run root; refuse repository-retained generated behavioral transport material and writes beside source. |
+| `Legacy closure` | `LTD-RUN-001` closes here through the compiled inventory: exactly one product executable identity and no obsolete runtime identity are discovered, and the second-product-stanza reintroduction is refused. The due-count for every other identifier is zero. |
+| `Predecessor` | The Phase-54 receipt in certification generation 2, chained by the digest of Phase 54's product closure plus the verifier and governance digests, and the DSL-barrier (Phase 9) receipt digest bound as the corpus source. |
+| `Residue` | `UNVERIFIED`: multi-node clusters, platform workloads, registries, storage services, providers, and every later live phase; the Apple and Windows routes remain their own phases. |
+| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run on the declared substrate, the applied bytes equal the Phase-3 rows, cleanup reports zero owned residue, and the human's `accept` records it. |
 
-## Resource provision — UNRESOLVED
+## Resource provision
 
-> **UNRESOLVED — blocks validation.** No live mutation may begin. The seven-label draft below is
-> non-operative capability inventory until its Haskell `ResourceProvisionContract`, interpreter, independent
-> observer, exact run binding, and complete gate execution exist.
+> The typed `ResourceProvisionContract` binds these seven labels to the Phase-55 subject and the runner's
+> observer. They are gate-ready contract terms, not evidence that the still-open gate has passed.
 
 - **Owner marker:** a run-local Haskell value binds the cluster name, container runtime endpoint, kubeconfig,
   source snapshot, predecessor receipt, and run identifier.
@@ -259,7 +257,7 @@ Phase-55 candidate. Until then this phase remains NOT VALIDATED.
 
 - [Development-plan tracker](README.md)
 - [Development-plan standards](development_plan_standards.md)
-- [Phase 49 no-hardware DSL barrier](phase_49_self_referential_gates.md)
+- [Phase 9](phase_09_dsl_barrier.md)
 - [Phase 54 Windows engine bring-up](phase_54_windows_engine_bringup.md)
 - [Substrate doctrine](../documents/engineering/substrate_doctrine.md)
 - [Cluster lifecycle doctrine](../documents/engineering/cluster_lifecycle_doctrine.md)

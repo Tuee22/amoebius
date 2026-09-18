@@ -17,7 +17,7 @@ listed here only to be recognised as the same shape. Reading it presumes the hon
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, documents/engineering/README.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, documents/engineering/README.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -150,16 +150,16 @@ stable encoding, owner, analyzer key, and qualified owner-domain reintroduction 
 class or let a later change recreate it silently. Markdown rows, cells, IDs, owners, counts, and predicate-like
 sentences remain unavailable to executable lifecycle or closure decisions.
 
-[Phase 0 Sprint 0.2](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-02-one-active-legacy-register-)
-owns only that closed inventory, total fail-closed analyzer dispatch, structural register check, and independent
-inventory/dispatch mutant declarations. The current lifecycle universe admits only Active, and Sprint 0.2
-retains required reintroduction-case identities rather than claiming executed guards. Reader-facing prose
+[Phase 0 Sprint 0.1](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-01-governance-surface-)
+owns only that closed inventory, total fail-closed analyzer dispatch, and structural register check; its
+inventory/dispatch mutants are runner-generated. The current lifecycle universe admits only Active, and
+Sprint 0.1 retains required reintroduction-case identities rather than claiming executed guards. Reader-facing prose
 correspondence is consolidated at the Phase-0 gate and does not itself require an intermediate
 confirmation. Each owning sprint implements and qualifies its
 domain observation/closure analyzer and reintroduction negative in numerical order; an unavailable analyzer
 cannot report closure and refuses at or beyond its owner, while an earlier active binding remains explicit
 later-owned debt rather than a deferred pass. All Phase-0-owned legacy queries may jointly reach zero only at the
-[Sprint-0.8 integrated candidate](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-08-integrated-phase-0-candidate-),
+[Sprint-0.7 gate specification and reset](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-07-phase-0-gate-specification-first-reseed-and-receipt-bearing-reset-),
 under the [gate-integrity contract](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate).
 This sequencing statement records target responsibility only; every sprint and phase remains NOT VALIDATED
 until the prescribed owning gate passes.

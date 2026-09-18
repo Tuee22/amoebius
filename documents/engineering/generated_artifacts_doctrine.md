@@ -14,7 +14,7 @@ the doctrine that defines each output.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/formal_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/validation_frame_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/formal_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -46,11 +46,11 @@ document explains the generated side of that boundary.
 
 ## 2. What is generated (and from what)
 
-Phase 41 names `emit-client-offline-plan` and `emit-server-replay-plan` as the two deterministic projections of
+Phase 8 names `emit-client-offline-plan` and `emit-server-replay-plan` as the two deterministic projections of
 one validated Haskell `OfflineSource`. Their bytes are lazy `.build/**` products; neither generated plan nor a
 serialized expectation is tracked source.
 
-Phase 42 adds a pure Haskell projection of the generic browser interpreter. The projection's structure is
+Phase 70 adds a pure Haskell projection of the generic browser interpreter. The projection's structure is
 checked in Haskell for trusted text and same-origin request primitives and for the absence of evaluation,
 remote imports, provider SDKs, and browser persistence mechanisms; generated browser-language bytes remain
 ignored `.build/**` output.
@@ -62,7 +62,7 @@ ignored `.build/**` output.
 | TLA+ module and TLC configuration | reifiable `Model` and semantic renderer; authored Haskell semantic facts are the oracle | `.build/tla/**` |
 | Kubernetes/provider objects | opaque checked and provisioned deployment values | `.build/manifests/**` |
 | Dockerfile and bake inputs | typed Haskell bake catalog and recipe renderer | `.build/docker/**` |
-| SQL schema, statements, constraints, and policies | Phase-36 scope-bearing declarations in `Amoebius.Transaction.Vocabulary`, independently constrained by `TransactionVocabularyOracle` | `.build/sql/**` |
+| SQL schema, statements, constraints, and policies | Phase 8 scope-bearing declarations in `Amoebius.Transaction.Vocabulary`, independently constrained by `TransactionVocabularyOracle` | `.build/sql/**` |
 | Proto, generated bindings, and protocol fixtures | Haskell protocol declarations and recipes | `.build/proto/**` |
 | Pulumi programs and provider inputs | Haskell infrastructure declarations | `.build/pulumi/**` |
 | PureScript/JavaScript client runtime, codecs, CSS/HTML/assets, and bundle | Haskell client-runtime and public-contract declarations | `.build/ui/**` |

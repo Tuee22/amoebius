@@ -17,7 +17,7 @@ entries and their loci are owned here; the numbering belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -77,7 +77,7 @@ flowchart LR
 
 ### 3.5 Undeployable pods (taints, tolerations & affinity)
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `topology`
 
@@ -111,7 +111,7 @@ witnessed node).
 
 ### 3.17 An over-committed deploy or workload (host / VM / cluster capacity exceeded)
 
-**Delivery-owner:** `Phase-27`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `capacity`
 
@@ -189,7 +189,7 @@ name does not assert synchronous ephemeral quota enforcement.
 
 ### 3.22 A hand-authored (un-derived) toleration
 
-**Delivery-owner:** `Phase-33`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `topology`
 
@@ -217,7 +217,7 @@ No expected pod-spec bytes are tracked; serialized projections exist only beneat
 
 ### 3.27 A deployment that fits in aggregate but has no resource-capable placement
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `capacity`
 
@@ -261,7 +261,7 @@ the elastic set).
 
 ### 3.28 Two accelerator owners on one node, or a fractional accelerator claim
 
-**Delivery-owner:** `Phase-29`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `accelerator`
 
@@ -296,7 +296,7 @@ runtime actually grant those devices only to the owner).
 
 ### 3.29 A host worker whose Demand overflows its physical host
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `capacity`
 
@@ -330,7 +330,7 @@ declares no physical-host `Capacity`) + `live-effect` (residue — that the host
 
 ### 3.30 An accelerator memory envelope that cannot fit the selected devices or unified-memory pool
 
-**Delivery-owner:** `Phase-29`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `accelerator`
 
@@ -390,7 +390,7 @@ actually fits under real batch/context).
 
 ### 3.72 A compute headroom pad that reserves past its own limit
 
-**Delivery-owner:** `Phase-27`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `capacity`
 
@@ -433,7 +433,7 @@ reason is required rather than defaultable, so an authored reservation has nowhe
 
 ### 3.73 A padded reservation that overcommits allocatable
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `capacity`
 

@@ -40,9 +40,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-70 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -74,7 +73,7 @@ required evidence strength advances the ETag-CAS pointer, after which the SSA re
 release's `deploymentDhallRef` and recomputes desired objects through the ordered `RolloutPlan`. The scope deliberately consumes upstream primitives as
 given: the `releaseHash` formula and the hash/pointer master registry are the Phase-69/Phase-80 store's
 (consumed here as an opaque content-address protocol); the proven/tested/assumed evidence ledger the gate
-reads is the contract owned by `testing_doctrine` (consumed here as an opaque witness; Phase 48's pure
+reads is the contract owned by `testing_doctrine` (consumed here as an opaque witness; Phase 7's pure
 test-workflow algebra is a required predecessor in the numeric chain, while Phase 90 owns later live topology
 automation); the Gateway-API canary weight-shift remains later-phase
 work, and the cross-cluster/geo promotion boundary is exercised in Phase 74 — neither is part of this gate.

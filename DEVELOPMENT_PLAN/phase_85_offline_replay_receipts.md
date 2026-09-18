@@ -35,9 +35,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-84 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -51,7 +50,7 @@ provider/Pulsar projections. Redis routes live outcomes only. Flushing Redis or 
 result but cannot lose, invent, or duplicate an accepted effect.
 
 The bounded campaign must gate scalar commands and one infernix ready-artifact workflow start with a small result
-payload; offline blob transfer is deferred to Phase 86. Phase 41 structurally admits jitML training starts,
+payload; offline blob transfer is deferred to Phase 86. Phase 8 structurally admits jitML training starts,
 but this linux-cpu gate does not claim a live offline CUDA training result.
 
 **Phase scope:** one cohesive claim — *an accepted offline command is established by its durable effect owner*. Delivery through Redis is transport, and transport is never acceptance.

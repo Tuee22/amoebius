@@ -14,7 +14,7 @@ not duplicate, summarize, qualify, or override this file; the documentation chec
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: CLAUDE.md, README.md, documents/glossary.md
+**Referenced by**: CLAUDE.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_dsl_barrier.md, README.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -73,17 +73,22 @@ ignored `.build/**` paths. Operator values are external or untracked inputs; the
 ## Validation Outcome and Ordering
 
 A complete qualified phase-gate pass is sufficient to mark that phase and its sprints Done.
-Recording the result is a mechanical status-only update after the exact current gate passes. Missing independent
-oracles, paired negatives, changed-production-subject mutants, complete discovery, required external
-observation, explicit residue, or the immediate predecessor's gate pass must make the gate fail rather than be
-represented as a pass. A smaller component check, fixture count, digest, or partial run is not the phase gate.
-The [development-plan standards](DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) own the
+Recording the result is the human's `accept`, a mechanical status-only update after the exact current gate
+passes. Missing independent oracles, paired negatives, changed-production-subject mutants, complete discovery,
+required external observation, explicit residue, or the immediate predecessor's gate pass must make the gate
+fail rather than be represented as a pass. A smaller component check, fixture count, digest, or partial run is
+not the phase gate. The
+[development-plan standards](DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) own the
 status procedure.
 
 Within one phase, a sprint's `Blocked by` edge declares implementation order, not a request for intermediate
-user confirmation. Agents continue through implementation-ready sprint seams. After the complete integrated
-phase gate passes, an agent may apply the mechanical status-only update and continue into the next numerically
-ordered phase in the same run. A component diagnostic or partial candidate must never trigger the Done update.
+user confirmation. Agents continue through implementation-ready sprint seams and run
+`amoebius-validate preview phase NN`, which runs the complete gate and mints nothing. An agent never edits a
+status line, never applies a status patch, and stops at the phase boundary. The human runs
+`sudo amoebius-validate accept --phase NN`; one phase advances per accept. A reset is receipt-bearing and
+names both a validator gap and a product-gap legacy identifier. A component diagnostic or partial candidate
+must never be presented as a pass
+([DL-0009](documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition)).
 
 Four ordering barriers are named by role, never by ordinal. `DSL_BARRIER` is the hardware-free end-to-end DSL
 gate; `BOOTSTRAP_HANDOFF` validates the bounded `pb`-to-Haskell handoff; `HOST_ENSURE` is the hardware-free
@@ -95,7 +100,9 @@ that a plan rebalance silently falsifies, so this file names the role and the ta
 No hardware discovery, container-engine bring-up, cluster creation, image execution, or other live validation
 may begin until the development plan records a passing `DSL_BARRIER` gate and passing results for
 all of its predecessors. That barrier requires every source-migration query—including the bounded
-`pb` role—to be zero. Before `BOOTSTRAP_HANDOFF` passes, `pb` is not an admissible validation transport: every
+`pb` role—to be zero. Its gate carries the spine fact: an operator-authored value reaches fake-applied bytes
+through the shipped `amoebius` binary, and every hardware phase binds that receipt and runs a corpus example
+through its own subject. Before `BOOTSTRAP_HANDOFF` passes, `pb` is not an admissible validation transport: every
 phase up to and including `DSL_BARRIER` builds and invokes the exact source-bound Haskell executable directly
 from an authenticated,
 network-independent toolchain input. Their `pb validate phase NN` spelling is the future public target, not
@@ -108,13 +115,36 @@ validate its own handoff. `HOST_ENSURE` remains a hardware-free Haskell host-ens
 boundaries; `FIRST_HARDWARE` is the first hardware-bearing validation phase.
 
 Validation must follow numeric phase order and fail closed when a predecessor gate result or any required test
-boundary is absent. Batch completion means repeated validate-and-record steps in one agent run; it never means
-skipping a phase, sharing one candidate across phases, or treating a later result as evidence for an earlier one.
+boundary is absent. One `accept` closes one phase. Repeated accepts are separate human acts; none skips a
+phase, shares one candidate across phases, or treats a later result as evidence for an earlier one.
 
 Numeric order governs integrated gate execution and status transitions. Hardware-free implementation for a
 later phase may be prepared ahead of the validated frontier only after that phase's typed contract and
 independent oracle exist; such work yields component diagnostics only, must not use `pb`, and cannot begin live
 or hardware-bearing effects or mint phase evidence before its predecessor gate passes.
+
+## Host Precondition
+
+Agent sessions run under a user identity with no sudoers entry and no read access to the receipt-issuer key.
+Receipt issuance, reseed, reset, govern, and demo are human acts from a password-sudo account. An LLM must not
+run `sudo`, must not rely on a cached sudo timestamp, and must report a shell in which `sudo -n true` succeeds
+as a host defect before any gate is accepted
+([DL-0010](documents/decision_log.md#dl-0010--host-precondition-for-agent-sessions)).
+
+## Doctrine Freeze
+
+Every governed document under `documents/**`, this file, the three plan rulebooks, and the legacy register
+are frozen under [`documentation_standards.md` §17](documents/documentation_standards.md#17-the-doctrine-freeze).
+An LLM may draft a [decision-log](documents/decision_log.md) entry and the amendment it authorises; it must
+not change a frozen body without landing that entry in the same change, and no instruction overrides this.
+
+## Kernel Budget
+
+The validator — the gate-specification library, the runner, and the retained custody core — is at most
+14,000 lines and never above the last accepted count. It contains no conditional compilation, no `*Run*`
+module, no phase-number literal, and one phase table. An LLM must not add a per-phase validator module or a
+validator-only test corpus; a gate's subject is shipped product code, and its examples are Haskell values the
+product executable links ([DL-0007](documents/decision_log.md#dl-0007--certification-generation-2-replaces-the-validation-kernel)).
 
 ## Registry Provider
 

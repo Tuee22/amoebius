@@ -15,7 +15,7 @@ pairing simply has no constructor, so nothing needs to reject it. The numbering 
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -51,7 +51,7 @@ the running deployment enforces it. Each `**Layer:**` tag records where the fore
 
 ### 3.13 A compute engine incompatible with its substrates (managed providers first-class)
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `topology`
 
@@ -71,7 +71,7 @@ uninhabitable).
 
 ### 3.14 rke2/kind on a host with no Linux node (apple/windows without an interposed Linux VM)
 
-**Delivery-owner:** `Phase-27`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `topology`
 
@@ -89,7 +89,7 @@ runtime-checked residue — that the Lima/WSL2 VM actually boots.
 
 ### 3.15 A multi-node kind cluster not on a single Linux host
 
-**Delivery-owner:** `Phase-25`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `topology`
 
@@ -103,7 +103,7 @@ that one host, and a second host has no field to bind. **Owner:**
 
 ### 3.16 A multi-node rke2 cluster with fewer Linux hosts than nodes (or a host reused)
 
-**Delivery-owner:** `Phase-27`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `topology`
 
@@ -130,7 +130,7 @@ a host).
 
 ### 3.24 An even/zero-server rke2 control plane (no etcd quorum / split-brain)
 
-**Delivery-owner:** `Phase-25`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `topology`
 
@@ -154,7 +154,7 @@ actually forms and holds quorum, owned by [`chaos_failover_doctrine.md`](../engi
 
 ### 3.37 A full stretched node on a managed EKS control plane without a provider-native hybrid arm
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `topology`
 
@@ -184,7 +184,7 @@ host-foreclosure readback remains a `live-effect` obligation because AWS authori
 
 ### 3.39 A split-Site etcd quorum
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `topology`
 

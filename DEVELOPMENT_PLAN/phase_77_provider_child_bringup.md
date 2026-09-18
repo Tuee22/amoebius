@@ -43,9 +43,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-76 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -79,7 +78,7 @@ Third, **the hostless daemon topology**. A provider child runs **exactly one** i
 `amoebius-capacity` scheduler role, and **zero** host worker-daemon roles. The host-only NodePort comms path and
 host worker daemons are structurally absent — there is no host — and the child advertises **no** host substrate,
 confirming at runtime the type-level foreclosure that the `Managed Eks` arm carries no `LinuxHost` witness.
-Gate-passed Phase 25 schema generation and Phase 26 GADT decoding must make that state unrepresentable before
+Gate-passed Phase 3 schema generation and Phase 3 GADT decoding must make that state unrepresentable before
 this phase may observe the corresponding runtime residue.
 
 Fourth, **the standard-HA convergence from typed manifests**. Through the child admin REST after handoff, the

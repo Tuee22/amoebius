@@ -16,7 +16,7 @@ them appears in the single-cluster slices. Their numbering is held by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -75,7 +75,7 @@ deployment enforces it (the load-bearing limit owned by [`illegal_state_catalog.
 
 ### 3.31 A capacity or workload fold spanning two clusters
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `topology`
 
@@ -106,7 +106,7 @@ the deferred geo-replication enaction, Phase 74).
 
 ### 3.35 A stretched host worker with no declared networking capability
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `topology`
 
@@ -134,7 +134,7 @@ declared `Site` matching reality, `discover = Unreachable → refuse`).
 
 ### 3.36 A declared-remote full agent with no control-plane witness
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `topology`
 
@@ -159,7 +159,7 @@ gate has no off-networking constructor); `live-effect` (the kubelet session actu
 
 ### 3.38 A host worker granted a control-plane witness or treated as a member
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `topology`
 

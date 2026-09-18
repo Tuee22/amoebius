@@ -15,7 +15,7 @@ capacity, capability, and platform doctrines it cites. It presumes only that a s
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_03_typed_spine.md, DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, documents/decision_log.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -78,6 +78,13 @@ mandatory operator input is an **external/untracked app-spec `.dhall`** containi
 the generic PureScript client plan and amoebius UI-server plan derive
 ([low_code_ui_runtime_doctrine.md §3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans)).
 
+**Business logic is defined**
+([DL-0003](../decision_log.md#dl-0003--business-logic-is-defined)): the set of tenant-parameterised, total,
+first-order rules over typed application state and events. It is expressed as `UiSource` update rules and
+expressions over a closed pure-function catalog and realised through the typed effect-port catalog. Anything
+outside that form is an astcheck-admitted Haskell adapter linked into the binary. The algebra that carries
+this form is owed by [Phase 8](../../DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md).
+
 An app may also select a trusted linked Haskell adapter when a declared data, workflow, or artifact port needs
 server semantics absent from the existing catalog. The adapter is admitted by extension-astcheck; it is not the UI and is
 not mandatory for an app whose ports bind entirely to existing handlers. The bounded view, state, and transition
@@ -132,7 +139,7 @@ What is *conspicuously absent* from this surface is the whole vocabulary of [§3
 region, no failover policy, no chaos knob, no substrate selector. The app author cannot write those words
 because the type does not have those fields.
 
-[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) owns the target capability test for this split:
+[Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md) owns the target capability test for this split:
 the app-facing `CapabilityNeed` has no product, provider, or shape field, while one Haskell-owned app-surface
 projection remains byte-identical across two bindings and those bindings produce structurally different provider graphs whose product,
 object-role, controller, execution, and intent semantics match an independently authored projection.
@@ -141,7 +148,7 @@ object-role, controller, execution, and intent semantics match an independently 
 
 ## 3. The deployment-rules surface — how the same app *runs*
 
-The Phase-30 contract specifies the provider/shape portion of this surface as a one-built-arm
+The Phase 3 contract specifies the provider/shape portion of this surface as a one-built-arm
 provider choice plus `SingleNode | Distributed n`; neither field is admitted by the app need.
 
 The deployment-rules surface is the mirror image of [§2](#2-the-application-logic-surface--what-an-app-is): **everything on this surface is about robustness, scale, and placement — and none of it changes what the app is.** Turn every one of these dials and a user sees the
@@ -429,7 +436,7 @@ the concentration principle intact: distribution behavior is still exercised and
 boundary rather than duplicated inside each application
 ([chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives)).
 
-[Phase 44](../../DEVELOPMENT_PLAN/phase_44_ui_local_composition.md) owns the concrete hardware-free acceptance
+[Phase 72](../../DEVELOPMENT_PLAN/phase_72_ui_program_release.md) owns the concrete hardware-free acceptance
 case for this split. Its Haskell cases declare five application interactions and four visible-state
 expectations for single- and multi-tenant shapes, while the production composition exposes no replica,
 topology, rollout, failover, or fault-schedule choice. Five changed-production checks constrain scope,
@@ -456,7 +463,7 @@ mechanics it points at:
 
 | Topic | Owner |
 |-------|-------|
-| The DSL grammar, the cluster / app-spec / deployment-rules type families, total composability | [dsl_doctrine.md](./dsl_doctrine.md) |
+| The DSL grammar, total composability, and the one spelling of `RootInForceSpec`, `ClusterSpec`, `AppSpec`, and `DeploymentRules` | [dsl_doctrine.md — the typed spec records](./dsl_doctrine.md#the-typed-spec-records) |
 | Which misfiling boundaries are type-enforced (made unrepresentable) | [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
 | The standard service set, HA-always, Keycloak-owns-all-ingress | [platform_services_doctrine.md](./platform_services_doctrine.md) |
 | Durable-storage mechanics: retained `no-provisioner` PVs, sizing, rebind | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |

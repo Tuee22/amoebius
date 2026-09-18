@@ -1,7 +1,7 @@
 # Phase 58: Typed renderer + object reconciler
 
 > **Purpose**: Take an opaque whole-deployment `ProvisionedSpec`, re-observe and cross-check the target's
-> complete resource/capability inventory before mutation, construct the Phase-33 deployment-global
+> complete resource/capability inventory before mutation, construct the Phase 3 deployment-global
 > `renderAll` object list and separately validate/index it, then enact snapshot-bound typed actions on a live
 > single-node `kind` cluster — mandatory bootstrap-holder `Lease` authority, scoped server-side apply,
 > kind-indexed controllers, staged serial/host/accelerator execution, Job terminal retention, and
@@ -20,7 +20,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -45,16 +45,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-57 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
 
 ## Phase Summary
 
-This phase's target is amoebius's live typed-action **object reconciler**. Gate-passed Phase 33 must supply
+This phase's target is amoebius's live typed-action **object reconciler**. Gate-passed Phase 3 must supply
 `renderAll :: ProvisionedSpec -> [K8sObject]`: one deployment-global rendered list with exact structural source ownership across service controllers, admission, quota, RBAC/config, route, storage, and control-plane projections. `validateAndIndexRenderedObjects` is the separate pure step that checks each emitted object's identity against its source key and constructs the `Map KubernetesObjectId (K8sObject, RenderActivation)` used
 by diff; it rejects duplicates, source/object-stage mismatch, or domain mismatch rather than changing
 `renderAll`'s canonical signature. Omitted global projections and per-service last-writer-wins concatenation
@@ -106,7 +105,7 @@ cache holds. Any missing or unbounded arm returns the specific error or `Unknown
 Success alone mints one single-use `ValidatedLiveTarget` containing the object/inventory fingerprint, all
 relevant resourceVersions, the exact normalized and runtime-storage witnesses, the mandatory-Lease
 identity/bootstrap-holder/resourceVersion readback, a complete map of `ValidatedExecutionTransitionAction`s, and
-the exact map of `ValidatedStorageScalingAction`s derived from Phase-28 policy-only envelopes and fresh storage
+the exact map of `ValidatedStorageScalingAction`s derived from Phase 4 policy-only envelopes and fresh storage
 snapshots. (The scheduler-ledger CAS-version arm of `ValidatedLiveTarget` is added in Phase 59.) A final
 fingerprint recheck consumes the applicable token; change restarts the read-only prefix.
 
@@ -218,7 +217,7 @@ remains phase-local and cannot be supplied by this prose.
 - [`manifest_generation_doctrine.md` §6 — The reconcile state model: desired is `renderAll(ProvisionedSpec)`, observed is live inventory, actions are typed](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)
   — **desired is the validated identity index of `renderAll(provisionedSpec)`, observed is live inventory, and actions are typed.** `renderAll` retains the canonical `[K8sObject]` result; a separate pure `validateAndIndexRenderedObjects` checks source/object identity and duplicate freedom before diff. Desired state is recomputed; actual Pod UIDs/process IDs, owner chains, host reservations, completions, and physical allocations are observed to authorize transitions, never treated as another desired source. (The state-indexed *k8s scheduler* reservation ledger this model also names is added in Phase 59.)
 - [`manifest_generation_doctrine.md` §2 — The typed manifest model: `renderAll` is the sole public pure function to objects](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects)
-  — **the typed manifest model** (the pure renderer half): this phase *consumes* the Phase-33 pure, total private
+  — **the typed manifest model** (the pure renderer half): this phase *consumes* the Phase 3 pure, total private
   per-source `renderSourcePrivate` projections through the exact deployment-global `renderAll` owner union. The
   `[K8sObject]` list is byte-for-byte the value `--dry-run` previews; its separately validated identity index is the desired map. An unchecked `ServiceSpec`, duplicate `KubernetesObjectId`, or emitted/source identity mismatch cannot reach diff.
 - [`resource_capacity_doctrine.md` §8 — Where the numbers come from: declared in pure input, provisioned before render, cross-checked at runtime](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)
@@ -237,9 +236,9 @@ remains phase-local and cannot be supplied by this prose.
   Deployment `replicas=1`, stateless (no PVC), single-writer authority delegated to k8s/etcd through its mandatory
   `Lease`, **no bespoke election**. This phase drives the reconciler from the host binary as a precursor; standing
   it up *inside* the control-plane daemon is Phase 65.
-- [`conformance_harness_doctrine.md` §3 — The load-bearing invariant: rendering never touches live infrastructure](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)
+- [`gate_runner_doctrine.md` §3 — The load-bearing invariant: rendering never touches live infrastructure](../documents/engineering/gate_runner_doctrine.md)
   — **rendering never touches live infrastructure.** The boundary this phase honors from the other side: the
-  `renderAll`/plan/`--dry-run` path stayed cluster-free through Phase 34, and **apply is the first live step** —
+  `renderAll`/plan/`--dry-run` path stayed cluster-free through Phase 3, and **apply is the first live step** —
   so live prerequisites (a reachable cluster, credentials) belong here, never on the render path.
 - [`generated_artifacts_doctrine.md` §3 — The rule](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
   — the applied `[K8sObject]` set is emitted from the Haskell source of truth and absent from the repository;
@@ -272,7 +271,7 @@ Haskell and qualify the mechanism that first admits their result; component obse
 ### Objective
 
 Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)
-— the reconcile state model. Make desired state the separately validated identity index of the exact Phase-33
+— the reconcile state model. Make desired state the separately validated identity index of the exact Phase 3
 `renderAll provisionedSpec :: [K8sObject]` owner union; make observed state a coherent snapshot of Kubernetes objects, actual Pod/process identities, host reservations, completions, and physical allocations; and mint only the typed actions justified by the whole transition. No planned slot is accepted as a live identity, no object label alone is a mutation capability, and no preflight module imports a writer. The state-indexed `amoebius-capacity` scheduler reservation ledger is layered on this observation in Phase 59.
 
 ### Deliverables
@@ -300,7 +299,7 @@ Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_
   `ObservedInventory`, exact budget-keyed storage-scaling snapshots, optional cloud observation, shared snapshot
   fingerprint, object/resourceVersions, exact mandatory-`Lease` identity/bootstrap-holder/resourceVersion readback,
   normalized commitment and runtime-storage witnesses, Job completion inventory, render-activation/domain equality,
-  and exact action-domain witness. Its storage-scaling map exact-joins every Phase-28
+  and exact action-domain witness. Its storage-scaling map exact-joins every Phase 4
   `ProvisionedStorageScalingEnvelope` to a complete `ObservedStorageScalingSnapshot`, total `planStorageScaling`
   result, backing-specific capability, immediate-snapshot recheck, and fresh `SingleUseStorageScalingActionToken`;
   a concrete transition is reconcile-time state, never a field of `ProvisionedSpec`. The provider observation is
@@ -326,7 +325,7 @@ Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_
 
 ### Validation
 
-1. The deployment-global `[K8sObject]` list equals the separately authored Phase-33 Haskell render expectation;
+1. The deployment-global `[K8sObject]` list equals the separately authored Phase 3 Haskell render expectation;
    the separately validated desired map and action plan equal independently authored Haskell expectations.
    Haskell changed-production-subject mutants for duplicate object identity, source/emitted-identity mismatch,
    source/object activation-stage mismatch, generic SSA over the full list, missing global projection, cached
@@ -645,25 +644,25 @@ Register-3 half supplies the live boundary evidence that bounds it.
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the Register-3 acceptance token: *converges and re-run is a no-op*, externally observed live)
 - [overview.md](overview.md) — target architecture and the no-Helm / no-release-store reconciler posture
 - [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) the apply/reconcile
-  engine adopted here; [§6](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) the reconcile state model; [§2](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) the pure renderer consumed from Phase 33
+  engine adopted here; [§6](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) the reconcile state model; [§2](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) the pure renderer consumed from Phase 3
 - [Readiness Ordering Doctrine](../documents/engineering/readiness_ordering_doctrine.md) — [§6](../documents/engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps) the runtime enactor
   (observe, never sleep) the wait-for-ready realizes
 - [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — [§8](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime) the pre-mutation live
   inventory cross-check
 - [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — [§3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon) the Deployment-`replicas=1`
   control-plane daemon (delegated single-instance, no election) that will own this reconciler in Phase 65
-- [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — [§3](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure) the invariant that
+- [Conformance Harness Doctrine](../documents/engineering/gate_runner_doctrine.md) — [§3](../documents/engineering/gate_runner_doctrine.md) the invariant that
   rendering never touches live infrastructure; apply is the first live step
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — why the applied object
   set is generated lazily beneath `.build/**` and is absent from the repository
 - [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — [§4](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits) the
   Register-2.5 io-sim environment the reconciler is validated against in Sprint 58.5, before the Register-3 live gate
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 3 (live), [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger
-- [phase_33_render_manifest_oracles.md](phase_33_render_manifest_oracles.md) — the pure per-projection renderers and
+- [Phase 3](phase_03_typed_spine.md) — the pure per-projection renderers and
   deployment-global Haskell `renderAll` owner-union expectations this phase enacts
-- [phase_34_chain_kernel_boundary.md](phase_34_chain_kernel_boundary.md) — the Register-2 fake-apply this phase
+- [Phase 3](phase_03_typed_spine.md) — the Register-2 fake-apply this phase
   replaces with real tools, and the `io-classes` seams Sprint 58.5 drives
-- [phase_16_deterministic_sim_substrate.md](phase_16_deterministic_sim_substrate.md) — the `IOSimPOR`
+- [Phase 75](phase_75_gateway_migration_drills.md) — the `IOSimPOR`
   deterministic-simulation substrate Sprint 58.5 runs on
 - [phase_55_bootstrap_coordinator_kind.md](phase_55_bootstrap_coordinator_kind.md) — the live single-node `kind` cluster this
   phase applies to

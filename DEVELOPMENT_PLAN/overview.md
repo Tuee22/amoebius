@@ -14,7 +14,7 @@ document each invariant cites. It presumes nothing.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -36,14 +36,15 @@ detail of each subsystem; this overview summarizes and links, and **never restat
 ([documentation_standards.md §5](../documents/documentation_standards.md#5-duplication-rules)). This document is the target-architecture companion to that grand, non-binding
 vision; the plan specifies the required decomposition. Haskell owns executable acceptance contracts.
 
-> **Reopened implementation, read this first.** Source and tests exist, but the [2026-09-08 reset](README.md#reopened-numeric-sequence)
-> withdraws prior certification, so the phase statuses in this document's prose would go stale the moment
-> they were written. [README.md](README.md)'s tracker is the sole record of which phase is where
+> **Reopened implementation, read this first.** Source and tests exist, but the
+> [generation-2 reset](README.md#generation-2-reset) withdraws every generation-1 certification, so a phase
+> status in this document's prose would go stale the moment it was written. [README.md](README.md)'s tracker is
+> the sole record of which phase is where
 > ([development_plan_standards.md §C](development_plan_standards.md#c-status-vocabulary)); read it, not a
-> summary of it. Every prescriptive sentence remains design intent until the redesigned complete qualified
-> phase gate passes. A partial component result alone is never sufficient. Where this overview leans on
-> the sibling `prodbox` project, that is cited as
-> *evidence* that a shape works — never as amoebius proof.
+> summary of it. Every prescriptive sentence remains design intent until the complete qualified phase gate
+> passes and the human records it with one `accept`. A component diagnostic alone is never sufficient. Where
+> this overview leans on the sibling `prodbox` project, that is cited as *evidence* that a shape works — never
+> as amoebius proof.
 
 ## 1. The everything-orchestrator shape: one runtime binary, three contexts
 
@@ -153,7 +154,10 @@ Low-code applications remain checked release data; only an optional gate-admitte
 ## 3. The hard constraints (cross-cutting invariants)
 
 These are the README "Cross-cutting invariants" — documented in Phase 0, upheld by every later phase. Each is
-owned by exactly one doctrine SSoT; the overview only names and links them.
+owned by exactly one doctrine SSoT; the overview only names and links them. The first block is the product
+invariant set; the second block is the cycle-breaking invariant set that certification generation 2 adds
+([DL-0007](../documents/decision_log.md#dl-0007--certification-generation-2-replaces-the-validation-kernel)),
+each enforced by code the runner executes rather than by prose alone.
 
 | Invariant | Owning doctrine (cited by name) |
 |-----------|----------------------------------|
@@ -178,15 +182,28 @@ owned by exactly one doctrine SSoT; the overview only names and links them.
 | **Baked service binaries + only `registry:2`** — every third-party *service* binary except the Registry provider, explicitly including `redis-server`/Sentinel mode and `redis-cli`, is baked into the base container for each architecture on hardware that natively runs it. The sole registry is the separately pinned and preloaded Distribution `registry:2` image; its binary is not baked into `amoebius-base`. The ML **engine payloads** are the other exception — jit-resolved into a `CacheBudget`-bounded cache, never baked or URL-fetched. | [`image_build_doctrine.md` §2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster); [`content_addressing_determinism.md` §4.5](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) |
 | **All amoebius-owned state is repository-contained** — `.build/**` is reproducible/transient/evidentiary, `.data/**` is production runtime/durable state, and `.test_data/**` is marker-owned test state. Test secrets are supplied or generated at run time under the owned test root; no cleartext secret source file is tracked. No system temp/data root, user home, or host-global engine is an amoebius storage backend. | [`repository_layout_doctrine.md` §2.3](../documents/engineering/repository_layout_doctrine.md#23-the-closed-local-state-roots); [`testing_doctrine.md` §3](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down); [`vault_pki_doctrine.md` §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-operators-prompt-automated) |
 | **Version-controlled behavioral source is Haskell only** — Python under `pb/**` is the sole bootstrap exception. Dhall, PureScript, JavaScript, Python outside `pb/**`, shell, Proto, Pulumi, Dockerfiles, manifests, fixtures, checking tools, oracle serializations, mutants, emitted `.tla`/`.cfg`, dependency resolution, enumerations, ledgers, receipts, and run evidence are generated lazily from Haskell under `.build/**`. Independently authored test expectations are Haskell values; serialized forms are generated. | [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md); [`repository_layout_doctrine.md`](../documents/engineering/repository_layout_doctrine.md) |
-| **The one formal obligation is the cross-cluster gateway migration** (both `Planned` and `Failover` branches), modelled as data, **safety + liveness-under-fairness** proven (TLC) and simulated (io-sim) once; its runtime fidelity is bridged by deterministic simulation + trace validation before live; intra-cluster consensus is delegated, not re-proven. | [`gateway_migration_model_doctrine.md`](../documents/engineering/gateway_migration_model_doctrine.md); [`formal_model_doctrine.md`](../documents/engineering/formal_model_doctrine.md); [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md) |
+| **The one formal obligation is the cross-cluster gateway migration** (both `Planned` and `Failover` branches), modelled as data, **safety + liveness-under-fairness** proven (TLC) and simulated (io-sim) once; its runtime fidelity is bridged by deterministic simulation + trace validation before live; intra-cluster consensus is delegated, not re-proven. The model is owned by Phase 75; the formal checkers are parked in the later-phases proof-assistant track. | [`gateway_migration_model_doctrine.md`](../documents/engineering/gateway_migration_model_doctrine.md); [`formal_model_doctrine.md`](../documents/engineering/formal_model_doctrine.md); [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md) |
 | **A test generates the enumeration, authors the expectation** — the spec generates the *enumeration* of surfaces requiring coverage; the operator authors the *expectations* asserted against them; an uncovered surface emits an UNVERIFIED `coverage` ledger row, never a silent pass. | [`testing_doctrine.md` §9 — Derivation: generated enumeration, authored expectation](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation); [`chaos_failover_doctrine.md` §11.2](../documents/engineering/chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation) |
 | **An effectful gate cannot pass on a replay or self-report.** A post-start challenge must appear in an authenticated observation outside the subject; security gates pair authority-minted own-scope success with foreign-scope denial, zero forbidden effect, and direct-bypass probes. | [`testing_spoof_resistance.md` §12](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence) |
 | **Backups are write-only for amoebius; deletion/retention is out of band** — a backup names a bounded medium in a distinct failure domain, is written under a put-only credential (no delete/expire/lifecycle action is representable), is append-only/WORM where declared, and its restore **seeds a fresh coordinate, never overwrites** live bytes; a `ColdSeedFromBackup` down-primary secondary takes the gateway only after proven freshness — consistency over availability. | [`backup_recovery_doctrine.md`](../documents/engineering/backup_recovery_doctrine.md); [`storage_lifecycle_doctrine.md` §7](../documents/engineering/storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation); [`consistency_pacelc_doctrine.md` §3.7](../documents/engineering/consistency_pacelc_doctrine.md#37-the-cold-dr-seed-recovery-source) |
 | **amoebius depends on no seed project, and no seed depends on amoebius.** The five seeds are reference implementations whose pure structures amoebius re-derives; a re-derivation is admissible only once the guarantee amoebius adds has been named. | [`lift_and_compose_doctrine.md`](../documents/engineering/lift_and_compose_doctrine.md) |
 | **Every artifact that is not Haskell source is generated from Haskell types**, under a closed exception list admitting only what must exist before the generator can run. Each is named by a content address that folds in its own rendered text, charged against a grant, and reaped when its region ends. | [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md), [`jit_budget_doctrine.md`](../documents/engineering/jit_budget_doctrine.md) |
-| **A domain or a hardware substrate joins by satisfying one contract** — a component in each of the five calculi and the four law families — and its conformance gate is generated from its own declaration rather than authored beside it, so an author cannot weaken it. | [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) |
+| **A domain or a hardware substrate joins by satisfying one contract** — one `ExtensionSpec` record linked into the shipped binary, a component in each of the five calculi, and the four law families — and its conformance gate is generated from its own declaration rather than authored beside it, so an author cannot weaken it. The five calculi remain the target design; the artifact, budget, evidence, and composition libraries are parked under `LTD-LIB-001` pending Phase 9's decision ([legacy register §5](legacy_tracking_for_deletion.md#5-dsl-divergence)). | [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md); [DL-0002](../documents/decision_log.md#dl-0002--one-extensionspec-record-is-the-extension-seam) |
 | **Teardown is a type obligation, not an activity.** Provisioning returns a handle and an obligation together, and the obligation is specified to be linear, so a workflow ending while it still holds one is rejected at compile time. | [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md) |
 | **An insecure state has no inhabitant.** Attestation is a type index, a tenant learned at run time is skolemised into a fresh type variable, an absent scope is a missing field rather than a widened query, and every derived keyspace is rendered injectively. | [`extension_conformance_security.md`](../documents/engineering/extension_conformance_security.md) |
+| **Privilege separation.** The agent identity has no sudoers entry and cannot read the receipt-issuer key; `Dispatch` never escalates; gate acceptance, receipt issuance, reseed, reset, govern, and demo are human commands from a password-sudo account, and the supervisor refuses when agent environment markers are present. | [`AGENTS.md` — Host precondition](../AGENTS.md#host-precondition); [DL-0010](../documents/decision_log.md#dl-0010--host-precondition-for-agent-sessions) |
+| **One transition per human act.** An agent may `preview` and draft but never edits a status line or applies a status patch; `sudo amoebius-validate accept --phase NN` prints the Claim, specification digest, kill table, spine outcome, and corpus delta, then signs and applies exactly one phase's patch. | [`gate_runner_doctrine.md` §6 — commands, generations, and receipts](../documents/engineering/gate_runner_doctrine.md#6-commands-generations-and-receipts); [DL-0009](../documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition) |
+| **Verifier binding.** Every gate compares the tree's verifier digest with the accepted seed's and refuses `KERNEL-VERIFIER-DIVERGED`; a generation identifier is the verifier's content address, and a reseed archives the prior store under a decision identifier and never deletes it. | [`gate_runner_doctrine.md` §5 — preflight refusals and predecessor chaining](../documents/engineering/gate_runner_doctrine.md#5-preflight-refusals-and-predecessor-chaining); [§6](../documents/engineering/gate_runner_doctrine.md#6-commands-generations-and-receipts) |
+| **Kernel budget.** The validator — the gate-specification library, the runner, and the retained custody core — is at most 14,000 lines and never above the last accepted count, with no conditional compilation, no `*Run*` module, no phase-number literal, and one phase table; no other stanza exposes a validator module. | [`AGENTS.md` — Kernel budget](../AGENTS.md#kernel-budget); [`gate_runner_doctrine.md` §3 — the runner](../documents/engineering/gate_runner_doctrine.md#3-the-runner) |
+| **Subjects are shipped code.** Every gate subject and every mutated module belongs to exactly one library stanza inside the transitive closure of `executable amoebius`, which links no validator module; a validator-only corpus never counts as product coverage, and `SUBJECT-NOT-SHIPPED` refuses a subject outside the closure. | [`gate_runner_doctrine.md` §2 — the gate-specification vocabulary](../documents/engineering/gate_runner_doctrine.md#2-the-gate-specification-vocabulary); [DL-0007](../documents/decision_log.md#dl-0007--certification-generation-2-replaces-the-validation-kernel) |
+| **Runner-held verdicts.** A suite writes bytes; a separate oracle executable with no product or validator dependency prints its ledger from literals in its own source; the runner digests suite output, ledger, and kill table into the receipt. A `PASS` token, a count, or a matching substring is not a verdict. | [`gate_runner_doctrine.md` §4 — runner-held verdicts and the oracle protocol](../documents/engineering/gate_runner_doctrine.md#4-runner-held-verdicts-and-the-oracle-protocol) |
+| **Generated mutants only.** No authored mutant seam exists under `src/`, `app/`, or `test/`; the runner generates mutants from a fixed operator catalogue with deterministic sampling, applies them to copies beneath `.build/runs/**`, and rebuilds serially; a stillborn mutant is excluded, not counted. | [`gate_runner_doctrine.md` §3 — the runner](../documents/engineering/gate_runner_doctrine.md#3-the-runner); [`development_plan_gate_integrity.md` §M.3](development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject) |
+| **The spine runs through the shipped binary.** Every non-seed `GateSpec` carries a `BinaryFact` — a public `amoebius` command, a runner-perturbed input, and runner-digested outputs; the `DSL_BARRIER` specification carries a `SpineFact` whose rendered `.dhall` the runner rewrites after the run starts. | [`gate_runner_doctrine.md` §2 — the gate-specification vocabulary](../documents/engineering/gate_runner_doctrine.md#2-the-gate-specification-vocabulary); [§3](../documents/engineering/gate_runner_doctrine.md#3-the-runner) |
+| **Corpus and coverage.** Examples are Haskell values in `Amoebius.Dsl.Examples` linked by the executable, organised as distinguishing pairs with expected manifest deltas or negatives with an exact tag and stage; oracle rows are authored before the stage exists, and `AuthoredFieldUnconsumed` refuses a field that reaches no byte. | [`gate_runner_doctrine.md` §7 — the example corpus and the hardware rule](../documents/engineering/gate_runner_doctrine.md#7-the-example-corpus-and-the-hardware-rule); [`testing_doctrine.md` §9](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) |
+| **Hardware consumes the barrier.** Every hardware specification binds the `DSL_BARRIER` receipt digest and runs a corpus command through its own subject; hardware evidence that consumes no barrier example is refused as `HARDWARE-BEFORE-BARRIER`. | [`gate_runner_doctrine.md` §7 — the example corpus and the hardware rule](../documents/engineering/gate_runner_doctrine.md#7-the-example-corpus-and-the-hardware-rule); [`AGENTS.md` — Validation outcome and ordering](../AGENTS.md#validation-outcome-and-ordering) |
+| **Chain on closure.** Predecessor binding is the digest of the predecessor's product closure plus the verifier and governance digests; an edit outside that closure keeps the receipt, an edit inside it reopens the predecessor, and a refresh is an identity projection that cannot weaken a specification. | [`gate_runner_doctrine.md` §5 — preflight refusals and predecessor chaining](../documents/engineering/gate_runner_doctrine.md#5-preflight-refusals-and-predecessor-chaining); [`development_plan_gate_integrity.md` §M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass) |
+| **Doctrine freeze and honesty.** Every governed document, `AGENTS.md`, the plan rulebooks, and the legacy register are frozen behind baseline rows `(path, digest, DecisionId)`; a frozen body changes only with a decision-log entry in the same change, and a paragraph naming a module or path is observed, historical, or specification voice. | [`documentation_standards.md` §17 — the doctrine freeze](../documents/documentation_standards.md#17-the-doctrine-freeze); [§6 — honesty](../documents/documentation_standards.md#6-honesty-the-proventestedassumed-discipline); [`AGENTS.md` — Doctrine freeze](../AGENTS.md#doctrine-freeze) |
+| **Typed reset cause.** A reset is receipt-bearing and carries `ResetCause { validatorGap, productGap }`, where the product gap is a legacy identifier with an owning phase; `NoProductGap` is refused while any `LTD-DSL` row is open, and the phase and gate tables at or below the frontier are digested into the generation record. | [`gate_runner_doctrine.md` §6 — commands, generations, and receipts](../documents/engineering/gate_runner_doctrine.md#6-commands-generations-and-receipts); [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice) |
 
 The standard service set behind these capabilities — Registry (Distribution `registry:2`) · MinIO · Vault · Pulsar ·
 Redis/Sentinel · Prometheus/Grafana · Percona/Patroni Postgres + pgAdmin · Envoy/Gateway-API · Keycloak · LoadBalancer — is
@@ -203,111 +220,52 @@ sole record of which phase is where
 ([development_plan_standards.md §C](development_plan_standards.md#c-status-vocabulary)); a status restated
 here goes stale the moment a gate runs, which is what happened to the sentence this replaces.
 
-The DSL is designed to be validated and **simulated per phase**, never as a monolithic pre-implementation: each pre-cluster
-phase discharges an in-process Register-1/2 gate and each live-band phase a Register-3 gate before the next
-opens. A bounded DSL decision/protocol tranche is model-checked in
-[Phase 18](phase_18_dsl_formal_model.md), and the actual reconcile decision core is replayed under
-`IOSim`/`IOSimPOR` in [Phase 19](phase_19_reconcile_core_simulation.md), both inside the DSL-validation band.
-The **Register-2.5 deterministic-simulation activity is never a phase gate**
+The DSL is designed to be validated and **simulated per phase**, never as a monolithic pre-implementation: each
+slice phase discharges an in-process Register-2 gate against a runner-materialized fake boundary, and each
+live-band phase a Register-3 gate, before the next opens. The formal checkers are parked in the later-phases
+proof-assistant track; the gateway model is owned by Phase 75. The **Register-2.5 deterministic-simulation
+activity is never a phase gate**
 ([development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)); where a
-live-band phase eventually runs it, the activity may compare built code with the independently validated
-Phase-19 model only after Phase 19 has passed its qualified gate. Its current status and evidence belong to the [tracker](README.md#phase-overview).
-Front-loading a *design* model ahead of its runtime is legitimate only while correspondence and runtime
-fidelity remain explicitly unverified
+live-band phase eventually runs it, the activity may compare built code with the gateway model only after
+[Phase 75](phase_75_gateway_migration_drills.md) has passed its qualified gate. Its status and evidence belong
+to the [tracker](README.md#phase-overview). Front-loading a *design* model ahead of its runtime is legitimate
+only while correspondence and runtime fidelity remain explicitly unverified
 ([development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed), [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md)).
 
-### Hardware-free foundations and formal semantics
+The phase domain is 0 through 9 and 50 through 95; the ordinals between are a reserved gap recorded by
+[DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice). The four ordering
+barriers are named by role: `DSL_BARRIER` is Phase 9, `BOOTSTRAP_HANDOFF` is Phase 50, `HOST_ENSURE` is Phase
+51, and `FIRST_HARDWARE` is Phase 52; the compiled phase-identity table, not this index, resolves each role to
+its ordinal.
+
+### Hardware-free slices and the barrier
 
 *Foundations (substrate `none`):*
-- **Phase 0 — Documentation, source-policy, and validation-trust suite (not DSL validation)** → [phase_0](phase_00_documentation_suite.md).
+- **Phase 0 — Documentation, governance, and the validation seed** → [phase_0](phase_00_documentation_suite.md).
 - **Phase 1 — Haskell toolchain and probe-source closure** → [phase_1](phase_01_toolchain_spike.md).
-- **Phase 2 — Repository layout conformance and de-phased naming** → [phase_2](phase_02_repository_layout_conformance.md).
+- **Phase 2 — Repository layout conformance and source closure** → [phase_2](phase_02_repository_layout_conformance.md).
 
-*The algebra — the five calculi and the two indices (substrate `none`, Register 1):*
-- **Phase 3 — The artifact calculus** → [phase_3](phase_03_artifact_calculus.md).
-- **Phase 4 — The budget calculus** → [phase_4](phase_04_budget_calculus.md).
-- **Phase 5 — The lift calculus** → [phase_5](phase_05_lift_calculus.md).
-- **Phase 6 — The workflow calculus** → [phase_6](phase_06_workflow_calculus.md).
-- **Phase 7 — The evidence calculus** → [phase_7](phase_07_evidence_calculus.md).
-- **Phase 8 — Scope index / scoped identity kernel** (`Amoebius.Scope.Index` and `Amoebius.Scope.Flow`) → [phase_8](phase_08_scope_index.md).
-- **Phase 9 — Capacity core fold + topology relation** → [phase_9](phase_09_resource_index.md).
-- **Phase 10 — Composition across the five calculi** → [phase_10](phase_10_calculus_composition.md).
+*The typed DSL slices — one growing corpus, every stage typed and consumed (substrate `none`, Register 2):*
+- **Phase 3 — The typed spine from one spec to fake-applied bytes** → [phase_3](phase_03_typed_spine.md).
+- **Phase 4 — Witness-driven manifests, capacity, and storage** → [phase_4](phase_04_witness_manifests_capacity_storage.md).
+- **Phase 5 — Substrates, lanes, rke2 quorum, and the image recipe** → [phase_5](phase_05_substrates_lanes_image_recipe.md).
+- **Phase 6 — Extension admission and attested scope** → [phase_6](phase_06_extension_admission_attested_scope.md).
+- **Phase 7 — Child clusters and obligation-indexed teardown** → [phase_7](phase_07_child_clusters_obligation_teardown.md).
+- **Phase 8 — UI program language, binding, and plans** → [phase_8](phase_08_ui_program_language_binding.md).
 
-*The proof stack — the checkers amoebius owns (substrate `none`, Registers 1–2):*
-- **Phase 11 — Formal-model EDSL (`Model`/`interpret`/`emitTLA`)**, consuming the Phase-10 indexed composition through a dedicated formal projection → [phase_11](phase_11_formal_model_kernel.md).
-- **Phase 12 — The amoebius explicit-state checker**, independently enumerating the shared `Model` and producing replayable bound/model-bound verdicts → [phase_12](phase_12_explicit_state_checker.md).
-- **Phase 13 — The amoebius symbolic checker**, owning QF_LIA/boolean induction obligations while injecting a dynamically resolved SMT decision procedure → [phase_13](phase_13_symbolic_checker.md).
-- **Phase 14 — The amoebius refinement checker**, targeted to compile bounded-fragment Haskell functions and
-  check preservation plus implication to invariant expressions projected from safe Phase-11 `Model` values
-  → [phase_14](phase_14_refinement_checker.md).
-- **Phase 15 — The compile-fail fixture harness**, targeted to bind Haskell-authored legal/illegal twins to
-  independently specified structured GHC rejection reasons → [phase_15](phase_15_compile_fail_harness.md).
-- **Phase 16 — Deterministic-simulation substrate**, targeted to exercise one polymorphic reference
-  reconciler through injected-client and `IOSim` interpreters with generated controls; modeled fidelity
-  remains outside the claim → [phase_16](phase_16_deterministic_sim_substrate.md).
-- **Phase 17 — Gateway-migration model (both branches)**, targeted to compare independently read bounded
-  model semantics and generated model-checker projections; runtime fidelity remains UNVERIFIED →
-  [phase_17](phase_17_gateway_migration_model.md).
-- **Phase 18 — DSL formal model**, targeted to join decoder, capacity, render, and protocol readings to
-  bounded Haskell models; runtime fidelity remains UNVERIFIED → [phase_18](phase_18_dsl_formal_model.md).
-- **Phase 19 — Reconcile decision core under deterministic simulation**, targeted to compare a Haskell
-  planner with independently authored modeled schedules; live fidelity remains UNVERIFIED →
-  [phase_19](phase_19_reconcile_core_simulation.md).
+*The DSL barrier — the `DSL_BARRIER` role (substrate `none`, Register 2):*
+- **Phase 9 — The DSL barrier through the shipped binary** (the `DSL_BARRIER` role) → [phase_9](phase_09_dsl_barrier.md).
 
-*The extension contract (substrate `none`, Register 1):*
-- **Phase 20 — The extension declaration**, targeted to define one opaque same-scope Haskell value and
-  independently recomputed content identity; law verdicts and runtime fidelity remain outside the claim →
-  [phase_20](phase_20_extension_declaration.md).
-- **Phase 21 — The per-extension laws L1–L5**, targeted to evaluate separately authored Haskell controls,
-  paired defects, generated observations, and changed-subject mutants; runtime conformance remains UNVERIFIED
-  → [phase_21](phase_21_extension_laws_per_extension.md).
-- **Phase 22 — The compositional laws C1–C7**, targeted to evaluate normalized Haskell composites against
-  independent expectations and changed-subject mutants; universal and runtime claims remain UNVERIFIED →
-  [phase_22](phase_22_extension_laws_compositional.md).
-- **Phase 23 — The security laws S1–S6**, targeted to exercise Haskell scope and authority boundaries;
-  cryptographic, timing, persistence, composition, and runtime fidelity remain UNVERIFIED →
-  [phase_23](phase_23_extension_security_laws.md).
-- **Phase 24 — The generated conformance gate**, targeted to derive a closed Haskell suite plan and opaque
-  pure-link verdict; execution, observer authenticity, proof, and runtime fidelity remain UNVERIFIED →
-  [phase_24](phase_24_conformance_gate_generator.md).
-
-### Generated DSL surfaces and integrated validation
-
-*The generative surface — every artifact class becomes a recipe (substrate `none`, Registers 1–2):*
-- **Phase 25 — Haskell-derived Dhall projection and smart-constructor prelude** → [phase_25](phase_25_dhall_schema_generation.md).
-- **Phase 26 — Haskell protocol declarations, GADT-indexed IR, and total decoder** → [phase_26](phase_26_gadt_decode_ir.md).
-- **Phase 27 — Illegal-state corpus + validation-locus ledger** → [phase_27](phase_27_illegal_state_covering.md).
-- **Phase 28 — Logical→physical storage geometry folds** → [phase_28](phase_28_storage_geometry_folds.md).
-- **Phase 29 — Execution-epoch + scheduler + accelerator + provider-root folds** → [phase_29](phase_29_execution_accelerator_folds.md).
-- **Phase 30 — Capability union + representational bind** → [phase_30](phase_30_capability_bind.md).
-- **Phase 31 — Whole-deployment provision seal + expansion** → [phase_31](phase_31_provision_seal.md).
-- **Phase 32 — InferenceEngine capability + accelerator provision** → [phase_32](phase_32_inference_accelerator_provision.md).
-- **Phase 33 — Pure `renderAll` + rendered-artifact oracles** → [phase_33](phase_33_render_manifest_oracles.md).
-- **Phase 34 — chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker** → [phase_34](phase_34_chain_kernel_boundary.md).
-- **Phase 35 — The amoebius image recipe** → [phase_35](phase_35_image_recipe_generation.md).
-- **Phase 36 — The closed transaction vocabulary** → [phase_36](phase_36_transaction_vocabulary.md).
-- **Phase 37 — Bounded UI-program schema** → [phase_37](phase_37_ui_program_schema.md).
-- **Phase 38 — UI authorization kernel** → [phase_38](phase_38_ui_authorization_kernel.md).
-- **Phase 39 — UI effect binding** → [phase_39](phase_39_ui_effect_binding.md).
-- **Phase 40 — UI plan compiler** → [phase_40](phase_40_ui_plan_compiler.md).
-- **Phase 41 — Offline language and paired plans** → [phase_41](phase_41_offline_language_plan.md).
-- **Phase 42 — Haskell browser-interpreter semantics and projection** → [phase_42](phase_42_ui_browser_interpreter.md).
-- **Phase 43 — Haskell UI-server boundary** → [phase_43](phase_43_ui_server_boundary.md).
-- **Phase 44 — Hardware-free Haskell UI composition** → [phase_44](phase_44_ui_local_composition.md).
-- **Phase 45 — Haskell offline-state semantics and runtime projection** → [phase_45](phase_45_encrypted_browser_runtime.md).
-- **Phase 46 — Haskell-generated browser contracts and bundle** → [phase_46](phase_46_ui_contract_generation.md).
-- **Phase 47 — Foreign-source generator closure, checking tools, and mutants** → [phase_47](phase_47_tool_and_mutant_generation.md).
-
-*Test-as-workflow (substrate `none`, Register 1):*
-- **Phase 48 — The test-workflow algebra** → [phase_48](phase_48_test_workflow_algebra.md).
-- **Phase 49 — No-hardware DSL gate barrier and self-referential gate suite** → [phase_49](phase_49_self_referential_gates.md).
+*Reserved — ordinals 10 through 49:* no phase occupies these ordinals, no phase file or tracker row exists for
+them, and the gap is not a promise of later insertion
+([DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice)).
 
 ### Host realization, live platform, and domain instances
 
 *Pre-binary and host — the first machine (Registers 2–3):*
-- **Phase 50 — Bounded `pb` bootstrap and Haskell handoff** → [phase_50](phase_50_host_assert_cli.md).
-- **Phase 51 — The host-ensure kernel** → [phase_51](phase_51_host_ensure_kernel.md).
-- **Phase 52 — Linux: sudoless Docker and the native image** → [phase_52](phase_52_linux_engine_bringup.md).
+- **Phase 50 — Bounded `pb` bootstrap and Haskell handoff** (the `BOOTSTRAP_HANDOFF` role) → [phase_50](phase_50_host_assert_cli.md).
+- **Phase 51 — The host-ensure kernel** (the `HOST_ENSURE` role) → [phase_51](phase_51_host_ensure_kernel.md).
+- **Phase 52 — Linux: sudoless Docker and the native image** (the `FIRST_HARDWARE` role) → [phase_52](phase_52_linux_engine_bringup.md).
 - **Phase 53 — Apple: Homebrew, Colima, and the native image** → [phase_53](phase_53_apple_engine_bringup.md).
 - **Phase 54 — Windows: WSL2 and the lifted Linux engine** → [phase_54](phase_54_windows_engine_bringup.md).
 - **Phase 55 — Haskell substrate coordinator and single kind cluster** → [phase_55](phase_55_bootstrap_coordinator_kind.md).
@@ -360,15 +318,20 @@ fidelity remain explicitly unverified
 
 ## 5. Reset baseline and live status authority
 
-- **Implementation footprints do not imply validation.** The repository contains Haskell plus tracked
-  Python, PureScript, Dhall, protocol, test, gate, mutant, and live-harness violations. Except for the bounded
-  `pb/**` bootstrap, every non-Haskell behavioral source is condemned migration input.
-  Typed Haskell legacy bindings must account bijectively for every observed violation until their numerical
-  owners close them. [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) explains those
-  bindings to readers and supplies no IDs, owners, predicates, counts, or verdict inputs;
+- **Implementation footprints do not imply validation.** Except for the bounded `pb/**` bootstrap, every
+  non-Haskell behavioral source is migration input owed to a numbered owner, and typed Haskell legacy
+  bindings account bijectively for each such violation until that owner closes it.
+  [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) explains those bindings to readers
+  and supplies no IDs, owners, predicates, counts, or verdict inputs;
   [system_components.md](system_components.md) remains target-only.
-- **Every prior result is invalidated.** Earlier gates used repository-resident enumeration and ledgers, wrote run
-  evidence beneath `DEVELOPMENT_PLAN/`, or depended on tracked resolver output and host-specific paths.
+- **Certification generation 2.** A generation identifier is the content address of the verifier, seeded by
+  the human under [DL-0007](../documents/decision_log.md#dl-0007--certification-generation-2-replaces-the-validation-kernel);
+  a gate whose verifier digest differs from the seed's refuses `KERNEL-VERIFIER-DIVERGED`. Generation-1 stores
+  are archived, never deleted, and supply no authority; a generation-1 receipt is not evidence for any phase.
+- **The frontier is Phase 0.** Every other phase is blocked behind it. The frontier advances by exactly one
+  phase per human `accept`
+  ([DL-0009](../documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition)); an
+  agent's `preview` runs the complete gate and mints nothing, and no agent edits a status line.
 - **Status posture:** the authoritative live per-phase projection lives only in [README.md](README.md) and its
   mechanically joined phase/sprint fields. This summary cannot restate or promote it.
 - **Artifact posture:** only Haskell behavioral source and the bounded Python `pb/**` bootstrap may be
@@ -378,10 +341,12 @@ fidelity remain explicitly unverified
   bytecode and caches must be redirected beneath `.build/**`; there is no source-adjacent cache exception.
 - **Toolchain posture:** dependencies and tools resolve dynamically from authored compatibility requirements.
   Lock/freeze files, resolved paths, and hard-coded library/package SHA values are generated and untracked.
-- **Evidence posture:** a gate writes to `.build/runs/` and an external immutable evidence store. Existing
-  ledgers and receipts are historical migration material, not current completion evidence.
-- **Hardware posture:** no hardware validation may begin until the hardware-free DSL gate barrier and
-  every preceding redesigned phase gate pass.
+- **Evidence posture:** a gate writes beneath `.build/runs/**` and the receipt store of the current generation;
+  a receipt carries the verifier digest, the governance digest, the kill table, and the status postimage
+  ([`gate_runner_doctrine.md` §6](../documents/engineering/gate_runner_doctrine.md#6-commands-generations-and-receipts)).
+- **Hardware posture:** no hardware validation may begin until the DSL barrier (Phase 9) and every preceding
+  gate pass; each hardware specification binds the barrier's receipt digest and runs a corpus command through
+  its own subject.
 
 ---
 
@@ -392,5 +357,7 @@ fidelity remain explicitly unverified
 - [substrates.md](substrates.md) — the substrate registry and per-phase substrate map
 - [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) — the reader-facing explanation of typed Haskell migration bindings as prodbox/infernix/jitML converge
 - [later_phases.md](later_phases.md) — the in-scope, high-numbered phases not yet given their own document
+- [Decision log](../documents/decision_log.md) — the entries the cycle-breaking invariants cite
+- [Gate-runner doctrine](../documents/engineering/gate_runner_doctrine.md) — the runner, the gate-specification vocabulary, and the human commands
 - [Engineering Doctrine Index](../documents/engineering/README.md) — the doctrine SSoTs this overview summarizes and links
 - [Documentation Standards](../documents/documentation_standards.md) — the header/link mechanics this inherits

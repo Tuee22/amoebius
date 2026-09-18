@@ -774,7 +774,7 @@ ProviderWorkerScalingPolicy account nodeClasses quota = -- opaque refinement
     ranges over agents; the fold re-runs
     ([§4](./resource_capacity_folds.md#4-the-total-fold-fits-carve-place-and-the-nesting), below) against
     the grown *agent* set only.
-  - The pure policy/reserve fold is Phase 9, but live rke2-agent acquisition, snapshot admission, join, and
+  - The pure policy/reserve fold is Phase 4, but live rke2-agent acquisition, snapshot admission, join, and
     enforcement remain an explicitly unassigned Phase-N gate.
   - Phase 79 enacts only the distinct managed-provider-worker arm; it does not silently provide rke2.
   - The closed-union quorum shape is type-foreclosed and owned by cluster topology, not claimed here.

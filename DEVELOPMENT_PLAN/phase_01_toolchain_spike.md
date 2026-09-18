@@ -1,22 +1,18 @@
 # Phase 1: Haskell toolchain and probe-source closure
 
-> **Purpose**: Consume the explicit non-numbered `GenesisTrust` root, authenticate and reproduce the contained
-> Haskell toolchain acquisition, derive a compatible dependency graph from its pinned, network-independent inputs,
-> and build the required decoder, simulator, resolver, browser-contract, and protocol-codegen probes
-> without committing resolution output, integrity pins, generated code, or host-specific paths.
-> **Read this if**: phase 1 is next in the queue, or a later phase depends on what its gate establishes.
+> **Purpose**: Consume the explicit non-numbered `GenesisTrust` root, reproduce the contained Haskell toolchain acquisition, report its digests through the shipped binary, and build the retained probe set from pinned network-independent inputs without tracking resolution output or host-specific paths.
+> **Read this if**: Phase 1 is next in the queue, or a later phase depends on what its gate establishes.
 
-This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
-command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
-status is owned by [the tracker](README.md) and the Phase Status block below.
+Phase 1 specifies the first reproducibility claim of the plan. The toolchain Phase 0 assumed is acquired
+twice from the pinned files, and the shipped `amoebius` binary reports digests equal to the pins spelled once
+in product code. Its predecessor is [Phase 0](phase_00_documentation_suite.md).
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, documents/engineering/content_addressing_determinism.md, documents/engineering/pulsar_client_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, documents/engineering/content_addressing_determinism.md, documents/engineering/gate_runner_doctrine.md, documents/engineering/pulsar_client_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -42,561 +38,368 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
-
-Gate execution remains blocked by the qualified Phase-0 predecessor and its compatible evidence chain.
+The contract is reopened under [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) by
+[DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice): the subject moves
+from the validator into product code. Under §N step 3, every generation-1 receipt for this phase is
+incompatible with certification generation 2 and supplies no authority. Gate execution is held shut by the
+Phase-0 predecessor receipt in certification generation 2.
 
 ## Phase Summary
 
-This phase specifies a Haskell target capability; it does not report a current implementation or
-result. `GenesisTrust` is the explicit irreducible `BootstrapRoot`, not a numbered provision and not a claim
-Phase 0 can prove with the compiler that built it. It supplies only the narrow local-custody file and
-compile-time/platform facts defined by Phase 0. This phase independently authenticates the pinned files against
-its publisher policy, proves the actual compiler/package-tool executable bytes, derivation, loader and host
-closure, and reproduces the contained compiler/package-tool acquisition and the
-source-bound validator build, records the executable/dependency identities, and derives a compatible dependency
-graph. It then builds the required decoder,
-simulator, resolver, browser-contract, and protocol-codegen probes without committing resolution
-output, integrity pins, generated code, or host-specific paths.
+Phase 1 moves the toolchain claim out of the validator and into the product. `Amoebius.Toolchain.Pins` spells
+the seven `GenesisTrust` pins and the compiler and package-tool identities once; `amoebius toolchain-report`
+prints the digests of what it observes; the independent oracle restates the pins from literals and compares.
+Two contained acquisitions from the same pinned files must agree on executable identity and elaborated plan.
 
-The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
-`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
-tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
-code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
-`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
-evidence contract remain UNRESOLVED and block validation.
+The probe set is retained. The in-process decoder, the deterministic simulator, the resolver dependencies, the
+browser-contract generator, and the maintained fork with its codegen link into the shipped binary and are
+exercised by the same report. No resolution output, package-integrity pin, generated code, or host-specific
+path is tracked; every derived product is rendered beneath `.build/**` during the run.
 
-This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
-behavior only. It cannot use network, host, hardware, live-service, or cluster observations to make its claim pass; every build input must already be present through the authenticated, network-independent
-toolchain input. Its `LTD-BOOT-001` closure establishes repeatable acquisition from `GenesisTrust`; it does not
-retroactively provide or remove the root Phase 0 assumed.
+`GenesisTrust` remains the explicit assumption. Agreement between two acquisitions closes `LTD-BOOT-001`; it
+does not turn the root into a theorem, and it does not authenticate the publisher keyring the signature check
+consults.
 
-**Phase scope:** Target capability only — authenticate and reproduce the toolchain acquisition derived from
-`GenesisTrust`, bind the source-built executable and elaborated dependency graph, and build the
-required decoder, simulator, resolver, browser-contract, and protocol-codegen probes without
-committing resolution output, integrity pins, generated code, or host-specific paths. NOT VALIDATED.
-
-**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
-
-**Lane:** `none`.
-
-**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
-
+**Phase scope:** One cohesive claim — the shipped binary's toolchain report equals the product-side pins for two contained acquisitions, and the retained probe set builds and executes offline; it splits if a claim needs compiler-wide source semantics, product behaviour, or a host.
+**Substrate:** `none`
+**Lane:** `none`
+**Register:** 2
 **Depends on:** [Phase 0](phase_00_documentation_suite.md)
+**Forward-deferred:** compiler-backed source closure — [Phase 2](phase_02_repository_layout_conformance.md) `repository_layout_conformance` / `LTD-SRC-000`; the re-run of every hardware-free gate through the shipped binary — [Phase 9](phase_09_dsl_barrier.md)
 **Gate:** `pb validate phase 01`; see [Gate integrity](#gate-integrity).
+
+### Gate specification
+
+```gate-spec
+capability: toolchain_spike
+subjects:
+  - Amoebius.Toolchain.Pins
+  - Amoebius.Toolchain.Acquire
+  - Amoebius.Toolchain.Probe
+  - Amoebius.Toolchain.Resolve
+  - Amoebius.Toolchain.Provenance
+  - Amoebius.Toolchain.Report
+suite: toolchain-suite
+oracle: oracle-toolchain
+positives: [pinned-acquisition, second-acquisition, probe-decode, probe-sim, probe-deps]
+negatives: [MistypedDecode, PerturbedSchedule, MissingDependency, MutableIdentity, TrackedProbeInput, TopLevelVendor, TrackedResolutionOutput]
+mutants: { perModule: 8, perGateCap: 40, killRatio: 0.6 }
+binaryFact:
+  command: amoebius toolchain-report
+  perturbation: archive-copy-to-nonce
+  outputs: [toolchain-report]
+substrate: HardwareFree
+```
 
 ## Gate integrity
 
-**Contract check**: BOUND — the replacement certification generation, protected accepted baseline,
-authenticated phase receipt, and current compatibility closure are Haskell-owned inputs. Execution evidence
-remains phase-local and cannot be supplied by this prose.
+**Contract check**: BOUND — the gate specification above is the compiled value the runner executes; the
+documentation checker refuses a block that differs from it. Execution evidence remains phase-local.
 
 | Key | Contract |
 |---|---|
-| `Claim` | From `GenesisTrust` and its exact local cache, authenticate the signed GHC and Cabal checksum manifests, check archive membership digests, bind the actual GHC/Cabal process identities, derive the final dependency graph twice offline, and build and execute the representative probe set without tracked resolution output or host-specific paths. |
-| `Subject` | The package-hidden acquired supervisor in `Amoebius.Validation.ToolchainSpikeRun.Internal`, the public refusal-safe source diagnostic, and the exact probe executables declared by `probe/probe.cabal`. |
-| `Command` | Future public spelling is exactly `pb validate phase 01`; before `BOOTSTRAP_HANDOFF`, the gate invokes the exact absolute source-bound Haskell executable directly. Every Cabal child carries `--offline` and `--jobs=1`, and the acquired GHC path is explicit. |
-| `Oracle` | `test/validation-kernel/ToolchainSpikeRunOracle.hs` owns the independent source-policy cases and `test/validation-kernel/ToolchainAcquisitionOracle.hs` owns process, dependency, fixture, simulation, and mutation expectations without importing private evidence constructors. |
-| `Positive controls` | Exact controls are publisher-signature verification, GHC 9.12.4, Cabal 3.16.1.0, two offline source builds, the complete linked dependency probe, the positive Dhall decode, and the unperturbed simulation terminal state `3`. |
-| `Paired negatives` | Exact one-dimension pairs are the mistyped Dhall count, perturbed simulation schedule, missing required dependency, mutable acquisition identity, tracked foreign probe input, top-level vendor reintroduction, and tracked resolution output. |
-| `Mutants` | Haskell-declared mutations remove one required dependency, change the expected terminal state, admit a mutable identity, and reintroduce each owned source-debt family; each carries an applied-change witness, exact refusal code, and unaffected-control observation. |
-| `Discovery` | Runtime-discovered probe executables and elaborated dependency names must equal the independent closed expected sets in both directions; empty, duplicate, missing, and extra discovery refuse. |
-| `Challenge` | After both builds start, execute the positive and minimally changed negative fixtures from fresh run-local paths and require the independent stdout/exit predicates to distinguish them. |
-| `Observer` | The Haskell supervisor captures process path, argv, exit, bounded stdout/stderr digest, executable digest, signature fingerprint, plan digest, and probe-output digest; self-reported success without the independently expected output refuses. |
-| `Authority/bypass` | Network use, `pb`, unbounded compiler concurrency, PATH-selected compiler substitution, mutable refs, tracked generated behavior, and accepting a failed build are forbidden and have explicit Haskell negatives. Cabal's content-addressed user store is a non-authoritative performance cache: exact run-local archive pins, fresh component builds, executable bytes, and executed outputs remain mandatory regardless of cache hits. |
-| `Freshness` | Both build roots and all fixtures are created after the opening snapshot, prior work roots are rejected or removed before acquisition, source opening and closing identities must match, and a prior candidate cannot substitute for either build. |
-| `Qualification` | A fixed Haskell sabotage corpus independently proves that the harness rejects wrong signature fingerprint, changed archive digest, missing dependency, wrong terminal state, foreign tracked probe input, top-level vendor input, and committed resolution output while the clean control remains green. |
-| `Cleanroom` | Generated fixtures, applied mutants, plans, transcripts, and build products exist only beneath the candidate's `.build/runs/phase-01/**` roots; the Haskell owner marker bounds cleanup and the final observer reports zero out-of-scope writes and zero temporary residue. |
-| `Legacy closure` | The acquired analyzer reports zero for `LTD-BOOT-001`, `LTD-SRC-007`, and `LTD-SRC-009`; generated reintroduction cases independently redden their exact loci. GenesisTrust remains the explicit bootstrap assumption rather than a legacy binding. |
-| `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 0 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
-| `Residue` | Explicit assumptions are the irreducible GenesisTrust local-custody root, the publisher keyring the signature check is made against — an operator-supplied input that the seed installer transfers but `GenesisTrust` does not yet pin by size and digest, so it is trusted rather than authenticated here — and the ordinary OS execution substrate used to run the independently pinned verifier and archive tools. Phase-2 compiler-wide source semantics and every later runtime, service, hardware, and correspondence claim remain unverified; no Phase-1 claim row is residue. |
-| `Pass criterion` | `qualified-gate-pass`: all eighteen rows above must be execution-derived green in one candidate for one stable source, with exact predecessor receipt and empty mandatory residue; that complete pass alone authorizes the status-only transition. |
+| `Claim` | From `GenesisTrust` and its seven pinned files, two contained acquisitions produce the pinned compiler and package tool, and `amoebius toolchain-report` prints executable, archive, and plan digests equal to the pins the oracle restates. The retained probe set builds offline and serially and prints the oracle's expected outputs. Network, host, product, and source-closure claims are excluded. |
+| `Subject` | The six stage modules named in the gate specification, the `toolchain-report` subcommand in `app/amoebius/Main.hs`, and the maintained fork modules beneath `src/vendor/**`. Every subject is inside the closure of `executable amoebius`. |
+| `Command` | Future public spelling is `pb validate phase 01`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 01`; the human runs `sudo amoebius-validate accept --phase 01`. The runner spawns the shipped `amoebius` binary as a child for `toolchain-report`; every Cabal child carries `--offline` and `--jobs=1`. |
+| `Oracle` | `test/oracle/toolchain/Main.hs` restates the seven pins, the compiler and package-tool identities, the expected probe outputs, and the refusal loci from literals; it depends on no `amoebius` library. |
+| `Positive controls` | Publisher-signature verification of the pinned manifests, two contained acquisitions agreeing on executable identity and plan, the probe set linked and executed, the positive decode, and the unperturbed simulation terminal state. |
+| `Paired negatives` | A mistyped decode case, a perturbed simulation schedule, a missing required dependency, a mutable acquisition identity, a tracked foreign probe input, a top-level vendor reintroduction, and a tracked resolution output — each refused at its exact locus with its twin accepted. |
+| `Mutants` | Runner-generated from the fixed operator catalogue over the six stage modules, eight per module, at most forty per gate, kill ratio at least 0.6; a mutant in `Amoebius.Toolchain.Pins` is killed by the oracle's pin comparison. No authored mutant seam exists in any subject. |
+| `Discovery` | The package description's stanza module map is compared two-way with the subjects; the probe entry points the report exercises equal the oracle's set; empty discovery refuses. |
+| `Challenge` | After the run starts, the runner copies one pinned archive beneath the run root and rewrites one byte to a nonce; the report over that copy must carry the changed digest, and the pin comparison must refuse at exactly that archive. |
+| `Observer` | `ProcessObserver` over the shipped binary, the signature verifier, and every Cabal child; executable identity, argv, environment policy, exit, and complete output are runner-captured. No subject log is trusted. |
+| `Authority/bypass` | Network, `pb`, compiler concurrency above one, a `PATH`-selected compiler, a mutable reference, and tracked generated behaviour are refused by name. `SUBJECT-NOT-SHIPPED` refuses a subject outside the executable's closure; the oracle stanza's hygiene refuses a product dependency. Cabal's user store is a cache, never evidence. |
+| `Freshness` | A unique run root; both acquisition roots absent at acquisition; the verifier digest equals the seed's; opening and closing source identities are equal; no prior candidate can satisfy the nonce. |
+| `Qualification` | The runner-generated mutant matrix over the six stage modules — eight per module, at most forty, kill ratio at least 0.6 — precedes the clean candidate in the same run. |
+| `Cleanroom` | Everything generated lives beneath `.build/runs/phase-01/**` and is absent afterward; the kernel ratchet is recorded. |
+| `Legacy closure` | `LTD-BOOT-001`, `LTD-SRC-007`, and `LTD-SRC-009` close here through the compiled inventory; the due-count for every other identifier is zero. |
+| `Predecessor` | The Phase-0 receipt in certification generation 2, chained by the digest of Phase 0's product closure plus the verifier and governance digests. |
+| `Residue` | `GenesisTrust` remains the explicit local-custody assumption, and the publisher keyring is an operator-supplied input that is trusted rather than authenticated. Phase-2 source closure and every product and hardware claim remain explicit limitations. |
+| `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and the human's `accept` records it. |
 
 ## Resource provision
 
-The resource is the run-local build/fixture root, not a host or live service. The Haskell supervisor creates an
-identity-bound owner marker after preflight; permits candidate writes beneath its two fresh build roots and fixture
-root; forbids network, hardware, package-manager, and authored-source mutation; observes exact
-paths and process results; removes temporary fixtures and applied mutants; and requires zero owned temporary
-residue. Cabal may reuse or install a content-addressed unit in its ordinary user store, but no store path or
-presence is evidence and the independently pinned source archives remain mandatory. Content-addressed candidate
-evidence and the declared build products beneath `.build/**` are retained outputs, not leaked resource residue.
+- **Owner marker:** the source snapshot, the Phase-0 receipt, the unique Phase-1 run root, and the two acquisition-root identities.
+- **Preflight:** the run root and both acquisition roots are absent; the seven pinned files are present at their pinned sizes and digests.
+- **Allowed mutations:** compiler products, extracted toolchains, rendered probe cases, and observations beneath `.build/runs/phase-01/**`.
+- **Forbidden mutations:** network, host package managers, ambient `PATH`, authored source, and any path outside the owner root.
+- **External observer:** the runner's `ProcessObserver` records every child executable, argv, exit, and transcript digest.
+- **Scoped cleanup:** the owner root is removed on every exit path; Cabal's user store is neither created nor removed as evidence.
+- **Zero-owned-residue:** the owner root is absent afterward and no authored path changed.
 
 ## Doctrine adopted
 
-- [`conformance_harness_doctrine.md` §2 — The registers, as amoebius uses them for pre-cluster validation](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)
-  and its [`conformance_harness_doctrine.md` §3 — The load-bearing invariant: rendering never touches live infrastructure](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure):
-  the target is Register 1 and cannot consult live infrastructure, credentials, or a broker.
-- [`dsl_doctrine.md §9 — Toolchain note`](../documents/engineering/dsl_doctrine.md#9-toolchain-note), read
-  with [`dsl_doctrine.md` §5 — The illegal-state-unrepresentable contract](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
-  the target Haskell probe must resolve the in-process decoder dependency dynamically; any foreign decoder
-  input or output is generated lazily beneath `.build/**`, and no compatible set is currently established.
-- [`gateway_migration_model_doctrine.md §4 — Simulate and prove`](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove):
-  the target probe covers the Haskell deterministic-simulation dependency only; it makes no model-checking
-  result or runtime-fidelity claim.
-- [`formal_model_doctrine.md §7 — Prototype validation`](../documents/engineering/formal_model_doctrine.md#7-prototype-validation):
-  any TLA+ representation is a lazy `.build/**` product of a Haskell model value; historical sibling-spike
-  observations are permanently inadmissible as amoebius validation evidence.
-- [`content_addressing_determinism.md` §4.5 — The ML-asset lifecycle: one bounded content-addressed cache, resolved on first miss](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
-  the target Haskell probe must cover the resolver dependencies without tracking materialized engines,
-  models, kernels, solver output, or pins.
+- [`gate_runner_doctrine.md` §2 — the gate-specification vocabulary](../documents/engineering/gate_runner_doctrine.md#2-the-gate-specification-vocabulary) — the `BinaryFact` this phase carries.
+- [`validation_frame_doctrine.md` §2.1 — `GenesisTrust` is an irreducible root](../documents/engineering/validation_frame_doctrine.md#21-genesistrust-is-an-irreducible-root) — the assumption this phase reproduces from but never proves.
+- [`dsl_doctrine.md` §9 — toolchain note](../documents/engineering/dsl_doctrine.md#9-toolchain-note) — the in-process decoder dependency the probe set carries.
+- [`gateway_migration_model_doctrine.md` §4 — simulate and prove](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove) — the deterministic-simulation dependency; no model-checking result is claimed.
+- [`content_addressing_determinism.md` §4.5 — the ML-asset lifecycle](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) — the resolver dependencies, without tracking any materialized asset.
+- [`repository_layout_doctrine.md` §4.1 — a compatibility edit is fixed source](../documents/engineering/repository_layout_doctrine.md#41-a-compatibility-edit-is-fixed-source-not-a-patch-against-a-moving-head) — the maintained fork and the absence of a patch root.
 
 ## Sprints
 
-The sprint requirements below remain part of the target acceptance scope. Each owner must bind them in
-Haskell and qualify the mechanism that first admits their result; component observations cannot close a sprint.
+## Sprint 1.1: GenesisTrust-bound toolchain acquisition ⏸️
 
-
-## Sprint 1.1: GenesisTrust-bound toolchain acquisition ✅
-
-**Status**: Done
-**Implementation**: `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun/Internal.hs` — gpgv publisher verification :170–171, dual contained extraction :172–173, two `--offline --jobs=1` builds :181–182, eighteen gate rows :230–247 — and `src/validation-kernel/Amoebius/Validation/BootstrapTrust/Internal.hs` — `GenesisTrust` :58, `acquireGenesisTrust` :138, `genesisTrustCheck` :168, `genesisTrustCompilerExecutable` :194. `CompilerBuildInfo` and `CompilerElaboratedPlan` are withdrawn from this field: neither is reached by this runner. The elaborated-plan and executable-derivation agreement legs remain UNRESOLVED and block validation.
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Toolchain/Pins.hs` and `src/Amoebius/Toolchain/Acquire.hs`
 **Blocked by**: [Phase 0](phase_00_documentation_suite.md) gate pass
-**Independent Validation**: From the narrow GenesisTrust local-custody facts and immutable offline files, independently verify publisher/content identities, actual compiler/package-tool executable derivation, and loader/host closure; acquire twice into distinct contained roots, build the same source snapshot, and require plans and executable identities to agree. A missing/mutable input, digest/signature mismatch, ambient-network read, self-reported identity, replay, or disagreement is an exact negative; GenesisTrust itself remains assumed.
-**Oracle**: `test/validation-kernel/ToolchainAcquisitionOracle.hs` (36 lines) authors the seven expected refusal loci independently at :28–36 and imports only the refusal projection `toolchainSpikeInternalQualificationDiagnostic` (`src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun/Internal.hs:473`). It is compiled into `validation-phase-contract-internal-component` (`amoebius.cabal:6796`) and executed by the Phase-49 DSL-barrier selector suite (`src/validation-kernel/Amoebius/Validation/DslBarrierRun/Internal.hs:187`; `test/validation-kernel/phase-contract-internal/Main.hs:38`), not by this gate: `probeTargets` builds no test component (`ToolchainSpikeRun/Internal.hs:305`). Binding a separately authored oracle inside the Phase-1 gate remains UNRESOLVED and blocks validation.
-**Legacy IDs**: `LTD-BOOT-001`
-**Docs to update**: `DEVELOPMENT_PLAN/README.md`, `documents/engineering/validation_frame_doctrine.md`, `documents/engineering/repository_layout_doctrine.md`
+**Independent Validation**: Two contained acquisitions from the seven pinned files that agree on compiler and package-tool executable identity and on the elaborated plan are the positive control. A missing pin, a digest mismatch, a signature mismatch, an ambient-network read, and a disagreeing second acquisition are paired negatives refused by name. A generated mutant in `Amoebius.Toolchain.Pins` is killed by the oracle's pin comparison.
+**Oracle**: `test/oracle/toolchain/Main.hs` states the seven pins and the expected executable identities from literals; it imports no `amoebius` module.
+**Legacy IDs**: `LTD-BOOT-001` — authenticated reproducible acquisition
+**Docs to update**: `documents/engineering/validation_frame_doctrine.md`
 
 ### Objective
-Turn the irreducible GenesisTrust input into a reproducible, authenticated contained toolchain acquisition and
-source-bound build without pretending that the resulting binary proves its own compiler.
+
+Turn the irreducible `GenesisTrust` input into a reproducible, authenticated contained acquisition whose
+identities are spelled once in product code, without pretending that the resulting binary proves its own
+compiler.
 
 ### Deliverables
-- A typed acquired authority that consumes GenesisTrust's seven pinned local-custody files and independently
-  adds publisher identity, actual compiler/package-tool executable bytes and derivation, loader/host closure,
-  and reproducibility evidence.
-- Two distinct contained acquisitions from the same immutable offline input with exact process, plan, and
-  executable receipts beneath `.build/**`.
-- One compatible dependency universe used by every later sprint in this phase; no resolved lock or identity is
-  copied into Git.
+
+- `Amoebius.Toolchain.Pins` with the seven pins and the compiler and package-tool identities.
+- `Amoebius.Toolchain.Acquire` verifying the publisher signatures, extracting into two contained roots, and building the same source under both with `--offline --jobs=1`.
+- A typed acquisition receipt per root, rendered beneath `.build/**` and never tracked.
 
 ### Validation
-1. Recheck the offline bytes against the GenesisTrust pins, then independently authenticate their publisher
-   relation before either acquisition and build the same exact source under both contained roots with
-   compiler-bearing commands serialized.
-2. Require the compiler/package-tool identities, elaborated plan, produced executable identity, and observed
-   command boundary to agree; each missing, mutable, replayed, network-assisted, or disagreeing case fails at
-   its assigned locus.
-3. Preserve GenesisTrust as an explicit assumption in residue; agreement closes `LTD-BOOT-001` but does not
-   turn the root into a theorem.
+
+Acquire twice; compare identities and plans with the oracle's literals; refuse each negative at its named
+locus. Preserve `GenesisTrust` as an explicit assumption in the residue row.
 
 ### Remaining Work
-Implement the acquired authority and independent oracle, qualify its changed-subject selectors, bind the exact
-Phase-0 predecessor receipt, close `LTD-BOOT-001`, and retain the result in the complete Phase-1 gate. Historical
-toolchain transcripts cannot support this candidate.
 
-## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ✅
+Implement the two modules. The validator-side acquisition supervisor is deleted in Sprint 1.8.
 
-**Status**: Done
-**Implementation**: `probe/app/Decode.hs`, declared `executable decode` at `probe/probe.cabal:32`, built into both contained roots by `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun/Internal.hs:181–184` (`probeTargets` :305) and executed on a run-generated positive and negative fixture at :189–190.
+## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ⏸️
+
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Toolchain/Probe/Decode.hs`
 **Blocked by**: Sprint 1.1
-**Independent Validation**: Positive — the decoded value must contain exactly `ProbeConfig {name = "phase-one", count = 3}` (`ToolchainSpikeRun/Internal.hs:426`, `PHASE-01-DECODE-VALUE`). Paired negative — the one-field-mistyped fixture (:188) must fail and emit `DHALL_TYPE_ERROR:` (:435–436). Changed-subject mutant — `("missing-dependency", …)` drops `dhall` from the closed set and reds exactly `PHASE-01-POLICY-DEPENDENCY` (:493, :509). Residue — the decoded-value expectation is a literal inside the production runner, so this leg is self-adjudicating; an independently authored oracle for it remains UNRESOLVED.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: `None` — the phase's closure set is `LTD-BOOT-001,LTD-SRC-007,LTD-SRC-009` (`src/validation-kernel/Amoebius/Validation/Evidence/Internal.hs:944`), owned by Sprints 1.1, 1.5 and 1.7.
-**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_01_toolchain_spike.md:549`); this sprint declares no owner of its own.
+**Independent Validation**: The positive decode case yields the oracle's literal value through the in-process `dhall` decoder linked into the shipped binary; the one-field-mistyped twin is refused with the decoder's type-error tag. Both cases are rendered beneath `.build/probe/**` after the run starts.
+**Oracle**: `test/oracle/toolchain/Main.hs` states the expected decoded value and the rejection tag from literals.
+**Legacy IDs**: none
+**Docs to update**: `documents/engineering/dsl_doctrine.md`
 
 ### Objective
-Adopt [`dsl_doctrine.md §9 — Toolchain note`](../documents/engineering/dsl_doctrine.md#9-toolchain-note) with
-its [§5 gadt-decode](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract): prove
-the in-process `dhall` decoder — the structural gadt-decode leg that must precede Phase-30/18 bind/provision — is
-buildable on the pin before Phase 26 promises an executable decoder. `dhall` historically lags new GHC releases, so
-`allow-newer` alone may be insufficient and a source patch or fork may be required.
+
+Adopt [`dsl_doctrine.md` §9 — toolchain note](../documents/engineering/dsl_doctrine.md#9-toolchain-note): prove
+that the in-process decoder dependency builds and executes on the pin before Phase 3 promises a typed decoder.
 
 ### Deliverables
-- A recorded resolution: the concrete `allow-newer`/patch/fork/pin that makes `dhall` build on GHC 9.12.4,
-  with fresh `cabal build` + `cabal run probe:decode` transcripts beneath `.build/runs/phase_1/**` produced
-  under exactly that set. There is no failing-transcript alternative: a dependency universe that does not
-  resolve prevents the status frontier from advancing and records the blocker as explicit `UNVERIFIED`
-  residue. That is a recorded blocker, not a gate pass.
-- Haskell-declared positive and bad-type probe cases plus separately authored Haskell expected decoded value
-  and rejection tag; any Dhall form is generated beneath `.build/probe/**` and is never tracked source.
+
+- The decode probe as a module the report exercises, with one positive and one mistyped case.
+- The compatibility requirement that makes the decoder build on the pinned compiler, authored as a Haskell value and never as a freeze file.
 
 ### Validation
-1. A probe depending on `dhall` builds under the pin from a clean store, and `cabal run probe:decode` decodes
-   the generated positive case into its independently expected Haskell value and exits 0. A green `cabal build`
-   alone does **not** satisfy this: an executed, exit-checked run is required.
-2. The same binary consumes the negative half of a Haskell-declared pair that differs from its positive only
-   in one mistyped field. The pair is rendered beneath `.build/probe/**`, and the observation must match the
-   separately authored Haskell `dhall` type-error expectation (§M.8), not merely report a generic failure.
-3. The exact `allow-newer`/source-patch/fork required by `dhall`'s transitive deps (`template-haskell`,
-   `aeson`, `megaparsec`, `prettyprinter`) is recorded **together with** the green transcript produced with
-   exactly that set. A remediation set counts only with its matching green transcript. A failing transcript is
-   never an alternative route to this row: it records why the phase is blocked, and a blocked phase does not
-   pass. Prose alone never passes.
+
+Decode the positive and refuse the twin; compare both outcomes with the oracle's literals.
 
 ### Remaining Work
-The pre-reset record said `None`; that statement and its 2026-08-08 decode observations are permanently
-cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor
-gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 1.3: `io-sim` + `io-classes` simulation build probe ✅
+Implement the probe module and its compatibility declaration.
 
-**Status**: Done
-**Implementation**: `probe/app/Sim.hs` (IOSimPOR two-writer schedule; `--perturbed` arm), declared `executable sim` at `probe/probe.cabal:42`, built by `ToolchainSpikeRun/Internal.hs:181–184` and executed clean and perturbed at :191–192.
+## Sprint 1.3: `io-sim` + `io-classes` simulation build probe ⏸️
+
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Toolchain/Probe/Sim.hs`
 **Blocked by**: Sprint 1.2
-**Independent Validation**: Positive — exact stdout `schedule=two-writer-fair;terminal=3` (`ToolchainSpikeRun/Internal.hs:427`, `PHASE-01-SIM-TERMINAL`). Paired negative — the `--perturbed` run must emit exactly `schedule=two-writer-fair;terminal=1` (:437). Changed-subject mutant — `("wrong-terminal", …)` reds exactly `PHASE-01-POLICY-TERMINAL` (:494, :510). Residue — the terminal-state expectation is a literal inside the production runner; an independently authored oracle for it remains UNRESOLVED.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: `None` — the phase's three IDs (`Evidence/Internal.hs:944`) are owned by Sprints 1.1, 1.5 and 1.7.
-**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_01_toolchain_spike.md:549`); this sprint declares no owner of its own.
+**Independent Validation**: The unperturbed two-writer schedule reaches the oracle's literal terminal state; the perturbed schedule reaches a different literal state; a probe that exits without printing a terminal state is refused.
+**Oracle**: `test/oracle/toolchain/Main.hs` states both terminal states from literals.
+**Legacy IDs**: none
+**Docs to update**: `documents/engineering/gateway_migration_model_doctrine.md`
 
 ### Objective
-Adopt [`gateway_migration_model_doctrine.md §4 — Simulate and prove`](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove):
-amoebius's one formal obligation drives the gateway-migration `Model` against `io-classes`/`IOSimPOR`'s
-deterministic, partial-order-reduced scheduler. Prove that toolchain builds on the pin before Phase 17 authors
-the simulation. TLC (`tla2tools.jar`) is pure JVM and version-stable, so the Phase-11/10 TLC path is **not** gated
-by this probe.
+
+Adopt [`gateway_migration_model_doctrine.md` §4 — simulate and prove](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove):
+prove that the deterministic-simulation dependency builds and runs on the pin before the gateway-migration
+model is authored.
 
 ### Deliverables
-- A recorded resolution for `io-sim` + `io-classes` on the pin with fresh build + `cabal run probe:sim`
-  transcripts beneath `.build/runs/phase_1/**`. An unresolvable pin is run-local blocker residue that leaves
-  the phase blocked, not a second way to satisfy this deliverable.
-- A checked Haskell declaration of the `IOSimPOR` schedule and a separately authored Haskell expected
-  terminal state, plus a Haskell comparison oracle and schedule-perturbation mutation operator. Any serialized
-  terminal state or applied mutant is generated only beneath `.build/probe/**`.
+
+- The simulation probe with a clean arm and a perturbed arm, the schedule as a Haskell value.
+- A terminal state printed by the probe, never a self-reported exit alone.
 
 ### Validation
-1. A probe depending on `io-sim`/`io-classes` builds under the pin from a clean store, and `cabal run
-   probe:sim` runs the Phase-0-named `IOSimPOR` schedule and **emits the terminal state it reaches on
-   stdout**; the separately authored Haskell oracle confirms an exact semantic match against its independent
-   terminal-state expectation. The leg greens **only** on that match, never on the probe's
-   self-reported exit 0 — a `main = exitSuccess` stub emits no terminal state and fails the diff.
-2. The checked Haskell schedule-perturbation operator changes the step ordering and drops one fairness step
-   in a temporary subject beneath `.build/probe/**`. Re-running it MUST turn `probe:sim` red at the independent
-   terminal-state oracle (§M.2), while the unchanged positive remains green.
-3. The green transcript and the exact remediation set that produced it are retained only beneath
-   `.build/runs/phase_1/**`. A recorded blocker is not a substitute for it; the blocker leaves the phase
-   blocked. Prose alone never passes.
+
+Run both arms; compare the terminal states with the oracle's literals.
 
 ### Remaining Work
-The pre-reset record said `None`; that statement and its 2026-08-08 simulation observations are permanently
-cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor
-gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe ✅
+Implement the probe module.
 
-**Status**: Done
-**Implementation**: the `proto-lens` link leg — `probe/probe.cabal:23`, `probe/app/ProbeDeps.hs:7` (`import Data.ProtoLens qualified ()`), and the closed `requiredDependencies` set at `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun/Internal.hs:308` — plus the maintained Haskell fork under `src/vendor/**`. No executed `proto-lens` codegen is bound: the only `proto-lens-protoc` declaration is `amoebius.cabal:5533` (`library pulsar-client`), `proto/` does not exist, and `pulsar-client` is not in `probeTargets` (:305). The codegen leg remains UNRESOLVED and blocks validation.
+## Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe ⏸️
+
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Toolchain/Probe/Codegen.hs` and the maintained fork modules beneath `src/vendor/**`
 **Blocked by**: Sprint 1.3
-**Independent Validation**: Positive — exact stdout `phase-1-dependency-surface-linked` (`ToolchainSpikeRun/Internal.hs:428`; `probe/app/ProbeDeps.hs:22`). No fork-identity or codegen paired negative and no resolution mutant exists; `qualificationMatrix` (:490–498) carries no such case. Those legs remain UNRESOLVED and block validation.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: `None` — the phase's three IDs (`Evidence/Internal.hs:944`) are owned by Sprints 1.1, 1.5 and 1.7.
-**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_01_toolchain_spike.md:549`); this sprint declares no owner of its own.
+**Independent Validation**: The fork and its protobuf codegen link into the shipped binary and the report prints the oracle's literal link token; the generated bindings are rendered beneath `.build/proto/**`; a removed fork identity is refused at the resolution locus.
+**Oracle**: `test/oracle/toolchain/Main.hs` states the link token and the expected generated-module set from literals.
+**Legacy IDs**: none — `LTD-SRC-009` is owed by Sprint 1.7
+**Docs to update**: `documents/engineering/pulsar_client_doctrine.md`
 
 ### Objective
-De-risk the native Pulsar client's `supernova` fork plus its `proto-lens` codegen — clause (v) of the
-Representative set, the Pulsar-client band's load-bearing build dependency — on the shared pin **here**, before
-the Pulsar-client phase promises it, rather than discovering mid-implementation that a forked client or its
-generated protobuf modules will not compile on GHC 9.12.4. This is the riskiest single leg (a fork plus a
-codegen step), so it is isolated as its own recorded resolution and then folded into the Sprint 1.8
-consolidated gate. Isolating it bounds the blast radius of a blocker; it does not make a blocker acceptable.
+
+De-risk the native Pulsar client's fork and its codegen on the shared pin before the Pulsar-client phase
+promises it, so a fork that will not compile is found here rather than mid-implementation.
 
 ### Deliverables
-- A recorded resolution: the concrete `supernova` fork ref + `proto-lens` `allow-newer`/patch/pin that makes the
-  fork and its codegen build on GHC 9.12.4. The fresh `cabal build` transcript is produced beneath
-  `.build/runs/phase_1/**` under exactly that set. A blocker recorded in the same run root is residue that
-  leaves the phase blocked, not an alternative accepting observation.
-- The `proto-lens` protobuf module and build transcript materialized only beneath `.build/proto/**` and
-  `.build/runs/phase_1/**`. Neither generated module nor transcript is tracked source or evidence authority.
+
+- The codegen probe as a module the report exercises.
+- The fork identity as a Haskell value; generated bindings beneath `.build/proto/**` only.
 
 ### Validation
-1. The `supernova` fork + `proto-lens` codegen resolve and compile green under the pin from a clean store,
-   with the run-local `cabal build` transcript beneath `.build/runs/phase_1/**` echoing the tool identities
-   in-band and showing the independently observed exit 0. The exact fork identity and compatibility requirement
-   are recorded together with that observation.
-2. The checked Haskell dependency-resolution operator removes the fork identity or compatibility declaration
-   in a temporary subject beneath `.build/probe/**`. Re-running it turns `cabal build` red at the
-   `supernova`/`proto-lens` resolution locus while the unchanged control remains green.
-3. The fork identity and compatibility declaration that produced the green build are recorded with it. An
-   unresolvable fork is recorded as explicit `UNVERIFIED` residue and leaves the phase blocked; a failing
-   `cabal build` is never evidence for this row. Prose alone never passes.
+
+Build and link; compare the token and the generated set with the oracle; refuse the removed identity.
 
 ### Remaining Work
-The pre-reset record said `None`; that statement and every recorded fork/codegen observation are permanently
-cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor
-gate pass, owned legacy closure, and the Haskell provenance/oracle/mutation obligations of the redesigned gate.
-[Sprint 1.7](#sprint-17-remove-top-level-vendor-source-and-own-the-haskell-fork-) owns the target split between
-maintained `.hs` modules under `src/vendor/**` and lazy upstream material beneath `.build/vendor/**`.
 
-## Sprint 1.5: Dynamic resolution and generated-output migration ✅
+Implement the probe and bind the fork identity.
 
-**Status**: Done
-**Implementation**: `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun.hs` — `resolutionOutput` :64 and `isResolutionOutput` :101–102 decide tracked resolution output, refusal `TOOLCHAIN-SPIKE-RESOLUTION-OUTPUT-TRACKED` :84, observation `toolchain-spike.resolution-output-count` :36; `probeForeign` :47 with `TOOLCHAIN-SPIKE-PROBE-DEBT-OPEN` :68 closes `LTD-SRC-007`. Containment is enforced by `authorityCheck` (`ToolchainSpikeRun/Internal.hs:451`) and `cleanroomCheck` (:517).
+## Sprint 1.5: Dynamic resolution and generated-output migration ⏸️
+
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Toolchain/Resolve.hs`
 **Blocked by**: Sprint 1.4
-**Independent Validation**: The in-runner mutant `("resolution-output", …)` reds exactly `PHASE-01-POLICY-RESOLUTION-OUTPUT` (`ToolchainSpikeRun/Internal.hs:498`, `:514`). The independent case is authored separately in `test/validation-kernel/ToolchainSpikeRunOracle.hs:46–49` (`cabal.project.freeze` → `["TOOLCHAIN-SPIKE-RESOLUTION-OUTPUT-TRACKED"]`), against the public `toolchainSpikeRunCheck` rather than the runner's own matrix.
-**Oracle**: `test/validation-kernel/ToolchainSpikeRunOracle.hs`, whose expectations are authored from the capability's claim (:37–49) and never restated from a run. It is compiled into `validation-compiler-source-graph-acquired-component` (`amoebius.cabal:6973`) and executed by the **Phase-2** gate (`test/validation-kernel/compiler-source-graph-acquired/Main.hs:22`; built and run at `src/validation-kernel/Amoebius/Validation/RepositoryLayoutRun/Internal.hs:118`, `:123`, `:126`). The Phase-1 gate does not execute it.
-**Legacy IDs**: `LTD-SRC-007`
-**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_01_toolchain_spike.md:549`); this sprint declares no owner of its own.
+**Independent Validation**: A compatibility declaration that names no resolved path, checksum, or solver graph resolves to a plan beneath `.build/toolchain/**`; a tracked freeze file, a tracked package pin, and a developer-home path are paired negatives refused at the source-closure locus.
+**Oracle**: `test/oracle/toolchain/Main.hs` states the refused path set from literals.
+**Legacy IDs**: `LTD-SRC-007` — foreign probe inputs
+**Docs to update**: `documents/engineering/repository_layout_doctrine.md`
 
 ### Objective
 
-Replace permanent pins, lock/freeze files, hard-coded package/library SHA values, developer-home paths, and
-repository-retained generated evidence with dynamic run-local resolution and repository-local run record.
+Replace permanent pins, lock files, hard-coded package checksums, developer-home paths, and repository-retained
+generated evidence with run-local resolution from authored Haskell requirements.
 
 ### Deliverables
 
-- Authored compatibility requirements containing no resolved path, package checksum, or solver graph.
-- A checked Haskell transformation declaration for each still-required compatibility change; delete the
-  tracked patch and top-level vendor copies, and materialize any upstream input or patch encoding beneath
-  `.build/vendor/**` only.
-- A `cabal.project` that references only admitted `.hs` source, minimal build metadata, and Haskell-declared
-  compatibility requirements, with no developer path, fixed dependency identity, or ignored evidence path.
-- Replacement of `toolchain/pins.json`: keep compatibility requirements in a checked Haskell declaration and
-  generate every resolved path, version, URL, identity, and integrity observation beneath `.build/toolchain/**`.
-- A resolver that writes the selected graph and tools only beneath `.build/`.
-- Resolved protocol package identity and checksums recorded beneath `.build/toolchain/**`. Rendering the wire schema and bindings beneath `.build/proto/**` is `LTD-SRC-003`, owned by its declared later phase, and is not a deliverable here.
-- An authored-root write guard and run-local record beneath `.build/**` covering every probe and applied
-  Haskell mutation operator.
-- Tracked-path and container-context checks that reject every legacy generated class.
+- Authored compatibility requirements as Haskell values containing no resolved path, package checksum, or solver graph.
+- A resolver that writes the selected graph and tools only beneath `.build/**`.
+- Probe cases rendered beneath `.build/probe/**` from Haskell declarations.
 
 ### Validation
 
-1. Begin from the source snapshot — non-ignored files only — and empty probe caches.
-2. Resolve, build, and execute the complete representative set twice using only the authenticated,
-   network-independent input.
-3. Confirm that all generated output is ignored and every authored path is unchanged.
-4. Confirm that no lock/freeze file, package integrity pin, or developer-home path is tracked.
-5. Confirm every referenced patch exists in the clone beneath an authored root; a seeded ignored-patch
-   reference and a seeded fixed dependency commit both fail at the source-closure/provenance locus.
-6. Verify the repository-local run record and all positive, negative, and mutant outcomes.
+Resolve twice from the pinned input; confirm every generated output is ignored and every authored path is
+unchanged; refuse each tracked artefact by name.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work
-includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and
-phase-specific obligation in the redesigned gate. The target must replace the condemned pin/patch inputs with
-checked Haskell compatibility declarations, confine every resolved product to `.build/**`, and independently
-demonstrate clean-source repeatability without network or outside-host observation. The current working source
-image has removed the nine tracked probe fixtures/mutants/oracle files, and the Phase-1 runner observes
-`toolchain-spike.probe-foreign-count = 0`; the Haskell generator, separately authored expectations, applied
-reintroduction negatives, and integrated evidence remain outstanding, so `LTD-SRC-007` stays active.
+Implement the resolver and the refusals.
 
-## Sprint 1.6: Pure discovery/ensure planning over injected inputs ✅
+## Sprint 1.6: Pure discovery/ensure planning over injected inputs ⏸️
 
-**Status**: Done
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Toolchain/Plan.hs`
 **Blocked by**: Sprint 1.5
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: The plan over an injected empty inventory and an authenticated provider catalogue equals the oracle's literal step list; an absent tool, an out-of-range version, and a platform with no asset are refused rather than substituted. The plan reads no host.
+**Oracle**: `test/oracle/toolchain/Main.hs` states the expected step list and the refusals from literals.
+**Legacy IDs**: none
+**Docs to update**: `documents/engineering/substrate_doctrine.md`
 
 ### Objective
 
 Model [`substrate_doctrine.md` §3 — the no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract)
-as a pure Haskell plan over injected inventories and authenticated provider catalogs. An absent tool with a
-supported plan yields typed acquisition steps; a missing floor prerequisite yields a typed refusal. This
-sprint may neither inspect nor modify a real host. Phase 51 owns the boundary-with-fakes interpreter after the
-Phase-49 barrier, and the later live band owns actual host observation and installation.
+as a pure plan over injected inventories, ahead of the boundary-with-fakes interpreter
+[Phase 51](phase_51_host_ensure_kernel.md) owns.
 
 ### Deliverables
 
-- The `host` source kind retired from the pure plan, so no requirement can mean "expected on the developer
-  host".
-- A `managed` source kind — a tool installed by another resolved tool, which is asked what it can supply —
-  generalizing the `ghcup-managed` kind the authored vocabulary already names but the resolver never
-  implemented.
-- The floor expressed as a checked Haskell value and evaluated only against an injected inventory, with each
-  failure carrying its remedy.
-- One canonical `<os>-<arch>` platform value, supplied as a synthetic case rather than discovered from a host,
-  replacing the three divergent normalizers and the inconsistent keys they compensate for.
-- `node`, `npm`, and `git` declared, having been invoked bare and undeclared.
-- A Haskell-declared negative corpus for resolution behaviour: absent tool, out-of-range version, and no asset
-  for the injected platform value. Any serialized acquisition request or response is generated beneath
-  `.build/**`.
+- A `managed` source kind — a tool installed by another resolved tool — and no `host` source kind.
+- The floor as a Haskell value evaluated only against an injected inventory, each failure carrying its remedy.
+- One canonical `<os>-<arch>` platform value, supplied as a case rather than discovered.
 
 ### Validation
 
-1. Evaluate the Haskell plan against an injected empty-tool inventory and authenticated provider catalog;
-   assert the exact typed acquisition steps without running them.
-2. Each checked Haskell resolution mutation operator makes only its independently expected property red.
-3. The architecture-refusal case uses a synthetic platform value and a catalog with no matching asset; it
-   must refuse rather than selecting a foreign asset.
-4. The Haskell surface join stays total after the newly declared tools are added, and the effect observer
-   confirms zero host, hardware, network, package-manager, or filesystem effects outside `.build/**`.
+Evaluate the plan; compare with the oracle; refuse each negative without selecting a foreign asset.
 
 ### Remaining Work
 
-The pre-reset completion account and platform table are permanently invalid and are not implementation
-instructions. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass,
-owned legacy closure, checked Haskell provider/platform/acquisition declarations, independent Haskell
-expectations, applied mutation controls, and fresh contained observations beneath `.build/**`. Any real host
-or acquisition correspondence remains explicitly UNVERIFIED.
+Implement the planner.
 
-## Sprint 1.7: Remove top-level vendor source and own the Haskell fork ✅
+## Sprint 1.7: Remove top-level vendor source and own the Haskell fork ⏸️
 
-**Status**: Done
-**Implementation**: `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun.hs` — `vendorTracked` :58, refusal `TOOLCHAIN-SPIKE-VENDOR-DEBT-OPEN` :76, observation `toolchain-spike.vendor-tracked-count` :35 — closing `LTD-SRC-009`; the in-runner mutant `("top-level-vendor", …)` reds exactly `PHASE-01-POLICY-VENDOR-SOURCE` (`ToolchainSpikeRun/Internal.hs:497`, `:513`); the independent case is `test/validation-kernel/ToolchainSpikeRunOracle.hs:42–45`; the maintained fork modules are `src/vendor/**`. The Haskell provenance declaration, immutable upstream identity, and `.build/vendor/**` materialization are not bound, and remain UNRESOLVED and blocking. (This sprint's Oracle field at line 435 names `test/Amoebius/Vendor/ProvenanceOracle.hs`, which does not exist; `test/`'s second level is `compile-negative fixture harness mutant negative spec validation-kernel`.)
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Toolchain/Provenance.hs` and the maintained fork modules beneath `src/vendor/**`
 **Blocked by**: Sprint 1.6
-**Independent Validation**: An immutable-input clean build is the positive; a mutable-ref acquisition is the paired negative; an applied top-level-vendor reintroduction mutant reddens its exact source row while the Haskell control stays green; upstream semantic fidelity and licensing remain explicit residue.
-**Oracle**: planned separately authored `test/Amoebius/Vendor/ProvenanceOracle.hs`; provenance and independence boundary unresolved
+**Independent Validation**: A clean build from the immutable upstream identity is the positive control; a mutable reference, an absent identity, a developer-home path, and a digest that does not match the acquired bytes are refused; a reintroduced top-level `vendor/**` path is refused at the layout locus.
+**Oracle**: `test/oracle/toolchain/Main.hs` states the upstream identity and the refusals from literals.
 **Legacy IDs**: `LTD-SRC-009`
 **Docs to update**: `documents/engineering/repository_layout_doctrine.md`, `documents/engineering/pulsar_client_doctrine.md`
 
 ### Objective
 
-Adopt [`repository_layout_doctrine.md` §4.1 — a compatibility edit is fixed source, not a patch against a
-moving head](../documents/engineering/repository_layout_doctrine.md#41-a-compatibility-edit-is-fixed-source-not-a-patch-against-a-moving-head):
-remove the transitional top-level `vendor/**` tree. Re-derive only maintained Haskell behavior under
-`src/vendor/**/*.hs`; materialize any required upstream non-Haskell source from an authenticated,
-network-independent input at an immutable identity beneath `.build/vendor/**` and apply transformations
-declared in Haskell.
+Adopt [`repository_layout_doctrine.md` §4.1 — a compatibility edit is fixed source](../documents/engineering/repository_layout_doctrine.md#41-a-compatibility-edit-is-fixed-source-not-a-patch-against-a-moving-head):
+maintained Haskell beneath `src/vendor/**`, upstream material beneath `.build/vendor/**` at an immutable
+identity, and no patch root.
 
 ### Deliverables
 
-- `vendor/**` absent from the tracked snapshot, with maintained Haskell modules re-derived under
-  `src/vendor/**` and separately authored against Haskell expectations.
-- Haskell provenance values recording an immutable upstream release identity; any reader-facing provenance
-  report is generated beneath `.build/**` and is not a build input.
-- A `cabal.project` with no developer-home path and a fixed dependency identity for every input, carrying no mutable `supernova`
-  source reference or post-checkout command.
-- `patches/supernova_ghc_9_12.patch` and `tools/apply_supernova_patch` deleted, and the `patches/` root with
-  them.
-- Haskell-generated negatives that reintroduce a top-level vendor path, a mutable `supernova` source, a
-  tracked Proto/Cabal input, and a patch program; each reddens its exact source-closure/provenance locus.
+- `Amoebius.Toolchain.Provenance` recording the immutable upstream identity as a Haskell value.
+- No top-level `vendor/**`, no patch program, no tracked foreign package description, and no post-checkout command.
 
 ### Validation
 
-1. From a clean source snapshot and empty `.build/**`, the representative set resolves the immutable upstream
-   input from the authenticated network-independent cache, generates required foreign build inputs, and
-   builds the maintained Haskell fork.
-2. The tracked snapshot contains no `vendor/**`, patch program, Proto input, foreign package description, or
-   generated binding; all such material is contained beneath the fresh run root.
-3. Each generated reintroduction negative reddens only its named source-closure or provenance check, while an
-   unaffected Haskell control remains green.
-4. The Haskell provenance declaration rejects mutable refs, absent identity, developer-home paths, and a
-   digest that does not match the acquired bytes.
+Build from the pinned input; refuse each negative at its named locus.
 
 ### Remaining Work
 
-`LTD-SRC-009` remains active but its tracked-path analyzer now observes zero top-level `vendor/**` paths: the
-17 maintained library modules have moved to `src/vendor/**/*.hs`, and the foreign package descriptions,
-Proto schema, licences, and prose inventory have left the current working source image. The Haskell
-provenance declaration, immutable offline materialization, generated Proto/package inputs, maintained-fork
-build, independent oracle, and generated reintroduction corpus still do not exist, so this implementation
-progress cannot close the sprint or support a candidate.
+Implement the provenance value and the refusals.
 
-## Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ✅
+## Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ⏸️
 
-**Status**: Done
-**Implementation**: `probe/app/ProbeDeps.hs` with `probe/probe.cabal:7–30`; the closed thirteen-package `requiredDependencies` at `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun/Internal.hs:308`; `discoveryCheck` (:393–419) requires every name present in `probe/probe.cabal` and one absolute binary from both builds. The closed set contains no `supernova`, so the Representative clause covering the fork is not covered and remains UNRESOLVED.
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Toolchain/Report.hs`, `app/amoebius/Main.hs`, `src/gate-spec/Amoebius/Validation/GateSpec/Toolchain.hs`, and `amoebius.cabal`
 **Blocked by**: Sprint 1.7
-**Independent Validation**: `discoveryCheck` :393, byte-identical dual-build `reproducibilityCheck` :440–450, `qualificationCheck` :459. Not bound: a "drop the compatibility allowance → version-resolution locus reds" mutant; `qualificationMatrix` (:490–498) has no compatibility-allowance case. That leg remains UNRESOLVED and blocks validation.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: `None` — the phase's three IDs (`Evidence/Internal.hs:944`) are owned by Sprints 1.1, 1.5 and 1.7.
-**Docs to update**: the phase-level owner set in [Documentation Requirements](#documentation-requirements) (`DEVELOPMENT_PLAN/phase_01_toolchain_spike.md:549`); this sprint declares no owner of its own.
+**Independent Validation**: `amoebius toolchain-report` prints the digests and probe outputs the oracle restates; the compiled specification equals the fenced block above; a dropped compatibility allowance is refused at the resolution locus; a stanza whose module map disagrees with the subjects is refused at discovery.
+**Oracle**: `test/oracle/toolchain/Main.hs` for the report; `test/oracle/runner/Main.hs` for the specification digest.
+**Legacy IDs**: none due here beyond the closures recorded above
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` only through the human's `accept`
 
 ### Objective
-Adopt [`content_addressing_determinism.md §4.5 — the ML-asset lifecycle`](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
-the shared `jit-build` resolver that materializes named catalog identities into the `CacheBudget`-bounded
-content-addressed cache carries its own Haskell dependencies. Fold them into one probe that also links `dhall`
-+ `io-sim` + `io-classes`, so the whole pre-cluster in-process surface is proven buildable as **one**
-dependency universe — the phase gate.
 
-**The gate runs last because it is the only run over the final source.** This sprint used to sit fourth, which
-made two things impossible at once: it needed the `supernova` fork that a later sprint produced, while that
-sprint declared this one as its blocker, and the pin replacement and vendor removal that follow it invalidated
-every transcript the earlier probes had recorded. A gate over a dependency universe has to observe the
-universe the phase actually leaves behind, so it is now the last seam and every earlier probe feeds it.
+Fold the resolver dependencies and the browser-contract generator into the one report, so the whole
+pre-cluster in-process surface is proven buildable as one dependency universe. The gate runs last because it
+is the only run over the final source.
 
 ### Deliverables
-- The consolidated throwaway probe executable whose `build-depends` matches the Representative-set list
-  exactly — all five clauses (i)–(v): `dhall` + `io-sim` + `io-classes` + the eight `jit-build` resolver
-  packages (`cryptohash-sha256`, `http-client`, `http-client-tls`, `typed-process`, `tar`, `zlib`,
-  `directory`, `filepath` — content-hashing, download-or-build, and process control) + the build-only
-  `purescript-bridge` contract generator + the `supernova` fork with its `proto-lens` codegen (the last
-  folded in from Sprint 1.4).
-- A run-local recorded-resolution ledger beneath `.build/runs/phase_1/**`: the `allow-newer`/patch/fork set
-  with its matching green observations. A hard blocker is recorded in the same ledger as `UNVERIFIED` residue
-  and holds the phase shut; it is never an accepting ledger. The tracker
-  may link a reader to evidence but cannot supply a behavioral input or verdict.
-- GateReady Haskell compatibility, terminal-state expectation, and mutation declarations. Solver selections,
-  build/run transcripts, any freeze projection, and applied mutant subjects are fresh outputs beneath
-  `.build/runs/phase_1/**`; no evidence bundle or serialized expectation is tracked.
-- A first-class proven/tested/assumed ledger artifact ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)) — naming **Register 1**, recording the green build +
-  executed-fixture results as *tested*, and marking every runtime, cluster, and gadt-decode-semantics layer
-  **UNVERIFIED** — emitted beneath `.build/runs/phase_1/**` even though the probe package itself is deleted
-  after resolution.
+
+- `toolchain-report` as a subcommand of the shipped binary, exercising every probe module.
+- The Phase-1 `GateSpec` with its `BinaryFact`.
+- Deletion of the validator-side toolchain runner and its oracle.
 
 ### Validation
-1. The consolidated probe's `build-depends` matches the Representative-set list exactly — all five clauses
-   (i)–(v); a category description, or a set already in the stock closure, does not satisfy this. It builds
-   and links under GHC 9.12.4 / Cabal 3.16.1.0 from a clean store.
-2. `cabal run probe:decode` exits 0 on the Haskell-declared positive rendered beneath `.build/probe/**`, and
-   `cabal run probe:sim`'s reported terminal state satisfies the separately authored Haskell expectation,
-   never the probe's self-exit.
-3. **Both** checked Haskell mutation operators are applied beneath `.build/probe/**` and re-run: dropping the
-   compatibility allowance reddens the version-resolution locus, while perturbing the simulation schedule
-   reddens the terminal-state locus —
-   together proving the gate detects an unbuildable config and a wrong-terminal-state sim rather than
-   rubber-stamping a green one.
-4. The consolidated `allow-newer`/patch/fork set is recorded with its matching green transcripts in the
-   fresh Phase-1 run bundle. This row has one branch. An unresolvable set is recorded as explicit `UNVERIFIED`
-   residue and leaves the phase blocked, because a gate a failing transcript can satisfy tests nothing: a
-   deliberately malformed `cabal.project` produces exactly those artefacts while building none of the probes.
-   All transcripts and the proven/tested/assumed ledger exist only beneath `.build/**` —
-   the Phase-1 acceptance condition. Prose in the tracker without matching run-local observations never passes.
+
+Run `preview phase 01` and require every row green; require the human's `accept` to record exactly one
+phase's patch.
 
 ### Remaining Work
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work
-includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and the
-Haskell probe, oracle, and mutation obligations of the redesigned gate.
 
+Everything above. The `accept` ends this phase.
 
 ## Documentation Requirements
 
-**Engineering docs to update (after the complete gate passes):**
+**Engineering docs to update (after the complete gate passes, never before):**
 
-- `documents/engineering/substrate_doctrine.md` — **historical pre-reset note from 2026-08-17 — cannot support a gate pass.** §3.1 records that the floor tables are
-  authored data evaluated before resolution, and that every substrate's floor is decided on every run,
-  including the ones the running host is not.
-- `documents/engineering/repository_layout_doctrine.md` — **historical pre-reset note from 2026-08-17 — cannot support a gate pass.** §4 records the one `<os>-<arch>`
-  platform vocabulary, the single normalizer that produces it, and the rule that a publisher with no asset for
-  the host's token is a refusal rather than a fallback.
-- `documents/engineering/repository_layout_doctrine.md` — **historical pre-reset note from 2026-08-12 — cannot support a gate pass.** The target replaces both
-  `toolchain/pins.json` and `tools/toolchain_requirements.json` with Haskell compatibility declarations and
-  run-local `.build/toolchain/**` projections; `cabal.project.freeze` remains inadmissible.
-- `documents/engineering/dsl_doctrine.md` — §9's Toolchain note gets a backlink to the recorded `dhall`
-  `allow-newer`/patch set once Sprint 1.2/1.4 lands.
-- `documents/engineering/gateway_migration_model_doctrine.md` — §4's io-sim instrument gets a backlink to the
-  gate-passed buildability evidence.
-- `documents/engineering/content_addressing_doctrine.md` — §4.5's `jit-build` resolver gets a backlink to the
-  gate-passed resolver-dependency evidence.
-- `documents/engineering/repository_layout_doctrine.md` — **historical pre-reset note from 2026-08-20 — cannot support a gate pass.** The `patches/**` tree row and
-  its TRANSITIONAL marker are deleted; §2 records why the root is absent rather than transitional, §2.2 no
-  longer carries a destination row for it, and §4.1 states that there is no patch root and no admitted patch.
-- `documents/engineering/pulsar_client_doctrine.md` — §4 identifies the current top-level vendor tree as
-  migration debt and the target split between maintained `src/vendor/**/*.hs` and lazy `.build/vendor/**`
-  acquisition.
+- `documents/engineering/validation_frame_doctrine.md` — only if the `GenesisTrust` boundary or the acquisition contract changes.
+- `documents/engineering/repository_layout_doctrine.md` — only if the dependency-resolution or vendor-provenance rule changes.
+- `documents/engineering/dsl_doctrine.md` — only if the toolchain note's decoder dependency changes.
+- `documents/engineering/pulsar_client_doctrine.md` — only if the maintained fork's identity or split changes.
 
 **Cross-references to add:**
 
-- `DEVELOPMENT_PLAN/README.md` — the Toolchain section records only the authored compatibility policy or a
-  current blocker; resolved `allow-newer`, patch application, source identity, and graph observations remain
-  in the run bundle. Only the pass criterion may change Phase 1 after checking a qualified candidate.
-- `DEVELOPMENT_PLAN/substrates.md` — the Phase-1 `none` gate row.
-- `DEVELOPMENT_PLAN/system_components.md` — register the Haskell toolchain/probe declarations; throwaway probe
-  packages and products live beneath `.build/**`. Identify top-level `vendor/**` only as `LTD-SRC-009`
-  migration debt.
+- Phase 0 predecessor gate pass and Phase 2 consumer links.
 
 ## Related Documents
-- [README.md](README.md) — the live tracker and phase order this document serves; the sole home of the
-  current phase status. Resolved tool and dependency observations live only in each generated run bundle.
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the Register-1 honesty token: a green build is a buildability result, never a runtime claim).
-- [overview.md](overview.md) — target architecture and the dynamically resolved toolchain policy.
-- [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — the Register-1
-  pre-cluster spine and the rendering-never-touches-live-infrastructure invariant.
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — the in-process `dhall` decoder (gadt-decode) and the
-  Toolchain note this probe de-risks.
-- [Gateway Migration Model Doctrine](../documents/engineering/gateway_migration_model_doctrine.md) — the one
-  formal obligation whose io-sim simulation depends on this build.
-- [Formal Model Doctrine](../documents/engineering/formal_model_doctrine.md) — the `Model`→{`interpret`,
-  `emitTLA`} mechanism whose spike is sibling evidence, not an amoebius result.
-- [Content Addressing Doctrine](../documents/engineering/content_addressing_doctrine.md) — the `jit-build`
-  resolver and the `CacheBudget`-bounded cache whose deps this probe includes.
-- [Repository Layout and Artifact Provenance](../documents/engineering/repository_layout_doctrine.md) — the
-  authored requirements, generated resolution, repository-local evidence, and ignore/context contract that Sprint 1.5
-  implements.
+
+- [Development-plan tracker](README.md)
+- [Phase 0 documentation suite](phase_00_documentation_suite.md) — the predecessor and the `GenesisTrust` pins
+- [Phase 2 repository layout conformance](phase_02_repository_layout_conformance.md) — source closure over the toolchain this phase establishes
+- [Phase 9](phase_09_dsl_barrier.md) — re-runs this gate through the shipped binary
+- [Reader-facing legacy register](legacy_tracking_for_deletion.md)
+- [Gate-runner doctrine](../documents/engineering/gate_runner_doctrine.md)
+- [Validation-frame doctrine](../documents/engineering/validation_frame_doctrine.md)
+- [DSL doctrine](../documents/engineering/dsl_doctrine.md)
+- [Gateway migration model doctrine](../documents/engineering/gateway_migration_model_doctrine.md)
+- [Content addressing and determinism](../documents/engineering/content_addressing_determinism.md)
+- [Repository layout doctrine](../documents/engineering/repository_layout_doctrine.md)
+- [Pulsar client doctrine](../documents/engineering/pulsar_client_doctrine.md)

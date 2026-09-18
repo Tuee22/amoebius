@@ -13,7 +13,7 @@ This document binds the Phase-51 capability and its still-open exact gate. Curre
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/substrate_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -36,11 +36,10 @@ This document binds the Phase-51 capability and its still-open exact gate. Curre
 
 ## Phase Status
 
-✅ Done.
+⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-50 predecessor and its compatible evidence chain.
 
@@ -93,19 +92,19 @@ remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
-| `Claim` | The actual Haskell host-context caller drives the typed probe-first ensure and lift semantics against independently observed fake host boundaries, with precise applicability/refusal reasons, fresh resolution after changes and no installation on an already converged second pass. |
-| `Subject` | `Amoebius.Host.{Substrate,Frame,HostTool,Ensure,Reconciler,Lift,Context}`, the production `mkBinaryContext` caller, and the acquired `Amoebius.Validation.HostEnsureKernelRun` supervisor. |
-| `Command` | `pb validate phase 51`; the already validated bootstrap forwards this exact argv to the source-bound Haskell dispatcher, which runs every compiler-bearing matrix row offline and serially with `--jobs=1`. |
-| `Oracle` | `test/spec/host/HostEnsureKernelOracle.hs`, which imports no production module and separately authors the exact frame, plan, applicability, argv, replay, paired-negative, and two-root expectations. |
+| `Claim` | The actual Haskell host-context caller drives the typed probe-first ensure and lift semantics against independently observed fake host boundaries, with precise applicability/refusal reasons, fresh resolution after changes and no installation on an already converged second pass. The candidate binds the DSL-barrier (Phase 9) receipt digest and derives its tool set from a corpus example's plan. |
+| `Subject` | `Amoebius.Host.{Substrate,Frame,HostTool,Ensure,Reconciler,Lift,Context}` and the production `mkBinaryContext` caller, all inside the closure of `executable amoebius`; the closed tool set is derived from the `StepAction`s of the corpus plan the DSL barrier accepted, never from a second declaration. |
+| `Command` | Future public spelling is `pb validate phase 51`, admissible while binding the Phase-50 receipt. The agent runs `amoebius-validate preview phase 51`; the human runs `sudo amoebius-validate accept --phase 51`. The runner drives the ensure kernel against fake boundaries with the corpus plan's tool set and runs every compiler-bearing row serially with `--jobs=1`. |
+| `Oracle` | `test/oracle/host/Main.hs`, which imports no `amoebius` library and separately authors the exact frame, plan, applicability, argv, replay, paired-negative, and two-root expectations from literals. |
 | `Positive controls` | Observe the actual production caller on every declared substrate/frame/tool/reconciler arm, exact typed plans and lifted requests, absent-to-present convergence, a probe-only second pass and two isolated fake hosts. |
 | `Paired negatives` | Require successful paired controls before bare/missing/nonexecutable/foreign-root/excluded-substrate/exhausted-plan cases. Each refusal must match its independently authored constructor, arguments and diagnostic with zero forbidden process requests. |
-| `Mutants` | Change initial probing, resolution freshness, applicability, diagnostic derivation, frame lifting or actual production caller routing. The assigned independent exact case must fail for its expected reason; a generic issue list labeled by the active selector is inadmissible. |
+| `Mutants` | Runner-generated from the fixed operator catalogue over `Amoebius.Host.Ensure`, `Amoebius.Host.Reconciler`, and `Amoebius.Host.Lift`, eight per module, at most forty per gate, kill ratio at least 0.6. A mutant that changes initial probing, resolution freshness, applicability, diagnostic derivation, frame lifting, or production caller routing is killed at its assigned oracle row while unrelated controls stay green; no authored mutant seam exists. |
 | `Discovery` | The acquired source inventory must equal the seven host production modules, production caller, Haskell spec, independent oracle, runner, and Cabal declarations in both directions; runtime discovery must produce exactly the closed expected files and row counts. |
 | `Challenge` | Each candidate uses a newly absent run root and two newly absent fake-host roots; a tool created after acquisition must resolve only in its owning root, while the paired foreign root remains empty. |
 | `Observer` | The acquired supervisor retains actual fake-boundary process/file identities, argv/environment, requests, state transitions and cleanup, and observes calls reached from the production binary host-context entry point. |
 | `Authority/bypass` | Only the validated `pb` handoff, authenticated compiler/Cabal/store, offline serial builds, and run-owned `.build/**` fake files are admitted. Network, package-manager mutation, container/VM/cluster/provider calls, hardware discovery, ambient `PATH`, and external roots are forbidden. |
 | `Freshness` | The run root and both fake host roots are unique and absent at acquisition, generated observations are recreated, opening and closing tracked-source identities match, and no prior candidate output can satisfy the new root challenge. |
-| `Qualification` | Reject generic-failure selector labeling, wrong-case assertions, failed positive setup, source-token-only caller checks, no-op driver/caller, stale snapshots and forged process observations through their exact acquired qualification cases before accepting the clean corpus. |
+| `Qualification` | The generated-mutant matrix precedes the clean candidate in the same run. Generic-failure labelling, wrong-case assertions, failed positive setup, and source-token-only caller checks cannot qualify anything, because the runner holds the verdict and the oracle prints from literals. |
 | `Cleanroom` | All build directories, fake executables, observations, and mutation products are generated beneath the unique `.build/runs/phase-51/**` owner root; tracked behavioral expectations remain Haskell and no live effect or external residue is admitted. |
 | `Legacy closure` | `LTD-HOST-001` closes only when the production caller reaches the probe-first driver and the bypass/stale mutants redden. `LTD-HOST-002` closes only when one resolver serves production and disjoint scoped roots and ambient/foreign-root negatives redden. |
 | `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 50 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
@@ -142,13 +141,13 @@ remains phase-local and cannot be supplied by this prose.
 
 ## Sprints
 
-## Sprint 51.1: The closed substrate algebra ✅
+## Sprint 51.1: The closed substrate algebra ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.Substrate` and `Amoebius.Host.Frame` own the wildcard-free closed mappings; `HostEnsureKernelSpec` enumerates every constructor.
 **Blocked by**: [Phase 50](phase_50_host_assert_cli.md) gate pass
 **Independent Validation**: exact four-substrate frame/engine/provider rows plus compiler exhaustiveness and the foreign-root negative.
-**Oracle**: `test/spec/host/HostEnsureKernelOracle.hs`, importing no `Amoebius.*` module.
+**Oracle**: `test/oracle/host/Main.hs`, importing no `Amoebius.*` module.
 **Legacy IDs**: `LTD-HOST-001`, `LTD-HOST-002`.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -183,13 +182,13 @@ member.
 
 Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.2: Install steps as typed data ✅
+## Sprint 51.2: Install steps as typed data ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.HostTool`, `Amoebius.Host.Ensure`, and `Amoebius.Host.Reconciler` own the closed tool, requirement, resolver, and typed step data.
 **Blocked by**: Sprint 51.1
 **Independent Validation**: exact 26-row plan plus bare-path and missing-requirement paired refusals.
-**Oracle**: `HostEnsureKernelOracle.expectedPlans`.
+**Oracle**: `test/oracle/host/Main.hs` (`expectedPlans` rows).
 **Legacy IDs**: `LTD-HOST-001`.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`.
 
@@ -224,13 +223,13 @@ make an install step a value the driver executes rather than a label a reader in
 
 Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.3: The reconciler table ✅
+## Sprint 51.3: The reconciler table ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.Reconciler` owns the single applicability/diagnostic/step table.
 **Blocked by**: Sprint 51.2
 **Independent Validation**: Drive an admitted reconciler through the real caller and observe requests; its minimally excluded counterpart refuses at the exact independently authored constructor/diagnostic before effects; assigned applicability mutants fail their exact case; real package-manager fidelity remains unverified.
-**Oracle**: `HostEnsureKernelOracle.expectedTable` and `expectedRefusals`.
+**Oracle**: `test/oracle/host/Main.hs` (`expectedTable` rows) and `expectedRefusals`.
 **Legacy IDs**: `LTD-HOST-001`.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`.
 
@@ -262,13 +261,13 @@ express a reconciler as a row so its three views cannot disagree with each other
 
 Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.4: The probe-first ensure driver ✅
+## Sprint 51.4: The probe-first ensure driver ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.Ensure.installAndVerify` and `Amoebius.Host.Context.ensureRequiredTools` provide the probe-first driver and production caller.
 **Blocked by**: Sprint 51.3
 **Independent Validation**: The production host-context entry point observes absent-to-present and a probe-only second pass on independent fake hosts; exhausted/stale/foreign-root pairs fail exactly; assigned driver/caller mutants fail their named assertion; live host behavior remains unverified.
-**Oracle**: `HostEnsureKernelOracle.expectedReplay`.
+**Oracle**: `test/oracle/host/Main.hs` (`expectedReplay` rows).
 **Legacy IDs**: `LTD-HOST-001`, `LTD-HOST-002`.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`.
 
@@ -304,13 +303,13 @@ pre-condition.
 
 Run the complete acquired Phase-51 gate; only its exact pass can authorize the mechanical status projection.
 
-## Sprint 51.5: The lift fold to argv ✅
+## Sprint 51.5: The lift fold to argv ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.Lift` owns the pure context-to-argv fold.
 **Blocked by**: Sprint 51.4
 **Independent Validation**: exact 15-row argv projection across host, frame, and container plus the frame-prefix changed subject.
-**Oracle**: `HostEnsureKernelOracle.expectedLift`.
+**Oracle**: `test/oracle/host/Main.hs` (`expectedLift` rows).
 **Legacy IDs**: `LTD-HOST-002`.
 **Docs to update**: `documents/engineering/daemon_topology_doctrine.md`.
 

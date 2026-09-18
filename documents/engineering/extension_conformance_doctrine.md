@@ -16,7 +16,7 @@ are stated over are owned by their own doctrines.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_20_extension_declaration.md, DEVELOPMENT_PLAN/phase_24_conformance_gate_generator.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/decision_log.md, documents/engineering/README.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -31,7 +31,7 @@ are stated over are owned by their own doctrines.
 - [5. The conformance gate is generated, not authored](#5-the-conformance-gate-is-generated-not-authored)
 - [6. The verdict seal](#6-the-verdict-seal)
 - [7. Link-time union closure](#7-link-time-union-closure)
-- [8. A hardware substrate is an extension too](#8-a-hardware-substrate-is-an-extension-too)
+- [8. A hardware substrate is a catalog member with a profile](#8-a-hardware-substrate-is-a-catalog-member-with-a-profile)
 - [9. What conformance does not prove](#9-what-conformance-does-not-prove)
 - [10. Planning ownership](#10-planning-ownership)
 - [Related Documents](#related-documents)
@@ -78,11 +78,12 @@ The two indices every declaration threads are the **resource index** (what capac
 **scope index** (whose data a value belongs to). They appear in every calculus below and are the reason the
 laws can be stated once rather than once per domain.
 
-The base composition seam is the pure `Amoebius.Calculus.Composition` module. Its private component and
-composition constructors admit only values minted under one generative `RequestScope`, preserve authored
-order and payloads, and fold the Phase-9 `ResourceVector` with exact `Natural` addition. Its bounded Phase-10
-oracle exhausts the 25 ordered kind pairs and 125 kind triples and samples numeric laws; it does not construct
-an extension declaration or discharge the later extension-law families.
+The base composition seam is the pure composition module, parked under
+[`LTD-LIB-001`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md#5-dsl-divergence) until
+[Phase 9](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md) decides whether a shipped subject links it. Its
+component and composition constructors are specified to admit only values minted under one generative
+`RequestScope`, preserve authored order and payloads, and fold the unit-tagged `ResourceVector` of
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) with exact addition.
 
 ---
 
@@ -103,16 +104,15 @@ core needs, and an extension that has left one empty is not a partial extension 
 The surface is deliberately small. A domain author's freedom is in the *logic*, which the core never inspects;
 the obligations are about the seams where that logic meets everything else.
 
-**Phase-20 declaration boundary — implemented, gate pending.** `lib:extension-declaration` stores five Phase-10
-`Component scope` values behind a private constructor. Its checked introduction rule must require them in
-calculus order, with one shared generative request-scope index; its resource observation must be the exact
-natural-number composition fold. Five readers must derive the per-calculus singleton sets. The declaration
-identity must hash a versioned, length-framed projection
-of the name, calculus tags, component names, resource coordinates, and explicit canonical payload fields.
-`Show` output is diagnostic only and does not participate. Phase 20 tests that boundary over two declarations
-and ten authored component rows, with a separately implemented digest oracle and compiler barriers for a
-missing component and mixed scopes. This is finite Register-1 evidence. It does not establish L1–L5, prevent
-an implementation from using an undeclared side channel, or make either fixture a conforming extension.
+The declaration is one field, `extDeclaration`, of the `ExtensionSpec` record spelled once in
+[`dsl_doctrine.md` §4](./dsl_doctrine.md#the-v1-extension-seam-extensionspec-linked-not-loaded)
+([DL-0002](../decision_log.md#dl-0002--one-extensionspec-record-is-the-extension-seam)). Its introduction rule
+is specified to require one `Component scope` value per calculus, in calculus order, under one shared
+generative request-scope index; its resource observation is the exact composition fold; and its identity
+hashes a versioned, length-framed projection of the name, calculus tags, component names, resource
+coordinates, and canonical payload fields, with `Show` output diagnostic only. That boundary is owed by
+[Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md). It does not by itself
+establish L1–L5 or prevent an implementation from using an undeclared side channel.
 
 ---
 
@@ -179,9 +179,9 @@ seams the extension declares. The suite is generated to `.build/` and is never t
 `ExtensionDeclaration scope` and a same-request peer list. The L cases follow the declaration vocabulary, C
 cases cross every named peer with C1–C7, compile cases follow evidence claims, and S1–S6 name the security
 boundary. It must emit five canonical suite manifests plus a generated coverage grid beneath `.build/**`; their
-joint length-framed SHA-256 digest is independent of traversal order. The bounded Phase-24 corpus must have one
+joint length-framed SHA-256 digest is independent of traversal order. The bounded Phase 6 corpus must have one
 Infernix declaration and one JitML peer: nineteen executable case identities and 24 coverage cells. P1–P6 are
-explicitly `not-applicable` because the Phase-20 declaration cannot name a transaction axis before Phase 36;
+explicitly `not-applicable` because the Phase 6 declaration cannot name a transaction axis before Phase 8;
 the transaction suite is empty rather than silently credited.
 
 These files are executable obligations only in the sense that a runner must return exactly one result for
@@ -227,7 +227,7 @@ verdict construction, verdict omission, and cross-request verdict use.
 
 That is content binding and a single API introduction path, not authenticated execution. Any in-process
 caller can supply an observation bundle to the pure runner; no signature, process isolation, or external gate
-service proves where those results came from. The Phase-24 contract records this as UNVERIFIED rather than promoting the
+service proves where those results came from. The Phase 6 contract records this as UNVERIFIED rather than promoting the
 modeled passing seal to authenticated execution. SHA-256 collision absence is likewise ASSUMED.
 
 ---
@@ -274,21 +274,25 @@ a bad practice.
 
 ---
 
-## 8. A hardware substrate is an extension too
+<a id="8-a-hardware-substrate-is-an-extension-too"></a>
 
-A new hardware substrate — a different accelerator, a different host operating system, a different frame
-technology — is admitted by the same contract, not by a special case. It declares its component in each of the
-five calculi exactly as a domain does: which artifacts it needs built, what capacity it grants, which layers
-exist on it and which transitions between them have witnesses, which workflow obligations it takes on, and what
-evidence it offers.
+## 8. A hardware substrate is a catalog member with a profile
 
-Two things follow. First, the substrate enumeration stops being a closed union edited by hand and becomes a
-link set with the same closure property, so "does this extension run on that substrate" is a question about a
-declared relation rather than about a wildcard arm
-([`lift_and_compose_doctrine.md` §7](./lift_and_compose_doctrine.md#7-the-lift-calculus)). Second, a substrate
-that cannot honestly declare a witness for some transition simply has no constructor for it, and every
-extension requiring that transition is statically excluded from it rather than failing there at run time. The
-concrete substrate instances are owned by [`substrate_doctrine.md`](./substrate_doctrine.md).
+A hardware substrate is not an extension
+([DL-0001](../decision_log.md#dl-0001--substrates-are-a-closed-catalog-with-one-profile-site)). The substrate
+axis is a closed four-member catalog owned by
+[`substrate_doctrine.md` §1](./substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob), with
+exactly one `SubstrateProfile` site mapping each member to its natural architecture, its lanes, and its host
+frame. Adding a family is a catalog edit plus a decision-log entry, never a declaration an extension can make.
+
+What an extension declares about hardware is one field, `extRequiresLane`, of the `ExtensionSpec` record
+spelled once in
+[`dsl_doctrine.md` §4](./dsl_doctrine.md#the-v1-extension-seam-extensionspec-linked-not-loaded). "Does this
+extension run on that substrate" is then a total question over the catalog: the lane the extension requires is
+either provided by the substrate's profile or it is not, and an extension whose lane is unavailable on the
+declared host is refused at admission with `LaneUnavailable`, never at run time. The transition witnesses of
+the lift calculus in [`substrate_doctrine.md` §10](./substrate_doctrine.md#10-the-lift-calculus) remain
+observation-produced; a substrate that cannot produce a witness for some transition has no constructor for it.
 
 ---
 
@@ -309,17 +313,14 @@ Stated plainly, because a conformance verdict is exactly the kind of artifact th
 - **It does not prove the law set is sufficient.** The laws are a human choice, exactly as the catalogue's
   taxonomy is, and a hazard along a dimension no law names passes every gate
   ([`documentation_standards.md` §16](../documentation_standards.md#16-the-illegal-state-catalogue-is-a-covering-not-a-list)).
-- **The target boundary is pure and bounded.** [Phase 10](../../DEVELOPMENT_PLAN/phase_10_calculus_composition.md)
-  owns the base same-request calculus composition; [Phase
-  20](../../DEVELOPMENT_PLAN/phase_20_extension_declaration.md) owns the complete declaration; [Phases
-  21–23](../../DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md) own bounded L, C, and S evaluators;
-  and Phase 24 owns the derived plan, suite bytes, modeled passing verdict, and guarded pure link set
-  described above. The bounded Phase-24 implementation is
-  `src/extension-conformance-gate/Amoebius/Extension/Conformance/Gate.hs`; its independently authored finite
-  inventory and package-hidden supervisor retain the generator, digest, admission, compiler-boundary, and
-  changed-production checks without upgrading the residue below. P instances await Phase 36's transaction vocabulary. None of these authenticates a result
-  observer, proves C1, closes S/P composition, or establishes runtime correspondence. Status lives only in the
-  [tracker](../../DEVELOPMENT_PLAN/README.md).
+- **The target boundary is pure and bounded.**
+  [Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) owns the complete
+  declaration, the bounded L, C, and S evaluators, the derived plan, suite bytes, modeled passing verdict, and
+  guarded pure link set described above; the base same-request calculus composition is parked under
+  [`LTD-LIB-001`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md#5-dsl-divergence). P instances await
+  the app-declared tables of [Phase 8](../../DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md). None of
+  these authenticates a result observer, proves C1, closes S/P composition, or establishes runtime
+  correspondence. Status lives only in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 

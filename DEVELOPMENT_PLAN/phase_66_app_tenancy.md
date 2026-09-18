@@ -35,9 +35,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-65 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -60,7 +59,7 @@ application-data-path gate.
 component suite can supply supporting observations only; the sole acceptance command is `pb validate phase 66`. Split the phase if
 work adds an application data operation, UI interaction, another cluster, HA failover, a second substrate, or
 a separately useful provider feature.
-**Substrate:** `linux-cpu` — future live cluster observation only after the Phase-49 barrier and every predecessor gate pass.
+**Substrate:** `linux-cpu` — future live cluster observation only after the DSL barrier (Phase 4) and every predecessor gate pass.
 **Lane:** `linux-cpu/amd64`.
 **Register:** 3 — live provider materialization and independent readback; NOT VALIDATED.
 
@@ -117,7 +116,7 @@ remains phase-local and cannot be supplied by this prose.
 ## Doctrine adopted
 
 - [`workflow_calculus_doctrine.md` §3 — Teardown is a type obligation](../documents/engineering/workflow_calculus_doctrine.md#3-teardown-is-a-type-obligation) — tenant/provider provisioning provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
-- [`tenancy_doctrine.md` §4 — The typed shapes: `TenantSpec` / `SubjectSpec` / `Membership` / `Owner` / `RoleBinding`](../documents/engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--subjectspec--membership--owner--rolebinding): consume the Phase-8 identity
+- [`tenancy_doctrine.md` §4 — The typed shapes: `TenantSpec` / `SubjectSpec` / `Membership` / `Owner` / `RoleBinding`](../documents/engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--subjectspec--membership--owner--rolebinding): consume the Phase 6 identity
   values without reintroducing an unqualified subject, tenant, owner, membership, or resource reference.
 - [`tenancy_doctrine.md` §5 — RBAC is derived, never authored](../documents/engineering/tenancy_doctrine.md#5-rbac-is-derived-never-authored): a checked tenant/role graph is the only source of provider policy.
 - [`service_capability_doctrine.md` §4 — Capability → provider → shape: the binding](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding): provider bindings supply mechanism, never caller authority.
@@ -197,7 +196,7 @@ qualify this phase's complete gate after its predecessor. Resolve owned legacy d
 
 ## Related Documents
 
-- [Phase 38 — UI authorization kernel](phase_38_ui_authorization_kernel.md)
+- [Phase 8](phase_08_ui_program_language_binding.md)
 - [Phase 65 — live DSL control-plane daemon](phase_65_live_dsl_deploy.md)
 - [Phase 67 — Pulsar client](phase_67_pulsar_client.md)
 - [Phase 68 — live subject/tenant isolation](phase_68_user_tenant_isolation_live.md)

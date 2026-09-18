@@ -17,7 +17,7 @@ decoupled from, owned by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doc
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -38,10 +38,10 @@ decoupled from, owned by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doc
 - [Related Documents](#related-documents)
 
 **Node-local read-side target — NOT VALIDATED.** The
-[Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) must validate model-pinned OCI
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) must validate model-pinned OCI
 content/snapshot joins, planned-slot versus observed-UID runtime metadata, closed
 layout routing, alias-aware backing groups, and physical raw-versus-VM-usable parent accounting. The
-target contract keeps these observations inside the bounded Phase-29 suite and exact negative/twin corpus.
+target contract keeps these observations inside the bounded Phase 4 suite and exact negative/twin corpus.
 Live deletion, GC, allocation, and backing observation remain unverified; no current ledger is asserted here.
 
 ## 1. Cluster and storage have independent lifetimes
@@ -285,7 +285,7 @@ node-level precondition for the cluster-level guarantee in [§6](#6-the-lossless
 ### 5.2 The storage backing is bounded — the closed `StorageBacking` union
 
 **Pure read-side candidate — NOT VALIDATED.** The
-[Phase 28 candidate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) implements the closed Haskell
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) implements the closed Haskell
 `StorageBudget`/`StorageBacking` read side and independently test physical
 geometry, filesystem presentation, allocation rounding, uniform per-backing claims, migrations, backup,
 restore, disjoint pools, and bounded snapshot-driven scaling. It consumes authored
@@ -736,7 +736,7 @@ Phase 78 is the first owner of the live provider-storage claim. Its Register-3 t
 bytes distinct from allocation-rounded bytes, seal a provider ID behind checked create receipt data, keep old
 and replacement bytes/count/attachments/copy execution charged together, render only a Retain static-PV shape
 over a known EBS handle, observe CSI attach and same-handle reattach, and verify cloud delete denial. Phase 90
-owns the later elevated cleanup/reclamation harness; no Phase-48 pure-algebra result may stand in for either
+owns the later elevated cleanup/reclamation harness; no Phase 7 pure-algebra result may stand in for either
 live provider observation. All of these targets remain NOT VALIDATED until their numerical predecessors are
 passed by their complete qualified gates.
 
@@ -757,8 +757,8 @@ consensus or provider storage.
 
 Phase 64 must re-exercise the delete/recreate mechanism after the authenticated edge is available. The
 destructive portion must run in a fresh, isolated, marker-owned `amoebius-keycloak-ingress-rebind` kind
-cluster established only after the Phase-49 barrier and Phase-55 live-kind owner. It may not assume or retain
-any pre-barrier Phase-35–43 live stack. A Haskell-declared Keycloak-relational row payload and exact MinIO
+cluster established only after the DSL barrier (Phase 4) and Phase-55 live-kind owner. It may not assume or retain
+any pre-barrier Phase 5–43 live stack. A Haskell-declared Keycloak-relational row payload and exact MinIO
 object must survive old node/API absence and a run-two control plane with different CA, kube-system namespace
 UID, and node-container ID; no post-recreate writes may precede readback, and the scratch cluster must then be
 removed while backing images remain. This is a target regression projection of the Phase-60 storage

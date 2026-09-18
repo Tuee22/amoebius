@@ -50,12 +50,12 @@ or opaque Haskell value does not establish that its claimed operation occurred.
 The [formal-model doctrine](./documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not)
 defines proof scope. The [spoof-resistance doctrine](./documents/engineering/testing_spoof_resistance.md)
 defines acceptance and observation boundaries. Current status is owned by the
-[phase overview](./DEVELOPMENT_PLAN/README.md#phase-overview); the dated audit beside it records what a named
-inspection observed rather than the present frontier.
+[phase overview](./DEVELOPMENT_PLAN/README.md#phase-overview).
 
-Development can progress automatically through ready sprints. A complete qualified phase run permits its exact
-status-only transition and the next numerical gate. Candidate changes must not redefine the accepted
-requirements used to judge that run. The
+An agent implements sprint seams and runs a gate preview that mints nothing. The human's `accept` records one
+complete qualified phase run as its exact status-only transition; one phase advances per accept
+([DL-0009](./documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition)). Candidate
+changes must not redefine the accepted requirements used to judge that run. The
 [gate-integrity contract](./DEVELOPMENT_PLAN/development_plan_gate_integrity.md) owns this procedure.
 
 ## Where to start
@@ -63,6 +63,7 @@ requirements used to judge that run. The
 - [Reading order](./documents/reading_order.md): a guided route through the design.
 - [Glossary](./documents/glossary.md): terms and their canonical owners.
 - [Development plan](./DEVELOPMENT_PLAN/README.md): phase order, current status, and remaining work.
+- [Decision log](./documents/decision_log.md): every decision that changed frozen doctrine or the plan.
 - [Documentation index](./documents/README.md): architecture and domain references.
 - [Testing doctrine](./documents/engineering/testing_doctrine.md): registers, expectations, and test lifecycles.
 - [Repository layout](./documents/engineering/repository_layout_doctrine.md): tracked source and generated state.
@@ -82,7 +83,11 @@ by the [layout doctrine](./documents/engineering/repository_layout_doctrine.md).
 ## Working agreement
 
 [`AGENTS.md`](./AGENTS.md) owns agent conduct, including serial compiler execution and the prohibition on
-agent staging, committing, or pushing. [`CLAUDE.md`](./CLAUDE.md) imports that file mechanically.
+agent staging, committing, or pushing. [`CLAUDE.md`](./CLAUDE.md) imports that file mechanically. Agents run
+under a user identity with no sudo, and every governed document is frozen behind the
+[decision log](./documents/decision_log.md), as
+[`AGENTS.md`](./AGENTS.md#host-precondition) and
+[`documentation_standards.md` §17](./documents/documentation_standards.md#17-the-doctrine-freeze) specify.
 
 ## Related Documents
 

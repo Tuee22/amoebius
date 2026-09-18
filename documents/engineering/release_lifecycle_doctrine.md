@@ -428,8 +428,8 @@ elsewhere:
 completion status, and validation gates are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the environment/promotion values compose with the SSA reconciler landing in
-**Phase 58**; pure test-workflow/evidence algebra is assigned to **Phase 48**, while live test-topology
-execution and its evidence observations are assigned to **Phase 90** after the Phase-49 barrier; the DB-schema-migration
+**Phase 58**; pure test-workflow/evidence algebra is assigned to **Phase 7**, while live test-topology
+execution and its evidence observations are assigned to **Phase 90** after the DSL barrier (Phase 4); the DB-schema-migration
 `RolloutPhase` lands in **Phase 71**, while the remaining manifest-change-correctness hardening and the generic
 third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md). This doc states the target shape and links back for status.
 
@@ -468,6 +468,6 @@ third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/
 > Gateway API/Envoy, Keycloak, Pulsar, browser, Kubernetes, CNI, or provider observation is current.
 
 > **Phase-87 target — NOT VALIDATED.** Promotion must eventually require a finite path for every admitted
-> offline record kind. A live-browser contract may only run after the Phase-49 barrier and must independently
+> offline record kind. A live-browser contract may only run after the DSL barrier (Phase 4) and must independently
 > observe stage, termination, atomic resume, reload, rollback, and incompatible-version refusal. Gateway,
 > Pulsar, provider, Keycloak, Kubernetes, and CNI observations are separate claims.

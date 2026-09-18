@@ -14,7 +14,7 @@ claimed as evidence is owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_31_provision_seal.md, documents/engineering/README.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_types.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_types.md
 **Generated sections**: none
 
 </details>
@@ -33,7 +33,7 @@ Current certification and evidence are recorded in the [development plan](../../
 For overcommit to be a pure checked rejection rather than only a runtime error, the capacity the fold checks
 against must be a **pure-model input** — a demand cannot be provisioned against a number learned only after
 effects. amoebius therefore **declares** capacity in the spec/inventory model, completes bind/expansion, runs
-the fold at the Phase-31 `provision-seal`, and then **cross-checks** the declaration against reality at
+the fold at the Phase 3 `provision-seal`, and then **cross-checks** the declaration against reality at
 reconcile (runtime-checked). gadt-decode decode never constructs `ProvisionedSpec`.
 
 - **Declared in pure input; checked at the provision seal.** Each host/node advertises an **allocatable**
@@ -1323,7 +1323,7 @@ commitment refuses rather than being assumed free. This doc consumes the two num
 
 > **Honesty.** This model is Phase-0 design intent, specified before implementation. The fold is a real
 > pure provision-seal spec-layer guarantee *when implemented as specified*; that claim is itself about a design not yet
-> built (Phase 9). The runtime-checked cross-check and enforcement are deferred by construction. Where the
+> built (Phase 4). The runtime-checked cross-check and enforcement are deferred by construction. Where the
 > capacity arithmetic generalizes the push-back soundness proven in prodbox
 > ([cluster_lifecycle_doctrine.md §6](./cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec)),
 > that is sibling evidence, not amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).

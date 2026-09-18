@@ -18,7 +18,7 @@ owned by [platform_services_doctrine.md](../engineering/platform_services_doctri
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
 **Generated sections**: none
 
 </details>
@@ -75,7 +75,7 @@ flowchart LR
 
 ### 3.3 Misconfigured gateway
 
-**Delivery-owner:** `Phase-27`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `security`
 
@@ -97,7 +97,7 @@ and TLS actually terminates).
 
 ### 3.4 DNS that binds to the wrong IP
 
-**Delivery-owner:** `Phase-33`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `security`
 
@@ -117,7 +117,7 @@ at reconcile — the enforcement half the type cannot reach).
 
 ### 3.6 Blocking NetworkPolicy (services can't reach each other)
 
-**Delivery-owner:** `Phase-33`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `security`
 
@@ -133,7 +133,7 @@ human never writes the policy. **Owner:**
 
 **Layer:** type-foreclosed at the Haskell IR — NetworkPolicies are derived from the declared dependency graph and never hand-authored, so a severing policy has no constructor; runtime-checked residue — that the live CNI actually admits the traffic. Exact edge-set equality over the emitted policies is `decode-foreclosed`.
 **Validation-locus:** `rendered-artifact-oracle` (the oracle compares the derived NetworkPolicy with the emitted objects —
-a declared dependency is never a connection the policy blocks; Phase 33 owns target validation of exact set
+a declared dependency is never a connection the policy blocks; Phase 3 owns target validation of exact set
 equality against the separately authored Haskell
 `expectedNetworkPolicyEdges :: InForceSpec -> Set ServiceEdge`, which does not call the production policy
 renderer; no encoded edge oracle is tracked) + `gadt-decode` (the consumer handle exists
@@ -145,7 +145,7 @@ comparison corpus is materialized only beneath `.build/test-corpora/**`.
 
 ### 3.7 Accidental insecure / backdoor ingress
 
-**Delivery-owner:** `Phase-27`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `security`
 
@@ -164,7 +164,7 @@ host-local peer into a wild endpoint, and none that exposes a workload to the wi
 **Layer:** type-foreclosed at the Haskell IR — only the Keycloak edge holds the expose-to-wild capability and endpoint kinds do not interconvert; runtime-checked residue — that the running cluster in fact exposes no unauthenticated path. The no-backdoor semantic predicate over the emitted objects is `decode-foreclosed`.
 **Validation-locus:** `dhall-typecheck` (the application schema exposes no authorable wild-ingress or raw
 NodePort arm) + `rendered-artifact-oracle` (the no-backdoor-ingress semantic predicate on the emitted objects — no wild
-NodePort or Keycloak-skipping Ingress in the rendered manifest, whose target Register-1 validation is owned by Phase 33) + `gadt-decode` (only the edge holds
+NodePort or Keycloak-skipping Ingress in the rendered manifest, whose target Register-1 validation is owned by Phase 3) + `gadt-decode` (only the edge holds
 the expose-to-wild capability, and endpoint kinds are distinct non-interconverting indices — a self-published
 wild endpoint has no constructor) + `live-effect` residue (that the running cluster in fact exposes no
 unauthenticated path). Phase 64 owns the `linux-cpu` residue challenge: the sole LoadBalancer must be the
@@ -175,7 +175,7 @@ WAN-Pod source is denied.
 
 ### 3.8 Cross-tenant references and literal secrets
 
-**Delivery-owner:** `Phase-27`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `security`
 
@@ -222,7 +222,7 @@ ConfigMap or etcd — this row's enforcement is explicitly the runtime half).
 
 ### 3.10 A child spec that reaches beyond its own subtree
 
-**Delivery-owner:** `Phase-27`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `security`
 
@@ -245,7 +245,7 @@ shape).
 
 ### 3.11 An unsafe workload (no resource limits, no hardened securityContext)
 
-**Delivery-owner:** `Phase-25`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `security`
 
@@ -278,12 +278,12 @@ whole-deployment `ProvisionedSpec`, returning a `ProvisionError` before that sea
 cannot supply any demand) +
 `rendered-artifact-oracle` (the hardened non-root / no-privilege-escalation / dropped-capabilities /
 read-only-root `securityContext` and the exact checked resource projection are present in the emitted
-manifest, whose target validation across all nine capability arms and both shapes is owned by Phase 33) + `live-effect` residue (the running pod actually enforces the hardened context and resource
+manifest, whose target validation across all nine capability arms and both shapes is owned by Phase 3) + `live-effect` residue (the running pod actually enforces the hardened context and resource
 ceilings).
 
 ### 3.40 A secure-gateway reach collapsing into wild ingress
 
-**Delivery-owner:** `Phase-33`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `security`
 
@@ -343,7 +343,7 @@ not survive the host-daemon→control-plane daemon handoff) + `live-effect` resi
 
 ### 3.45 A cross-tenant or hand-authored RBAC binding
 
-**Delivery-owner:** `Phase-31`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `capability-provision`
 
@@ -402,7 +402,7 @@ residue, not a Phase-66 claim. Ledger `external-run-reference`.
 
 ### 3.79 A UI action whose server authorization does not match its declaration
 
-**Delivery-owner:** `Phase-38`
+**Delivery-owner:** `Phase 8`
 
 **Case-family:** `ui`
 
@@ -452,7 +452,7 @@ unguarded, change a handler id without changing the policy, and serve the privat
 client asset; each must fail before effects or private disclosure. Black-box direct action and manifest
 requests are the live oracle, not a click-visibility test.
 
-**Current Phase-38 validation contract.** The Register-1 gate matches five normalized registry tuples and
+**Current Phase 8 validation contract.** The Register-1 gate matches five normalized registry tuples and
 byte-equal client/server projections against `AuthorizationOracle.hs`, matches six allow/deny rows and four
 exact stale-epoch failures, and requires every denial to leave an empty pure effect trace. Its acquired Haskell
 supervisor builds and executes the `default-allow` and `visibility-is-authorization` production CPP mutations
@@ -460,20 +460,20 @@ serially in a fresh run root; both must fail at their independently named loci. 
 their floor and the five-calculus projection composes counts `5,6,8,9,2` to `5,30,0,0`. Serialized tables,
 the Python gate, and materialized mutant descriptors are retired authorities. Live gateway, UI-server,
 identity-provider, and provider-policy enforcement remains UNVERIFIED. See
-[Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md).
+[Phase 8](../../DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md).
 
-**Current Phase-43 validation contract.** The Register-2 `serve-ui` Haskell boundary derives tenant, subject,
+**Current Phase 70 validation contract.** The Register-2 `serve-ui` Haskell boundary derives tenant, subject,
 permission, and epoch from a signed credential. Own-scope read/mutation reaches the modeled guarded handler,
 while foreign, forged-header, wrong-origin, and stale twins produce no handler invocation; startup,
 private-plan, idempotency, and WebSocket pairs are independently pinned, and nine production mutations must
 turn red. The startup battery includes an extra unreferenced linked handler, and the real five-calculus
 projection accounts for 80 units. The complete integrated gate remains **NOT VALIDATED**.
 Live Keycloak, edge exclusivity, provider policy, cluster deployment, and HA remain UNVERIFIED. See
-[Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md).
+[Phase 70](../../DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md).
 
 ### 3.80 A subject resolving or mutating another subject's resource without a grant
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase 6`
 
 **Case-family:** `ui`
 
@@ -518,11 +518,11 @@ drop only the tenant predicate, trust a browser-supplied tenant, key a cache by 
 grant after revocation; every cross-scope result must be indistinguishable from an unavailable resource and no
 mutation may occur.
 
-**Phase-8 bounded evidence contract.** The Register-1 scope gate matches six owner/grant joins and the exact same-tenant
+**Phase 6 bounded evidence contract.** The Register-1 scope gate matches six owner/grant joins and the exact same-tenant
 `OwnerMismatch` and cross-tenant `TenantMismatch` swaps. Legal twins compile while raw `ResourceId`
 construction, scope retagging, request-index escape, and request-scope forgery fail at pinned compiler reasons;
 the registry-backed owner-equality mutant makes both swaps red. Provider enforcement remains the live residue.
-See [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md).
+See [Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md).
 
 **Permanently invalidated Phase-68 run report.** The Register-3 gate authenticates and introspects three real Keycloak credentials across
 two tenants, then drives a constructor-private Haskell request context through paired own/foreign Postgres RLS,
@@ -534,7 +534,7 @@ provider-audit-log correspondence remain `UNVERIFIED`. Ledger
 
 ### 3.81 A UI value flowing to an incompatible tenant, subject, or audience scope
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase 6`
 
 **Case-family:** `ui`
 
@@ -572,15 +572,15 @@ formatter into a public response, log a labelled secret, key a cache without its
 topic, and feed untrusted model/browser text into an authority sink; each must identify the complete offending
 path before effects.
 
-**Phase-8 bounded evidence contract.** The Register-1 flow gate matches four independently authored direct/transitive decisions
+**Phase 6 bounded evidence contract.** The Register-1 flow gate matches four independently authored direct/transitive decisions
 and exact subject-mismatch, cycle, missing-member, and missing-path diagnostic rows. Nine generated rejection
 classes meet their floors, general declassification fails at its pinned compiler reason, and the total checker
 reports transitive leaks with complete paths. Live sink behavior remains `UNVERIFIED`. See
-[Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md).
+[Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md).
 
 ### 3.83 A UI plan executed after an authority-bearing source changed
 
-**Delivery-owner:** `Phase-40`
+**Delivery-owner:** `Phase 8`
 
 **Case-family:** `ui`
 
@@ -626,13 +626,13 @@ current registry, publish only one plan half, swap equal-shaped client/server ge
 browser's claimed generation. Every stale or mixed replay must fail closed; a cosmetic-only change outside the
 declared source set remains executable, preventing an oracle that merely rejects all old bundles.
 
-**Current Phase-40 contract.** The Register-1 compiler must match four logical projections, four canonical
+**Current Phase 8 contract.** The Register-1 compiler must match four logical projections, four canonical
 artifacts declared in typed Haskell, four independently derived SHA-256 identities, and six finite-demand
 cells. An independently assembled authority-source list detects change and omission, opposite insertion
 orders in fresh processes must be byte-identical, and six changed-production projection/digest mutants must
 turn red at exact loci. The five-calculus composition accounts for 32 units. Request-time freshness and live
 release pairing remain UNVERIFIED; validation status is owned only by the qualified phase gate. See
-[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md).
+[Phase 8](../../DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md).
 
 ---
 

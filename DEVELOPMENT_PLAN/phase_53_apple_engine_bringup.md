@@ -37,27 +37,27 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-🔄 Active — NOT VALIDATED.
+⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-52 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
 
-The tracker previously recorded Phase 52 and every earlier gate as Done. This checkout is on macOS `arm64`, but the
-2026-09-08 inspection found no transferred predecessor receipt, matching original candidate, bootstrap
+The tracker previously recorded Phase 52 and every earlier gate as Done. The inspected Apple checkout was on
+macOS `arm64`, but the 2026-09-08 inspection found no transferred predecessor receipt, matching original candidate, bootstrap
 inputs, or authenticated source-repository cache. The existing Phase-53 dispatcher also acquires the
 Linux/`x86_64`-only `GenesisTrust` token before reaching its Apple runner. Native toolchain acquisition and
 the predecessor evidence must be bound without relaxing the original genesis assumption or substituting
 tracker status for execution evidence.
 
 The Haskell subject, independent oracle, paired negatives, six production mutation selectors, runner, and
-typed gate/resource contracts exist. Serialized native direct-source component diagnostics accept the clean
-subject and reject all six mutants at their independently assigned assertion sets. They also reject a combined
-mutant with an unrelated failure and a selected mutant linked against unchanged production. These are component
-observations only; no complete Phase-53 gate or live Colima execution occurred in this checkout.
+typed gate/resource contracts exist. Serialized native direct-source component diagnostics in that Apple
+checkout accepted the clean subject and rejected all six mutants at their independently assigned assertion
+sets. They also rejected a combined mutant with an unrelated failure and a selected mutant linked against
+unchanged production. These are component
+observations only; no complete Phase-53 gate or live Colima execution occurred in that Apple checkout.
 
 
 ## Phase Summary
@@ -67,6 +67,10 @@ runs one boundary away from the host it started on. The target gate must close t
 the one prerequisite Homebrew is, ensure Colima through it, provision a frame whose size came from the carve
 arithmetic rather than from a default, and run the linux step list inside it. The frame is plumbing; what
 the cluster sees is a CPU-only Linux host at `arm64`.
+
+On a host whose natural substrate is not `apple`, the runner refuses this gate as `SUBSTRATE-ABSENT` by design;
+no mock, emulation, or documentation can stand in for the physical Apple Silicon host
+([`gate_runner_doctrine.md` §5](../documents/engineering/gate_runner_doctrine.md#5-preflight-refusals-and-predecessor-chaining)).
 
 What makes this phase cheap is that the step list is Phase 51's, lifted into the Colima frame rather than
 re-authored for it. That is the load-bearing property, not an efficiency: a second deployment path is how one
@@ -148,9 +152,9 @@ remains phase-local and cannot be supplied by this prose.
 The sprint contracts below own the current implementation seams. Their component diagnostics do not close
 any sprint; the complete acquired phase gate remains the required validation boundary.
 
-## Sprint 53.1: The Homebrew floor is verified, never installed 🔄
+## Sprint 53.1: The Homebrew floor is verified, never installed ⏸️
 
-**Status**: Active — NOT VALIDATED
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `Amoebius.Host.AppleEngine.admitAppleFloor` and the acquired live supervisor verify physical Apple Silicon, Homebrew, and Xcode before any mutation.
 **Blocked by**: [Phase 52](phase_52_linux_engine_bringup.md) gate pass
 **Independent Validation**: one green floor and three exact missing-prerequisite pairs, plus the installs-floor production mutant.
@@ -182,11 +186,15 @@ supply.
 
 ### Remaining Work
 
-Restore the verified Phase-52 receipt together with its matching original candidate and the authenticated
-build inputs. Replace the Phase-53 dispatcher's dependence on locally reacquiring Linux-only GenesisTrust
+Make the Phase-52 receipt, its matching original candidate, and authenticated build inputs available to the
+Apple validation environment, and establish their authenticity and current compatibility through the accepted
+verifier. The 2026-09-17 Linux inspection located candidate/receipt files in the protected certification mirror,
+but did not validate or transfer them. Replace the Phase-53 dispatcher's dependence on locally reacquiring
+Linux-only GenesisTrust
 with an independently checked native toolchain authority that consumes the predecessor fact without changing
 the original bootstrap assumption. Resolve the qualification compiler, Cabal, and store from that authority;
-the runner's hard-coded `~/.cabal/store` is absent on this host, which uses Cabal's XDG store. Then run the
+the runner's hard-coded `~/.cabal/store` was absent on the previously inspected Apple host, which used Cabal's
+XDG store. Then run the
 complete acquired Phase-53 gate on physical Apple Silicon; only its exact pass can authorize the mechanical
 status projection.
 

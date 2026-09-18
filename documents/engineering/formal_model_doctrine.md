@@ -16,7 +16,7 @@ bridges model and implementation, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_14_refinement_checker.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/tla_modelling_assumptions.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -108,7 +108,7 @@ Compile-time rejection witnesses establish only the named type boundary under th
 kernel's semantics unspecified. Making the whole later proof stack a prerequisite prevents the finite kernel
 from being established independently.
 
-**The rule.** [Phase 11](../../DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md) owns the finite kernel and
+**The rule.** [the proof-assistant track](../../DEVELOPMENT_PLAN/later_phases.md) owns the finite kernel and
 independent semantic expectations. Later checker and concrete-model phases add executable checker
 correspondence and protocol proofs. Each phase states the exact strength and scope it owns.
 
@@ -169,9 +169,9 @@ rejection. Unrelated compile errors, arbitrary exceptions, and missing output do
 counterexamples.
 
 The concrete-model owners are
-[Phase 17](../../DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md) and
-[Phase 18](../../DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md).
-[Phase 19](../../DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md) owns correspondence under modeled
+[Phase 75](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md) and
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md).
+[Phase 75](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md) owns correspondence under modeled
 concurrency. Their plans define the executable case inventories; this doctrine records no passing counts.
 
 **What it forecloses.** A model that initializes a fixture count and asserts that same count does not validate
@@ -233,6 +233,15 @@ Model checks run at development and gate time for the bound source and contract.
 relevant changes; an earlier result is not permanent. Per-spec structural admission checks must enforce the
 envelope assumed by the model without pretending to rerun its exhaustive proof.
 
+Under certification generation 2 the run-local fake solver yields only `Inconclusive`; `Inductive` and
+`Proved` are unconstructible without an authenticated real decision procedure
+([DL-0007](../decision_log.md#dl-0007--certification-generation-2-replaces-the-validation-kernel)). The
+explicit-state, symbolic, and refinement checkers are parked in the
+[proof-assistant track](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-surgical-proof-assistant-track-emittla-faithfulness--fold-closure)
+under `LTD-LIB-002`
+([legacy register §5](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md#5-dsl-divergence)); no numbered
+phase consumes them until that track is promoted.
+
 ### 6.1 The proof stack is amoebius-owned
 
 amoebius owns the Haskell model, translations, decision classification, refinement relation, and qualification.
@@ -251,7 +260,7 @@ outside its sampled values. Treating that result as `unsat` can turn a false obl
 general completeness theorem for linear integer constraints. A fake process returning solver-shaped text
 does not supply that theorem.
 
-**The rule.** [Phase 13](../../DEVELOPMENT_PLAN/phase_13_symbolic_checker.md) must bind an authenticated real
+**The rule.** [the proof-assistant track](../../DEVELOPMENT_PLAN/later_phases.md) must bind an authenticated real
 decision procedure or an independently checked complete procedure for the exact admitted theory. Base and
 step induction use the full invariant conjunction. Unsupported theory, timeout, unknown, and malformed
 results remain distinct refusals or inconclusive outcomes.
@@ -261,7 +270,7 @@ unbounded proof. Qualification includes satisfiable formulas whose witnesses esc
 false unsatisfiability responses, incomplete models, and replayed solver output. Exact Haskell cases belong
 to the phase oracle.
 
-[Phase 14](../../DEVELOPMENT_PLAN/phase_14_refinement_checker.md) additionally binds the actual GHC-accepted
+[the proof-assistant track](../../DEVELOPMENT_PLAN/later_phases.md) additionally binds the actual GHC-accepted
 source body to the parsed refinement fragment. GHC acceptance alone does not establish the annotation.
 Preservation and postcondition-to-model implication must be discharged by the admitted decision authority.
 
@@ -307,16 +316,17 @@ at the production call site; it cannot be inferred from an import, a module name
 ## 9. Planning ownership
 
 This doctrine owns the target model and evidence distinctions. The
-[development-plan tracker](../../DEVELOPMENT_PLAN/README.md) owns the validation reset, dated implementation
-audit, status, and remaining work. This document records no current formal-validation result.
+[development-plan tracker](../../DEVELOPMENT_PLAN/README.md) owns status and remaining work; the
+[decision log](../decision_log.md) records the reset that parked the checkers. This document records no
+current formal-validation result.
 
 The complete DSL target remains the connected language and its required compositions. Each phase discharges
 only its declared obligation. Bounded proof and sampled checks remain useful evidence without becoming an
 unbounded whole-language theorem through a phase-status change.
 
 The finite bootstrap trust root is not required to prove the entire checker stack.
-The [hardware-free barrier](./conformance_harness_doctrine.md#5-the-pre-hardware-gate-barrier) owns complete
-language integration before live validation opens.
+[Phase 9, the DSL barrier](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md), owns complete language
+integration before live validation opens.
 
 ## Related Documents
 
@@ -324,7 +334,7 @@ language integration before live validation opens.
 - [Gateway migration model](./gateway_migration_model_doctrine.md)
 - [Chaos and failover](./chaos_failover_doctrine.md)
 - [Generated artifacts](./generated_artifacts_doctrine.md)
-- [No-cluster conformance harness](./conformance_harness_doctrine.md)
+- [No-cluster conformance harness](./gate_runner_doctrine.md)
 - [Deterministic simulation](./deterministic_simulation_doctrine.md)
 - [Manifest generation](./manifest_generation_doctrine.md)
 - [Documentation standards](../documentation_standards.md)

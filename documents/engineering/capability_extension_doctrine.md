@@ -1,7 +1,7 @@
 # The Capability-Extension Graph
 
 > **Purpose**: Single source of truth for the amoebius capability-extension graph — how a linked
-> `ExtensionSpec` declares what it PROVIDES (`extCapabilities`) and REQUIRES (`extRequires`), how the two
+> `ExtensionSpec` declares what it PROVIDES (`extProvides`) and REQUIRES (`extRequires`), how the two
 > capability-extension kinds the linked ML extensions consume (`jit-build`, `coordination`) plug in, and how
 > a link set merges into one binary by a total, acyclic, anti-shadow merge.
 > **Read this if**: a capability has to be added by an extension rather than by the core set.
@@ -16,7 +16,7 @@ nor the extensions themselves, owned by [lift_and_compose_doctrine.md](./lift_an
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, documents/engineering/README.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/monitoring_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/decision_log.md, documents/engineering/README.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/monitoring_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -55,7 +55,7 @@ containment hierarchy cannot express one shared, single-owned resolver at all. A
 (`dlopen`, per-extension image) is the other default; it cannot be checked before it runs, so a missing
 requirement or a collision is a production failure, not a compile error.
 
-amoebius wires extensions as **flat peers in one linked binary along a typed acyclic PROVIDE/REQUIRE capability graph.** Each `ExtensionSpec` declares `extCapabilities` (what it PROVIDES into the capability surface) and
+amoebius wires extensions as **flat peers in one linked binary along a typed acyclic PROVIDE/REQUIRE capability graph.** Each `ExtensionSpec` declares `extProvides` (what it PROVIDES into the capability surface) and
 `extRequires` (what it CONSUMES from a peer extension or the core), and a link set merges into one
 binary by a merge that is **total** (every required capability is provided), **acyclic** (no requirement cycle),
 and **anti-shadow** (no two extensions share an id or constructor). A cycle, a missing requirement, or a
@@ -99,9 +99,9 @@ together — the PROVIDE/REQUIRE structure, which the conformance contract does 
 and its monitoring. The app's bounded view/state/event program remains `UiSource` and is checked through the
 separate module graph
 ([low_code_ui_runtime_doctrine.md §6](./low_code_ui_runtime_doctrine.md#6-modules-and-total-composition)). The
-adapter carries **no** `extCapabilities`, **no** `extRequires`, and **no** author-supplied global id:
+adapter carries **no** `extProvides`, **no** `extRequires`, and **no** author-supplied global id:
 
-- **No `extCapabilities`.** An app PROVIDES nothing into the capability surface. This preserves the
+- **No `extProvides`.** An app PROVIDES nothing into the capability surface. This preserves the
   [§3](#3-the-provide-and-require-contract) property exactly as written: an extension-provided capability is
   still reachable *only* through a peer's `extRequires` at link time, never authored by an app spec as a free
   service, so the closed core vocabulary
@@ -134,25 +134,20 @@ wired by the same graph every other extension is wired by.
 
 ## 3. The PROVIDE and REQUIRE contract
 
-[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) owns the target two-member link set of `{infernix, jitML}`
-provide/require refinement in `src/capability-bind/Amoebius/Capability/Binding.hs`: requirements must resolve, duplicate providers
-are rejected as anti-shadow violations, and provider edges must be acyclic. Its paired legal/cyclic/shadowing
-fixtures plus a direct missing-requirement/closed-graph pair establish totality only for the pure gadt-decode
-model; linked runtime behavior remains unverified.
+[Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) owns the target two-member
+link set of `{infernix, jitML}` and its provide/require refinement: requirements must resolve, duplicate
+providers are rejected as anti-shadow violations, and provider edges must be acyclic. Its paired
+legal/cyclic/shadowing twins and the missing-requirement pair are owed by that phase; linked runtime behavior
+is owned by the live phases.
 
-[dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability) owns the `ExtensionSpec` seam itself — `extDhall`,
-`extChain :: cfg -> [Step]`, `extCapabilities`, and the mandatory `extMonitoring` — and the fact that specs are merged at compile/link time into one binary. This doctrine owns one addition to that contract: extending the capability declaration from **export-only** to **PROVIDE + REQUIRE**.
+The `ExtensionSpec` record is spelled once in
+[`dsl_doctrine.md` §4](./dsl_doctrine.md#the-v1-extension-seam-extensionspec-linked-not-loaded)
+([DL-0002](../decision_log.md#dl-0002--one-extensionspec-record-is-the-extension-seam)); specs are merged at
+compile/link time into one binary. This doctrine owns the meaning of two of its fields, `extProvides` and
+`extRequires`, and the merge over them: the capability declaration is **PROVIDE + REQUIRE**, never
+export-only.
 
-    ExtensionSpec :
-      { extDhall        : <a typed Dhall sub-catalog nested inside the InForceSpec>   -- dsl [§4](#4-the-two-capability-extensions-jit-build-and-coordination)
-      , extChain        : cfg -> [Step]                                                -- dsl [§4](#4-the-two-capability-extensions-jit-build-and-coordination)
-      , extCapabilities : List Capability     -- PROVIDES: exported into the capability surface
-      , extRequires     : List Capability     -- REQUIRES: consumed from a peer extension or the core (new)
-      , extUiHandlers   : List TrustedUiHandler -- server handlers offered to typed UI-port binding
-      , extMonitoring   : NonEmpty MonitoringSurface                                   -- dsl [§4](#4-the-two-capability-extensions-jit-build-and-coordination)
-      }
-
-- **`extCapabilities` is PROVIDES.** An extension exports each listed capability into the capability surface
+- **`extProvides` is PROVIDES.** An extension exports each listed capability into the capability surface
   owned by [service_capability_doctrine.md](./service_capability_doctrine.md). For a workload extension this is
   the capability it stands up (e.g. `infernix` provides `InferenceEngine`,
   [service_capability_doctrine.md §4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored));
@@ -228,7 +223,7 @@ The graph is the union of every extension's `extRequires`. The edge set of the t
 Both columns are `List Capability` ([§3](#3-the-provide-and-require-contract)), so a cell names capabilities
 only — never a workload. A workload extension that stands up no capability provides the empty list.
 
-| Extension | Kind | REQUIRES (`extRequires`) | PROVIDES (`extCapabilities`) |
+| Extension | Kind | REQUIRES (`extRequires`) | PROVIDES (`extProvides`) |
 |---|---|---|---|
 | `jitML` | workload | `JitBuild`, `Coordination`, `InferenceEngine` | — (empty; contributes a training/serving workload, not a capability) |
 | `infernix` | workload | `JitBuild` | `InferenceEngine` |
@@ -260,7 +255,7 @@ are authoritative here and prevent one extension from hiding another. This doctr
 **provide/require graph** checks:
 
 - **Total.** Every capability named in some extension's `extRequires` is provided by some extension's
-  `extCapabilities` or by the core. A required-but-unprovided capability has **no inhabitant** — the merge
+  `extProvides` or by the core. A required-but-unprovided capability has **no inhabitant** — the merge
   decode-rejects rather than emitting a binary with an unsatisfiable dependency. This is the
   topology-relation-over-a-collection technique
   ([illegal_state_catalog.md §4.7](../illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)),
@@ -280,7 +275,7 @@ are authoritative here and prevent one extension from hiding another. This doctr
     injectivity makes a duplicate id between two apps **unconstructible** rather than rejected. This is the
     content-address totality technique — make the name a computed function of what it names
     ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)).
-  - **`extDhall` sub-catalogs are qualified by `ExtensionId`.** Derived ids alone would not close constructor
+  - **`extConfig` sub-catalogs are qualified by `ExtensionId`.** Derived ids alone would not close constructor
     collision: two adapters whose nested catalogs each declare a constructor of the same name still shadow. Each
     sub-catalog is therefore namespaced under its own extension, and anti-shadow quantifies over *qualified*
     constructors. The unqualified global check is retained where it is genuinely required — capability names,

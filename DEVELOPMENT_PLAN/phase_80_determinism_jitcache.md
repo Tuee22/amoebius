@@ -18,7 +18,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -46,9 +46,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-79 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -92,7 +91,7 @@ temporary materializations. It builds the **jit-build resolver** — `resolve = 
 a prebuilt engine or builds it from source (using the Phase-56 baked toolchain) into the cache; there is no arm
 to author a URL, because the identity is drawn from the closed catalog. The gate must test **node-level reuse through the one cache owner**: a second client pod on the same node that names the same identity receives the
 cache-resident handle and pays no re-materialization, without mounting one pod's ephemeral volume into another.
-"More cached than fits" is rejected at the post-bind `provision-seal` by the Phase-9 capacity fold, not
+"More cached than fits" is rejected at the post-bind `provision-seal` by the Phase 4 capacity fold, not
 discovered as a runtime disk-full.
 
 The scope deliberately stops at the kernel primitives, the engine tier (Tier 1), and one live proof of each. The
@@ -296,8 +295,8 @@ implement; individual sprints cite the same sections where they must adopt them.
   — *the `Quantity` types, the canonical provision matrix, and the total `fits`/`carve`/`place` fold*: the live
   recompute runs and the cache owner/clients instantiate the resource matrix and the sealed whole-deployment
   provision boundary; `CacheBudget` is nested inside the cache-owner pod's bounded `emptyDir` and
-  ephemeral-storage envelope, and the derived peak bound is the **same** checked capacity fold Phase 9 must
-  establish and Phase 31 must invoke at `provision-seal` — "more cached than fits" is rejected by that fold, not discovered as a
+  ephemeral-storage envelope, and the derived peak bound is the **same** checked capacity fold Phase 4 must
+  establish and Phase 3 must invoke at `provision-seal` — "more cached than fits" is rejected by that fold, not discovered as a
   runtime disk-full.
 - [`image_build_doctrine.md` §7 — What amoebius bakes vs builds — the base container is the supply chain](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)
   — *what amoebius bakes vs builds*: the base image bakes the jit-build **resolver + toolchain** (the
@@ -388,7 +387,7 @@ None in this sprint.
 
 Adopt [`content_addressing_doctrine.md §3 — experimentHash: identity is what was requested ‖ where it ran`](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran):
 implement the run identity that folds the resolved program and the substrate fingerprint into one digest,
-consuming the Phase-25 normal form and the Phase-55 full-path substrate probe, per the substrate doctrine's
+consuming the Phase 3 normal form and the Phase-55 full-path substrate probe, per the substrate doctrine's
 no-env/no-`PATH` contract.
 
 ### Deliverables
@@ -578,7 +577,7 @@ over-budget derived peak before the resolver ever materializes an asset.
 
 1. There is no exported path to a cache key from a free string; the only path to a resident entry is content
    addressing — asserted by the checked Haskell compile-fail source `test/negative/determinism_jitcache/freestring_key.hs`
-   (registered in the Phase-27 negative corpus, authored in this phase's oracle-pinning sprint) failing to
+   (registered in the Phase 3 negative corpus, authored in this phase's oracle-pinning sprint) failing to
    typecheck *at the attempt to construct a cache key from a `String`/`Text`/`Url`* with the specific
    "no instance / no exported constructor" error, paired with a positive that differs only in keying from
    `sha256(real bytes)` and compiles.
@@ -650,7 +649,7 @@ path.
    warm cache returns a handle with no resolve, proven by the argv-recording shim / `strace` observer at the OS
    boundary (§M.5) capturing zero toolchain-or-backend subprocess on the warm path; there is no path that accepts
    a URL or free string, asserted by the checked Haskell compile-fail source `test/negative/determinism_jitcache/url_arm.hs`
-   (Phase-27 corpus, independently authored) failing at the constructor locus with "no `Url`/free-string
+   (Phase 3 corpus, independently authored) failing at the constructor locus with "no `Url`/free-string
    constructor", paired with the closed-catalog positive that compiles.
    The Haskell-authored changed-subject seeded mutant `resolve _ = <fixed-marker>` ([Gate integrity](#gate-integrity) part (b) mutant (a))
    must turn the stored-address assertion red.
@@ -785,7 +784,7 @@ second-client reuse, and the provision-rejected over-budget peak — without ove
    selected-for-deletion entries still charged until observed absent. The Haskell-authored changed-subject mutant `prune = pure ()`
    ([Gate integrity](#gate-integrity) part (b) mutant (b)) must turn this red. A resident-plus-bounded-temp
    one-byte overflow, catalog digest-size conflict, early deletion credit, bounded-parallel-derived overflow, and
-   ephemeral-under-reserved owner each return their **tagged** `Left` at the Phase-9 fold at the Phase-31
+   ephemeral-under-reserved owner each return their **tagged** `Left` at the Phase 4 fold at the Phase 3
    **`provision-seal`** before any resolve runs, and each materialized artifact's measured final/temp on-disk
    size is within its catalog-owned `AssetMaterializationDemand`.
 3. The Register-3 ledger is emitted and marks first-miss resolution, cross-pod reuse, and pin-aware eviction as
@@ -865,10 +864,10 @@ The Tier-2 model and Tier-3 CUDA kernel reuse remain assigned to Phases 91 and 9
   arbitrary URL is type-foreclosed while an over-budget cache peak is constructible input the `provision-seal`
   rejects
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) the registers (Register 3 reached here)
-- [phase_9](phase_09_resource_index.md) — the `fits`/`carve` capacity fold the `CacheBudget` bound reuses
-- [phase_31](phase_31_provision_seal.md) — the whole-deployment provision seal where the over-budget cache peak is rejected
-- [phase_32](phase_32_inference_accelerator_provision.md) — the `InferenceEngine` binder + closed `EngineRuntime` union the resolver keys on
-- [phase_34](phase_34_chain_kernel_boundary.md) — the `chain`/`Step` kernel the kernel primitives plug into
+- [phase_9](phase_04_witness_manifests_capacity_storage.md) — the `fits`/`carve` capacity fold the `CacheBudget` bound reuses
+- [phase_31](phase_03_typed_spine.md) — the whole-deployment provision seal where the over-budget cache peak is rejected
+- [phase_32](phase_04_witness_manifests_capacity_storage.md) — the `InferenceEngine` binder + closed `EngineRuntime` union the resolver keys on
+- [phase_34](phase_03_typed_spine.md) — the `chain`/`Step` kernel the kernel primitives plug into
 - [phase_55](phase_55_bootstrap_coordinator_kind.md) — the bootstrap coordinator + single-node `kind` cluster + substrate fingerprint this phase runs on
 - [phase_56](phase_56_base_image_registry.md) — the base image that bakes the jit-build resolver + toolchain this phase drives live
 - [phase_58](phase_58_object_reconciler.md) — the typed SSA object reconciler that renders the cache owner and client pods

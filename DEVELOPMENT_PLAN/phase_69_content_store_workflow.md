@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -40,9 +40,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-68 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -258,7 +257,7 @@ sprints cite the same sections where they must build on them.
   retried produce or a redelivered consume idempotent.
 - [`deterministic_simulation_doctrine.md` §4 — Register 2.5 — where deterministic simulation sits](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
   — *Register 2.5 — where deterministic simulation sits*: Sprint 69.4 runs the real Sprint-64.2/32.3 workflow
-  runtime under `IOSimPOR` against the Phase-16 modeled environment as a Register-2.5 lower-register cross-check
+  runtime under `IOSimPOR` against the Phase 75 modeled environment as a Register-2.5 lower-register cross-check
   of the same leak-free-takeover / no-double-application properties the Register-3 live gate asserts.
 - [`chaos_failover_doctrine.md` §12 — The moral core — proven, tested, assumed](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)
   (cross-reference) — *proven, tested, assumed*: each gate run emits a proven/tested/assumed ledger; skipping
@@ -479,7 +478,7 @@ bespoke amoebius election — and assemble the phase gate.
 - The **postflight sweep's explicit inventory contract**: the sweep MUST inventory, and the ledger MUST record,
   every one of these resource classes: (i) k8s objects the topology applied, enumerated by the run's **field manager / ApplySet**; (ii) **Pulsar topics, subscriptions, consumers, and producers** created for the run;
   (iii) **MinIO objects under the run's `experiment-hash` prefix** outside a **named retained-by-design set**
-  (the durable test-flagged bytes reclaimed by Phase 48). The sweep emits its **full inventory list and the named retained set** into the per-run ledger; **any non-empty remainder outside the retained set is a hard gate failure**. (Durable-byte reclaim staying with Phase 48 is the *only* exemption, and only for the
+  (the durable test-flagged bytes reclaimed by Phase 7). The sweep emits its **full inventory list and the named retained set** into the per-run ledger; **any non-empty remainder outside the retained set is a hard gate failure**. (Durable-byte reclaim staying with Phase 7 is the *only* exemption, and only for the
   explicitly named retained set — not a blanket class exemption.)
 - **Reference and mutation apparatus:** execute the independent no-fault path during the run and retain its
   `pointers/latest` HEAD only beneath `.build/runs/phase_63/`; remove
@@ -560,19 +559,19 @@ generate comparison material at gate time beneath `.build/**` and rerun under un
 Adopt [`deterministic_simulation_doctrine.md §4 — Register 2.5 — where deterministic simulation sits`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits) at
 **Register 2.5** on the **`none`** substrate: run the *real* Sprint-64.2/32.3 workflow runtime and its
 Failover-takeover path — the daemon/workflow code written against `io-classes` — under `IOSimPOR` against the
-Phase 16 Sprint 16.2 modeled fault-injectable environment, and assert the same load-bearing properties the Sprint 69.3
+Phase 75 Sprint 16.2 modeled fault-injectable environment, and assert the same load-bearing properties the Sprint 69.3
 live gate asserts (leak-free standby takeover; no double-application), now **deterministically replayable** under
 adversarial schedules instead of a single live wall-clock trace.
 
 ### Deliverables
 
 - A `WorkflowFailoverSimSpec` that binds `Amoebius.Workflow.Runtime`/`Orchestrator`/`Worker` (Sprints 59.2–38.3)
-  to the Phase 16 Sprint 16.2 `Amoebius.Sim.Env` substrate through `io-classes` and drives it under `IOSimPOR` — the
+  to the Phase 75 Sprint 16.2 `Amoebius.Sim.Env` substrate through `io-classes` and drives it under `IOSimPOR` — the
   production code path, not a simulation-only re-implementation.
 - The injected fault schedule (`WorkflowSimScenario`): a `kill-worker-mid-workflow` inside the gate's critical
   window — after the store write and before the `event` ack — at-least-once **redelivery** of the un-acked
   command, and a broker/consumer
-  **partition** — modeled by the fake Pulsar/MinIO of Phase 16 Sprint 16.2, not a live cluster.
+  **partition** — modeled by the fake Pulsar/MinIO of Phase 75 Sprint 16.2, not a live cluster.
 - A property that, over *every* schedule `IOSimPOR` explores, asserts the Pulsar-Failover subscription takeover
   is **leak-free** (no orphaned consumer/producer/artifact handle survives the promotion) and that **no effect is double-applied** — content-addressed re-fetch is a no-op and log-fold dedup collapses the redelivery — so
   the committed pointer HEAD and downstream state are identical across all explored interleavings.

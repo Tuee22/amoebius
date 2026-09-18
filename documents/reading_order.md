@@ -41,7 +41,8 @@ prior knowledge, but every stop presumes the stops above it.
 > expectations, qualification, custody, and predecessor compatibility before a result can authorize status.
 
 - [`glossary.md`](./glossary.md) — open in a second tab and leave it open; every stop below assumes it.
-- [`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md) — consult the current certification frontier and dated audit before interpreting implementation claims.
+- [`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md) — consult the current certification frontier before interpreting implementation claims.
+- [`decision_log.md`](./decision_log.md) — every decision that changed frozen doctrine or the plan, with what it rejected.
 - [Accepted baseline and certification generation](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation) — the trust boundary required for certification after the reset.
 
 ## Stop 1. What amoebius is
@@ -82,6 +83,7 @@ that every implementation satisfies those laws or that all possible compositions
 - [`extension_conformance_laws.md` §2](./engineering/extension_conformance_laws.md#2-how-to-read-a-law) — how a law is stated, then skim L1–L5 and C1–C7.
 - [`extension_conformance_security.md` §3](./engineering/extension_conformance_security.md#3-the-skolem-scope) — the one mechanism five of the six security laws rest on.
 - [`lift_and_compose_doctrine.md` §2](./engineering/lift_and_compose_doctrine.md#2-the-two-non-dependencies) — why amoebius owns what it must prove, and what a seed project is for.
+- [`substrate_doctrine.md` §10](./engineering/substrate_doctrine.md#10-the-lift-calculus) — the lift calculus: the closed layer set, the total transition relation, and the witness each transition consumes.
 
 ## Stop 3. The description language
 
@@ -96,6 +98,7 @@ Each boundary requires its own implementation and evidence. External-language ma
 source surface.
 
 - [`dsl_doctrine.md` §5](./engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) — the language's required construction contract and its foreclosure boundaries.
+- [`gate_runner_doctrine.md` §2](./engineering/gate_runner_doctrine.md#2-the-gate-specification-vocabulary) — the one runner that judges every phase, and the `BinaryFact` that makes a gate run through the shipped binary.
 
 - [`resource_capacity_doctrine.md` §1](./engineering/resource_capacity_doctrine.md#1-capacity-is-a-budget-the-fold-consumes-and-overcommit-is-a-checked-rejection) — capacity as a budget a fold consumes, and overcommit as a checked rejection.
 - [`resource_capacity_doctrine.md` §2](./engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed) — the honesty limit that keeps the whole model from overclaiming.
@@ -110,6 +113,7 @@ This stop distinguishes specified obligations, finite model results, sampled tes
 correspondence, and live observations. The limits of each result remain part of its claim.
 
 - [`documentation_standards.md` §6](./documentation_standards.md#6-honesty-the-proventestedassumed-discipline) — the rule every claim in the corpus is written under.
+- [`documentation_standards.md` §17](./documentation_standards.md#17-the-doctrine-freeze) — why a normative sentence changes only through the decision log.
 - [`chaos_failover_doctrine.md` §6](./engineering/chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives) — why one boundary carries the whole formal obligation and the rest delegate.
 - [`formal_model_doctrine.md` §6](./engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not) — the boundary between what the model establishes and what the code must still earn.
 - [`gateway_migration_doctrine.md` §5](./engineering/gateway_migration_doctrine.md#5-the-migration-as-a-typed-edge-observed-state-machine) — the one place that obligation concentrates, drawn as a state machine.
@@ -121,19 +125,19 @@ downstream evidence. Later replay checks portability; it cannot stand in for the
 
 ## Stop 6. The plan
 
-- [`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md) — the tracker for phase order, current status, and dated implementation audits; each linked phase owns its contract.
+- [`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md) — the tracker for phase order and current status; each linked phase owns its contract.
 - [`development_plan_standards.md` §M](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the eighteen required gate rows and their execution obligations; table completeness alone supplies no certification.
 - [Accepted baseline and certification generation](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation) — separate acceptance authority, contract revision, and protected receipt custody.
 - [Candidate evidence and gate pass](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass) — dependency-based compatibility and authenticated evidence reuse.
 - [`development_plan_standards.md` §K](../DEVELOPMENT_PLAN/development_plan_standards.md#k-honesty-proven--tested--assumed) — how stop 5's discipline binds a phase before it may be marked done.
-- [`development_plan_standards.md` §C](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — a complete qualified gate pass is sufficient for status; a human, agent, or CI job may record the narrow status projection while a component self-report cannot pass by itself.
+- [`development_plan_standards.md` §C](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — a complete qualified gate pass is sufficient for status; the human's `accept` records it, one phase per accept.
 - [`development_plan_standards.md` §L](../DEVELOPMENT_PLAN/development_plan_standards.md#l-one-substrate-discipline) — later hardware evidence stays scoped to the one natural substrate actually exercised and cannot be generalized to an untested substrate.
 
 Work proceeds in numerical phase order. A later hardware-dependent gate does not compensate for an open or
 unaccepted predecessor, and no hardware provisioning should begin merely to validate a language surface that
 has not crossed the hardware-free barrier above.
 Hardware-free implementation may continue through ready seams under the plan's separate implementation rules.
-Ordinary qualification and phase progression remain automatic within accepted scope.
+Qualification and preview continue through those seams; each phase transition is one human `accept`.
 
 ## Stop 7. Where to go next, by role
 

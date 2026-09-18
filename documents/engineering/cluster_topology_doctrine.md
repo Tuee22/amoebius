@@ -18,7 +18,7 @@ resulting node set, owned by [resource_capacity_folds.md](./resource_capacity_fo
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -56,13 +56,13 @@ substrate doctrine already owns (Lima on apple, WSL2 on windows). This document 
 topology it induces; it owns **no** substrate names, no detection, no VM-provider mechanics, and no capacity
 numbers (those are [substrate_doctrine.md](./substrate_doctrine.md) and [resource_capacity_doctrine.md](./resource_capacity_doctrine.md)).
 
-The pure relation is implemented for Phase 9, its reflected schema/decoder consumers arrive in Phases 25–26, and
+The pure relation is implemented for Phase 4, its reflected schema/decoder consumers arrive in Phase 3, and
 runtime engine realization belongs to Phases 52–54.
-The bound [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) validates
+The bound [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) validates
 `Amoebius.Dsl.Topology` at Register 1: seven compile-time index pairs, the exhausted 3×3 engine/environment
 compatibility matrix, host distinctness, fixed placement, and elastic growth are accepted only with all
 changed-production mutants red.
-The three corresponding Dhall-typecheck loci remain Phase-25 work rather than a backward dependency.
+The three corresponding Dhall-typecheck loci remain Phase 3 work rather than a backward dependency.
 No EKS resource was created, no VM booted, and no node joined; those runtime facts remain **UNVERIFIED**.
 Status and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -591,7 +591,7 @@ flowchart LR
   classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
 ```
 
-*Design intent (Phase 25): a type-level compatibility pipeline. A declared engine meets a substrate-gated `LinuxHost` witness, or a hostless provider slot, at a compatible-pair smart constructor, and an elementwise fold yields a `Topology` or a `Left`. Whether the virtual machine actually boots is runtime-checked, not established here.*
+*Design intent (Phase 3): a type-level compatibility pipeline. A declared engine meets a substrate-gated `LinuxHost` witness, or a hostless provider slot, at a compatible-pair smart constructor, and an elementwise fold yields a `Topology` or a `Left`. Whether the virtual machine actually boots is runtime-checked, not established here.*
 
 ---
 
@@ -631,7 +631,7 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
   `Networking` wire; being stretched is a *networking* fact that never moves the per-host capacity fold.
 
 > **Honesty.** Everything here is Phase-0 design intent. The type demands ([§3](#3-the-linuxhost-witness-rke2kind-on-a-host-with-no-linux-node-is-uninhabitable)-[§5](#5-the-compatibility-relation-technique-47-only-compatible-pairs-have-a-constructor)) are type-foreclosed/decode-foreclosed
-> spec-layer properties *when implemented as specified* (Phase 25); the runtime residue — the VM actually
+> spec-layer properties *when implemented as specified* (Phase 3); the runtime residue — the VM actually
 > booting, N rke2 nodes actually joining on N hosts, an EKS cluster actually coming up — is runtime-checked, owned by
 > the Phase 89/54/55 gates and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Where a mechanism
 > generalizes hostbootstrap's virtualization providers or prodbox's EKS reality, that is sibling evidence,
@@ -643,7 +643,7 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
 
 This document is normative topology doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the `ComputeEngine` /
-`LinuxHost` / `Topology` types and the compatibility relation are assigned to **Phase 25**, with Haskell
+`LinuxHost` / `Topology` types and the compatibility relation are assigned to **Phase 3**, with Haskell
 expectations and generated run-local Dhall negatives; the Lima `LinuxHost` witness is assigned to **Phase
 89** (`apple`) for runtime exercise; first live kind topology is assigned to **Phase 55**, while live
 multi-node rke2 remains an explicitly unassigned

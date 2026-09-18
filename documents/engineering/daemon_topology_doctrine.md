@@ -15,7 +15,7 @@ between the parts, owned by [host_cluster_comms_doctrine.md](./host_cluster_comm
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -34,7 +34,7 @@ between the parts, owned by [host_cluster_comms_doctrine.md](./host_cluster_comm
 - [Related Documents](#related-documents)
 
 **Target scheduler boundary — NOT VALIDATED.** The eventual
-[Phase-29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) must validate the aggregate
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) must validate the aggregate
 snapshot/root-version reservation guard, absent-Pod recovery debit, and pure
 Reserved→BindingInFlight→Bound algebra. Phase 59 must later validate the same-binary live scheduler role and
 Kubernetes Binding effects. Former reseals and external-run references are permanently invalid evidence.
@@ -87,10 +87,10 @@ PureScript assets and Haskell UI-server interpreter specified by
 behaviour. infernix and jitML remain linked trusted workflow and component adapters behind typed ports. The
 named behaviours are libraries inside one binary, not separate products.
 
-[Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) owns the hardware-free Haskell
+[Phase 70](../../DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md) owns the hardware-free Haskell
 executable-boundary contract. Its implemented pure boundary admits the `serve-ui` responsibility and refuses
 missing, duplicate, contract-mismatched, or ABI-mismatched handler registries while allowing one unreferenced
-handler to remain unreachable. The integrated Phase-43 gate remains **NOT VALIDATED**; this contract cannot
+handler to remain unreachable. The integrated Phase 70 gate remains **NOT VALIDATED**; this contract cannot
 establish an in-cluster worker or replica lifecycle.
 
 This document owns *which contexts exist and what each is for*. **How** the host daemon communicates — the
@@ -134,10 +134,10 @@ There is no fourth arm and no free-text role: a pod that names a role amoebius d
 constructor. `InClusterRole` is what
 [`resource_capacity_schema.md`](./resource_capacity_schema.md)'s `ContainerProcess` names when a container
 runs the amoebius binary, which is how "what this container executes" becomes typed rather than inherited
-from an image's entrypoint. A Haskell schema declaration must carry these types exactly once; Phase 25 may
+from an image's entrypoint. A Haskell schema declaration must carry these types exactly once; Phase 3 may
 lazily render consumer-facing `Role.dhall` and `Image.dhall` files beneath `.build/dhall/**`, but neither
 rendered file is tracked source or authority. The present tracked Dhall forms are condemned legacy
-observations, not a target module layout. Until Phase 25 closes its source row and structural gate, the arms
+observations, not a target module layout. Until Phase 3 closes its source row and structural gate, the arms
 above remain design intent only
 ([`legacy_tracking_for_deletion.md` §2](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md#2-tracked-source-violations)).
 
@@ -774,7 +774,7 @@ claim. Phase 84 is **NOT VALIDATED**.
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — [§0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision) the checkpoint-free tag-discovery host reconciler (tier (b)) that enacts child rke2 rollout over SSH
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
-- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — Phase-31 provisioning runs the complete
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — Phase 3 provisioning runs the complete
   post-bind capacity fold before `ProvisionedSpec`/`renderAll`; **consumes** the wholesale per-node accelerator
   ownership of [§4.2](#42-the-accelerator-owner-worker-wholesale-per-node-ownership-a-typed-per-node-singleton)
 - [Service Capability Doctrine](./service_capability_doctrine.md) — [§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored) owns the substrate→`EngineRuntime` quotient whose pod-vs-host-subprocess consequence [§4.1](#41-the-engine-offering-vs-the-node-hardware-in-cluster-pod-or-host-subprocess) records

@@ -35,9 +35,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-81 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -57,7 +56,7 @@ retain or reveal a raw tenant identity supplied by the browser.
 `ui-multi-tenant-live` Haskell component suite can supply supporting observations only; the sole acceptance command is `pb validate
 phase 82`. Split on workflow/artifact UX, replica failure/HA, a second substrate, or a second independently
 releasable runtime feature.
-**Substrate:** `linux-cpu` — future live browser/cluster observation only after the Phase-49 barrier and every predecessor gate pass.
+**Substrate:** `linux-cpu` — future live browser/cluster observation only after the DSL barrier (Phase 4) and every predecessor gate pass.
 **Lane:** `linux-cpu/amd64`.
 **Register:** 3 — live authenticated multi-tenant browser isolation; NOT VALIDATED.
 **Depends on:** [Phase 81](phase_81_ui_single_tenant_live.md)

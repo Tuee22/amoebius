@@ -16,7 +16,7 @@ it, so these entries bound what that exception may do. Their numbering is held b
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, documents/engineering/content_addressing_determinism.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, documents/engineering/content_addressing_determinism.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -49,7 +49,7 @@ every "unrepresentable" as *design intent for the type discipline*, never as a t
 
 ### 3.25 An ML asset named by arbitrary URL (or an unready / unlanded model)
 
-**Delivery-owner:** `Phase-32`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `ml-asset`
 
@@ -96,7 +96,7 @@ bytes loading on the substrate, and an imported model's pin/tag being truthful).
 
 ### 3.32 A continuous training run with no checkpoint cadence, or a feed with no bounded retention
 
-**Delivery-owner:** `Phase-28`
+**Delivery-owner:** `Phase 4`
 
 **Case-family:** `storage`
 
@@ -169,7 +169,7 @@ serve path honoring the per-app namespace).
 
 ### 3.84 A model output used as an authority-bearing command or identity
 
-**Delivery-owner:** `Phase-38`
+**Delivery-owner:** `Phase 8`
 
 **Case-family:** `ui`
 

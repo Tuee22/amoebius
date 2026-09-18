@@ -158,7 +158,7 @@ following counts are target expectations, not a current tool result:
 | admissible, empty, and justified | 34 |
 | **admissible, empty, and still owing a reason** | **0** |
 
-The obligation is not discharged until Phase 27 has a authored Haskell subject, an independent Haskell
+The obligation is not discharged until Phase 3 has a authored Haskell subject, an independent Haskell
 oracle and a complete qualified gate pass. The target occupancy uses declared pairings rather than an
 upper bound over prose. Historical analysis reduced an earlier estimate from 143 to 64 and exposed defects,
 but that analysis is rationale, not current validation evidence — an
@@ -175,7 +175,7 @@ A complete covering would establish exhaustiveness relative to these three axes 
 lying along an axis nobody declared stays outside the claim, which is the residue
 [`illegal_state_techniques.md` §6.2](./illegal_state_techniques.md#62-the-covering-obligation--exhaustive-relative-to-a-declared-taxonomy)
 carries. The covering also says nothing about whether an occupied cell's entry is *right*; that each entry's
-foreclosure actually rejects its fixture at the locus it names is the Phase-27 corpus obligation, keyed to the
+foreclosure actually rejects its fixture at the locus it names is the Phase 3 corpus obligation, keyed to the
 same pairing through separately authored Haskell declarations. Any serialized registry is lazily generated
 beneath `.build/**` and has no verdict authority.
 

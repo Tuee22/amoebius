@@ -38,9 +38,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-62 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -487,12 +486,12 @@ as [Register 2.5](../documents/engineering/testing_doctrine.md#2-the-registers-o
 phase's own bring-up. The subject is the *real* Sprint-58.3 readiness-DAG orchestration: the derived graph
 that deploys concurrently where services are independent and sequentially where they depend, carrying the
 HA-always readiness ordering this phase owns. That orchestration runs unchanged under `IOSimPOR` against the
-Phase-34.4 modeled substrates, so the ordering and fail-closed invariants are validated deterministically
+Phase 3.4 modeled substrates, so the ordering and fail-closed invariants are validated deterministically
 in-process before the Register-3 live gate ever runs.
 
 ### Deliverables
 
-- An `IOSimPOR` harness that drives the *unmodified* Sprint-58.3 `BringUp` orchestration (written against `io-classes`, no real IO) against the Phase-34.4 fake Pulsar/MinIO/apiserver/route53/Vault/clock (`src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*`), with injected **partial failure, restart, and network partition** on the modeled dependencies.
+- An `IOSimPOR` harness that drives the *unmodified* Sprint-58.3 `BringUp` orchestration (written against `io-classes`, no real IO) against the Phase 3.4 fake Pulsar/MinIO/apiserver/route53/Vault/clock (`src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*`), with injected **partial failure, restart, and network partition** on the modeled dependencies.
 - Schedule-exhaustive assertions over the partial-order search, four in all.
   (a) **No service starts before its readiness precondition**, on any explored schedule.
   (b) The concurrent bring-up is **deadlock-free** and **fail-closed**: a missing or unhealthy dependency
@@ -546,7 +545,7 @@ qualify this phase's complete gate after its predecessor. Resolve owned legacy d
 - [UI Realtime Coordination](../documents/engineering/ui_realtime_coordination_doctrine.md) — the ephemeral
   Redis/Sentinel topology and failure boundary delivered by Sprint 63.2
 - [Storage Lifecycle](../documents/engineering/storage_lifecycle_doctrine.md) — the no-provisioner retained PVs the stateful services land on
-- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the Register-2.5 `IOSim`/`IOSimPOR` simulation of the real bring-up over the Phase-34.4 modeled substrates
+- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the Register-2.5 `IOSim`/`IOSimPOR` simulation of the real bring-up over the Phase 3.4 modeled substrates
 - [phase_61](phase_61_vault_pki.md) — the root Vault/PKI whose unseal edge gates secret-dependent startup here
 - [phase_62](phase_62_platform_backbone.md) — the MetalLB/MinIO/Pulsar backbone this phase's services and DAG build on
 - [phase_64](phase_64_keycloak_ingress.md) — the Keycloak-owned ingress edge that fronts Grafana and pgAdmin next

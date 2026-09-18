@@ -3,7 +3,7 @@
 > **Purpose**: Target the Register-3 residue of amoebius's one proof obligation — drive the future Haskell
 > gateway-migration runtime through **both** a `Planned` coordinated handover (RPO=0) and a `Failover`
 > emergency takeover (bounded rebind) against the future [Phase 74](phase_74_multicluster_spawn_georepl.md)
-> forest, then compare its trace with the Phase-17 model. NOT VALIDATED.
+> forest, then compare its trace with the Phase 75 model. NOT VALIDATED.
 > **Read this if**: phase 75 is next in the queue, or a later phase depends on its future gate.
 
 This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/resource_capacity_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -29,7 +29,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 75.1: The gateway-migration runtime — both branches over the Phase-17 `interpret` core](#sprint-751-the-gateway-migration-runtime--both-branches-over-the-phase-17-interpret-core-)
+- [Sprint 75.1: The gateway-migration runtime — both branches over the Phase 75 `interpret` core](#sprint-751-the-gateway-migration-runtime--both-branches-over-the-phase-75-interpret-core-)
 - [Sprint 75.2: Teardown-with-cleanup vs chaos-failover + unsatisfiable-spec push-back](#sprint-752-teardown-with-cleanup-vs-chaos-failover--unsatisfiable-spec-push-back-)
 - [Sprint 75.3: Register-2.5 gateway-migration runtime fidelity — simulation + trace validation](#sprint-753-register-25-gateway-migration-runtime-fidelity--simulation--trace-validation-)
 - [Sprint 75.4: Register-3 correspondence — Inject drills against the running forest + lazy live-gate projection + ledger](#sprint-754-register-3-correspondence--inject-drills-against-the-running-forest--lazy-live-gate-projection--ledger-)
@@ -40,9 +40,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-74 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -55,14 +54,14 @@ handoff across the non-confluent gateway boundary. The Haskell runtime must enac
 fail-closed freshness gate within a declared data-loss budget. The gate must distinguish lossless
 teardown-with-cleanup from bounded-loss chaos failover and refuse teardown that would make the root
 `InForceSpec` unsatisfiable. Before live injection, the production decision core must run under `IOSimPOR`
-against modeled boundaries and its transition log must satisfy the separately authored Phase-17 `Model`
+against modeled boundaries and its transition log must satisfy the separately authored Phase 75 `Model`
 relation. The live challenge then tests only the named physical premises; it does not convert a model result
 or sampled drill into universal proof. No predecessor result or runtime correspondence is current.
 
 This phase consumes earlier phases and does not re-implement them: Phase 74's geo-replicated forest and
-invariant-confluence classifier, Phase 17's `GatewayMigration` `Model` + `interpret` + decode-time
+invariant-confluence classifier, Phase 75's `GatewayMigration` `Model` + `interpret` + decode-time
 structural-fit fold, Phase 64's Keycloak-owned wild ingress, Phase 73's WireGuard fabric (whose hub role the
-`Planned` handover repoints), and Phase 16's (Sprints 28.1/15.2) `io-classes` seams and modeled route53/Pulsar. A
+`Planned` handover repoints), and Phase 75's (Sprints 28.1/15.2) `io-classes` seams and modeled route53/Pulsar. A
 **stretched cluster is not geo-replication**: one etcd, one boundary owes no R9 budget and no Second-Axis
 obligation and is out of scope here.
 
@@ -190,7 +189,7 @@ RPO/RTO assertions would otherwise pass.
   [`gateway_migration_doctrine.md` §4 — Client rebind — a live session must always find the gateway](../documents/engineering/gateway_migration_doctrine.md#4-client-rebind--a-live-session-must-always-find-the-gateway)
   and the typed, edge-observed state machine of
   [`gateway_migration_doctrine.md` §5 — The migration as a typed, edge-observed state machine](../documents/engineering/gateway_migration_doctrine.md#5-the-migration-as-a-typed-edge-observed-state-machine)
-  to be built as the effectful shell around the Phase-17 decision core, honest per
+  to be built as the effectful shell around the Phase 75 decision core, honest per
   [`gateway_migration_doctrine.md` §6 — Honesty and layer markers](../documents/engineering/gateway_migration_doctrine.md#6-honesty-and-layer-markers).
 - [`chaos_failover_second_axis.md` §18 — The rules scale to the boundary](../documents/engineering/chaos_failover_second_axis.md#18-the-rules-scale-to-the-boundary)
   and [`chaos_failover_second_axis.md` §19 — The cross-boundary ledger and conformance rows](../documents/engineering/chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows)
@@ -211,7 +210,7 @@ RPO/RTO assertions would otherwise pass.
   state machine.
 - [`deterministic_simulation_doctrine.md` §4 — Register 2.5 — where deterministic simulation sits](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
   — the Register-2.5 runtime-fidelity stage: the future production forest code under `IOSimPOR` against a modeled
-  route53/Pulsar, trace-validated against the Phase-17 emitted spec's `Next` relation before the Register-3 live
+  route53/Pulsar, trace-validated against the Phase 75 emitted spec's `Next` relation before the Register-3 live
   drills, so the code↔model bridge is a formal, early, replayable check rather than only sampled live chaos.
 - [`testing_doctrine.md` §3 — The test-topology contract: spin up → run → always tear down](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down)
   (the test-as-`InForceSpec` spin-up → run → always-tear-down contract) and
@@ -226,7 +225,7 @@ Haskell and qualify the mechanism that first admits their result; component obse
 >
 > **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in checked Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
-## Sprint 75.1: The gateway-migration runtime — both branches over the Phase-17 `interpret` core ⏸️
+## Sprint 75.1: The gateway-migration runtime — both branches over the Phase 75 `interpret` core ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
@@ -242,7 +241,7 @@ Adopt [`gateway_migration_doctrine.md §2`](../documents/engineering/gateway_mig
 the client-rebind protocol of [`§4`](../documents/engineering/gateway_migration_doctrine.md#4-client-rebind--a-live-session-must-always-find-the-gateway),
 and the R7/R8/R9 cross-boundary rules of
 [`chaos_failover_second_axis.md §18`](../documents/engineering/chaos_failover_second_axis.md#18-the-rules-scale-to-the-boundary):
-build the effectful gateway-migration shell for **both** branches whose every branch decision is the Phase-17
+build the effectful gateway-migration shell for **both** branches whose every branch decision is the Phase 75
 pure `interpret` value (a *liveness* coercion is licensed; a *durability* claim is forbidden — the tail beyond
 the watermark stays a typed `NotYetObserved`), so the runtime realizes the proven model rather than re-deriving
 it.
@@ -366,7 +365,7 @@ simulation against the modeled world here (Register 2.5), then as live Inject dr
   `NoWriteAfterStaleFailover`, `NoTakeWithoutProvenFreshness` — on every explored schedule under injected
   partition/kill-cluster-mid-geo-sync/lag.
 - The `GatewayMigrationTrace` validator: each observed transition of the simulated forest is a legal `Next`-step
-  of the Phase-17 emitted spec
+  of the Phase 75 emitted spec
   ([`formal_model_doctrine.md §8`](../documents/engineering/formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge)),
   and a mismatch is a code↔model divergence, red.
 - A Register-2.5 proven/tested/assumed ledger — the built forest upholds the safety invariants and refines the
@@ -409,7 +408,7 @@ and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross
 
 - The Register-3 Inject drill set run in the inter-cluster dimension against the running forest — cut
   replication, kill the lead mid-`Planned`-handover, kill the lead with no drain to force `Failover`, drive lag
-  past the bound, and fail back with late plus duplicate arrivals — each asserting the Phase-17 named invariants.
+  past the bound, and fail back with late plus duplicate arrivals — each asserting the Phase 75 named invariants.
   This is the concrete confirmation that the built runtime, which *is* the model's
   `interpret`, upholds under real physics what the model proves in logical time (never a re-authored TLA+ spec,
   never a paper variable→module table, which is what the superseded framing had reversed).
@@ -425,14 +424,14 @@ and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross
   mutation operators (`verify-caught-up`-stub and `promote-before-fence`) mutate the Sprint-70.1 implementation,
   so they are **checked at the start of Phase 75, before that implementation is trusted** (the §M.1
   start-of-owning-phase form for oracles that depend on later code).
-- A machine-derived per-run proven/tested/assumed ledger that marks `Planned` RPO=0 **proven-for-the-model (Phase 17, scope 2) + drilled (tested)**, the `Failover` recovery time + reconciliation **tested (drilled)**, the data-loss /
+- A machine-derived per-run proven/tested/assumed ledger that marks `Planned` RPO=0 **proven-for-the-model (Phase 75, scope 2) + drilled (tested)**, the `Failover` recovery time + reconciliation **tested (drilled)**, the data-loss /
   replication-lag bound **assumed (monitored, never proven)**, and the modeled safety/liveness
-  **proven-for-the-model at scope 2** (Phase-17, a design-layer result) — and never reports an
+  **proven-for-the-model at scope 2** (Phase 75, a design-layer result) — and never reports an
   assumed-and-monitored result as proven.
 
 ### Validation
 
-1. The built decision core resolves to the Phase-17 `interpret` — the correspondence-check mechanic is fixed as:
+1. The built decision core resolves to the Phase 75 `interpret` — the correspondence-check mechanic is fixed as:
    the step-by-step trace-validation of Sprint 75.3 (Register 2.5) **plus** a Register-3 **modeled-action-coverage assertion** that every modeled action fired ≥ 1 time across the drill set (no orphaned modeled action); step-by-step
    trace-validation is the Sprint-70.3 obligation and is not re-run in Register 3. The Inject drills run against
    the live forest and pass, each asserting all five named safety invariants (`NoWriteAfterStaleFailover` is the
@@ -457,7 +456,7 @@ Route53 provider API mutation, physically independent brokers, and real WAN part
   *run against a live forest* for both branches, recording the differential-correspondence result and live trace
   validation without inventing a variable→module table; keep the abstracted premises assumed.
 - `documents/engineering/gateway_migration_doctrine.md` — backlink §2/§3/§4/§5 to the built
-  `src/Amoebius/Multicluster/*` runtime; confirm `Planned` RPO=0 stayed proven-for-the-model (Phase 17, scope 2; now drilled live) and
+  `src/Amoebius/Multicluster/*` runtime; confirm `Planned` RPO=0 stayed proven-for-the-model (Phase 75, scope 2; now drilled live) and
   `Failover` stayed bounded-by-budget.
 - `documents/engineering/chaos_failover_doctrine.md` — the §19 cross-boundary ledger and the §15/§19 conformance
   rows gain an amoebius-tested linux-cpu datapoint (recovery-time drilled, data-loss assumed), so the matrix
@@ -490,6 +489,6 @@ Route53 provider API mutation, physically independent brokers, and real WAN part
 - [Gateway Migration Doctrine](../documents/engineering/gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy, client rebind, and the typed edge-observed state machine
 - [Chaos & Failover Doctrine](../documents/engineering/chaos_failover_doctrine.md) — the Inject move, the R7/R8/R9 cross-boundary rules, and the proven/tested/assumed cross-boundary ledger
 - [Cluster Lifecycle Doctrine](../documents/engineering/cluster_lifecycle_doctrine.md) — teardown-vs-chaos and push-back
-- [phase_17](phase_17_gateway_migration_model.md) — the `GatewayMigration` design-model whose Register-3 correspondence against the built forest is discharged here
+- [phase_17](phase_75_gateway_migration_drills.md) — the `GatewayMigration` design-model whose Register-3 correspondence against the built forest is discharged here
 - [phase_74](phase_74_multicluster_spawn_georepl.md) — the prior phase; the geo-replicated forest and confluence classifier this phase runs over
 - [phase_76](phase_76_provider_deploy_checkpoint.md) — the next phase; the forest extended to provider-managed clusters

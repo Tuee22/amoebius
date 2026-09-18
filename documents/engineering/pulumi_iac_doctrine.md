@@ -660,7 +660,7 @@ amoebic spawning via SSH-key Pulumi with the MinIO backend + Vault-envelope encr
 **Phase 74**; provider-managed clusters (EKS) and dynamic node provisioning are assigned to **Phase 76**; the
 elevated live-harness storage-deletion safety that makes the
 [§6](#6-the-ebs-create-vs-delete-credential-model) create-vs-delete model leak-free is assigned to
-**Phase 90**. Phase 48 owns only the substrate-free test-workflow and teardown algebra; it may not exercise a
+**Phase 90**. Phase 7 owns only the substrate-free test-workflow and teardown algebra; it may not exercise a
 provider, elevated harness, or storage deletion. Per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), no statement here is a proven amoebius
 result: the model generalizes behaviour proven in prodbox into amoebius design intent, and the

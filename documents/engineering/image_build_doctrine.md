@@ -20,7 +20,7 @@ nor the runtime asset cache that is the deliberate exception, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -231,7 +231,7 @@ reference names bytes some machine actually ran. On a mixed-architecture cluster
 from the registry to the manifest that names the image, which is a deployment concern owned by
 [service_capability_doctrine.md](./service_capability_doctrine.md).
 
-[Phase 35](../../DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md) owns the future Register-1 boundary for
+[Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md) owns the future Register-1 boundary for
 this rule and is **NOT VALIDATED**. Its Haskell contract must cover all CPU/CUDA × amd64/arm64 cases and refuse
 observed/requested architecture mismatches before emission. Even a future pure result cannot establish an
 engine build, published image, or runtime correspondence.
@@ -708,11 +708,11 @@ which forces a concrete divergence from prodbox's mechanics:
   recorded resolution is a resolution *this run* performed. It also stops the rendered recipe changing every
   time an upstream base is republished, which is a diff nobody reads and everybody approves.
 
-  [Phase 35](../../DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md) binds the complete Register-1 gate
+  [Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md) binds the complete Register-1 gate
   for this pure boundary: the Haskell catalog has no authored digest field,
   `BaseChannel` excludes digest syntax, and the lazy renderer emits one base argument and one matching
   `FROM` while distinct run-local resolutions leave the recipe bytes unchanged. Completion remains owned by
-  the exact Phase-35 gate;
+  the exact Phase 5 gate;
   registry resolution and use of an observed digest in a live build are later claims.
 - **No `DOCKER_CONFIG` environment variable — use `docker --config <dir>`.** prodbox isolated registry-push
   auth from public-pull auth with an **ephemeral `DOCKER_CONFIG`** (`local_registry_pipeline.md` §6.1).
@@ -755,7 +755,7 @@ move to MinIO's S3 driver after MinIO is serving
 is a separate ordinary migration, not this bootstrap cycle. This doc records the build-side consequence:
 
 - **The base image and fixed `registry:2` bootstrap image are preloaded before registry object initialization.** In the target
-  sequence, Phase 55 first establishes an empty cluster after the Phase-49 barrier. The only upstream contact
+  sequence, Phase 55 first establishes an empty cluster after the DSL barrier (Phase 4). The only upstream contact
   is the base-image *build* (apt/binary/source downloads on the
   builder, [§2](#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)/[§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)); the separately pinned
   Distribution image is the only Registry bootstrap image. Once both are admitted and preloaded, the
@@ -785,7 +785,7 @@ is a separate ordinary migration, not this bootstrap cycle. This doc records the
 > Haskell-only source boundary, natural-architecture rule, or spoof-resistant gate contract. Historical run
 > descriptions are diagnostic only and cannot establish exact source binding, native execution, publication
 > atomicity, private-pull enforcement, mutation sensitivity, or promotion. The rewritten Phase-56 contract
-> must establish those claims independently after the hardware-free Phase-49 DSL gate passes.
+> must establish those claims independently after the hardware-free the DSL barrier (Phase 9) DSL gate passes.
 
 The target `linux-cpu` image and Distribution `registry:2` lane is required on every hardware substrate; that
 availability is not currently validated.

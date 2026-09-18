@@ -21,7 +21,7 @@ and provisioning enaction are owned elsewhere and named in
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/image_build_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_schema.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/resource_capacity_types.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/image_build_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_schema.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/resource_capacity_types.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -89,15 +89,15 @@ illegal and the technique that forecloses them is
 [illegal_state_catalog.md §3.17-§3.21 / §4.6](../illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded); this doc is the normative home of
 the model that catalog names.
 
-The model below begins with Phase 9's implemented base index, continues through the schema, provision, and
+The model below begins with Phase 4's implemented base index, continues through the schema, provision, and
 render band, and ends with later live phases that enact and cross-check it. The bound
-[Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) validates the **base**
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) validates the **base**
 `Amoebius.Capacity.Types` / `Amoebius.Capacity.Fold` slice: CPU,
 memory, logical pod-ephemeral storage, pod and driver-scoped CSI slots, finite CPU-limit policy, headroom,
 taint/anti-affinity eligibility, and fixed/elastic placement. Its 15 direct negatives, 15 legal twins, two
 carried positives, four sampled properties, and 19 changed-production mutants distinguish the subject at
 Register 1. This is a bound gate contract, not a live-enforcement claim.
-The [Phase 28 candidate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) implements the five-module
+The [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) implements the five-module
 `storage-geometry-folds` library, and its gate validates the
 closed storage budget/growth arithmetic, BookKeeper/MinIO physical expansion, presentation/allocation
 rounding, uniform claims, six-arm object inventory, service/migration/cache/root/control-plane geometry,
@@ -106,7 +106,7 @@ variant/twin rows, two positive specs, six sampled equivalence properties, and 3
 subject at Register 1; the independently authored five-calculus projection must account for all 99 projected
 units, with transient run evidence beneath `.build/runs/phase-28/`. The separately authored
 `StorageGeometryOracle` replaces the retired serialized storage-case and calculus tables.
-The [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) must validate execution
+The [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) must validate execution
 epochs, aggregate scheduler reservations, structural runtime/image accounting, physical partition and
 provider-root arithmetic, accelerator residency against net VRAM, host-only compute derivations, and the
 composed full-vector witness. Its 37 negative/twin variants, seven sampled properties, two composed positives,
@@ -118,7 +118,7 @@ Post-bind provisioning, live storage mutation, device attachment, observed inven
 enforcement remain **UNVERIFIED** here. Status and gates live only in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
-The [Phase 31 gate](../../DEVELOPMENT_PLAN/phase_31_provision_seal.md) must validate the pure post-bind consumer
+The [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md) must validate the pure post-bind consumer
 of those folds. Its `planInfrastructure` paths derive demand internally, distinguish pre-existing from one
 exact creation batch, reject plan/action token replay and promised identities, and admit receipt-bound
 materialization evidence. Its `provision` path accepts all 18 inherited bound deployments, rejects ten exact
@@ -127,7 +127,7 @@ stages, and must cover two boundary properties plus ten paired mutants. The 42-u
 and 40-row locus ledger must be exact. Provider realization, observed runtime capacity, and model/runtime
 correspondence remain **UNVERIFIED**.
 
-The [Phase 32 gate](../../DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md) must validate the
+The [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) must validate the
 inference-owner specialization: four target offerings project onto three lanes, all twelve family/lane cells
 must match the authored relation, and the identity-complete CUDA/Metal demand must be checked across every permitted
 coexistence epoch. Eight distinct seal failures, exact-fit twins, the covered property, and five paired mutants
@@ -144,7 +144,7 @@ is a `decode-foreclosed` checked rejection in the catalog's historical layer tax
 at the post-bind `provision-seal` locus, never a type-foreclosed uninhabitable-by-type proof.** Dhall (and the GADT-indexed Haskell it decodes into) has **no dependent arithmetic**: capacity is a *value*, not a type
 index, so neither "a feasible packing exists" nor "the sum fits" can be a statement about type inhabitance.
 Each is a **total smart constructor / fold** that inspects a constructible value and rejects it (`Left
-Overcommit` / `Left Unschedulable`) during Phase-31 provisioning, after the complete source inventory is
+Overcommit` / `Left Unschedulable`) during Phase 3 provisioning, after the complete source inventory is
 bound and before `ProvisionedSpec` or `renderAll` exists. Per the three foreclosure layers
 ([illegal_state_catalog.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
 this remains `decode-foreclosed`: a *spec-layer guarantee* (the spec never reaches the interpreter), but a
@@ -155,7 +155,7 @@ the whole-deployment fold is reporting the wrong boundary, and this doc forbids 
 Because the guarantee is a *checked rejection*, the check's own correctness is a property to establish, not a
 given. The fold's soundness — and, for the two-directionally-decidable checks (`Σ ≤ backing`, elementwise
 compatibility), its **accepts ⟺ in-envelope equivalence** — is property-tested over generated inputs in the
-[Phase 9](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) base slice (never a fixed fixture set alone).
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) base slice (never a fixed fixture set alone).
 Where a specific fold's algebraic laws are load-bearing enough to warrant a
 machine-checked proof, that is the surgical, deferred proof-assistant track
 ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md)), not a broad proof layer.
@@ -190,7 +190,7 @@ flowchart TD
   infra -->|InfrastructureRequired| batch["Non-renderable ProvisionedProviderActionBatch"]:::intent
   batch -->|fresh provider/host validation + CAS enactment| receipt[/"Receipt-bound observed materialization"/]:::effect
   receipt --> context
-  context -->|Phase 31 provision seal: placement, capability, geometry and budget folds| fold[/"All pod, host, build, engine, monitoring, storage and accelerator demands feasible?"\]:::gate
+  context -->|Phase 3 provision seal: placement, capability, geometry and budget folds| fold[/"All pod, host, build, engine, monitoring, storage and accelerator demands feasible?"\]:::gate
   fold -->|yes| ir((("Opaque ProvisionedSpec plus placement/capability witnesses"))):::seal
   fold -->|no| reject>"Structured Left: Overcommit, Unschedulable, or MissingCapability"]:::refuse
   ir -->|pure renderAll, then reconcile| runtime["Live cluster: requests/limits, volumes, device resources, scheduler, quota"]:::runtime
@@ -312,18 +312,18 @@ type discipline is assigned to **Phases 25 and 9** (the negative `.dhall` gate a
 runtime realization of kubelet layout/image-store and engine/etcd transitions in **Phase 55**, host build and
 registry admission in **Phase 56**, presentation-rounded retained/uniform claims in **Phase 60**, Vault
 Raft/audit storage in **Phase 61**, BookKeeper/MinIO geometry in **Phase 62**, monitoring-work binding in
-**Phase 30** and TSDB live projection in **Phase 63**, failed-write orphan/GC admission in **Phase 69**, kernel
+**Phase 3** and TSDB live projection in **Phase 63**, failed-write orphan/GC admission in **Phase 69**, kernel
 fabric demand in **Phase 73**, the host/VM presentation cross-check in **Phase 89**, and the `ScalingPolicy`
 enaction in **Phase 79**, realtime Redis/WebSocket demand in **Phases 63 and 81–66**, and offline replay,
 upload, compatibility, and multi-zone fault demand in **Phases 67–70**. This doc never maintains a competing status ledger; it states the target shape and
 links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
-[Phase 19](../../DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md) owns a bounded reservation implementation
+[Phase 75](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md) owns a bounded reservation implementation
 against the `Amoebius.Capacity.Scheduler` algebra. Two concurrent modeled-store attempts must create exactly one `Reserved`
 row; `beginBinding`, `confirmBound`, and `ledgerOnlyAbsentRecovery` then retain one complete-resource debit and
 reach `Bound` across crashes at `Reserved`, `BindingInFlight`, and `Bound`. A changed-production crash-drop
 mutation must fail at the direct debit observation. This targets Register-2 evidence
-over three authored cuts, linked to Phase 18's `OneDebitPerReservation` invariant name. It cannot prove
+over three authored cuts, linked to Phase 4's `OneDebitPerReservation` invariant name. It cannot prove
 model-to-code refinement nor replaces Phase 59's live scheduler observations; modeled-store fidelity is
 ASSUMED and live runtime fidelity is UNVERIFIED here.
 

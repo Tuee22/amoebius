@@ -17,7 +17,7 @@ restated.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_budget_calculus.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, documents/engineering/README.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, documents/engineering/README.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -186,8 +186,8 @@ Stated plainly, because a budget calculus reads as stronger than it is:
   admitted against its declared bound, and a recipe that exceeds its own declaration is refused mid-write. That
   refusal is the one place a partial rendering can occur; [§4](#4-admission-fails-first-not-last)'s staging rule
   is what keeps it from becoming a partial *artifact*, and it is why the per-item bound is part of the grant.
-- **Phase 4 owns the target grant, admission, and reaper boundary; the rest remains later work.**
-  [Phase 4](../../DEVELOPMENT_PLAN/phase_04_budget_calculus.md) must cover the grant issued from a finite pool,
+- **The budget calculus is parked under `LTD-LIB-001` until Phase 9 decides whether a shipped subject links it; the grant, admission, and reaper boundary remain its target, and the rest remains later work.**
+  [`LTD-LIB-001`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md#5-dsl-divergence) must cover the grant issued from a finite pool,
   the ceiling and concurrency as one bound, `admit`/`admitFirst` over a demand, the staging rule of
   [§4](#4-admission-fails-first-not-last), and the retention grant that has no constructor without a reaper —
   all as pure values in Register 1, which would be a decision result and not a runtime one. No phase currently

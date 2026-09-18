@@ -1,20 +1,21 @@
 # Amoebius Development Plan
 
-> **Purpose**: Provide the authoritative numeric phase order, current status, remaining work, and routing
-> to each phase's independently authored validation contract.
+> **Purpose**: Provide the authoritative phase order, current status, and routing to each phase's
+> independently authored validation contract.
 > **Read this if**: the current phase, the next permitted work, or the location of a phase gate must be established.
 
-This tracker owns phase order, status, and dated implementation progress. Each phase document owns its
-capability-specific validation contract, while the universal source-snapshot postcondition is owned by
+This tracker owns phase order and status. Each phase document owns its capability-specific validation
+contract, while the universal source-snapshot postcondition is owned by
 [development_plan_standards.md §S](development_plan_standards.md#s-universal-artifact-hygiene-gate).
-Architecture remains owned by the doctrine suite under [`../documents/`](../documents/README.md).
+Architecture remains owned by the doctrine suite under [`../documents/`](../documents/README.md), and the
+reasons the plan has its present shape are recorded in the [decision log](../documents/decision_log.md).
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_03_artifact_calculus.md, DEVELOPMENT_PLAN/phase_04_budget_calculus.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_06_workflow_calculus.md, DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_14_refinement_checker.md, DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_20_extension_declaration.md, DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md, DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md, DEVELOPMENT_PLAN/phase_23_extension_security_laws.md, DEVELOPMENT_PLAN/phase_24_conformance_gate_generator.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md, DEVELOPMENT_PLAN/phase_47_tool_and_mutant_generation.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_90_test_topology_live.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/low_code_ui_workflow_lifting.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_schema.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/resource_capacity_types.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_03_typed_spine.md, DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md, DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md, DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md, DEVELOPMENT_PLAN/phase_07_child_clusters_obligation_teardown.md, DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md, DEVELOPMENT_PLAN/phase_09_dsl_barrier.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_90_test_topology_live.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/decision_log.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/low_code_ui_workflow_lifting.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_schema.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/resource_capacity_types.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -26,46 +27,51 @@ Architecture remains owned by the doctrine suite under [`../documents/`](../docu
 - [Toolchain](#toolchain)
 - [Document index](#document-index)
 - [Status vocabulary](#status-vocabulary)
-- [Implementation-progress vocabulary](#implementation-progress-vocabulary)
 - [Definition of Done](#definition-of-done)
-- [Reopened numeric sequence](#reopened-numeric-sequence)
-- [Current implementation audit](#current-implementation-audit)
+- [Transition procedure](#transition-procedure)
+- [Generation-2 reset](#generation-2-reset)
 - [Phase overview](#phase-overview)
 - [Related Documents](#related-documents)
 
 ## Phase discipline
 
 The [phase model](development_plan_phase_model.md#e-one-canonical-phase-model) owns the ordered domain and
-hardware barriers. This tracker retains phases 0–95 and their existing capability identities. The compiled
-phase-identity table supplies barrier ordinals; this documentation reset does not renumber capabilities.
+hardware barriers. The domain is `0..9 ∪ 50..95`; ordinals 10 through 49 are a reserved gap with no row,
+occupiable only by a new decision-log entry and a new certification generation
+([DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice)). Phases are
+considered in table order: Phase 50's predecessor is Phase 9.
 
-An agent may continue automatically through implementation-ready sprints and consecutive qualified phases.
-Each phase receives its own candidate and exact status-only transition. Later hardware-free preparation
-requires its own contract and independent oracle; it produces component diagnostics until its predecessor passes.
+The four ordering barriers are named by role: `DSL_BARRIER` (Phase 9), `BOOTSTRAP_HANDOFF` (Phase 50),
+`HOST_ENSURE` (Phase 51), and `FIRST_HARDWARE` (Phase 52), in that order. The compiled phase-identity table
+resolves each role to its ordinal; this tracker projects that table. Hardware discovery and live effects
+remain closed until the barrier's receipt exists, and every hardware gate binds that receipt and runs a
+corpus example through its own subject. Missing software verification cannot be replaced by hardware success.
 
-Hardware discovery and live effects remain closed until `DSL_BARRIER` and every required predecessor pass.
-The roles remain `DSL_BARRIER`, `BOOTSTRAP_HANDOFF`, `HOST_ENSURE`, and `FIRST_HARDWARE`, in that order.
-Missing software verification cannot be replaced by hardware success.
+An agent implements sprint seams and runs `amoebius-validate preview phase NN`, which mints nothing. Later
+hardware-free preparation requires its own contract and independent oracle; it produces component diagnostics
+until its predecessor is accepted.
 
 ## Repository and evidence discipline
 
 The [layout doctrine](../documents/engineering/repository_layout_doctrine.md) owns source classification and
-state roots. Haskell owns executable contracts, expectations, coverage, reset generations, and evidence
-eligibility. Markdown explains those obligations; its dates, tables, and completion markers supply no verdict.
+state roots. Haskell owns executable contracts, expectations, coverage, generations, and evidence eligibility.
+Markdown explains those obligations; its dates, tables, and completion markers supply no verdict.
 
 The [gate-integrity contract](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass) requires
 protected acceptance and evidence custody. Copies beneath `.build/**`, matching hashes, and hidden constructors
-alone do not establish an authentic pass. Evidence must bind the accepted generation and exact dependency closure.
+alone do not establish an authentic pass. Evidence must bind the accepted generation, the verifier digest, the
+governance digest, and the predecessor's product closure.
 
 ## Toolchain
 
 The [validation-execution doctrine](../documents/engineering/validation_frame_doctrine.md#2-the-bootstrap-boundary)
 owns the finite bootstrap assumption and authenticated acquisition. Phase 0 states its irreducible trust
-boundary; Phase 1 qualifies broader toolchain claims. Neither phase depends on implementing the universal DSL gate.
+boundary; Phase 1 qualifies broader toolchain claims. Neither phase depends on implementing the DSL barrier.
 
-Before the handoff gate passes, validation invokes the exact source-bound Haskell executable directly.
-Compiler-bearing development remains serial. Authenticated, network-independent inputs are required by the
-phase contract; a locally available compiler supports only the diagnostics that actually used it.
+Before the handoff gate passes, validation invokes the exact source-bound verifier `amoebius-validate`
+directly, which spawns the product binary `amoebius` as a child for every product command. Compiler-bearing
+development remains serial. Authenticated, network-independent inputs are required by the phase contract; a
+locally available compiler supports only the diagnostics that actually used it.
 
 ## Document index
 
@@ -77,171 +83,84 @@ phase contract; a locally available compiler supports only the diagnostics that 
 | [overview.md](overview.md) | Target architecture and cross-cutting invariants |
 | [system_components.md](system_components.md) | Target-only Haskell component-to-doctrine/phase map; never a present-tree or status ledger |
 | [substrates.md](substrates.md) | Hardware/substrate registry and pristine-host routing |
-| [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) | The sole reader-facing explanation of active typed Haskell divergence bindings; never executable contract |
+| [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) | The sole reader-facing explanation of active typed Haskell divergence bindings and the audit map of every re-sequence; never executable contract |
+| [Decision log](../documents/decision_log.md) | The append-only register of decisions that changed frozen doctrine or this plan |
 | [Repository Layout and Artifact Provenance](../documents/engineering/repository_layout_doctrine.md) | Complete authored/generated tree, dynamic resolution, and ignore/context contract |
-| [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) | Validation registers and boundary discipline |
+| [Gate-runner doctrine](../documents/engineering/gate_runner_doctrine.md) | The one generic runner, its gate-specification vocabulary, refusals, and the human commands |
 | [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) | Register-2.5 scheduling and replay discipline |
-| [Lift and Compose Doctrine](../documents/engineering/lift_and_compose_doctrine.md) | Sibling-source migration and convergence rules |
-| `phase_00_*.md` … `phase_95_*.md` | One independently authored capability and validation contract per phase |
-| [later_phases.md](later_phases.md) | In-scope phases not yet assigned an integer document |
+| `phase_00_*.md` … `phase_09_*.md`, `phase_50_*.md` … `phase_95_*.md` | One independently authored capability and validation contract per phase |
+| [later_phases.md](later_phases.md) | In-scope work not yet assigned an integer document, including the proof-assistant track |
 
 ## Status vocabulary
 
 The numbered plan has exactly three states: **Done**, **Active — NOT VALIDATED**, and
 **Blocked — NOT VALIDATED**. The [phase model](development_plan_phase_model.md#c-status-vocabulary) defines
-their exact tracker, phase, and sprint forms. There is one contiguous validation frontier.
-
-## Implementation-progress vocabulary
-
-**Observed footprint** records attributable source or diagnostics. **Known partial** records a specific missing
-behavior, authority, or observation. These descriptions preserve development progress without conferring
-certification. They are separate from phase status and cannot authorize gate execution.
+their exact tracker, phase, and sprint forms. There is one contiguous validation frontier in table order.
 
 ## Definition of Done
 
 The [gate-integrity contract](development_plan_gate_integrity.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
-owns acceptance. A complete qualified run must demonstrate the accepted capability through actual production
-behavior, independent expectations, exact mutation attribution, authentic observation, and current-generation evidence.
+owns acceptance. A complete qualified run must demonstrate the accepted capability through the shipped
+product binary, independent expectations, runner-generated mutants, authentic observation, and
+generation-2 evidence.
 
-An accepted run emits its exact status-only patch. After the verifier exits, an agent may check the bound
-preimage, apply that patch, and continue numerically without another routine approval.
+An accepted run emits its exact status-only patch. After the verifier exits, only the human's `accept`
+applies that patch, one phase per accept
+([DL-0009](../documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition)).
 Implementation, oracle, policy, or contract changes require the eligibility checks defined by the
 [revalidation procedure](development_plan_phase_model.md#n-reopening-and-amending-a-phase).
 
-This documentation refactor is not a qualified gate run. It closes no phase and repairs no Haskell verifier.
+This documentation change is not a qualified gate run. It closes no phase and repairs no Haskell verifier.
 
-## Reopened numeric sequence
+## Transition procedure
 
-**Certification reset — 2026-09-08.** All earlier phase and sprint certification is invalidated for the
-replacement validation generation. The reset set Phase 0 Active and phases 1–95 Blocked; the table below
-alone reports the current frontier. Existing implementation and
-diagnostics remain available for inspection and repair.
+1. The agent runs one gate serially (`--jobs=1`) with `amoebius-validate preview phase NN`, which runs the
+   complete gate, prints the would-be receipt, and mints nothing.
+2. The agent stops at the phase boundary and reports the preview.
+3. The human runs `sudo amoebius-validate accept --phase NN`, reads the printed Claim, specification digest,
+   kill table, spine outcome, and corpus delta, reads `git diff` (status lines only), and commits with the
+   receipt identifier.
+4. The next gate's preflight compares HEAD's status surface with the receipt's postimage and refuses
+   `StatusSurfaceDirty` or `PredecessorNotCommitted` on any difference.
 
-The August 22 reset and subsequent recorded completions are historical. Commits `f260c29`, `e6ce05c`,
-`66690f7`, and `d880196` recorded advancement through phases 0, 46, 49, and 52 respectively.
-Those status changes do not establish eligibility under the replacement contract.
+## Generation-2 reset
 
-The Haskell boundary identifies `amoebius-certification-generation-1`. Its protected path admits only the
-root-owned accepted verifier after the finite seven-case custody corpus, and issues signed phase receipts bound
-to the accepted baseline and current compatibility closure. Unprotected diagnostic paths remain refusal-only.
-This date is a reader reference, not the identity; old JSON or a prior Done marker cannot clear admission.
+Certification generation 2 replaces the generation-1 validator with the custody core plus one generic runner
+([DL-0007](../documents/decision_log.md#dl-0007--certification-generation-2-replaces-the-validation-kernel)).
+The plan is re-sequenced into a vertical slice, Phases 3 through 9 over one growing corpus, with 10 through 49
+reserved ([DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice)). The
+frontier is Phase 0; every other phase is Blocked. Generation-1 stores are archived as historical observations
+and supply no authority. The typed reset cause is
+`ResetCause { validatorGap = "gates measured the harness", productGap = LTD-DSL-001 }`.
 
-The reset retains target capabilities and source paths. An obligation may be refined or transferred only
-under the [scope-preservation procedure](development_plan_phase_model.md#n-reopening-and-amending-a-phase).
-Restating a narrower test inventory cannot discharge the original capability.
-
-## Current implementation audit
-
-**2026-09-08 — Known partial.** The audit found false-proof and false-qualification paths in current source.
-Serial direct-source GHC diagnostics reproduced the cases below. They are defect observations, not phase
-evidence, authenticated toolchain acquisition, or complete corpus coverage.
-
-| Owner | Observed footprint or known partial boundary | Required repair |
-|---|---|---|
-| [Phase 0](phase_00_documentation_suite.md) | The generation-1 UID-zero supervisor protects the accepted seed and issuer, executes the seven-case custody corpus, verifies schema-v4 candidates, and stores canonical signed phase receipts. Unprotected entry points remain refusal-only. | Run the exact final-source Phase-0 gate and apply only its emitted status projection; retain the explicit GenesisTrust assumptions. |
-| [Phases 1–2](phase_01_toolchain_spike.md) | Toolchain and source-graph machinery exists; this checkout lacks transferred authenticated inputs and gate receipts. | Reacquire authentic inputs and qualify source/dependency closure without treating file presence as evidence. |
-| [Phases 11–14](phase_11_formal_model_kernel.md) | Malformed guards can disappear; sets and name binding disagree; a commented function can receive a refinement proof. | Reject malformed semantics and establish interpreter, solver, and compiled-source correspondence. |
-| [Phases 18–34](phase_18_dsl_formal_model.md) | Capacity differentials and TLC machinery exist; several later projections represent fixture counts. | Preserve bounded results and establish correspondence of actual decoded, provisioned, rendered, and planned values. |
-| [Phases 42–46](phase_42_ui_browser_interpreter.md) | A plan with no routes admits a workflow route; generated browser artifacts contain placeholders. | Implement generic checked-plan semantics and executable software projections with independent observations. |
-| [Phase 49](phase_49_self_referential_gates.md) | Stage records contain supplied success values; qualification accepts labels and unrelated exceptions. | Execute the real typed pipeline and sabotage the actual accepted harness at exact loci. |
-| [Phases 50–52](phase_50_host_assert_cli.md) | Bootstrap and host implementations exist; mutation attribution and effect observation remain incomplete. | Require exact failures, unaffected controls, production-caller coverage, and independently observed effects. |
-| [Phase 53](phase_53_apple_engine_bringup.md) | Apple oracle changes distinguish assigned failure sets; native acquisition and predecessor custody remain open. | Preserve those tests and qualify the complete native path only after the reset frontier reaches it. |
-| [Phases 54–95](phase_54_windows_engine_bringup.md) | Retained plans and source are implementation inventory. | Implement and validate each preserved capability in numerical order. |
-
-**Phase-0 repair progress — Candidate ready.** Structural status parsing admits only the three canonical
-lifecycle markers, and Phase 46's structural Register metadata matches its Register 2 plan. The Linux
-generation-1 supervisor now owns the accepted verifier, baseline, custody oracle provenance, and private issuer
-behind a tested UID-zero boundary. Its schema-v4 candidate and canonical Ed25519 phase receipt bind generation,
-baseline, compatibility closure, source transition, predecessor, and process observations. The independent
-custody component and one end-to-end development gate run passed; subsequent hardening invalidated that run's
-source binding, so no status changed. The exact final-source Phase-0 gate remains required. The documentation
-diagnostic has no structural findings; `cabal check` still reports the pre-existing missing `proto` source
-directory. This audit is dated: it records what that inspection observed, and the frontier it implied has
-since moved. The table below reports the current status.
-
-The symbolic diagnostic returned `Inductive` for a model whose explicit checker returned an invariant
-counterexample. The refinement diagnostic returned `Proved` while its compiled function returned `-1`
-under a nonnegative-result obligation. A mutation selector reported qualification success for an unrelated exception.
-
-These results do not erase useful work. The source includes an independent 6,561-case capacity differential,
-Java/TLC state comparisons, and production mutation seams. Their scope and any future qualification are
-determined by the owning contracts, not by their existence or earlier PASS output.
-
-**Observed footprint — Apple development.** Before this reset, the macOS `arm64` checkout had no transferred
-Phase-52 receipt, original candidate, bootstrap inputs, or authenticated source cache. Its dispatcher also
-required Linux-only GenesisTrust, and its qualification runner assumed a different Cabal store location.
-
-The existing Apple oracle changes distinguish exact assigned failures, missing floor members, and one-short
-capacity refusals. Serial diagnostics accepted clean production and rejected six mutants, a combined unrelated
-failure, and unchanged production linked to a mutant-selected test. No complete Apple gate or live Colima
-execution occurred. Those source changes remain preserved.
-
-The [divergence register](legacy_tracking_for_deletion.md) explains existing typed bindings and outstanding
-reconciliation. New repair identities and their reintroduction cases must be implemented in Haskell; a row here
-cannot manufacture such a binding. Earlier detailed diagnostic narratives remain in Git history.
+Until the reopened Phase 0 reconciles the checker, the existing documentation checker reports the reserved
+gap as missing phases, the tracker and identity table as the wrong cardinality, and Phase 50's predecessor
+edge as non-adjacent. Those findings are the reconciliation target of Phase 0's second sprint. The reasons
+behind this reset are recorded in the decision log
+([DL-0006](../documents/decision_log.md#dl-0006--the-honesty-backlog-is-struck-or-re-mooded)) and the active
+divergence in the [legacy register](legacy_tracking_for_deletion.md); this tracker carries no audit narrative.
 
 ## Phase overview
 
-The table is an order-and-status index. It is read with the dated progress audit above, not as an assertion
-that a blocked phase has no code. The linked phase document owns the phase-specific gate; every gate also
-inherits the universal postcondition above.
+The table is an order-and-status index. The linked phase document owns the phase-specific gate; every gate
+also inherits the universal postcondition above.
 
 | Phase | Name | Substrate | Lane | Register | Status | Validation contract |
 |---|---|---|---|---|---|---|
-| 0 | Documentation, source policy, and validation baseline | none | `none` | — | ✅ Done | [Contract](phase_00_documentation_suite.md) |
-| 1 | Haskell toolchain and probe-source closure | none | `none` | 1 | ✅ Done | [Contract](phase_01_toolchain_spike.md) |
-| 2 | Repository layout conformance and de-phased naming | none | `none` | 1 | ✅ Done | [Contract](phase_02_repository_layout_conformance.md) |
-| 3 | The artifact calculus | none | `none` | 1 | ✅ Done | [Contract](phase_03_artifact_calculus.md) |
-| 4 | The budget calculus | none | `none` | 1 | ✅ Done | [Contract](phase_04_budget_calculus.md) |
-| 5 | The lift calculus | none | `none` | 1 | ✅ Done | [Contract](phase_05_lift_calculus.md) |
-| 6 | The workflow calculus | none | `none` | 1 | ✅ Done | [Contract](phase_06_workflow_calculus.md) |
-| 7 | The evidence calculus | none | `none` | 1 | ✅ Done | [Contract](phase_07_evidence_calculus.md) |
-| 8 | Scoped identity kernel | none | `none` | 1 | ✅ Done | [Contract](phase_08_scope_index.md) |
-| 9 | Capacity core fold + topology relation | none | `none` | 1 | ✅ Done | [Contract](phase_09_resource_index.md) |
-| 10 | Composition across the five calculi | none | `none` | 1 | ✅ Done | [Contract](phase_10_calculus_composition.md) |
-| 11 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | none | `none` | 1 | ✅ Done | [Contract](phase_11_formal_model_kernel.md) |
-| 12 | The amoebius explicit-state checker | none | `none` | 1 | ✅ Done | [Contract](phase_12_explicit_state_checker.md) |
-| 13 | The amoebius symbolic checker | none | `none` | 1 | ✅ Done | [Contract](phase_13_symbolic_checker.md) |
-| 14 | The amoebius refinement checker | none | `none` | 1 | ✅ Done | [Contract](phase_14_refinement_checker.md) |
-| 15 | The compile-fail fixture harness | none | `none` | 1 | ✅ Done | [Contract](phase_15_compile_fail_harness.md) |
-| 16 | Deterministic-simulation substrate | none | `none` | 2 | ✅ Done | [Contract](phase_16_deterministic_sim_substrate.md) |
-| 17 | Gateway-migration model (both branches) | none | `none` | 1 | ✅ Done | [Contract](phase_17_gateway_migration_model.md) |
-| 18 | DSL formal model | none | `none` | 1 | ✅ Done | [Contract](phase_18_dsl_formal_model.md) |
-| 19 | Reconcile decision core under deterministic simulation | none | `none` | 2 | ✅ Done | [Contract](phase_19_reconcile_core_simulation.md) |
-| 20 | The extension declaration | none | `none` | 1 | ✅ Done | [Contract](phase_20_extension_declaration.md) |
-| 21 | The per-extension laws L1-L5 | none | `none` | 1 | ✅ Done | [Contract](phase_21_extension_laws_per_extension.md) |
-| 22 | The compositional laws C1-C7 | none | `none` | 1 | ✅ Done | [Contract](phase_22_extension_laws_compositional.md) |
-| 23 | The security laws S1-S6 | none | `none` | 1 | ✅ Done | [Contract](phase_23_extension_security_laws.md) |
-| 24 | The generated conformance gate | none | `none` | 1 | ✅ Done | [Contract](phase_24_conformance_gate_generator.md) |
-| 25 | Haskell-derived Dhall projection and smart-constructor prelude | none | `none` | 1 | ✅ Done | [Contract](phase_25_dhall_schema_generation.md) |
-| 26 | Haskell protocol declarations, GADT-indexed IR, and total decoder | none | `none` | 1 | ✅ Done | [Contract](phase_26_gadt_decode_ir.md) |
-| 27 | Illegal-state corpus + validation-locus ledger | none | `none` | 1 | ✅ Done | [Contract](phase_27_illegal_state_covering.md) |
-| 28 | Logical→physical storage geometry folds | none | `none` | 1 | ✅ Done | [Contract](phase_28_storage_geometry_folds.md) |
-| 29 | Execution-epoch + scheduler + accelerator + provider-root folds | none | `none` | 1 | ✅ Done | [Contract](phase_29_execution_accelerator_folds.md) |
-| 30 | Capability union + representational bind | none | `none` | 1 | ✅ Done | [Contract](phase_30_capability_bind.md) |
-| 31 | Whole-deployment provision seal + expansion | none | `none` | 1 | ✅ Done | [Contract](phase_31_provision_seal.md) |
-| 32 | InferenceEngine capability + accelerator provision | none | `none` | 1 | ✅ Done | [Contract](phase_32_inference_accelerator_provision.md) |
-| 33 | Pure `renderAll` + rendered-artifact oracles | none | `none` | 1 | ✅ Done | [Contract](phase_33_render_manifest_oracles.md) |
-| 34 | chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker | none | `none` | 2 | ✅ Done | [Contract](phase_34_chain_kernel_boundary.md) |
-| 35 | The amoebius image recipe | none | `none` | 1 | ✅ Done | [Contract](phase_35_image_recipe_generation.md) |
-| 36 | The closed transaction vocabulary | none | `none` | 1 | ✅ Done | [Contract](phase_36_transaction_vocabulary.md) |
-| 37 | Bounded UI-program schema | none | `none` | 1 | ✅ Done | [Contract](phase_37_ui_program_schema.md) |
-| 38 | UI authorization kernel | none | `none` | 1 | ✅ Done | [Contract](phase_38_ui_authorization_kernel.md) |
-| 39 | UI effect binding | none | `none` | 1 | ✅ Done | [Contract](phase_39_ui_effect_binding.md) |
-| 40 | UI plan compiler | none | `none` | 1 | ✅ Done | [Contract](phase_40_ui_plan_compiler.md) |
-| 41 | Offline language and paired plans | none | `none` | 1 | ✅ Done | [Contract](phase_41_offline_language_plan.md) |
-| 42 | Haskell browser-interpreter semantics and projection | none | `none` | 1 | ✅ Done | [Contract](phase_42_ui_browser_interpreter.md) |
-| 43 | Haskell UI-server boundary | none | `none` | 2 | ✅ Done | [Contract](phase_43_ui_server_boundary.md) |
-| 44 | Hardware-free Haskell UI composition | none | `none` | 2 | ✅ Done | [Contract](phase_44_ui_local_composition.md) |
-| 45 | Haskell offline-state semantics and runtime projection | none | `none` | 1 | ✅ Done | [Contract](phase_45_encrypted_browser_runtime.md) |
-| 46 | Haskell-generated browser contracts and bundle | none | `none` | 2 | ✅ Done | [Contract](phase_46_ui_contract_generation.md) |
-| 47 | Foreign-source generator closure, checking tools, and mutants | none | `none` | 1 | ✅ Done | [Contract](phase_47_tool_and_mutant_generation.md) |
-| 48 | The test-workflow algebra | none | `none` | 1 | ✅ Done | [Contract](phase_48_test_workflow_algebra.md) |
-| 49 | No-hardware DSL gate barrier + self-referential gate suite | none | `none` | 2 | ✅ Done | [Contract](phase_49_self_referential_gates.md) |
-| 50 | Validate the bounded `pb` → Haskell handoff | none | `none` | 2 | ✅ Done | [Contract](phase_50_host_assert_cli.md) |
-| 51 | The host-ensure kernel | none | `none` | 2 | ✅ Done | [Contract](phase_51_host_ensure_kernel.md) |
-| 52 | Linux: sudoless Docker and the native image | linux-cpu | `linux-cpu/amd64` | 3 | ✅ Done | [Contract](phase_52_linux_engine_bringup.md) |
-| 53 | Apple: Homebrew, Colima, and the native image | apple | `linux-cpu/arm64` | 3 | 🔄 Active — NOT VALIDATED | [Contract](phase_53_apple_engine_bringup.md) |
+| 0 | Documentation, governance, and the validation seed | none | `none` | — | 🔄 Active — NOT VALIDATED | [Contract](phase_00_documentation_suite.md) |
+| 1 | Haskell toolchain and probe-source closure | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_01_toolchain_spike.md) |
+| 2 | Repository layout conformance and source closure | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_02_repository_layout_conformance.md) |
+| 3 | The typed spine from one spec to fake-applied bytes | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_03_typed_spine.md) |
+| 4 | Witness-driven manifests, capacity, and storage | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_04_witness_manifests_capacity_storage.md) |
+| 5 | Substrates, lanes, rke2 quorum, and the image recipe | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_05_substrates_lanes_image_recipe.md) |
+| 6 | Extension admission and attested scope | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_06_extension_admission_attested_scope.md) |
+| 7 | Child clusters and obligation-indexed teardown | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_07_child_clusters_obligation_teardown.md) |
+| 8 | UI program language, binding, and plans | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_08_ui_program_language_binding.md) |
+| 9 | The DSL barrier through the shipped binary | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_09_dsl_barrier.md) |
+| 50 | Validate the bounded `pb` → Haskell handoff | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_50_host_assert_cli.md) |
+| 51 | The host-ensure kernel | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_51_host_ensure_kernel.md) |
+| 52 | Linux: sudoless Docker and the native image | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_52_linux_engine_bringup.md) |
+| 53 | Apple: Homebrew, Colima, and the native image | apple | `linux-cpu/arm64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_53_apple_engine_bringup.md) |
 | 54 | Windows: WSL2 and the lifted Linux engine | windows | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_54_windows_engine_bringup.md) |
 | 55 | Haskell substrate coordinator + single kind cluster | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_55_bootstrap_coordinator_kind.md) |
 | 56 | The base image, the jit-build resolver, and the in-cluster registry | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_56_base_image_registry.md) |
@@ -285,12 +204,14 @@ inherits the universal postcondition above.
 | 94 | The jitML training and checkpoint contracts, re-derived | linux-cuda | `cuda` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_94_jitml_ui_rederivation.md) |
 | 95 | The multi-tenant web application re-derived | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_95_webapp_rederivation.md) |
 
-Unnumbered future work remains in [later_phases.md](later_phases.md). It is not a numbered phase, tracker row,
-predecessor, or validation state until a standards change assigns it an exact ordinal and contract.
+Unnumbered future work, including the proof-assistant track that owns the parked formal checkers, remains in
+[later_phases.md](later_phases.md). It is not a numbered phase, tracker row, predecessor, or validation state
+until a decision-log entry assigns it an exact ordinal and contract.
 
 ## Related Documents
 
 - [Documentation Standards](../documents/documentation_standards.md)
+- [Decision Log](../documents/decision_log.md)
 - [Engineering Doctrine Index](../documents/engineering/README.md)
 - [Repository Layout and Artifact Provenance](../documents/engineering/repository_layout_doctrine.md)
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md)

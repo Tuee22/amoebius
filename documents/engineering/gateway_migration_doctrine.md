@@ -170,7 +170,7 @@ and the reconciliation of divergent histories are owned by
 [chaos_failover_second_axis.md §16–§19](./chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
 and its
 [Appendix B](./chaos_failover_worked_examples.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question);
-the formal model is [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) (Phase 17).
+the formal model is [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) (Phase 75).
 
 **Reconciliation on the primary's return** (summarized; owned by
 [chaos_failover_worked_examples.md Appendix B](./chaos_failover_worked_examples.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question)):
@@ -344,6 +344,6 @@ status.
 - [Consistency & PACELC Doctrine](./consistency_pacelc_doctrine.md) — the whole-stance PACELC posture and the unified deployment-rules surface (the R8 lag bound, R9 RTO budget, and per-app participation flag) that this taxonomy's budget and pairing feed into.
 - [Illegal-State Catalog](../illegal_state/illegal_state_catalog.md) — the "session that cannot rebind on migration" entry ([§3.44](../illegal_state/illegal_state_multicluster.md#344-a-session-that-cannot-rebind-on-gateway-migration)) and the GADT-indexed-state-machine technique ([§4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)).
 - [DSL Doctrine](./dsl_doctrine.md) — the typed `GatewayFailover` forest relation as a parent-minted, child-projected subtree field.
-- [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the formal model of both the `Planned` and `Failover` branches (Phase 17).
+- [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the formal model of both the `Planned` and `Failover` branches (Phase 75).
 - [Development Plan → Phase 75](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.
 - [Documentation Standards](../documentation_standards.md) — header, SSoT, and the proven/tested/assumed honesty rule.

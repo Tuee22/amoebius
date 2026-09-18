@@ -43,9 +43,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-77 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -98,7 +97,7 @@ second create path. Provider-volume replacement or shrink is a `StorageMigration
 old and new raw allocations, provider volume counts, copy/verify workspace, and the complete copy Job envelope
 must fit simultaneously, and a failed copy/verification or unobservable cleanup retains and charges both volumes.
 This phase is the live owner of the `CreateProviderCapacity` cloud-mutation capability:
-[Phase 28](phase_28_storage_geometry_folds.md) owns the policy-only envelope and the observe-then-plan
+[Phase 4](phase_04_witness_manifests_capacity_storage.md) owns the policy-only envelope and the observe-then-plan
 `Growable`/scaling fold; [Phase 58](phase_58_object_reconciler.md) owns the generic fresh-snapshot validation and
 single-use dispatcher; this phase alone supplies the account-scoped cloud mutation — embedding an exact
 storage-capacity refinement of the batch-owned Pulumi graph, validating it against current durable byte/count
@@ -467,7 +466,7 @@ durable checkpoint, and static-attachment machinery — and make replacement/shr
   ambiguous outcomes retain every possible byte/count/checkpoint commitment and force re-observation.
 - An in-file honesty note: this sprint builds the create-only guard's scaling/migration arms;
   `CreateProviderCapacity` is the live cloud writer, while the policy-only envelope and single-use dispatcher it
-  refines are owned by [Phase 28](phase_28_storage_geometry_folds.md) and
+  refines are owned by [Phase 4](phase_04_witness_manifests_capacity_storage.md) and
   [Phase 58](phase_58_object_reconciler.md).
 
 ### Validation
@@ -488,7 +487,7 @@ durable checkpoint, and static-attachment machinery — and make replacement/shr
    verification, while the old backing remains charged until an independent privileged observation proves
    deletion.
 3. Drive a `Growable` durable-EBS budget across its threshold without editing its desired demand. The fresh
-   observation and [Phase 28](phase_28_storage_geometry_folds.md) planner must select `CreateProviderCapacity`;
+   observation and [Phase 4](phase_04_witness_manifests_capacity_storage.md) planner must select `CreateProviderCapacity`;
    validate that its storage-only action domain, deploy/checkpoint projection, rounded byte/count debit, and
    Pulumi execution demand equal the enclosing cloud batch exactly. Change account usage, allocation inventory,
    checkpoint fingerprint, or parent executor residual after validation and assert zero AWS/checkpoint calls. On
@@ -636,7 +635,7 @@ surfaces remain UNVERIFIED, including Phase-90 elevated durable reclamation.
 - [phase_60](phase_60_retained_storage.md) — the `no-provisioner` retained PVs + lossless rebind the EBS backs
 - [phase_56](phase_56_base_image_registry.md) — the multi-arch baked-binary supply chain this phase extends with
   provider-only CSI binaries
-- [phase_28](phase_28_storage_geometry_folds.md) — the storage-scaling policy-only envelope and observe-then-plan
+- [phase_28](phase_04_witness_manifests_capacity_storage.md) — the storage-scaling policy-only envelope and observe-then-plan
   `Growable`/scaling fold the `CreateProviderCapacity` enactor refines
 - [phase_58](phase_58_object_reconciler.md) — the typed SSA reconciler that installs the static CSI and the
   generic fresh-snapshot validation + single-use dispatcher this scaling arm invokes

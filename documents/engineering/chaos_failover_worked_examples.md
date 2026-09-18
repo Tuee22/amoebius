@@ -149,7 +149,7 @@ converges on heal — R7); *≤ 1 gateway authority once views converge* (Append
 workflow with a live cluster eventually completes through one authority.* Honest limit: the model is in
 **logical time** — it encodes "an effect either had or had not crossed the boundary before the cut" but says
 **nothing** about the real size of that window; whether field lag stays within bound is the **R8/R9 assumed premise**, in the ledger, not the model. **The concrete spec is owned by
-[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) (Phase 17), which the
+[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) (Phase 75), which the
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) names as the phase that carries this proof.**
 
 **Inject applied.** Extend the test-`.dhall` harness into the inter-cluster dimension: **cut the replication channel** and assert divergence stays bounded and mergeable and ≤ 1 gateway authority once
@@ -165,7 +165,7 @@ dedup + pointer-merge fold (decision layer); the modeled two-cluster safety/live
 replication-lag/promotion-gate, and failback-idempotency drills. *Assumed* — the data-loss-window /
 replication-lag bound (R8/R9), monitored never proven; the PACELC latency-for-consistency posture (R7);
 runtime fidelity and behaviour beyond 2 clusters. **Under the two-tier schedule, the two-cluster
-design-model's safety/liveness properties are Phase-17 proof obligations at scope 2 (design-first), and
+design-model's safety/liveness properties are Phase 75 proof obligations at scope 2 (design-first), and
 model↔code correspondence is differentially checked; the runtime fidelity (real physics) and live
 cross-cluster-failover-in-a-running-forest remain UNVERIFIED — the Tier-2 Phase-75 obligation, and the single
 place the per-system proof concentrates.**

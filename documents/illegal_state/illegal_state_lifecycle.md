@@ -18,7 +18,7 @@ be observed as having happened. The numbering belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -90,7 +90,7 @@ adds one new **Validation-locus** line naming where the illegal state is caught 
 
 ### 3.41 A duration-gated / hand-ordered bring-up sequence (a readiness race)
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `lifecycle`
 
@@ -122,7 +122,7 @@ and the derived-edge handle; `decode-foreclosed` for the acyclic/complete DAG fo
 that the observed condition actually resolves (owned by [`readiness_ordering_doctrine.md` §6](../engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps), [`cluster_lifecycle_doctrine.md` §9](../engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine), and [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md)). *(Honesty: the `type-foreclosed` claim scopes to the sanctioned `Readiness`-typed surface, not the whole `IO` monad — a raw `threadDelay` is caught one layer out by the [`daemon_topology_doctrine.md` §6](../engineering/daemon_topology_doctrine.md#6-the-shared-daemon-spine) ban, a `runtime-checked` discipline.)*
 
 **Validation-locus:** `gadt-decode` (the closed `Readiness` union with no `AfterDuration` arm is a Haskell
-`data` type on the Phase-34 surface, and bring-up order is *derived*, never Dhall-authored — so no `dhall
+`data` type on the Phase 3 surface, and bring-up order is *derived*, never Dhall-authored — so no `dhall
 type` fixture can exercise it. A tracked Haskell negative declaration materializes the attempted "wait N then
 assume ready" module only beneath `.build/test-corpora/**` and requires GHC to reject it for the separately
 pinned Haskell diagnostic identity; this is not an editor-time `dhall type` failure, per the
@@ -163,13 +163,13 @@ orthogonal to the foreclosure layer above.
 **Phase-71 target instance — NOT VALIDATED:** the gate must compile the closed
 `Environment`/opaque-`EvidenceWitness` boundary and exercise it live. Runtime- and Protocol-missing fixtures
 must return their specific refusal tags and produce no pointer mutation; the Runtime witness must produce the
-only Prod advance. Even successful live wiring would be tested, never proven; Phase 48 owns only the pure
+only Prod advance. Even successful live wiring would be tested, never proven; Phase 7 owns only the pure
 test-workflow/evidence algebra, while Phase 90 owns later live topology derivation and execution after the
-Phase-49 barrier.
+DSL barrier (Phase 4).
 
 ### 3.43 An unmonitored workflow or extension (or an unauthenticated monitoring surface)
 
-**Delivery-owner:** `Phase-31`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `capacity`
 
@@ -210,7 +210,7 @@ a `SubjectScoped` filter actually excludes another subject's data). Per the vali
 
 ### 3.46 A chaos fault targeting a component the spec never declared
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `lifecycle`
 
@@ -365,7 +365,7 @@ that the linked handler actually serves the extension the worker names.
 
 ### 3.78 Extension source that reaches outside the sanctioned API
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `lifecycle`
 
@@ -396,7 +396,7 @@ time over extension source before link, per the validation-locus axis of
 
 ### 3.87 An execution unit with no monitoring obligation
 
-**Delivery-owner:** `Phase-31`
+**Delivery-owner:** `Phase 3`
 
 **Case-family:** `capacity`
 

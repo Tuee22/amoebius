@@ -32,7 +32,8 @@ below group reference material by subject. Their descriptions state intended arc
   eight stops, each naming where to stop reading.
 - [`glossary.md`](./glossary.md) — the routing table from every amoebius term and acronym to the section that
   owns it, including the accepted baseline, certification generation, evidence custody, and current compatibility.
-- [`../DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md) — the current certification frontier and dated audit; consult it before treating a design description as an implementation claim.
+- [`../DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md) — the current certification frontier; consult it before treating a design description as an implementation claim.
+- [`decision_log.md`](./decision_log.md) — the append-only register of decisions that changed frozen doctrine or the plan.
 
 ## The three doctrine families
 
@@ -56,8 +57,10 @@ below group reference material by subject. Their descriptions state intended arc
 ## Shared standards
 
 - **[`documentation_standards.md`](./documentation_standards.md)** — the house rules every doc follows: the
-  header block, SSoT / no-duplication, the proven/tested/assumed honesty discipline, the third-person tone, and
-  the `§N` anchor-link conventions.
+  header block, SSoT / no-duplication, the proven/tested/assumed honesty discipline, the third-person tone,
+  the `§N` anchor-link conventions, and the doctrine freeze.
+- **[`decision_log.md`](./decision_log.md)** — the entry contract every amendment to a frozen document lands
+  through, and the errata register.
 - **[`engineering/repository_layout_doctrine.md`](./engineering/repository_layout_doctrine.md)** — the complete
   tracked-tree grammar: every behavioral source is `.hs`, Python under `pb/**` is the sole language exception,
   every external-language artifact is generated lazily under `.build/**`, and operator inputs stay untracked.
@@ -66,8 +69,9 @@ below group reference material by subject. Their descriptions state intended arc
 
 ## Where status, progress, and phase order live
 
-The [plan tracker](../DEVELOPMENT_PLAN/README.md) owns phase order, current status, and dated implementation
-progress. Each linked phase document owns its acceptance contract. The
+The [plan tracker](../DEVELOPMENT_PLAN/README.md) owns phase order and current status; the
+[decision log](./decision_log.md) owns the reasons the plan has its shape. Each linked phase document owns its
+acceptance contract. The
 [gate-integrity standard](../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass)
 owns evidence and compatibility requirements; these indexes supply none of that evidence.
 

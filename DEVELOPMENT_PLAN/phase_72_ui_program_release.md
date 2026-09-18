@@ -15,7 +15,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -29,6 +29,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 72.1: Release immutable UI plans without rebuilding the runtime](#sprint-721-release-immutable-ui-plans-without-rebuilding-the-runtime-)
+- [Sprint 72.2: Local composition of the browser and server plans](#sprint-722-local-composition-of-the-browser-and-server-plans-)
+- [Sprint 72.3: Generated browser contracts and the generic bundle](#sprint-723-generated-browser-contracts-and-the-generic-bundle-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -36,9 +38,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-71 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -81,7 +82,7 @@ remains phase-local and cannot be supplied by this prose.
 | Key | Contract |
 |---|---|
 | `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: one cohesive claim — *a UI program is released atomically by content address, without rebuilding the runtime image*. A stale or mixed plan identity is refused before any action executes. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Subject` | `Amoebius.Ui.Runtime.Release`, `Amoebius.Ui.Runtime.Composition`, and `Amoebius.Ui.Runtime.Bundle` under `src/Amoebius/Ui/Runtime/`, consuming the checked program of Phase 8 and the runtime of Phase 70; every subject is inside the closure of `executable amoebius`. |
 | `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 72` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
@@ -94,7 +95,7 @@ remains phase-local and cannot be supplied by this prose.
 | `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Legacy closure` | `LTD-UI-001` closes here for local composition and the generated bundle, and `LTD-SRC-004` closes its generated-artifact share, through the compiled inventory. The due-count for every other identifier is zero. |
 | `Predecessor` | UNRESOLVED — blocks validation: the typed generation/compatibility binding still requires implementation. Require authenticated `ImmediatePredecessorPass` for Phase 71 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
 | `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
@@ -128,11 +129,11 @@ Haskell and qualify the mechanism that first admits their result; component obse
 ## Sprint 72.1: Release immutable UI plans without rebuilding the runtime ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Implementation**: `src/Amoebius/Ui/Runtime/Release.hs`
 **Blocked by**: [Phase 71](phase_71_release_lifecycle.md) gate pass
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
+**Oracle**: `test/oracle/ui/Main.hs`, which imports no `amoebius` library.
+**Legacy IDs**: `LTD-UI-001`, `LTD-SRC-004`
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
 ### Objective
@@ -166,6 +167,60 @@ per-app frontend image, half-published plan, mixed-plan execution, or stale-plan
 
 The pre-reset `None` claim is permanently invalid; this sprint remains blocked and NOT VALIDATED. Future compatibility-witness coverage and rolling overlap/reconnect remain owned by
 their later phases and are not claimed by this gate.
+## Sprint 72.2: Local composition of the browser and server plans ⏸️
+
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Ui/Runtime/Composition.hs`
+**Blocked by**: Sprint 72.1
+**Independent Validation**: The browser and server plans of one release compose with typed workflow and artifact handles so that tenant and owner scope, ready-receipt order, paired-plan identity, and denial of direct browser-to-domain access hold on the corpus's two application shapes; runner-generated mutants in the composition are killed by the independent visible/effect/access/denial values.
+**Oracle**: `test/oracle/ui/Main.hs` states the expected visible, effect, access, and denial values from literals.
+**Legacy IDs**: `LTD-UI-001`
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`
+
+### Objective
+
+Compose the browser and server semantic boundary in pure Haskell before a release ships it.
+
+### Deliverables
+
+- The composition over paired plans with typed handles.
+- The denial of direct browser-to-domain access as a refusal, not a runtime check.
+
+### Validation
+
+Compose both application shapes; compare with the oracle; refuse the direct-access twin by name.
+
+### Remaining Work
+
+Implement the composition. Live adapters and execution remain this phase's live claims.
+
+## Sprint 72.3: Generated browser contracts and the generic bundle ⏸️
+
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Ui/Runtime/Bundle.hs`
+**Blocked by**: Sprint 72.2
+**Independent Validation**: The generic browser interpreter, its foreign-function shims, the package description, and the build description are rendered beneath `.build/ui/**` from Haskell public-boundary values; a clean-room browser build consumes generated files only; a tracked PureScript, JavaScript, or package-manifest file is refused at the layout locus; generated artifacts contain no placeholder.
+**Oracle**: `test/oracle/ui/Main.hs` states the expected generated file set and its digests from literals.
+**Legacy IDs**: `LTD-UI-001`, `LTD-SRC-004` — the generated-artifact share
+**Docs to update**: `documents/engineering/generated_artifacts_doctrine.md` and `documents/engineering/repository_layout_doctrine.md`
+
+### Objective
+
+Generate every browser artifact from Haskell and track none of it.
+
+### Deliverables
+
+- The bundle renderer beneath `.build/ui/**`.
+- The clean-room build that consumes only generated files.
+
+### Validation
+
+Render, build in a clean room, compare the generated set with the oracle, and refuse each tracked reintroduction.
+
+### Remaining Work
+
+Implement the renderer and the clean-room build; the image-rebuild prompt applies when the bundle changes the runtime image.
+
 
 ## Documentation Requirements
 

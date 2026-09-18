@@ -32,8 +32,8 @@ that the rest of amoebius reads. It is the **single owner** (an ownership index,
 *which hosts/substrates exist*, *how much each host advertises*, and *which taints a node carries*. Three
 consumers read it, and each is a foreclosure that depends on there being exactly one such list.
 
-**Phase-9 read-side bound contract.** The
-[Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) validates the capacity/topology fold
+**Phase 4 read-side bound contract.** The
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) validates the capacity/topology fold
 against authored in-process `NodeCapacity`, host, candidate-class, taint, and quota values.
 It performs no live inventory read. The required `declared allocatable ≤ observed allocatable` cross-check,
 filesystem/runtime metadata observation, VM boot, and node join therefore remain **UNVERIFIED** until their

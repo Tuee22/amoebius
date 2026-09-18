@@ -16,7 +16,7 @@ rather than restated.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_workflow_calculus.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_child_clusters_obligation_teardown.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -138,7 +138,7 @@ argument.
 
 amoebius's own gates are workflows in this algebra. A phase gate provisions what it needs, builds what it
 tests, deploys, observes, asserts, and tears down; the evidence it seals is the observation arm's output
-([`conformance_harness_doctrine.md`](./conformance_harness_doctrine.md)).
+([`gate_runner_doctrine.md`](./gate_runner_doctrine.md)).
 
 The self-reference is deliberate and it earns two things. The calculus is exercised by every gate run, so a
 defect in it surfaces in amoebius's own validation before it reaches an extension. And the gates become
@@ -154,7 +154,7 @@ clean workflow execution with raw external observations. The complete qualified 
 record the candidate as Done
 ([`testing_spoof_resistance.md`](./testing_spoof_resistance.md)).
 
-[Phase 49](../../DEVELOPMENT_PLAN/phase_49_self_referential_gates.md) is the target integrated instance. It
+[Phase 9](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md) is the target integrated instance. It
 routes the complete hardware-free DSL pipeline through the workflow value after the separately authored
 kernel freezes the claim. It does not execute a retained Python command, wrap a supplied exit code, consume a
 checked-in command inventory, or seal its own verdict. All serialized declarations, observations, and mutation
@@ -203,7 +203,7 @@ VALIDATED; this doctrine contains no current tested instance.
 - [Evidence Calculus Doctrine](./evidence_calculus_doctrine.md) — the evidence calculus, and the independence test a self-referential gate has to answer
 - [Testing Doctrine](./testing_doctrine.md) — the register model and the independent-oracle discipline
 - [Testing Spoof Resistance](./testing_spoof_resistance.md) — the independent observation that a teardown actually happened
-- [Conformance Harness Doctrine](./conformance_harness_doctrine.md) — the harness amoebius's own gates run in
+- [Conformance Harness Doctrine](./gate_runner_doctrine.md) — the harness amoebius's own gates run in
 - [Monitoring Doctrine](./monitoring_doctrine.md) — the observe arm's standing obligations
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — the promotion gate a deploy arm may demand
 - [DSL Doctrine](./dsl_doctrine.md) — the declared state a workflow moves the system toward

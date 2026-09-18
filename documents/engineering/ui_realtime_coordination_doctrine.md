@@ -15,7 +15,7 @@ message bus and projections; nor the application language above it, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -111,23 +111,23 @@ and refresh tokens are absent.
 
 ## 4. Typed routing and resume envelope
 
-[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md) owns the pure paired-plan and finite-demand
+[Phase 8](../../DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md) owns the pure paired-plan and finite-demand
 compiler that fixes this envelope's generated location. Its typed Haskell cases, independent reference
 relation, five-calculus projection, and six production mutants constrain compilation without executing
 WebSockets, Redis routing, resume, or cross-pod dispatch. Its status remains owned solely by the development
 plan and qualified gate.
 
-[Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md) is limited to hardware-free Haskell
+[Phase 70](../../DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md) is limited to hardware-free Haskell
 browser-interpreter semantics and lazy projection. It must not start a browser, fake server, network service,
-or OS-policy observer before the Phase-49 gate barrier. Live same-origin WebSocket behavior belongs to a
-later phase. Phase 42's status is owned by the plan's mechanical status projection
+or OS-policy observer before the DSL barrier (Phase 9). Live same-origin WebSocket behavior belongs to a
+later phase. Phase 70's status is owned by the plan's mechanical status projection
 ([`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md)).
 
-[Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) is limited to a Haskell server-boundary model
+[Phase 70](../../DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md) is limited to a Haskell server-boundary model
 and Haskell-owned fakes. Its eventual contract must admit the exact signed-credential/current-scope case and
 refuse minimally different twins without starting a browser, network service, or OS observer. Live server
 admission, Redis routing, resume, durable receipts, cross-pod dispatch, replica drain, and failover belong
-after the Phase-49 barrier. Phase 43's status is owned by the plan's mechanical status projection
+after the DSL barrier (Phase 4). Phase 70's status is owned by the plan's mechanical status projection
 ([`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md)).
 
 Every routed frame carries an envelope equivalent to:

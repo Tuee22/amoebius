@@ -10,7 +10,7 @@ This document owns the distinction between evidence about *behaviour* and eviden
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md
+**Referenced by**: 
 **Generated sections**: none
 
 </details>

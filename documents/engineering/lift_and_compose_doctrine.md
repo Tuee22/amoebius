@@ -4,21 +4,21 @@
 > `prodbox`, `jitML`, `infernix`, `mattandjames`) — that amoebius **depends on none of them and none of them
 > depends on amoebius**, that they are **reference implementations** whose pure structures amoebius
 > **re-derives** under stronger obligations, and that a re-derivation is admissible only once the guarantee
-> amoebius must add has been named. It also owns the **lift calculus**: the algebra that gives the word "lift"
-> a meaning a type can check.
+> amoebius must add has been named.
 > **Read this if**: a seed already implements something amoebius needs, and the question is what amoebius is
 > allowed to do about it.
 
-This document owns the self-containment rule, the re-derivation discipline, and the lift calculus. It owns no
-seed code and no seam: each seam is owned by its own doctrine, and each re-derived structure is owned by the
-amoebius doctrine that specifies it.
+This document owns the self-containment rule and the re-derivation discipline. It owns no seed code and no
+seam: each seam is owned by its own doctrine, and each re-derived structure is owned by the amoebius doctrine
+that specifies it. The lift calculus is owned by
+[`substrate_doctrine.md` §10](./substrate_doctrine.md#10-the-lift-calculus).
 
 <details>
 <summary>Link-graph metadata</summary>
 
-**Status**: Authoritative source
+**Status**: Reference only
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -191,37 +191,11 @@ nothing about amoebius until an amoebius gate says so.
 
 ## 7. The lift calculus
 
-"Lift" survives the inversion as a technical term, and this section is its owner. A lift is not a decision to
-reuse code; it is the answer to a question with a closed set of answers: **where does an effect run, and what
-does the caller have to hold to make it run there?**
-
-The calculus has three parts:
-
-- **A closed layer set.** Every effect executes at exactly one layer — on the host, inside a frame the host
-  provides, inside a container that frame runs, and so on outward. The set is closed, so "somewhere else" has
-  no constructor, and the layer at which a step runs is part of its type rather than part of its documentation.
-- **A total transition relation.** Moving an effect from one layer to another is a relation over the layer set,
-  and it is total: every pair either has a constructor that performs the transition or has no inhabitant at
-  all. There is no fallback arm, which is the guarantee [§5](#5-the-re-derivation-map) records against `hostbootstrap`.
-- **A witness for each transition.** A transition consumes evidence that its precondition holds — that the
-  frame exists, that the engine is present, that the image is resolved. The witness is produced by observation
-  and cannot be asserted, so a step cannot claim to have crossed a boundary it did not cross.
-
-Composition follows from the three: two lifts compose exactly when the inner one's target layer is the outer
-one's source layer, which is a type equation rather than a check. The substrate-specific instances of this
-calculus — which frames exist on which hardware, and which engine each frame provides — are owned by
-[`substrate_doctrine.md`](./substrate_doctrine.md), which reads this algebra rather than restating it.
-
-**Phase-5 target boundary — NOT VALIDATED.** [Phase 5](../../DEVELOPMENT_PLAN/phase_05_lift_calculus.md) must
-cover all three parts as pure values in Register 1: the layer set closed at three members, the relation total over all
-nine ordered pairs with no fallback arm, a witness per transition that only an observation produces, and
-composition as the type equation above. Three things it did not settle. The set is closed *at three* — the
-"and so on outward" this section allows for is a change to that module rather than something the code already
-carries. The relation is over primitive transitions and is deliberately not transitive, so reaching a
-container from the host is a composition and not a relation arm. And nothing in that register enters a frame
-or asks an engine, so every witness there is produced from an observation the suite hands it; the live
-observation is the substrate doctrine's. Status lives only in the
-[tracker](../../DEVELOPMENT_PLAN/README.md).
+"Lift" survives the inversion as a technical term. The calculus that gives it a meaning a type can check — a
+closed layer set, a total transition relation, and a witness per transition — is owned by
+[`substrate_doctrine.md` §10](./substrate_doctrine.md#10-the-lift-calculus), beside the substrate instances it
+ranges over. The guarantee it records against `hostbootstrap` is the one [§5](#5-the-re-derivation-map) names:
+no fallback arm.
 
 ---
 
@@ -270,7 +244,7 @@ establish an amoebius result; every current phase is NOT VALIDATED.
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — the precedent: a load-bearing client is owned, not consumed
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — secrets by name, the seam every seed's credential handling is re-derived onto
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — the `jitML` row's naming discipline
-- [Conformance Harness Doctrine](./conformance_harness_doctrine.md) — re-derivation is Register-1/2 validatable
+- [Conformance Harness Doctrine](./gate_runner_doctrine.md) — re-derivation is Register-1/2 validatable
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — the line a re-derived structure must not blur
 - [Documentation Standards](../documentation_standards.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

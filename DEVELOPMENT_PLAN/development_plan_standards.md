@@ -14,7 +14,7 @@ section/anchor surface and the exact document templates.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/documentation_standards.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/documentation_standards.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -91,7 +91,8 @@ The governed set is closed:
 | `later_phases.md` | Unnumbered future intent only |
 
 There is one reader-facing legacy register only. Closed and superseded explanations are deleted; Git history
-is the archive. No other file may become a second deletion register. Its legacy-specific structural seam
+is the archive. No other file may become a second deletion register. The audit map of a plan re-sequence
+lives in that register under its audit-map section, as [§E](#e-one-canonical-phase-model) requires. Its legacy-specific structural seam
 enforces exact canonical file cardinality, regular non-executable mode, UTF-8 readability, absence of a second
 exact canonical basename, and absence of the exact forbidden archive basename. It does not infer semantic
 aliases from arbitrary prose or filenames. The general documentation checker may separately enforce ordinary
@@ -120,17 +121,21 @@ The three markers and their mandatory wording are defined in
 phase and sprint says `NOT VALIDATED`. A complete qualified phase-gate pass is sufficient for ✅ Done. Digests
 and generated evidence remain inputs to the test rather than substitutes for running it.
 
-The 2026-09-08 certification reset initializes Phase 0 as `🔄 Active — NOT VALIDATED` and Phases 1–95 as
-`⏸️ Blocked — NOT VALIDATED`. It withdraws every earlier certification without deleting implementation or
-renumbering phases. Current status comes from the canonical tracker, phase, and sprint projection.
-Its vector contains one Done prefix, exactly one Active phase, and one Blocked suffix, or the terminal all-Done state.
+The generation-2 reset
+([DL-0007](../documents/decision_log.md#dl-0007--certification-generation-2-replaces-the-validation-kernel),
+[DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice)) initializes Phase 0 as
+`🔄 Active — NOT VALIDATED` and Phases 1–9 and 50–95 as `⏸️ Blocked — NOT VALIDATED`; ordinals 10–49 are a
+reserved gap with no row. It withdraws every generation-1 certification without deleting implementation.
+Current status comes from the canonical tracker, phase, and sprint projection. Its vector contains one Done
+prefix, exactly one Active phase, and one Blocked suffix in table order, or the terminal all-Done state.
 
-The reset requires a new Haskell-owned certification generation under
-[gate integrity §M.0](development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation).
-That authority is implemented by the protected Haskell generation-1 supervisor, not supplied by this Markdown
-text. Pre-reset receipts cannot restore status, satisfy a predecessor, or authorize hardware work in the new
-generation. Retained phase rows still specify intended capabilities, while each phase must separately acquire
-its authenticated predecessor and produce current execution evidence.
+The reset requires the generation-2 certification authority under
+[gate integrity §M.0](development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation):
+a content-addressed verifier seeded by the human, not supplied by this Markdown text. Generation-1 receipts
+cannot restore status, satisfy a predecessor, or authorize hardware work. Retained phase rows still specify
+intended capabilities, while each phase must separately acquire its authenticated predecessor and produce
+current execution evidence. This change is the last hand-applied status edit
+([DL-0009](../documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition)).
 
 The current phase-status line is a raw, one-line, exact field and occurs once. The `**Gate:**` summary is a
 separate immutable command/link field: it never carries status or result prose, so recording a pass cannot make
@@ -153,8 +158,9 @@ gate binds the source snapshot it tested and permits only the tracker, phase, an
 that result to change. The one contiguous frontier advances with the pass: the closing phase and all of its
 sprints become Done, and its immediate successor plus that successor's first sprint become Active when one
 exists; every later phase remains Blocked. The validator emits the verified patch only beneath `.build/**` and
-never changes a tracked file. After that process exits, a human, agent, or CI job may recheck the bound preimage
-and apply the exact patch. Any other byte change creates a new candidate and requires the gate to run again.
+never changes a tracked file. After that process exits, the human's `accept` rechecks the bound preimage and
+applies the exact patch; an agent's `preview` applies nothing. Any other byte change creates a new candidate
+and requires the gate to run again.
 
 A later edit preserves an earlier run as a historical fact, but current reuse requires an authenticated
 compatibility decision under [gate integrity §M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass).
@@ -167,9 +173,10 @@ Done phase with an identity status projection. A failed or incompatible accepted
 reopening procedure. Receipt age, filename hashes, copied candidate bytes, and an active phase's assertion of
 compatibility supply no reuse authority.
 
-Within accepted scope, implementation, qualification, recording, and numerical progression continue
-automatically. Routine sprint boundaries require no user confirmation. Contract or verifier changes follow
-the separately qualified baseline-revision procedure; the candidate cannot weaken its own acceptance.
+Within accepted scope, implementation and qualification continue through sprint seams without confirmation.
+Recording and numerical progression happen one phase per human `accept`; an agent stops at the phase
+boundary. Contract or verifier changes follow the separately qualified baseline-revision procedure; the
+candidate cannot weaken its own acceptance.
 
 ---
 
@@ -216,6 +223,12 @@ input; it is neither a hidden phase nor a capability Phase 0 can prove with the 
 Gate line is a future public-command target, not an assertion that it exists, runs, or passes; status belongs
 only to the tracker, phase-status line, sprint headings, and sprint status fields.
 
+A slice phase (Phases 3 through 9) adds two subsections after the `Gate:` field, inside Phase Summary:
+`### Corpus`, naming the corpus module, the minimum number of distinguishing pairs, the new tags, and the
+predecessor corpus it contains; and `### Gate specification`, holding one fenced `gate-spec` block that
+renders the `GateSpec` the implementation must produce. The documentation checker compares that block with
+the compiled specification, so the two cannot drift. Neither subsection is a Phase Summary field.
+
 `Forward-deferred:` is the one conditional field, placed exactly between `Depends on:` and `Gate:`. It is
 present when and only when the phase names an artefact a later phase owns, and it carries that owner's
 capability plus the contract-level forward-deferral tag under which the reach is recorded. That tag is not an
@@ -227,9 +240,9 @@ forward reach has nowhere to be stated and is invisible to every checker. Naming
 consume it: the reach is an excluded forward deferral the later owner discharges, and a phase whose claim cannot be settled without
 the later artefact is mis-ordered rather than forward-deferred.
 
-Until Phase 50's qualified gate passes,
-`pb` is an inadmissible validation transport: Phase 0 through Phase 49 invoke the exact source-bound Haskell
-executable directly. Phase 0 carries only the narrow `GenesisTrust` local-custody and compile-time/platform
+Until `BOOTSTRAP_HANDOFF` (Phase 50) passes its qualified gate,
+`pb` is an inadmissible validation transport: Phase 0 through the DSL barrier (Phase 9) invoke the exact
+source-bound Haskell verifier directly. Phase 0 carries only the narrow `GenesisTrust` local-custody and compile-time/platform
 assumption; it does not authenticate the actual compiler executable bytes or derivation. Phase 1 owns the
 authenticated, reproducible toolchain acquisition bound by subsequent builds without retroactively providing
 Phase 0's compiler. Phase 50
@@ -247,7 +260,7 @@ it. `## Resource provision` is the only optional section between Gate integrity 
 The universal validation envelope does not by itself select that optional section. Starting the exact outer
 source-bound Haskell gate and containing its ordinary generated observations beneath the run-scoped `.build/**`
 root are common gate mechanics governed by `Command`, `Cleanroom`, and candidate-evidence binding. They do not
-make all ninety-six phases resource-provisioning phases.
+make all fifty-six phases resource-provisioning phases.
 
 A phase must include `## Resource provision` when its phase-specific subject, fake, adapter, external observer,
 or cleanup helper may create, change, retain, or delete an additional process, host, VM, container, cluster,
@@ -281,9 +294,14 @@ command cannot substitute for this contract.
 
 ## E. One canonical phase model
 
-Phases are contiguous and considered in numerical order. Every gate after Phase 0 binds the immediately
-preceding gate pass. Phase 49 is the no-hardware end-to-end DSL gate barrier; no fake-host takeover,
-hardware bring-up, container, registry, cluster, GPU, or cloud evidence may open before its gate passes.
+The plan's domain is `0..9 ∪ 50..95`; ordinals `10..49` are reserved and occupiable only by a new
+decision-log entry and a new certification generation. Phases are considered in table order, and every gate
+after Phase 0 binds the gate pass of the previous row, so Phase 50's predecessor is Phase 9. The semantic cut
+is named by role: `GenesisTrust` → Phase 0 → Phase 1 → Phase 2 → Phase 3, the thin spine → Phases 4–8,
+breadth over the same corpus → `DSL_BARRIER` (Phase 9) → `BOOTSTRAP_HANDOFF` (Phase 50) → `HOST_ENSURE`
+(Phase 51) → `FIRST_HARDWARE` (Phase 52). Phase N's corpus contains Phase N−1's. No fake-host takeover,
+hardware bring-up, container, registry, cluster, GPU, or cloud evidence may open before the barrier's gate
+passes.
 
 The full argument is in
 [`development_plan_phase_model.md` §E](development_plan_phase_model.md#e-one-canonical-phase-model).
@@ -329,12 +347,11 @@ HTML comments, and joins wrapped artifact-authority wording across line boundari
 mutant, and residue. The expanded numbered Validation list may provide detail. A command exit code, parent
 gate reference, test count, fixture existence, or hash comparison alone is insufficient.
 
-Where the seam has selectable changed-production subjects, `Independent Validation` also names its
-independently literal oracle-owned selector-to-exact-case registry. The candidate must reconcile exact selector
-identities in both directions across production, that registry, and build mappings; reject duplicates, unknown
-targets, and omissions; and run each changed subject against its assigned exact case and named locus. A registry
-derived from production or build declarations, cardinality-only agreement, or an aggregate oracle that turns
-red outside the assigned case is inadmissible under
+`Independent Validation` names generated-mutant loci by stage module, never a conditional-compilation flag,
+and no `_MUTANT` symbol may be named as retained source. The runner generates every mutant from its fixed
+operator catalogue, applies it to a copy beneath `.build/runs/**`, and records the applied-change witness; a
+kill is the following stage's refusal of the changed bytes. An authored mutant seam, a build flag, or an
+aggregate oracle that turns red outside the assigned stage is inadmissible under
 [`testing_spoof_resistance.md` §12.4](../documents/engineering/testing_spoof_resistance.md#124-subject-change-witnesses).
 
 `Forward-deferred` is present when and only when the sprint's deliverables or validation name an artefact a
@@ -367,15 +384,15 @@ Blocked — NOT VALIDATED until the immediate predecessor gate passes.
 
 The raw blocker value is closed: Phase 0 Sprint 0.1 uses only `` `genesis` ``; a first sprint in every later
 phase uses only `[Phase N](phase_NN_<slug>.md) gate pass` for the immediate predecessor; and every later
-sprint uses only `Sprint N.(Y-1)`. Appended candidate, confirmation, earlier-phase, or additional-sprint prose
-is a second edge and refuses the schema even when the immediate edge also appears.
+sprint uses only `Sprint N.(Y-1)`. The immediate predecessor is the previous row of the tracker table, not
+the ordinal minus one: Phase 50's first sprint names Phase 9. Appended candidate, confirmation, earlier-phase,
+or additional-sprint prose is a second edge and refuses the schema even when the immediate edge also appears.
 
 Validation is consolidated at the phase gate. The qualified parent gate must rerun and retain every sprint
-seam in one complete candidate run. When that gate passes, its emitted status patch may be applied by a human,
-agent, or CI job after the validator exits and the bound preimage is rechecked.
-Where `Blocked by` names an earlier phase rather than an earlier sprint, that dependency is the earlier gate
-pass. An agent may validate, record, and continue across multiple phases in one run, but each phase still
-receives its own candidate and ordered gate execution.
+seam in one complete candidate run. When that gate passes under the agent's `preview`, the agent stops; the
+human's `accept` applies the emitted status patch after the validator exits and the bound preimage is
+rechecked. Where `Blocked by` names an earlier phase rather than an earlier sprint, that dependency is the
+earlier gate pass. An agent may preview several phases in one run; recording is one human `accept` per phase.
 
 The `Oracle` field declares the independence boundary exercised by the consolidated phase gate. It is not an
 intermediate confirmation request. An agent continues through implementation-ready sprint seams while the
@@ -436,7 +453,8 @@ projections, link reports, inventories, run summaries, and evidence renderings a
 `.build/docs/**`. A generated report may diagnose the plan; it may not edit status or become a verdict.
 
 Plan automation parses only closed structure: governed paths, metadata, headings, links/anchors/backlinks,
-exact status syntax, numerical dependencies, sprint fields, and the fixed eighteen-row table. It never derives
+exact status syntax, numerical dependencies, sprint fields, the fixed eighteen-row table, the decision-log
+entry structure, the frozen baseline, and the gate-specification block. It never derives
 a semantic contract, source/provider choice, legacy closure, or validation verdict from prose or keyword
 counts. Executable cross-cutting choices live in the source-bound Haskell `PolicyContract`; phase semantics live
 in separately authored Haskell declarations. The documentation gate owns prose correspondence, and a prose decoy must be
@@ -494,9 +512,10 @@ claim, subject, command, oracle, positive controls, paired negatives, mutants, d
 authority/bypass, freshness, qualification, cleanroom, legacy closure, predecessor, residue, and pass
 criterion.
 
-A candidate is inadmissible unless the harness first rejects its phase-owned qualification corpus, required
-mutants visibly change production and are rejected by their independent oracle, discovery is non-empty and
-two-way complete, required freshness/authority checks fail closed, and cleanup leaves no forbidden residue.
+A candidate is inadmissible unless the runner's generated-mutant matrix precedes the clean run and meets its
+kill ratio, every killed mutant visibly changed shipped production and was refused by the independent oracle
+at the following stage, discovery is non-empty and two-way complete, required freshness/authority checks fail
+closed, and cleanup leaves no forbidden residue.
 Phase 0 has the closed finite exception in gate-integrity §M.4: its three changed sources and binaries must
 differ from clean; its v2 transcript must retain a silent successful clean run and, for every mutant, exact
 `ExitFailure 1`, empty stdout, and canonical case-label-plus-newline stderr.
@@ -505,12 +524,11 @@ later-owned capabilities remain visible as scoped `UNVERIFIED` limitations. No p
 satisfy a blanket empty-residue check. Once the accepted verifier certifies the complete gate, the status
 update is mechanical.
 
-Mutation scope is bounded by the claim and typed owner frontier. A milestone runs the cumulative selector
-corpus owned at or before that capability; Phase 49 is the first complete hardware-free universal corpus. The
-milestones are named in [`development_plan_gate_integrity.md` §M.3](development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject).
-An ordinary gate runs exactly those selectors whose declared impact set intersects its own `Claim`,
-`Positive controls`, and `Paired negatives` rows, subject to the per-deliverable and foreclosure floor. A
-milestone is named as a capability, never as an ordinal.
+Qualification is the runner-generated mutant matrix over the specification's stage modules; Legacy closure
+is the hygiene row plus the two-way typed inventory join. A milestone re-runs the union corpus of every phase
+at or before it; the DSL barrier re-runs the union corpus of Phases 3 through 8. The milestones are named in
+[`development_plan_gate_integrity.md` §M.3](development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject),
+as capabilities, never as ordinals.
 
 Before an adapter has authenticated every authority its claim requires, its parser and integrity-consistent
 values remain private behind an always-refusing `CheckResult`; it may not export a conventional success branch,
@@ -601,13 +619,15 @@ immutability, containment, complete discovery, exact accounting against strictly
 bindings, zero findings for the candidate phase's due bindings, predecessor gate pass, and the rule that
 partial evidence is not a gate pass. A later-owned binding records temporary observed debt; it is not permission to add
 or consume that source. The reader-facing register explains those bindings but supplies no executable value.
-The transition expires before the gate cut: Phase 49 requires every `LTD-SRC-*` query, including
-Phase-2-owned `LTD-SRC-008`, to be zero. Phase 0 first requires a scoped `SourcePb` zero for its captured
-bootstrap source without retiring that binding. The only non-Haskell behavioral source then remaining is `pb/**`
-Python positively classified by the deny-by-default Haskell grammar as minimal platform discrimination,
-contained toolchain establishment, source-bound build, and opaque exec handoff. Phase 50 validates that
-already-bounded runtime handoff and owns no source-migration binding; Phase 51 onward retains the same grammar.
-Hardware therefore cannot begin with condemned tracked source present.
+The transition expires before the gate cut: the DSL barrier (Phase 9) requires every `LTD-SRC-*` query,
+including Phase-2-owned `LTD-SRC-008`, to be zero. Phase 0 first requires a scoped `SourcePb` zero for its
+captured bootstrap source without retiring that binding. The only non-Haskell behavioral source then remaining
+is `pb/**` Python positively classified as minimal platform discrimination, contained toolchain establishment,
+source-bound build, and opaque exec handoff, pinned by its SHA-256. Phase 50 validates that already-bounded
+runtime handoff and owns no source-migration binding; Phase 51 onward retains the same boundary. Hardware
+therefore cannot begin with condemned tracked source present. Every gate also inherits the kernel budget and
+no-conditional-compilation postconditions in
+[`development_plan_gate_integrity.md` §S](development_plan_gate_integrity.md#s-universal-source-and-artifact-hygiene-gate).
 
 ---
 
@@ -647,4 +667,5 @@ The full rule is in
 - [Reader-facing legacy register](legacy_tracking_for_deletion.md) — prose correspondence, not executable
   inventory or closure authority
 - [Documentation standards](../documents/documentation_standards.md)
+- [Decision log](../documents/decision_log.md) — the entries that amend this rulebook
 - [Repository layout doctrine](../documents/engineering/repository_layout_doctrine.md)

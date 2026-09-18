@@ -15,7 +15,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
@@ -29,6 +29,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 70.1: Build and independently verify the owner-scoped live projection](#sprint-701-build-and-independently-verify-the-owner-scoped-live-projection-)
+- [Sprint 70.2: The generic browser interpreter as pure Haskell semantics](#sprint-702-the-generic-browser-interpreter-as-pure-haskell-semantics-)
+- [Sprint 70.3: The UI-server boundary as pure Haskell policy](#sprint-703-the-ui-server-boundary-as-pure-haskell-policy-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -36,9 +38,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-The [2026-09-08 reset](README.md#reopened-numeric-sequence) withdraws prior certification. Existing
-implementation is an Observed footprint / Known partial. Retained requirements remain obligations; only this
-phase's complete qualified gate under the replacement acceptance baseline can authorize Done.
+Gate execution is held shut by the predecessor's receipt in certification generation 2; the generation-2 reset is
+recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice).
 
 Gate execution remains blocked by the qualified Phase-69 predecessor and its compatible evidence chain.
 Live effects also require the preceding named barriers in [the phase model](development_plan_phase_model.md#l-one-substrate-discipline).
@@ -73,7 +74,7 @@ foreign-owner and foreign-tenant handles yield the same public denial and cannot
 `ui-projection-runtime-live` Haskell component suite can supply supporting observations only; the sole acceptance command is `pb
 validate phase 70`. Split if work adds a browser interaction, release transition, ML adapter, another
 substrate, HA fault, or a second independently useful claim.
-**Substrate:** `linux-cpu` — future live cluster observation only after the Phase-49 barrier and every predecessor gate pass.
+**Substrate:** `linux-cpu` — future live cluster observation only after the DSL barrier (Phase 4) and every predecessor gate pass.
 **Lane:** `linux-cpu/amd64`.
 **Register:** 3 — live Pulsar/provider projection and independent readback; NOT VALIDATED.
 
@@ -89,7 +90,7 @@ remains phase-local and cannot be supplied by this prose.
 | Key | Contract |
 |---|---|
 | `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: one cohesive claim — *a projection key, a receipt key and a query handle cannot collapse command, subject or tenant scope*. The read model is owner-qualified by construction. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Subject` | `Amoebius.Ui.Runtime.Projection`, `Amoebius.Ui.Runtime.Interpreter`, and `Amoebius.Ui.Runtime.Server` under `src/Amoebius/Ui/Runtime/`, consuming the checked program of Phase 8; every subject is inside the closure of `executable amoebius`. |
 | `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 70` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
@@ -102,7 +103,7 @@ remains phase-local and cannot be supplied by this prose.
 | `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Legacy closure` | `LTD-UI-001` closes here for the browser interpreter and the server boundary through the compiled inventory; the generated bundle share closes at Phase 72. The due-count for every other identifier is zero. |
 | `Predecessor` | UNRESOLVED — blocks validation: the typed generation/compatibility binding still requires implementation. Require authenticated `ImmediatePredecessorPass` for Phase 69 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
 | `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
@@ -152,11 +153,11 @@ Haskell and qualify the mechanism that first admits their result; component obse
 ## Sprint 70.1: Build and independently verify the owner-scoped live projection ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Implementation**: `src/Amoebius/Ui/Runtime/Projection.hs`
 **Blocked by**: [Phase 69](phase_69_content_store_workflow.md) gate pass
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
-**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
+**Oracle**: `test/oracle/ui/Main.hs`, which imports no `amoebius` library.
+**Legacy IDs**: `LTD-UI-001`
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
 ### Objective
@@ -190,6 +191,60 @@ preserving command, issuer-qualified subject, tenant, and owner scope end to end
 
 The pre-reset `None` claim is permanently invalid; Sprint 70.1 remains blocked and NOT VALIDATED. Browser/reconnect, release, ML-lift, HA, and cross-cluster claims remain with their named
 later phases.
+## Sprint 70.2: The generic browser interpreter as pure Haskell semantics ⏸️
+
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Ui/Runtime/Interpreter.hs` and `src/Amoebius/Ui/Runtime/Projection.hs`
+**Blocked by**: Sprint 70.1
+**Independent Validation**: The interpreter's state, event, route, focus, freshness, trusted-text, challenge, and same-origin request-plan semantics over the checked program of Phase 8 equal an independent Haskell reference on the corpus traces; the deterministic projection to browser-language source is byte-stable; a plan with no routes admits no workflow route; runner-generated mutants in the interpreter are killed by the differential.
+**Oracle**: `test/oracle/ui/Main.hs`, which imports no `amoebius` library and states the reference traces from literals.
+**Legacy IDs**: `LTD-UI-001` — the browser runtime re-homed from the pre-barrier plan
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`
+
+### Objective
+
+Interpret the checked program Phase 8 produces as pure Haskell semantics before any browser executes it, and project that runtime as generated source beneath `.build/ui/**`.
+
+### Deliverables
+
+- The pure interpreter over `BoundUiProgram` and its client plan.
+- The deterministic projection of the runtime as PureScript beneath `.build/ui/**`, rendered lazily and never tracked.
+
+### Validation
+
+Run the corpus traces through the interpreter and the reference; compare; refuse a plan with no routes that admits a workflow route.
+
+### Remaining Work
+
+Implement the interpreter and the projection. Browser execution remains a later-owned claim of this phase's live gate.
+
+## Sprint 70.3: The UI-server boundary as pure Haskell policy ⏸️
+
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Ui/Runtime/Server.hs`
+**Blocked by**: Sprint 70.2
+**Independent Validation**: Authenticated request, current-epoch authorization, authorization-before-dispatch, exact handler-registry admission, public-only asset, idempotent retry, and WebSocket registration are pure Haskell policy values equal to the oracle's; a request dispatched before authorization is refused; runner-generated mutants in the server policy are killed.
+**Oracle**: `test/oracle/ui/Main.hs` states the policy table from literals.
+**Legacy IDs**: `LTD-UI-001`
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`
+
+### Objective
+
+Make the server side of the checked program a pure policy the live projection runtime consumes.
+
+### Deliverables
+
+- The server policy values and their dispatch order.
+- The handler-registry admission over the effect-port catalog of Phase 8.
+
+### Validation
+
+Compare the policy table with the oracle; refuse authorization-after-dispatch by name.
+
+### Remaining Work
+
+Implement the policy module. Live identity, browser and operating-system enforcement, provider dispatch, deployment, and high availability remain this phase's live claims.
+
 
 ## Documentation Requirements
 
@@ -209,7 +264,7 @@ later phases.
 
 ## Related Documents
 
-- [Phase 43 — UI server boundary](phase_43_ui_server_boundary.md)
+- [Phase 70](phase_70_ui_projection_runtime.md)
 - [Phase 68 — live subject/tenant isolation](phase_68_user_tenant_isolation_live.md)
 - [Phase 69 — content store and workflow runtime](phase_69_content_store_workflow.md)
 - [Phase 72 — atomic UI-program release](phase_72_ui_program_release.md)

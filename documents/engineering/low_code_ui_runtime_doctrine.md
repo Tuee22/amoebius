@@ -17,7 +17,7 @@ owned by [browser_offline_runtime_doctrine.md](./browser_offline_runtime_doctrin
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_workflow_lifting.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/decision_log.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_workflow_lifting.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
 **Generated sections**: none
 
 </details>
@@ -153,27 +153,23 @@ projections. JSON plans and manifests are generated under `.build/**`, never use
 removed for a clean-room rerun. The browser gate must compile freshly generated PureScript and compare its
 transitions and observations with a distinct Haskell reference semantics plus required red controls.
 
-The Phase-40 implementation follows this boundary with one `compileUiPlans` entry point, typed Haskell
-projection/artifact expectations, an independent digest and authority-source relation, and six CPP-selected
-production mutations. Its Register-1 claim ends at pure plan, manifest, digest, and finite-demand compilation;
-it does not imply browser or server interpretation.
+The plan compiler is specified to follow this boundary with one `compileUiPlans` entry point and typed
+Haskell projection and artifact expectations; its Register-2 claim ends at pure plan, manifest, digest, and
+finite-demand compilation and does not imply browser or server interpretation. It is owed by
+[Phase 8](../../DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md).
 
-Phase 42 supplies the generic interpreter as pure Haskell state/event/route, focus, freshness, trusted-text,
-challenge, and same-origin request-plan semantics plus a deterministic Haskell projection of browser-language
-source. Its independent Haskell differential and nine production mutations establish the semantic boundary;
-they do not claim that a browser, CSP, or operating-system network boundary executed it.
+The generic interpreter — pure Haskell state, event, route, focus, freshness, trusted-text, challenge, and
+same-origin request-plan semantics plus a deterministic Haskell projection of browser-language source — and
+the server side — authenticated request, current-epoch authorization, authorization-before-dispatch, exact
+handler-registry admission, public-only asset, idempotent retry, and WebSocket registration semantics — are
+specified here and owed by [Phase 70](../../DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md). Neither claim
+extends to a browser, a content-security policy, or an operating-system network boundary executing them.
 
-Phase 43 supplies the server side as pure Haskell authenticated request, current-epoch authorization,
-authorization-before-dispatch, exact handler-registry admission, public-only asset, idempotent retry, and
-WebSocket registration semantics. Its independent Haskell policy values and nine production mutations
-establish the hardware-free boundary; live identity, browser and OS enforcement, provider dispatch,
-deployment, redundancy, and HA remain later-owned.
-
-Phase 44 composes the browser/server semantic boundary with typed workflow and artifact handles in pure
-Haskell. Its two application shapes, independent visible/effect/access/denial values, and five production
-mutations enforce tenant and owner scope, ready-receipt order, paired-plan identity, and denial of direct
-browser-to-domain access. Live adapters, browser/server execution, deployment, release, and HA remain
-later-owned.
+The composition of the browser/server semantic boundary with typed workflow and artifact handles — tenant
+and owner scope, ready-receipt order, paired-plan identity, and denial of direct browser-to-domain access — is
+owed by [Phase 72](../../DEVELOPMENT_PLAN/phase_72_ui_program_release.md). Live adapters, browser and server
+execution, deployment, release, and high availability remain later-owned
+([DL-0006](../decision_log.md#dl-0006--the-honesty-backlog-is-struck-or-re-mooded)).
 
 ---
 
@@ -444,6 +440,12 @@ it never selects a browser API or transport product.
 
 ---
 
+The expression and update algebra — `UiType`, `CheckedExpr`, `UpdateRule`, and `checkExpr` over a closed
+pure-function catalog with static fuel — is the admissible form of business logic
+([DL-0003](../decision_log.md#dl-0003--business-logic-is-defined)). It is owed by
+[Phase 8](../../DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md); until that phase's gate is accepted,
+this section states a target.
+
 ## 8. Effects are typed ports, not network operations
 
 An effect is an invocation of a required port. Its checked shape is equivalent to:
@@ -621,7 +623,7 @@ Confidentiality may be narrowed without new authority. Audience widening or cros
 closed named release/grant action with current authorization, declared purpose, target audience, audit class,
 and a server-issued result carrying the new label. There is no general declassification function.
 
-The standalone pure Phase-8 scope gate exercises `Amoebius.Scope.Index` and `Amoebius.Scope.Flow` through
+The standalone pure Phase 6 scope gate exercises `Amoebius.Scope.Index` and `Amoebius.Scope.Flow` through
 fresh request indices, owner joins, swaps, flow decisions, graph diagnostics, compiler-negative pairs,
 generated reject classes, and a changed-production subject. Its expected relations are separately authored
 Haskell values; tracked serialized fixtures do not influence the verdict.
@@ -810,7 +812,7 @@ horizon; `ReloadRequired` cannot discard queued intent. The complete rule is own
 The committed behavioral sources are Haskell only. External `UiSource` values are untracked inputs, and the
 PureScript runtime is generated lazily. The following build/release artifacts are never committed:
 
-- normalized and checked UI plans, including Phase-41 paired offline client/replay key projections;
+- normalized and checked UI plans, including Phase 8 paired offline client/replay key projections;
 - reflected Dhall schemas and public-contract manifests;
 - PureScript contract/catalog types and codecs built into the generic runtime;
 - one immutable generic client bundle per runtime ABI/component-catalog identity;

@@ -18,7 +18,7 @@ and the algebra it rests on belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_23_extension_security_laws.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -39,17 +39,17 @@ Current certification and evidence are recorded in the [development plan](../../
 
 This document is a **family slice**. It owns S1–S6 and the skolem-scope mechanism they share. It does not own
 the tenant model, the gateway and identity edge, the offline runtime, or the relational data plane; each S-law
-names the doctrine that does. [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md) owns the lexical
+names the doctrine that does. [Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) owns the lexical
 pure mechanism in `Amoebius.Scope.Index` and `Amoebius.Scope.Flow`; the laws and live boundaries retain their own delivery owners, and status lives only in the
 [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 The bounded pure implementation is `Amoebius.Extension.Laws.Security`. It distinguishes claimed and
-attested identities, eliminates an attested identity through Phase 8's fresh request scope, requires that scope at the
+attested identities, eliminates an attested identity through Phase 6's fresh request scope, requires that scope at the
 operation and derived-key boundaries, represents only revocation-edge or positive-staleness-bound authority
-layers, and evaluates S1–S6 over explicit observations. Its independently authored Phase-23 Haskell corpus covers one valid and one tampered fixture
+layers, and evaluates S1–S6 over explicit observations. Its independently authored Phase 6 Haskell corpus covers one valid and one tampered fixture
 envelope, fifteen operations in a two-tenant/two-subject store, five foreign/absent refusal pairs, five
 namespace transpositions, two authority layers, 42 authored verdicts, four compiler negatives, and six exact
-production mutants. The package-hidden Phase-23 supervisor executes that corpus and all compiler and mutation rows serially from a fresh ignored run root. This remains bounded Register-1 evidence: the fixture SHA-256 check is not production cryptographic
+production mutants. The package-hidden Phase 6 supervisor executes that corpus and all compiler and mutation rows serially from a fresh ignored run root. This remains bounded Register-1 evidence: the fixture SHA-256 check is not production cryptographic
 verification, equal modeled steps are not wall-clock timing, the layer pair is not a runtime inventory, and no
 compositional S-law or persisted-value re-entry path is thereby discharged.
 
@@ -98,14 +98,14 @@ single rank-2 combinator whose continuation is polymorphic in a fresh type varia
 unforgeable, unique to the request, and confined to it. Every scoped value the request derives — a resolved
 handle, a statement, a replay key, a rendered namespace — carries that variable, and two values minted under
 different identities are specified to have types that do not unify, so a cross-scope use is not a check that
-fails — it is an expression the compiler rejects. Phase 8 establishes that boundary through source-bound
+fails — it is an expression the compiler rejects. Phase 6 establishes that boundary through source-bound
 legal/illegal Haskell compiler pairs.
 
 Two properties are specified to make this work rather than merely look elegant. The context type exports no
 constructor, so authentication is the sole introduction rule and no test, migration, or admin path has a second
 one. And the escape argument that makes the region pattern safe in its original setting carries: a scoped value
 cannot outlive the continuation that minted it, so it cannot be stashed and reused under another identity.
-Phase 8 exercises those claims with legal/illegal compiler pairs for constructor forgery, retagging, and
+Phase 6 exercises those claims with legal/illegal compiler pairs for constructor forgery, retagging, and
 request-index escape, plus a constructor-closure scan. The bounded security-law kernel reuses that eliminator;
 its adjacent compiler twins additionally reject claimed-as-attested use, an explicit promotion, a missing
 scope argument, and a key minted by another request.
@@ -120,7 +120,7 @@ comparison, which is the scope check this section opened by saying the tag techn
 
 That re-entry combinator is unavoidable and it is the mechanism's one back door. It is named here rather than
 left implicit, and the obligation it carries is that it appear exactly once, be audited as carefully as the
-authentication path, and be the only unchecked coercion in the scoped surface. Phase 8 deliberately contains
+authentication path, and be the only unchecked coercion in the scoped surface. Phase 6 deliberately contains
 no persisted-value re-entry combinator; no later gate yet establishes the required single audited back door.
 
 Two further limits. Skolemisation is a **static** distinctness property, not a runtime identity: type variables
@@ -159,7 +159,7 @@ scope of the same type, and each of those is a silent cross-tenant read.
 **Guideline.** Obtain the scope from the request eliminator of [§3](#3-the-skolem-scope), thread the resulting context, and never
 convert it to a plain value. If you want to pass "the tenant id" to a helper, pass the context.
 
-**Discharge.** Phase 8's compile-fail fixtures construct a context directly, retag one scope as another, and
+**Discharge.** Phase 6's compile-fail fixtures construct a context directly, retag one scope as another, and
 let a scoped handle escape its continuation. The bounded S2 fixture rejects a key from another rank-2 request,
 and the source oracle requires a `RequestScope scope` at scoped operations rather than two exchangeable plain
 identifiers. Foreclosed states:
