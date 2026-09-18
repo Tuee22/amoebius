@@ -166,6 +166,7 @@ Haskell and qualify the mechanism that first admits their result; component obse
 Adopt [Lift and Compose Doctrine §5 — The re-derivation map](../documents/engineering/lift_and_compose_doctrine.md#5-the-re-derivation-map):
 link the existing inference core behind one typed, reversible, scope-checked artifact facade over amoebius's
 already-closed store, transport, secret, engine, workflow, determinism, and resource capabilities.
+The infernix snapshot this phase reads as its specification is commit `e48f4a0ad2c9fc75550da456b70289ffe18d6282`, the revision the project file pinned as a `source-repository-package` until that entry was removed; the seed is a specification, never a build input ([Lift and Compose Doctrine §2](../documents/engineering/lift_and_compose_doctrine.md#2-the-two-non-dependencies)).
 
 ### Deliverables
 

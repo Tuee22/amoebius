@@ -176,6 +176,7 @@ and [Content Addressing Doctrine §2 — Three-tier store](../documents/engineer
 adapt one real sibling jitML training path to amoebius's existing scoped workflow, closed-catalog CUDA,
 accelerator-owner, and pointer-committed store contracts so the only successful output is an opaque pointer-committed
 artifact carrying its trusted scope and provenance.
+The jitML snapshot this phase reads as its specification is commit `f6f917fe3e8aaeb80885504a72cd90f164325af4`, the revision the project file pinned as a `source-repository-package` until that entry was removed; the seed is a specification, never a build input ([Lift and Compose Doctrine §2](../documents/engineering/lift_and_compose_doctrine.md#2-the-two-non-dependencies)).
 
 ### Deliverables
 

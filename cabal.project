@@ -14,23 +14,12 @@ packages:
 optimization: False
 tests: True
 
--- The infernix and jitML cores are foreign provenance: their source is not authored here.
--- lib:infernix and lib:jitml previously reached them with `hs-source-dirs: ../../infernix/src`
--- and `../../jitML/src`, which resolves against the developer's home layout rather than the
--- source snapshot. Both are pinned to the exact revisions already present in the
--- network-independent dependency input; the Phase-0 acquisition/toolchain evidence must
--- authenticate those bytes and revisions rather than trusting the remote repository.
+-- The infernix and jitML cores are seeds, not dependencies: amoebius links no seed package,
+-- so this file declares no source-repository-package (lift_and_compose_doctrine.md section 2).
+-- The lib:infernix and lib:jitml sublibraries and the suites that link them are non-buildable
+-- legacy seed consumers retired by Phases 91 and 93 (LTD-SEED-001, LTD-SEED-002).
 --
 -- The maintained Pulsar compatibility source is Haskell under src/vendor/**. Its
 -- generated Proto transport and probe package are derived lazily beneath .build/**
 -- by the Phase-1 Haskell acquisition runner; top-level vendor packages are not
 -- authored project inputs.
-source-repository-package
-  type: git
-  location: https://github.com/Tuee22/infernix.git
-  tag: e48f4a0ad2c9fc75550da456b70289ffe18d6282
-
-source-repository-package
-  type: git
-  location: https://github.com/Tuee22/jitML.git
-  tag: f6f917fe3e8aaeb80885504a72cd90f164325af4

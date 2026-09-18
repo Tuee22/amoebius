@@ -997,6 +997,9 @@ library provider-pulumi
         base >=4.21 && <4.22,
         text >=2.1 && <2.2
 library infernix
+    -- LTD-SEED-001: links a seed package; non-buildable until Phase 91 re-derives it
+    -- (lift_and_compose_doctrine.md section 2: amoebius depends on no seed).
+    buildable:        False
     exposed-modules:
         Infernix.Adapter.Core
         Infernix.Adapter.Store
@@ -1023,6 +1026,9 @@ library infernix
         serialise ==0.2.6.1,
         text >=2.1 && <2.2
 library infernix-ui
+    -- LTD-SEED-001: links a seed package; non-buildable until Phase 91 re-derives it
+    -- (lift_and_compose_doctrine.md section 2: amoebius depends on no seed).
+    buildable:        False
     exposed-modules:  Amoebius.Infernix.UiAdapter
     visibility:       public
     hs-source-dirs:   src
@@ -1039,6 +1045,9 @@ library infernix-ui
         amoebius:infernix,
         text >=2.1 && <2.2
 library jitml
+    -- LTD-SEED-002: links a seed package; non-buildable until Phase 93 re-derives it
+    -- (lift_and_compose_doctrine.md section 2: amoebius depends on no seed).
+    buildable:        False
     exposed-modules:  Amoebius.JitML.CudaArtifactLift
     visibility:       public
     hs-source-dirs:   src
@@ -1058,6 +1067,9 @@ library jitml
         serialise ==0.2.6.1,
         text >=2.1 && <2.2
 library jitml-ui
+    -- LTD-SEED-002: links a seed package; non-buildable until Phase 93 re-derives it
+    -- (lift_and_compose_doctrine.md section 2: amoebius depends on no seed).
+    buildable:        False
     exposed-modules:  Amoebius.JitML.UiAdapter
     visibility:       public
     hs-source-dirs:   src
@@ -3392,6 +3404,9 @@ test-suite provider-teardown-contract
         amoebius:provider-pulumi,
         text >=2.1 && <2.2
 test-suite infernix-native-driver
+    -- LTD-SEED-001: links a seed package; non-buildable until Phase 91 re-derives it
+    -- (lift_and_compose_doctrine.md section 2: amoebius depends on no seed).
+    buildable:        False
     type:             exitcode-stdio-1.0
     main-is:          NativeDriver.hs
     hs-source-dirs:   test/spec/infernix
@@ -3406,6 +3421,9 @@ test-suite infernix-native-driver
         amoebius:infernix,
         text >=2.1 && <2.2
 test-suite infernix-core-artifact-lift-contract
+    -- LTD-SEED-001: links a seed package; non-buildable until Phase 91 re-derives it
+    -- (lift_and_compose_doctrine.md section 2: amoebius depends on no seed).
+    buildable:        False
     type:             exitcode-stdio-1.0
     main-is:          InfernixLiftContractSpec.hs
     hs-source-dirs:   test/spec/kernel
@@ -3436,6 +3454,9 @@ test-suite infernix-core-artifact-lift-live-gate
         text >=2.1 && <2.2,
         vector >=0.13 && <0.14
 test-suite infernix-ui-lift-contract
+    -- LTD-SEED-001: links a seed package; non-buildable until Phase 91 re-derives it
+    -- (lift_and_compose_doctrine.md section 2: amoebius depends on no seed).
+    buildable:        False
     type:             exitcode-stdio-1.0
     main-is:          InfernixUiContractSpec.hs
     hs-source-dirs:   test/spec/ui
@@ -3470,6 +3491,9 @@ test-suite infernix-ui-lift-live-gate
         filepath >=1.5 && <1.6,
         text >=2.1 && <2.2
 test-suite jitml-cuda-artifact-lift-contract
+    -- LTD-SEED-002: links a seed package; non-buildable until Phase 93 re-derives it
+    -- (lift_and_compose_doctrine.md section 2: amoebius depends on no seed).
+    buildable:        False
     type:             exitcode-stdio-1.0
     main-is:          JitMLCudaArtifactContractSpec.hs
     hs-source-dirs:   test/spec/kernel
@@ -3501,6 +3525,9 @@ test-suite jitml-cuda-artifact-lift-live-gate
         text >=2.1 && <2.2,
         vector >=0.13 && <0.14
 test-suite jitml-ui-lift-contract
+    -- LTD-SEED-002: links a seed package; non-buildable until Phase 93 re-derives it
+    -- (lift_and_compose_doctrine.md section 2: amoebius depends on no seed).
+    buildable:        False
     type:             exitcode-stdio-1.0
     main-is:          JitMLUiContractSpec.hs
     hs-source-dirs:   test/spec/ui

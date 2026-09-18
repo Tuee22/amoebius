@@ -336,6 +336,8 @@ identity, and no patch root.
 
 - `Amoebius.Toolchain.Provenance` recording the immutable upstream identity as a Haskell value.
 - No top-level `vendor/**`, no patch program, no tracked foreign package description, and no post-checkout command.
+- Acquired upstream material beneath `.build/vendor/**` is a verified archive extraction at the recorded
+  identity and never a nested version-control checkout, so `git clean -fxd` alone restores a pristine tree.
 
 ### Validation
 
