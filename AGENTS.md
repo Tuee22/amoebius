@@ -141,8 +141,9 @@ not change a frozen body without landing that entry in the same change, and no i
 ## Kernel Budget
 
 The validator — the gate-specification library, the runner, and the retained custody core — is at most
-14,000 lines and never above the last accepted count. It contains no conditional compilation, no `*Run*`
-module, no phase-number literal, and one phase table. An LLM must not add a per-phase validator module or a
+14,000 lines and never above the last accepted count. It contains no conditional compilation, no per-phase
+run module (a path segment ending in `Run`; the generic runner is not one), no phase-number literal, and one
+phase table. An LLM must not add a per-phase validator module or a
 validator-only test corpus; a gate's subject is shipped product code, and its examples are Haskell values the
 product executable links ([DL-0007](documents/decision_log.md#dl-0007--certification-generation-2-replaces-the-validation-kernel)).
 

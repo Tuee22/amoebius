@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -48,9 +47,6 @@ data FaultSchedule = FaultSchedule
   deriving anyclass (FromJSON, ToJSON)
 
 activeFaults :: FaultSchedule -> [FaultKnob]
-#ifdef DETERMINISTIC_SIM_BYPASS_FAULTS_MUTANT
-activeFaults _ = []
-#else
 activeFaults schedule =
   concat
     [ [Partition | schedulePartition schedule]
@@ -59,7 +55,6 @@ activeFaults schedule =
     , [Crash | scheduleCrash schedule]
     , [Delay | scheduleDnsDelay schedule > 0]
     ]
-#endif
 
 data World = World
   { worldPulsar :: Pulsar.PulsarState
@@ -94,11 +89,7 @@ newSimEnv schedule = do
             Pulsar.emptyPulsar
               Pulsar.PulsarFaults
                 { Pulsar.pulsarPartitioned = schedulePartition schedule
-#ifdef DETERMINISTIC_SIM_IGNORE_SEED_MUTANT
-                , Pulsar.pulsarReorder = scheduleReorder schedule
-#else
                 , Pulsar.pulsarReorder = scheduleReorder schedule || odd (scheduleSeed schedule)
-#endif
                 , Pulsar.pulsarDuplicate = scheduleRedelivery schedule || scheduleDuplicate schedule
                 }
         , worldMinIO = MinIO.emptyMinIO

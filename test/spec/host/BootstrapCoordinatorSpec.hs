@@ -81,7 +81,6 @@ verifyHostTools = do
       rejected = length [() | Left NonAbsolutePath <- map mkAbsExe generated]
       accepted = length generated - rejected
   unless (rejected >= 20 && accepted >= 20) (die "AbsExe generator did not cover both branches by 20%")
-  unless (mutantBareNamePath == "kind") (die "M2 artifact disappeared")
 
 absOutcome :: FilePath -> String
 absOutcome path = case mkAbsExe path of

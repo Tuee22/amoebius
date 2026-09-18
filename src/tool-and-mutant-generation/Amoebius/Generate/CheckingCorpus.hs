@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Generate.CheckingCorpus
@@ -77,11 +76,7 @@ data GenerationProblem
 data BuildRoot = BuildRoot FilePath Text
 
 outputPolicy :: OutputPolicy
-#ifdef TOOL_GENERATION_TRACK_OUTPUT_MUTANT
-outputPolicy = AuthoredTree
-#else
 outputPolicy = BuildTree
-#endif
 
 supportCorpus :: [SupportArtifact]
 supportCorpus = selectTools tools <> cases <> selectMutations mutations <> providerPrograms
@@ -117,18 +112,10 @@ artifact :: Text -> ArtifactClass -> FilePath -> ByteString -> SupportArtifact
 artifact = SupportArtifact
 
 selectTools :: [SupportArtifact] -> [SupportArtifact]
-#ifdef TOOL_GENERATION_MISSING_RULE_MUTANT
-selectTools = selectWithDrop True
-#else
 selectTools = selectWithDrop False
-#endif
 
 selectMutations :: [SupportArtifact] -> [SupportArtifact]
-#ifdef TOOL_GENERATION_DROP_OPERATOR_MUTANT
-selectMutations = selectWithDrop True
-#else
 selectMutations = selectWithDrop False
-#endif
 
 selectWithDrop :: Bool -> [value] -> [value]
 selectWithDrop shouldDrop values = case (shouldDrop, values) of

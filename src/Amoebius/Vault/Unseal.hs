@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Vault.Unseal
   ( FreshnessWitness
@@ -27,8 +27,4 @@ observeUnseal identity initialized sealed
 permitSecretDependentStartup :: UnsealResult -> Either VaultError FreshnessWitness
 permitSecretDependentStartup result = case result of
   UnsealReady witness -> Right witness
-#ifdef VAULT_PKI_STALE_READ_MUTANT
-  UnsealFailed _ -> Right (FreshnessWitness (error "stale-vault-identity"))
-#else
   UnsealFailed failure -> Left failure
-#endif

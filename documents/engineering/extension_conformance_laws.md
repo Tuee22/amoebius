@@ -166,13 +166,13 @@ extension.
 
 ### Bound discharge boundary — NOT VALIDATED
 
-The Phase 6 evaluator in `src/extension-laws/Amoebius/Extension/Laws/PerExtension.hs` makes each L-law a
-separate typed verdict. Before deciding a verdict, it requires the
+The evaluator owed by [Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md), in
+`src/extension-laws/Amoebius/Extension/Laws/PerExtension.hs`, makes each L-law a separate typed verdict. Before deciding a verdict, it requires the
 observed operation, artifact, budget, flow, or claim names to cover the corresponding sets derived from the
 Phase 6 declaration. The executable case inventory and expected outcomes are a separately authored Haskell
-oracle in `test/spec/extension/ExtensionLawsPerExtensionOracle.hs`; neither this list nor an encoded table
+oracle executable (`test/oracle/extension/Main.hs`); neither this list nor an encoded table
 supplies a verdict. The spec joins actual results to the independent inventory and refuses missing, duplicate,
-or extra cases. Any serialized result is generated only beneath the acquired `.build/runs/phase-21/**` root.
+or extra cases. Any serialized result is generated only beneath the acquired `.build/runs/phase-06/**` root.
 Its executable corpus is deliberately finite:
 
 - L1 catches exceptions over six authored inputs and scans one pure fixture for known partial tokens and

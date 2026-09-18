@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 -- | A deliberately bounded refinement checker for compiled Haskell fixtures.
 --
@@ -322,22 +322,14 @@ checkRefinement solver invariants source = case Map.lookup key invariants of
   Just invariant -> case prepare invariant of
     Left problem -> pure (Left problem)
     Right (post, modelPost, precondition, body) -> do
-#ifdef REFINEMENT_SKIPS_CORRESPONDENCE_MUTANT
-      let correspondence = pure (Right (SolverUnsat, ""))
-#else
       let correspondence = solve solver (renderQuery arguments [post, "(not " <> modelPost <> ")"])
-#endif
       correspondenceResult <- correspondence
       case correspondenceResult of
         Left problem -> pure (Left problem)
         Right (SolverSat, solverModel) ->
           pure (Right (makeResult CorrespondenceMismatch "postcondition does not imply the registered model invariant" solverModel))
         Right (SolverUnsat, _) -> do
-#ifdef REFINEMENT_WEAKENS_POSTCONDITION_MUTANT
-          let proofPost = "true"
-#else
           let proofPost = post
-#endif
           preservation <- solve solver (renderQuery arguments [precondition, "(= result " <> body <> ")", "(not " <> proofPost <> ")"])
           pure $ case preservation of
             Left problem -> Left problem
@@ -349,13 +341,7 @@ checkRefinement solver invariants source = case Map.lookup key invariants of
   prepare invariant = do
     Term postSort post <- translate (arguments <> ["result"]) (refinementPostcondition source)
     Term invariantSort modelPost <- translate (arguments <> ["result"]) invariant
-#ifdef REFINEMENT_DROPS_PRECONDITION_CONJUNCT_MUTANT
-    let selectedPrecondition = case refinementPrecondition source of
-          And left _ -> left
-          other -> other
-#else
     let selectedPrecondition = refinementPrecondition source
-#endif
     Term preSort precondition <- translate (arguments <> ["result"]) selectedPrecondition
     Term bodySort body <- translate arguments (refinementBody source)
     requireSort "postcondition" BooleanSort postSort

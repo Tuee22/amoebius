@@ -186,14 +186,14 @@ would be reporting a designed extension point as a built one.
 
 ## 4. Capability → provider → shape: the binding
 
-[Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md) owns this representational seam in
-`src/capability-bind/Amoebius/Capability/{Types,Binding}.hs`. Its NOT-VALIDATED contract requires all nine arms under both shapes, 18
-exact graph semantics, app-byte invariance, and an independent object-node-multiset oracle. Provision and
-runtime provider health remain outside that contract. [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md)
-owns the post-bind planner/seal in `src/provision-seal/Amoebius/Capacity/{Provision,RenderSource}.hs` with
-runtime accounting supplied by `src/execution-accelerator-folds/Amoebius/Capacity/RuntimeStorage.hs`; its
-NOT-VALIDATED contract requires all 18 bound shapes, both planner arms, the opaque identity-keyed source set,
-four activation stages, and ten distinct seal-locus failures. Four changed-production subjects cover replay,
+This representational seam in `src/capability-bind/Amoebius/Capability/{Types,Binding}.hs` is owed by [Phase
+3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md). Its NOT-VALIDATED contract requires all nine arms under
+both shapes, exact graph semantics, app-byte invariance, and an independent object-node-multiset oracle.
+Provision and runtime provider health remain outside that contract. The post-bind planner/seal in
+`src/provision-seal/Amoebius/Capacity/{Provision,RenderSource}.hs`, with runtime accounting supplied by
+`src/execution-accelerator-folds/Amoebius/Capacity/RuntimeStorage.hs`, is owed by the same phase; its
+NOT-VALIDATED contract requires every bound shape, both planner arms, the opaque identity-keyed source set,
+the activation stages, and distinct seal-locus failures. Generated production mutants must cover replay,
 readback, execution-expansion, and runtime-accounting faults; live realization remains later-owned.
 
 A capability becomes a running service through a **three-part binding**, and the three parts live on different
@@ -474,7 +474,7 @@ content-addressed cache, [content_addressing_determinism.md §4.5](./content_add
 > target. The sibling **infernix**
 > project is *evidence* that the
 > select-don't-fetch engine binding is real code — **sibling evidence, not an amoebius result**:
-> `src/Infernix/Runtime/Worker.hs` (sibling source)
+> `infernix/src/Infernix/Runtime/Worker.hs` (sibling source)
 > selects the engine by `adapterType` (`case engineBindingAdapterType engineBinding of …`) and **never fetches > it** — precisely the Tier-1 discipline above. But infernix also shows the exact divergences amoebius fixes:
 > its `infernix/docker/Dockerfile` **curl-tars native payloads and > installs per-engine Poetry venvs at image build**, and its
 > `infernix/python/adapters/model_cache.py` carries a

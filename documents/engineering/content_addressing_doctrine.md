@@ -586,7 +586,7 @@ blob keys; live MinIO must accept the content-addressed object and expose an
 idempotent same-key duplicate, while native Pulsar and Patroni observers must recover the same fresh work
 identity. The target data plane is the retained HA Phase-62–64 platform shared by two real child-cluster projections; a
 physically independent Pulsar broker set per child remains UNVERIFIED. Every hardware substrate can always run
-this `linux-cpu` lane.
+this `linux-cpu` lane. Owed by [Phase 74](../../DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md).
 
 The Phase-80 Register-3 target must make Tier-1 engine materialization content-addressed in
 `Amoebius.Jit.Resolver` and keep digest constructors and cache keys private. Pure contracts must cover canonical
@@ -596,7 +596,7 @@ use four fresh compute Jobs, out-of-band MinIO comparison, a replaceable cache o
 clients, and an in-cluster Distribution `registry:2` service to observe MISS→materialize→HIT and cleanup. The target
 payload is a pinned executable engine fixture, not a full production llama.cpp or model-inference result;
 cross-substrate bit equality, cross-node reuse, the Tier-2 model cache, and Tier-3 CUDA kernel cache remain
-UNVERIFIED. Every hardware substrate can always run the `linux-cpu` lane.
+UNVERIFIED. Every hardware substrate can always run the `linux-cpu` lane. Owed by [Phase 80](../../DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md).
 
 The Phase-91 scoped target must stage a pinned 87-byte CPU micro-model as blob → canonical-CBOR manifest →
 ready pointer, refuse a precommit reference, and write two fresh-Job outputs that are byte-equal to an

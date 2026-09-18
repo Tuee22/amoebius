@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
@@ -25,12 +24,6 @@ import Amoebius.Calculus.Workflow.Arm
   , Evidence
   , Resource
   )
-#ifdef SELF_REFERENTIAL_GATES_DROP_OBSERVE_MUTANT
-import Amoebius.Calculus.Workflow.Arm (Evidence (Evidence))
-#endif
-#ifdef SELF_REFERENTIAL_GATES_LEAK_RESOURCE_MUTANT
-import Amoebius.Calculus.Workflow.Arm (Resource (Resource))
-#endif
 import Amoebius.Calculus.Workflow.Ledger
   ( Ledger
   , balances
@@ -39,9 +32,6 @@ import Amoebius.Calculus.Workflow.Ledger
   , ledgerProvisioned
   , ledgerReleased
   )
-#ifdef SELF_REFERENTIAL_GATES_LEAK_RESOURCE_MUTANT
-import Amoebius.Calculus.Workflow.Ledger (recordProvision)
-#endif
 import Amoebius.Calculus.Workflow.Run
   ( Workflow
   , andThen
@@ -121,23 +111,11 @@ gateWorkflow declaration verdict =
               , evidenceObservation = observation
               }
  where
-#ifdef SELF_REFERENTIAL_GATES_DROP_OBSERVE_MUTANT
-  observed = pureWorkflow (Evidence "observation-arm-dropped")
-#else
   observed = observe
-#endif
 
 mutateLedger :: Ledger -> Ledger
 mutateLedger =
-#ifdef SELF_REFERENTIAL_GATES_LEAK_RESOURCE_MUTANT
-  recordProvision (Resource "leaked-gate-process")
-#else
   id
-#endif
 
 includesMutants :: Bool
-#ifdef SELF_REFERENTIAL_GATES_SKIP_MUTANT_MUTANT
-includesMutants = False
-#else
 includesMutants = True
-#endif

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -48,10 +47,4 @@ foldLift _ = Plan . fmap toEntry
   objectIdentityText object = case objectIdentity object of
     K8sObjectIdentity identity -> identity
   projectedFrame step =
-#ifdef CHAIN_DESCENT_INFRAME_MUTANT
-    if stepLabel step == "global/managed-capacity-admission"
-      then AfterBootstrapAddonCutoverFrame
-      else stepFrame step
-#else
     stepFrame step
-#endif

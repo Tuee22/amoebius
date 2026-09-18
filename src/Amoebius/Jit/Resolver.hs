@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Jit.Resolver
@@ -75,10 +74,4 @@ resolveEngine arm runtime state =
 
 materialize :: EngineRuntime -> ByteString
 materialize runtime =
-#ifdef DETERMINISM_JITCACHE_FIXED_MARKER_MUTANT
-  "fixed-16-marker!"
-#elif defined(DETERMINISM_JITCACHE_ONE_BYTE_SHORT_MUTANT)
-  ByteString.init (catalogPayload runtime)
-#else
   catalogPayload runtime
-#endif

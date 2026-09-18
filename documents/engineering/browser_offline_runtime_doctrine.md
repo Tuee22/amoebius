@@ -119,10 +119,11 @@ bodies have no persistable representation.
 
 ## 4. Queueable ports are a stricter port class
 
-The Register-1 implementation is the closed Haskell `Continuity`/`OfflineSource` language in
-`offline-language-types`, with total validation in `Amoebius.Ui.Offline.Decode`. Typed Haskell cases cover the
-three authored continuity declarations and every bounded-contract or online-only-operation refusal; no
-serialized fixture is an executable authority.
+The Register-1 implementation owed by [Phase
+8](../../DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md) is the closed Haskell
+`Continuity`/`OfflineSource` language in `offline-language-types`, with total validation in
+`Amoebius.Ui.Offline.Decode`. Typed Haskell cases must cover the three authored continuity declarations and
+every bounded-contract or online-only-operation refusal; no serialized fixture is an executable authority.
 
 A `QueuedPort` references an existing typed mutating/workflow port and adds a contract equivalent to:
 

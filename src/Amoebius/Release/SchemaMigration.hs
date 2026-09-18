@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Release.SchemaMigration
   ( SchemaMigrationDemand (..)
@@ -52,22 +52,16 @@ provisionSchemaMigration demand supply = case individual <> total of
     , short "new-schema" (newSchemaBytes demand) (suppliedNewSchemaBytes supply)
     , short "row-data" (rowDataBytes demand) (suppliedRowDataBytes supply)
     , short "copy-wal" (copyWalBytes demand) (suppliedCopyWalBytes supply)
-#ifndef RELEASE_LIFECYCLE_DROP_VERIFICATION_WAL_MUTANT
     , short "verification-wal" (verificationWalBytes demand) (suppliedVerificationWalBytes supply)
-#endif
     , short "workspace" (workspaceBytes demand) (suppliedWorkspaceBytes supply)
     , short "executor" (executorBytes demand) (suppliedExecutorBytes supply)
     , short "old-workload" (oldWorkloadBytes demand) (suppliedOldWorkloadBytes supply)
     , short "new-workload" (newWorkloadBytes demand) (suppliedNewWorkloadBytes supply)
     ]
   requiredTotal =
-#ifdef RELEASE_LIFECYCLE_SCALAR_MIGRATION_PEAK_MUTANT
-    migrationScalarPeak demand
-#else
     oldSchemaBytes demand + newSchemaBytes demand + rowDataBytes demand + copyWalBytes demand
       + verificationWalBytes demand + workspaceBytes demand + executorBytes demand
       + oldWorkloadBytes demand + newWorkloadBytes demand
-#endif
   total = short "total" requiredTotal (suppliedTotalBytes supply)
   short label required supplied
     | supplied < required = [MigrationProvisionShort label required supplied]
@@ -75,9 +69,7 @@ provisionSchemaMigration demand supply = case individual <> total of
 
 failureRetainedBytes :: SchemaMigrationDemand -> Integer
 failureRetainedBytes demand =
-#ifndef RELEASE_LIFECYCLE_DROP_OLD_SCHEMA_ON_FAILURE_MUTANT
   oldSchemaBytes demand +
-#endif
   newSchemaBytes demand + rowDataBytes demand + copyWalBytes demand
     + verificationWalBytes demand + workspaceBytes demand
 

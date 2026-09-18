@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Formal.Interpret
   ( interpret
@@ -140,11 +140,7 @@ interpret model event state = do
   domainsOk <- either (const Nothing) Just $ traverse (argumentInDomain bindings) (zip (actionParameters action) (eventArguments event))
   guard (and domainsOk)
   enabled <- either (const Nothing) Just (evalBool model bindings state (actionGuard action))
-#ifdef FORMAL_MODEL_IGNORES_GUARD_MUTANT
-  guard (enabled || not enabled)
-#else
   guard enabled
-#endif
   effects <- either (const Nothing) Just (traverse (evaluateEffect bindings) (actionEffects action))
   pure (foldr (uncurry Map.insert) state effects)
   where

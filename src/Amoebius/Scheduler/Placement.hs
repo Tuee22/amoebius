@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Scheduler.Placement
   ( PlacementError (..)
@@ -26,11 +26,7 @@ refoldSchedulerPlacement
   -> SchedulerResourceVector
   -> Either PlacementError SchedulerResourceVector
 refoldSchedulerPlacement capacity existing candidate =
-#ifdef CAPACITY_SCHEDULER_NUMERIC_ADD_MUTANT
-  let total = candidate
-#else
   let total = foldl addSchedulerVector candidate existing
-#endif
    in if schedulerVectorWithin total capacity
         then Right total
         else Left (SchedulerCapacityExceeded total capacity)

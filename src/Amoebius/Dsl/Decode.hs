@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields #-}
@@ -419,11 +418,7 @@ executionResources executionPrefix structural = do
     Just (StructuralNode _ "Union" "Host") -> Right HostResource
     _ -> Left (SchemaMismatch "execution resource envelope is absent or unknown")
   let complete = [node | node@(StructuralNode nodePath _ _) <- structural, resourcePrefix `isPrefixOf` nodePath]
-#ifdef PHASE6_NORMALIZATION_MUTANT
-      retained = take 1 complete
-#else
       retained = complete
-#endif
   if null retained
     then Left (SchemaMismatch "execution resource envelope retained no fields")
     else Right (ResourceEnvelope arm retained)

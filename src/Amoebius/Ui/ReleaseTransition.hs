@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Ui.ReleaseTransition
   ( Release (..)
@@ -25,13 +25,9 @@ beginRelease release state = state {desiredRelease = release, activePlans = [Rel
 observeWatermark :: Release -> TransitionState -> TransitionState
 observeWatermark release state = state {projectorWatermark = release}
 shiftGateway :: TransitionState -> Either TransitionError TransitionState
-#ifdef UI_ROLLOUT_RECONNECT_SHIFT_BEFORE_WATERMARK_MUTANT
-shiftGateway state = Right state {gatewayRelease = desiredRelease state}
-#else
 shiftGateway state
   | desiredRelease state == projectorWatermark state = Right state {gatewayRelease = desiredRelease state}
   | otherwise = Left ProjectorNotCaughtUp
-#endif
 stalePlanDecision :: Release -> TransitionState -> Either TransitionError ()
 stalePlanDecision client state
   | client == gatewayRelease state = Right ()

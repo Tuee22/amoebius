@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Platform.Registry
@@ -69,11 +68,7 @@ registryStorageConfiguration backend = case effectiveBackend backend of
       , "    v4auth: true"
       ]
  where
-#ifdef PLATFORM_BACKBONE_REGISTRY_FS_DRIVER_MUTANT
-  effectiveBackend _ = RegistryFilesystem "/var/lib/registry"
-#else
   effectiveBackend = id
-#endif
 
 cutoverRegistry :: Bool -> ProvisionedRegistryRehome -> RegistryBackend
 cutoverRegistry verified provision

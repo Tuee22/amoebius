@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 -- | One fold from a step list to argv, for every context a step can execute in.
 --
@@ -66,11 +66,7 @@ liftArgv context resolve version step = case stepPerformer step of
       Just absolute -> Right (absExePath absolute : arguments)
     -- Across a context boundary the *entry point* is the outermost tool and is the
     -- only thing resolved; the step's tool is handed on as the guest's own name.
-#ifdef HOST_ENSURE_LIFT_DROPS_FRAME_PREFIX_MUTANT
-    InFrame _ _ -> Right (toolCommandName tool : arguments)
-#else
     InFrame _ entry -> Right (absExePath entry : "--" : toolCommandName tool : arguments)
-#endif
     InContainer engine image ->
       Right (absExePath engine : "run" : "--rm" : image : toolCommandName tool : arguments)
 

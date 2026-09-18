@@ -623,10 +623,11 @@ Confidentiality may be narrowed without new authority. Audience widening or cros
 closed named release/grant action with current authorization, declared purpose, target audience, audit class,
 and a server-issued result carrying the new label. There is no general declassification function.
 
-The standalone pure Phase 6 scope gate exercises `Amoebius.Scope.Index` and `Amoebius.Scope.Flow` through
-fresh request indices, owner joins, swaps, flow decisions, graph diagnostics, compiler-negative pairs,
-generated reject classes, and a changed-production subject. Its expected relations are separately authored
-Haskell values; tracked serialized fixtures do not influence the verdict.
+The standalone pure scope gate owed by [Phase
+6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) must exercise `Amoebius.Scope.Index`
+and `Amoebius.Scope.Flow` through fresh request indices, owner joins, swaps, flow decisions, graph
+diagnostics, compiler-negative pairs, generated reject classes, and a changed-production subject. Its expected
+relations are separately authored Haskell values; tracked serialized fixtures do not influence the verdict.
 
 Browser input and model output begin with untrusted integrity. They cannot flow to an authority-bearing sink,
 policy decision, provider coordinate, executable action identity, ownership field, or release decision until a

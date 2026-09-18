@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 
@@ -57,19 +56,12 @@ data WaitError
   deriving anyclass (NFData)
 
 observeReady :: ReadinessObservation -> Either WaitError ()
-#ifdef PHASE26_WAIT_FOR_READY_PURE_MUTANT
-observeReady _ = Right ()
-#else
 observeReady observed
   | not (readinessAvailable observed) = Left ConvergenceTimeout
   | readinessObservedMillis observed < readinessCreatedMillis observed + readinessInitialDelaySeconds observed * 1000 = Left ReadinessReportedBeforeInitialDelay
   | otherwise = Right ()
-#endif
 
 validateChildEnvelope :: ChildEnvelope -> ChildEnvelope -> Either WaitError ()
-#ifdef PHASE26_HEALTHY_OVERBOUND_CHILD_MUTANT
-validateChildEnvelope _ _ = Right ()
-#else
 validateChildEnvelope provisioned observed
   | childCpuMillis observed > childCpuMillis provisioned = exceeded
   | childMemoryBytes observed > childMemoryBytes provisioned = exceeded
@@ -80,7 +72,6 @@ validateChildEnvelope provisioned observed
   | otherwise = Right ()
  where
   exceeded = Left (ChildEnvelopeExceeded provisioned observed)
-#endif
 
 claimControllerEnvelopeNamespaces
   :: [(ControllerEnvelopeOwner, ControllerEnvelopeNamespace)]

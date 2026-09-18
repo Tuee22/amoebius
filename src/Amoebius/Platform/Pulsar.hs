@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Platform.Pulsar
@@ -77,11 +76,7 @@ provisionPulsarBackbone demand = do
         | value == 0 || value > pulsarHotTierCapBytes demand -> Left "size-trigger-outside-hot-tier-cap"
         | otherwise -> Right (ProvisionedPulsarBackbone demand storage metadata)
  where
-#ifdef PLATFORM_BACKBONE_OFFLOAD_TIME_ONLY_MUTANT
-  effectiveTrigger _ = Nothing
-#else
   effectiveTrigger = pulsarSizeTriggerBytes
-#endif
 
 applySizeTriggeredOffload :: Natural -> [Segment] -> OffloadResult
 applySizeTriggeredOffload cap segments = go [] segments (sum (fmap segmentBytes segments))

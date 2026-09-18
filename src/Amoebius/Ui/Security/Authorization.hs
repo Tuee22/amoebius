@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.Security.Authorization (
@@ -186,22 +185,12 @@ authorize ::
     Either AuthorizationError AuthorizedAction
 authorize (BoundActionRegistry _ registry) (AuthoritySnapshot current policy) presented context owner resource action requested = do
     spec <- maybe (Left (MissingAction action)) Right (Map.lookup action registry)
-#ifdef UI_AUTH_VISIBILITY_MUTANT
-    if specVisibility spec == Visible
-        then Right (AuthorizedAction spec)
-        else Left (PermissionMismatch action)
-#else
     _ <- either (Left . WrongScope) Right (resolveOwned context owner resource)
     checkEpochs current presented
-#ifdef UI_AUTH_DEFAULT_ALLOW_MUTANT
-    let granted = Map.findWithDefault (specPermission spec) action policy
-#else
     granted <- maybe (Left (PolicyAbsent action)) Right (Map.lookup action policy)
-#endif
     if requested == specPermission spec && granted == specPermission spec
         then Right (AuthorizedAction spec)
         else Left (PermissionMismatch action)
-#endif
 
 canRead :: AuthorizedAction -> Maybe CanRead
 canRead action@(AuthorizedAction spec)

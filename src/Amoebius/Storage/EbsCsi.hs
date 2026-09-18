@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Static-only consumption of provider-created EBS identities.
@@ -76,13 +75,8 @@ staticOnlyInstall =
     , installUsesPublicImage = False
     }
  where
-#ifdef PROVIDER_EBS_CREDENTIAL_DYNAMIC_PROVISIONER_MUTANT
-  storageClass = "ebs.csi.aws.com"
-  provisioners = 1
-#else
   storageClass = "kubernetes.io/no-provisioner"
   provisioners = 0
-#endif
 
 bakedCsiInventory :: [CsiBinary]
 bakedCsiInventory =

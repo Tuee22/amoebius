@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Release.ReleaseHash
@@ -38,9 +37,7 @@ releasePreimage source = TextEncoding.encodeUtf8 (Text.intercalate "\n" fields)
   fields =
     [resolvedDeploymentDhall source]
       <> sort (releaseImageDigests source)
-#ifndef RELEASE_LIFECYCLE_HASH_OMITS_SUBSTRATE_MUTANT
       <> [releaseSubstrateFingerprint source]
-#endif
 
 deriveReleaseHash :: ReleaseSource -> ReleaseHash
 deriveReleaseHash = ReleaseHash . digestHex . contentDigest . releasePreimage

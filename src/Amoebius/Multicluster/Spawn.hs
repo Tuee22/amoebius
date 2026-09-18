@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Multicluster.Spawn
@@ -93,11 +92,7 @@ representativeForestDemand =
         , executorPluginCacheBytes = 33554432
         , executorWorkspaceBytes = 67108864
         }
-#ifdef MULTICLUSTER_SPAWN_GEOREPL_DROP_PARALLEL_EXECUTOR_MUTANT
-      parallelLimit = 1
-#else
       parallelLimit = 2
-#endif
       execution = case boundedExecutionDemand parallelLimit [executor, executor] of
         Left failure -> error (show failure)
         Right value -> value

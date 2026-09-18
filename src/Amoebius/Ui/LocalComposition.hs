@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.LocalComposition
@@ -44,19 +43,7 @@ data DomainEffect = DomainEffect
   deriving (Eq, Show)
 
 compiledCompositionMutant :: CompositionMutant
-#if defined(UI_LOCAL_DROP_HANDLE_TENANT_MUTANT)
-compiledCompositionMutant = DropHandleTenant
-#elif defined(UI_LOCAL_DIRECT_WORKFLOW_FETCH_MUTANT)
-compiledCompositionMutant = DirectWorkflowFetch
-#elif defined(UI_LOCAL_MIX_CLIENT_SERVER_PLAN_MUTANT)
-compiledCompositionMutant = MixClientServerPlan
-#elif defined(UI_LOCAL_READY_BEFORE_RECEIPT_MUTANT)
-compiledCompositionMutant = ReadyBeforeReceipt
-#elif defined(UI_LOCAL_OWNER_KEY_SWAP_MUTANT)
-compiledCompositionMutant = OwnerKeySwap
-#else
 compiledCompositionMutant = CompositionClean
-#endif
 
 pairedPlanIdentity :: CompositionMutant -> Text -> Text -> Bool
 pairedPlanIdentity mutant clientDigest serverDigest = clientDigest == effectiveServerDigest

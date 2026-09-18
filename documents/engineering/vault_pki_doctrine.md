@@ -738,15 +738,15 @@ parent secret injection, and cross-cluster intermediate CAs are separate later c
 
 Every hardware substrate can always run this `linux-cpu` lane.
 
-The Phase-74 Register-3 instance realizes the child policy seams in
+The Phase-74 Register-3 instance must realize the child policy seams in
 `Amoebius.Multicluster.ChildUnseal`, `Amoebius.Vault.TransitChildKey`, and
-`Amoebius.Multicluster.SecretInjection`. The pure gate admits both sanctioned unseal modes, proves that the
-parent-held mode bricks while the parent is sealed, and rejects cross-child subtree decrypt. The live gate
-creates distinct Vault Transit keys, observes cross-key decrypt denial, and resolves parent-injected named KV
+`Amoebius.Multicluster.SecretInjection`. The pure gate must admit both sanctioned unseal modes, prove that the
+parent-held mode bricks while the parent is sealed, and reject cross-child subtree decrypt. The live gate
+must create distinct Vault Transit keys, observe cross-key decrypt denial, and resolve parent-injected named KV
 secrets without retaining raw values in evidence. A Vault server physically resident in each child and a
 cross-cluster intermediate-CA hierarchy remain UNVERIFIED. The CPU-only Linux fallback remains selectable on
 every detected hardware class. Fresh guest isolation is provided by Incus for either Linux class, by Lima for
-Apple, and by WSL2 for Windows.
+Apple, and by WSL2 for Windows. Owed by [Phase 74](../../DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md).
 
 The Phase-91 scoped infernix exercise keeps adapter configuration to Vault secret names, mints one-use
 tenant-scoped challenge credentials, observes tenant B denial against tenant A's model path, and records only

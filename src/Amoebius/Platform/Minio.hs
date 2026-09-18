@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -65,23 +64,9 @@ provisionMinio demand = do
             , provisionedMinioUniformDebit = uniformDebit
             }
  where
-#ifdef PLATFORM_BACKBONE_CONTENT_IMMEDIATE_GC_MUTANT
-  transientBytes _ = 0
-#else
   transientBytes = gatewayTransientBytes
-#endif
-#ifdef PLATFORM_BACKBONE_LOGICAL_AS_PHYSICAL_MUTANT
-  mutateGeometry logical geometry = geometry {geometryPhysicalBytes = logical}
-#elif defined(PLATFORM_BACKBONE_DROP_FAULT_SCENARIO_MUTANT)
-  mutateGeometry _ geometry = geometry {geometryFailureScenarios = [[]]}
-#else
   mutateGeometry _ geometry = geometry
-#endif
-#ifdef PLATFORM_BACKBONE_SUM_ORDINALS_MUTANT
-  uniformDebitFor perDrive drives = perDrive + drives
-#else
   uniformDebitFor perDrive drives = perDrive * drives
-#endif
 
 renderMinio :: ProvisionedMinio -> [PlatformObject]
 renderMinio provision =

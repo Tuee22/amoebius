@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Exec.Boundary
@@ -10,9 +9,6 @@ module Amoebius.Exec.Boundary
 import Amoebius.Exec.Tool
 import Control.Monad (unless)
 import Data.ByteString.Lazy (ByteString)
-#ifdef BOUNDARY_BYTE_MUTANT
-import Data.ByteString.Lazy qualified as ByteString
-#endif
 import System.Exit (ExitCode (ExitSuccess))
 
 data BoundaryTools = BoundaryTools
@@ -44,21 +40,7 @@ runBoundaryCorpus tools manifestBytes = do
   pure results
  where
   kubectlArguments =
-#ifdef BOUNDARY_ARGV_MUTANT
-    ["apply", "--server-side=true", "-f"]
-#else
     ["apply", "--server-side=true", "-f", "-"]
-#endif
   kubectlBytes =
-#ifdef BOUNDARY_BYTE_MUTANT
-    flipFirstByte manifestBytes
-#else
     manifestBytes
-#endif
 
-#ifdef BOUNDARY_BYTE_MUTANT
-flipFirstByte :: ByteString -> ByteString
-flipFirstByte bytes = case ByteString.uncons bytes of
-  Nothing -> "x"
-  Just (first, remaining) -> ByteString.cons (first + 1) remaining
-#endif

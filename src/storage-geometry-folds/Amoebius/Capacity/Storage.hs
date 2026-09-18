@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -144,11 +143,7 @@ data RestoreDemand = RestoreDemand
 
 fitBacking :: StorageBacking -> Natural -> Either StorageError StorageWitness
 fitBacking backing required
-#if defined(STORAGE_GEOMETRY_BACKING_ACCEPT_OVER_MUTANT)
-  | required <= backingCapacityBytes backing + 1 =
-#else
   | required <= backingCapacityBytes backing =
-#endif
       Right
         StorageWitness
           { witnessOwner = unBackingId (backingId backing)
@@ -166,9 +161,7 @@ fitStorageBudget budget required = case budget of
     | otherwise -> Left (StorageOverBacking owner (amountBytes required) bytes)
   ProviderObjectQuota budgetName provider bytes objects
     | amountBytes required > bytes -> Left (StorageOverBacking (BackingId provider) (amountBytes required) bytes)
-#if !defined(STORAGE_GEOMETRY_OBJECT_DROP_COUNT_MUTANT)
     | amountObjects required > objects -> Left (ObjectCountOverQuota provider (amountObjects required) objects)
-#endif
     | otherwise -> Right (mkWitness (unBudgetId budgetName) required (StorageAmount bytes objects))
 
 validateDisjointPools :: [(PoolKind, BackingId)] -> Either StorageError ()
@@ -179,48 +172,28 @@ validateDisjointPools entries = go Map.empty (sortOn snd entries)
     (pool, owner) : rest -> case Map.lookup owner owners of
       Nothing -> go (Map.insert owner pool owners) rest
       Just prior
-#if defined(STORAGE_GEOMETRY_POOL_ALLOW_ALIAS_MUTANT)
-        | otherwise -> go owners rest
-#else
         | prior == pool -> go owners rest
         | otherwise -> Left (DisjointCapacityPoolViolation owner prior pool)
-#endif
 
 provisionBackup :: BackupDemand -> Either StorageError StorageWitness
 provisionBackup demand =
   let oneGeneration = backupWorkingBytes demand + backupJobBytes demand
-#if defined(STORAGE_GEOMETRY_BACKUP_DROP_RETENTION_MUTANT)
-      required = oneGeneration + backupJobBytes demand
-#else
       required = oneGeneration * backupRetainedGenerations demand + backupJobBytes demand
-#endif
    in fitBacking (backupMedium demand) required
 
 provisionRestore :: RestoreDemand -> Either StorageError StorageWitness
-#if defined(STORAGE_GEOMETRY_RESTORE_DROP_WORKSPACE_MUTANT)
-provisionRestore demand = fitBacking (restoreTarget demand) (restoreArtifactBytes demand)
-#else
 provisionRestore demand = fitBacking (restoreTarget demand) (restoreArtifactBytes demand + restoreWorkspaceBytes demand)
-#endif
 
 presentBytes :: FilesystemPresentation -> Natural -> Natural
 presentBytes presentation logicalBytes = case presentation of
   BlockPresentation -> logicalBytes
-#if defined(STORAGE_GEOMETRY_FILESYSTEM_DROP_OVERHEAD_MUTANT)
-  FilesystemPresentation _ _ -> logicalBytes
-#else
   FilesystemPresentation _ basisPoints -> logicalBytes + ceilDiv (logicalBytes * basisPoints) 10000
-#endif
 
 roundAllocation :: BackingAllocationPolicy -> Natural -> Natural
 roundAllocation policy bytes =
   let minimumAllocation = max bytes (allocationMinimumBytes policy)
       quantum = allocationQuantumBytes policy
-#if defined(STORAGE_GEOMETRY_ALLOCATION_DROP_QUANTUM_MUTANT)
-   in minimumAllocation
-#else
    in if quantum == 0 then minimumAllocation else ceilDiv minimumAllocation quantum * quantum
-#endif
 
 mkWitness :: Text -> StorageAmount -> StorageAmount -> StorageWitness
 mkWitness owner required available =

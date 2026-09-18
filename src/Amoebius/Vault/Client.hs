@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Vault.Client
@@ -70,11 +69,7 @@ resolveSecret
   -> Maybe ByteString
   -> m (Either VaultError ByteString)
 resolveSecret transport identity jwt reference ciphertext = do
-#ifdef VAULT_PKI_PREMINTED_TOKEN_MUTANT
-  let authenticated = Right (VaultToken "login-token")
-#else
   authenticated <- authenticateKubernetes transport identity jwt
-#endif
   case authenticated of
     Left failure -> pure (Left failure)
     Right token ->
@@ -127,11 +122,7 @@ assertSecretsPresent transport identity jwt references = do
     Right token -> collect token [] references
  where
   collect _ missing [] =
-#ifdef VAULT_PKI_FIRST_MISSING_MUTANT
-    pure $ if null missing then Right () else Left (MissingSecrets (take 1 (reverse missing)))
-#else
     pure $ if null missing then Right () else Left (MissingSecrets (reverse missing))
-#endif
   collect token missing (reference : remaining) = do
     present <- foldSecretRef
       (kvFieldExists transport token)

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Fabric.WgReconcile
@@ -208,18 +207,12 @@ fitRow capacity demand row
 
 authorizeEnactment :: Text -> Maybe EnactmentState -> Either ProvisionError EnactmentState
 authorizeEnactment currentFingerprint maybeState =
-#ifdef NETWORK_FABRIC_WIREGUARD_DROP_RESOURCE_ENVELOPE_MUTANT
-  case maybeState of
-    Nothing -> Right Consumed
-    Just _ -> Right Consumed
-#else
   case maybeState of
     Nothing -> Left MissingEnactmentToken
     Just Consumed -> Left EnactmentAlreadyConsumed
     Just (Fresh (ValidatedFabricEnactment fingerprint _))
       | fingerprint /= currentFingerprint -> Left SnapshotChanged
       | otherwise -> Right Consumed
-#endif
 
 reconcileActions :: [RenderedNode] -> KernelObservation -> [FabricAction]
 reconcileActions desired observed =
@@ -234,11 +227,7 @@ reconcileActions desired observed =
 
 replacementActions :: Bool -> [FabricAction]
 replacementActions oldProcessPresent =
-#ifdef NETWORK_FABRIC_WIREGUARD_EARLY_LISTENER_REPLACEMENT_MUTANT
-  if oldProcessPresent then [StartReplacementListener] else [StartReplacementListener]
-#else
   if oldProcessPresent then [ObserveOldListenerExit] else [StartReplacementListener]
-#endif
 
 requirePositive :: Text -> Integer -> Either ProvisionError ()
 requirePositive label value

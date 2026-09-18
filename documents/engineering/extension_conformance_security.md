@@ -39,19 +39,22 @@ Current certification and evidence are recorded in the [development plan](../../
 
 This document is a **family slice**. It owns S1–S6 and the skolem-scope mechanism they share. It does not own
 the tenant model, the gateway and identity edge, the offline runtime, or the relational data plane; each S-law
-names the doctrine that does. [Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) owns the lexical
-pure mechanism in `Amoebius.Scope.Index` and `Amoebius.Scope.Flow`; the laws and live boundaries retain their own delivery owners, and status lives only in the
+names the doctrine that does. The lexical
+pure mechanism in `Amoebius.Scope.Index` and `Amoebius.Scope.Flow` is owed by
+[Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md); the laws and live boundaries retain their own delivery owners, and status lives only in the
 [tracker](../../DEVELOPMENT_PLAN/README.md).
 
-The bounded pure implementation is `Amoebius.Extension.Laws.Security`. It distinguishes claimed and
-attested identities, eliminates an attested identity through Phase 6's fresh request scope, requires that scope at the
-operation and derived-key boundaries, represents only revocation-edge or positive-staleness-bound authority
-layers, and evaluates S1–S6 over explicit observations. Its independently authored Phase 6 Haskell corpus covers one valid and one tampered fixture
-envelope, fifteen operations in a two-tenant/two-subject store, five foreign/absent refusal pairs, five
-namespace transpositions, two authority layers, 42 authored verdicts, four compiler negatives, and six exact
-production mutants. The package-hidden Phase 6 supervisor executes that corpus and all compiler and mutation rows serially from a fresh ignored run root. This remains bounded Register-1 evidence: the fixture SHA-256 check is not production cryptographic
-verification, equal modeled steps are not wall-clock timing, the layer pair is not a runtime inventory, and no
-compositional S-law or persisted-value re-entry path is thereby discharged.
+The bounded pure implementation owed by [Phase
+6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) is
+`Amoebius.Extension.Laws.Security`. It must distinguish claimed and attested identities, eliminate an attested
+identity through Phase 6's fresh request scope, require that scope at the operation and derived-key
+boundaries, represent only revocation-edge or positive-staleness-bound authority layers, and evaluate S1–S6
+over explicit observations. Its corpus must cover valid and tampered fixture envelopes, a
+two-tenant/two-subject store, foreign/absent refusal pairs, namespace transpositions, two authority layers,
+compiler negatives, and generated production mutants. This remains bounded Register-1 evidence: the fixture
+SHA-256 check is not production cryptographic verification, equal modeled steps are not wall-clock timing, the
+layer pair is not a runtime inventory, and no compositional S-law or persisted-value re-entry path is thereby
+discharged.
 
 ---
 

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Vault.Seal
@@ -19,10 +18,6 @@ import Data.ByteString qualified as ByteString
 import Data.ByteString.Builder qualified as Builder
 import Data.ByteString.Lazy qualified as LazyByteString
 import Data.Word (Word32, Word8)
-#ifdef VAULT_PKI_RAW_SHA256_SEAL_MUTANT
-import Crypto.Hash.SHA256 qualified as SHA256
-import Data.Bits (xor)
-#endif
 
 data EnvelopeParameters = EnvelopeParameters
   { envelopeMemoryKiB :: Word32
@@ -44,10 +39,6 @@ sealUnlockMaterialIO password plaintext = do
   pure (sealUnlockMaterial password salt nonce plaintext)
 
 sealUnlockMaterial :: ByteString -> ByteString -> ByteString -> ByteString -> Either String ByteString
-#ifdef VAULT_PKI_RAW_SHA256_SEAL_MUTANT
-sealUnlockMaterial password _ _ plaintext =
-  Right ("RAW-SHA256\0" <> xorCycle (SHA256.hash password) plaintext)
-#else
 sealUnlockMaterial password salt nonceBytes plaintext
   | ByteString.length salt /= 16 = Left "invalid-salt-length"
   | ByteString.length nonceBytes /= 12 = Left "invalid-nonce-length"
@@ -60,15 +51,8 @@ sealUnlockMaterial password salt nonceBytes plaintext
           (ciphertext, encryptedState) = ChaCha.encrypt plaintext ready
           tag = convert (ChaCha.finalize encryptedState) :: ByteString
       pure (header <> word32be (fromIntegral (ByteString.length ciphertext)) <> ciphertext <> tag)
-#endif
 
 openUnlockMaterial :: ByteString -> ByteString -> Either String ByteString
-#ifdef VAULT_PKI_RAW_SHA256_SEAL_MUTANT
-openUnlockMaterial password envelope
-  | "RAW-SHA256\0" `ByteString.isPrefixOf` envelope =
-      Right (xorCycle (SHA256.hash password) (ByteString.drop 11 envelope))
-  | otherwise = Left "invalid-envelope-magic"
-#else
 openUnlockMaterial password envelope = do
   (parameters, salt, nonceBytes, ciphertext, suppliedTag, header) <- parseEnvelope envelope
   key <- deriveKey parameters password salt
@@ -80,7 +64,6 @@ openUnlockMaterial password envelope = do
   if expectedTag `constEq` suppliedTag
     then Right plaintext
     else Left "envelope-authentication-failed"
-#endif
 
 deriveKey :: EnvelopeParameters -> ByteString -> ByteString -> Either String ByteString
 deriveKey parameters password salt =
@@ -167,10 +150,3 @@ cryptoEither message result = case result of
   CryptoPassed value -> Right value
   CryptoFailed _ -> Left message
 
-#ifdef VAULT_PKI_RAW_SHA256_SEAL_MUTANT
-xorCycle :: ByteString -> ByteString -> ByteString
-xorCycle key input =
-  let repetitions = (ByteString.length input + ByteString.length key - 1) `div` ByteString.length key
-      stream = ByteString.take (ByteString.length input) (ByteString.concat (replicate repetitions key))
-   in ByteString.pack (ByteString.zipWith xor input stream)
-#endif

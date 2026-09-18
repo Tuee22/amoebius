@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Vault.Pki
   ( RootCa (..)
@@ -19,20 +19,12 @@ data LeafCertificate = LeafCertificate
   deriving stock (Eq, Show)
 
 issueInternalLeaf :: Bool -> RootCa -> String -> Either VaultError LeafCertificate
-#ifdef VAULT_PKI_SEALED_ISSUANCE_MUTANT
-issueInternalLeaf _ root commonName = Right (mkLeaf root commonName)
-#else
 issueInternalLeaf sealed root commonName
   | sealed = Left VaultSealed
   | otherwise = Right (mkLeaf root commonName)
-#endif
 
 mkLeaf :: RootCa -> String -> LeafCertificate
-#ifdef VAULT_PKI_UNRELATED_LEAF_MUTANT
-mkLeaf _ commonName = LeafCertificate commonName "unrelated-key"
-#else
 mkLeaf root commonName = LeafCertificate commonName (rootKeyId root)
-#endif
 
 verifiesAgainst :: RootCa -> LeafCertificate -> Bool
 verifiesAgainst root leaf = rootKeyId root == leafIssuerKeyId leaf

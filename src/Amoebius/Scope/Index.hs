@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
 
@@ -161,14 +160,10 @@ resolveOwned
   -> ResourceId
   -> Either ScopeError (SomeScopedHandle scope)
 resolveOwned (RequestScope requestTenant requestSubject _) owner resource = case owner of
-#ifdef SCOPE_INDEX_DROP_OWNER_EQUALITY_MUTANT
-  OwnedBySubject _ _ -> Right (SomeSubjectHandle (ScopedHandle resource))
-#else
   OwnedBySubject ownerTenant ownerSubject
     | requestTenant /= ownerTenant -> Left TenantMismatch
     | requestSubject /= ownerSubject -> Left OwnerMismatch
     | otherwise -> Right (SomeSubjectHandle (ScopedHandle resource))
-#endif
   OwnedByTenant ownerTenant
     | requestTenant /= ownerTenant -> Left TenantMismatch
     | otherwise -> Right (SomeTenantHandle (ScopedHandle resource))

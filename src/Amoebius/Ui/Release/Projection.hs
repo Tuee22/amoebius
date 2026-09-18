@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.Release.Projection
@@ -70,11 +69,7 @@ projectUiProgram runtime source = do
     ]
   authority = digestArtifact (Aeson.encode (sourcePolicyEpoch source))
   selectedRuntime =
-#ifdef UI_PROGRAM_RELEASE_REBUILD_RUNTIME_PER_PROGRAM_MUTANT
-    RuntimeImageDigest (runtimeImageDigestText runtime <> "-program-" <> revisionText revision)
-#else
     runtime
-#endif
 
 releaseContentDigest :: UiProgramRelease -> ArtifactDigest
 releaseContentDigest release = manifestDigest (uiReleaseManifest release)

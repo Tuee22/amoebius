@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -52,9 +51,7 @@ admitExecutionCreate readiness identity
         else Left ExecutionSchedulerMismatch
   | incomplete identity = Left ExecutionIdentityIncomplete
   | not (executionOwnerChainValid identity) = Left ExecutionOwnerChainInvalid
-#ifndef CAPACITY_SCHEDULER_DEFAULT_SCHEDULER_BYPASS_MUTANT
   | executionToleratesManagedTaint identity && executionSchedulerName identity /= "amoebius-capacity" = Left DefaultSchedulerManagedNodeBypass
-#endif
   | executionSchedulerName identity /= "amoebius-capacity" = Left ExecutionSchedulerMismatch
   | otherwise = case readiness of
       BeforeManagedCapacityReady -> Left ManagedCapacityNotReady

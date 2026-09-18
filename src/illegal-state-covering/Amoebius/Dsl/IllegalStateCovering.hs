@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
@@ -235,11 +234,7 @@ structuralCases =
   ]
  where
   structural entry subcase token legal illegal =
-#ifdef ILLEGAL_STATE_UNION_MUTANT
-    if subcase == "closed-ingress-shape" then StructuralCase entry subcase token legal legal else StructuralCase entry subcase token legal illegal
-#else
     StructuralCase entry subcase token legal illegal
-#endif
 
 data DecodeError
   = DistinctHosts | UnspellableCombination | ControllerResourceMismatch | StatefulSetRequiresRolling
@@ -285,9 +280,7 @@ decodeCases =
 validateDecode :: DecodeInput -> Either DecodeError DecodeInput
 validateDecode value
   | length (inputHosts value) /= length (nub (inputHosts value)) = Left DistinctHosts
-#ifndef ILLEGAL_STATE_DECODE_MUTANT
   | inputProgress value == "zero-zero" = Left UnspellableCombination
-#endif
   | inputController value /= "HostProcess" && inputResource value == "Host" = Left ControllerResourceMismatch
   | inputController value == "HostProcess" && inputResource value /= "Host" = Left ControllerResourceMismatch
   | inputController value == "StatefulSet" && inputProgress value == "Once" = Left StatefulSetRequiresRolling
@@ -301,11 +294,7 @@ validateDecode value
 data Tenant = TenantA | TenantB
 data Ref (from :: Tenant) (to :: Tenant) = Ref
 acceptTenantRef ::
-#ifdef ILLEGAL_STATE_GADT_MUTANT
-  Ref from to -> ()
-#else
   Ref tenant tenant -> ()
-#endif
 acceptTenantRef _ = ()
 
 data VolumeName = DataVolume | OtherVolume
@@ -333,34 +322,18 @@ data SmartFamily = ReplicaFamily | RolloutFamily | HeadroomFamily
   deriving stock (Eq, Ord, Show, Enum, Bounded)
 
 smartConstructorClosed :: SmartFamily -> Natural -> Natural -> Natural -> Bool
-#ifdef ILLEGAL_STATE_PROPERTY_MUTANT
-smartConstructorClosed _ _ _ _ = False
-#else
 smartConstructorClosed ReplicaFamily count _ _ = count > 0
 smartConstructorClosed RolloutFamily surge unavailable _ = surge > 0 || unavailable > 0
 smartConstructorClosed HeadroomFamily request limitAmount pad = pad > 0 && request + pad <= limitAmount
-#endif
 
 roundTrip :: ([Text], [Text], [Natural]) -> ([Text], [Text], [Natural])
-#ifdef ILLEGAL_STATE_PROPERTY_MUTANT
-roundTrip _ = ([], [], [])
-#else
 roundTrip = id
-#endif
 
 totalFold :: [Natural] -> Natural
-#ifdef ILLEGAL_STATE_PROPERTY_MUTANT
-totalFold _ = 0
-#else
 totalFold = sum
-#endif
 
 composeFragments :: ([Text], [Text], [Natural]) -> ([Text], [Text], [Natural]) -> ([Text], [Text], [Natural])
-#ifdef ILLEGAL_STATE_PROPERTY_MUTANT
-composeFragments _ _ = ([], [], [])
-#else
 composeFragments (as, av, ar) (bs, bv, br) = (as <> bs, av <> bv, ar <> br)
-#endif
 
 rke2ServerCounts :: [Natural]
 rke2ServerCounts = [1, 3, 5]

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.Server.ScopedAuthority
@@ -67,11 +66,7 @@ authorizeProviderRequest
 authorizeProviderRequest credential hostile audience grant operation =
   hostile `seq`
   let trusted = serverRequestContext credential
-#ifdef USER_TENANT_ISOLATION_ACCEPT_BODY_TENANT_MUTANT
-      requestTenant = callerTenant hostile
-#else
       requestTenant = contextTenant trusted
-#endif
       requestSubject = contextSubject trusted
       authorize tenant subject resource =
         Right ProviderRequest
@@ -86,13 +81,9 @@ authorizeProviderRequest credential hostile audience grant operation =
           | otherwise -> Left ScopedDenial
         SubjectAudience tenant owner resource
           | requestTenant /= tenant -> Left ScopedDenial
-#ifdef USER_TENANT_ISOLATION_DROP_USER_PREDICATE_MUTANT
-          | otherwise -> authorize tenant requestSubject resource
-#else
           | requestSubject == owner -> authorize tenant requestSubject resource
           | grant == ActiveGrant -> authorize tenant requestSubject resource
           | otherwise -> Left ScopedDenial
-#endif
 
 data ProbeDemand = ProbeDemand
   { demandPodSlots :: Int

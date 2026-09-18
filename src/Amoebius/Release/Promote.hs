@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Release.Promote
   ( ETag (..)
@@ -47,9 +47,7 @@ data PointerResult
 
 promote :: Environment -> Maybe ETag -> ReleaseHash -> PointerStore -> (PointerStore, PointerResult)
 promote environment expected target store
-#ifndef RELEASE_LIFECYCLE_BLIND_PUT_MUTANT
   | expected /= (pointerETag <$> current) = (store, PointerConflict current)
-#endif
   | otherwise =
       let next = PointerHead target (ETag (maybe 1 ((+ 1) . unETag . pointerETag) current))
           heads = Map.insert environment next (pointerHeads store)

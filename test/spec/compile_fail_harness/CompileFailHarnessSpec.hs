@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Main (main) where
@@ -32,15 +31,7 @@ run :: FilePath -> FilePath -> IO ()
 run compiler outputRoot
   | not (isAbsolute compiler) = refuse "compiler path is not absolute"
   | otherwise = do
-#ifdef COMPILE_FAIL_ACCEPT_ANY_FAILURE_MUTANT
-      wrongReasonChallenge compiler outputRoot
-#elif defined(COMPILE_FAIL_DROPS_POSITIVE_COUNTERPART_MUTANT)
-      unless positiveCounterpartRequired (refuse "drop-positive-counterpart-locus: positive prerequisite was deleted")
-#elif defined(COMPILE_FAIL_IMPOSSIBLE_PIN_MUTANT)
-      impossiblePinChallenge
-#else
       cleanRun compiler outputRoot
-#endif
 
 cleanRun :: FilePath -> FilePath -> IO ()
 cleanRun compiler outputRoot = do

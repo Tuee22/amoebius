@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Main (main) where
@@ -46,20 +45,12 @@ program = do
   tenant <- firstShow (trustedTenant "composition-compile-tenant")
   subject <- firstShow (trustedSubject tenant "composition-compile-subject")
   membership <- firstShow (activeMembership tenant subject)
-#ifdef EXTENSION_LAWS_COMPOSITIONAL_TEST_CROSS_SCOPE
-  nested <- firstShow $ withRequestScope tenant subject membership $ \leftScope ->
-    withRequestScope tenant subject membership $ \rightScope ->
-      () <$ crossScopeComposite leftScope rightScope
-  inner <- firstShow nested
-  firstShow inner
-#else
   nested <- firstShow $ withRequestScope tenant subject membership $ \scope -> do
     left <- declaration "left" scope
     right <- declaration "right" scope
     pure (() <$ nonEmpty (composeComposites (singletonComposite left) (singletonComposite right)))
   result <- firstShow nested
   firstShow result
-#endif
 
 declaration :: Text -> RequestScope scope -> Either DeclarationError (ExtensionDeclaration scope)
 declaration name scope =
@@ -76,16 +67,6 @@ nonEmpty composite = case compositePartNames composite of
   [] -> Left "composition unexpectedly empty"
   _names -> Right composite
 
-#ifdef EXTENSION_LAWS_COMPOSITIONAL_TEST_CROSS_SCOPE
-crossScopeComposite
-  :: RequestScope left
-  -> RequestScope right
-  -> Either DeclarationError (CompositeDeclaration left)
-crossScopeComposite leftScope rightScope = do
-  left <- declaration "left" leftScope
-  right <- declaration "right" rightScope
-  pure (composeComposites (singletonComposite left) (singletonComposite right))
-#endif
 
 firstShow :: Show problem => Either problem value -> Either String value
 firstShow value = case value of

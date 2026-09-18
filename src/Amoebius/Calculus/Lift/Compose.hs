@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Composition: two lifts compose exactly when the inner one's target layer is the outer
@@ -34,9 +33,6 @@ module Amoebius.Calculus.Lift.Compose
 
 import Amoebius.Calculus.Lift.Layer (Layer, SLayer, layerOf)
 import Amoebius.Calculus.Lift.Transition (Lift, SomeLift (..), liftSource, liftTarget)
-#ifdef LIFT_CALCULUS_COMPOSE_DROPS_MEETING_LAYER_MUTANT
-import Unsafe.Coerce (unsafeCoerce)
-#endif
 
 -- | A composition of primitive transitions, from one layer to another.
 --
@@ -57,15 +53,10 @@ step = Step
 
 -- | Compose two paths. The shared @b@ says the inner one's target is the outer one's
 -- source, which is the whole of section 7's composition rule.
-#ifdef LIFT_CALCULUS_COMPOSE_DROPS_MEETING_LAYER_MUTANT
-compose :: Path x c -> Path a y -> Path a c
-compose _outer inner = unsafeCoerce inner
-#else
 compose :: Path b c -> Path a b -> Path a c
 compose outer inner = case outer of
   Here _layer -> inner
   Step transition rest -> Step transition (compose rest inner)
-#endif
 
 -- | The layer a path starts at.
 pathSource :: Path from to -> Layer
@@ -114,12 +105,4 @@ planFrom start = go start
       case meets reached (liftSource transition) of
         False -> Left (LayersDoNotMeet reached (liftSource transition))
         True -> go (liftTarget transition) rest
-#ifdef LIFT_CALCULUS_COMPOSITION_JOINS_UNMET_LAYERS_MUTANT
-    -- The seeded join. Two lifts are composed whether or not the inner one's target is the
-    -- outer one's source, which is the type equation deleted at the one place values can
-    -- reach it: a decoded plan is a list, and a list that is never checked is a path
-    -- nobody proved.
-    meets _reached _source = True
-#else
     meets reached source = reached == source
-#endif

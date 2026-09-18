@@ -346,7 +346,7 @@ flowchart TD
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
 
-*Phase-51 implementation boundary. `Amoebius.Host.Ensure.installAndVerify` implements this probe/decision/refuse shape, and `Amoebius.Host.Context.ensureRequiredTools` is its production caller. The phase gate remains the authority for whether that implementation is validated.*
+*Phase-51 implementation boundary, owed by [Phase 51](../../DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md). `Amoebius.Host.Ensure.installAndVerify` is to implement this probe/decision/refuse shape, and `Amoebius.Host.Context.ensureRequiredTools` is to be its production caller. The phase gate remains the authority for whether that implementation is validated.*
 
 ### The exact boundary of the no-`PATH` rule
 
@@ -354,7 +354,7 @@ The rule governs **the host invocation surface**, and only that surface. When am
 boundary — running a subcommand of itself inside a VM or container ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux); the composition lift owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md)) — only the **outermost** host tool is
 resolved to an absolute path; every **nested** tool is the guest's *own* bare name run against the guest's
 own `PATH`, which is legitimate because it is that guest's environment, not the host's
-(`Amoebius.Host.Lift.liftArgv`). The invariant is "amoebius never resolves a tool against the *host's*
+(`Amoebius.Host.Lift.liftArgv`, owed by [Phase 51](../../DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md)). The invariant is "amoebius never resolves a tool against the *host's*
 `PATH`," not "no `PATH` exists anywhere in the universe."
 
 > **Honesty.** The structural enforcement above is now amoebius-owned: `AbsExe` hides its constructor,

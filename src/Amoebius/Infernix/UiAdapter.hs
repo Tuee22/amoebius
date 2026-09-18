@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Infernix.UiAdapter
@@ -250,14 +249,9 @@ invokeReadyArtifact context claim scope handle input state
  where
   owner = readyArtifactOwner handle
   command = readyArtifactCommandId handle
-#ifdef INFERNIX_UI_LIFT_TRUST_CLIENT_ARTIFACT_SCOPE_MUTANT
-  authorizationTenant = claimedTenant claim
-  authorizationSubject = claimedSubject claim
-#else
   authorizationTenant = contextTenant context
   authorizationSubject = contextSubject context
   _ignoredClientClaim = claim
-#endif
 
 lookupDurableReceipt :: OwnerCoordinate -> Text -> UiAdapterState -> Maybe DurableReceipt
 lookupDurableReceipt owner command state =
@@ -324,8 +318,4 @@ hex = Text.pack . concatMap twoHex . ByteString.unpack
     digits -> digits
 
 terminalCommandId :: Text -> Text
-#ifdef INFERNIX_UI_LIFT_DROP_COMMAND_ID_FROM_TERMINAL_MUTANT
-terminalCommandId _ = "unrelated-command"
-#else
 terminalCommandId = id
-#endif

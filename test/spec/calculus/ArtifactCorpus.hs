@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The recipe corpus the Phase-3 gate renders: one recipe per target, each a pure
@@ -99,8 +98,4 @@ body seed prefix declared =
 -- | The seeded observation. Clean, it is the empty string and the seed is unused; under
 -- the mutant the rendering folds it, and the two-process comparison sees it immediately.
 ambient :: Seed -> Text
-#ifdef ARTIFACT_CALCULUS_RECIPE_ADMITS_CLOCK_MUTANT
-ambient (Seed value) = "@" <> value
-#else
 ambient (Seed _) = ""
-#endif

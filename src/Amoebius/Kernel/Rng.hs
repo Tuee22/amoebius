@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Kernel.Rng
   ( SplitMixSeed
@@ -25,11 +25,7 @@ deriveSplitMixSeed (SplitMixSeed master) streamIndex = SplitMixSeed (mix64 (mast
 
 deriveSplitMixSeedForWorker :: SplitMixSeed -> Word64 -> Word64 -> SplitMixSeed
 deriveSplitMixSeedForWorker master streamIndex workerId =
-#ifdef DETERMINISM_JITCACHE_RNG_WORKERID_MUTANT
-  deriveSplitMixSeed master (streamIndex + workerId)
-#else
   let _ = workerId in deriveSplitMixSeed master streamIndex
-#endif
 
 gamma :: Word64
 gamma = 0x9e3779b97f4a7c15

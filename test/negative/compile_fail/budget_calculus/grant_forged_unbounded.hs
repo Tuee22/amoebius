@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The illegal half of the issuer pair: a grant written down rather than issued, and an
@@ -18,17 +17,9 @@ module BudgetCalculusGrantForgedUnbounded where
 -- them here would report it as an import error instead of as the program having no type.
 import Amoebius.Calculus.Budget.Grant
   (
-#ifdef BUDGET_CALCULUS_GRANT_CONSTRUCTORS_EXPOSED_MUTANT
-    Allowance (..)
-#else
     Allowance
-#endif
   , Bytes (..)
-#ifdef BUDGET_CALCULUS_GRANT_CONSTRUCTORS_EXPOSED_MUTANT
-  , Grant (..)
-#else
   , Grant
-#endif
   , Location (..)
   , Purpose (BuildCache)
   , Slots (..)

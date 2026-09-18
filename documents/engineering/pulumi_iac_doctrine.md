@@ -599,11 +599,13 @@ one object, accounting-model version, and inventory pagination/version completen
 one-unit shortfall or a renderer/live value that differs from the witness refuses the next effect; it is never
 repaired by silently recomputing a smaller demand.
 
-Module ownership is explicit: `src/execution-accelerator-folds/Amoebius/Capacity/RuntimeStorage.hs` owns the shared structural
-component-role/layout and node-aggregate fold; `src/Amoebius/Pulumi/Observed.hs` owns Pulumi
-executor/Job readback normalization; and `test/spec/provider/RuntimeStorageSpec.hs` owns the planned-slot→observed-Pod-UID,
-SplitRuntime backing, scope/domain/ownership, reservation/observed no-double-debit, and alias-control
-conformance cases.
+Module ownership is to be explicit: `src/execution-accelerator-folds/Amoebius/Capacity/RuntimeStorage.hs` owns
+the shared structural component-role/layout and node-aggregate fold, owed by [Phase
+4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md); `src/Amoebius/Pulumi/Observed.hs`
+owns Pulumi executor/Job readback normalization, owed by [Phase
+76](../../DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md); and the provider oracle executable owns
+the planned-slot→observed-Pod-UID, SplitRuntime backing, scope/domain/ownership, reservation/observed
+no-double-debit, and alias-control conformance cases.
 
 This doc **does not own** that machinery. The reconciler-with-predicates pattern, the managed-resource
 registry, the totality/soundness/idempotence invariants, and the canonical teardown cascade are owned by
@@ -681,38 +683,38 @@ must run Pulumi inside a parent `kind` cluster, create two
 child clusters concurrently, export checkpoint state, observe an unchanged second pass, and destroy both
 stacks. The target observer must read Vault Transit envelope ciphertext and the checkpoint object from retained
 MinIO; the gate must refuse direct checkpoint admission and one-byte-short storage. Provider-managed programs remain
-Phase 75.
+Phase 75. Owed by [Phase 74](../../DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md).
 
 **Phase-75 target boundary — NOT VALIDATED.** Phase 75 must realize the provider-neutral DNS decision and hub handoff in
 `Amoebius.Multicluster.DnsRepoint` and `GatewayMigration`. The live drill must query a dedicated authoritative
 DNS server from outside the migration runtime and move a raw-kernel `wg0` role. Route53 API/Pulumi mutation
-remains UNVERIFIED and cannot be certified by a local DNS result.
+remains UNVERIFIED and cannot be certified by a local DNS result. Owed by [Phase 75](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md).
 
 **Phase-76 target boundary — NOT VALIDATED.** Phase 76 must build the provider plan and receipt boundary in `Amoebius.Pulumi.Provider.Eks`, extend
 `Amoebius.Pulumi.Engine` with exact bounded executor provisioning and the control-plane daemon/absolute-path/empty-child-
-environment contract, and implements the exact checkpoint fold in
+environment contract, and implement the exact checkpoint fold in
 `Amoebius.Pulumi.Backend.EncryptedMinio`. The scoped Register-3 challenge must observe two concurrent
 resource-bounded Jobs, a zero-environment absolute Pulumi `version` `execve`, HTTP-503 sealed-Vault refusal
 before MinIO mutation, six Transit-enveloped MinIO objects, direct Transit decrypt, three red mutants, and
 exact cleanup. Provider-account observation, actual
 control-plane daemon `pulumi up`, EKS, the managed node group, CloudTrail, AWS-plugin `execve`, pod-filesystem inspection,
-and direct-S3 denial remain UNVERIFIED.
+and direct-S3 denial remain UNVERIFIED. Owed by [Phase 76](../../DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md).
 
 **Phase-78 target boundary — NOT VALIDATED.** Phase 78 must implement the pure durable-EBS program in
 `Amoebius.Pulumi.Ebs` and the closed operational/CSI/elevated-test action matrix in
 `Amoebius.Pulumi.Credential`. Its gate must validate integral-GiB allocation, byte/count
 quota refusal, deterministic promised slots, receipt-only materialization, distinct durable checkpoint keys,
-protect/Retain metadata, old+new migration overlap, and all five seeded mutants. The scoped live observer used
+protect/Retain metadata, old+new migration overlap, and every generated mutant. The scoped live observer must use
 real Vault Transit and MinIO for separate ephemeral/durable checkpoint namespaces. No AWS volume or IAM call
 occurred, so create/delete authorization, volume retention, receipt-bound EBS state, and provider migration
-remain UNVERIFIED. The development-plan tracker owns the portable CPU/clean-guest routing rule.
+remain UNVERIFIED. The development-plan tracker owns the portable CPU/clean-guest routing rule. Owed by [Phase 78](../../DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md).
 
 **Phase-79 target boundary — NOT VALIDATED.** Phase 79 must implement `Amoebius.Pulumi.NodeGroup` as receipt-only provider-node materialization and
 `Amoebius.Pulumi.Teardown` as fail-closed per-class teardown plus broadened run-owned enumeration. The pure
 contract requires the managed-capacity taint, complete supply/layout/device and fresh scheduler authority,
 rejects foreign-pod admission, retains durable resources, and discovers owned resources through run tag, VPC,
 or cluster ownership rather than tag alone. The retained-Kubernetes ownership drill is an analogue only:
-actual EKS/EC2 mutation, AWS enumeration, and provider leak freedom remain UNVERIFIED.
+actual EKS/EC2 mutation, AWS enumeration, and provider leak freedom remain UNVERIFIED. Owed by [Phase 79](../../DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md).
 
 ---
 

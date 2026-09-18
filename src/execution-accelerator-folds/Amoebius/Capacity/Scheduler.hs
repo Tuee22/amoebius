@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -215,11 +214,7 @@ ledgerOnlyAbsentRecovery row
   | ledgerPodPresent row = ledgerReservation row
   | otherwise = case ledgerReservationState row of
       Reserved -> ledgerReservation row
-#ifdef RECONCILE_CORE_RESERVATION_CRASH_DROP_MUTANT
-      BindingInFlight -> retainedOnly (ledgerReservation row)
-#else
       BindingInFlight -> ledgerReservation row
-#endif
       Bound -> ledgerReservation row
       Terminating -> ledgerReservation row
       TerminalRetained -> retainedOnly (ledgerReservation row)

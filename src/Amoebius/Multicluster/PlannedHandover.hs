@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Multicluster.PlannedHandover
   ( WatermarkSnapshot (..)
@@ -18,11 +18,7 @@ data PlannedHandoverError
   deriving stock (Eq, Show)
 
 verifyCaughtUp :: WatermarkSnapshot -> Bool
-#ifdef GATEWAY_MIGRATION_DRILLS_VERIFY_CAUGHT_UP_STUB_MUTANT
-verifyCaughtUp _ = True
-#else
 verifyCaughtUp snapshot = targetWatermark snapshot == sourceWatermark snapshot
-#endif
 
 plannedHandoverActions :: WatermarkSnapshot -> Either PlannedHandoverError [String]
 plannedHandoverActions snapshot

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.Generate.BrowserContracts
@@ -30,11 +29,7 @@ contractInventory = valueRows <> clientPlanFields <> transitionFields
     valueRows = map valueRow publicValueTypes
 
 publicValueTypes :: [Source.ValueType]
-#ifdef UI_CONTRACT_GENERATION_SERIALIZE_SERVER_HANDLE_MUTANT
-publicValueTypes = [minBound .. maxBound]
-#else
 publicValueTypes = filter (/= Source.ServerHandle) [minBound .. maxBound]
-#endif
 
 valueRow :: Source.ValueType -> ContractRow
 valueRow value = ContractRow "value" (Text.pack (show value)) (valueCodec value) "public"
@@ -57,9 +52,6 @@ clientPlanFields =
   , publicField "client-plan" "links" "array-string"
   , publicField "client-plan" "routes" "array-string"
   ]
-#ifdef UI_CONTRACT_GENERATION_UNDECLARED_CODEC_MUTANT
-  <> [publicField "client-plan" "providerCoordinate" "string"]
-#endif
 
 transitionFields :: [ContractRow]
 transitionFields =
@@ -69,9 +61,6 @@ transitionFields =
   , publicField "transition" "route" "string"
   , publicField "transition" "focus" "string"
   ]
-#ifdef UI_CONTRACT_GENERATION_RAW_SINK_MUTANT
-  <> [publicField "transition" "rawHtml" "string"]
-#endif
 
 publicField :: Text -> Text -> Text -> ContractRow
 publicField kind name codec = ContractRow kind name codec "public"

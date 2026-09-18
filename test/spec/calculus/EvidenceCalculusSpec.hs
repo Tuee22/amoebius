@@ -108,9 +108,9 @@ independentClaimInventory =
 
 independentMutantRecords :: [Either RecordError MutantRecord]
 independentMutantRecords =
-  [ record "dispatch-admits-a-fallback" "catch-all-introduction" "dispatch" "LIFT_CALCULUS_DISPATCH_ADMITS_A_FALLBACK_MUTANT"
-  , record "witness-forged-without-observation" "evidence-assertion" "witness-requires-observation" "LIFT_CALCULUS_WITNESS_FORGED_WITHOUT_OBSERVATION_MUTANT"
-  , record "composition-joins-unmet-layers" "type-equation-deletion" "composition-requires-meeting-layers" "LIFT_CALCULUS_COMPOSITION_JOINS_UNMET_LAYERS_MUTANT"
+  [ record "dispatch-admits-a-fallback" "catch-all-introduction" "dispatch" "generated:dispatch-admits-a-fallback"
+  , record "witness-forged-without-observation" "evidence-assertion" "witness-requires-observation" "generated:witness-forged-without-observation"
+  , record "composition-joins-unmet-layers" "type-equation-deletion" "composition-requires-meeting-layers" "generated:composition-joins-unmet-layers"
   ]
   where
     record identifier operator locus flag =

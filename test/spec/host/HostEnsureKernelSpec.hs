@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Emit what the Phase-4 gate judges.
@@ -130,19 +129,7 @@ rootIsolation absoluteRoot = do
   pure ["root-isolation" | observedA == Nothing || observedB /= Nothing]
 
 mutantToken :: String
-#if defined(HOST_ENSURE_CONVERGED_WITHOUT_PROBING_MUTANT)
-mutantToken = "host-ensure-kernel-mutant: RED converged-without-probing probe-first-driver"
-#elif defined(HOST_ENSURE_STALE_SNAPSHOT_MUTANT)
-mutantToken = "host-ensure-kernel-mutant: RED stale-snapshot post-step-resolve"
-#elif defined(HOST_ENSURE_APPLE_DOCKER_STEP_MUTANT)
-mutantToken = "host-ensure-kernel-mutant: RED apple-docker-step reconciler-table"
-#elif defined(HOST_ENSURE_AUTHORED_DIAGNOSTIC_MUTANT)
-mutantToken = "host-ensure-kernel-mutant: RED authored-diagnostic applicability-projection"
-#elif defined(HOST_ENSURE_LIFT_DROPS_FRAME_PREFIX_MUTANT)
-mutantToken = "host-ensure-kernel-mutant: RED drops-frame-prefix lift-fold"
-#else
 mutantToken = "host-ensure-kernel-spec: RED unexpected"
-#endif
 
 everySubstrate :: [Substrate]
 everySubstrate = [minBound .. maxBound]

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Main (main) where
@@ -119,9 +118,6 @@ checkCompileRefusals output compiler = do
     ]
   compile compilerPath root source = do
     let arguments = ["-fno-code", "-fforce-recomp", "-fdiagnostics-as-json", "-XGHC2024", "-package", "text", "-isrc/illegal-state-covering", "-odir", root, "-hidir", root]
-#ifdef ILLEGAL_STATE_GADT_MUTANT
-          <> ["-DILLEGAL_STATE_GADT_MUTANT"]
-#endif
           <> [source, "src/illegal-state-covering/Amoebius/Dsl/IllegalStateCovering.hs"]
     (status, stdoutText, stderrText) <- readCreateProcessWithExitCode (proc compilerPath arguments) ""
     pure (Receipt status (Text.pack stdoutText) (Text.pack stderrText))

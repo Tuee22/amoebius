@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Main (main) where
 
@@ -52,18 +52,4 @@ main = do
   putStrLn "linux-engine-bringup-spec: PASS (4 pristine surfaces, 5 mutations, 2 ledgers, 4 dirty negatives, 1 architecture negative, 8 architecture triples, 2 unelevated probes, 1 unelevated client, 1 image reference)"
 
 mutantToken :: String
-#if defined(LINUX_ENGINE_EPHEMERAL_MEMBERSHIP_MUTANT)
-mutantToken = "linux-engine-bringup-mutant: RED ephemeral-membership durable-group-read"
-#elif defined(LINUX_ENGINE_UNREFRESHED_CREDENTIALS_MUTANT)
-mutantToken = "linux-engine-bringup-mutant: RED unrefreshed-credentials current-process-read"
-#elif defined(LINUX_ENGINE_ELEVATED_RETRY_MUTANT)
-mutantToken = "linux-engine-bringup-mutant: RED elevated-retry unelevated-session-read"
-#elif defined(LINUX_ENGINE_CONVERGE_WITHOUT_PROBE_MUTANT)
-mutantToken = "linux-engine-bringup-mutant: RED converge-without-probe second-pass-probes"
-#elif defined(LINUX_ENGINE_PLATFORM_OVERRIDE_MUTANT)
-mutantToken = "linux-engine-bringup-mutant: RED platform-override native-architecture"
-#elif defined(LINUX_ENGINE_ROOT_CLIENT_MUTANT)
-mutantToken = "linux-engine-bringup-mutant: RED root-client unelevated-docker-client"
-#else
 mutantToken = "linux-engine-bringup-spec: RED unexpected"
-#endif

@@ -81,7 +81,8 @@ describe a gate the runner will not execute.
 
 ## 3. The runner
 
-The runner is one library, `Amoebius.Validation.Runner`, with these stages in order:
+The runner is one library, `Amoebius.Validation.Runner`, owed by
+[Phase 0](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md), with these stages in order:
 
 1. **`verifySpec`.** Map every `ProductionModule` to exactly one library stanza, compute the executable's
    closure from the package description, and refuse any subject outside it. Check the oracle stanza's hygiene:
@@ -97,21 +98,27 @@ The runner is one library, `Amoebius.Validation.Runner`, with these stages in or
    output. For a `SpineFact`, rewrite the rendered example and require the fake-applied digest to equal the
    render digest.
 5. **Hygiene row.** Record the kernel line count and refuse when it exceeds the smaller of fourteen thousand
-   and the last accepted count; refuse any conditional-compilation line, any `*Run*` module, any phase-number
-   literal, or a second phase table in the kernel; refuse a second definition of any vocabulary type.
+   and the last accepted count; refuse any conditional-compilation line, any per-phase run module (a path
+   segment ending in `Run`; the generic runner is not one), any phase-number literal, or a second phase table
+   in the kernel; refuse a second definition of any vocabulary type inside the validator roots and observe
+   duplicates elsewhere under `src/` as debt owed to the vocabulary library's phase
+   ([DL-0012](../decision_log.md#dl-0012--the-hygiene-rows-roots-run-module-pattern-and-run-directory-convention)).
 6. **Capture.** Fill the eighteen-row candidate from the observations above; no row is caller-supplied.
 
-The kernel budget covers the runner, the gate-specification library, and the retained custody core together.
-The count only ratchets down once accepted.
+The kernel budget covers the runner, the gate-specification library, and the retained custody core together:
+every Haskell line under `src/validation-kernel` and `src/gate-spec`. The documentation checker under
+`src/doc-check` carries its own recorded cap. The count only ratchets down once accepted.
 
 ## 4. Runner-held verdicts and the oracle protocol
 
 A suite is a byte producer. The oracle executable for an area reads those bytes and prints a ledger derived
 from literals in its own source; it imports no product module, so it cannot regenerate an expectation from
 the subject. Each area has one exclusive source directory whose entry module is named exactly, for example
-`test/oracle/dsl/Main.hs`; the directory is never named alone. The runner digests the suite output, the
+`test/oracle/dsl/Main.hs`; the directory is never named alone. A suite receives the run's suite directory as
+its one argument and writes its bytes there; the oracle receives the same directory and prints its ledger to
+standard output. The runner digests the suite output, the
 oracle ledger, and the kill table into the receipt. A `PASS` token, a count, or a matching substring in a
-suite's output is not a verdict.
+suite's output is not a verdict. Owed by [Phase 0](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md).
 
 Oracle rows are authored from the requirement before the pipeline stage exists. A row derived from subject
 output, or added after a stage was written to match it, is a contract change under

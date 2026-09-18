@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -119,11 +118,7 @@ protocolDeclarations =
       ]
   , ProtocolMessage "MessageMetadata"
       [ ProtocolField "producer_name" 1
-#ifdef GADT_DECODE_PROTOCOL_FIELD_MUTANT
-      , ProtocolField "sequence_id" 3
-#else
       , ProtocolField "sequence_id" 2
-#endif
       , ProtocolField "publish_time" 3
       ]
   , ProtocolMessage "CommandConnect"
@@ -173,12 +168,8 @@ refine raw = do
     "Host" -> Right HostResource
     other -> Left (UnknownResourceArm other)
   if Text.null (Text.strip (executionId raw)) then Left EmptyExecutionId else Right ()
-#ifndef GADT_DECODE_ZERO_REVISION_MUTANT
   if revision raw == 0 then Left ZeroRevision else Right ()
-#endif
-#ifndef GADT_DECODE_TENANT_MISMATCH_MUTANT
   if tenant raw /= owner raw then Left (TenantMismatch (tenant raw) (owner raw)) else Right ()
-#endif
   secret <- case secretKind raw of
     "Vault" -> Right (Vault (secretValue raw))
     "TransitKey" -> Right (TransitKey (secretValue raw))
@@ -199,13 +190,9 @@ refineExecution raw arm = case controller raw of
  where
   identity = executionId raw
   version = revision raw
-#ifdef GADT_DECODE_RESOURCE_ARM_MUTANT
-  podOnly _ value = Right value
-#else
   podOnly label value
     | arm == PodResource = Right value
     | otherwise = Left (ResourceArmMismatch label arm)
-#endif
   hostOnly value
     | arm == HostResource = Right value
     | otherwise = Left (ResourceArmMismatch "HostProcess" arm)

@@ -10,7 +10,7 @@ This document owns the distinction between evidence about *behaviour* and eviden
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: 
+**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_typed_spine.md
 **Generated sections**: none
 
 </details>

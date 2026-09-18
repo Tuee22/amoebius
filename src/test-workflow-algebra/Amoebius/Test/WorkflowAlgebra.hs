@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -143,13 +142,9 @@ newtype TestTopology state = TestTopology TopologyBody
 authorityRef :: Text -> Maybe AuthorityRef
 authorityRef value
   | Text.null value = Nothing
-#ifdef TEST_WORKFLOW_ALLOW_SECRET_MUTANT
-  | otherwise = Just (AuthorityRef value)
-#else
   | Text.any (`elem` ['\n', '\r', '\NUL']) value = Nothing
   | any (`Text.isPrefixOf` Text.toLower value) ["secret:", "token:", "password:"] = Nothing
   | otherwise = Just (AuthorityRef value)
-#endif
 
 suggestTest :: SuppliedTestModel -> Either SuggestionRefusal (TestTopology TeardownPending)
 suggestTest model = do
@@ -173,11 +168,7 @@ topologyOwnership :: TestTopology state -> OwnershipIntent
 topologyOwnership _ = TestOwnedIntent
 
 topologyTeardownRequired :: TestTopology state -> Bool
-#ifdef TEST_WORKFLOW_OPTIONAL_TEARDOWN_MUTANT
-topologyTeardownRequired _ = False
-#else
 topologyTeardownRequired _ = True
-#endif
 
 observeTeardown :: WorkflowOutcome -> TeardownOutcome -> TestTopology TeardownPending -> TestTopology TeardownObserved
 observeTeardown workflow teardown (TestTopology body) =
@@ -187,18 +178,10 @@ terminalResult :: TestTopology TeardownObserved -> TerminalResult
 terminalResult (TestTopology body) =
   case (bodyWorkflowOutcome body, bodyTeardownOutcome body) of
     (Just (WorkflowFailed primary), Just (TeardownFailed cleanup)) ->
-#ifdef TEST_WORKFLOW_REPLACE_PRIMARY_MUTANT
-      TerminalTeardownFailure cleanup
-#else
       TerminalWorkflowFailure primary
-#endif
     (Just (WorkflowFailed primary), Just _) -> TerminalWorkflowFailure primary
     (Just WorkflowSucceeded, Just (TeardownFailed cleanup)) ->
-#ifdef TEST_WORKFLOW_CLEANUP_SUCCESS_MUTANT
-      TerminalSuccess
-#else
       TerminalTeardownFailure cleanup
-#endif
     (Just WorkflowSucceeded, Just TeardownRepeated) -> TerminalRepeatedTeardown
     (Just WorkflowSucceeded, Just TeardownSucceeded) -> TerminalSuccess
     _ -> TerminalTeardownFailure (Failure "internal-unobserved-teardown")
@@ -230,11 +213,7 @@ classifyResidue before after
   | not (null postOnly) = PostOnlyModeledResidue postOnly
   | otherwise = CleanModeledInventory
  where
-#ifdef TEST_WORKFLOW_DROP_INVENTORY_DOMAIN_MUTANT
-  requiredDomains = init [minBound .. maxBound]
-#else
   requiredDomains = [minBound .. maxBound]
-#endif
   declared = sort (inventoryDomains before) == requiredDomains && sort (inventoryDomains after) == requiredDomains
   missing = if declared then [] else [domain | domain <- requiredDomains, domain `notElem` inventoryDomains before || domain `notElem` inventoryDomains after]
   postOnly = sort [resource | resource <- inventoryResources after, resource `notElem` inventoryResources before]
@@ -253,11 +232,7 @@ deriveEvidence (TestTopology body) =
   [EvidenceRow ExtractMove PureProven, EvidenceRow ModelMove ModelChecked]
     <> [EvidenceRow (InjectMove fault) runtimeStrength | fault <- suppliedFaults (bodyModel body)]
  where
-#ifdef TEST_WORKFLOW_UPGRADE_RUNTIME_MUTANT
-  runtimeStrength = ModelChecked
-#else
   runtimeStrength = RuntimeUnverified
-#endif
 
 renderSuggestedTopology :: TestTopology state -> Text
 renderSuggestedTopology topology@(TestTopology body) = Text.intercalate "\n"
@@ -284,11 +259,7 @@ requiredDemand :: Branch -> ResourceVector
 requiredDemand branch = case branch of
   CoreBranch -> ResourceVector 3000 3221225472 8589934592 1073741824 536870912 4 4 1 1
   RegistryBranch -> ResourceVector 3500 4294967296 12884901888 3221225472 536870912 5 5 2 2
-#ifdef TEST_WORKFLOW_DROP_PROVIDER_DEBIT_MUTANT
-  ProviderBranch -> ResourceVector 4000 5368709120 12884901888 2147483648 1073741824 6 6 3 1
-#else
   ProviderBranch -> ResourceVector 4000 5368709120 12884901888 2147483648 1073741824 6 6 3 8
-#endif
   MigrationBranch -> ResourceVector 4500 6442450944 17179869184 4294967296 536870912 7 7 4 4
   AcceleratorBranch -> ResourceVector 5000 8589934592 21474836480 2147483648 2147483648 8 8 4 6
 

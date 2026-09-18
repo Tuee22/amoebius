@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -67,11 +66,7 @@ mkPersistentVolume _ = PersistentVolume
 mkPersistentVolumeClaim :: VolumeToken slot -> Text -> PersistentVolumeClaim slot
 mkPersistentVolumeClaim _ = PersistentVolumeClaim
 
-#ifdef PHASE6_GADT_MUTANT
-bindPersistentVolume :: PersistentVolume volumeSlot -> PersistentVolumeClaim claimSlot -> BoundVolume volumeSlot
-#else
 bindPersistentVolume :: PersistentVolume slot -> PersistentVolumeClaim slot -> BoundVolume slot
-#endif
 bindPersistentVolume (PersistentVolume volume) (PersistentVolumeClaim claim) = BoundVolume (volume <> ":" <> claim)
 
 data EndpointKind = WildIngress | HostLocalPeer | SecureGatewayReach

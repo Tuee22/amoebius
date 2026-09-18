@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The store a reservation is spent into, and the staging rule that keeps a refusal from
@@ -129,14 +128,7 @@ materializeUnder reservation wanted store
         { storeCommitted = Map.insert key content (storeCommitted store)
         , storeStaging = Map.delete key (storeStaging staged)
         }
-#ifdef BUDGET_CALCULUS_ADMIT_AFTER_PARTIAL_WRITE_MUTANT
-    -- The seeded inversion. The content reaches its address before the declaration is
-    -- checked, so the refusal arrives after the write instead of before it and the store
-    -- keeps a partial artifact at an address a consumer can name.
-    reaped = committed
-#else
     reaped = store
-#endif
 
 -- | Length-prefixed framing, so the concatenation is unambiguous.
 frame :: [ByteString] -> ByteString

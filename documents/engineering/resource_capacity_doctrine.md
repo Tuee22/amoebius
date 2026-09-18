@@ -89,31 +89,23 @@ illegal and the technique that forecloses them is
 [illegal_state_catalog.md §3.17-§3.21 / §4.6](../illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded); this doc is the normative home of
 the model that catalog names.
 
-The model below begins with Phase 4's implemented base index, continues through the schema, provision, and
-render band, and ends with later live phases that enact and cross-check it. The bound
-[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) validates the **base**
-`Amoebius.Capacity.Types` / `Amoebius.Capacity.Fold` slice: CPU,
-memory, logical pod-ephemeral storage, pod and driver-scoped CSI slots, finite CPU-limit policy, headroom,
-taint/anti-affinity eligibility, and fixed/elastic placement. Its 15 direct negatives, 15 legal twins, two
-carried positives, four sampled properties, and 19 changed-production mutants distinguish the subject at
-Register 1. This is a bound gate contract, not a live-enforcement claim.
-The [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) implements the five-module
-`storage-geometry-folds` library, and its gate validates the
-closed storage budget/growth arithmetic, BookKeeper/MinIO physical expansion, presentation/allocation
-rounding, uniform claims, six-arm object inventory, service/migration/cache/root/control-plane geometry,
-backup/restore/pool checks, both Pulsar ceilings, and snapshot-bound policy-only scaling. Its 30 exact
-variant/twin rows, two positive specs, six sampled equivalence properties, and 31 mutants must distinguish the
-subject at Register 1; the independently authored five-calculus projection must account for all 99 projected
-units, with transient run evidence beneath `.build/runs/phase-28/`. The separately authored
-`StorageGeometryOracle` replaces the retired serialized storage-case and calculus tables.
-The [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) must validate execution
-epochs, aggregate scheduler reservations, structural runtime/image accounting, physical partition and
-provider-root arithmetic, accelerator residency against net VRAM, host-only compute derivations, and the
-composed full-vector witness. Its 37 negative/twin variants, seven sampled properties, two composed positives,
-and 45 mutants must distinguish the subject at Register 1; the independently authored five-calculus
-projection must account for all 128 observed units. Direct cases must cover the peer graph and build/cache,
-engine-storage, monitoring-volume, and
-Pulumi-concurrency boundaries. No current ledger is asserted here.
+The model below begins with the base index owed by [Phase
+4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md), continues through the schema,
+provision, and render band, and ends with later live phases that enact and cross-check it. Phase 4 must
+validate the **base** `Amoebius.Capacity.Types` / `Amoebius.Capacity.Fold` slice: CPU, memory, logical
+pod-ephemeral storage, pod and driver-scoped CSI slots, finite CPU-limit policy, headroom, taint/anti-affinity
+eligibility, and fixed/elastic placement. Direct negatives, legal twins, carried positives, sampled
+properties, and generated production mutants must distinguish the subject at Register 1. This is a bound gate
+contract, not a live-enforcement claim. The same phase owes the storage-geometry folds, and its gate must
+validate the closed storage budget/growth arithmetic, BookKeeper/MinIO physical expansion,
+presentation/allocation rounding, uniform claims, the object inventory,
+service/migration/cache/root/control-plane geometry, backup/restore/pool checks, both Pulsar ceilings, and
+snapshot-bound policy-only scaling; the separately authored storage-geometry oracle replaces the retired
+serialized storage-case and calculus tables, with transient run evidence beneath `.build/runs/**`. Phase 4
+must also validate execution epochs, aggregate scheduler reservations, structural runtime/image accounting,
+physical partition and provider-root arithmetic, accelerator residency against net VRAM, host-only compute
+derivations, and the composed full-vector witness; direct cases must cover the peer graph and build/cache,
+engine-storage, monitoring-volume, and Pulumi-concurrency boundaries. No current ledger is asserted here.
 Post-bind provisioning, live storage mutation, device attachment, observed inventory, and all physical
 enforcement remain **UNVERIFIED** here. Status and gates live only in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
@@ -318,8 +310,8 @@ enaction in **Phase 79**, realtime Redis/WebSocket demand in **Phases 63 and 81�
 upload, compatibility, and multi-zone fault demand in **Phases 67–70**. This doc never maintains a competing status ledger; it states the target shape and
 links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
-[Phase 75](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md) owns a bounded reservation implementation
-against the `Amoebius.Capacity.Scheduler` algebra. Two concurrent modeled-store attempts must create exactly one `Reserved`
+A bounded reservation implementation against the `Amoebius.Capacity.Scheduler` algebra is owed by
+[Phase 75](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md). Two concurrent modeled-store attempts must create exactly one `Reserved`
 row; `beginBinding`, `confirmBound`, and `ledgerOnlyAbsentRecovery` then retain one complete-resource debit and
 reach `Bound` across crashes at `Reserved`, `BindingInFlight`, and `Bound`. A changed-production crash-drop
 mutation must fail at the direct debit observation. This targets Register-2 evidence
@@ -404,7 +396,7 @@ CPU, memory, pod-ephemeral, pod-slot, CNI, CSI-attachment, and capability obliga
 permission when any ceiling is short. Repeated attachment to one PVC must be deduplicated while distinct
 old/new PVCs during replacement must not be. The gate must challenge pure contracts and a retained-Kubernetes
 signal analogue; live provider
-quota, node supply, root-EBS geometry, and scheduler admission remain UNVERIFIED.
+quota, node supply, root-EBS geometry, and scheduler admission remain UNVERIFIED. Owed by [Phase 79](../../DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md).
 
 **Phase-80 target capacity boundary — NOT VALIDATED.** Phase 80 must add the Tier-1 cache-capacity
 specialization in `Amoebius.Jit.CacheBudget`. Admission must deduplicate
@@ -413,7 +405,7 @@ must account for the largest finite concurrent temporary overlap, and must requi
 and pod ephemeral-storage request to cover the provisioned demand. The retained owner/client drill must
 observe a 121 MiB high-water mark within a 160 MiB cache budget, prune an unpinned entry, preserve a pinned
 entry, and leave no temporary residue. This cannot validate cross-node reuse, Tier-2 model capacity, Tier-3 CUDA cache
-capacity, or every substrate's physical limits.
+capacity, or every substrate's physical limits. Owed by [Phase 80](../../DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md).
 
 **Phase-93 target capacity boundary — NOT VALIDATED.** Phase 93 must add a scoped CUDA admission
 specialization. The pure adapter must reject a CPU target, fewer than 200

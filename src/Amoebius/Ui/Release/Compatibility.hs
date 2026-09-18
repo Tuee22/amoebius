@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Ui.Release.Compatibility
   ( PresentedPlan (..)
@@ -25,9 +25,7 @@ admitAction :: UiProgramRelease -> PresentedPlan -> Admission
 admitAction current presented
   | presentedClientDigest presented /= Just expectedClient = ReloadRequired
   | presentedServerDigest presented /= Just expectedServer = ReloadRequired
-#ifndef UI_PROGRAM_RELEASE_ACCEPT_STALE_AUTHORITY_DIGEST_MUTANT
   | presentedAuthorityDigest presented /= Just (uiReleaseAuthority current) = ReloadRequired
-#endif
   | presentedContentDigest presented /= Just (releaseContentDigest current) = ReloadRequired
   | otherwise = Accepted
  where

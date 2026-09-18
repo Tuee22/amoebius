@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Ui.Offline.Receipt
   ( CommandId (..)
@@ -47,11 +47,7 @@ emptyDurableReceipts = DurableReceipts Map.empty
 
 idempotencyKey :: Scope -> CommandId -> String
 idempotencyKey scope (CommandId command) =
-#ifdef OFFLINE_REPLAY_RECEIPTS_REMOVE_SCOPE_IDEMPOTENCY_MUTANT
-  command
-#else
   tenantId scope <> "|" <> ownerId scope <> "|" <> programId scope <> "|" <> show (scopeEpoch scope) <> "|" <> command
-#endif
 
 recordEffect :: Scope -> Receipt -> DurableReceipts -> (DurableReceipts, Receipt, Bool)
 recordEffect scope receipt (DurableReceipts receipts) =
@@ -66,14 +62,7 @@ durableLookup scope command (DurableReceipts receipts) =
   Map.lookup (idempotencyKey scope command) receipts
 
 recoverOutcome :: Scope -> CommandId -> Maybe Receipt -> DurableReceipts -> ReplayOutcome Receipt
-#ifdef OFFLINE_REPLAY_RECEIPTS_ACK_REDIS_PUBLISH_MUTANT
-recoverOutcome _ _ (Just routed) _ = Accepted routed
-#endif
-#ifdef OFFLINE_REPLAY_RECEIPTS_OMIT_DURABLE_LOOKUP_MUTANT
-recoverOutcome _ _ _ _ = Pending
-#else
 recoverOutcome scope command _ durable = maybe Pending Accepted (durableLookup scope command durable)
-#endif
 
 infernixWorkId :: CommandId -> WorkId
 infernixWorkId (CommandId command) = WorkId command

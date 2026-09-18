@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.Browser.Interpreter (
@@ -20,11 +19,7 @@ data TransportPlan = TransportPlan { transportMethod :: Text, transportOrigin ::
 data Observation = Observation { visibleState :: UiState, requestedEffect :: Effect, route :: Text, atomicWrites :: Int } deriving stock (Eq, Show)
 
 verifyEnvelope :: ClientPlan -> Either Text ()
-#ifdef UI_BROWSER_ACCEPT_STALE_PLAN_MUTANT
-verifyEnvelope _ = Right ()
-#else
 verifyEnvelope plan | planDigest plan == currentDigest plan = Right (); verifyEnvelope _ = Left "ReloadRequired"
-#endif
 
 interpret :: ClientPlan -> Interaction -> Either Text Observation
 interpret plan selected = do
@@ -36,48 +31,20 @@ interpret plan selected = do
   step Cancel = Observation Cancelled (PortRequest "cancel") "workflow" 1
   step OpenDocs = Observation Home (Navigate "docs") "home" 1
   step Choose = Observation Ready (PortRequest "scope") "home" 1
-#ifdef UI_BROWSER_DROP_EVENT_EFFECT_MUTANT
-  submitEffect = NoEffect
-#else
   submitEffect = PortRequest "submit"
-#endif
-#ifdef UI_BROWSER_SWAP_ROUTE_TARGET_MUTANT
-  submitRoute = "home"
-#else
   submitRoute = "workflow"
-#endif
-#ifdef UI_BROWSER_SEQUENTIAL_WRITES_MUTANT
-  sequentialWrites = 2
-#else
   sequentialWrites = 1
-#endif
 
 renderTrustedText :: Text -> Text
-#ifdef UI_BROWSER_RAW_HTML_SINK_MUTANT
-renderTrustedText = id
-#else
 renderTrustedText = Text.replace ">" "&gt;" . Text.replace "<" "&lt;" . Text.replace "&" "&amp;"
-#endif
 
 focusAfter :: Text -> Text -> Text
-#ifdef UI_BROWSER_BREAK_FOCUS_RETURN_MUTANT
-focusAfter "Escape" _ = "document-body"
-#else
 focusAfter "Escape" opener = opener
-#endif
 focusAfter "route" _ = "new-route-h1"
 focusAfter _ _ = "modal-first-control"
 
 challengeBody :: Text -> Text
-#ifdef UI_BROWSER_HARDCODED_RESPONSE_MUTANT
-challengeBody _ = "fresh-challenge"
-#else
 challengeBody nonce = "challenge=" <> nonce
-#endif
 
 providerRequestAllowed :: TransportPlan -> Bool
-#ifdef UI_BROWSER_DIRECT_PROVIDER_FETCH_MUTANT
-providerRequestAllowed request = transportOrigin request == "same-origin" || transportOrigin request == "https://provider.invalid"
-#else
 providerRequestAllowed request = transportOrigin request == "same-origin"
-#endif

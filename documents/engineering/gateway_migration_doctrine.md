@@ -289,7 +289,8 @@ source it admits is owned by [`backup_recovery_doctrine.md` §8](./backup_recove
 
 ## 6. Honesty and layer markers
 
-The forest/geo-replication substrate is assigned to **Phase 74**. Phase 75 owns the migration-shell target in
+The forest/geo-replication substrate is assigned to **Phase 74**. The migration-shell target owed by
+[Phase 75](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md) is
 `Amoebius.Multicluster.GatewayMigration`, `PlannedHandover`, `PromotionGate`, `DnsRepoint`, and
 `ClientRebind`. Phase order, status, and the acceptance gate are owned by
 [DEVELOPMENT_PLAN/README.md → Phase 75](../../DEVELOPMENT_PLAN/README.md); this document never restates phase

@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Image.BuildArgv (
     ImageFlavor (..),
@@ -51,18 +51,10 @@ buildImageInvocation engine channel observed requested flavor dockerfile context
                 <> [context]
 
 buildSubcommand :: String
-#ifdef IMAGE_RECIPE_BUILDX_SUBCOMMAND_MUTANT
-buildSubcommand = "buildx"
-#else
 buildSubcommand = "build"
-#endif
 
 platformOverride :: Platform -> [String]
-#ifdef IMAGE_RECIPE_SECOND_PLATFORM_MUTANT
-platformOverride platform = ["--platform", "linux/" <> renderPlatform platform]
-#else
 platformOverride _ = []
-#endif
 
 renderImageFlavor :: ImageFlavor -> String
 renderImageFlavor flavor = case flavor of

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -75,17 +74,12 @@ planStorageScaling
   -> ObservedStorageScalingSnapshot
   -> Either StorageError StorageScalingPlan
 planStorageScaling envelope snapshot
-#if !defined(STORAGE_GEOMETRY_SCALING_IGNORE_FINGERPRINT_MUTANT)
   | envelopeFingerprint envelope /= snapshotFingerprint snapshot =
       Left (ScalingSnapshotMismatch (envelopeFingerprint envelope) (snapshotFingerprint snapshot))
-#endif
   | desired == current = Right (NoStorageChange (witness 0))
   | desired < current =
       let highWaterRequired = current + desired
        in if snapshotMigrationHighWaterBytes snapshot
-#if defined(STORAGE_GEOMETRY_SCALING_DROP_HIGHWATER_MUTANT)
-            + 1
-#endif
             >= highWaterRequired
             then Right (ShrinkByVerifiedMigration (witness (snapshotMigrationHighWaterBytes snapshot)))
             else Left (ScalingEnvelopeViolation "shrink migration high-water is not witnessed")

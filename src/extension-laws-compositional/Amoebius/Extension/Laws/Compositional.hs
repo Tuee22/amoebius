@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Mechanical observations and predicates for the seven compositional laws.
@@ -190,41 +189,13 @@ evaluateCompositionLaws left right _third observations =
   ]
  where
   pair = composeComposites left right
-#ifdef EXTENSION_LAWS_COMPOSITIONAL_IGNORE_CLOSURE_MUTANT
-  c1Failures = []
-#else
   c1Failures = closureFailures pair observations
-#endif
-#ifdef EXTENSION_LAWS_COMPOSITIONAL_IGNORE_IDENTITY_MUTANT
-  c2Failures = []
-#else
   c2Failures = identityFailures pair observations
-#endif
-#ifdef EXTENSION_LAWS_COMPOSITIONAL_IGNORE_ASSOCIATIVITY_MUTANT
-  c3Failures = []
-#else
   c3Failures = associativityFailures observations
-#endif
-#ifdef EXTENSION_LAWS_COMPOSITIONAL_IGNORE_NON_INTERFERENCE_MUTANT
-  c4Failures = []
-#else
   c4Failures = nonInterferenceFailures pair observations
-#endif
-#ifdef EXTENSION_LAWS_COMPOSITIONAL_IGNORE_BUDGET_ADDITIVITY_MUTANT
-  c5Failures = []
-#else
   c5Failures = budgetFailures left right observations
-#endif
-#ifdef EXTENSION_LAWS_COMPOSITIONAL_IGNORE_SCOPE_CONJUNCTION_MUTANT
-  c6Failures = []
-#else
   c6Failures = scopeFailures observations
-#endif
-#ifdef EXTENSION_LAWS_COMPOSITIONAL_IGNORE_NAME_DISJOINTNESS_MUTANT
-  c7Failures = []
-#else
   c7Failures = addressFailures pair observations
-#endif
 
 compositionLawPassed :: CompositionVerdict -> Bool
 compositionLawPassed lawVerdict = case lawVerdict of

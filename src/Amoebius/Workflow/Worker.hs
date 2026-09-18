@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Workflow.Worker
@@ -16,19 +15,11 @@ data WorkerStep = StoreArtifact | EmitWorkflowEvent | AcknowledgeCommand
 
 workerCriticalSteps :: [WorkerStep]
 workerCriticalSteps =
-#ifdef CONTENT_STORE_WORKFLOW_ACK_BEFORE_STORE_WRITE_MUTANT
-  [AcknowledgeCommand, StoreArtifact, EmitWorkflowEvent]
-#else
   [StoreArtifact, EmitWorkflowEvent, AcknowledgeCommand]
-#endif
 
 coordinationSurfaces :: [Text]
 coordinationSurfaces =
-#ifdef CONTENT_STORE_WORKFLOW_LEASE_ELECTION_MUTANT
-  ["coordination.k8s.io/Lease"]
-#else
   []
-#endif
 
 workflowComponents :: [(Text, ByteString)]
 workflowComponents =

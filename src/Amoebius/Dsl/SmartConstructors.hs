@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -30,9 +29,6 @@ mkPositiveReplicated count
   | otherwise = Right (Replicated count)
 
 mkComputeHeadroom :: [(Natural, Natural, Natural)] -> Either DecodeError [Natural]
-#ifdef PHASE6_MUTANT
-mkComputeHeadroom triples = Right [requests + padding | (requests, _limits, padding) <- triples]
-#else
 mkComputeHeadroom triples
   | all (\(_, _, padding) -> padding == 0) triples =
       Left (UnspellableCombination "execution.resource.headroom.PositiveHeadroomAxisWitness")
@@ -41,7 +37,6 @@ mkComputeHeadroom triples
   checked (requests, limits, padding)
     | requests + padding <= limits = Right (requests + padding)
     | otherwise = Left (UnspellableCombination "execution.resource.headroom.requests+pad>limits")
-#endif
 
 mkDeploymentUnit :: ExecutionIdentity -> Cardinality -> DeploymentProgress -> ResourceEnvelope -> Either DecodeError (ExecutionUnit 'DeploymentK)
 mkDeploymentUnit identity cardinality progress resources = case (progress, resourceArm resources) of

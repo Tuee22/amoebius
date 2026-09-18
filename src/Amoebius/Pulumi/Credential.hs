@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 -- | Closed credential/action policy used before any provider invocation.
 module Amoebius.Pulumi.Credential
@@ -49,11 +49,7 @@ decide :: Principal -> CloudAction -> PolicyRow
 decide principal action =
   case (principal, action) of
     (Operational, CreateVolume) -> row Allow AccountAndDeclaredZone
-#ifdef PROVIDER_EBS_CREDENTIAL_ALLOW_DELETE_MUTANT
-    (Operational, DeleteVolume) -> row Allow AllResources
-#else
     (Operational, DeleteVolume) -> row Deny DurableRetained
-#endif
     (Operational, CreateCluster) -> row Allow PerRunCluster
     (Operational, DeleteCluster) -> row Allow PerRunCluster
     (CsiRuntime, DescribeVolumes) -> row Allow AttachedCluster

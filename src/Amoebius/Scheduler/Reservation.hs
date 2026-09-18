@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 
@@ -88,13 +87,7 @@ reserveCandidate capacity nonLedger expectedVersion candidate (ReservationRoot r
     else case Map.lookup (candidateUid candidate) (reservationRootRecords snapshot) of
       Just existing
         | existing == candidateRecord candidate -> do
-#ifdef CAPACITY_SCHEDULER_SAME_UID_DOUBLE_DEBIT_MUTANT
-            let changed = snapshot {reservationRootVersion = reservationRootVersion snapshot + 1}
-            writeTVar root changed
-            pure (Right (ReservationReused existing (reservationRootVersion changed)))
-#else
             pure (Right (ReservationReused existing (reservationRootVersion snapshot)))
-#endif
         | otherwise -> pure (Left (ReservationIdentityConflict (candidateUid candidate)))
       Nothing -> case refoldSchedulerPlacement capacity (nonLedger <> fmap reservationFullDebit (Map.elems (reservationRootRecords snapshot))) (candidateFullDebit candidate) of
         Left problem -> pure (Left (ReservationCapacityError problem))

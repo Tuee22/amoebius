@@ -73,8 +73,8 @@ inspect end to end before any object reaches the cluster.
 **The prodbox seed is real, and so is the gap it leaves.** The sibling prodbox project already renders a
 large slice of its object set from types, not templates:
 `Secret`/`ServiceAccount`/`Role`/`RoleBinding`/`ClusterIssuer`/`GatewayClass`/`EnvoyProxy`/`SecurityPolicy`/
-`HTTPRoute`/`IPAddressPool` are built as `Data.Aeson.object [...]` in `src/Prodbox/CLI/Rke2.hs` and applied with `kubectl apply -f`, and `Namespace`/`PersistentVolume`/`PersistentVolumeClaim`/`StorageClass` (provisioner `kubernetes.io/no-provisioner`) are built from `ChartStorageSpec → ChartStorageBinding → object` in
-`src/Prodbox/Lib/Storage.hs`. **But prodbox still ships its *workloads* (Deployments, StatefulSets, the services themselves) as Helm charts**, orchestrated by the pure planner in `src/Prodbox/Lib/ChartPlatform.hs`
+`HTTPRoute`/`IPAddressPool` are built as `Data.Aeson.object [...]` in `prodbox/src/Prodbox/CLI/Rke2.hs` and applied with `kubectl apply -f`, and `Namespace`/`PersistentVolume`/`PersistentVolumeClaim`/`StorageClass` (provisioner `kubernetes.io/no-provisioner`) are built from `ChartStorageSpec → ChartStorageBinding → object` in
+`prodbox/src/Prodbox/Lib/Storage.hs`. **But prodbox still ships its *workloads* (Deployments, StatefulSets, the services themselves) as Helm charts**, orchestrated by the pure planner in `prodbox/src/Prodbox/Lib/ChartPlatform.hs`
 (`buildChartDeploymentPlan` produces a `ChartDeploymentPlan` of `ChartReleasePlan`s carrying a
 `chartReleasePlanValuesJson` fed to Helm). amoebius's move is to close that gap: **lift the typed-render
 discipline prodbox already applies to its supporting objects up to the entire object set, and replace the

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.HostWorker.Capacity
@@ -90,11 +89,7 @@ provisionAppleHost supply demand = do
   let metal = demandMetalOwner demand
   if supplyMetalProfile supply == metalProfile metal then Right () else Left MetalProfileMismatch
   let sourceKeys = Map.keysSet (metalSourceBytes metal)
-#ifdef APPLE_METAL_HOST_DAEMON_OMIT_METAL_WORK_ITEM_MUTANT
-      workloadKeys = Set.delete "jit" (Map.keysSet (metalWorkloadBytes metal))
-#else
       workloadKeys = Map.keysSet (metalWorkloadBytes metal)
-#endif
   if sourceKeys == workloadKeys then Right () else Left MetalKeyDomainMismatch
   if Map.keysSet (metalResidentClassBounds metal) == sourceKeys
       && Map.keysSet (metalRunningClassBounds metal) == sourceKeys
@@ -118,11 +113,7 @@ metalEpochPeak demand = do
   values <- traverse epochBytes (metalCoexistenceEpochs demand)
   case values of
     [] -> Left MetalEpochDomainMismatch
-#ifdef APPLE_METAL_HOST_DAEMON_FAVORABLE_METAL_EPOCH_MUTANT
-    _ -> Right (minimum values)
-#else
     _ -> Right (maximum values)
-#endif
  where
   epochBytes classes = do
     classBytes <- traverse
@@ -135,11 +126,7 @@ metalEpochPeak demand = do
 
 hostMemoryDebit :: AppleHostDemand -> Word64 -> Either AppleProvisionError Word64
 hostMemoryDebit demand epochPeak = checkedSum
-#ifdef APPLE_METAL_HOST_DAEMON_DROP_METAL_OVERLAP_DEBIT_MUTANT
-  [demandVmMemoryBytes demand, demandSystemHeadroomBytes demand, demandWorkerRuntimeBytes demand]
-#else
   [demandVmMemoryBytes demand, demandSystemHeadroomBytes demand, demandWorkerRuntimeBytes demand, epochPeak]
-#endif
 
 checkedSum :: [Word64] -> Either AppleProvisionError Word64
 checkedSum = foldl step (Right 0)

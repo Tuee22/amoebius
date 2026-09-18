@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 
@@ -77,22 +76,12 @@ completeStorageMigration
   -> Bool
   -> Either MigrationError [MigrationStep]
 completeStorageMigration provisioned observedDigest deletionObserved
-#ifndef RETAINED_STORAGE_FAKE_VERIFY_MUTANT
   | observedDigest /= provisionedMigrationDigest provisioned = Left (ByteVerificationMismatch (provisionedMigrationDigest provisioned) observedDigest)
-#endif
-#ifndef RETAINED_STORAGE_CREDIT_BEFORE_CLEANUP_MUTANT
   | not deletionObserved = Left OldExtentDeletionNotObserved
-#endif
   | otherwise = Right sequenceSteps
  where
   sequenceSteps =
-#ifdef RETAINED_STORAGE_CUTOVER_BEFORE_VERIFY_MUTANT
-    [CopyJobRan, ClaimCutOver, ReclaimEligible, IndependentByteVerifyPassed, NewVolumeNonceReadBack, OldExtentDeletionObserved, OldExtentRetired]
-#elif defined(RETAINED_STORAGE_CREDIT_BEFORE_CLEANUP_MUTANT)
-    [CopyJobRan, IndependentByteVerifyPassed, ClaimCutOver, ReclaimEligible, NewVolumeNonceReadBack, OldExtentRetired, OldExtentDeletionObserved]
-#else
     [CopyJobRan, IndependentByteVerifyPassed, ClaimCutOver, ReclaimEligible, NewVolumeNonceReadBack, OldExtentDeletionObserved, OldExtentRetired]
-#endif
 
 enactRetainedScaling
   :: MonadSTM m

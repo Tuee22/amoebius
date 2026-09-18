@@ -10,27 +10,19 @@ import Amoebius.Host.LinuxEngine (runLinuxEngineGuestPass)
 import Amoebius.Image.Build (runAdmittedBuildxOci, runBakeInventory, runRenderBakeDockerfile)
 import Amoebius.Vault.Client (runVaultPromptWriteCommand, runVaultReadCommand, runVaultTransitCommand)
 import Amoebius.Vault.Seal (openUnlockMaterial, sealUnlockMaterialIO)
-import Amoebius.Validation.Dispatch (runValidateCommand)
-import Amoebius.Validation.SeedCustodySupervisor (runSeedCustodySupervisorContinuation)
-import Amoebius.Validation.PbBoundary (runPbHandoffContinuation)
 import Data.ByteString.Base64 qualified as Base64
 import Data.ByteString.Char8 qualified as StrictByteString
 import Data.ByteString.Lazy qualified as ByteString
-import System.Environment (getArgs)
-import System.Exit (exitWith)
+import System.Directory (doesFileExist, findExecutable)
+import System.Environment (getArgs, getExecutablePath)
+import System.Exit (ExitCode (..), exitWith)
+import System.FilePath (takeDirectory, (</>))
+import System.IO (hPutStrLn, stderr)
+import System.Posix.Process (executeFile)
 import Text.Read (readMaybe)
 
 main :: IO ()
-main = do
-  arguments <- getArgs
-  seedContinuation <- runSeedCustodySupervisorContinuation arguments
-  case seedContinuation of
-    Just result -> exitWith result
-    Nothing -> do
-      continuation <- runPbHandoffContinuation arguments
-      case continuation of
-        Just result -> exitWith result
-        Nothing -> dispatch arguments
+main = getArgs >>= dispatch
 
 dispatch :: [String] -> IO ()
 dispatch arguments =
@@ -45,7 +37,7 @@ dispatch arguments =
     "vault-read" : options -> runVaultReadCommand options
     "vault-transit-decrypt" : options -> runVaultTransitCommand options
     "vault-prompt-write" : options -> runVaultPromptWriteCommand options
-    "validate" : options -> runValidateCommand options >>= exitWith
+    "validate" : options -> delegateValidate options
     ["--version"] -> putStrLn "amoebius 0.1.0.0"
     ["dev", "linux-engine-guest-pass", passText, outputRoot]
       | Just pass <- readMaybe passText -> runLinuxEngineGuestPass pass outputRoot
@@ -73,3 +65,19 @@ runOpenUnlock = do
       encoded = StrictByteString.strip (StrictByteString.drop 1 envelopeWithNewline)
   envelope <- either fail pure (Base64.decode encoded)
   either fail StrictByteString.putStr (openUnlockMaterial password envelope)
+
+-- | The product binary owns no verdict. @amoebius validate …@ replaces this
+-- process with the verifier executable beside it (or on PATH), forwarding every
+-- argument unchanged, so the bootstrap's public spelling and its pin are
+-- untouched (gate_runner_doctrine.md section 6).
+delegateValidate :: [String] -> IO ()
+delegateValidate options = do
+  self <- getExecutablePath
+  let sibling = takeDirectory self </> "amoebius-validate"
+  siblingExists <- doesFileExist sibling
+  resolved <- if siblingExists then pure (Just sibling) else findExecutable "amoebius-validate"
+  case resolved of
+    Just verifier -> executeFile verifier False options Nothing
+    Nothing -> do
+      hPutStrLn stderr "amoebius validate: the verifier executable amoebius-validate is neither beside amoebius nor on PATH"
+      exitWith (ExitFailure 2)

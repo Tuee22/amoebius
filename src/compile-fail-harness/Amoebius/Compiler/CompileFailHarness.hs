@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -84,19 +83,11 @@ validateNegative :: Pair -> ExitCode -> Text -> Either Text Int
 validateNegative pair status compilerOutput
   | status == ExitSuccess = Left (at "illegal fixture compiled")
   | null errors = Left (at "illegal fixture emitted no structured error")
-#ifdef COMPILE_FAIL_ACCEPT_ANY_FAILURE_MUTANT
-  | otherwise = Right (length errors)
-#else
   | any unrelated errors = Left (at "illegal fixture failed for an unrelated compiler reason")
-#ifdef COMPILE_FAIL_IMPOSSIBLE_PIN_MUTANT
-  | otherwise = Right (length errors)
-#else
   | distinctCodes /= [pairCode pair] = Left (at ("diagnostic codes " <> Text.pack (show distinctCodes) <> " do not equal the authored singleton"))
   | length pinned /= 1 = Left (at ("expected exactly one diagnostic at " <> Text.pack (show (pairLine pair, pairColumn pair))))
   | not (all (`Text.isInfixOf` pinnedMessage) (pairMessageFragments pair)) = Left (at "pinned diagnostic lacks an authored message fragment")
   | otherwise = Right (length errors)
-#endif
-#endif
  where
   errors = parseDiagnostics compilerOutput
   distinctCodes = uniqueSorted (map code errors)
@@ -113,11 +104,7 @@ validateNegative pair status compilerOutput
   at detail = pairClaim pair <> ": " <> detail
 
 positiveCounterpartRequired :: Bool
-#ifdef COMPILE_FAIL_DROPS_POSITIVE_COUNTERPART_MUTANT
-positiveCounterpartRequired = False
-#else
 positiveCounterpartRequired = True
-#endif
 
 forbiddenMessages :: [Text]
 forbiddenMessages = ["Could not find module", "Variable not in scope", "parse error"]

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -44,11 +43,7 @@ mkDecisionFragment substrates services resources
   | otherwise = Right (DecisionFragment substrates services resources)
 
 encodeDecision :: DecisionFragment -> Text
-#ifdef PHASE6_MUTANT
-encodeDecision fragment = Text.pack (show fragment {fragmentServices = []})
-#else
 encodeDecision = Text.pack . show
-#endif
 
 decodeDecision :: Text -> Either Text DecisionFragment
 decodeDecision encoded = case readMaybe (Text.unpack encoded) of
@@ -56,23 +51,14 @@ decodeDecision encoded = case readMaybe (Text.unpack encoded) of
   Just fragment -> mkDecisionFragment (fragmentSubstrates fragment) (fragmentServices fragment) (fragmentResources fragment)
 
 composeDecisionFragments :: DecisionFragment -> DecisionFragment -> Either Text DecisionFragment
-#ifdef PHASE6_MUTANT
-composeDecisionFragments _ _ = Left "mutant.dropped-composition"
-#else
 composeDecisionFragments left right =
   mkDecisionFragment
     (fragmentSubstrates left <> fragmentSubstrates right)
     (fragmentServices left <> fragmentServices right)
     (fragmentResources left <> fragmentResources right)
-#endif
 
 foldResourceTotal :: [Natural] -> Natural
-#ifdef PHASE6_MUTANT
-foldResourceTotal [] = 1
-foldResourceTotal values = foldl' (+) 0 values
-#else
 foldResourceTotal = foldl' (+) 0
-#endif
 
 distinctHostIds :: [Text] -> Either Text [Text]
 distinctHostIds hosts

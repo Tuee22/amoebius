@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -45,9 +44,7 @@ projectionMessageKey key entityId =
   joinKey
     [ ownerAppId owner
     , ownerTenantId owner
-#ifndef UI_PROJECTION_RUNTIME_DROP_OWNER_KEY_MUTANT
     , ownerSubject owner
-#endif
     , projectionId key
     , entityId
     ]
@@ -60,11 +57,7 @@ receiptMessageKey key =
     [ ownerAppId owner
     , ownerTenantId owner
     , ownerSubject owner
-#ifdef UI_PROJECTION_RUNTIME_DROP_RECEIPT_COMMAND_ID_MUTANT
-    , "receipt"
-#else
     , receiptCommandId key
-#endif
     ]
  where
   owner = receiptOwner key
@@ -74,9 +67,7 @@ ownerStreamKey key =
   joinKey
     [ ownerAppId owner
     , ownerTenantId owner
-#ifndef UI_PROJECTION_RUNTIME_DROP_OWNER_SUBSCRIPTION_MUTANT
     , ownerSubject owner
-#endif
     , projectionId key
     ]
  where

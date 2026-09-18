@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Release.RolloutPlan
   ( RolloutPhase (..)
@@ -15,11 +15,7 @@ data RolloutPhase = BaseApply | SchemaMigration | Finalize
   deriving stock (Eq, Ord, Read, Show)
 
 rolloutPlan :: [RolloutPhase]
-#ifdef RELEASE_LIFECYCLE_ROLLOUT_REORDERS_RETIRE_MUTANT
-rolloutPlan = [BaseApply, Finalize, SchemaMigration]
-#else
 rolloutPlan = [BaseApply, SchemaMigration, Finalize]
-#endif
 
 data ReadinessObservation
   = LiveObjectReady RolloutPhase
@@ -47,8 +43,4 @@ applyPhase phase observation state = case drop (length (appliedPhases state)) ro
     | otherwise -> Right (RolloutState (appliedPhases state <> [phase]))
  where
   accepted (LiveObjectReady observed) = observed == phase
-#ifdef RELEASE_LIFECYCLE_PHASE_GATE_SELFREPORT_MUTANT
-  accepted (SelfReportedDone observed) = observed == phase
-#else
   accepted (SelfReportedDone _) = False
-#endif

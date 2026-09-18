@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Test.Sweep
   ( Inventory (..)
@@ -27,11 +27,7 @@ newtype InventoryDiff = InventoryDiff (Set InventoryEntry)
 
 diffInventory :: Inventory -> Inventory -> InventoryDiff
 diffInventory (Inventory before) (Inventory after) = InventoryDiff
-#ifdef TEST_TOPOLOGY_DSL_TAG_QUERY_MUTANT
-  (Set.filter inventoryTestOwned after `Set.difference` before)
-#else
   (after `Set.difference` before)
-#endif
 
 inventoryClean :: InventoryDiff -> Bool
 inventoryClean (InventoryDiff leaked) = Set.null leaked

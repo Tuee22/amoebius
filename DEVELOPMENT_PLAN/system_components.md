@@ -7,7 +7,7 @@
 This is a target-only inventory. It owns no architectural rule and makes no implementation or validation
 claim. Architecture belongs to the linked doctrine, phase status belongs only to [the tracker](README.md), and
 executable source/layout-divergence accounting belongs to typed Haskell bindings in
-`Amoebius.Validation.Legacy`. The single
+`Amoebius.Plan.Legacy`, owed by [Phase 0](phase_00_documentation_suite.md). The single
 [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) file explains those bindings to readers;
 the documentation gate owns the correspondence.
 
@@ -64,7 +64,8 @@ that rule.
 ## Reconciliation state
 
 This document deliberately contains no present-tree audit, historical result, stale receipt, or deletion
-checklist. The closed typed Haskell inventory in `Amoebius.Validation.Legacy` is the only executable source
+checklist. The closed typed Haskell inventory in `Amoebius.Plan.Legacy`, owed by
+[Phase 0](phase_00_documentation_suite.md), is the only executable source
 of active divergence IDs, owners, observations, and closure predicates. The single
 [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) register explains that inventory to
 readers and supplies no machine input. A current finding not bijectively matched to one typed Haskell ID is

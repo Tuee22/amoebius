@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Single-use refinement of a storage scaling decision into cloud actions.
@@ -68,9 +67,6 @@ enactCreateProviderCapacity
   -> ValidatedCloudActionBatch
   -> Either ScalingError CloudEnactment
 enactCreateProviderCapacity observed receipt batch
-#ifdef PROVIDER_EBS_CREDENTIAL_BYPASS_VALIDATED_BATCH_MUTANT
-  = observed `seq` Right (CloudEnactment exactProviderActions receipt batch)
-#else
   | batchTransition batch /= CreateProviderCapacity = Left NonProviderTransition
   | batchActions batch /= exactProviderActions = Left ScalingBatchDomainMismatch
   | batchConsumed batch = Left ScalingBatchAlreadyConsumed
@@ -82,7 +78,6 @@ enactCreateProviderCapacity observed receipt batch
           , enactedReceiptFingerprint = receipt
           , enactedBatch = batch {batchConsumed = True}
           }
-#endif
 
 exactProviderActions :: [CloudAction]
 exactProviderActions = [CreateVolume, WriteDurableCheckpoint]

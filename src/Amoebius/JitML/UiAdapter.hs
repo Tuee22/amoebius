@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.JitML.UiAdapter
@@ -211,25 +210,13 @@ adoptCheckpoint context scope started disposition = do
           || artifactWork /= startWorkId started
         then Left ArtifactUnavailable
         else Right (mintReady started (Just artifact) (committedArtifactManifestSha artifact))
-#ifdef JITML_UI_LIFT_MINT_READY_FROM_CHECKPOINT_PATH_MUTANT
-    CheckpointInFlight path -> Right (mintReady started Nothing path)
-#else
     CheckpointInFlight _ -> Left ArtifactNotReady
-#endif
     CheckpointFailed _ -> Left ArtifactNotReady
 
 requireScopeAndOwner :: ServerRequestContext -> ScopeEpoch -> TrainingUiStart -> Either UiAdapterError ()
 requireScopeAndOwner context scope started
-#ifdef JITML_UI_LIFT_IGNORE_ARTIFACT_SCOPE_MUTANT
-  | False = Left ArtifactUnavailable
-#else
   | contextTenant context /= ownerTenantId owner = Left ArtifactUnavailable
-#endif
-#ifdef JITML_UI_LIFT_IGNORE_ARTIFACT_OWNER_MUTANT
-  | False = Left ArtifactUnavailable
-#else
   | contextSubject context /= ownerSubject owner = Left ArtifactUnavailable
-#endif
   | scope /= startScopeEpoch started = Left ReloadRequired
   | otherwise = Right ()
  where
@@ -300,16 +287,8 @@ invokeReadyModel context scope handle modelInput state
  where
   owner = internalReadyModelOwner handle
   command = internalReadyModelCommandId handle
-#ifdef JITML_UI_LIFT_IGNORE_ARTIFACT_SCOPE_MUTANT
-  authorizationTenant = ownerTenantId owner
-#else
   authorizationTenant = contextTenant context
-#endif
-#ifdef JITML_UI_LIFT_IGNORE_ARTIFACT_OWNER_MUTANT
-  authorizationSubject = ownerSubject owner
-#else
   authorizationSubject = contextSubject context
-#endif
 
 lookupDurableReceipt :: OwnerCoordinate -> Text -> UiAdapterState -> Maybe DurableReceipt
 lookupDurableReceipt owner command state =
@@ -332,17 +311,9 @@ pinSocket replica state = state {routeSocketOwner = Just replica}
 
 originateReceipt :: Text -> DurableReceipt -> RealtimeRouteState -> RealtimeRouteState
 originateReceipt _origin receipt state = state
-#ifdef JITML_UI_LIFT_REDIS_AS_RECEIPT_MUTANT
-  { routeDurableReceipt = Nothing
-#else
   { routeDurableReceipt = Just receipt
-#endif
   , routeRedisReceipt = Just receipt
-#ifdef JITML_UI_LIFT_LOCAL_ONLY_WEBSOCKET_ROUTE_MUTANT
-  , routePendingReceipt = if routeSocketOwner state == Just _origin then Just receipt else Nothing
-#else
   , routePendingReceipt = Just receipt
-#endif
   }
 
 pendingReceipt :: RealtimeRouteState -> Maybe DurableReceipt
@@ -365,11 +336,7 @@ reconnectAndRepair replica state = case authoritativeReceipt state of
     })
 
 authoritativeReceipt :: RealtimeRouteState -> Maybe DurableReceipt
-#ifdef JITML_UI_LIFT_REDIS_AS_RECEIPT_MUTANT
-authoritativeReceipt = routeRedisReceipt
-#else
 authoritativeReceipt = routeDurableReceipt
-#endif
 
 deliveredReceiptCount :: RealtimeRouteState -> Natural
 deliveredReceiptCount = routeDeliveredCount

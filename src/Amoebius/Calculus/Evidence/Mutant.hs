@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The mutant record, and the one registry the corpus lives in.
@@ -115,14 +114,7 @@ mutantRecord capability identifier operator change locus body flag =
               , mutantCarrier = carrier
               }
   where
-#ifdef EVIDENCE_CALCULUS_MUTANT_POINTS_AT_THE_WRONG_LOCUS_MUTANT
-    -- The seeded misdirection. Every record reports the same locus, so the corpus still
-    -- says a check must redden and no longer says which — which is a mutation argument
-    -- that has stopped distinguishing the claim it was holding from any other.
-    reported _stated = "the-gate"
-#else
     reported = Text.strip
-#endif
 
 -- | The one registry: a source and the records read from it.
 data Registry = Registry
@@ -153,14 +145,7 @@ registry offered = case offered of
     | admits rest -> duplicated (Registry {registrySource = source, registryRecords = records})
     | otherwise -> Left (MoreThanOneRegistry (fmap fst offered))
   where
-#ifdef EVIDENCE_CALCULUS_SECOND_MUTANT_REGISTRY_MUTANT
-    -- The seeded second file. A further source is accepted and its records are simply not
-    -- read, which is worse than merging them: the corpus now has two answers and reports
-    -- the first, so a mutation recorded in the second is enumerated by nothing.
-    admits _rest = True
-#else
     admits rest = null rest
-#endif
     duplicated built = case identities built of
       keys | length keys == length (nub keys) -> Right built
       keys -> Left (DuplicateMutation (firstRepeat keys))

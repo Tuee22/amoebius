@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Ui.Offline.Browser.Crypto
   ( Ciphertext
@@ -18,18 +18,11 @@ newtype Ciphertext = Ciphertext String
   deriving stock (Eq, Show)
 
 sealRecord :: Secret -> String -> Ciphertext
-#if defined(ENCRYPTED_BROWSER_RUNTIME_STORE_PLAINTEXT_MUTANT) || defined(OFFLINE_BLOBS_ISOLATION_STORE_PLAINTEXT_MUTANT)
-sealRecord _ plaintext = Ciphertext plaintext
-#else
 sealRecord (Secret secret) plaintext = Ciphertext (show encoded)
   where
     encoded = zipWith xor (map ord plaintext) (cycle (map ord secret))
-#endif
 
 openRecord :: Secret -> Ciphertext -> Maybe String
-#if defined(ENCRYPTED_BROWSER_RUNTIME_STORE_PLAINTEXT_MUTANT) || defined(OFFLINE_BLOBS_ISOLATION_STORE_PLAINTEXT_MUTANT)
-openRecord _ (Ciphertext plaintext) = Just plaintext
-#else
 openRecord (Secret secret) (Ciphertext encoded) = do
   (values, rest) <- listToMaybe (reads encoded)
   if null rest
@@ -39,7 +32,6 @@ openRecord (Secret secret) (Ciphertext encoded) = do
     decode value key = chr (value `xor` key)
     listToMaybe [] = Nothing
     listToMaybe (value : _) = Just value
-#endif
 
 rawCiphertext :: Ciphertext -> String
 rawCiphertext (Ciphertext value) = value

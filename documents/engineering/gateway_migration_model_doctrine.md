@@ -275,16 +275,16 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
   Register 3 is owned by the later live-drill phase. Until those gates pass, runtime fidelity is
   **UNVERIFIED**: qualified explorer/TLC/IOSimPOR agreement would establish only its bounded model and tested
   correspondence claims. It would not show
-  that a local authoritative DNS server is Route53 or that a single-host pause reproduces WAN physics.
+  that a local authoritative DNS server is Route53 or that a single-host pause reproduces WAN physics. Owed by [Phase 75](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md).
 
-**Current source boundary.** Phase 75's production model is
-`Amoebius.Formal.GatewayMigration`; its per-spec cutoff is
-`Amoebius.Multicluster.StructuralFit`. A separately authored Haskell oracle fixes constants, actions,
-obligations, renderer facts, cutoff cases, and cutoff-deletion expectations. The source-bound supervisor
-invokes Cabal serially and offline, injects digest-pinned Java 21.0.9 and TLA+ 1.8.0 inputs, and confines every
-rendered TLA/CFG/DOT/log/result product to a fresh `.build/runs/phase-17/**` root. Three CPP-selected mutations
-change production ownership, cutoff, and fairness loci; tracked Python gates and serialized behavioral
-expectations are not part of this boundary.
+**Target source boundary.** Phase 75's production model is to be `Amoebius.Formal.GatewayMigration`; its
+per-spec cutoff `Amoebius.Multicluster.StructuralFit`. A separately authored Haskell oracle fixes constants,
+actions, obligations, renderer facts, cutoff cases, and cutoff-deletion expectations. The gate runner invokes
+Cabal serially and offline, injects digest-pinned Java and TLA+ inputs, and confines every rendered
+TLA/CFG/DOT/log/result product to a fresh run root beneath `.build/runs/**`; generated mutants change
+production ownership, cutoff, and fairness loci. Tracked Python gates and serialized behavioral expectations
+are not part of this boundary. Owed by [Phase
+75](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md).
 
 ---
 

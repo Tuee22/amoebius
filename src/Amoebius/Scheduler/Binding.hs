@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 
@@ -34,7 +33,5 @@ prepareBinding
   -> Either BindingError BindingRequest
 prepareBinding expectedHolder observedHolder rootVersion record
   | expectedHolder /= observedHolder = Left BindingLeaseHolderMismatch
-#ifndef CAPACITY_SCHEDULER_BIND_BEFORE_RESERVATION_CAS_MUTANT
   | reservationState record /= BindingInFlight = Left BindingReservationNotInFlight
-#endif
   | otherwise = Right (BindingRequest (reservationUid record) (reservationNode record) rootVersion observedHolder)

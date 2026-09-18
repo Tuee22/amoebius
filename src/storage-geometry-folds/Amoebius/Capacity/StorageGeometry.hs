@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -259,17 +258,9 @@ bookKeeperPhysicalDemand policy logicalBytes
   writeQuorum = bookKeeperWriteQuorum policy
   faultBound = bookKeeperFaultBound policy
   baseBytes = logicalBytes *
-#if defined(STORAGE_GEOMETRY_BOOKKEEPER_DROP_QUORUM_MUTANT)
-    (writeQuorum - 1)
-#else
     writeQuorum
-#endif
   reserves = ensemble * bookKeeperJournalAndIndexBytesPerBookie policy
-#if defined(STORAGE_GEOMETRY_BOOKKEEPER_DROP_RECOVERY_MUTANT)
-  recoveryBytes = 0
-#else
   recoveryBytes = logicalBytes * faultBound
-#endif
 
 minioPhysicalDemand :: MinioPolicy -> Natural -> Either StorageError GeometryWitness
 minioPhysicalDemand policy logicalBytes
@@ -295,11 +286,7 @@ minioPhysicalDemand policy logicalBytes
   dataShards = minioDataShards policy
   parityShards = minioParityShards policy
   totalShards = dataShards +
-#if defined(STORAGE_GEOMETRY_MINIO_DROP_PARITY_MUTANT)
-    0
-#else
     parityShards
-#endif
   blockBytes = minioShardBlockBytes policy
   stripes = ceilDiv logicalBytes (dataShards * blockBytes)
   resident = stripes * totalShards * blockBytes
@@ -307,20 +294,12 @@ minioPhysicalDemand policy logicalBytes
   metadata = drives * minioMetadataBytesPerDrive policy
   faultBound = minioFaultBoundPerSet policy
   healing =
-#if defined(STORAGE_GEOMETRY_MINIO_DROP_HEALING_MUTANT)
-    0
-#else
     sets * faultBound * minioHealingWorkspaceBytesPerDrive policy + ceilDiv (resident * faultBound) dataShards
-#endif
   orphanAndInflight =
-#if defined(STORAGE_GEOMETRY_MINIO_DROP_ORPHAN_MUTANT)
-    0
-#else
     (minioConcurrentWriteSets policy + minioFailedWriteSets policy)
       * minioMaximumWriteSetBytes policy
       * totalShards
       `div` dataShards
-#endif
 
 provisionVolume :: DeclaredVolumeDemand -> Either StorageError ProvisionedVolumeDemand
 provisionVolume demand = do
@@ -344,11 +323,7 @@ uniformStatefulSetClaims demands = do
       memberBytes = fmap (maximumTotal . fmap provisionedBytes) groups
       members = fmap (fromIntegral . length) groups
       debit =
-#if defined(STORAGE_GEOMETRY_UNIFORM_USE_AGGREGATE_MUTANT)
-        fmap (sum . fmap provisionedBytes) groups
-#else
         Map.intersectionWith (*) memberBytes members
-#endif
   mapM_ (checkGroup debit) (Map.toList groups)
   pure (UniformClaimWitness debit memberBytes members)
  where
@@ -388,16 +363,12 @@ mergeObjectStoreLogicalPeaks
   -> [ProvisionedObjectStoreLogicalPeak]
   -> Either StorageError ObjectStoreAdmissionGatewayDemand
 mergeObjectStoreLogicalPeaks sourceInventory producers
-#if defined(STORAGE_GEOMETRY_OBJECT_DROP_PRODUCER_ARM_MUTANT)
-  | False = Left (ObjectProducerInventoryMismatch [] [])
-#else
   | sourceInventory /= producerInventory =
       Left
         ( ObjectProducerInventoryMismatch
             (Set.toAscList sourceInventory)
             (Set.toAscList producerInventory)
         )
-#endif
   | otherwise = do
       objects <- mergeObjects Map.empty producers
       pure
@@ -411,25 +382,13 @@ mergeObjectStoreLogicalPeaks sourceInventory producers
   producerInventory = Set.fromList (fmap objectProducer producers)
 
 provisionStorageMigration :: MigrationDemand -> Either StorageError ProvisionedMigration
-#if defined(STORAGE_GEOMETRY_MIGRATION_DROP_OLD_MUTANT)
-provisionStorageMigration demand = provisionMigration demand {migrationOldBytes = 0}
-#else
 provisionStorageMigration = provisionMigration
-#endif
 
 provisionSchemaMigration :: MigrationDemand -> Either StorageError ProvisionedMigration
-#if defined(STORAGE_GEOMETRY_SCHEMA_DROP_WAL_MUTANT)
-provisionSchemaMigration demand = provisionMigration demand {migrationWalBytes = 0}
-#else
 provisionSchemaMigration = provisionMigration
-#endif
 
 provisionRegistryBackendMigration :: MigrationDemand -> Either StorageError ProvisionedMigration
-#if defined(STORAGE_GEOMETRY_REGISTRY_MIGRATION_DROP_WORKSPACE_MUTANT)
-provisionRegistryBackendMigration demand = provisionMigration demand {migrationWorkspaceBytes = 0}
-#else
 provisionRegistryBackendMigration = provisionMigration
-#endif
 
 provisionNodeRootVolume
   :: Natural
@@ -438,20 +397,12 @@ provisionNodeRootVolume
   -> Either StorageError ProvisionedNodeRootVolumeRequest
 provisionNodeRootVolume systemReserve carves supply = case supply of
   InstanceStoreRoot backing -> do
-#if defined(STORAGE_GEOMETRY_PROVIDER_ROOT_UNDER_SIZE_MUTANT)
-    witness <- fitBacking backing (requiredUsable - 1)
-#else
     witness <- fitBacking backing requiredUsable
-#endif
     pure (ProvisionedNodeRootVolumeRequest requiredUsable requiredUsable 1 witness)
   EphemeralRootEbs quotaBytes quotaVolumes presentation allocation -> do
     let provisioned = roundAllocation allocation (presentBytes presentation requiredUsable)
         syntheticBacking = StorageBacking (BackingId "nodeRootStorage")
-#if defined(STORAGE_GEOMETRY_PROVIDER_ROOT_DEBIT_DURABLE_MUTANT)
-          (quotaBytes + 1)
-#else
           quotaBytes
-#endif
           allocation
     if quotaVolumes < 1
       then Left (ObjectCountOverQuota "nodeRootStorage" 1 quotaVolumes)
@@ -464,18 +415,10 @@ provisionNodeRootVolume systemReserve carves supply = case supply of
 provisionPulsar :: PulsarDemand -> Either StorageError PulsarStorageWitness
 provisionPulsar demand = do
   durable <- case pulsarDurableRetainedBytes demand of
-#if defined(STORAGE_GEOMETRY_PULSAR_DROP_DURABLE_MUTANT)
-    Nothing -> Right 0
-#else
     Nothing -> Left (PulsarDurableCeilingUnbounded (pulsarTopic demand))
-#endif
     Just bytes -> Right bytes
   hot <- bookKeeperPhysicalDemand (pulsarBookKeeperPolicy demand) (pulsarLogicalHotBytes demand)
-#if defined(STORAGE_GEOMETRY_PULSAR_DROP_HOT_MUTANT)
-  hotFit <- fitBacking (pulsarBookieBacking demand) (geometryPhysicalBytes hot - 1)
-#else
   hotFit <- fitBacking (pulsarBookieBacking demand) (geometryPhysicalBytes hot)
-#endif
   durableFit <- fitStorageBudget (pulsarDurableBudget demand) (StorageAmount durable 1)
   pure (PulsarStorageWitness hot hotFit durableFit)
 
@@ -533,12 +476,8 @@ mergeObjects accumulated producers = case producers of
     (identity, bytes) : rest -> case Map.lookup identity current of
       Nothing -> mergeOne (Map.insert identity bytes current) rest
       Just prior
-#if defined(STORAGE_GEOMETRY_OBJECT_ACCEPT_CONFLICT_MUTANT)
-        | otherwise -> mergeOne current rest
-#else
         | prior == bytes -> mergeOne current rest
         | otherwise -> Left (ObjectIdentityConflict identity prior bytes)
-#endif
 
 failureSubsets :: Natural -> Natural -> [[Natural]]
 failureSubsets population maximumFailures =

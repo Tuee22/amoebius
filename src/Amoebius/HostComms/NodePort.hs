@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.HostComms.NodePort
@@ -42,11 +41,7 @@ data HostCommsError
   deriving stock (Eq, Show)
 
 renderServiceType :: Text
-#ifdef APPLE_METAL_HOST_DAEMON_LB_NODEPORT_MUTANT
-renderServiceType = "LoadBalancer"
-#else
 renderServiceType = "NodePort"
-#endif
 
 provisionHostComms :: HostCommsSpec -> Either HostCommsError ProvisionedHostComms
 provisionHostComms spec

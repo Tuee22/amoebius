@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Store.Budget
@@ -55,19 +54,11 @@ logicalPeakBytes demand observation =
     + failedWindow
     + retainedObservedOrphan
   where
-#ifdef CONTENT_STORE_WORKFLOW_ORPHAN_BUDGET_OMITTED_MUTANT
-    failedWindow = 0
-#else
     failedWindow = demandFailedWriteSetBytes demand * demandMaximumFailedWriteSets demand
-#endif
-#ifdef CONTENT_STORE_WORKFLOW_ORPHAN_FREE_ON_POINTER_CONFLICT_MUTANT
-    retainedObservedOrphan = 0
-#else
     retainedObservedOrphan
       | observedOrphanDeletion observation
           && observedOrphanAgeSeconds observation >= demandOrphanGcHorizonSeconds demand = 0
       | otherwise = observedOrphanBytes observation
-#endif
 
 admitObjectStore :: Natural -> ObjectStoreDemand -> BudgetObservation -> BudgetDecision
 admitObjectStore supply demand observation

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Dhall.Schema.Generation
@@ -54,27 +53,13 @@ schemaModules =
   ]
 
 capabilitySource :: Text
-#ifdef DHALL_SCHEMA_CUSTOM_CAPABILITY_MUTANT
-capabilitySource = "< ObjectStore | SecretStore | MessageBus | Sql | Identity | Observability | Registry | Edge | InferenceEngine | Custom : Text >"
-#else
 capabilitySource = "< ObjectStore | SecretStore | MessageBus | Sql | Identity | Observability | Registry | Edge | InferenceEngine >"
-#endif
 
 resourcesSource :: Text
-#if defined(DHALL_SCHEMA_OPTIONAL_RESOURCE_MUTANT)
-resourcesSource = "{ requests : Optional { cpu : Natural, memory : Natural, ephemeralStorage : Natural }, limits : { cpu : Natural, memory : Natural, ephemeralStorage : Natural } }"
-#elif defined(DHALL_SCHEMA_RESOURCE_TYPE_MUTANT)
-resourcesSource = "{ requests : { cpu : Natural, memory : Text, ephemeralStorage : Natural }, limits : { cpu : Natural, memory : Natural, ephemeralStorage : Natural } }"
-#else
 resourcesSource = "{ requests : { cpu : Natural, memory : Natural, ephemeralStorage : Natural }, limits : { cpu : Natural, memory : Natural, ephemeralStorage : Natural } }"
-#endif
 
 secretRefSource :: Text
-#ifdef DHALL_SCHEMA_PLAINTEXT_SECRET_MUTANT
-secretRefSource = "< Vault : { mount : Text, path : Text, field : Text } | TransitKey : { name : Text } | Prompt : { name : Text, purpose : Text } | PlainText : Text >"
-#else
 secretRefSource = "< Vault : { mount : Text, path : Text, field : Text } | TransitKey : { name : Text } | Prompt : { name : Text, purpose : Text } >"
-#endif
 
 schemaCases :: [SchemaCase]
 schemaCases = positives <> negatives

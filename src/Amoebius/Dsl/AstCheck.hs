@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -8,11 +7,7 @@ module Amoebius.Dsl.AstCheck
   , SourceSpan (..)
   , AstViolation (..)
   , ExtensionSourceVerdict (..)
-#ifdef ASTCHECK_EXPORT_CTOR_MUTANT
-  , CheckedExtensionSource (..)
-#else
   , CheckedExtensionSource
-#endif
   , checkExtensionSource
   , linkCheckedExtension
   , renderAstViolation
@@ -74,9 +69,7 @@ checkExtensionSource path source = case concatMap checkLine (zip [1 ..] (Text.li
   tokenViolations lineNumber line =
     concat
       [ detect path lineNumber line "foreign import" ForeignCall
-#ifndef ASTCHECK_ALLOW_RAWIO_MUTANT
       , detect path lineNumber line ":: IO" RawIO
-#endif
       , detect path lineNumber line "unsafe" UnsafeOperation
       , detect path lineNumber line "$(" TemplateHaskell
       , detect path lineNumber line "instance " OrphanInstance

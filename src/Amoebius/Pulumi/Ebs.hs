@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Pure admission model for one durable provider volume per claim.  The
@@ -269,18 +268,9 @@ provisionStorageMigration demand supply
  where
   execution = migrationCopyExecutionDemand demand
   requiredBytes = migrationOldBytesDemand demand + migrationReplacementBytesDemand demand
-#ifdef PROVIDER_EBS_CREDENTIAL_CREDIT_OLD_MUTANT
-  chargedBytes = migrationReplacementBytesDemand demand
-  oldCharged = False
-#else
   chargedBytes = requiredBytes
   oldCharged = True
-#endif
-#ifdef PROVIDER_EBS_CREDENTIAL_DROP_COPY_EXECUTOR_MUTANT
-  chargedExecution = Nothing
-#else
   chargedExecution = Just execution
-#endif
 
 migrationDurableBytes :: ProvisionedStorageMigration -> Natural
 migrationDurableBytes = provisionedMigrationDurableBytes

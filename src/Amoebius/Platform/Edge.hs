@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Platform.Edge
@@ -68,26 +67,10 @@ provisionEdge demand = do
                   then Left "public-edge-image-forbidden"
                   else Right (ProvisionedEdge demand routes)
  where
-#ifdef KEYCLOAK_INGRESS_DROP_OIDC_MUTANT
-  effectiveOidc _ = False
-#else
   effectiveOidc = edgeOidcGuard
-#endif
-#ifdef KEYCLOAK_INGRESS_DROP_ORIGIN_MUTANT
-  effectiveOrigin _ = False
-#else
   effectiveOrigin = edgeExactOrigin
-#endif
-#ifdef KEYCLOAK_INGRESS_NONCE_REPLAY_MUTANT
-  effectiveNonce _ = False
-#else
   effectiveNonce = edgeSingleUseNonce
-#endif
-#ifdef KEYCLOAK_INGRESS_DIRECT_BACKEND_MUTANT
-  effectiveDirect _ = True
-#else
   effectiveDirect = edgeDirectBackendPublished
-#endif
   isPublic image = any (`Text.isPrefixOf` image) ["docker.io/", "quay.io/", "ghcr.io/"]
 
 renderEdge :: ProvisionedEdge -> [PlatformObject]
@@ -115,8 +98,4 @@ validateRecreateWitness witness
   | not (recreateMarkerByteIdentical witness) = Left "cluster-recreate-marker-drift"
   | otherwise = Right witness
  where
-#ifdef KEYCLOAK_INGRESS_DELETE_NOOP_MUTANT
-  effectiveNew = recreateOldClusterIdentity
-#else
   effectiveNew = recreateNewClusterIdentity
-#endif

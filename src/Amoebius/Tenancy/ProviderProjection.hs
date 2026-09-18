@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -116,21 +115,13 @@ derivationActions :: TenantPolicyDerivation -> [ProjectionAction]
 derivationActions (TenantPolicyDerivation actions) = actions
 
 actionQualifiedKey :: ProjectionAction -> Text
-#ifdef APP_TENANCY_COLLAPSE_TENANT_KEY_MUTANT
-actionQualifiedKey action = actionLocalId action
-#else
 actionQualifiedKey action =
   Text.intercalate "/" [actionAppId action, actionTenantId action, providerText (actionProvider action), actionLocalId action]
-#endif
 
 deriveTenantPolicy :: CheckedTenantGraph -> Either ProjectionError TenantPolicyDerivation
 deriveTenantPolicy (CheckedTenantGraph raw) = do
   let derived = concatMap (tenantActions (appId raw)) (tenants raw)
-#ifdef APP_TENANCY_DROP_PROVIDER_ARM_MUTANT
-      actions = filter ((/= Pulsar) . actionProvider) derived
-#else
       actions = derived
-#endif
   validateComplete actions
   validateKeys actions
   pure (TenantPolicyDerivation actions)

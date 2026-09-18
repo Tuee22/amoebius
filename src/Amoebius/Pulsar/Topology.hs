@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Pulsar.Topology
@@ -78,15 +77,11 @@ laneText Apple = "apple"
 laneText Windows = "windows"
 
 topicFor :: Text -> Text -> RouteEntry -> Lane -> Topic
-#ifdef PULSAR_CLIENT_TOPIC_LITERAL_MUTANT
-topicFor _ _ _ _ = Topic "persistent://literal/mutant/hard-coded"
-#else
 topicFor tenant namespace route lane =
   Topic
     ( "persistent://" <> tenant <> "/" <> namespace <> "/"
         <> routeWorkflow route <> "." <> routePhase route <> "." <> laneText lane
     )
-#endif
 
 renderTopic :: Topic -> Text
 renderTopic (Topic value) = value
@@ -113,9 +108,6 @@ validateTopology routes = duplicates <> empties <> oneSided <> monitoring <> unr
         | route <- routes
         , lane <- Set.toList (routeLanes route)
         ]
-#ifdef PULSAR_CLIENT_DROP_ONE_SIDED_MUTANT
-    oneSided = []
-#else
     oneSided =
       [ OneSidedLink workflow lane
       | ((workflow, lane), values) <- Map.toList directions
@@ -123,7 +115,6 @@ validateTopology routes = duplicates <> empties <> oneSided <> monitoring <> unr
       , plainDirections /= Set.fromList [Input, Report]
       , not (plainDirections == Set.singleton Report && any snd values)
       ]
-#endif
     monitoring =
       [ MonitoringInfeasible (routeWorkflow route)
       | route <- routes

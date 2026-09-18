@@ -392,9 +392,9 @@ data ProvisionedRolloutWork       -- private constructors only
 
 ### Sibling evidence — the `RolloutPlan` apply
 
-jitML's `src/JitML/Cluster/Helm.hs` defines exactly this shape — a three-arm `HelmPhase`, a
+jitML's `jitML/src/JitML/Cluster/Helm.hs` defines exactly this shape — a three-arm `HelmPhase`, a
 `releasePhase :: HelmPhase` field on each release, and a
-`helmPhasedRolloutPlan` that applies them in readiness-gated phase order — the **`RolloutPhase` pattern, demonstrated in a sibling** (but bound to Helm, which amoebius drops). jitML's `src/JitML/Bootstrap.hs` splits its
+`helmPhasedRolloutPlan` that applies them in readiness-gated phase order — the **`RolloutPhase` pattern, demonstrated in a sibling** (but bound to Helm, which amoebius drops). jitML's `jitML/src/JitML/Bootstrap.hs` splits its
 rollout in two around the Postgres schema grant (`livePreGrantSubprocessesForPort → postgresSchemaGrantIO →
 livePostGrantSubprocessesForPort`), which is **the schema-migration-as-a-phase shape, LIVE in a sibling** and
 the concrete evidence behind the Phase-71 rollout shape. By contrast, hostbootstrap's only delivery gate

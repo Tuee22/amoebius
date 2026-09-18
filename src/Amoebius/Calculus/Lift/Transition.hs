@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The transition relation: total over the closed layer set, and wildcard-free.
@@ -98,22 +97,11 @@ data SomeLift where
 admits :: Layer -> Layer -> Bool
 admits from to = case (from, to) of
   (OnHost, OnHost) -> True
-#ifndef LIFT_CALCULUS_REMOVE_ENTER_FRAME_RELATION_MUTANT
   (OnHost, InFrame) -> True
-#endif
   (OnHost, InContainer) -> False
   (InFrame, InFrame) -> True
-#ifndef LIFT_CALCULUS_REMOVE_ENTER_CONTAINER_RELATION_MUTANT
   (InFrame, InContainer) -> True
-#endif
   (InContainer, InContainer) -> True
-#ifdef LIFT_CALCULUS_DISPATCH_ADMITS_A_FALLBACK_MUTANT
-  -- The seeded fallback admits every otherwise-refused inward/skip pair. The independent
-  -- relation rejects those exact cells, while the source-shape check separately keeps a
-  -- wildcard from becoming the authority for any future layer.
-  (_from, _to) -> True
-#else
   (InFrame, OnHost) -> False
   (InContainer, OnHost) -> False
   (InContainer, InFrame) -> False
-#endif

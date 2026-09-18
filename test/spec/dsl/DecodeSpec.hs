@@ -1,14 +1,10 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Main (main) where
 
-#if !defined(GADT_DECODE_ONLY)
 import CorpusSpec (CorpusSummary (..), runCorpusSpec)
 import DecisionPropSpec (runDecisionPropSpec)
 import ValidationLocusLedger (runValidationLocusLedger)
-#endif
-#if !defined(GADT_DECODE_ONLY) && !defined(ILLEGAL_STATE_CORPUS_ONLY)
 import CapacityTopologyGate (runCapacityTopologyGate)
 import ExecutionAcceleratorGate (runExecutionAcceleratorGate)
 import StorageGeometryGate (runStorageGeometryGate)
@@ -16,36 +12,6 @@ import BindGate (runBindGate)
 import ProvisionSealGate (runProvisionSealGate)
 import EngineAcceleratorGate (runEngineAcceleratorGate)
 import RenderGoldenGate (runRenderGoldenGate)
-#endif
-#if defined(GADT_DECODE_ONLY) || defined(ILLEGAL_STATE_CORPUS_ONLY)
-import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
-import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
-import Amoebius.Calculus.Composition
-  ( append
-  , artifactComponent
-  , budgetComponent
-  , calculusTag
-  , compose
-  , compositionKinds
-  , compositionNames
-  , compositionResource
-  , evidenceComponent
-  , everyCalculus
-  , liftComponent
-  , singleton
-  , workflowComponent
-  )
-import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
-import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
-import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
-import Amoebius.Scope.Index
-  ( activeMembership
-  , trustedSubject
-  , trustedTenant
-  , withRequestScope
-  )
-#endif
 import Amoebius.Dsl.Decode (decodeCluster)
 import Amoebius.Dsl.Error (decodeErrorTag)
 import Amoebius.Dsl.Types
@@ -117,18 +83,11 @@ runSuite = do
   forM_ negativeCases (checkNegative schemaOverride)
   checkImportPolicy
   checkCompilePairs "test/oracle/gadt_decode_ir/compile_pairs.tsv"
-#ifdef GADT_DECODE_ONLY
-  checkDecodedCalculusProjection decoded
-#endif
-#ifndef GADT_DECODE_ONLY
   corpus <- runCorpusSpec
   localCompilePairs <- checkPhase27CompileFail
   predecessorCompilePairs <- checkPhase9CompileFail
   runDecisionPropSpec
   (discharged, deferred, predecessorRows) <- runValidationLocusLedger (coveredKeys corpus)
-#ifdef ILLEGAL_STATE_CORPUS_ONLY
-  checkIllegalStateCalculusProjection corpus (localCompilePairs + predecessorCompilePairs) discharged deferred
-#else
   runCapacityTopologyGate
   runStorageGeometryGate
   runExecutionAcceleratorGate
@@ -136,7 +95,6 @@ runSuite = do
   runProvisionSealGate
   runEngineAcceleratorGate
   runRenderGoldenGate
-#endif
   putStrLn
     ( "illegal-state-predecessors: PASS ("
         <> show predecessorRows
@@ -144,7 +102,6 @@ runSuite = do
         <> show predecessorCompilePairs
         <> " compile pairs)"
     )
-#endif
   putStrLn
     ( suiteName
         <> ": PASS ("
@@ -153,7 +110,6 @@ runSuite = do
         <> show (length negativeCases)
         <> " tagged negatives, 3 compile-fail pairs)"
     )
-#ifndef GADT_DECODE_ONLY
   putStrLn
     ( "illegal-state-dsl-spec: PASS ("
         <> show (dhallTypecheckCount corpus)
@@ -167,92 +123,15 @@ runSuite = do
         <> show deferred
         <> " deferred)"
     )
-#endif
 
 suiteName :: String
-#ifdef GADT_DECODE_ONLY
-suiteName = "gadt-decode-spec"
-#elif defined(ILLEGAL_STATE_CORPUS_ONLY)
-suiteName = "illegal-state-corpus-spec"
-#else
 suiteName = "dsl-spec"
-#endif
 
 gateCommand :: String
-#ifdef ILLEGAL_STATE_CORPUS_ONLY
-gateCommand = "tools/illegal_state_corpus_gate.py"
-#else
 gateCommand = "tools/gadt_decode_ir_gate.py"
-#endif
 
-#ifdef GADT_DECODE_ONLY
-checkDecodedCalculusProjection :: [ClusterIR] -> IO ()
-checkDecodedCalculusProjection decoded = case decoded of
-  [artifactIr, budgetIr, liftIr, workflowIr, evidenceIr] -> do
-    expected <- loadMetricOracle "test/oracle/gadt_decode_ir/calculus_projection.tsv"
-    tenant <- either (die . show) pure (trustedTenant "gadt-decode-tenant")
-    subject <- either (die . show) pure (trustedSubject tenant "gadt-decode-subject")
-    membership <- either (die . show) pure (activeMembership tenant subject)
-    action <- either (die . show) pure $ withRequestScope tenant subject membership $ \scope -> do
-      let resources ir = ResourceVector 1 (fromIntegral (length (clusterNodes ir))) 0 0
-          artifact = artifactComponent scope "decoded-artifact" (resources artifactIr) (RecipeId (clusterSemanticHash artifactIr) 1)
-          budgetRows = fromIntegral (length (clusterNodes budgetIr))
-          budget = budgetComponent scope "decoded-budget" (resources budgetIr) (allowance (Bytes budgetRows) (Slots 1) (Bytes budgetRows))
-          lift = liftComponent scope "decoded-lift" (resources liftIr) OnHost
-          workflow = workflowComponent scope "decoded-workflow" (resources workflowIr) emptyLedger
-          evidence = evidenceComponent scope "decoded-evidence" (resources evidenceIr) PureRegister
-          composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
-          ResourceVector cpu memory ephemeral pods = compositionResource composition
-          actual =
-            [ ("calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition)))
-            , ("component-names", Text.intercalate "," (compositionNames composition))
-            , ("resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods]))
-            ]
-      assert (compositionKinds composition == everyCalculus) "decoded projection omitted or reordered a calculus"
-      assert (actual == expected) ("decoded calculus projection changed: " <> show actual)
-    action
-    putStrLn "gadt-decode-calculus: PASS (5 kinds, 5527 retained rows)"
-  _ -> die "decoded calculus projection requires exactly five authored positives"
-#endif
 
-#ifdef ILLEGAL_STATE_CORPUS_ONLY
-checkIllegalStateCalculusProjection :: CorpusSummary -> Int -> Int -> Int -> IO ()
-checkIllegalStateCalculusProjection corpus compilePairs discharged deferred = do
-  expected <- loadMetricOracle "test/oracle/illegal_state_corpus/calculus_projection.tsv"
-  tenant <- either (die . show) pure (trustedTenant "illegal-state-corpus-tenant")
-  subject <- either (die . show) pure (trustedSubject tenant "illegal-state-corpus-subject")
-  membership <- either (die . show) pure (activeMembership tenant subject)
-  action <- either (die . show) pure $ withRequestScope tenant subject membership $ \scope -> do
-    let negativeCount = dhallTypecheckCount corpus + gadtDecodeCount corpus
-        positiveRows = positiveCount corpus
-        resources count = ResourceVector 1 (fromIntegral count) 0 0
-        artifact = artifactComponent scope "negative-corpus" (resources negativeCount) (RecipeId "illegal-state-corpus" 1)
-        budget = budgetComponent scope "deferred-ledger" (resources deferred) (allowance (Bytes (fromIntegral deferred)) (Slots 1) (Bytes (fromIntegral deferred)))
-        lift = liftComponent scope "positive-corpus" (resources positiveRows) OnHost
-        workflow = workflowComponent scope "compile-pairs" (resources compilePairs) emptyLedger
-        evidence = evidenceComponent scope "discharged-ledger" (resources discharged) PureRegister
-        composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
-        ResourceVector cpu memory ephemeral pods = compositionResource composition
-        actual =
-          [ ("calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition)))
-          , ("component-names", Text.intercalate "," (compositionNames composition))
-          , ("projection-counts", Text.intercalate "," (map (Text.pack . show) [negativeCount, deferred, positiveRows, compilePairs, discharged]))
-          , ("resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods]))
-          ]
-    assert (compositionKinds composition == everyCalculus) "illegal-state projection omitted or reordered a calculus"
-    assert (actual == expected) ("illegal-state calculus projection changed: " <> show actual)
-  action
-  putStrLn "illegal-state-calculus: PASS (5 kinds, 172 projected units)"
-#endif
 
-#if defined(GADT_DECODE_ONLY) || defined(ILLEGAL_STATE_CORPUS_ONLY)
-loadMetricOracle :: FilePath -> IO [(Text, Text)]
-loadMetricOracle path = do
-  contents <- Text.readFile path
-  forM (dropHeader (Text.lines contents)) $ \row -> case Text.splitOn "\t" row of
-    [metric, value] -> pure (metric, value)
-    _ -> die ("malformed metric row: " <> Text.unpack row)
-#endif
 
 printGate2Oracle :: IO ()
 printGate2Oracle = do
@@ -280,7 +159,6 @@ printGate2Oracle = do
     AppSurface -> "App"
     DeploymentSurface -> "Deployment"
 
-#ifndef GADT_DECODE_ONLY
 checkPhase27CompileFail :: IO Int
 checkPhase27CompileFail = do
   (exitCode, stdout, stderr) <- readCreateProcessWithExitCode (proc "sh" ["tools/compile_fail.sh"]) ""
@@ -294,7 +172,6 @@ checkPhase9CompileFail =
   -- later suite consumes the four pair identities represented by its own
   -- predecessor-coverage join; it does not rerun a predecessor compiler.
   pure 4
-#endif
 
 checkPositive :: PositiveCase -> IO ClusterIR
 checkPositive PositiveCase {positiveFile, positiveSurface, positiveHash, positiveNodeCount, positiveFingerprint} = do

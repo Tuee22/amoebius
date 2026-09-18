@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 -- | The content address, which folds in the rendered text.
 --
@@ -88,13 +88,8 @@ addressOf recipe declaration rendered =
       [ Encoding.encodeUtf8 (targetTag (recipeTarget recipe))
       , recipeIdBytes (recipeIdentity recipe)
       , declarationBytes declaration
-#ifdef ARTIFACT_CALCULUS_ADDRESS_DROPS_RENDERED_MUTANT
-      ]
-    _unusedRendering = renderedBytes rendered
-#else
       , renderedBytes rendered
       ]
-#endif
 
 -- | Length-prefixed framing, so the concatenation is unambiguous. Without it a recipe
 -- named @ab@ rendering @c@ and one named @a@ rendering @bc@ fold identical bytes, and the

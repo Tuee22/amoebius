@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Multicluster.ConfluenceClass
@@ -58,11 +57,7 @@ classifyInvariant invariant = case invariant of
   GatewayAuthority -> NonConfluent
   LatestPointer -> NonConfluent
   ClusterVpnIpAllocation -> NonConfluent
-#ifdef MULTICLUSTER_SPAWN_GEOREPL_CLASSIFIER_DEFAULT_CONFLUENT_MUTANT
-  Unclassified _ -> Confluent
-#else
   Unclassified _ -> NonConfluent
-#endif
 
 activeActiveAllowed :: CrossingInvariant -> Bool
 activeActiveAllowed = (== Confluent) . classifyInvariant

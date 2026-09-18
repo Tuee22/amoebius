@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Total, constructor-hidden content names.  Callers supply content, never a
@@ -47,11 +46,7 @@ canonicalFields :: [(Text, Text)] -> ByteString
 canonicalFields fields =
   Char8.pack "{" <> mconcat (intersperse (Char8.pack ",") (map render ordered)) <> Char8.pack "}"
  where
-#ifdef DETERMINISM_JITCACHE_CONTENT_ORDER_LEAK_MUTANT
-  ordered = fields
-#else
   ordered = sortOn fst fields
-#endif
   render (key, value) = Char8.pack (show (Text.unpack key)) <> Char8.pack ":" <> Char8.pack (show (Text.unpack value))
 
 digest :: ByteString -> Text

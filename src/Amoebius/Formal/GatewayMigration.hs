@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Formal.GatewayMigration
   ( gatewayMigrationModel
@@ -148,11 +148,7 @@ promotePlanned = action "PromotePlanned"
   ]
 
 plannedSourceOwnership :: Expr
-#ifdef GATEWAY_MIGRATION_DUAL_OWNER_MUTANT
-plannedSourceOwnership = bool True
-#else
 plannedSourceOwnership = bool False
-#endif
 
 repointPlannedDns :: Action
 repointPlannedDns = action "RepointPlannedDns"
@@ -343,8 +339,4 @@ gatewayMigrationModel = Model
   }
 
 gatewayFairness :: [Fairness]
-#ifdef GATEWAY_MIGRATION_DROP_FAIRNESS_MUTANT
-gatewayFairness = []
-#else
 gatewayFairness = [Fairness WeakFair name | name <- gatewayActionNames]
-#endif

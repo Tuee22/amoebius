@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Ui.Offline.Browser.Partition
   ( PartitionKey
@@ -17,11 +17,7 @@ newtype PartitionKey = PartitionKey String
 partitionKey :: String -> String -> String -> String -> Int -> PartitionKey
 partitionKey tenant subject device program epoch = PartitionKey (digest material)
   where
-#if defined(ENCRYPTED_BROWSER_RUNTIME_REUSE_PARTITION_KEY_MUTANT) || defined(OFFLINE_BLOBS_ISOLATION_OMIT_PARTITION_SCOPE_MUTANT)
-    material = subject <> "|" <> device <> "|" <> program <> "|" <> show epoch
-#else
     material = tenant <> "|" <> subject <> "|" <> device <> "|" <> program <> "|" <> show epoch
-#endif
 
 renderPartitionKey :: PartitionKey -> String
 renderPartitionKey (PartitionKey value) = value

@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 -- | The ensure algebra: what a step /is/, how a tool is resolved, and the driver.
 --
@@ -289,12 +289,6 @@ installAndVerify
   -> HostConfig
   -> HostTool
   -> IO (Either EnsureError HostConfig)
-#ifdef HOST_ENSURE_CONVERGED_WITHOUT_PROBING_MUTANT
-installAndVerify _reresolve _installer _plan config _requested = pure (Right config)
- where
-  _unusedDrive :: ()
-  _unusedDrive = ()
-#else
 installAndVerify reresolve installer plan config requested = case lookupTool requested config of
   Just _ -> pure (Right config)
   Nothing -> drive plan config
@@ -305,15 +299,10 @@ installAndVerify reresolve installer plan config requested = case lookupTool req
     case outcome of
       Left failure -> pure (Left failure)
       Right () -> do
-#ifdef HOST_ENSURE_STALE_SNAPSHOT_MUTANT
-        let observed = current
-#else
         observed <- reresolve (hostSubstrate current)
-#endif
         case lookupTool requested observed of
           Just _ -> pure (Right observed)
           Nothing -> drive remaining observed
-#endif
 
 -- ---------------------------------------------------------------------------
 -- invocation

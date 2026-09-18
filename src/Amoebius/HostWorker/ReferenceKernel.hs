@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.HostWorker.ReferenceKernel
@@ -15,15 +14,7 @@ import Data.ByteString.Lazy qualified as LazyByteString
 -- | The independently pinned Phase-53 numerical contract: y = 2*x + 1,
 -- rounded at Float precision and emitted as little-endian IEEE-754 bytes.
 referenceKernel :: [Float] -> ByteString
-#ifdef APPLE_METAL_HOST_DAEMON_CONST_OUTPUT_MUTANT
-referenceKernel _ = encodeFloat32Le [3, 5, 7, 9]
-#elif defined(APPLE_METAL_HOST_DAEMON_ECHO_GOLDEN_MUTANT)
-referenceKernel values
-  | values == [-1, 0.5, 7, 11] = encodeFloat32Le [-1, 2, 15, 23]
-  | otherwise = encodeFloat32Le [3, 5, 7, 9]
-#else
 referenceKernel values = encodeFloat32Le (fmap (\value -> 2 * value + 1) values)
-#endif
 
 encodeFloat32Le :: [Float] -> ByteString
 encodeFloat32Le = LazyByteString.toStrict . toLazyByteString . foldMap floatLE

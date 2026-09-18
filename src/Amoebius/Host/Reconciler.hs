@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 -- | Reconcilers as rows, so their three views cannot disagree.
 --
@@ -73,11 +73,6 @@ reconcilers =
       { reconcilerName = "cluster-tools"
       , reconcilerApplies = everySubstrate
       , reconcilerSteps = \substrate ->
-#ifdef HOST_ENSURE_APPLE_DOCKER_STEP_MUTANT
-          -- Seeded: an engine installed on the one substrate whose frame supplies one.
-          [InstallStep Docker (PerformedBy PackageManagerRoot) (rootInstall substrate "docker") | substrate == Apple]
-            <>
-#endif
           [ InstallStep Kubectl (PerformedBy PackageManagerRoot) (rootInstall substrate (kubectlPackage substrate))
           , InstallStep Kind (PerformedBy PackageManagerRoot) (rootInstall substrate "kind")
           ]
@@ -124,11 +119,7 @@ diagnostic :: Reconciler -> Substrate -> String
 diagnostic reconciler substrate =
   reconcilerName reconciler
     <> " applies to "
-#ifdef HOST_ENSURE_AUTHORED_DIAGNOSTIC_MUTANT
-    <> "linux-cpu, linux-cuda, apple, windows"
-#else
     <> intercalate ", " (map renderSubstrate (sortOn fromEnum (reconcilerApplies reconciler)))
-#endif
     <> "; it was driven on "
     <> renderSubstrate substrate
 

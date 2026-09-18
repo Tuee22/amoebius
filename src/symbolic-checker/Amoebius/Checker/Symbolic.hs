@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 -- | Amoebius-owned inductive safety checking over the Phase-11 formal 'Model'.
 --
@@ -145,14 +145,7 @@ runObligations solver passed (obligation : rest) = do
     Right (SolverUnsat, _) ->
       runObligations solver ((obligationKind obligation, digest query) : passed) rest
     Right (SolverSat, solverModel) ->
-#ifdef SYMBOLIC_ACCEPTS_SAT_STEP_MUTANT
-      case obligationKind obligation of
-        StepCase _ _ _ ->
-          runObligations solver ((obligationKind obligation, digest query) : passed) rest
-        BaseCase _ -> pure (Right (counterexample solverModel))
-#else
       pure (Right (counterexample solverModel))
-#endif
  where
   query = obligationQuery obligation
   counterexample solverModel = NotInductive InductionCounterexample
@@ -309,17 +302,9 @@ stepObligations model declarations current next currentInvariants nextInvariants
     requireSameSort BooleanSort guardTerm (UnsupportedExpression (actionGuard action))
     transitions <- transitionTerms model sorts current next parameters action
     let hypotheses =
-#ifdef SYMBOLIC_DROPS_CONJOINED_HYPOTHESIS_MUTANT
-          [termText term | (name, term) <- currentInvariants, name == targetName]
-#else
           [termText term | (_, term) <- currentInvariants]
-#endif
         encodedGuard =
-#ifdef SYMBOLIC_NEGATES_ACTION_GUARD_MUTANT
-          "(not " <> termText guardTerm <> ")"
-#else
           termText guardTerm
-#endif
         arguments = [value | parameter <- actionParameters action
                            , Just value <- [Map.lookup (parameterName parameter) parameters]]
     pure Obligation

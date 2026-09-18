@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.Release.PlanPair
@@ -62,9 +61,7 @@ publishPlanPair maybeClient maybeServer = do
   server <- maybe (Left ServerPlanMissing) Right maybeServer
   if planRole client == ClientRole then Right () else Left ClientRoleMismatch
   if planRole server == ServerRole then Right () else Left ServerRoleMismatch
-#ifndef UI_PROGRAM_RELEASE_PUBLISH_MIXED_PLAN_PAIR_MUTANT
   if planRevision client == planRevision server
     then Right ()
     else Left (MixedProgramRevision (planRevision client) (planRevision server))
-#endif
   pure (PlanPair client server)

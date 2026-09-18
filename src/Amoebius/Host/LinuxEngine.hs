@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 -- | The typed Linux engine bring-up plan.  Live interpreters may execute these
 -- actions only after a pristine observation has been admitted; the second pass
@@ -77,13 +77,7 @@ admitPristineGuest observed = case [surface | surface <- [minBound .. maxBound],
   surface : _ -> Left (GuestNotPristine surface)
 
 planLinuxEnginePass :: LinuxEngineObservation -> [LedgerAction]
-#if defined(LINUX_ENGINE_CONVERGE_WITHOUT_PROBE_MUTANT)
-planLinuxEnginePass observed
-  | observed == convergedObservation = []
-  | otherwise = ordinaryPlan observed
-#else
 planLinuxEnginePass = ordinaryPlan
-#endif
 
 ordinaryPlan :: LinuxEngineObservation -> [LedgerAction]
 ordinaryPlan observed = probes <> mutations
@@ -91,17 +85,9 @@ ordinaryPlan observed = probes <> mutations
   probes = map Probe [minBound .. maxBound]
   mutations =
     [Mutate InstallEngine | not (enginePackagePresent observed)]
-#if defined(LINUX_ENGINE_EPHEMERAL_MEMBERSHIP_MUTANT)
-      <> []
-#else
       <> [Mutate PersistDockerGroupMembership | not (dockerGroupMember observed)]
-#endif
       <> [Mutate StartDockerDaemon | not (daemonReachable observed)]
-#if defined(LINUX_ENGINE_UNREFRESHED_CREDENTIALS_MUTANT)
-      <> []
-#else
       <> [Mutate RefreshCurrentCredentials | not (dockerGroupMember observed) || not (daemonReachable observed)]
-#endif
       <> [Mutate BuildNativeImage | not (nativeImagePresent observed)]
 
 admitNativeBuild
@@ -109,20 +95,12 @@ admitNativeBuild
   -> NativeArchitecture
   -> NativeArchitecture
   -> Either LinuxEngineError ()
-#if defined(LINUX_ENGINE_PLATFORM_OVERRIDE_MUTANT)
-admitNativeBuild _ _ _ = Right ()
-#else
 admitNativeBuild requested guest engine
   | requested == guest && guest == engine = Right ()
   | otherwise = Left (ArchitectureMismatch requested guest engine)
-#endif
 
 daemonProbeArgv :: [String]
-#if defined(LINUX_ENGINE_ELEVATED_RETRY_MUTANT)
-daemonProbeArgv = ["/usr/bin/sudo", "-n", "/usr/bin/docker", "info", "--format", "{{.ServerVersion}}"]
-#else
 daemonProbeArgv = ["/usr/bin/docker", "info", "--format", "{{.ServerVersion}}"]
-#endif
 
 futureSessionArgv :: String -> [String]
 futureSessionArgv user = ["/usr/bin/su", "-", user, "-c", unwords daemonProbeArgv]
@@ -137,9 +115,6 @@ guestDockerUser = "ubuntu"
 -- start the pass; @--init-groups@ is what re-reads the membership a mutation
 -- just wrote.
 unelevatedArgv :: [String] -> [String]
-#if defined(LINUX_ENGINE_ROOT_CLIENT_MUTANT)
-unelevatedArgv = id
-#else
 unelevatedArgv arguments =
   [ "/usr/bin/setpriv"
   , "--reuid=" <> guestDockerUser
@@ -147,7 +122,6 @@ unelevatedArgv arguments =
   , "--init-groups"
   ]
     <> arguments
-#endif
 
 -- | A Docker client invocation: probe, inspect, version, build, or run.  There
 -- is one spelling, so no call site can quietly become the elevated one.

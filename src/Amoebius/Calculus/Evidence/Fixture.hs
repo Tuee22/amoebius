@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The four fixture kinds, and what a passing run of each entitles a claim to say.
@@ -99,11 +98,7 @@ admitsStrength kind strength = case (kind, strength) of
   (Property, ObservedOnce) -> False
   (Oracle, ThisExpressionRejected) -> False
   (Oracle, NoCounterexampleFound) -> False
-#ifdef EVIDENCE_CALCULUS_ORACLE_ADMITS_REJECTED_MUTANT
-  (Oracle, SatisfiesAuthoredPredicate) -> False
-#else
   (Oracle, SatisfiesAuthoredPredicate) -> True
-#endif
   (Oracle, ObservedOnce) -> False
   (LiveProbe, ThisExpressionRejected) -> False
   (LiveProbe, NoCounterexampleFound) -> False
@@ -128,12 +123,4 @@ fixture kind path register
   | names path = Just (Fixture {fixtureKind = kind, fixturePath = path, fixtureRegister = register})
   | otherwise = Nothing
   where
-#ifdef EVIDENCE_CALCULUS_CLAIM_WITHOUT_A_FIXTURE_MUTANT
-    -- The seeded hole. A fixture that names nothing is admitted, so a claim can be
-    -- registered against it — which is section 2's "a claim with no fixture is prose"
-    -- arriving through the one door the type could not close, since a 'Text' has no
-    -- non-empty arm.
-    names _candidate = True
-#else
     names candidate = not (Text.null (Text.strip candidate))
-#endif

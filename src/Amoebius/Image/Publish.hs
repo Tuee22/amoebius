@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -242,8 +241,4 @@ unique values = case values of
   value : rest -> value : unique (filter (/= value) rest)
 
 advertisedOnFailure :: Bool
-#ifdef BASE_IMAGE_REGISTRY_RECORD_BEFORE_PUSH_MUTANT
-advertisedOnFailure = True
-#else
 advertisedOnFailure = False
-#endif

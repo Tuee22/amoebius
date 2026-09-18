@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Release.OfflineCompatibility
   ( CompatibilityPath (..)
@@ -75,16 +75,11 @@ canonicalWitness = CompatibilityWitness 90000 paths
   where
     paths =
       [ (OutboxRecord, TotalMigration SchemaA SchemaB)
-#ifndef OFFLINE_RELEASE_EVOLUTION_OMIT_OLD_DECODER_MUTANT
       , (BlobDependencyRecord, RetainedDecoderHandler 1)
-#endif
       , (CachedProjectionRecord, TotalMigration SchemaA SchemaB)
       ]
 
 admitPromotion :: Int -> CompatibilityWitness -> Either PromotionError CompatibilityWitness
-#ifdef OFFLINE_RELEASE_EVOLUTION_BYPASS_PROMOTION_CHECK_MUTANT
-admitPromotion _ witness = Right witness
-#else
 admitPromotion required witness
   | compatibilityHorizonSeconds witness < required = Left HorizonTooShort
   | otherwise = case duplicates of
@@ -95,7 +90,6 @@ admitPromotion required witness
   where
     kinds = map fst (compatibilityPaths witness)
     duplicates = [kind | kind <- nub kinds, length (filter (== kind) kinds) > 1]
-#endif
 
 beginMigration :: Schema -> Schema -> [PersistedRecord] -> MigrationState
 beginMigration = MigrationNotStarted
@@ -110,23 +104,12 @@ resumeMigration :: Int -> MigrationState -> Either MigrationError MigrationState
 resumeMigration generation (MigrationStaged _ target _ staged ownerGeneration)
   | generation /= ownerGeneration = Left WrongLeader
   | otherwise = Right (MigrationCommitted target staged 1)
-#ifdef OFFLINE_RELEASE_EVOLUTION_TWO_MIGRATIONS_MUTANT
-resumeMigration _ (MigrationCommitted target records runs) =
-  Right (MigrationCommitted target (migrateRecords target records) (runs + 1))
-#else
 resumeMigration _ state@(MigrationCommitted _ _ _) =
   Right state
-#endif
 resumeMigration _ (MigrationNotStarted _ _ _) = Left NoStagedMigration
 
 migrateRecords :: Schema -> [PersistedRecord] -> [PersistedRecord]
-#ifdef OFFLINE_RELEASE_EVOLUTION_PARTIAL_MIGRATION_MUTANT
-migrateRecords target records = case records of
-  [] -> []
-  first : rest -> first {recordSchema = target} : rest
-#else
 migrateRecords target = map (\record -> record {recordSchema = target})
-#endif
 
 committedRecords :: MigrationState -> Maybe [PersistedRecord]
 committedRecords (MigrationCommitted _ records _) = Just records
@@ -137,19 +120,11 @@ migrationRuns (MigrationCommitted _ _ runs) = runs
 migrationRuns _ = 0
 
 reloadRequired :: PersistedState -> PersistedState
-#ifdef OFFLINE_RELEASE_EVOLUTION_CLEAR_STATE_RELOAD_MUTANT
-reloadRequired _ = PersistedState []
-#else
 reloadRequired = id
-#endif
 
 replayRetained :: Bool -> Bool -> ReplayDecision
 replayRetained _currentAuthority _storedAuthority =
-#ifdef OFFLINE_RELEASE_EVOLUTION_PRESERVE_OLD_AUTHORIZATION_MUTANT
-  if _storedAuthority then ReplayAccepted else ReplayDeniedCurrentAuthority
-#else
   if _currentAuthority then ReplayAccepted else ReplayDeniedCurrentAuthority
-#endif
 
 generatedCompatibilityArtifacts :: [String]
 generatedCompatibilityArtifacts = sort ["emit-offline-compatibility-manifest", "emit-offline-migration-table"]

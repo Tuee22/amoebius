@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -36,9 +35,6 @@ emptyRuntimeState = RuntimeState Set.empty 0 Set.empty Nothing
 
 applyWork :: WorkId -> RuntimeState -> (Bool, RuntimeState)
 applyWork identifier state
-#ifdef CONTENT_STORE_WORKFLOW_DOUBLE_APPLY_ON_REDELIVERY_MUTANT
-  = (True, state {appliedWorkIds = Set.insert identifier (appliedWorkIds state), appliedEffectCount = appliedEffectCount state + 1})
-#else
   | identifier `Set.member` appliedWorkIds state = (False, state)
   | otherwise =
       ( True
@@ -47,17 +43,12 @@ applyWork identifier state
           , appliedEffectCount = appliedEffectCount state + 1
           }
       )
-#endif
 
 promoteStandby :: Text -> Text -> RuntimeState -> RuntimeState
 promoteStandby oldActive promoted state =
   state
     { activeConsumerName = Just promoted
-#ifdef CONTENT_STORE_WORKFLOW_ORPHAN_CONSUMER_ON_PROMOTION_MUTANT
-    , openConsumerHandles = Set.insert promoted (Set.insert oldActive (openConsumerHandles state))
-#else
     , openConsumerHandles = Set.insert promoted (Set.delete oldActive (openConsumerHandles state))
-#endif
     }
 
 runtimeInvariant :: RuntimeState -> Either Text ()
@@ -68,8 +59,4 @@ runtimeInvariant state
 
 sweepClasses :: [Text]
 sweepClasses =
-#ifdef CONTENT_STORE_WORKFLOW_SWEEP_SKIPS_PULSAR_MUTANT
-  ["kubernetes", "minio"]
-#else
   ["kubernetes", "minio", "pulsar"]
-#endif

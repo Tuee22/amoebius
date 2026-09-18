@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Vault.Error
@@ -24,19 +23,11 @@ errorTag failure = case failure of
   VaultUninitialized -> "uninitialized"
   VaultSealed -> "sealed"
   VaultPolicyMissing -> "policy-missing"
-#ifdef VAULT_PKI_ERROR_COLLAPSE_MUTANT
-  VaultSecretMissing -> "sealed"
-#else
   VaultSecretMissing -> "secret-missing"
-#endif
   VaultDecryptDenied -> "decrypt-denied"
 
 -- | Deliberately accepts no path, token, or resolved value.  The tag is the
 -- only varying field, so this log cannot become a secret-presence oracle.
 redactedErrorLog :: VaultError -> Text
 redactedErrorLog failure =
-#ifdef VAULT_PKI_ERROR_COLLAPSE_MUTANT
-  "vault-read-failed tag=" <> errorTag failure <> " path=amoebius/canary"
-#else
   "vault-read-failed tag=" <> errorTag failure <> " detail=redacted"
-#endif

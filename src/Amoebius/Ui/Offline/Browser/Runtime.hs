@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Ui.Offline.Browser.Runtime
   ( Facility (..)
@@ -68,11 +68,7 @@ renderRuntimeProjection =
   [ ("indexed-db.js", "partitionKey; encryptedEnvelope; quotaOutcome")
   , ("opfs.js", "partitionKey; encryptedBlob; dependencyRefusal")
   , ("service-worker.js", "immutablePublicAssets; digestCheck")
-#ifdef ENCRYPTED_BROWSER_RUNTIME_DROP_FENCE_HOOK_MUTANT
-  , ("web-locks.js", "singleOwner")
-#else
   , ("web-locks.js", "partitionKey; fenceGeneration; singleOwner")
-#endif
   , ("broadcast-channel.js", "partitionKey; fenceGeneration; ownerNotice")
   , ("web-crypto.js", "localUnlock; nonExtractableKey; encryptedEnvelope")
   ]

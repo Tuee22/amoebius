@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -479,13 +478,8 @@ validateInfrastructurePlan ledger observedSnapshot plan
   | otherwise = Right (ValidatedInfrastructureActionBatch plan)
  where
   batch = infrastructurePlanBatch plan
-#ifdef PROVISION_SEAL_ACCEPT_PLAN_REPLAY_MUTANT
-  planReplayDetected = False
-  actionReplayDetected = False
-#else
   planReplayDetected = infrastructurePlanToken plan `Set.member` consumedPlanTokens ledger
   actionReplayDetected = providerActionToken batch `Set.member` consumedActionTokens ledger
-#endif
 
 enactInfrastructurePlan
   :: InfrastructureActionLedger
@@ -507,9 +501,7 @@ enactInfrastructurePlan ledger validated readback = do
   if readbackSnapshotVersion readback /= infrastructurePlanSnapshotVersion plan
     then Left (InfrastructureSnapshotMismatch (infrastructurePlanSnapshotVersion plan) (readbackSnapshotVersion readback))
     else Right ()
-#ifndef PROVISION_SEAL_ACCEPT_MISSING_READBACK_MUTANT
   ensureExactIdentities expected (readbackIdentities readback)
-#endif
   ensureResources (infrastructureRequiredResources (infrastructurePlanDemand plan)) (readbackCapacity readback)
   let updated =
         InfrastructureActionLedger
@@ -591,18 +583,7 @@ provision context topology deployment = do
       }
 
 mutateExecutionCandidate :: ProvisionedExecutionEpochs -> ProvisionedExecutionEpochs
-#ifdef PROVISION_SEAL_DROP_EXECUTION_REPLICA_MUTANT
-mutateExecutionCandidate execution =
-  execution
-    { provisionedDesiredSteady =
-        maybe
-          (provisionedDesiredSteady execution)
-          (\(identity, _) -> Map.delete identity (provisionedDesiredSteady execution))
-          (Map.lookupMin (provisionedDesiredSteady execution))
-    }
-#else
 mutateExecutionCandidate = id
-#endif
 
 supplyProjection :: ProvisionTargetSupply -> (InfrastructureState, ResourceVector, Set Text, Natural)
 supplyProjection supply = case supply of
@@ -721,11 +702,7 @@ provisionRuntime context execution = do
   identities = Map.keysSet (provisionedDesiredSteady execution)
   scope = PlannedEpochScope "desired" (Set.map ("planned:" <>) identities)
   demands =
-#ifdef PROVISION_SEAL_DROP_RUNTIME_ROW_MUTANT
-    drop 1
-#else
     id
-#endif
       (fmap runtimeDemand (Map.elems (provisionedDesiredSteady execution)))
 
 runtimeDemand :: MaterializedExecutionInstance -> KubeletRuntimeMetadataDemand

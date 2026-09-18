@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 -- | The pure, typed Apple engine bring-up contract.
 --
@@ -125,11 +125,7 @@ prerequisiteRemedy prerequisite = case prerequisite of
 admitAppleFloor :: AppleFloorObservation -> Either AppleFloorError ()
 admitAppleFloor observed
   | appleOs observed /= "darwin" || appleArchitecture observed /= "arm64" = missing AppleSiliconMac
-#ifdef APPLE_ENGINE_INSTALLS_FLOOR_MUTANT
-  | appleBrewPath observed == Nothing = Right ()
-#else
   | appleBrewPath observed == Nothing = missing HomebrewRoot
-#endif
   | Just path <- appleBrewPath observed, not (absolute path) = Left (AppleFloorPathNotAbsolute HomebrewRoot path)
   | appleXcodePath observed == Nothing = missing XcodeCommandLineTools
   | Just path <- appleXcodePath observed, not (absolute path) = Left (AppleFloorPathNotAbsolute XcodeCommandLineTools path)
@@ -143,11 +139,7 @@ providerFor substrate workload
   | otherwise = Right (select workload)
  where
   select candidate = case candidate of
-#ifdef APPLE_ENGINE_WRONG_PROVIDER_MUTANT
-    ContainerImageBuild -> LimaProvider
-#else
     ContainerImageBuild -> ColimaProvider
-#endif
     EphemeralContainerRun -> ColimaProvider
     PersistentContainerRuntime -> ColimaProvider
     DistributionGuest -> LimaProvider
@@ -160,25 +152,17 @@ providerBrewTool provider = case provider of
 lifecycleFor :: AppleWorkload -> FrameLifecycle
 lifecycleFor workload = case workload of
   ContainerImageBuild -> EphemeralFrame
-#ifdef APPLE_ENGINE_LEAKS_EPHEMERAL_MUTANT
-  EphemeralContainerRun -> PersistentFrame
-#else
   EphemeralContainerRun -> EphemeralFrame
-#endif
   PersistentContainerRuntime -> PersistentFrame
   DistributionGuest -> PersistentFrame
 
 admitFrameDemand :: FrameSupply -> FrameDemand -> Either AppleEngineError FrameDemand
 admitFrameDemand supplied demanded
   | any (== 0) [demandedCpuCores demanded, demandedMemoryBytes demanded, demandedDiskBytes demanded] = Left FrameDemandEmpty
-#ifdef APPLE_ENGINE_DEFAULT_FRAME_MUTANT
-  | otherwise = Right (FrameDemand 2 (2 * gib) (20 * gib))
-#else
   | demandedCpuCores demanded > suppliedCpuCores supplied = Left (FrameCpuOvercommit (demandedCpuCores demanded) (suppliedCpuCores supplied))
   | demandedMemoryBytes demanded > suppliedMemoryBytes supplied = Left (FrameMemoryOvercommit (demandedMemoryBytes demanded) (suppliedMemoryBytes supplied))
   | demandedDiskBytes demanded > suppliedDiskBytes supplied = Left (FrameDiskOvercommit (demandedDiskBytes demanded) (suppliedDiskBytes supplied))
   | otherwise = Right demanded
-#endif
 
 colimaStartArgv :: AbsExe -> String -> FrameDemand -> [String]
 colimaStartArgv executable profile demanded =
@@ -209,11 +193,7 @@ liftLinuxSteps
   -> [InstallStep]
   -> Either String [[String]]
 liftLinuxSteps entry versions steps =
-#ifdef APPLE_ENGINE_REAUTHORS_LIFT_MUTANT
-  Right [["/usr/bin/apt-get", "install", "-y", "docker.io"]]
-#else
   either (Left . show) Right (liftPlan (InFrame LimaGuest entry) (const Nothing) versions steps)
-#endif
 
 -- | Bind the generic Phase-51 frame prefix to Colima's concrete SSH protocol.
 -- The nested tail is preserved byte-for-byte; only the provider-owned envelope is
@@ -226,14 +206,10 @@ colimaSshArgv executable profile lifted = case lifted of
   _ -> Left (InvalidColimaLiftEnvelope lifted)
 
 admitNativeArm64 :: String -> String -> String -> Bool -> Either AppleEngineError ()
-#ifdef APPLE_ENGINE_ALLOWS_EMULATION_MUTANT
-admitNativeArm64 _ _ _ _ = Right ()
-#else
 admitNativeArm64 host frame engine emulated
   | emulated = Left EmulationForbidden
   | host == "arm64" && frame `elem` ["arm64", "aarch64"] && engine `elem` ["arm64", "aarch64"] = Right ()
   | otherwise = Left (NativeArm64Mismatch host frame engine)
-#endif
 
 planAppleEngine
   :: FrameSupply

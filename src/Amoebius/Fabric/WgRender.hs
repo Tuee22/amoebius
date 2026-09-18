@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Fabric.WgRender
@@ -108,11 +107,7 @@ renderNode inventory local = do
  where
   renderRemote remote = do
     let normalEndpoint = if peerRole remote == Gateway then peerEndpoint remote else Nothing
-#ifdef NETWORK_FABRIC_WIREGUARD_HUB_NO_ENDPOINT_MUTANT
-        endpoint = (Nothing :: Maybe Text)
-#else
         endpoint = normalEndpoint
-#endif
     if peerRole remote == Gateway && endpoint == Nothing
       then Left GatewayEndpointMissing
       else Right RenderedPeer

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Infernix.Inference.Deterministic
@@ -16,11 +15,7 @@ deterministicCpuDecode :: ByteString -> ByteString -> SplitMixSeed -> ByteString
 deterministicCpuDecode model normalizedInput requestedSeed =
   Char8.pack (Text.unpack digest <> "\n")
  where
-#ifdef INFERNIX_LIFT_USE_WALLCLOCK_SEED_MUTANT
-  seedWord = splitMixSeedWord64 requestedSeed + 1
-#else
   seedWord = splitMixSeedWord64 requestedSeed
-#endif
   seedHex = leftPad16 (showHex seedWord "")
   preimage = model <> "|" <> normalizedInput <> "|" <> Char8.pack seedHex
   digest = Text.drop 7 (blobShaText (contentAddress preimage))

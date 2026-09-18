@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -40,16 +39,9 @@ data PasswordDisposition = TransportOnly | PersistToFilesystem
   deriving anyclass (NFData)
 
 passwordDisposition :: PasswordDisposition
-#ifdef LIVE_DSL_DEPLOY_PERSIST_PASSWORD_MUTANT
-passwordDisposition = PersistToFilesystem
-#else
 passwordDisposition = TransportOnly
-#endif
 
 authorizeReach :: EndpointFamily -> ReachClass -> AdminDecision
-#ifdef LIVE_DSL_DEPLOY_REACH_ANY_MUTANT
-authorizeReach _ _ = Admit
-#else
 authorizeReach endpoint reach = case (endpoint, reach) of
   (VaultInit, NodeLocal) -> Admit
   (VaultUnseal, NodeLocal) -> Admit
@@ -61,7 +53,6 @@ authorizeReach endpoint reach = case (endpoint, reach) of
   (KvCrud, AuthenticatedFabric) -> Admit
   (DhallUpdate, _) -> Refuse "admin-reach-trusted-required"
   (KvCrud, _) -> Refuse "admin-reach-trusted-required"
-#endif
 
 data SecretCapabilityProbe = SecretCapabilityProbe
   { capabilityName :: Text
@@ -106,8 +97,4 @@ proveSecretCapability probe
   | otherwise = Right probe
 
 admitDhallUpdate :: [SecretCapabilityProbe] -> Either AdmissionError [SecretCapabilityProbe]
-#ifdef LIVE_DSL_DEPLOY_ADMIT_UNPROVEN_SECRET_MUTANT
-admitDhallUpdate = Right
-#else
 admitDhallUpdate = traverse proveSecretCapability
-#endif

@@ -474,7 +474,6 @@ readInt = readMaybe . Text.unpack
 
 parseConfig :: [String] -> IO (Either String ServeConfig)
 parseConfig arguments = do
-  mutantText <- maybe "" Text.pack <$> lookupEnv "AMOEBIUS_UI_SERVER_BOUNDARY_MUTANT"
   let options = pairs arguments
       required name = maybe (Left ("missing " <> name)) Right (lookup name options)
   handlerPortContent <- case lookup "--handler-port-file" options of
@@ -503,7 +502,7 @@ parseConfig arguments = do
     challengeFile <- Right (lookup "--challenge-file" options)
     handlerPort <- maybe (Left "invalid handler port") Right
       ((readMaybe =<< firstLine handlerPortContent) :: Maybe PortNumber)
-    mutant <- if Text.null mutantText then Right NoBoundaryMutant else maybe (Left "unknown UI-server boundary mutant") Right (parseBoundaryMutant mutantText)
+    mutant <- Right NoBoundaryMutant
     Right ServeConfig
       { configPortFile = portFile
       , configHandlerPort = handlerPort

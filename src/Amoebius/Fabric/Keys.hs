@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Fabric.Keys
@@ -58,13 +57,8 @@ resolvePeerKeyPair transport identity jwt references = do
   privateResult <- resolveSecret transport identity jwt (peerPrivateRef references) Nothing
   publicResult <- resolveSecret transport identity jwt (peerPublicRef references) Nothing
   pure $ do
-#ifdef NETWORK_FABRIC_WIREGUARD_MISSING_PEER_KEY_MUTANT
-    privateBytes <- either (const (Right "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")) Right privateResult
-    publicBytes <- either (const (Right "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")) Right publicResult
-#else
     privateBytes <- privateResult
     publicBytes <- publicResult
-#endif
     either (const (Left VaultSecretMissing)) Right (checkedPeerKeyPair privateBytes publicBytes)
 
 privateKeyBytes :: PeerKeyPair -> ByteString

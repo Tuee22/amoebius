@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Manifest.NetworkPolicy
@@ -30,11 +29,7 @@ derivePolicyEdges graph
     | (consumer, providers) <- Map.toList graph
     , provider <- Set.toList providers
     ]
-#ifdef KEYCLOAK_INGRESS_NETPOL_SWAP_MUTANT
-  effectiveEdges rows = Set.insert (PolicyEdge "undeclared" "vault") (Set.delete (PolicyEdge "envoy" "keycloak") rows)
-#else
   effectiveEdges = id
-#endif
 
 renderPolicyEdges :: Set PolicyEdge -> Text
 renderPolicyEdges edges = Text.unlines

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.JitML.CudaArtifactLift
@@ -161,11 +160,7 @@ provisionCudaTraining
 provisionCudaTraining request capacity = do
   case trainingTarget request of
     CudaTarget -> Right ()
-#ifdef JITML_LIFT_CUDA_SILENT_CPU_FALLBACK_MUTANT
-    CpuTarget -> Right ()
-#else
     CpuTarget -> Left CudaRequired
-#endif
   if trainingOptimizerSteps request < 200 then Left TrainingStepFloor else Right ()
   if trainingParameterCount request < 10000000 then Left TrainingParameterFloor else Right ()
   if cudaWholeDeviceCount capacity /= 1 then Left CudaDeviceCountMismatch else Right ()
@@ -181,11 +176,7 @@ provisionCudaTraining request capacity = do
   Right (ProvisionedCudaTraining request capacity)
 
 capacityForAdmission :: CudaCapacity -> Word64
-#ifdef JITML_LIFT_CUDA_SPEND_RAW_VRAM_MUTANT
-capacityForAdmission = cudaTotalVramBytes
-#else
 capacityForAdmission = cudaNetAllocatableBytes
-#endif
 
 cudaExecutionProof
   :: ProvisionedCudaTraining
@@ -223,12 +214,8 @@ commitStagedArtifact
   -> StagedJitMLArtifact
   -> Either LiftError CommittedJitMLArtifact
 commitStagedArtifact result staged = case result of
-#ifdef JITML_LIFT_CUDA_MINT_ARTIFACT_BEFORE_CAS_MUTANT
-  _ -> Right (mintArtifact (PointerRevision "uncommitted") staged)
-#else
   PointerCasSucceeded revision -> Right (mintArtifact revision staged)
   PointerCasConflict -> Left PointerConflict
-#endif
 
 mintArtifact :: PointerRevision -> StagedJitMLArtifact -> CommittedJitMLArtifact
 mintArtifact revision staged =
@@ -244,11 +231,7 @@ mintArtifact revision staged =
         }
 
 workIdentity :: ScopedTrainingRequest -> TrainingCommandId
-#ifdef JITML_LIFT_CUDA_REGENERATE_COMMAND_ID_MUTANT
-workIdentity _ = TrainingCommandId "regenerated-command"
-#else
 workIdentity request = trainingCommandId request
-#endif
 
 committedArtifactTenant :: CommittedJitMLArtifact -> Text
 committedArtifactTenant = internalArtifactTenant

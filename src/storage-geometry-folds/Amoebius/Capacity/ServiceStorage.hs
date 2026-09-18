@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -154,19 +153,13 @@ provisionCacheDemand demand placement =
   let peak = cachePeak demand
    in case placement of
         InClusterCache budget emptyDir
-#if !defined(STORAGE_GEOMETRY_INCLUSTER_CACHE_DROP_NESTING_MUTANT)
           | peak > budget -> Left (CacheBudgetNestingViolation (cachePopulationName demand) peak budget)
-#endif
           | budget > emptyDir -> Left (CacheBudgetNestingViolation (cachePopulationName demand) budget emptyDir)
           | otherwise -> Right (ProvisionedCacheDemand (cachePopulationName demand) peak Nothing)
         NativeCache budget backing
           | peak > budget -> Left (CacheBudgetNestingViolation (cachePopulationName demand) peak budget)
           | otherwise -> do
-#if defined(STORAGE_GEOMETRY_NATIVE_CACHE_DOUBLE_SPEND_MUTANT)
-              witness <- fitBacking backing (budget - 1)
-#else
               witness <- fitBacking backing budget
-#endif
               pure (ProvisionedCacheDemand (cachePopulationName demand) peak (Just witness))
 
 registryStoragePeak :: RegistryStorageDemand -> Either StorageError ProvisionedServiceStorage
@@ -175,11 +168,7 @@ registryStoragePeak demand = provisionService (registryName demand) peak (regist
   residents = sum (Map.elems (Map.fromListWith max (registryObjects demand)))
   uploads = registryConcurrentUploads demand * registryMaximumUploadBytes demand
   failed =
-#if defined(STORAGE_GEOMETRY_REGISTRY_DROP_PARTIALS_MUTANT)
-    0
-#else
     registryFailedUploadsPerWindow demand * registryMaximumUploadBytes demand
-#endif
   peak = residents + uploads + failed
 
 provisionZooKeeperMetadataStore :: ZooKeeperMetadataStoreDemand -> Either StorageError ProvisionedServiceStorage
@@ -189,9 +178,7 @@ provisionZooKeeperMetadataStore demand = provisionService (zooKeeperName demand)
     zooKeeperPathsBytesPerMember demand
       + zooKeeperTransactionLogBytesPerMember demand
       + zooKeeperSnapshotBytesPerMember demand
-#if !defined(STORAGE_GEOMETRY_ZOOKEEPER_DROP_RECOVERY_MUTANT)
       + zooKeeperRecoveryBytesPerMember demand
-#endif
   peak = zooKeeperMembers demand * perMember
 
 provisionPatroniSql :: PatroniSqlDemand -> Either StorageError ProvisionedServiceStorage
@@ -199,9 +186,7 @@ provisionPatroniSql demand = provisionService (patroniName demand) peak (patroni
  where
   peak =
     patroniDataBytes demand
-#if !defined(STORAGE_GEOMETRY_PATRONI_DROP_WAL_MUTANT)
       + patroniWalBytes demand
-#endif
       + patroniCheckpointBytes demand
       + patroniFailoverReplayBytes demand
       + patroniRecoveryWorkspaceBytes demand
@@ -217,11 +202,7 @@ vaultStoragePeak demand = provisionService (vaultName demand) peak (vaultBacking
       + vaultCompactionBytes demand
       + vaultRecoveryBytes demand
   auditPeak =
-#if defined(STORAGE_GEOMETRY_VAULT_DROP_AUDIT_MUTANT)
-    0
-#else
     (vaultAuditBackups demand + 1) * vaultAuditMaximumFileBytes demand
-#endif
   peak = raftPeak + auditPeak
 
 provisionControlPlaneStorage :: ControlPlaneStorageDemand -> Either StorageError ProvisionedServiceStorage
@@ -233,11 +214,7 @@ provisionControlPlaneStorage demand = provisionService (controlPlaneName demand)
   snapshots =
     (controlPlaneRetainedSnapshots demand + 1) * controlPlaneSnapshotBytes demand
   defragOldAndNew =
-#if defined(STORAGE_GEOMETRY_CONTROL_PLANE_DROP_TRANSITION_MUTANT)
-    controlPlaneMvccBytes demand
-#else
     controlPlaneMvccBytes demand + controlPlaneDefragBytes demand
-#endif
   audit = (controlPlaneAuditBackups demand + 1) * controlPlaneAuditMaximumFileBytes demand
   peak = controlPlaneMvccBytes demand + walPeak + snapshots + defragOldAndNew + audit
 

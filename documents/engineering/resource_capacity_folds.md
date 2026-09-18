@@ -76,14 +76,14 @@ flowchart TD
 residue that the kernel and kubelet honour the caps remains runtime-checked. Gate status remains owned by the
 development-plan tracker.*
 
-**Base-fold bound contract.** The
-[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) builds `Amoebius.Capacity.Types`,
-`Amoebius.Capacity.Fold`, and `Amoebius.Dsl.Topology` with exhaustive-pattern warnings promoted to errors.
-Fifteen direct negative/twin pairs, two Haskell topology positives, four sampled properties with independent
-witness recomputation, and 19 compiled production mutants challenge the base CPU, memory,
-logical ephemeral, pod-slot, CSI-attach, finite CPU-policy, eligibility, and fixed/elastic placement axes.
-The storage, execution/runtime, accelerator, and provider-root extensions described below remain
-**UNVERIFIED** until Phase 9 decides the parked calculi (`LTD-LIB-001`); live enforcement is not established by this result.
+**Base-fold bound contract.** `Amoebius.Capacity.Types`, `Amoebius.Capacity.Fold`, and `Amoebius.Dsl.Topology`
+are owed by [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md), built with
+exhaustive-pattern warnings promoted to errors. Direct negative/twin pairs, Haskell topology positives,
+sampled properties with independent witness recomputation, and generated production mutants must challenge the
+base CPU, memory, logical ephemeral, pod-slot, CSI-attach, finite CPU-policy, eligibility, and fixed/elastic
+placement axes. The storage, execution/runtime, accelerator, and provider-root extensions described below
+remain **UNVERIFIED** until Phase 9 decides the parked calculi (`LTD-LIB-001`); live enforcement is not
+established by this result.
 
 ### The four total functions
 

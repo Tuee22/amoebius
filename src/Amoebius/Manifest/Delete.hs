@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 
@@ -38,11 +37,6 @@ data DeleteError = DeleteAuthorityMismatch | DeleteRetainedObject | DeleteDepend
   deriving anyclass (NFData)
 
 authorizeDelete :: DeleteAuthority -> DeleteCandidate -> Either DeleteError DeleteCandidate
-#ifdef PHASE26_LABEL_ONLY_DELETE_MUTANT
-authorizeDelete authority candidate
-  | deleteAuthorityOwner authority == deleteCandidateOwner candidate = Right candidate
-  | otherwise = Left DeleteAuthorityMismatch
-#else
 authorizeDelete authority candidate
   | deleteAuthorityIdentity authority /= deleteCandidateIdentity candidate = Left DeleteAuthorityMismatch
   | deleteAuthorityOwner authority /= deleteCandidateOwner candidate = Left DeleteAuthorityMismatch
@@ -51,4 +45,3 @@ authorizeDelete authority candidate
   | deleteCandidateRetained candidate = Left DeleteRetainedObject
   | not (deleteCandidateDependenciesReleased candidate) = Left DeleteDependencyActive
   | otherwise = Right candidate
-#endif

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Admission: the only place a declared demand may fail.
@@ -210,15 +209,7 @@ admit budget demand
         { budgetHeldBytes = wouldHold
         , budgetHeldSlots = addSlots (budgetHeldSlots budget) (Slots 1)
         }
-#ifdef BUDGET_CALCULUS_CEILING_SEPARATED_FROM_CONCURRENCY_MUTANT
-    -- The seeded split. The ceiling still holds and the concurrency it is shared across
-    -- no longer does, which is the state section 3 says reads as a complete sentence and
-    -- is an incomplete specification: four in-flight materializations each individually
-    -- within budget overrun the ceiling together.
-    concurrencyExhausted = False
-#else
     concurrencyExhausted = budgetHeldSlots budget >= allowanceConcurrency bound
-#endif
 
 -- | The first candidate that fits.
 --

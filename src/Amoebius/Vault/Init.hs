@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Vault.Init
   ( VaultId (..)
@@ -40,11 +40,7 @@ planInit :: VaultObservation -> InitAction
 planInit observation = case observation of
   EmptyRetainedVolume -> InitializeOnce
   NonEmptyUninitializedVolume -> RefuseNonEmptyUninitialized
-#ifdef VAULT_PKI_REINIT_EXISTING_MUTANT
-  InitializedSealed _ -> InitializeOnce
-#else
   InitializedSealed identity -> UnsealExisting identity
-#endif
   InitializedUnsealed identity -> VaultAlreadyReady identity
 
 -- | Logical source populations only.  No authorable raw backing byte field
@@ -92,11 +88,7 @@ provisionVaultStorage durableBacking auditBacking demand auditDemand
   | otherwise = Right (ProvisionedVaultStorageDemand resident required raw auditUsable auditRaw)
  where
   populations = [kvResidentBytes demand, transitResidentBytes demand, pkiResidentBytes demand, authAndLeaseResidentBytes demand]
-#ifdef VAULT_PKI_DELETE_STORAGE_TERM_MUTANT
-  resident = sum (take 3 populations)
-#else
   resident = sum populations
-#endif
   wal = resident `div` 4
   snapshot = resident
   oldAndNewCompaction = resident * 2
@@ -124,9 +116,5 @@ standardVaultAuditDemand =
   VaultAuditDemand
     { auditActiveFileBytes = 1048576
     , auditBackupCount = 3
-#ifdef VAULT_PKI_UNBOUNDED_AUDIT_MUTANT
-    , auditMinimumRawBytes = 0
-#else
     , auditMinimumRawBytes = 67108864
-#endif
     }

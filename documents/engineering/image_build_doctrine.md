@@ -659,10 +659,11 @@ enum (absolute-path `AbsExe`, probe-first `Ensure` reconcile), so it is discover
 `PATH`.
 
 For amoebius, that sibling seam informs the implementation but does not become a second source of truth.
-Haskell `Amoebius.Image.BakeCatalog` values are authoritative and lazily emit the catalog projection and
-Dockerfile beneath `.build/**`. Redis is added to that Haskell catalog and to an separately authored
-Haskell service-inventory oracle; tracked Dhall, a handwritten Dockerfile, or a serialized expected-service
-inventory is non-conforming.
+Haskell `Amoebius.Image.BakeCatalog` values, owed by [Phase
+5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md), are to be authoritative and lazily emit
+the catalog projection and Dockerfile beneath `.build/**`. Redis is added to that Haskell catalog and to a
+separately authored Haskell service-inventory oracle; tracked Dhall, a handwritten Dockerfile, or a serialized
+expected-service inventory is non-conforming.
 
 Every member of the baked list is obtainable through the typed apt/official-artifact/source ladder. The fixed
 Registry provider is deliberately outside that list and runs only from the separately pinned and preloaded

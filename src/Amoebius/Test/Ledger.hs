@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Test.Ledger
@@ -30,10 +29,6 @@ deriveRunLedger provisioned = RunLedger (fmap classify (topologyExpectations top
     | KillWorker _ "test-topology-dsl-failover" <- topologyFaults topology
     ]
   classify expectation
-#ifdef TEST_TOPOLOGY_DSL_ALL_TESTED_MUTANT
-    = CoverageRow (expectationInvariant expectation) Tested
-#else
     | expectationInvariant expectation `Set.member` faulted && expectationWitness expectation /= Nothing =
         CoverageRow (expectationInvariant expectation) Tested
     | otherwise = CoverageRow (expectationInvariant expectation) Unverified
-#endif

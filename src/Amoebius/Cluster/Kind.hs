@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Cluster.Kind
@@ -135,15 +134,6 @@ discoverCluster context = do
       )
 
 planActions :: ClusterObservation -> [ReconcileAction]
-#ifdef BOOTSTRAP_COORDINATOR_ONE_SHOT_KIND_GUARD_MUTANT
--- The seeded M3 mutant: registration alone is treated as convergence, so a stopped node or
--- a deleted kubeconfig plans no repair at all. It exists to prove the divergence-repair
--- observation has teeth -- a gate that only ever starts from "absent" cannot tell this
--- apart from the real planner.
-planActions observed
-  | clusterRegistered observed = []
-  | otherwise = [CreateCluster, EnsureNodeEnvelope, EnsureKubeletEnvelope, WaitReady, EnsureAddonEnvelopes]
-#else
 planActions observed
   | not (clusterRegistered observed) = [CreateCluster, EnsureNodeEnvelope, EnsureKubeletEnvelope, WaitReady, EnsureAddonEnvelopes]
   | otherwise =
@@ -153,7 +143,6 @@ planActions observed
         <> [ExportKubeconfig | not (kubeconfigPresent observed)]
         <> [WaitReady | not (nodeReady observed)]
         <> [EnsureAddonEnvelopes | not (addonEnvelopesConverged observed)]
-#endif
 
 reconcileKind
   :: BinaryContext

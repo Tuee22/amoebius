@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 
@@ -35,11 +34,7 @@ data EnactRecord = EnactRecord
   deriving anyclass (NFData)
 
 enactPlan :: Set ObjectIdentity -> Set ObjectIdentity -> ReconcilePlan
-#ifdef LIVE_DSL_DEPLOY_ENACT_NOOP_MUTANT
-enactPlan _ _ = ReconcilePlan []
-#else
 enactPlan desired observed = ReconcilePlan (Set.toAscList (desired `Set.difference` observed))
-#endif
 
 executePlan :: Set ObjectIdentity -> ReconcilePlan -> (Set ObjectIdentity, [EnactRecord])
 executePlan observed (ReconcilePlan actions) =

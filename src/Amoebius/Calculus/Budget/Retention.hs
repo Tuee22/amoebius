@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The retention grant: space held indefinitely, and the reaper that returns it.
@@ -70,14 +69,9 @@ data RetentionGrant = RetentionGrant
 -- The reaper is the last argument on purpose. A caller that forgets it does not get a
 -- retention grant with a hole in it; it gets a function, and the compile-fail twin is
 -- exactly that program.
-#ifdef BUDGET_CALCULUS_RETENTION_OMITS_REAPER_MUTANT
-retain :: Grant -> Bytes -> Either Refusal RetentionGrant
-retain grant wanted = retainWith grant wanted (DependentLifetime "unstated")
-#else
 retain :: Grant -> Bytes -> Reaper -> Either Refusal RetentionGrant
 retain grant wanted reaper
   = retainWith grant wanted reaper
-#endif
 
 retainWith :: Grant -> Bytes -> Reaper -> Either Refusal RetentionGrant
 retainWith grant wanted reaper

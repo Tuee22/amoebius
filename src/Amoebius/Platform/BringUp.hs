@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Platform.BringUp
   ( Service (..)
@@ -64,13 +64,7 @@ oracleDependencies =
 declaredDependencies :: Map Service (Set Service)
 declaredDependencies = mutate oracleDependencies
  where
-#ifdef PLATFORM_SERVICES_2_DAG_DROP_EDGE_MUTANT
-  mutate = Map.adjust (Set.delete PerconaOperator) GrafanaPostgres
-#elif defined(PLATFORM_SERVICES_2_DAG_INJECT_CYCLE_MUTANT)
-  mutate = Map.adjust (Set.insert Grafana) PerconaOperator
-#else
   mutate = id
-#endif
 
 deriveReadinessLevels :: Map Service (Set Service) -> Either String [[Service]]
 deriveReadinessLevels graph

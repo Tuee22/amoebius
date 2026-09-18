@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Materialize, consume, reap — the region an artifact's existence /is/.
@@ -163,15 +162,9 @@ data RegionOutcome a = RegionOutcome
   }
   deriving stock (Eq, Show)
 
-#ifdef ARTIFACT_CALCULUS_HANDLE_ESCAPES_REGION_MUTANT
--- | The seeded escape. Dropping the rank-2 quantifier lets @a@ mention @s@, so a handle
--- leaves the region and the committed compile-fail fixture starts compiling.
-runRegion :: Region s a -> RegionOutcome a
-#else
 -- | Run a region and reap it. The rank-2 quantifier is the escape argument: @a@ cannot
 -- mention @s@, so no handle survives the call.
 runRegion :: (forall s. Region s a) -> RegionOutcome a
-#endif
 runRegion program =
   case program of
     Region step -> case step (RegionState Map.empty []) of

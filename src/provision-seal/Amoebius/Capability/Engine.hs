@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -278,13 +277,9 @@ checkedDemand owner family profile devices deviceCount sources workloads policy 
     then Left (EngineSourceWorkloadMismatch sourceKeys workloadKeys)
     else Right ()
   mapM_ (validateWorkload sources deviceCount) (Map.toList effectiveWorkloads)
-#ifdef INFERENCE_ACCELERATOR_ACCEPT_DOMAIN_MISMATCH_MUTANT
-  Right ()
-#else
   if classes /= residentDomain || classes /= runningDomain
     then Left (EnginePolicyDomainMismatch classes residentDomain runningDomain)
     else Right ()
-#endif
   epochs <- traverse (epochFor effectiveWorkloads) (mutateEngineEpochs (Map.toList (engineAllowedEpochs policy)))
   Right
     AcceleratorDemand
@@ -314,15 +309,11 @@ validateWorkload sources deviceCount (identity, residency) = do
     then Left (EngineWorkloadClassMismatch identity expectedClass (acceleratorResidencyWorkloadClass residency))
     else Right ()
   case acceleratorResidencyPlacement residency of
-#ifdef INFERENCE_ACCELERATOR_SKIP_SHARD_VALIDATION_MUTANT
-    Sharded _ -> Right ()
-#else
     Sharded shards
       | fromIntegral (length shards) > deviceCount -> Left (EngineResidencyPlacementInvalid (identity <> ":shard-count"))
       | Set.size (Set.fromList (fmap vramShardId shards)) /= length shards -> Left (EngineResidencyPlacementInvalid (identity <> ":shard-id"))
       | sum (fmap vramShardBytes shards) /= acceleratorResidencyBytes residency -> Left (EngineResidencyPlacementInvalid (identity <> ":shard-sum"))
       | otherwise -> Right ()
-#endif
     _ -> Right ()
 
 epochFor
@@ -338,27 +329,13 @@ epochFor workloads (epochIdentity, members) = do
     Just row -> Right row
 
 mutateEngineWorkloads :: Map Text AcceleratorResidencyDemand -> Map Text AcceleratorResidencyDemand
-#ifdef INFERENCE_ACCELERATOR_DROP_WORK_ITEM_MUTANT
-mutateEngineWorkloads workloads = case Map.minViewWithKey workloads of
-  Nothing -> workloads
-  Just ((_identity, _row), remaining) -> remaining
-#else
 mutateEngineWorkloads = id
-#endif
 
 mutateEngineEpochs :: [(Text, Set Text)] -> [(Text, Set Text)]
-#ifdef INFERENCE_ACCELERATOR_SELECT_FAVORABLE_EPOCH_MUTANT
-mutateEngineEpochs = take 1
-#else
 mutateEngineEpochs = id
-#endif
 
 mutateEpochRows :: [AcceleratorResidencyDemand] -> [AcceleratorResidencyDemand]
-#ifdef INFERENCE_ACCELERATOR_DROP_OVERLAP_DEBIT_MUTANT
-mutateEpochRows rows = take 1 rows
-#else
 mutateEpochRows = id
-#endif
 
 classText :: EngineWorkloadClass -> Text
 classText workloadClass = case workloadClass of

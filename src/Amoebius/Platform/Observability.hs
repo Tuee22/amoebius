@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Platform.Observability
@@ -64,11 +63,7 @@ provisionObservability demand = do
       _ <- either (Left . Text.pack . show) Right (fitBacking (observabilityBacking demand) raw)
       Right (ProvisionedObservability demand work usable raw)
  where
-#ifdef PLATFORM_SERVICES_2_FIXED_PROMETHEUS_MUTANT
-  effectiveMonitoringBudget row = (observabilityMonitoringBudget row) {monitoringTsdbTemporaryBytes = 0}
-#else
   effectiveMonitoringBudget = observabilityMonitoringBudget
-#endif
   validateFiniteQuery budget
     | any (== 0)
         [ queryMaximumConcurrent budget

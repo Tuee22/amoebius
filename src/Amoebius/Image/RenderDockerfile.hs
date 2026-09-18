@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -16,11 +15,7 @@ newtype Dockerfile = Dockerfile {dockerfileText :: Text}
     deriving stock (Eq, Show)
 
 renderBaseFrom :: Text
-#ifdef IMAGE_RECIPE_AUTHORED_BASE_DIGEST_MUTANT
-renderBaseFrom = "FROM ubuntu:24.04@sha256:0000000000000000000000000000000000000000000000000000000000000000 AS amoebius-base"
-#else
 renderBaseFrom = "FROM ${BASE_IMAGE} AS amoebius-base"
-#endif
 
 renderDockerfile :: BakeCatalog -> Either CatalogError Dockerfile
 renderDockerfile catalog = do

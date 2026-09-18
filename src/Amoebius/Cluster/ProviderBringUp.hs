@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Cluster.ProviderBringUp
@@ -51,9 +50,6 @@ data ManagedProviderChild = ManagedProviderChild ProviderChildPlan ManagedCapaci
   deriving stock (Eq, Show)
 
 validateProviderImageSource :: String -> Either ProviderBringUpError ()
-#ifdef PROVIDER_CHILD_BRINGUP_PUBLIC_PULL_MUTANT
-validateProviderImageSource _ = Right ()
-#else
 validateProviderImageSource image
   | not ("registry.amoebius.invalid:5000/amoebius/" `isPrefixOf` image) = Left PublicRegistryImageForbidden
   | not ("@sha256:" `contains` image) = Left MutableImageReferenceForbidden
@@ -62,7 +58,6 @@ validateProviderImageSource image
   contains needle haystack = any (needle `isPrefixOf`) (tails haystack)
   tails [] = [[]]
   tails value@(_ : rest) = value : tails rest
-#endif
 
 bringUpManagedCapacity
   :: ProviderChildPlan

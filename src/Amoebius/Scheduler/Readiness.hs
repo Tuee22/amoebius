@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 
@@ -56,9 +55,7 @@ observeBootstrapCapacitySchedulerReady
   -> Either BootstrapReadinessError BootstrapCapacitySchedulerReady
 observeBootstrapCapacitySchedulerReady observed
   | bootstrapExpectedGeneration observed /= bootstrapObservedGeneration observed = Left BootstrapGenerationMismatch
-#ifndef CAPACITY_SCHEDULER_COLLAPSED_READINESS_MUTANT
   | bootstrapExpectedConfigDigest observed /= bootstrapObservedConfigDigest observed = Left BootstrapConfigDigestMismatch
-#endif
   | bootstrapExpectedRootResourceVersion observed /= bootstrapObservedRootResourceVersion observed = Left BootstrapRootMismatch
   | not (bootstrapSchedulerAvailable observed) = Left BootstrapSchedulerUnavailable
   | not (bootstrapManagedTaintAbsent observed && bootstrapGeneralAdmissionAbsent observed && bootstrapFullBindingAuthorityAbsent observed) = Left BootstrapManagedAuthorityAlreadyPresent
@@ -129,13 +126,9 @@ data BootstrapAction = CutoverEnumeratedController Text | InstallManagedAuthorit
   deriving anyclass (NFData)
 
 authorizeBootstrapAction :: BootstrapCapacitySchedulerReady -> BootstrapAction -> Bool
-#ifdef CAPACITY_SCHEDULER_STAGE_DROP_MUTANT
-authorizeBootstrapAction _ _ = True
-#else
 authorizeBootstrapAction _ CutoverEnumeratedController {} = True
 authorizeBootstrapAction _ InstallManagedAuthority = False
 authorizeBootstrapAction _ ApplyGeneralGuardedController = False
-#endif
 
 nullText :: Text -> Bool
 nullText value = value == mempty

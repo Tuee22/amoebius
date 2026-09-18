@@ -894,7 +894,7 @@ and external Vault, MinIO, native Pulsar, and Patroni observers. Three
 classifier/projection/resource-accounting mutants must turn red. This would test the classifier and child
 boundary, not the Phase-75 planned/failover migration correspondence or physically independent brokers per
 child. The required lane and guest on each substrate are owned by
-[substrate_doctrine.md §1.1](./substrate_doctrine.md#11-the-natural-architecture-rule) rather than restated here.
+[substrate_doctrine.md §1.1](./substrate_doctrine.md#11-the-natural-architecture-rule) rather than restated here. Owed by [Phase 74](../../DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md).
 
 **Phase-75 target migration challenge — NOT VALIDATED.** `Amoebius.Multicluster.GatewayMigration` must
 delegate its decisions to the Phase 75 `interpret` model. Planned and Failover traces must cover all sixteen
@@ -902,7 +902,7 @@ migration actions; an outside-forest journal must observe eight unreplicated ack
 zero Planned loss, fenced promotion, and post-heal convergence. Recovery time is to be tested, while the
 data-loss bound remains assumed-and-monitored. Authoritative local DNS and a raw-kernel hub move are also
 future gate subjects; Route53 and real WAN behavior remain outside that claim. No sentence in this target
-description is a validation result.
+description is a validation result. Owed by [Phase 75](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md).
 
 ---
 

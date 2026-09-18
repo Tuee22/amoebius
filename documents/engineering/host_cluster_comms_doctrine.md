@@ -362,7 +362,7 @@ validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPME
 compute-daemon contracts are assigned to **Phase 89**; its scoped target does not claim the physical Apple
 peer. The target surfaces are `Amoebius.HostComms.{NodePort,Loopback,Illegal}` and
 `Amoebius.HostWorker.{Peer,Auth}`; their assignment is not an implementation or validation result. This doc never
-maintains a competing status ledger; it states the target shape and links back for status.
+maintains a competing status ledger; it states the target shape and links back for status. Owed by [Phase 89](../../DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md).
 
 ---
 

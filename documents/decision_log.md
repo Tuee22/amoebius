@@ -148,6 +148,24 @@ specification, not an observed property.
 **Replaces**: N/A
 **Replaced by**: N/A
 
+### DL-0011 — The honesty rule scope and trigger
+
+**Date**: 2026-09-17
+**Decision**: The three-mood rule of [`documentation_standards.md` §6](./documentation_standards.md#6-honesty-the-proventestedassumed-discipline) measures doctrine, the root guides, and the plan rulebooks and indexes; a phase contract is specification by construction and the two registers exist to name identifiers, so they are outside its scope. A paragraph names machinery when a backticked span is a module of this repository or a concrete repository source file; a layout glob, a bare extension, or a sibling project's path is not a claim, and a sibling path is spelled with that project's prefix so the distinction is visible in the text. The standalone checker of [DL-0005](#dl-0005--the-documentation-checker-is-a-standalone-package) implements exactly this trigger and scope.
+**Rejected alternatives**: Measuring every governed paragraph, including phase contracts and registers. A sprint's implementation field and a register row name modules by design, so the rule would flag the documents whose purpose is to name what is owed. Treating every `src/`-rooted span as this repository's path. Sibling projects share that layout, so their evidence paragraphs would be forced into an "owed by" that owes nothing.
+**Affected documents**: `documents/documentation_standards.md`, `documents/engineering/manifest_generation_doctrine.md`, `documents/engineering/release_lifecycle_doctrine.md`, `documents/engineering/service_capability_doctrine.md`, `src/doc-check/Amoebius/Doc/Governance.hs`
+**Replaces**: N/A
+**Replaced by**: N/A
+
+### DL-0012 — The hygiene row's roots, run-module pattern, and run-directory convention
+
+**Date**: 2026-09-18
+**Decision**: The kernel budget counts every Haskell line under `src/validation-kernel` and `src/gate-spec`; the documentation checker under `src/doc-check` carries its own recorded cap of seven thousand lines, and the plan-decisions library is data the row observes without a cap. A per-phase run module is a module whose path segment ends in `Run` (`PhaseZeroRun`, `ArtifactCalculusRun/Internal.hs`); the generic `Runner` and its submodules are not run modules. The refusal of a second definition of a vocabulary type measures the validator roots; a duplicate elsewhere under `src/` is observed on the row and owed to the phase that owns the vocabulary library, so the seed gate cannot be blocked by product debt a later phase closes. A suite receives the run's suite directory as its one argument and writes its bytes there; the area's oracle executable receives the same directory and prints its ledger to standard output; the runner reads that ledger and the oracle's exit and holds the verdict.
+**Rejected alternatives**: Reading `*Run*` literally, which would refuse the one runner the doctrine requires. Counting the checker inside the kernel budget, which would spend half of it on a package the kernel never links. Letting each area choose its own suite-to-oracle transport, which would leave the runner unable to digest the bytes uniformly.
+**Affected documents**: `AGENTS.md`, `documents/engineering/gate_runner_doctrine.md`, `src/validation-kernel/Amoebius/Validation/Runner/Hygiene.hs`, `src/validation-kernel/Amoebius/Validation/Runner.hs`
+**Replaces**: N/A
+**Replaced by**: N/A
+
 ## 3. Errata register
 
 Each erratum names the passage corrected and the entry that decided the correction. The corrected passage
@@ -161,6 +179,7 @@ links the entry; this table is the index.
 | E4 | `dsl_doctrine.md` §4; `app_vs_deployment_doctrine.md` §11 | The typed spec records spelled once, owed by Phase 3. | [DL-0004](#dl-0004--the-typed-spec-records-are-spelled-once) |
 | E5 | Implementation ledgers in `dsl_doctrine.md`, `extension_conformance_doctrine.md`, `low_code_ui_runtime_doctrine.md`, and the tracker | Struck. | [DL-0006](#dl-0006--the-honesty-backlog-is-struck-or-re-mooded) |
 | E6 | False present tense about unbuilt machinery across the doctrine suite and the glossary | Re-mooded into specification voice with "owed by" links. | [DL-0006](#dl-0006--the-honesty-backlog-is-struck-or-re-mooded) |
+| E7 | Sibling-project source paths in `manifest_generation_doctrine.md` §3, `release_lifecycle_doctrine.md` §8, and `service_capability_doctrine.md` §7 | Spelled with the sibling project's prefix; outside the honesty trigger. | [DL-0011](#dl-0011--the-honesty-rule-scope-and-trigger) |
 
 ## Related Documents
 

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -104,15 +103,9 @@ planObjectActions authority generation desired observed =
         else Left (GenericSsaStageNotEligible identity (desiredActivation wanted))
       Right (validatedAction (applyKind (objectKind (desiredObject wanted))) identity)
 
-#ifdef PHASE26_GENERATION_AFTER_DIFF_MUTANT
-  -- The mutant deliberately turns stable objects into writes by changing the
-  -- generation after diff. The external snapshot oracle catches this.
-  stableKind _ = ApplyDesiredObject
-#else
   stableKind kind
     | kind == JobKind = RetainTerminalAwaitingCompletionGateway
     | otherwise = NoOp
-#endif
 
   applyKind kind
     | kind `elem` [DeploymentKind, StatefulSetKind, DaemonSetKind] = ApplyDesiredPodController

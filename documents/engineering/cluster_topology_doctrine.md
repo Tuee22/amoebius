@@ -56,15 +56,14 @@ substrate doctrine already owns (Lima on apple, WSL2 on windows). This document 
 topology it induces; it owns **no** substrate names, no detection, no VM-provider mechanics, and no capacity
 numbers (those are [substrate_doctrine.md](./substrate_doctrine.md) and [resource_capacity_doctrine.md](./resource_capacity_doctrine.md)).
 
-The pure relation is implemented for Phase 4, its reflected schema/decoder consumers arrive in Phase 3, and
-runtime engine realization belongs to Phases 52–54.
-The bound [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) validates
-`Amoebius.Dsl.Topology` at Register 1: seven compile-time index pairs, the exhausted 3×3 engine/environment
-compatibility matrix, host distinctness, fixed placement, and elastic growth are accepted only with all
-changed-production mutants red.
-The three corresponding Dhall-typecheck loci remain Phase 3 work rather than a backward dependency.
-No EKS resource was created, no VM booted, and no node joined; those runtime facts remain **UNVERIFIED**.
-Status and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+The pure relation is owed by [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md),
+its reflected schema/decoder consumers by [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md), and
+runtime engine realization by Phases 52–54. Phase 4 must validate `Amoebius.Dsl.Topology` at Register 1:
+compile-time index pairs, the exhausted engine/environment compatibility matrix, host distinctness, fixed
+placement, and elastic growth are accepted only with every generated production mutant red. The corresponding
+Dhall-typecheck loci remain Phase 3 work rather than a backward dependency. No EKS resource, VM, or node join
+is claimed; those runtime facts remain **UNVERIFIED**. Status and gates live only in
+[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 

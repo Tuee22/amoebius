@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Ui.Offline.Replay
   ( Outbox (..)
@@ -39,24 +39,14 @@ noReplayOwner = ReplayOwner Nothing
 
 admitReplay :: ReplaySession -> ReplayAdmission
 admitReplay session
-#ifndef OFFLINE_REPLAY_RECEIPTS_DROP_MEMBERSHIP_VALIDATION_MUTANT
   | not (membershipCurrent session) = ReplayRefused DeniedMembership
-#endif
   | not (programCompatible session) = ReplayRefused ReloadRequired
   | otherwise = ReplayAdmitted (replayScope session)
 
 claimReplay :: Tab -> ReplayOwner -> Either Denial ReplayOwner
 claimReplay tab (ReplayOwner Nothing) = Right (ReplayOwner (Just tab))
 claimReplay _tab (ReplayOwner (Just _)) =
-#ifdef OFFLINE_REPLAY_RECEIPTS_TWO_TAB_REPLAY_MUTANT
-  Right (ReplayOwner (Just _tab))
-#else
   Left DeniedNotReplayOwner
-#endif
 
 disconnect :: Outbox -> Outbox
-#ifdef OFFLINE_REPLAY_RECEIPTS_DISCARD_PENDING_DISCONNECT_MUTANT
-disconnect _ = Outbox []
-#else
 disconnect outbox = outbox
-#endif

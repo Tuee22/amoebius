@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The complete, inspectable declaration of one extension.
@@ -52,9 +51,6 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as Encoding
 import Numeric (showHex)
-#ifdef EXTENSION_DECLARATION_DROPS_SCOPE_INDEX_MUTANT
-import Unsafe.Coerce (unsafeCoerce)
-#endif
 
 -- | A calculus slot received a component from another calculus, or the declaration was
 -- given no name.  The error names both calculi so the refusal is externally observable.
@@ -77,16 +73,6 @@ data DeclaredComponent = DeclaredComponent
   }
   deriving stock (Eq, Ord, Show)
 
-#ifdef EXTENSION_DECLARATION_OPTIONAL_COMPONENT_MUTANT
--- Seeded defect: the evidence component and its field have become optional by absence.
-data ExtensionDeclaration scope = ExtensionDeclaration
-  { extensionName :: Text
-  , extensionArtifact :: Component scope
-  , extensionBudget :: Component scope
-  , extensionLift :: Component scope
-  , extensionWorkflow :: Component scope
-  }
-#else
 data ExtensionDeclaration scope = ExtensionDeclaration
   { extensionName :: Text
   , extensionArtifact :: Component scope
@@ -95,38 +81,8 @@ data ExtensionDeclaration scope = ExtensionDeclaration
   , extensionWorkflow :: Component scope
   , extensionEvidence :: Component scope
   }
-#endif
 
 -- | Construct the only declaration shape admitted by the core.
-#ifdef EXTENSION_DECLARATION_OPTIONAL_COMPONENT_MUTANT
-declareExtension
-  :: Text
-  -> Component scope
-  -> Component scope
-  -> Component scope
-  -> Component scope
-  -> Either DeclarationError (ExtensionDeclaration scope)
-declareExtension name artifact budget lift workflow = do
-  validateName name
-  validateSlot ArtifactCalculus artifact
-  validateSlot BudgetCalculus budget
-  validateSlot LiftCalculus lift
-  validateSlot WorkflowCalculus workflow
-  pure (ExtensionDeclaration name artifact budget lift workflow)
-#elif defined(EXTENSION_DECLARATION_DROPS_SCOPE_INDEX_MUTANT)
--- Seeded defect: independent scope indices are erased before the declaration is stored.
-declareExtension
-  :: Text
-  -> Component artifactScope
-  -> Component budgetScope
-  -> Component liftScope
-  -> Component workflowScope
-  -> Component evidenceScope
-  -> Either DeclarationError (ExtensionDeclaration artifactScope)
-declareExtension name artifact budget lift workflow evidence =
-  declareExtensionSameScope
-    name artifact (unsafeCoerce budget) (unsafeCoerce lift) (unsafeCoerce workflow) (unsafeCoerce evidence)
-#else
 declareExtension
   :: Text
   -> Component scope
@@ -136,9 +92,7 @@ declareExtension
   -> Component scope
   -> Either DeclarationError (ExtensionDeclaration scope)
 declareExtension = declareExtensionSameScope
-#endif
 
-#ifndef EXTENSION_DECLARATION_OPTIONAL_COMPONENT_MUTANT
 declareExtensionSameScope
   :: Text
   -> Component scope
@@ -155,7 +109,6 @@ declareExtensionSameScope name artifact budget lift workflow evidence = do
   validateSlot WorkflowCalculus workflow
   validateSlot EvidenceCalculus evidence
   pure (ExtensionDeclaration name artifact budget lift workflow evidence)
-#endif
 
 validateName :: Text -> Either DeclarationError ()
 validateName name
@@ -186,9 +139,7 @@ rawComponents declaration =
   , extensionBudget declaration
   , extensionLift declaration
   , extensionWorkflow declaration
-#ifndef EXTENSION_DECLARATION_OPTIONAL_COMPONENT_MUTANT
   , extensionEvidence declaration
-#endif
   ]
 
 declarationComposition :: ExtensionDeclaration scope -> Composition scope
@@ -199,24 +150,15 @@ declarationComposition declaration =
         (singleton (extensionArtifact declaration))
         (singleton (extensionBudget declaration)))
       (singleton (extensionLift declaration)))
-#ifdef EXTENSION_DECLARATION_OPTIONAL_COMPONENT_MUTANT
-    (singleton (extensionWorkflow declaration))
-#else
     (append
       (singleton (extensionWorkflow declaration))
       (singleton (extensionEvidence declaration)))
-#endif
 
 declarationResource :: ExtensionDeclaration scope -> ResourceVector
 declarationResource = compositionResource . declarationComposition
 
 declarationArtifactSet :: ExtensionDeclaration scope -> Set DeclaredComponent
-#ifdef EXTENSION_DECLARATION_OMIT_DECLARED_RECIPE_MUTANT
--- Seeded defect: the production artifact reader silently drops its component.
-declarationArtifactSet _ = Set.empty
-#else
 declarationArtifactSet = setFor ArtifactCalculus
-#endif
 
 declarationBudgetSet :: ExtensionDeclaration scope -> Set DeclaredComponent
 declarationBudgetSet = setFor BudgetCalculus

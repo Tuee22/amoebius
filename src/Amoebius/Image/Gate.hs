@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -131,10 +130,6 @@ renderRegistryPullGateError problem = case problem of
   RegistryRerunMutated _ -> "RegistryRerunMutated"
 
 validateMechanism :: RegistryDenialMechanism -> Either RegistryPullGateError ()
-#ifdef BASE_IMAGE_REGISTRY_NOOP_EGRESS_POLICY_MUTANT
-validateMechanism _ = Right ()
-#else
 validateMechanism mechanism = case mechanism of
   EnforcingNodeFirewall -> Right ()
   KindnetNetworkPolicy -> Left PublicRegistryDenialNotEnforcing
-#endif

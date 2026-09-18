@@ -547,13 +547,13 @@ run two bounded Pulumi executor Jobs concurrently, project each child and a gran
 ancestor branch, observe a byte-stable no-op second reconcile, and then remove both child stacks and all three
 test clusters through the same discover/diff/enact discipline. The compile corpus must independently reject
 sibling and ancestor fields. This target is bounded to two `kind` children; provider children and live rke2
-joins remain UNVERIFIED. Every hardware substrate can run the `linux-cpu` target lane.
+joins remain UNVERIFIED. Every hardware substrate can run the `linux-cpu` target lane. Owed by [Phase 74](../../DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md).
 
 Phase 75 must realize teardown policy in `Amoebius.Multicluster.Teardown` and `Pushback`. The gate must distinguish
 lossless-by-synchronization from bounded-by-failover-budget, refuses CPU, memory, ephemeral, durable, cache,
 device, and unreachable-survivor deficits before teardown, and records a named failback on explicit override.
 Its outside inventory must observe removal of the three test clusters, network namespaces, DNS authority, and
-external journal roots while retaining the Phase-62–64 backing platform.
+external journal roots while retaining the Phase-62–64 backing platform. Owed by [Phase 75](../../DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md).
 
 ---
 
@@ -649,7 +649,7 @@ must cover workflow-completion/load target derivation, quota and capability refu
 physical identities, taint/supply/layout/device/scheduler-authority gates, and `Unreachable → refuse`. A
 retained-Kubernetes drill must observe the signal and ownership-metadata analogues with exact cleanup. It is not
 EKS, managed-node, or AWS leak-freedom evidence; those layers remain UNVERIFIED until valid AWS authority is
-available. Every hardware substrate can always supply the `linux-cpu` parent lane.
+available. Every hardware substrate can always supply the `linux-cpu` parent lane. Owed by [Phase 79](../../DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md).
 
 ---
 

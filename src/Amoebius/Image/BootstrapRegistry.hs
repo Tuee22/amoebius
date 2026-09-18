@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -204,9 +203,6 @@ bootstrapRegistryDomain =
       , K8sObjectIdentity "Deployment/amoebius-bootstrap/registry-mutation-proxy"
       , K8sObjectIdentity "Service/amoebius-bootstrap/registry-mutation-proxy"
       ]
-#ifdef BASE_IMAGE_REGISTRY_BOOTSTRAP_DOMAIN_EXPANSION_MUTANT
-        <> [K8sObjectIdentity "Deployment/default/foreign"]
-#endif
     )
 
 bootstrapRegistryInitializedFields :: Set Text
@@ -327,9 +323,6 @@ adoptBootstrapRegistryHandoff
   -> Set Text
   -> Text
   -> IO (Either BootstrapRegistryError BootstrapHandoffVerdict)
-#ifdef BASE_IMAGE_REGISTRY_HANDOFF_WITHOUT_EQUALITY_MUTANT
-adoptBootstrapRegistryHandoff provision _liveDomain _liveFields _liveDigest = adoptReady provision
-#else
 adoptBootstrapRegistryHandoff provision liveDomain liveFields liveDigest
   | liveDomain /= provisionedBootstrapRegistryIdentities provision =
       pure (Left (BootstrapRegistryObservedDomainMismatch (provisionedBootstrapRegistryIdentities provision) liveDomain))
@@ -338,7 +331,6 @@ adoptBootstrapRegistryHandoff provision liveDomain liveFields liveDigest
   | liveDigest /= provisionedBootstrapRegistryHandoffDigest provision =
       pure (Left (BootstrapHandoffDigestMismatch (provisionedBootstrapRegistryHandoffDigest provision) liveDigest))
   | otherwise = adoptReady provision
-#endif
 
 adoptReady :: ProvisionedBootstrapRegistry -> IO (Either BootstrapRegistryError BootstrapHandoffVerdict)
 adoptReady provision = do

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -132,8 +131,4 @@ controlPlaneReady phase = case phase of
   _ -> False
 
 controlPlaneFieldManager :: Text
-#ifdef LIVE_DSL_DEPLOY_EFFECT_SWAP_MUTANT
-controlPlaneFieldManager = "live-dsl-deploy-harness"
-#else
 controlPlaneFieldManager = "amoebius-live-dsl-deploy"
-#endif

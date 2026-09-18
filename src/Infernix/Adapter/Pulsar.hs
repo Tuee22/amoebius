@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -57,11 +56,7 @@ eventForCommand :: InferenceCommand -> InferenceEvent
 eventForCommand command =
   InferenceEvent
     { eventScopeText = commandScopeText command
-#ifdef INFERNIX_LIFT_REGENERATE_COMMAND_ID_MUTANT
-    , eventCommandId = let CommandId value = commandId command in CommandId (value <> "-retry")
-#else
     , eventCommandId = commandId command
-#endif
     , eventWorkId = commandWorkId command
     , eventNonce = commandNonce command
     , eventKind = "terminal"

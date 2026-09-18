@@ -77,6 +77,34 @@ resources before the validation frontier reaches it.
 **Forward-deferred:** authenticated reproducible toolchain acquisition — [Phase 1](phase_01_toolchain_spike.md) `toolchain_spike` / `LTD-BOOT-001`; compiler-backed source closure — [Phase 2](phase_02_repository_layout_conformance.md) `repository_layout_conformance` / `LTD-SRC-000`, `LTD-SRC-008`; the spine fact through the shipped binary — [Phase 3](phase_03_typed_spine.md) `typed_spine` / `LTD-DSL-001`
 **Gate:** `pb validate phase 00`; see [Gate integrity](#gate-integrity).
 
+### Gate specification
+
+The compiled specification the runner executes, rendered by `amoebius-validate spec phase 00`; the
+documentation checker refuses this document when the block and the compiled value differ.
+
+```gate-spec
+capability: documentation_suite
+role: seed
+claim: For one snapshot, the standalone documentation checker reports zero findings on the governed corpus and the named finding on each rendered negative; the three bootstrap predicate mutants are judged by the independent driver; the custody probes pass; the hygiene row is green at the recorded cap; the generation-2 seed is content-addressed and human-issued.
+subjects: Amoebius.Validation.BootstrapPredicate, Amoebius.Doc.Check, Amoebius.Validation.Runner, Amoebius.Validation.Custody
+suite: plan-decisions-suite
+oracle: oracle-doc
+positive: clean-predicate | input=Amoebius.Validation.BootstrapPredicate | expected=silent ExitSuccess
+negative: digest-equality-bypass | input=bootstrapDigestMatches | tag=digest-equality-bypass | stage=predicate
+negative: snapshot-freshness-bypass | input=bootstrapSnapshotMatches | tag=snapshot-freshness-bypass | stage=predicate
+negative: bootstrap-path-bypass | input=bootstrapInputPathAllowed | tag=bootstrap-path-bypass | stage=predicate
+positive: store-seed-roundtrip | input=SeedRecord | expected=equal
+positive: store-receipt-roundtrip | input=Receipt | expected=equal
+negative: store-tampered-receipt | input=receipt payload | tag=signature does not verify | stage=custody
+negative: tripwire-agent-shell | input=CLAUDECODE,AI_AGENT | tag=ISSUER-AGENT-SESSION | stage=custody
+negative: preflight-status-surface-dirty | input=surface digest | tag=StatusSurfaceDirty | stage=preflight
+negative: preflight-verifier-diverged | input=verifier digest | tag=KERNEL-VERIFIER-DIVERGED | stage=preflight
+negative: preflight-generation-absent | input=seed | tag=GENERATION-ABSENT | stage=preflight
+mutants: stages= per-module=8 cap=40 kill-ratio=3/5
+substrate: none
+seed: predicates=clean-predicate,digest-equality-bypass,snapshot-freshness-bypass,bootstrap-path-bypass | custody=store-seed-roundtrip,store-receipt-roundtrip,store-tampered-receipt,tripwire-agent-shell,preflight-status-surface-dirty,preflight-verifier-diverged,preflight-generation-absent
+```
+
 ### GenesisTrust pins
 
 The following seven repository-relative local-custody inputs are the complete pinned file set. The byte count
@@ -140,7 +168,7 @@ remains phase-local and cannot be supplied by this prose.
 | `Command` | Future public spelling is `pb validate phase 00`, but `pb` is inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs the shipped verifier directly as `amoebius-validate preview phase 00`, which mints nothing; the human runs `sudo amoebius-validate accept --phase 00`. The seed hook compiles and runs the three-case predicate matrix serially with `-j1`. |
 | `Oracle` | `test/oracle/doc/Main.hs` prints the expected finding ledger from literals and imports no product or validator module. Acquired `test/validation-kernel/BootstrapMutationDriver.hs` independently states the clean-plus-three predicate expectations. `Amoebius.Validation.SeedCustodyOracle.Internal` separately states the closed seven-case custody transcript without importing the supervisor's decision types. |
 | `Positive controls` | The governed corpus; the clean predicate; the seven custody successes; a frozen baseline that matches the tree; a decision log whose entries are well-formed and strictly increasing. |
-| `Paired negatives` | Rendered documentation negatives: broken link, missing status line, duplicate anchor, non-frontier status vector, unauthorised frozen edit, uncited module claim, gate-specification block mismatch. The three predicate mutants. The six custody refusals. Each is refused with its exact finding or case label at its exact locus. |
+| `Paired negatives` | Rendered documentation negatives: broken link, stale backlink, missing status line, non-frontier status vector, unauthorised frozen edit, uncited module claim, gate-specification block mismatch, decision-log order. The three predicate mutants. The six custody refusals. Each is refused with its exact finding or case label at its exact locus. |
 | `Mutants` | Runner-generated over `Amoebius.Doc.Check`, `Amoebius.Validation.Runner.Spec`, `Amoebius.Validation.Runner.Mutants`, and `Amoebius.Validation.Runner.Hygiene`, eight per module, kill ratio at least 0.6, stillborn excluded. The finite three-case predicate exception in §M.4 is retained as the only authored mutant set. |
 | `Discovery` | The governed path inventory is compared two-way with the frozen baseline; the package description's stanza module map is compared two-way with the subjects named above; empty discovery refuses. |
 | `Challenge` | The runner renders the negative corpus beneath `.build/docs/**` after the run starts, with a nonce in each negative's path; the checker's finding ledger must carry that nonce. |
@@ -200,13 +228,15 @@ their exact loci.
 
 ### Remaining Work
 
-Implement the three plan-decisions modules and the two kernel edits. Until this sprint records Done, its raw
-observations are retained by the integrated Phase-0 gate.
+The paired negatives named above are discharged only by the Phase-0 gate specification owed by
+[Sprint 0.7](#sprint-07-phase-0-gate-specification-first-reseed-and-receipt-bearing-reset-); until the human's `accept`, the
+plan-decisions projection and its oracle ledger are component diagnostics. The frozen baseline is re-projected
+from the governed corpus in the same change that lands it, so the digest rows never lag the bytes they freeze.
 
 ## Sprint 0.2: Checker reconciliation ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/validation-kernel/Amoebius/Validation/PhaseContract/Internal.hs`, `src/validation-kernel/Amoebius/Validation/Documentation/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PhasePassReceipt/Internal.hs`, and `src/plan-decisions/Amoebius/Plan/PhaseIdentity.hs`
+**Implementation**: `src/validation-kernel/Amoebius/Validation/PhaseContract/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PhaseSemanticContract.hs`, `src/validation-kernel/Amoebius/Validation/PhaseSemanticJoin.hs`, `src/validation-kernel/Amoebius/Validation/ResourceProvisionContract.hs`, `src/validation-kernel/Amoebius/Validation/PhasePassReceipt/Internal.hs`, `src/validation-kernel/Amoebius/Validation/Legacy/Internal.hs`, and `src/plan-decisions/Amoebius/Plan/PhaseIdentity.hs`
 **Blocked by**: Sprint 0.1
 **Independent Validation**: The reconciled checker reports zero findings over the fifty-six-phase plan; the expected findings recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice) are the paired negatives, each reproduced by re-inserting one literal. A checker that still derives the domain from `0..95` is refused at the identity-table locus.
 **Oracle**: `test/oracle/doc/Main.hs` states the expected finding set for the reconciled plan and for each re-inserted literal.
@@ -232,15 +262,21 @@ the named finding at the named locus.
 
 ### Remaining Work
 
-Implement the derivations and remove the literals. The forty phase-missing findings, the cardinality
-findings, and the Phase-50 edge finding are the reconciliation target.
+The forty phase-missing findings, the cardinality findings, and the Phase-50 edge finding are the
+reconciliation target, and the checker must report zero findings over the plan before the Phase-0 gate can
+run. Two residues are deliberate: the generation-1 semantic registry keeps its per-slot requirement values as
+placeholders for the slice phases and for the rows DL-0008 resolved by decision, and the kernel's own component
+suites that pinned the retired literals stay red. Both are deleted, not re-authored, by
+[Sprint 0.6](#sprint-06-delete-pass-package-rewrite-and-executable-split-), because a typed second copy of the
+plan is what [DL-0007](../documents/decision_log.md#dl-0007--certification-generation-2-replaces-the-validation-kernel)
+retires.
 
 ## Sprint 0.3: Documentation checker extraction ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/doc-check/Amoebius/Doc/Check.hs`, `src/doc-check/Amoebius/Doc/Render.hs`, and `app/amoebius-validate/Main.hs`
+**Implementation**: `src/doc-check/Amoebius/Doc/Check.hs`, `src/doc-check/Amoebius/Doc/Governance.hs`, `src/doc-check/Amoebius/Doc/Phase.hs`, `src/doc-check/Amoebius/Doc/Render.hs`, `src/doc-check/Amoebius/Doc/Types.hs`, `src/plan-decisions/Amoebius/Plan/StatusFrontier.hs`, and `app/amoebius-validate/Main.hs`
 **Blocked by**: Sprint 0.2
-**Independent Validation**: The standalone checker over the governed corpus is the positive control; each runner-rendered negative is a paired negative refused by its named finding. The new checks — decision-log structure, frozen baseline, three-mood honesty, gate-specification block equality, status vector, and paragraph-spanning sentence measurement — each have a rendered negative. Generated mutants in `Amoebius.Doc.Check` are killed by the ledger.
+**Independent Validation**: The standalone checker over the governed corpus is the positive control; each runner-rendered negative is a paired negative refused by its named finding. The new checks — decision-log structure, frozen baseline, three-mood honesty under the scope [DL-0011](../documents/decision_log.md#dl-0011--the-honesty-rule-scope-and-trigger) fixes, gate-specification block equality, and the status vector — each have a rendered negative judged by the oracle from its own literals; the paragraph-spanning sentence measurement stays an observation of the prose budget and has no negative. Generated mutants in `Amoebius.Doc.Check` are killed by the ledger.
 **Oracle**: `test/oracle/doc/Main.hs`; it depends on no `amoebius` library.
 **Legacy IDs**: none
 **Docs to update**: `documents/documentation_standards.md`
@@ -264,12 +300,17 @@ named finding respectively. Refuse a checker that imports a validator module at 
 
 ### Remaining Work
 
-Extract the checker, remove its conditional-compilation loci, and author the rendered negatives.
+The checker's recorded cap is seven thousand lines across `src/doc-check`, measured by the hygiene row owed by
+[Sprint 0.4](#sprint-04-gate-specification-and-runner-core-); until that row exists the cap is a constant the
+package states about itself. Gate-specification block equality compares against the blocks the corpus carries
+until the gate-specification library of the same sprint supplies the compiled values. The generated-mutant
+kill over the checker is the runner's, so this sprint's own evidence is the corpus ledger and the eight
+negatives.
 
 ## Sprint 0.4: Gate specification and runner core ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/gate-spec/Amoebius/Validation/GateSpec.hs`, `src/validation-kernel/Amoebius/Validation/Runner.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Spec.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Mutants.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Binary.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Observer.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Hygiene.hs`, and `src/validation-kernel/Amoebius/Validation/Runner/Capture.hs`
+**Implementation**: `src/gate-spec/Amoebius/Validation/GateSpec.hs`, `src/validation-kernel/Amoebius/Validation/Runner.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Spec.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Mutants.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Binary.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Observer.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Hygiene.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Capture.hs`, and `test/runner/Main.hs`
 **Blocked by**: Sprint 0.3
 **Independent Validation**: A specification whose subjects are inside the executable's closure verifies; a kernel subject, a non-seed specification without a `BinaryFact`, and an oracle stanza with a product dependency are refused by the smart constructor or `verifySpec` at their exact loci. A generated mutant that changes suite bytes is killed; a stillborn mutant is excluded, not counted.
 **Oracle**: `test/oracle/runner/Main.hs` states the expected refusals, the sampled operator loci, and the kill table from literals.
@@ -293,12 +334,22 @@ and require the oracle to refuse the changed bytes at the following stage.
 
 ### Remaining Work
 
-Implement the library and the runner. The operator catalogue is fixed at delivery.
+The operator catalogue is fixed at delivery: constant flip, boundary shift, branch swap, field drop, and
+list truncation, sampled by a seeded stream so a rerun draws the same loci. The runner's own suite
+exercises the constructor refusals, verification against a fixture package description, the loci and the
+witness, the kill table, the hygiene row over a fixture tree, and capture; the first rebuild-and-judge of a
+generated mutant against a shipped module is owed by [Phase 1](phase_01_toolchain_spike.md), whose gate is
+the first non-seed specification. Two rows stay red by construction until
+[Sprint 0.6](#sprint-06-delete-pass-package-rewrite-and-executable-split-): the hygiene row, because the
+generation-1 kernel is over budget and carries conditional compilation, and the authority row, because the
+product executable still links the validator. A component diagnostic may run the stages past the hygiene
+preflight to observe them; it cannot mint a green candidate while either row is red
+([DL-0012](../documents/decision_log.md#dl-0012--the-hygiene-rows-roots-run-module-pattern-and-run-directory-convention)).
 
 ## Sprint 0.5: Custody core and human commands ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/validation-kernel/Amoebius/Validation/SeedCustodySupervisor/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SeedReceipt/Internal.hs`, `src/validation-kernel/Amoebius/Validation/PhasePassReceipt/Internal.hs`, `src/validation-kernel/Amoebius/Validation/CertificationReset/Internal.hs`, `src/validation-kernel/Amoebius/Validation/Compatibility.hs`, `src/validation-kernel/Amoebius/Validation/Dispatch/Internal.hs`, and `app/amoebius-validate/Main.hs`
+**Implementation**: `src/validation-kernel/Amoebius/Validation/Custody.hs`, `src/validation-kernel/Amoebius/Validation/Custody/Store.hs`, `src/validation-kernel/Amoebius/Validation/Custody/Status.hs`, `src/validation-kernel/Amoebius/Validation/Custody/Preflight.hs`, `src/validation-kernel/Amoebius/Validation/Compatibility.hs`, `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs`, and `app/amoebius-validate/Main.hs`
 **Blocked by**: Sprint 0.4
 **Independent Validation**: `preview` runs the complete gate and mints nothing; `accept` from the human account signs and applies exactly one phase's patch; each preflight refusal — `StatusSurfaceDirty`, `PredecessorNotCommitted`, `STATUS-WITHOUT-RECEIPT`, `KERNEL-VERIFIER-DIVERGED`, `GOVERNANCE-UNACCEPTED`, `HARDWARE-BEFORE-BARRIER`, `SUBSTRATE-ABSENT`, `KernelOverBudget`, `SPEC-WEAKENED` — is a paired negative. An agent environment marker refuses issuance. Closure-based chaining keeps a receipt across an edit outside the closure and reopens across an edit inside it.
 **Oracle**: `src/validation-kernel/Amoebius/Validation/SeedCustodyOracle/Internal.hs` for the seven custody probes; `test/oracle/runner/Main.hs` for the refusals and chaining cases.
@@ -325,12 +376,26 @@ Edit a file outside and then inside the predecessor closure and require the rece
 
 ### Remaining Work
 
-Implement the edits to the custody core and the verifier executable's command surface.
+The generation-2 custody core is new code beside the generation-1 modules rather than an edit of them: the
+store, the signed seed and receipt records, the status surface and its one-phase patch, the preflight
+decision as a pure function of gathered facts, and the closure digest. The generation-1 supervisor, its
+receipt format, and the protected mirror are retired with the delete pass of
+[Sprint 0.6](#sprint-06-delete-pass-package-rewrite-and-executable-split-). Three things wait on later
+sprints or the human: the issuer key and the first generation exist only after the human's reseed; `accept`
+runs the gate through the registry, which carries no specification until
+[Sprint 0.7](#sprint-07-phase-0-gate-specification-first-reseed-and-receipt-bearing-reset-); and the
+frozen-document findings the doc-check reports are folded into `GOVERNANCE-UNACCEPTED` once the verifier
+links the checker's ledger into the preflight facts. `accept` runs the gate as the user who invoked sudo, never as
+root, with that user's home and the tool paths named by `--cabal` and `--ghc`, and only the signing and the
+status patch happen with privilege. An accepted phase also turns every paragraph that said
+it was owed by that phase into an honesty finding, so the agent's next act after a human `accept` is to
+re-mood those paragraphs as observed implementations citing the new receipt, under a decision-log entry
+where the paragraph is frozen.
 
 ## Sprint 0.6: Delete pass, package rewrite, and executable split ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `amoebius.cabal`, `app/amoebius/Main.hs`, and `app/amoebius-validate/Main.hs`
+**Implementation**: `amoebius.cabal`, `app/amoebius/Main.hs`, `app/amoebius-validate/Main.hs`, `test/runner/Main.hs`, and the flag-free compile-fail twins beside their legal suites
 **Blocked by**: Sprint 0.5
 **Independent Validation**: After the pass, the kernel line count is at or below fourteen thousand, no conditional-compilation line remains under `src/`, `app/`, or `test/`, no `*Run*` module remains, the package description declares at most twenty flags, and the product executable's closure contains no validator module. Each is a paired negative reproduced by re-inserting one artefact. The unprotected component suite passes after every family deletion.
 **Oracle**: `test/oracle/runner/Main.hs` states the expected hygiene row and closure from literals.
@@ -356,12 +421,21 @@ end, require the hygiene row and the closure test to pass.
 
 ### Remaining Work
 
-Perform the pass. No receipt is issued during it.
+No receipt is issued during the pass. The kernel that remains is the generation-2 custody core, the runner,
+and the three-module seed vocabulary; every generation-1 family, its authored mutant seams, and its four
+hundred suites are gone, and the package description declares no flag. Two residues are recorded rather than
+hidden: the flag-selected compile-fail twins are rendered as flag-free Haskell files beside their legal
+suites, and their compilation-failure judgement is owed by [Phase 3](phase_03_typed_spine.md) with the
+compile-fail facility it folds in; and the product components that were never buildable before the pass —
+the Pulsar client and the fifteen components that link it, which need the lazily generated transport module
+— stay unbuilt until [Phase 1](phase_01_toolchain_spike.md) derives that input. Packaging defects the pass
+surfaced in never-built product stanzas are repaired in the package description as declared dependencies
+and listed modules, never as source changes.
 
 ## Sprint 0.7: Phase-0 gate specification, first reseed, and receipt-bearing reset ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/gate-spec/Amoebius/Validation/GateSpec/Seed.hs`, `src/validation-kernel/Amoebius/Validation/BootstrapQualification/Internal.hs`, and `test/validation-kernel/BootstrapMutationDriver.hs`
+**Implementation**: `src/gate-spec/Amoebius/Validation/GateSpec/Seed.hs`, `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs`, `src/validation-kernel/Amoebius/Validation/BootstrapQualification/Internal.hs`, `src/validation-kernel/Amoebius/Validation/Runner.hs`, and `test/validation-kernel/BootstrapMutationDriver.hs`
 **Blocked by**: Sprint 0.6
 **Independent Validation**: The Phase-0 specification verifies and its fenced block equals the compiled value; the human's reseed installs generation 2 at the verifier's content address; the receipt-bearing reset names `ResetCause { validatorGap = "gates measured the harness", productGap = LTD-DSL-001 }`; a reset without a product gap is refused while any `LTD-DSL-*` row is open. The three predicate cases retain their exact exits and streams.
 **Oracle**: `test/validation-kernel/BootstrapMutationDriver.hs` for the predicate matrix; `test/oracle/runner/Main.hs` for the specification and reset cases.
@@ -387,7 +461,14 @@ identity and require exactly one phase's patch.
 
 ### Remaining Work
 
-Everything above. The first `accept` ends this phase.
+The seed protocol is generated, never authored: each bypass is one complete-line rewrite of the predicate
+source applied to a fresh copy beneath the run root, compiled directly with the pinned compiler together with
+the independent driver, and run under the observer; the driver refuses with the case label alone. The seed
+role is the one role whose subjects are validator modules and whose closure is the verifier executable's,
+because the phase validates the validator's seed and no product binary exists yet. The specification joins
+the registry under its capability, and the fenced block in this document equals its rendering. Two acts
+remain the human's: the reseed that installs generation 2 at the verifier's content address with the issuer
+key beside it, and the reset and `accept` that follow. The agent runs `preview phase 00` and stops.
 
 ## Documentation Requirements
 
@@ -417,3 +498,4 @@ Everything above. The first `accept` ends this phase.
 - [Validation-frame doctrine](../documents/engineering/validation_frame_doctrine.md)
 - [Repository-layout doctrine](../documents/engineering/repository_layout_doctrine.md)
 - [Testing spoof resistance](../documents/engineering/testing_spoof_resistance.md)
+- [Behavioural verification doctrine](../documents/engineering/behavioural_verification_doctrine.md) — a verdict never rests on how a subject presents itself

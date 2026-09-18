@@ -245,13 +245,13 @@ Phase 63 must run the production `Amoebius.Platform.BringUp` orchestration uncha
 across healthy, partial-failure, restart-after-failure, and partition families must produce 256 deterministic
 schedules. Every fault must fail closed, every healthy replay must be byte-identical and reach all Ready
 states, and the MinIO/Percona-operator intervals must supply an independent-chain concurrency witness.
-`IOSimPOR` must separately explore the healthy trace under a branching/schedule bound.
+`IOSimPOR` must separately explore the healthy trace under a branching/schedule bound. Owed by [Phase 63](../../DEVELOPMENT_PLAN/phase_63_platform_services_2.md).
 
 ### Phase-67 target dedup-fold simulation — NOT VALIDATED
 
 Phase 67 must drive the production `Amoebius.Pulsar.Dedup` fold through 720 deterministic reorder/duplicate
 schedules. Every stable work key must apply exactly one effect and the unstable-key twin must turn red;
-modeled-broker fidelity remains bounded by a separate Register-3 native-client challenge.
+modeled-broker fidelity remains bounded by a separate Register-3 native-client challenge. Owed by [Phase 67](../../DEVELOPMENT_PLAN/phase_67_pulsar_client.md).
 
 ### Phase-69 target workflow-failover simulation — NOT VALIDATED
 
@@ -260,7 +260,7 @@ and a bounded `IOSimPOR` exploration of store-commit/kill/redelivery/partition i
 schedule must keep one applied effect, one promoted consumer handle, and the pinned pointer HEAD; the
 duplicate-apply and orphan-consumer mutants must turn the simulation red. Modeled-substrate fidelity remains
 assumed and requires a separate Register-3 live Failover challenge on the `linux-cpu` baseline at the host's
-natural architecture ([substrate_doctrine.md §1.1](./substrate_doctrine.md#11-the-natural-architecture-rule)).
+natural architecture ([substrate_doctrine.md §1.1](./substrate_doctrine.md#11-the-natural-architecture-rule)). Owed by [Phase 69](../../DEVELOPMENT_PLAN/phase_69_content_store_workflow.md).
 
 Phase 75 must add a second Register-2.5 instance: `GatewayMigrationSimSpec` must drive both migration traces
 through the Phase 75 `interpret` function, validate every edge against the pinned action sequence, check all

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Index-preserving composition over the five core calculi.
@@ -197,11 +196,7 @@ renameComponent name component = case component of
   WorkflowComponent _ resources value -> WorkflowComponent name (kept resources) value
   EvidenceComponent _ resources value -> EvidenceComponent name (kept resources) value
  where
-#ifdef CALCULUS_COMPOSITION_DROPS_TRANSFORM_INDEX_MUTANT
-  kept _resources = zeroResources
-#else
   kept resources = resources
-#endif
 
 -- | An ordered composition at one request scope.  The constructor is private, so callers
 -- cannot retag a component or insert an unindexed value into the sequence.
@@ -214,23 +209,8 @@ emptyComposition _scope = Composition []
 singleton :: Component scope -> Composition scope
 singleton component = Composition [component]
 
-#ifdef CALCULUS_COMPOSITION_WIDENS_SCOPE_MUTANT
--- The seeded hole: the right component's request index is discarded and rebuilt at the
--- left index.  The committed negative fixture compiles only in this configuration.
-compose :: Component leftScope -> Component rightScope -> Composition leftScope
-compose left right = Composition [left, retag right]
-
-retag :: Component from -> Component to
-retag component = case component of
-  ArtifactComponent name resources value -> ArtifactComponent name resources value
-  BudgetComponent name resources value -> BudgetComponent name resources value
-  LiftComponent name resources value -> LiftComponent name resources value
-  WorkflowComponent name resources value -> WorkflowComponent name resources value
-  EvidenceComponent name resources value -> EvidenceComponent name resources value
-#else
 compose :: Component scope -> Component scope -> Composition scope
 compose left right = Composition [left, right]
-#endif
 
 append :: Composition scope -> Composition scope -> Composition scope
 append (Composition left) (Composition right) = Composition (left <> right)
@@ -246,14 +226,4 @@ compositionResource (Composition components) =
   foldl' addIndex zeroResources (fmap componentResource components)
 
 addIndex :: ResourceVector -> ResourceVector -> ResourceVector
-#ifdef CALCULUS_COMPOSITION_SATURATES_RESOURCE_SUM_MUTANT
-addIndex left right =
-  ResourceVector
-    { resourceCpu = min 8 (resourceCpu left + resourceCpu right)
-    , resourceMemory = min 80 (resourceMemory left + resourceMemory right)
-    , resourceEphemeralStorage = min 800 (resourceEphemeralStorage left + resourceEphemeralStorage right)
-    , resourcePodSlots = min 8 (resourcePodSlots left + resourcePodSlots right)
-    }
-#else
 addIndex = addResources
-#endif

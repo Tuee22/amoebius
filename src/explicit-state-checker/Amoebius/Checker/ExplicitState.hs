@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 -- | Amoebius-owned bounded explicit-state checking over the formal 'Model'.
 --
@@ -148,28 +148,12 @@ successorNode model node event = case interpret model event (nodeState node) of
     pure (if allowed then Just (Node successor (nodeTrace node <> [step])) else Nothing)
 
 enqueue :: [Node] -> [Node] -> [Node]
-#ifdef EXPLICIT_STATE_TRUNCATES_FRONTIER_MUTANT
-enqueue queue successors = queue <> take 1 successors
-#else
 enqueue queue successors = queue <> successors
-#endif
 
 checkerSemantics :: Model -> Model
-#ifdef EXPLICIT_STATE_WIDENS_ACTION_GUARD_MUTANT
-checkerSemantics model = model
-  { modelActions =
-      [ action {actionGuard = Literal (BoolValue True)}
-      | action <- modelActions model
-      ]
-  }
-#else
 checkerSemantics = id
-#endif
 
 firstViolation :: Model -> State -> Either CheckerError (Maybe ViolationKind)
-#ifdef EXPLICIT_STATE_SKIPS_INVARIANT_MUTANT
-firstViolation _model _state = Right Nothing
-#else
 firstViolation model state = go (modelInvariants model)
  where
   go [] = Right Nothing
@@ -177,7 +161,6 @@ firstViolation model state = go (modelInvariants model)
     valid <- liftEvaluation
       (evalExpr model Map.empty state (namedExprBody named) >>= valueAsBool)
     if valid then go rest else Right (Just (InvariantViolation (namedExprName named)))
-#endif
 
 satisfiesConstraint :: Model -> State -> Either CheckerError Bool
 satisfiesConstraint model state = case modelConstraint model of

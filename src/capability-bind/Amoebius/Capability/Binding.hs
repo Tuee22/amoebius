@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Total representational binding.  This module expands provider graphs but
@@ -83,11 +82,7 @@ assembleBoundDeployment transition volumeRef registryRef services = do
 -- Phase 31 is the sole owner of the transition out of this state.
 boundDeploymentIsUnprovisioned :: BoundDeployment -> Bool
 boundDeploymentIsUnprovisioned _ =
-#ifdef CAPABILITY_BIND_PROVISIONED_VALUE_MUTANT
-  False
-#else
   True
-#endif
 
 decodeCapabilityProvider :: Text -> Either DecodeError CapabilityProvider
 decodeCapabilityProvider provider = case provider of
@@ -158,11 +153,7 @@ providerGraph arm resource shape = serviceObject : configObject : members <> dis
   configObject = ProviderObject (prefix <> "/config") "ConfigMap" "provider-config" Nothing
   members = fmap member (ordinals selectedNodeCount) <> bootstrapObjects
   selectedNodeCount =
-#ifdef CAPABILITY_BIND_COPY_SHAPE_TAG_MUTANT
-    1
-#else
     shapeNodes shape
-#endif
   member ordinal =
     ProviderObject
       (prefix <> "/member-" <> naturalText ordinal)
@@ -171,16 +162,10 @@ providerGraph arm resource shape = serviceObject : configObject : members <> dis
       (Just (prefix <> "/controller-" <> naturalText ordinal))
   distributedObjects = case shape of
     SingleNode -> []
-#ifdef CAPABILITY_BIND_COPY_SHAPE_TAG_MUTANT
-    Distributed nodes ->
-      [ ProviderObject (prefix <> "/shape-" <> naturalText nodes) "ScalarTag" "shape-tag" Nothing
-      ]
-#else
     Distributed _ ->
       [ ProviderObject (prefix <> "/discovery") "Service" "member-discovery" Nothing
       , ProviderObject (prefix <> "/quorum-policy") "PodDisruptionBudget" "quorum-policy" Nothing
       ]
-#endif
   bootstrapObjects = case arm of
     Sql -> [ProviderObject (prefix <> "/schema-bootstrap") "Job" "bootstrap" (Just (prefix <> "/schema-controller"))]
     _ -> []

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The witness a transition consumes: evidence that its precondition holds.
@@ -24,11 +23,7 @@ module Amoebius.Calculus.Lift.Witness
   , observationTag
   , observationFromTag
   , everyObservation
-#ifdef LIFT_CALCULUS_WITNESS_CONSTRUCTOR_EXPOSED_MUTANT
-  , Witness (..)
-#else
   , Witness
-#endif
   , witnessDetail
   , observe
   ) where
@@ -98,19 +93,4 @@ observe from to seen = case (layerOf from, layerOf to, seen) of
   (OnHost, OnHost, _unseen) -> Nothing
   (InFrame, InFrame, _unseen) -> Nothing
   (InContainer, InContainer, _unseen) -> Nothing
-#ifdef LIFT_CALCULUS_WITNESS_FORGED_WITHOUT_OBSERVATION_MUTANT
-  -- The seeded forgery, and it is deliberately the narrowest one available: entering a
-  -- frame is licensed when /nothing was observed/. That is the assertion section 7
-  -- forbids in its purest form — the evidence exists because a caller asked for it, and
-  -- there is not even a mistaken observation behind it.
-  --
-  -- Narrow on purpose. A forgery that also licensed the frame entry from an engine
-  -- observation would break the transition-specificity claim as well, and a mutant that
-  -- reddens two checks says nothing about which of them was holding the property. Both
-  -- arms below name a constructor, so the catch-all scan next door still has nothing to
-  -- say about this module and the observation table is the only instrument that reacts.
-  (OnHost, InFrame, NothingObserved) -> Just (Witness "asserted")
   (OnHost, InFrame, _unseen) -> Nothing
-#else
-  (OnHost, InFrame, _unseen) -> Nothing
-#endif

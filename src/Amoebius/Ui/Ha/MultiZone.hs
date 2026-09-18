@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Ui.Ha.MultiZone
   ( AdmissionError (..)
@@ -84,41 +84,13 @@ canonicalTopology =
     , redisIsReceiptAuthority = redisReceiptAuthority
     }
   where
-#ifdef UI_HA_MULTIZONE_REPLICAS_ONE_MUTANT
-    uiServers = [ZoneA]
-#else
     uiServers = [ZoneA, ZoneB, ZoneC]
-#endif
-#ifdef UI_HA_MULTIZONE_DROP_TOPOLOGY_SPREAD_MUTANT
-    uiProjectors = [ZoneA, ZoneA, ZoneC]
-#else
     uiProjectors = [ZoneA, ZoneB, ZoneC]
-#endif
-#ifdef UI_HA_MULTIZONE_REDIS_ONE_NODE_MUTANT
-    redisMembers = [ZoneA]
-#else
     redisMembers = [ZoneA, ZoneB, ZoneC]
-#endif
-#ifdef UI_HA_MULTIZONE_DROP_KEYCLOAK_ZONE_SPREAD_MUTANT
-    keycloakMembers = [ZoneA, ZoneA, ZoneC]
-#else
     keycloakMembers = [ZoneA, ZoneB, ZoneC]
-#endif
-#ifdef UI_HA_MULTIZONE_DROP_PDB_MUTANT
-    pdbMinimum = 0
-#else
     pdbMinimum = 2
-#endif
-#ifdef UI_HA_MULTIZONE_STICKY_SESSION_REQUIRED_MUTANT
-    stickyRequired = True
-#else
     stickyRequired = False
-#endif
-#ifdef UI_HA_MULTIZONE_REDIS_PERSISTENT_RECEIPT_MUTANT
-    redisReceiptAuthority = True
-#else
     redisReceiptAuthority = False
-#endif
 
 replicasFor :: Component -> HaTopology -> [Zone]
 replicasFor component topology = maybe [] id (lookup component (placements topology))
@@ -141,11 +113,7 @@ admitTopology topology =
         | otherwise -> Right topology
 
 plannedFault :: Fault
-#ifdef UI_HA_MULTIZONE_FAULT_ONE_NODE_ONLY_MUTANT
-plannedFault = OneNode ZoneB
-#else
 plannedFault = WholeZone ZoneB
-#endif
 
 continuityDuring :: HaTopology -> Fault -> Continuity
 continuityDuring topology fault = case fault of
@@ -163,8 +131,4 @@ authorizeAfterFault authority =
   cookieEmptyLogin authority && currentMembership authority && currentScopeEpoch authority
 
 repairAfterCoordinationLoss :: DurableState -> Maybe DurableState
-#ifdef UI_HA_MULTIZONE_SKIP_CURSOR_REPAIR_MUTANT
-repairAfterCoordinationLoss _ = Nothing
-#else
 repairAfterCoordinationLoss durable = Just durable
-#endif

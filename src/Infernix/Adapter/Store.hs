@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Infernix.Adapter.Store
@@ -57,23 +56,15 @@ stageArtifact scope catalog payload = do
       }
 
 commitReadyPointer :: Bool -> StagedArtifact -> Either ArtifactError ReadyArtifactHandle
-#ifdef INFERNIX_LIFT_MINT_READY_BEFORE_POINTER_COMMIT_MUTANT
-commitReadyPointer _ staged = Right (ready staged)
-#else
 commitReadyPointer committed staged
   | committed = Right (ready staged)
   | otherwise = Left ArtifactNotReady
-#endif
  where
   ready value = ReadyArtifactHandle value (pointerFor value)
 
 authorizeReadyArtifact :: ServiceCredential -> ReadyArtifactHandle -> Either ArtifactError ReadyArtifactHandle
 authorizeReadyArtifact credential handle@(ReadyArtifactHandle staged _)
-#ifdef INFERNIX_LIFT_DROP_ARTIFACT_SCOPE_MUTANT
-  | credentialScope credential /= stagedScope staged = Right handle
-#else
   | credentialScope credential /= stagedScope staged = Left ArtifactUnavailable
-#endif
   | otherwise = Right handle
 
 rejectForgedWireReference :: TenantScope -> CatalogIdentity -> Text -> Either ArtifactError ReadyArtifactHandle

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -102,11 +101,7 @@ capabilityArm need = case need of
   RegistryNeed _ -> Registry
   EdgeNeed _ -> Edge
   InferenceEngineCapabilityNeed _ ->
-#ifdef CAPABILITY_BIND_CATCHALL_ARM_MUTANT
-    SecretStore
-#else
     InferenceEngine
-#endif
 
 capabilityResourceName :: CapabilityNeed -> Text
 capabilityResourceName need = case need of
@@ -124,11 +119,7 @@ capabilityResourceName need = case need of
 -- bytes; the same need therefore survives a deployment-shape change exactly.
 renderCapabilityNeedSurface :: CapabilityNeed -> Text
 renderCapabilityNeedSurface need =
-#ifdef CAPABILITY_BIND_SHARED_APP_IMPORT_MUTANT
-  "capability:shared"
-#else
   armName (capabilityArm need) <> ":" <> capabilityResourceName need
-#endif
 
 -- | Haskell-owned Dhall projections used to demonstrate that product names,
 -- arbitrary engine URLs, and deployment-only fields have no app syntax.

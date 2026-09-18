@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The workflow itself: five arms over one vocabulary, indexed by what it still owes.
@@ -41,9 +40,6 @@ import Amoebius.Calculus.Workflow.Arm
   , Evidence (Evidence)
   , Resource (Resource)
   )
-#ifdef WORKFLOW_CALCULUS_TRANSFER_CONDITION_OPTIONAL_MUTANT
-import Amoebius.Calculus.Workflow.Arm qualified as WorkflowArm
-#endif
 import Amoebius.Calculus.Workflow.Ledger
   ( Ledger
   , emptyLedger
@@ -102,19 +98,11 @@ inParallel
   -> Workflow '[] cs y
   -> Workflow rs (Append bs (Append cs rs)) (x, y)
 inParallel (Workflow left) (Workflow right) =
-#ifdef WORKFLOW_CALCULUS_PARALLEL_REVERSES_BRANCHES_MUTANT
-  Workflow
-    ( \ledger -> case right ledger of
-        (rightValue, afterRight) -> case left afterRight of
-          (leftValue, afterLeft) -> ((leftValue, rightValue), afterLeft)
-    )
-#else
   Workflow
     ( \ledger -> case left ledger of
         (leftValue, afterLeft) -> case right afterLeft of
           (rightValue, afterRight) -> ((leftValue, rightValue), afterRight)
     )
-#endif
 
 -- | Bring a declared resource into existence, yielding a handle that witnesses it and an
 -- obligation that is now in the type.
@@ -148,20 +136,7 @@ teardown :: KnownSymbol r => Proxy r -> Workflow rs (Remove r rs) ()
 teardown name = Workflow (\ledger -> ((), released (recordArm Teardown ledger)))
   where
     resource = resourceOf name
-#if defined(WORKFLOW_CALCULUS_OBLIGATION_DROPPED_MUTANT)
-    -- The seeded drop. The arm still ran and still appears in the trace; only the record
-    -- that the obligation left the outstanding set is missing, which is exactly the shape
-    -- of the cleanup script that quietly diverges from what the other arms created. The
-    -- provisioned and released sets stop being equal, and nothing else moves.
-    released = id
-#elif defined(WORKFLOW_CALCULUS_OBLIGATION_DISCHARGED_TWICE_MUTANT)
-    -- The seeded double discharge. The two sets stay equal, so the balance question sees
-    -- nothing at all; only the multiplicity question does, which is why the ledger asks
-    -- both rather than one.
-    released ledger = recordRelease resource ToreDown (recordRelease resource ToreDown ledger)
-#else
     released = recordRelease resource ToreDown
-#endif
 
 -- | Discharge an obligation by transferring it to a longer-lived declaration, under a
 -- stated condition.
@@ -169,14 +144,6 @@ teardown name = Workflow (\ledger -> ((), released (recordArm Teardown ledger)))
 -- The condition is an argument and not a field with a default, so a caller that forgets it
 -- does not get a transfer with a hole in it — it gets a function, and the committed
 -- compile-fail twin is exactly that program.
-#ifdef WORKFLOW_CALCULUS_TRANSFER_CONDITION_OPTIONAL_MUTANT
-transfer :: KnownSymbol r => Proxy r -> Workflow rs (Remove r rs) ()
-transfer name =
-  Workflow
-    ( \ledger ->
-        ((), recordRelease (resourceOf name) (TransferredTo (WorkflowArm.Condition "unstated")) (recordArm Teardown ledger))
-    )
-#else
 transfer :: KnownSymbol r => Proxy r -> Condition -> Workflow rs (Remove r rs) ()
 transfer name condition =
   Workflow
@@ -184,27 +151,14 @@ transfer name condition =
         ((), recordRelease (resourceOf name) (dischargeFor condition) (recordArm Teardown ledger))
     )
   where
-#ifdef WORKFLOW_CALCULUS_TRANSFER_WITHOUT_A_CONDITION_MUTANT
-    -- The seeded loss. The obligation still leaves the outstanding set and the ledger
-    -- still balances, so neither of the ledger's two questions notices; what is gone is
-    -- the record of /why/ it left, and a transfer whose condition nobody stated is the
-    -- orphan this calculus exists to foreclose arriving through the one door left open.
-    dischargeFor _stated = ToreDown
-#else
     dischargeFor = TransferredTo
-#endif
-#endif
 
 -- | Run a workflow that begins owing nothing and ends owing nothing.
 --
 -- The two @'[]@s are the whole of section 3's compile-time claim. A workflow still holding
 -- an obligation has a different type, so it is not that this function refuses it — it is
 -- that the application does not typecheck.
-#ifdef WORKFLOW_CALCULUS_RUN_ACCEPTS_OUTSTANDING_MUTANT
-runWorkflow :: Workflow '[] after a -> (a, Ledger)
-#else
 runWorkflow :: Workflow '[] '[] a -> (a, Ledger)
-#endif
 runWorkflow (Workflow fold) = fold emptyLedger
 
 resourceOf :: KnownSymbol r => Proxy r -> Resource

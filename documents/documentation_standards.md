@@ -294,6 +294,13 @@ exactly one of three moods, and the mood is visible from the paragraph alone
 3. **Specification voice.** The paragraph contains "owed by" and links the phase document that owes the
    machinery, and that phase's status is not Done.
 
+The rule measures doctrine, the root guides, and the plan rulebooks and indexes; a phase contract is
+specification by construction, and the two registers exist to name identifiers. A paragraph names machinery
+when a backticked span is a module of this repository or a concrete repository source file under `src/`,
+`app/`, `test/`, or `pb/`; a layout glob, a bare extension, or a sibling project's path spelled with that
+project's prefix is not a claim
+([DL-0011](./decision_log.md#dl-0011--the-honesty-rule-scope-and-trigger)).
+
 File presence establishes only an observed footprint. A historical pass remains diagnostic after reopening
 and cannot be phrased as current validation. Doctrine never records a current pass, green count, or
 validation ledger. Those belong to retrievable run evidence and the plan's mechanical status projection.

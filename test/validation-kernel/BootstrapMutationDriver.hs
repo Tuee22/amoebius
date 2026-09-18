@@ -1,4 +1,8 @@
-module BootstrapMutationDriver (main) where
+-- | The independent driver of the finite Phase-0 seed. It links the predicate
+-- source directly, never a library, and judges the three decisions from literals:
+-- a clean predicate is silent and succeeds; a bypass makes the driver refuse with
+-- the bypass's case label alone on standard error and exit status one.
+module Main (main) where
 
 import Amoebius.Validation.BootstrapPredicate
   ( bootstrapDigestMatches
@@ -16,15 +20,9 @@ main = do
   when (bootstrapDigestMatches "not-a-digest" "not-a-digest") (reject "malformed-digest-accepted")
   unless (bootstrapSnapshotMatches digestA digestA) (reject "positive-snapshot-control-refused")
   when (bootstrapSnapshotMatches digestA digestB) (reject "snapshot-freshness-bypass")
-  unless
-    (bootstrapInputPathAllowed ".build/bootstrap-inputs/ghc-SHA256SUMS")
-    (reject "canonical-bootstrap-input-path-refused")
-  when
-    (bootstrapInputPathAllowed ".build/bootstrap-inputs/../escape")
-    (reject "bootstrap-path-bypass")
-  when
-    (bootstrapInputPathAllowed "src/validation-kernel/Main.hs")
-    (reject "tracked-source-accepted-as-bootstrap-input")
+  unless (bootstrapInputPathAllowed ".build/bootstrap-inputs/ghc-SHA256SUMS") (reject "canonical-bootstrap-input-path-refused")
+  when (bootstrapInputPathAllowed ".build/bootstrap-inputs/../escape") (reject "bootstrap-path-bypass")
+  when (bootstrapInputPathAllowed "src/validation-kernel/Main.hs") (reject "tracked-source-accepted-as-bootstrap-input")
 
 reject :: String -> IO ()
 reject label = hPutStrLn stderr label >> exitFailure

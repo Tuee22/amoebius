@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -371,36 +370,12 @@ evaluateSecurityLaws observations =
 
 securityVerdictS1, securityVerdictS2, securityVerdictS3, securityVerdictS4, securityVerdictS5, securityVerdictS6
   :: SecurityObservations -> SecurityVerdict
-#if defined(EXTENSION_SECURITY_IGNORE_S1_MUTANT)
-securityVerdictS1 _ = SecurityLawPassed
-#else
 securityVerdictS1 observations = verdict (s1Failures observations)
-#endif
-#if defined(EXTENSION_SECURITY_IGNORE_S2_MUTANT)
-securityVerdictS2 _ = SecurityLawPassed
-#else
 securityVerdictS2 observations = verdict [SkolemBarrierMissing | not (skolemCompilerBarriersPassed observations)]
-#endif
-#if defined(EXTENSION_SECURITY_IGNORE_S3_MUTANT)
-securityVerdictS3 _ = SecurityLawPassed
-#else
 securityVerdictS3 observations = verdict (s3Failures observations)
-#endif
-#if defined(EXTENSION_SECURITY_IGNORE_S4_MUTANT)
-securityVerdictS4 _ = SecurityLawPassed
-#else
 securityVerdictS4 observations = verdict (s4Failures observations)
-#endif
-#if defined(EXTENSION_SECURITY_IGNORE_S5_MUTANT)
-securityVerdictS5 _ = SecurityLawPassed
-#else
 securityVerdictS5 observations = verdict (s5Failures observations)
-#endif
-#if defined(EXTENSION_SECURITY_IGNORE_S6_MUTANT)
-securityVerdictS6 _ = SecurityLawPassed
-#else
 securityVerdictS6 observations = verdict (s6Failures observations)
-#endif
 
 securityLawPassed :: SecurityVerdict -> Bool
 securityLawPassed lawVerdict = case lawVerdict of

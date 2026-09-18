@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Store.Manifest
@@ -36,11 +35,7 @@ manifest components
   | hasDuplicateNames ordered = Left "ManifestComponentNamesMustBeUnique"
   | otherwise = Right (Manifest ordered)
   where
-#ifdef CONTENT_STORE_WORKFLOW_INSERTION_ORDER_ENCODER_MUTANT
-    ordered = components
-#else
     ordered = sortOn (TextEncoding.encodeUtf8 . componentName) components
-#endif
     hasDuplicateNames values =
       let names = map componentName values
        in any (uncurry (==)) (zip names (drop 1 names))

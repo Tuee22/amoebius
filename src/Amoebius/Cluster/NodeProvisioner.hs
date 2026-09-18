@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Pure signal-to-node-set planning.  This module cannot call a provider; it
@@ -118,45 +117,21 @@ planNodeSet nodeClass observed quota demand signal current observation = do
     LT -> Right (AddNode target)
     EQ -> Right (NodeNoOp target)
     GT -> case observation of
-#ifdef PROVIDER_DYNAMIC_NODES_UNREACHABLE_AS_GONE_MUTANT
-      Unreachable -> Right (RemoveNode target)
-#else
       Unreachable -> Left RefuseOnUnreachable
-#endif
       Present -> Right (RemoveNode target)
       Absent -> Right (RemoveNode target)
  where
   active = case signal of WorkflowCompletion value -> value; Load value -> value
-#ifdef PROVIDER_DYNAMIC_NODES_IGNORE_SIGNAL_MUTANT
-  target = nodeClassBaseCount nodeClass
-#else
   target = min (nodeClassMaximumCount nodeClass) (nodeClassBaseCount nodeClass + if active then 1 else 0)
-#endif
   podLimit = minimum [nodeClassPodSlots nodeClass, nodeClassCniSlots nodeClass, observedKubeletPodSlots observed, observedCniSlots observed]
-#ifdef PROVIDER_DYNAMIC_NODES_DEDUP_DISTINCT_PVCS_MUTANT
-  requiredAttachments = if null (demandCsiClaims demand) then 0 else 1
-#else
   requiredAttachments = fromIntegral (Set.size (Set.fromList (demandCsiClaims demand)))
-#endif
-#ifdef PROVIDER_DYNAMIC_NODES_IGNORE_LIVE_CSINODE_MUTANT
-  attachLimit = nodeClassCsiAttachSlots nodeClass
-#else
   attachLimit = min (nodeClassCsiAttachSlots nodeClass) (observedCsiAttachSlots observed)
-#endif
 
 cloudMutationPermitted :: Either NodeProvisionError NodePlan -> Bool
-#ifdef PROVIDER_DYNAMIC_NODES_APPLY_OVER_QUOTA_MUTANT
-cloudMutationPermitted _ = True
-#else
 cloudMutationPermitted (Right (AddNode _)) = True
 cloudMutationPermitted (Right (RemoveNode _)) = True
 cloudMutationPermitted _ = False
-#endif
 
 providerPhysicalIdentity :: Text -> Text -> Text -> Natural -> Text -> Text
 providerPhysicalIdentity account cluster nodeClass ordinal templatePath =
-#ifdef PROVIDER_DYNAMIC_NODES_TEMPLATE_ID_AS_PHYSICAL_MUTANT
-  Text.intercalate "/" [account, cluster, nodeClass, templatePath]
-#else
   Text.intercalate "/" [account, cluster, nodeClass, Text.pack (show ordinal), templatePath]
-#endif

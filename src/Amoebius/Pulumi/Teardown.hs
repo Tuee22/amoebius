@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 -- | Fail-closed teardown decisions and broadened run-owned enumeration.
 module Amoebius.Pulumi.Teardown
@@ -49,17 +49,10 @@ teardownDecision Ephemeral Absent = Right AlreadyAbsent
 teardownDecision Ephemeral Unreachable = Left RefuseOnUnreachable
 
 sweepRunOwned :: SweepCriteria -> [ObservedResource] -> [Text]
-#ifdef PROVIDER_DYNAMIC_NODES_SKIP_SWEEP_MUTANT
-sweepRunOwned _ _ = []
-#else
 sweepRunOwned criteria = map observedResourceId . filter leaked
  where
   leaked resource = observedResourceClass resource == Ephemeral && owned resource
   owned resource =
     observedRunTag resource == Just (sweepRunTag criteria)
-#ifdef PROVIDER_DYNAMIC_NODES_UNTAGGED_ORPHAN_MUTANT
-#else
       || observedVpcId resource == Just (sweepVpcId criteria)
       || observedClusterName resource == Just (sweepClusterName criteria)
-#endif
-#endif

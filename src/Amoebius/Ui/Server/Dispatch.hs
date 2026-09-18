@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The @serve-ui@ boundary ABI: what a request has to satisfy before a handler sees it.
@@ -62,13 +61,9 @@ data DispatchTrace = DispatchTrace
   deriving stock (Eq, Show)
 
 dispatchAuthorized :: RequestContext -> Either SecurityError DispatchTrace
-#ifdef UI_SINGLE_TENANT_LIVE_DISPATCH_BEFORE_AUTH_MUTANT
-dispatchAuthorized _ = Right (DispatchTrace 1 1 1)
-#else
 dispatchAuthorized request = do
   authorizeMutation request
   Right (DispatchTrace 1 1 1)
-#endif
 
 -- | The wire contract the linked handler registry was compiled against.
 data UiServerAbi
@@ -105,27 +100,7 @@ data BoundaryMutant
   deriving stock (Bounded, Enum, Eq, Show)
 
 compiledBoundaryMutant :: BoundaryMutant
-#if defined(UI_SERVER_TRUST_TENANT_HEADER_MUTANT)
-compiledBoundaryMutant = TrustTenantHeader
-#elif defined(UI_SERVER_DISPATCH_BEFORE_AUTHORIZE_MUTANT)
-compiledBoundaryMutant = DispatchBeforeAuthorize
-#elif defined(UI_SERVER_SKIP_CURRENT_EPOCH_MUTANT)
-compiledBoundaryMutant = SkipCurrentEpoch
-#elif defined(UI_SERVER_DISABLE_ORIGIN_CHECK_MUTANT)
-compiledBoundaryMutant = DisableOriginCheck
-#elif defined(UI_SERVER_DROP_CSP_HEADER_MUTANT)
-compiledBoundaryMutant = DropCspHeader
-#elif defined(UI_SERVER_READY_UNRESOLVED_HANDLER_MUTANT)
-compiledBoundaryMutant = ReadyWithUnresolvedHandler
-#elif defined(UI_SERVER_FIRST_HANDLER_WINS_MUTANT)
-compiledBoundaryMutant = ServerFirstHandlerWins
-#elif defined(UI_SERVER_SERVE_PRIVATE_PLAN_MUTANT)
-compiledBoundaryMutant = ServeServerPlanAsClientAsset
-#elif defined(UI_SERVER_NEW_RETRY_KEY_MUTANT)
-compiledBoundaryMutant = NewIdempotencyKeyOnRetry
-#else
 compiledBoundaryMutant = NoBoundaryMutant
-#endif
 
 securityHeadersFor :: BoundaryMutant -> [(Text, Text)]
 securityHeadersFor DropCspHeader = filter ((/= "Content-Security-Policy") . fst) productionSecurityHeaders

@@ -134,9 +134,10 @@ The calculus makes claims reviewable and falsifiable; it does not make them true
 - It does not establish current applicability from a historical pass alone; the accepted verifier must check
   the dependency compatibility relation in [§M.6](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass).
 
-Every result names these limits as assumptions or `UNVERIFIED` residue. The evidence-calculus implementation
-is the four public Haskell modules under `Amoebius.Calculus.Evidence`; only a complete current gate of a phase that links the parked evidence calculus (`LTD-LIB-001`)
-result establishes its source-bound instance.
+Every result names these limits as assumptions or `UNVERIFIED` residue. The evidence calculus is a parked
+library (`LTD-LIB-001`) whose four public Haskell modules under `Amoebius.Calculus.Evidence` are linked or
+deleted by a decision owed by [Phase 9](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md); only a complete
+current gate of a phase that links the calculus establishes its source-bound instance.
 
 ---
 

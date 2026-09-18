@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The grant: the authority a byte needs in order to exist.
@@ -37,21 +36,13 @@ module Amoebius.Calculus.Budget.Grant
   , everyPurpose
   , purposeTag
     -- * The paired bound
-#ifdef BUDGET_CALCULUS_GRANT_CONSTRUCTORS_EXPOSED_MUTANT
-  , Allowance (..)
-#else
   , Allowance
-#endif
   , allowance
   , allowanceCeiling
   , allowanceConcurrency
   , allowancePerItem
     -- * The grant
-#ifdef BUDGET_CALCULUS_GRANT_CONSTRUCTORS_EXPOSED_MUTANT
-  , Grant (..)
-#else
   , Grant
-#endif
   , grantLocation
   , grantPurpose
   , grantAllowance
@@ -202,8 +193,4 @@ issue source purpose wanted = case (bytesFit, slotsFit) of
         , poolFreeSlots = subtractSlots (poolFreeSlots source) (allowanceConcurrency wanted)
         }
     shortfall :: IssueRefusal -> Either IssueRefusal (Grant, Pool)
-#ifdef BUDGET_CALCULUS_GRANT_DEFAULTS_UNBOUNDED_MUTANT
-    shortfall _ = Right (granted, source {poolFreeBytes = Bytes 0, poolFreeSlots = Slots 0})
-#else
     shortfall = Left
-#endif

@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Formal.Dsl.Models
   ( dslModels
@@ -30,11 +30,7 @@ exactProjection = And
   ]
 
 projectionCapacityCases :: Expr
-#ifdef DSL_FORMAL_PROJECTION_COUNT_MUTANT
-projectionCapacityCases = int 0
-#else
 projectionCapacityCases = int 6561
-#endif
 
 projectionModel :: Model
 projectionModel = Model
@@ -84,14 +80,7 @@ tokenModel = Model
   }
 
 consumeGuard :: Expr
-#ifdef DSL_FORMAL_TOKEN_REUSE_MUTANT
-consumeGuard = And
-  [ NotEqual (Ref "tokenState") (atom "unissued")
-  , ArithmeticComparison LessThan (Ref "writes") (int 2)
-  ]
-#else
 consumeGuard = tokenState "ready"
-#endif
 
 consumeEffects :: [(Name, Expr)]
 consumeEffects = [("tokenState", atom "used"), ("writes", Add (Ref "writes") (int 1))]
@@ -183,10 +172,6 @@ reconcileActions =
   , action "MarkAbsentConverged" (And [observation "absent", Not (Ref "converged")])
       [("converged", bool True)]
   ]
-#ifdef DSL_FORMAL_RECONCILE_UNREACHABLE_MUTANT
-  <> [action "DeleteWhileUnreachable" (observation "unreachable")
-        [("replacement", atom "boundready"), ("oldDeleted", bool True)]]
-#endif
 
 reconcileModel :: Model
 reconcileModel = Model

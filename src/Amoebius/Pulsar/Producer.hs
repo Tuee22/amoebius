@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Pulsar.Producer
@@ -9,9 +8,6 @@ module Amoebius.Pulsar.Producer
   , produceKeyedAtSequence
   , closeProducer
   , producerApiSurface
-#ifdef PULSAR_CLIENT_PRODUCE_RAW_MUTANT
-  , produceRaw
-#endif
   ) where
 
 import Amoebius.Pulsar.Cbor (cborBytes, encodeCbor)
@@ -21,9 +17,6 @@ import Amoebius.Pulsar.Internal.Types
 import Proto.PulsarApi (BaseCommand'Type (..), MessageIdData, MessageMetadata)
 import Proto.PulsarApi_Fields qualified as F
 import Codec.Serialise (Serialise)
-#ifdef PULSAR_CLIENT_PRODUCE_RAW_MUTANT
-import Data.ByteString (ByteString)
-#endif
 import Data.IORef (atomicModifyIORef', newIORef)
 import Data.Function ((&))
 import Data.Text (Text)
@@ -97,12 +90,6 @@ producerApiSurface =
   , "produceAtSequence :: Serialise a => Producer -> Word64 -> a -> IO MessageId"
   , "produceKeyedAtSequence :: Serialise a => Producer -> Word64 -> Text -> a -> IO MessageId"
   ]
-#ifdef PULSAR_CLIENT_PRODUCE_RAW_MUTANT
-  <> ["produceRaw :: Producer -> ByteString -> IO MessageId"]
-
-produceRaw :: Producer -> ByteString -> IO MessageId
-produceRaw producer bytes = produceAtSequence producer 0 bytes
-#endif
 
 fromProto :: MessageIdData -> MessageId
 fromProto identifier =

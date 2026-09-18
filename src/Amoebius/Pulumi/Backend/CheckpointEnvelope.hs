@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Pulumi.Backend.CheckpointEnvelope
   ( CheckpointEntry (..)
@@ -94,10 +94,6 @@ acceptTransitEnvelope keyName plaintext ciphertext
   | plaintext `isInfixOf` ciphertext = Left "CheckpointPlaintextPresent"
   | otherwise =
       Right TransitEnvelope
-#ifdef PROVIDER_DEPLOY_CHECKPOINT_STATIC_KEY_MUTANT
-        { envelopeKeySource = PodLocalStaticKey
-#else
         { envelopeKeySource = VaultTransit
-#endif
         , envelopeCiphertext = ciphertext
         }

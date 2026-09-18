@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Ephemeral, node-scoped cache state.  Keys can only be obtained by hashing
@@ -68,9 +67,6 @@ cacheBytes = sum . map residentSizeBytes . cacheResidents
 pruneFor :: Natural -> Natural -> CacheState -> Either Text ([CacheKey], CacheState)
 pruneFor budget incoming state
   | incoming > budget = Left "CachePeakExceedsBudget"
-#ifdef DETERMINISM_JITCACHE_PRUNE_NOOP_MUTANT
-  | otherwise = Right ([], state)
-#else
   | cacheBytes state + incoming <= budget = Right ([], state)
   | otherwise = evict [] candidates state
  where
@@ -83,4 +79,3 @@ pruneFor budget incoming state
      in if cacheBytes next + incoming <= budget
           then Right (reverse (key : removed), next)
           else evict (key : removed) rest next
-#endif

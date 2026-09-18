@@ -312,7 +312,7 @@ catalogued in [`../illegal_state/illegal_state_tenancy.md`](../illegal_state/ill
 `Amoebius.Scope.Index` and `Amoebius.Scope.Flow`: its rank-2 request eliminator, private constructors, and
 Haskell compile pairs prevent request-index forgery, retagging, and escape. While its gate remains Active,
 persisted re-entry, law-family conformance, and provider
-enforcement are later claims.
+enforcement are later claims. Owed by [Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md).
 
 **Application code is shared; authority is not.** Low-code applications use the same generic client and server
 interpreters. Isolation therefore cannot rely on one tenant's compiled UI being absent from another image. It

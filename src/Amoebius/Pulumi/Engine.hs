@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Pulumi.Engine
   ( PulumiExecutorDemand (..)
@@ -77,11 +77,7 @@ boundedExecutionDemand parallelLimit executors
   | parallelLimit <= 0 = Left InvalidParallelCeiling
   | any invalid executors = Left NegativeExecutorDemand
   | otherwise =
-#ifdef PROVIDER_DEPLOY_CHECKPOINT_DROP_PARALLEL_EXECUTOR_MUTANT
-      aggregate (take 1 executors)
-#else
       aggregate (take parallelLimit executors)
-#endif
  where
   aggregate live =
     Right PulumiExecutionDemand
@@ -150,11 +146,7 @@ preparePulumiUp _ pulumiPath pluginPath stack
   | otherwise =
       Right EngineInvocation
         { invocationArgv = [pulumiPath, "up", "--yes", "--non-interactive", "--stack", stack]
-#ifdef PROVIDER_DEPLOY_CHECKPOINT_LEAK_PATH_MUTANT
-        , invocationEnvironment = [("PATH", "/usr/local/bin:/usr/bin:/bin")]
-#else
         , invocationEnvironment = []
-#endif
         , invocationPluginPath = pluginPath
         }
  where

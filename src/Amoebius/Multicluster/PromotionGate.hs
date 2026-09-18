@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Multicluster.PromotionGate
   ( PromotionEvidence (..)
@@ -27,10 +27,5 @@ authorizePromotion :: PromotionEvidence -> Either PromotionError PromotionAuthor
 authorizePromotion evidence
   | observedLagSeconds evidence > lagBoundSeconds evidence =
       Left (PromotionLagBoundExceeded (observedLagSeconds evidence) (lagBoundSeconds evidence))
-#ifdef GATEWAY_MIGRATION_DRILLS_PROMOTE_BEFORE_FENCE_MUTANT
-  | not (hasFreshnessWitness evidence || holdsFence evidence) = Right PromotionAuthorized
-  | otherwise = Left PromotionFreshnessUnproven
-#else
   | hasFreshnessWitness evidence || holdsFence evidence = Right PromotionAuthorized
   | otherwise = Left PromotionFreshnessUnproven
-#endif

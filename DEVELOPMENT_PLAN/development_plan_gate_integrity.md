@@ -555,7 +555,8 @@ Every phase inherits the following postconditions. They are part of the gate, no
     runner-generated beneath `.build/runs/**`.
 22. **Admitted non-Haskell set.** The tracked non-`.hs`, non-`.md` set is exactly the six admitted
     build, ignore, licence, and packaging files that
-    [Phase 2](phase_02_repository_layout_conformance.md) names; `pb/__main__.py` is pinned by its SHA-256.
+    [Phase 2](phase_02_repository_layout_conformance.md) names; the pin of `pb/__main__.py` by its SHA-256 is
+    owed by that phase.
 
 <a id="s-commit-timing"></a>
 
@@ -630,7 +631,7 @@ normative tree and the mechanical file classification. The development plan adds
    `src/validation-kernel`; the product gains `src/vocabulary`, `src/ui-core`, and `src/extension-spec`; each
    oracle area has one exclusive directory whose entry module is named exactly, for example
    `test/oracle/dsl/Main.hs`; and there are two executables, `amoebius` and `amoebius-validate`, with no
-   product-to-validator dependency edge.
+   product-to-validator dependency edge. Owed by [Phase 0](phase_00_documentation_suite.md).
 
 These rules make repository closure a prerequisite to evidence. A gate cannot certify behaviour while
 silently consuming a condemned source language, a pre-generated artifact, or a legacy fallback.

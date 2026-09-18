@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
 module Amoebius.Kernel.Chain
@@ -41,11 +40,7 @@ chain :: PlanConfig -> [Step PlanConfig]
 chain cfg@PlanConfig {internalPlanCounter} = fmap objectStep selectedObjects
  where
   selectedObjects =
-#ifdef CHAIN_DROP_SERVICE_MUTANT
-    dropLast (renderAll (planConfigProvisionedSpec cfg))
-#else
     renderAll (planConfigProvisionedSpec cfg)
-#endif
   objectStep object =
     let K8sObjectIdentity identity = objectIdentity object
      in mkCountingStep
@@ -56,12 +51,6 @@ chain cfg@PlanConfig {internalPlanCounter} = fmap objectStep selectedObjects
           [object]
           (const (pure ()))
 
-#ifdef CHAIN_DROP_SERVICE_MUTANT
-dropLast :: [a] -> [a]
-dropLast values = case reverse values of
-  [] -> []
-  _ : remaining -> reverse remaining
-#endif
 
 activationFrame :: RenderActivation -> Frame
 activationFrame activation = case activation of

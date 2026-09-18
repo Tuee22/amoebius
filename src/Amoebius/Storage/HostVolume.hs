@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -40,9 +39,7 @@ data HostVolumeError
 
 validateHostVolume :: RetainedPV -> HostVolumeObservation -> Either HostVolumeError ()
 validateHostVolume planned observed
-#ifndef RETAINED_STORAGE_RAW_HOST_DIRECTORY_MUTANT
   | observedHostVolumeKind observed /= FixedRawFilesystemImage = Left RawHostDirectoryForbidden
-#endif
   | observedRawBytes observed /= retainedPvCapacityBytes planned = Left (RawCapacityBelowWitness (retainedPvCapacityBytes planned) (observedRawBytes observed))
   | observedUsableBytes observed < retainedPvRequiredUsableBytes planned = Left (UsableCapacityBelowRequirement (retainedPvRequiredUsableBytes planned) (observedUsableBytes observed))
   | expectedFilesystem planned /= observedFilesystemType observed = Left (ObservedFilesystemTypeMismatch (expectedFilesystem planned) (observedFilesystemType observed))

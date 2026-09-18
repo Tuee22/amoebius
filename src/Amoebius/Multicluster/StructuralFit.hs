@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Multicluster.StructuralFit
   ( MigrationEdge (..)
@@ -68,11 +68,7 @@ checks edges =
   ]
 
 budgetWithinCap :: [MigrationEdge] -> Bool
-#ifdef GATEWAY_MIGRATION_CUTOFF_BUDGET_MUTANT
-budgetWithinCap _ = True
-#else
 budgetWithinCap = all ((<= maxDataLoss) . edgeDataLossBudget)
-#endif
 
 noDuplicates :: Ord value => [value] -> Bool
 noDuplicates values = all ((== 1) . length) (group (sort values))

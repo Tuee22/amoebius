@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Main (main) where
 
@@ -80,18 +80,4 @@ main = do
   putStrLn "apple-engine-bringup-spec: PASS (3 floor negatives, 3 brew ensure rows, 3 path negatives, 4 provider rows, 4 lifecycle rows, 3 fit negatives, complete unchanged lift, native arm64, ephemeral teardown)"
 
 mutantToken :: String
-#if defined(APPLE_ENGINE_INSTALLS_FLOOR_MUTANT)
-mutantToken = "apple-engine-bringup-mutant: RED installs-floor homebrew-refusal"
-#elif defined(APPLE_ENGINE_WRONG_PROVIDER_MUTANT)
-mutantToken = "apple-engine-bringup-mutant: RED wrong-provider image-build-selection"
-#elif defined(APPLE_ENGINE_LEAKS_EPHEMERAL_MUTANT)
-mutantToken = "apple-engine-bringup-mutant: RED leaks-ephemeral lifecycle"
-#elif defined(APPLE_ENGINE_DEFAULT_FRAME_MUTANT)
-mutantToken = "apple-engine-bringup-mutant: RED default-frame checked-carve"
-#elif defined(APPLE_ENGINE_REAUTHORS_LIFT_MUTANT)
-mutantToken = "apple-engine-bringup-mutant: RED reauthors-lift unchanged-linux-step"
-#elif defined(APPLE_ENGINE_ALLOWS_EMULATION_MUTANT)
-mutantToken = "apple-engine-bringup-mutant: RED allows-emulation native-arm64"
-#else
 mutantToken = "apple-engine-bringup-spec: RED unexpected"
-#endif

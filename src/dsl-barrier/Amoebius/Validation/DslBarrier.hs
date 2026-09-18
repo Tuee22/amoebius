@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The hardware-free composition boundary. Stage implementations remain in
@@ -81,17 +80,7 @@ data BarrierProblem
 
 expectedBarrierStages :: [BarrierStage]
 expectedBarrierStages =
-#if defined(DSL_BARRIER_LEGALITY_DROP_MUTANT)
-  [Decode, BindExpand, PlanResolve, Provision, RenderAll, Plan, DryRun, FakeApply]
-#elif defined(DSL_BARRIER_BIND_ARM_SWAP_MUTANT)
-  [Decode, Legality, PlanResolve, BindExpand, Provision, RenderAll, Plan, DryRun, FakeApply]
-#elif defined(DSL_BARRIER_RENDER_OMISSION_MUTANT)
-  [Decode, Legality, BindExpand, PlanResolve, Provision, Plan, DryRun, FakeApply]
-#elif defined(DSL_BARRIER_PLAN_REORDER_MUTANT)
-  [Decode, Legality, BindExpand, PlanResolve, Provision, RenderAll, DryRun, Plan, FakeApply]
-#else
   [minBound .. maxBound]
-#endif
 
 validateDslBarrier ::
   [StageObservation] -> BarrierChallenge -> FakeBoundaryObservation -> GateRun -> Either BarrierProblem ()
@@ -107,12 +96,8 @@ validateDslBarrier stages challenge fake gateRun = do
   renderedDigest <- maybe (Left (StageInventoryMismatch (map observedStage stages))) Right (digestOf RenderAll stages)
   require (fakeRequestDigest fake == renderedDigest) FakeRequestMismatch
   require (fakeRecoveredChallenge fake == barrierChallengeText challenge) FakeChallengeMismatch
-#if !defined(DSL_BARRIER_DRY_RUN_EXECUTION_MUTANT)
   require (fakeEffectStage fake == FakeApply) EffectBeforeFakeApply
-#endif
-#if !defined(DSL_BARRIER_FAKE_CALL_BYPASS_MUTANT)
   require (fakeExternallyObserved fake) SelfObservation
-#endif
   require (fakeTeardownObserved fake) FakeTeardownMissing
   require (runArms gateRun == everyArm) WorkflowArmMismatch
   require (evidenceObservation (runEvidence gateRun) == Evidence "observed") WorkflowEvidenceMismatch
@@ -122,28 +107,16 @@ validateDslBarrier stages challenge fake gateRun = do
   require (runIncludesMutants gateRun) WorkflowMutantsSkipped
  where
   checkStage observation = do
-#if defined(DSL_BARRIER_DECODE_WIDENING_MUTANT)
-    if observedStage observation == Decode then pure () else require (observedStagePassed observation) (StageFailed (observedStage observation))
-#else
     require (observedStagePassed observation) (StageFailed (observedStage observation))
-#endif
-#if defined(DSL_BARRIER_DEMAND_OMISSION_MUTANT)
-    if observedStage observation == PlanResolve then pure () else require (sha256Text (observedStageDigest observation)) (StageDigestMalformed (observedStage observation))
-#else
     require (sha256Text (observedStageDigest observation)) (StageDigestMalformed (observedStage observation))
-#endif
 
 digestOf :: BarrierStage -> [StageObservation] -> Maybe Text
 digestOf stage = fmap observedStageDigest . find ((== stage) . observedStage)
 
 uniqueDigests :: [StageObservation] -> Bool
-#if defined(DSL_BARRIER_PROVISION_IDENTITY_COLLAPSE_MUTANT)
-uniqueDigests _ = True
-#else
 uniqueDigests observations =
   let values = map observedStageDigest observations
   in length values == length (nub values)
-#endif
 
 sha256Text :: Text -> Bool
 sha256Text value =

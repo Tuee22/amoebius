@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.Browser.Projection (projectPureScript, projectionIsSafe) where
@@ -11,9 +10,6 @@ projectPureScript = Text.unlines
   [ "module Amoebius.Ui.Generated where"
   , "renderText = trustedText"
   , "request action = sameOrigin action"
-#ifdef UI_BROWSER_UNSAFE_INLINE_BUILD_MUTANT
-  , "unsafeInline = eval"
-#endif
   ]
 
 projectionIsSafe :: Text -> Bool

@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Test.Runner
   ( RunnerActions (..)
@@ -18,10 +18,6 @@ data RunnerActions = RunnerActions
 
 runTestTopology :: ProvisionedTestTopology -> RunnerActions -> IO ()
 runTestTopology _ actions =
-#ifdef TEST_TOPOLOGY_DSL_SKIP_TEARDOWN_MUTANT
-  runBody actions
-#else
   runBody actions `finally` topologyTeardown actions
-#endif
  where
   runBody steps = topologySpinUp steps >> topologyRunWorkflow steps >> topologyInjectFault steps >> topologyEvaluate steps

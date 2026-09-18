@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+
 
 module Amoebius.Ui.Realtime.Receipt
   ( CommandId (..)
@@ -23,8 +23,4 @@ data ReceiptSources = ReceiptSources
   deriving stock (Eq, Show)
 
 authoritativeReceipt :: ReceiptSources -> CommandId -> Maybe Receipt
-#ifdef UI_SINGLE_TENANT_LIVE_REDIS_RECEIPT_AUTHORITY_MUTANT
-authoritativeReceipt sources command = Map.lookup command (redisAcks sources)
-#else
 authoritativeReceipt sources command = Map.lookup command (durableReceipts sources)
-#endif
