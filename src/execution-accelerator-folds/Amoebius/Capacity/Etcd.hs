@@ -13,7 +13,7 @@ module Amoebius.Capacity.Etcd
   , provisionEtcdDemand
   ) where
 
-import Amoebius.Capacity.Phase29Mutation (phase29MutationTargets)
+import Amoebius.Capacity.CapacityMutation (capacityMutationTargets)
 import Control.DeepSeq (NFData)
 import Data.Text (Text)
 import GHC.Generics (Generic)
@@ -105,6 +105,6 @@ provisionEtcdDemand logical model = mutateEtcdResult original
 mutateEtcdResult :: Either EtcdError ProvisionedEtcdDemand -> Either EtcdError ProvisionedEtcdDemand
 mutateEtcdResult outcome = case outcome of
   Left EngineStorageOvercommit {}
-    | phase29MutationTargets "etcd-transition-physical" ->
+    | capacityMutationTargets "etcd-transition-physical" ->
         Left (EtcdLogicalQuotaExceeded 1 0)
   _ -> outcome

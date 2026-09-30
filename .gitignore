@@ -1,16 +1,10 @@
-# Every pattern here is a claim that the path it names is generated, and that the
-# repository-layout doctrine section 2 target tree contains it. A rule for a path the
-# tree does not contain is removed rather than kept — a rule hiding a path nobody
-# intends is how a second home for a generated class survives review. The rules covering
-# section 2.2 migration surfaces are temporary and retire with the root they cover.
+# Every pattern here is a claim about generated state or a tool-specific spill.
 
 # Canonical contained-state roots. Production and test state are both local but have
 # different teardown authority; neither is a source or container-context input.
 /.build/
 /.data/
 /.test_data/
-
-/test/golden/phase_*_ledger.json
 
 # Dependency resolution is refreshed dynamically and never committed.
 *.lock
@@ -37,24 +31,15 @@ dist-newstyle/
 *.tla
 *.cfg
 
-# JavaScript and PureScript build output. `node_modules/` is unanchored for the same
-# reason as the Cabal roots: the toolchain installs it beneath `.build/` with `--prefix`,
-# but `package.json` sits at the repository root, so a bare `npm install` lands here.
+# A misdirected package-manager invocation can leave a dependency tree beside source.
 node_modules/
-
-# Legacy PureScript build output below the authored UI root.
-/ui/.spago/
-/ui/output/
-/ui/dist/
 
 # Python may keep source-adjacent interpreter caches. They are always generated
 # and must never become repository inputs.
 __pycache__/
 *.py[cod]
 
-# The Poetry distribution's virtualenv. Unanchored for the same reason as `node_modules/`:
-# `pb/poetry.toml` pins it in-project so an environment check is a question about this
-# checkout, and a resolved dependency tree is never an authored input wherever it lands.
+# A misdirected Python invocation can leave a virtual environment beside source.
 .venv/
 
 # Cabal's per-worktree configure output. It sits beside the authored `cabal.project` and

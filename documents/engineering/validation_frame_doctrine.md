@@ -46,7 +46,7 @@ This ordering is mandatory:
 ```text
 GenesisTrust records exact prepared local-custody bytes plus narrow compile-time/platform facts
   → Phase 0 qualifies a finite governance, source-classification, and gate seed
-  → Phase 1 authenticates and reproduces the toolchain acquisition derived from that root
+  → Phase 1 verifies pinned bytes and reproduces toolchain acquisition relative to that root
   → Phase 2 closes the compiler-backed semantic source graph
   → Phases 3–8 build the typed DSL slices over one growing corpus
   → Phase 9, DSL_BARRIER, re-runs the union corpus through the shipped binary
@@ -83,7 +83,12 @@ Phase 0 must bind that narrow input to its invocation and evidence. It cannot au
 derivation, publisher, loader, host, or reproducibility by inspecting only the binary that compiler produced.
 These are named root assumptions, not silently discharged proof obligations.
 
-Phase 1 owns broader acquisition and provenance; Phase 2 owns compiler-backed source closure. The DSL barrier
+Phase 1 owns broader pin-verified acquisition and recorded byte identity. It compares all seven file sizes and digests,
+requires each pinned `SHA256SUMS` archive entry to agree with its independently fixed archive pin, and runs
+two contained offline acquisitions. It requires no operator keyring or GPG result; the three signature files
+remain opaque pinned bytes, and publisher identity remains an explicit unverified assumption
+([DL-0017](../decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring)).
+Phase 2 owns compiler-backed source closure. The DSL barrier
 owns universal qualification. These later obligations must not become recursive prerequisites for the finite
 Phase-0 seed. Exact root inputs and supported build platform are owned by the
 [Phase-0 contract](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md).
@@ -143,10 +148,14 @@ attribute a passing handoff or completed repair.
 
 ### 2.4 The reproducibility rule
 
-A receipt carries no signature and needs no privileged identity. Its authority is that any later run of the
-verifier re-derives its reproducible digest; `amoebius-validate replay` does so for every Done phase whose
-store record is absent or belongs to another generation, and a receipt that does not reproduce is void
-([DL-0013](../decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible)). The rule is stated for agents in
+A receipt carries no signature and needs no privileged identity. Its authority is that a complete gate ran
+and any later run of the verifier can re-derive its reproducible digest. The accepted receipt and bounded
+observations are durably archived under `validation-records/**`; the verifier exact-reads that bundle for
+predecessor custody. `amoebius-validate replay` re-runs every Done phase whose bundle is absent, invalid, or
+belongs to another verifier or governance digest. A receipt that does not reproduce is void. Losing ignored
+`.build/**` scratch does not destroy the tracked record; a phase digest without a valid bundle requires a fresh
+gate run ([DL-0015](../decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence),
+[DL-0016](../decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)). The rule is stated for agents in
 [`AGENTS.md`](../../AGENTS.md#reproducibility) and enforced by the runner's preflight, owed by
 [Phase 0](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md).
 
@@ -156,8 +165,9 @@ store record is absent or belongs to another generation, and a receipt that does
 
 `Substrate: none` means that the claim does not depend on a hardware-specific or live-infrastructure fact.
 For Phase 0, the compiler version/path and platform carried by the narrow GenesisTrust token are assumed build
-facts, not authenticated toolchain provenance; Phase 1 makes subsequent acquisition authenticated and
-reproducible. Through the DSL barrier (Phase 9) that toolchain remains a build prerequisite, not
+facts, not toolchain provenance; Phase 1 makes subsequent acquisition reproducible relative to fixed pins,
+without claiming publisher identity ([DL-0017](../decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring)).
+Through the DSL barrier (Phase 9) that toolchain remains a build prerequisite, not
 evidence about Linux, Apple, Windows, CUDA, Metal, a container engine, or a published image. Phase 50 separately observes the
 bounded `pb` runtime handoff; it cannot retroactively strengthen an earlier semantic result.
 
@@ -183,8 +193,8 @@ baseline, qualification corpus, tools, dependencies, and predecessor receipt bef
 Candidate code receives only declared read capabilities and run-owned write capabilities. It cannot replace
 those authorities, their parent directories, their process identities, or the runner's observations.
 
-Outside the explicitly assumed `GenesisTrust` root, tools must be bound to authenticated acquisition and
-actual executable bytes, including the interpreter, loader,
+Outside the explicitly assumed `GenesisTrust` root, tools must be bound to independently fixed digest pins
+and actual executable bytes, including the interpreter, loader,
 configuration, and dependency closure required by the claim. A wrapper reporting the expected compiler version
 cannot qualify as that compiler. Tool identity must survive replacement, symlink, and race challenges at the
 consumption boundary.
@@ -195,14 +205,18 @@ boundary. If the required protection cannot be enforced, the gate refuses that c
 assuming protection from candidate tampering.
 
 The canonical source checkout and separately acquired oracle baseline remain readable inputs. Generated
-materializations, protected runner state, toolchains, dependency caches, and evidence stay beneath physical
-repository-owned roots. Separate ownership or process capabilities do not authorize state outside the checkout.
+materializations, protected runner state, toolchains, dependency caches, and candidate evidence stay beneath
+physical repository-owned `.build/**` roots. The accepted historical bundle goes to the exact tracked
+`validation-records/**` grammar after qualification; it cannot supply an oracle or candidate input. Separate
+ownership or process capabilities do not authorize state outside the checkout
+([DL-0015](../decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence)).
 The [repository-layout doctrine](./repository_layout_doctrine.md) owns those roots and their lifecycles.
 
 Each candidate begins with an absent run namespace under `.build/runs/**`. Retained inputs are explicit and
-read-only: authenticated toolchain/package inputs, protected expectations, source snapshot, and the exact
-required predecessor receipt. Their presence is part of the acquisition contract; unlisted ignored artifacts
-or ambient caches are unavailable. Production `.data/**` is inaccessible and must never be deleted for validation.
+read-only: pin-verified toolchain and integrity-checked package inputs, protected expectations, source snapshot, and the exact
+required predecessor bundle from `validation-records/**`. Their presence is part of the acquisition contract; unlisted ignored artifacts
+or ambient caches are unavailable. Fixed pins do not authenticate publisher identity
+([DL-0021](../decision_log.md#dl-0021--cleanroom-input-names-respect-the-fixed-pin-trust-boundary)). Production `.data/**` is inaccessible and must never be deleted for validation.
 
 Phase 0 retains its bounded `GenesisTrust` exception and one uniquely owned qualification leaf. It records
 only its declared input closure and verifies its own leaf cleanup. Universal cleanroom and adversarial
@@ -219,10 +233,12 @@ The runner records actual process exits, streams, read inputs, observed effects,
 are data to validate, not authority to mint observations. Qualification must expose transcript replay,
 executable replacement, expectation edits, fabricated process identities, and missing dependency observations.
 
-Every validator leaves tracked files unchanged. After a qualified success, it emits the exact status-only
-patch beneath the run root. `accept` applies that patch after checking its bound preimage and records the
-reproducible receipt. Implementation and preview then continue through sprint seams; each phase transition is
-one `accept`.
+Every candidate gate leaves tracked files unchanged. After a qualified success, the verifier emits the exact
+status-only patch beneath the run root. `accept` applies it after checking its bound preimage and publishes
+the immutable archive bundle against the resulting status postimage. `replay` exact-reads status after each
+Done-phase refresh and publishes a new bundle without advancing status. Both outputs form one reviewable
+worktree change that the human commits; each phase transition remains one `accept`
+([DL-0016](../decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 
 **What it forecloses.** A current source digest cannot compensate for an untrusted tool or a candidate-owned
 oracle. File containment cannot compensate for missing privilege separation. Even an enforced boundary still

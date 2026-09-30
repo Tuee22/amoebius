@@ -35,7 +35,7 @@ import Amoebius.Capacity.Storage
   , presentBytes
   , roundAllocation
   )
-import Amoebius.Capacity.Phase29Mutation (phase29MutationTargets)
+import Amoebius.Capacity.CapacityMutation (capacityMutationTargets)
 import Control.DeepSeq (NFData)
 import Data.List (sortOn)
 import Data.Map.Strict (Map)
@@ -301,38 +301,38 @@ mutateImageResult
   -> Either NodeLocalStorageError ProvisionedNodeImageStorageDemand
 mutateImageResult outcome = case outcome of
   Left (ImageMetadataMissing "sha-index")
-    | phase29MutationTargets "image-content-join" -> changed
+    | capacityMutationTargets "image-content-join" -> changed
   Left (ImageMetadataMissing "artifact:platform-manifest")
-    | phase29MutationTargets "image-manifest-join" -> changed
+    | capacityMutationTargets "image-manifest-join" -> changed
   Left (ImageMetadataMissing "snap-a")
-    | phase29MutationTargets "image-snapshot-join" -> changed
+    | capacityMutationTargets "image-snapshot-join" -> changed
   Left (ImageMetadataMissing "model-v1")
-    | phase29MutationTargets "image-storage-model" -> changed
+    | capacityMutationTargets "image-storage-model" -> changed
   _ -> outcome
  where
-  changed = Left (ImageMetadataConflict "phase-29 changed-production image mutation")
+  changed = Left (ImageMetadataConflict "capacity changed-production image mutation")
 
 mutateLayoutResult
   :: Either NodeLocalStorageError ProvisionedNodeLocalStorage
   -> Either NodeLocalStorageError ProvisionedNodeLocalStorage
 mutateLayoutResult outcome = case outcome of
   Left FilesystemLayoutMismatch {}
-    | phase29MutationTargets "filesystem-layout-alias" -> changed
+    | capacityMutationTargets "filesystem-layout-alias" -> changed
   Left SplitImageUnsupported {}
-    | phase29MutationTargets "split-image-containerd-v1" -> changed
+    | capacityMutationTargets "split-image-containerd-v1" -> changed
   Left (NodeLocalStorageOverBacking "unified" _ _)
-    | phase29MutationTargets "node-image-workspace" -> changed
+    | capacityMutationTargets "node-image-workspace" -> changed
   _ -> outcome
  where
-  changed = Left (NodeStorageComponentDuplicate "phase-29 changed-production layout mutation")
+  changed = Left (NodeStorageComponentDuplicate "capacity changed-production layout mutation")
 
 mutateObservationResult
   :: Either NodeLocalStorageError ()
   -> Either NodeLocalStorageError ()
 mutateObservationResult outcome = case outcome of
   Left FilesystemLayoutMismatch {}
-    | phase29MutationTargets "filesystem-layout-swapped" ->
-        Left (NodeStorageComponentDuplicate "phase-29 changed-production observation mutation")
+    | capacityMutationTargets "filesystem-layout-swapped" ->
+        Left (NodeStorageComponentDuplicate "capacity changed-production observation mutation")
   _ -> outcome
 
 mutatePartitionResult
@@ -340,14 +340,14 @@ mutatePartitionResult
   -> Either NodeLocalStorageError ProvisionedPhysicalDiskPartition
 mutatePartitionResult outcome = case outcome of
   Left PhysicalDiskOvercommit {}
-    | phase29MutationTargets "partition-parent" -> changed
+    | capacityMutationTargets "partition-parent" -> changed
   Left DiskBackingAlias {}
-    | phase29MutationTargets "partition-carve-alias" -> changed
+    | capacityMutationTargets "partition-carve-alias" -> changed
   Left DiskExtentUnitMismatch {}
-    | phase29MutationTargets "partition-unit-mismatch" -> changed
+    | capacityMutationTargets "partition-unit-mismatch" -> changed
   _ -> outcome
  where
-  changed = Left (NodeStorageComponentDuplicate "phase-29 changed-production partition mutation")
+  changed = Left (NodeStorageComponentDuplicate "capacity changed-production partition mutation")
 
 validateArtifact :: ImageMetadataCatalog -> ImageArtifactRequirement -> Either NodeLocalStorageError [Text]
 validateArtifact catalog artifact = do

@@ -18,20 +18,17 @@ import Data.Text qualified as Text
 
 data RowVerdict = Green | Red | Unverified
   deriving (Eq, Ord, Show)
-
 renderVerdict :: RowVerdict -> Text
 renderVerdict verdict = case verdict of
   Green -> "green"
   Red -> "red"
   Unverified -> "unverified"
-
 data CandidateRow = CandidateRow
   { rowCategory :: GateCategory
   , rowVerdict :: RowVerdict
   , rowObservations :: [(Text, Text)]
   }
   deriving (Eq, Show)
-
 data Candidate = Candidate
   { candidatePhase :: Int
   , candidateCapability :: Text

@@ -72,6 +72,9 @@ generator, fixture, oracle, mutant, or generated source must classify it unambig
   to establish the pinned toolchain, build the source-bound binary, and `exec` Haskell with every user
   argument unchanged; Haskell owns host-floor policy, help, version, validation, and every public command;
 - governed non-source input such as Markdown or minimal build/repository metadata;
+- immutable, verifier-issued historical validation evidence under `validation-records/**`, whose closed
+  format is owned by the [repository-layout doctrine](./engineering/repository_layout_doctrine.md#1-classification-rule)
+  and which supplies no behavioral expectation or verdict for a new run ([DL-0015](./decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence));
 - external or local-untracked operator input; or
 - a lazy Haskell-generated materialization beneath `.build/**`.
 
@@ -346,8 +349,9 @@ does not compile", "there is no back door" — about machinery no gate has run a
 tell it from a result.
 
 Every required row of the qualified phase gate must pass before a phase or sprint becomes Done. The human's
-`accept` then records that result as a mechanical status-only projection; an agent runs `preview` and edits
-no status line ([DL-0009](./decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition)).
+Agent-run `accept` then records that result as a mechanical status-only projection and publishes its accepted
+bundle; an agent runs `preview` and edits no status line by hand
+([DL-0015](./decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence)).
 Documentation may describe a target contract, candidate evidence, or an observed footprint, but prose alone
 cannot turn any of them into validation status. The development-plan standards own the gate-pass procedure;
 this rule prevents doctrine prose from bypassing it.

@@ -1,10 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-
--- | The one generic gate runner (gate_runner_doctrine.md section 3). It consumes
--- one 'GateSpec', runs its six stages in order under the process observer, and
--- fills the eighteen-row candidate from its own observations. It holds every
--- verdict; a suite prints bytes and an oracle prints a ledger, and neither can
--- mint a row.
+-- | One generic gate runner. Suites and oracles provide observations; only this runner mints verdicts.
 module Amoebius.Validation.Runner
   ( GateOutcome (..)
   , RunnerConfig (..)
@@ -16,7 +11,6 @@ module Amoebius.Validation.Runner
   , runGate
   , specDigest
   ) where
-
 import Amoebius.Doc.Check (checkTree, discoverDocuments)
 import Amoebius.Doc.Render (Negative (..), negativeCatalogue, renderNegative, writeCorpus)
 import Amoebius.Doc.Types (CheckResult (..), Finding (..), Observation (..))
@@ -31,7 +25,7 @@ import Amoebius.Validation.Runner.Hygiene
 import Amoebius.Validation.Runner.Mutants
 import Amoebius.Validation.Runner.Observer
 import Amoebius.Validation.Runner.Spec
-import Control.Monad (forM, forM_, unless)
+import Control.Monad (forM)
 import Data.Map.Strict qualified as Map
 import Data.List (transpose)
 import Data.Maybe (isJust, isNothing)
@@ -39,10 +33,9 @@ import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as TextIO
-import System.Directory (copyFile, createDirectoryIfMissing, doesDirectoryExist, doesFileExist, makeAbsolute)
+import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist)
 import System.Exit (ExitCode (..))
-import System.FilePath (takeDirectory, (</>))
-
+import System.FilePath ((</>))
 data RunnerConfig = RunnerConfig
   { runnerRoot :: FilePath
   , runnerRunRoot :: FilePath
@@ -57,7 +50,6 @@ data RunnerConfig = RunnerConfig
   , runnerCompiler :: Maybe FilePath
   }
   deriving (Eq, Show)
-
 defaultRunnerConfig :: FilePath -> Int -> RunnerConfig
 defaultRunnerConfig root phase =
   RunnerConfig
@@ -75,7 +67,6 @@ defaultRunnerConfig root phase =
     }
  where
   pad n = let s = show n in if length s < 2 then '0' : s else s
-
 data RunnerRefusal
   = SpecRefused [SpecProblem]
   | HygieneRefused HygieneReport
@@ -83,7 +74,6 @@ data RunnerRefusal
   | RunRootNotFresh FilePath
   | ProductBinaryUnavailable Text
   deriving (Eq, Show)
-
 renderRefusal :: RunnerRefusal -> Text
 renderRefusal refusal = case refusal of
   SpecRefused problems -> Text.intercalate "; " (map renderSpecProblem problems)
@@ -91,7 +81,6 @@ renderRefusal refusal = case refusal of
   HardwareBeforeBarrier substrate -> "HARDWARE-BEFORE-BARRIER: " <> renderSubstrate substrate
   RunRootNotFresh path -> "RUN-ROOT-NOT-FRESH: " <> Text.pack path
   ProductBinaryUnavailable detail -> "PRODUCT-BINARY-UNAVAILABLE: " <> detail
-
 data GateOutcome = GateOutcome
   { outcomeCandidate :: Candidate
   , outcomeHygiene :: HygieneReport
@@ -99,12 +88,9 @@ data GateOutcome = GateOutcome
   , outcomeRuns :: [ObservedRun]
   }
   deriving (Eq, Show)
-
 specDigest :: GateSpec -> Text
 specDigest = sha256Hex . renderGateSpec
-
--- | Run one gate. Refusals happen before any subject runs; afterwards every
--- stage records into the candidate and the verdict is the candidate's rows.
+-- | Refuse before subject execution, then capture each stage's observations.
 runGate :: RunnerConfig -> GateSpec -> IO (Either RunnerRefusal GateOutcome)
 runGate config spec = do
   verified <- verifySpec (runnerRoot config) spec
@@ -120,7 +106,6 @@ runGate config spec = do
       case preflight of
         (refusal : _) -> pure (Left refusal)
         [] -> Right <$> execute config spec vspec hygiene
-
 execute :: RunnerConfig -> GateSpec -> VerifiedSpec -> HygieneReport -> IO GateOutcome
 execute config spec vspec hygiene = do
   let root = runnerRoot config
@@ -131,10 +116,7 @@ execute config spec vspec hygiene = do
   let challengeSeed = sha256Hex (digest <> "\n" <> Text.pack runRoot <> "\n" <> opening)
   nonce@(Nonce nonceText) <- freshNonce runRoot challengeSeed
   graph <- either (const Nothing) Just <$> loadPackageGraph root
-  -- Stage 3 first: the matrix precedes the clean candidate in the same run. The
-  -- seed role runs its finite predicate protocol and the documentation claim
-  -- instead of a generated matrix; their ledgers land in the suite directory so
-  -- the area's oracle judges them with the suite's own bytes.
+  -- The mutation matrix precedes the clean candidate; the seed uses its finite protocol.
   (table, mutantRuns) <- case gateSeed spec of
     Just _ -> pure (killTable [], [])
     Nothing -> mutantMatrix config spec vspec graph digest
@@ -144,9 +126,7 @@ execute config spec vspec hygiene = do
   documentation <- case gateSeed spec of
     Just _ -> Just <$> seedDocumentation root (runRoot </> "docs") (runRoot </> "clean" </> "suite")
     Nothing -> pure Nothing
-  -- Stage 2: the clean run.
   (cleanRuns, ledger) <- cleanRun config spec (runRoot </> "clean")
-  -- Stage 4: perturbation.
   binary <- case (gateBinaryFact spec, runnerProductBinary config) of
     (Just fact, Just binaryPath) -> Just <$> runBinaryFact root (runRoot </> "binary") binaryPath fact nonce
     _ -> pure Nothing
@@ -156,7 +136,7 @@ execute config spec vspec hygiene = do
   closing <- treeDigest root
   let productClosure = maybe Set.empty (\g -> maybe Set.empty id (executableClosure g "amoebius")) graph
       seedRuns = maybe [] (\outcome -> maybe [] pure (seedCleanRun outcome) <> [run | (_, Just run, _) <- seedMutantRuns outcome]) seed
-      allRuns = seedRuns <> mutantRuns <> cleanRuns <> maybe [] (maybe [] pure . binaryRun) binary
+      allRuns = seedRuns <> mutantRuns <> cleanRuns <> maybe [] binaryRuns binary
       chain = foldl chainDigest challengeSeed allRuns
       captured = capture config spec vspec hygiene digest nonceText chain (opening, closing) table ledger binary spine allRuns seed documentation productClosure
       candidate = captured {candidateReproducibleCore = reproducibleCore digest captured (ledgerDigest ledger) table}
@@ -166,11 +146,7 @@ execute config spec vspec hygiene = do
     (runRoot </> "outcome.tsv")
     (Text.unlines ["green\t" <> Text.pack (show (candidateGreen candidate)), "spec-digest\t" <> digest, "chain\t" <> chain, "reproducible-core\t" <> candidateReproducibleCore candidate, "capability\t" <> gateCapability spec, "claim\t" <> gateClaim spec])
   pure GateOutcome {outcomeCandidate = candidate, outcomeHygiene = hygiene, outcomeKillTable = table, outcomeRuns = allRuns}
-
--- | The reproducible core of a candidate (DL-0013): the specification digest, the
--- ordered row verdicts, the oracle ledger digest, and every mutant's locus and
--- outcome. Nonces, chains, timestamps, and process digests are excluded, so a
--- later run of the same gate on the same tree re-derives the same core.
+-- | Bind stable gate outcomes while excluding nonces, timestamps, and process digests.
 reproducibleCore :: Text -> Candidate -> Text -> KillTable -> Text
 reproducibleCore digest candidate ledgerDigestValue table =
   sha256Hex
@@ -189,20 +165,14 @@ reproducibleCore digest candidate ledgerDigestValue table =
     Survived -> "survived"
     Stillborn _ -> "stillborn"
     Unapplied _ -> "unapplied"
-
--- | The seed's documentation claim: zero findings over the corpus and the named
--- finding on every rendered negative, judged against the compiled specification
--- blocks the registry supplies. Both ledgers are written into the suite
--- directory in the verifier's own format.
+-- | Judge the seed's corpus and named negatives against compiled specification blocks.
 data DocumentationOutcome = DocumentationOutcome
   { documentationFindings :: [Text]
   , documentationNegatives :: [(Text, Bool)]
   }
   deriving (Eq, Show)
-
 documentationGreen :: DocumentationOutcome -> Bool
 documentationGreen outcome = null (documentationFindings outcome) && not (null (documentationNegatives outcome)) && all snd (documentationNegatives outcome)
-
 -- | The compiled gate-specification blocks for every registered phase.
 compiledBlocks :: [(Int, Text)]
 compiledBlocks =
@@ -211,14 +181,12 @@ compiledBlocks =
   , Just input <- [specInputFor (PhaseIdentity.phaseIdentityCapability row)]
   , Right spec <- [mkGateSpec (roleFor (PhaseIdentity.phaseIdentityOrdinal row)) input]
   ]
-
 roleFor :: Int -> GateRole
 roleFor ordinal
   | ordinal == PhaseIdentity.phaseDomainLowerOrdinal = SeedGate
   | Just ordinal == PhaseIdentity.roleOrdinal PhaseIdentity.DslBarrier = BarrierGate
   | maybe False (ordinal >=) (PhaseIdentity.roleOrdinal PhaseIdentity.FirstHardware) = HardwareGate
   | otherwise = OrdinaryGate
-
 seedDocumentation :: FilePath -> FilePath -> FilePath -> IO DocumentationOutcome
 seedDocumentation root docsRoot suiteDir = do
   corpus <- checkTree compiledBlocks root
@@ -248,7 +216,6 @@ seedDocumentation root docsRoot suiteDir = do
       { documentationFindings = [findingCode item <> " " <> Text.pack (findingSubject item) | item <- checkFindings corpus]
       , documentationNegatives = [(negativeName negative, named) | (negative, _, named) <- negatives]
       }
-
 -- | The oracle ledger as the runner reads it: exit, rows, and the red rows.
 data Ledger = Ledger
   { ledgerExit :: Maybe ExitCode
@@ -256,13 +223,10 @@ data Ledger = Ledger
   , ledgerDigest :: Text
   }
   deriving (Eq, Show)
-
 ledgerGreen :: Ledger -> Bool
 ledgerGreen ledger = ledgerExit ledger == Just ExitSuccess && not (null (ledgerRows ledger)) && all (\(_, verdict, _) -> verdict == "green") (ledgerRows ledger)
-
 ledgerRedRows :: Ledger -> [Text]
 ledgerRedRows ledger = [name | (name, verdict, _) <- ledgerRows ledger, verdict /= "green"]
-
 parseLedger :: Maybe ExitCode -> Text -> Ledger
 parseLedger exit output =
   Ledger
@@ -270,12 +234,9 @@ parseLedger exit output =
     , ledgerRows = [(name, verdict, observed) | line <- Text.lines output, (name : verdict : rest) <- [Text.splitOn "\t" line], let observed = Text.intercalate "\t" rest]
     , ledgerDigest = sha256Hex output
     }
-
--- | Build the suite serially, run it into the suite directory, and run the oracle
--- over that directory, all under the observer.
+-- | Build and run the suite, then its oracle, serially under the observer.
 cleanRun :: RunnerConfig -> GateSpec -> FilePath -> IO ([ObservedRun], Ledger)
 cleanRun config spec workRoot = suiteAndOracle config (runnerRoot config) spec workRoot
-
 suiteAndOracle :: RunnerConfig -> FilePath -> GateSpec -> FilePath -> IO ([ObservedRun], Ledger)
 suiteAndOracle config treeRoot spec workRoot = do
   let suiteDir = workRoot </> "suite"
@@ -289,9 +250,7 @@ suiteAndOracle config treeRoot spec workRoot = do
       suiteRun <- observe treeRoot (runnerCabal config) ["run", "-v0", "--jobs=1", suite, "--", suiteDir]
       oracleRun <- observe treeRoot (runnerCabal config) ["run", "-v0", "--jobs=1", oracle, "--", suiteDir]
       pure ([build, suiteRun, oracleRun], parseLedger (Just (runExit oracleRun)) (runStdout oracleRun))
-
--- | Generate, apply, rebuild, and judge the sampled mutants, one copy of the
--- tracked tree per mutant beneath the run root.
+-- | Apply and judge sampled mutants in separate copies of the authored tree.
 mutantMatrix :: RunnerConfig -> GateSpec -> VerifiedSpec -> Maybe PackageGraph -> Text -> IO (KillTable, [ObservedRun])
 mutantMatrix config spec vspec graph digest = do
   let root = runnerRoot config
@@ -324,23 +283,6 @@ mutantMatrix config spec vspec graph digest = do
               | otherwise = Killed (Text.intercalate "," (take 3 (ledgerRedRows ledger)))
         pure ((locus, Just witness, outcome), runs)
   pure (killTable (map fst results), concatMap snd results)
-
--- | The authored tree: every tracked file plus every untracked file the ignore
--- rules admit, so a candidate's new modules are copied and digested before the
--- human commits them; ignored generated material is never part of it.
-trackedFiles :: FilePath -> IO [FilePath]
-trackedFiles root = do
-  absolute <- makeAbsolute root
-  listing <- observe root "git" ["-c", "safe.directory=" <> absolute, "ls-files", "-z", "--cached", "--others", "--exclude-standard"]
-  pure (filter (not . null) (map Text.unpack (Text.splitOn "\0" (runStdout listing))))
-
-copyTree :: FilePath -> FilePath -> [FilePath] -> IO ()
-copyTree from to files = forM_ files $ \file -> do
-  exists <- doesFileExist (from </> file)
-  unless (not exists) $ do
-    createDirectoryIfMissing True (takeDirectory (to </> file))
-    copyFile (from </> file) (to </> file)
-
 -- | The digest of every tracked file's bytes, used for opening/closing freshness.
 treeDigest :: FilePath -> IO Text
 treeDigest root = do
@@ -349,7 +291,6 @@ treeDigest root = do
     exists <- doesFileExist (root </> file)
     if exists then (\contents -> Text.pack file <> " " <> sha256Hex contents) <$> TextIO.readFile (root </> file) else pure (Text.pack file <> " absent")
   pure (sha256Hex (Text.unlines digests))
-
 capture
   :: RunnerConfig
   -> GateSpec
@@ -393,6 +334,9 @@ capture config spec vspec hygiene digest nonce chain (opening, closing) table le
       documentation
   positives = [c | c@PositiveControl {} <- gateCases spec]
   negatives = [c | c@PairedNegative {} <- gateCases spec]
+  ledgerCaseGreen item = case Text.stripPrefix "case:" (caseName item) of
+    Nothing -> True
+    Just _ -> length [() | (name, verdict, _) <- ledgerRows ledger, name == caseName item, verdict == "green"] == 1
   fresh = opening == closing
   observed = all (isNothing . runSpawnFailure) runs && not (null runs)
   stageKilled stage = any (\(locus, _, outcome) -> locusModule locus == productionModuleName stage && isKilled outcome) (killRows table)
@@ -408,7 +352,7 @@ capture config spec vspec hygiene digest nonce chain (opening, closing) table le
   isValidatorStanza stanza = stanza `elem` ["validation-kernel", "validation-runner", "doc-check", "plan-decisions", "gate-spec"]
   binaryGreen = case binary of
     Nothing -> isNothing (gateBinaryFact spec)
-    Just outcome -> null (binaryProblems outcome) && not (null (binaryNonceRecovered outcome)) && all snd (binaryNonceRecovered outcome) && maybe False ((== ExitSuccess) . runExit) (binaryRun outcome)
+    Just outcome -> null (binaryProblems outcome) && not (null (binaryRuns outcome)) && not (null (binaryNonceRecovered outcome)) && all snd (binaryNonceRecovered outcome)
   spineGreen = maybe (isNothing (gateSpineFact spec)) spineDigestsEqual spine
   predecessorGreen = runnerPhase config == PhaseIdentity.phaseDomainLowerOrdinal || isJust (runnerPredecessorDigest config)
   legacyDue = Legacy.legacyIdsOwnedBy (runnerPhase config)
@@ -420,8 +364,8 @@ capture config spec vspec hygiene digest nonce chain (opening, closing) table le
       Subject -> (verdictOf (not (Map.null (verifiedStanzaOf vspec))), [("subject." <> productionModuleName m, stanza) | (m, stanza) <- Map.toList (verifiedStanzaOf vspec)])
       Command -> (Green, [("command", "amoebius-validate preview phase " <> Text.pack (show (runnerPhase config))), ("suite", cabalTargetName (gateSuite spec)), ("oracle", oracleExecutableName (gateOracle spec))])
       Oracle -> (verdictOf (isJust (ledgerExit ledger)), [("oracle.directories", Text.intercalate "," (map Text.pack (verifiedOracleDirectories vspec))), ("oracle.ledger-sha256", ledgerDigest ledger), ("oracle.rows", showText (length (ledgerRows ledger)))])
-      PositiveControls -> (verdictOf (not (null positives) && ledgerGreen ledger && (not seed || (seedOk && docOk))), [("positive.count", showText (length positives)), ("ledger.red-rows", Text.intercalate "," (ledgerRedRows ledger))] <> docObservations)
-      PairedNegatives -> (verdictOf (not (null negatives) && ledgerGreen ledger && (not seed || (seedOk && docOk))), [("negative.count", showText (length negatives)), ("ledger.red-rows", Text.intercalate "," (ledgerRedRows ledger))] <> docObservations)
+      PositiveControls -> (verdictOf (not (null positives) && ledgerGreen ledger && all ledgerCaseGreen positives && (not seed || (seedOk && docOk))), [("positive.count", showText (length positives)), ("ledger.red-rows", Text.intercalate "," (ledgerRedRows ledger))] <> docObservations)
+      PairedNegatives -> (verdictOf (not (null negatives) && ledgerGreen ledger && all ledgerCaseGreen negatives && (not seed || (seedOk && docOk))), [("negative.count", showText (length negatives)), ("ledger.red-rows", Text.intercalate "," (ledgerRedRows ledger))] <> docObservations)
       Mutants -> (if seed then verdictOf seedOk else verdictOf mutantsGreen, if seed then seedObservations else [("mutants.killed", showText (killedCount table)), ("mutants.viable", showText (viableCount table)), ("mutants.stillborn", showText (stillbornCount table)), ("mutants.ratio", Text.pack (show (killRatioObserved table))), ("mutants.rows", showText (length (killRows table)))] <> [("mutant." <> showText i, line) | (i, line) <- zip [1 :: Int ..] (renderKillTable table)])
       Discovery -> (verdictOf (not (Set.null (verifiedClosure vspec)) && length (verifiedStanzaOf vspec) == length (gateSubjects spec)), [("closure.stanzas", Text.intercalate "," (Set.toList (verifiedClosure vspec))), ("subjects.mapped", showText (Map.size (verifiedStanzaOf vspec))), ("subjects.declared", showText (length (gateSubjects spec)))])
       Challenge -> (verdictOf (if seed then seedOk else binaryGreen && spineGreen), [("challenge.nonce", nonce), ("challenge.kind", if seed then "pure predicate judged by the independent driver" else "runner-perturbed input"), ("challenge.binary", maybe "absent" (\o -> Text.pack (show (binaryNonceRecovered o))) binary), ("challenge.spine", maybe "absent" (\o -> Text.pack (show (spineDigestsEqual o))) spine)])
@@ -434,6 +378,5 @@ capture config spec vspec hygiene digest nonce chain (opening, closing) table le
       Predecessor -> (verdictOf predecessorGreen, [("predecessor", if runnerPhase config == PhaseIdentity.phaseDomainLowerOrdinal then "genesis" else maybe "absent" id (runnerPredecessorDigest config))])
       Residue -> (verdictOf fresh, [("residue.tracked-unchanged", Text.pack (show fresh)), ("residue.unverified", "later-owned capabilities remain UNVERIFIED by construction")])
       PassCriterion -> (verdictOf (all (\c -> rowVerdict (row c) == Green) (filter (/= PassCriterion) allGateCategories)), [("pass-criterion", "qualified-gate-pass")])
-
 showText :: Int -> Text
 showText = Text.pack . show

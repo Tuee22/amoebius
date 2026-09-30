@@ -23,5 +23,4 @@ module Amoebius.Validation.PhaseIdentity
   , roleOrdinal
   , successorOrdinal
   ) where
-
 import Amoebius.Plan.PhaseIdentity

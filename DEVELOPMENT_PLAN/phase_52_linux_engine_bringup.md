@@ -193,7 +193,7 @@ Run the complete acquired Phase-52 gate; only its exact pass can authorize the m
 ## Sprint 52.2: The pre-binary leg on a host that carries nothing ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Host/LinuxEngine.hs` installs only guest build prerequisites and mounts the authenticated contained toolchain read-only; the runner invokes `pb` under its `ProcessObserver`.
+**Implementation**: `src/Amoebius/Host/LinuxEngine.hs` installs only guest build prerequisites and mounts the pin-verified contained toolchain read-only; the runner invokes `pb` under its `ProcessObserver` ([DL-0021](../documents/decision_log.md#dl-0021--cleanroom-input-names-respect-the-fixed-pin-trust-boundary)).
 **Blocked by**: Sprint 52.1
 **Independent Validation**: the runner's `ProcessObserver` trace must show `pb` replacing itself with the source-bound `amoebius` binary carrying `compile <corpus example>` unchanged, as the Phase-50 handoff observation specifies; a rewritten argv or a surviving Python parent is refused.
 **Oracle**: `test/oracle/host/Main.hs` reads the process trace and states the expected argv from literals.
@@ -207,7 +207,7 @@ and observe the handoff from outside the process that performs it.
 
 ### Deliverables
 
-- Bind the externally observed bootstrap-to-binary handoff to the same guest, exact authenticated source/toolchain and credential context used by subsequent passes; version tracing alone cannot attest later execution.
+- Bind the externally observed bootstrap-to-binary handoff to the same guest, exact source snapshot, pin-verified toolchain, and credential context used by subsequent passes; version tracing alone cannot attest later execution.
 
 - A linux floor decision taken before any tool is resolved: the package-manager root at its absolute path,
   and the privilege that installs through it, verified without a prompt.

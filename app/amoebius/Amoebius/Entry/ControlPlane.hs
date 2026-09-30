@@ -33,7 +33,7 @@ import System.IO (hFlush, stdout)
 import System.Process (proc, readCreateProcessWithExitCode)
 
 helperPath :: FilePath
-helperPath = "/live-dsl-deploy-artifacts/phase33_runtime_helper.py"
+helperPath = "/live-dsl-deploy-artifacts/control_plane_runtime_helper.py"
 
 uploadPath :: FilePath
 uploadPath = "/live-dsl-deploy-dhall/examples/live-dsl-deploy-upload.dhall"

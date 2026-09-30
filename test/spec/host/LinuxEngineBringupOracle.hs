@@ -58,7 +58,7 @@ expectedDockerBuildClient =
   ]
 
 expectedImageReference :: String
-expectedImageReference = "amoebius-phase52-cpu-amd64:local"
+expectedImageReference = "amoebius-linux-engine-cpu-amd64:local"
 
 -- Every three-way architecture read the admission rule can be given, with the
 -- verdict written out rather than recomputed, so a production rule that admits

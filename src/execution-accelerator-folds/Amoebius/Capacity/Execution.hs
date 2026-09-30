@@ -32,7 +32,7 @@ import Amoebius.Capacity.Types
   , envelopeRequests
   , zeroResources
   )
-import Amoebius.Capacity.Phase29Mutation (phase29MutationTargets)
+import Amoebius.Capacity.CapacityMutation (capacityMutationTargets)
 import Control.DeepSeq (NFData)
 import Data.List (sortOn)
 import Data.Map.Strict (Map)
@@ -176,18 +176,18 @@ mutateExecutionResult
   -> Either ExecutionError ProvisionedExecutionEpochs
   -> Either ExecutionError ProvisionedExecutionEpochs
 mutateExecutionResult available inventory outcome
-  | phase29MutationTargets "execution-replica-peak"
+  | capacityMutationTargets "execution-replica-peak"
       && executionTransition inventory == FirstDeployment
       && resourceCpu available == 3 = changed
-  | phase29MutationTargets "execution-rollout-surge"
+  | capacityMutationTargets "execution-rollout-surge"
       && executionTransition inventory == FirstDeployment
       && resourceCpu available == 5 = changed
-  | phase29MutationTargets "execution-prior-old-revision"
+  | capacityMutationTargets "execution-prior-old-revision"
       && isUpdate (executionTransition inventory) = changed
   | otherwise = outcome
  where
   changed = case outcome of
-    Left _ -> Left (InvalidExecutionPolicy "phase-29 changed-production execution mutation")
+    Left _ -> Left (InvalidExecutionPolicy "capacity changed-production execution mutation")
     Right value -> Right value
   isUpdate transition = case transition of
     UpdateFrom _ -> True

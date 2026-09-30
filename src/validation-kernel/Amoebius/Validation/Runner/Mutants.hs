@@ -6,18 +6,9 @@
 -- and the kill table. Mutants are generated, never authored, and every applied
 -- mutant records a 'SubjectChangeWitness'.
 module Amoebius.Validation.Runner.Mutants
-  ( KillTable (..)
-  , Locus (..)
-  , MutantOutcome (..)
-  , Operator (..)
-  , SubjectChangeWitness (..)
-  , allOperators
-  , applyLocus
-  , enumerateLoci
-  , killTable
-  , renderKillTable
-  , renderOperator
-  , sampleLoci
+  ( KillTable (..), Locus (..), MutantOutcome (..), Operator (..)
+  , SubjectChangeWitness (..), allOperators, applyLocus, enumerateLoci
+  , killTable, renderKillTable, renderOperator, sampleLoci
   ) where
 
 import Amoebius.Validation.Runner.Observer (sha256Hex)
@@ -35,10 +26,8 @@ data Operator
   | FieldDrop
   | ListTruncation
   deriving (Bounded, Enum, Eq, Ord, Show)
-
 allOperators :: [Operator]
 allOperators = [minBound .. maxBound]
-
 renderOperator :: Operator -> Text
 renderOperator operator = case operator of
   ConstantFlip -> "constant-flip"
@@ -79,7 +68,6 @@ enumerateLoci moduleName file operator source =
           && not ("import " `Text.isPrefixOf` trimmed)
           && not ("module " `Text.isPrefixOf` trimmed)
           && not ("#" `Text.isPrefixOf` trimmed)
-
 rewrite :: Operator -> Text -> Maybe Text
 rewrite operator line = case operator of
   ConstantFlip -> constantFlip line
@@ -87,7 +75,6 @@ rewrite operator line = case operator of
   BranchSwap -> firstReplacement [(" == ", " /= "), (" /= ", " == "), ("if not (", "if ("), (" not $ ", " ")] line
   FieldDrop -> fieldDrop line
   ListTruncation -> listTruncation line
-
 firstReplacement :: [(Text, Text)] -> Text -> Maybe Text
 firstReplacement [] _ = Nothing
 firstReplacement ((needle, replacement) : rest) line =
@@ -150,10 +137,8 @@ sampleLoci seed count loci = sortOn (\locus -> (locusLine locus, locusOperator l
         index = fromIntegral (next `mod` fromIntegral (length pool))
         (before, chosen : after) = splitAt index pool
      in chosen : go next (remaining - 1) (before <> after)
-
 seedValue :: Text -> Word
 seedValue seed = max 1 (fromIntegral (Text.foldl' (\acc c -> acc * 31 + fromEnum c) (7 :: Int) seed))
-
 xorshift :: Word -> Word
 xorshift state0 =
   let state1 = state0 `xorW` (state0 * 8192)
@@ -203,14 +188,12 @@ applyLocus copyRoot locus = do
               , witnessDiff = "-" <> locusBefore locus <> "\n+" <> locusAfter locus
               }
         )
-
 data MutantOutcome
   = Killed Text
   | Survived
   | Stillborn Text
   | Unapplied Text
   deriving (Eq, Ord, Show)
-
 data KillTable = KillTable
   { killRows :: [(Locus, Maybe SubjectChangeWitness, MutantOutcome)]
   , killedCount :: Int
@@ -219,7 +202,6 @@ data KillTable = KillTable
   , killRatioObserved :: Rational
   }
   deriving (Eq, Show)
-
 killTable :: [(Locus, Maybe SubjectChangeWitness, MutantOutcome)] -> KillTable
 killTable rows =
   KillTable
@@ -232,7 +214,6 @@ killTable rows =
  where
   killed = length [() | (_, _, Killed _) <- rows]
   viable = killed + length [() | (_, _, Survived) <- rows]
-
 renderKillTable :: KillTable -> [Text]
 renderKillTable table =
   [ Text.intercalate

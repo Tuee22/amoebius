@@ -21,6 +21,7 @@ import Amoebius.Validation.Runner (reproducibleCore)
 import Data.ByteString qualified as ByteString
 import Amoebius.Validation.Runner.Hygiene
 import Amoebius.Validation.Runner.Mutants
+import Amoebius.Validation.Runner.Observer (sha256Hex)
 import Amoebius.Validation.Runner.Spec
 import Data.List (sort)
 import Data.Map.Strict qualified as Map
@@ -29,7 +30,7 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 import Data.Text.IO qualified as TextIO
-import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist)
+import System.Directory (createDirectoryIfMissing, createFileLink, doesDirectoryExist, doesFileExist, removeFile, removePathForcibly)
 import System.Environment (getArgs)
 import System.FilePath ((</>))
 
@@ -40,7 +41,7 @@ main = do
         [path] -> path
         _ -> ".build/runs/phase-00/runner"
   createDirectoryIfMissing True output
-  rows <- concat <$> sequence [constructorRows, verifyRows output, operatorRows output, killRows', hygieneRows output, captureRows, preflightRows, storeRows output, statusRows output, reproducibleRows, packageRows]
+  rows <- concat <$> sequence [constructorRows, verifyRows output, operatorRows output, killRows', hygieneRows output, captureRows, preflightRows, storeRows output, archiveRows output, replayVoidRows output, statusRows output, reproducibleRows, packageRows]
   TextIO.writeFile (output </> "runner.tsv") (Text.unlines (map (Text.intercalate "\t") rows))
   putStrLn ("runner projection written: " <> (output </> "runner.tsv"))
 
@@ -390,6 +391,120 @@ storeRows output = do
     , ["store", "restored-receipt", Text.pack (show (length restored))]
     , ["store", "generation-directory", Text.pack (generationDirectory (Store "/s") "abcdef0123456789zzzz")]
     ]
+
+-- The tracked archive is tested separately from the disposable generation store.
+-- Every refusal is observed through the archive reader, not by inspecting the
+-- written fixture path or accepting the writer's claim.
+archiveRows :: FilePath -> IO [[Text]]
+archiveRows output = do
+  let root = output </> "fixture-archive"
+      generation = Text.replicate 64 "a"
+      candidate = Text.unlines ["candidate\tphase=0\tcapability=documentation_suite", "spec-digest\tspec", "row\tgreen"]
+      killTable = "mutant\tkilled\n"
+      evidence =
+        [ ("candidate.tsv", candidate)
+        , ("kill-table.tsv", killTable)
+        , ("outcome.tsv", "green\tTrue\n")
+        , ("oracle-ledger.tsv", "clean\tgreen\n")
+        , ("observer.tsv", "run\texit-success\n")
+        ]
+      receipt = Receipt 0 "documentation_suite" generation "spec" "rendered\nspec"
+        (sha256Hex candidate) (sha256Hex killTable) "closure" (Text.replicate 64 "b")
+        generation "governance" (Text.replicate 64 "c") "commit" ["w1"] Nothing Nothing "2026-09-23 00:00:00 UTC"
+      bundle = archivedBundlePath root receipt evidence
+      changedEvidence = [(name, if name == "outcome.tsv" then "green\tTrue\nrun\tsecond\n" else body) | (name, body) <- evidence]
+      secondReceipt = receipt {receiptIssuedAt = "2026-09-23 00:00:01 UTC"}
+      refusal result = either (Text.takeWhile (/= ':')) (const "accepted") result
+  exists <- doesDirectoryExist root
+  if exists then removePathForcibly root else pure ()
+  written <- writeArchivedReceipt root receipt evidence
+  case written of
+    Left problem -> pure [["archive", "write", "refused: " <> problem]]
+    Right published | published /= bundle -> pure [["archive", "write", "wrong-path"]]
+    Right published -> do
+      firstRead <- readArchivedBundles root generation
+      repeated <- writeArchivedReceipt root receipt evidence
+      let observer = bundle </> "observer.tsv"
+          candidatePath = bundle </> "candidate.tsv"
+      TextIO.writeFile candidatePath "candidate\tchanged\n"
+      tampered <- readArchivedBundles root generation
+      TextIO.writeFile candidatePath candidate
+      removeFile observer
+      missing <- readArchivedBundles root generation
+      createFileLink "candidate.tsv" observer
+      linked <- readArchivedBundles root generation
+      removeFile observer
+      TextIO.writeFile observer "run\texit-success\n"
+      restored <- readArchivedBundles root generation
+      second <- writeArchivedReceipt root secondReceipt changedEvidence
+      twoRuns <- readArchivedBundles root generation
+      pure
+        [ ["archive", "write", "accepted"]
+        , ["archive", "roundtrip", if firstRead == Right [(receipt, bundle)] then "exact" else "different"]
+        , ["archive", "repeat", if repeated == written then "same" else "different"]
+        , ["archive", "tampered-evidence", refusal tampered]
+        , ["archive", "missing-file", refusal missing]
+        , ["archive", "symlink", refusal linked]
+        , ["archive", "restored", if restored == Right [(receipt, bundle)] then "exact" else "different"]
+        , ["archive", "distinct-run-bundle", case (second, twoRuns) of
+            (Right secondPath, Right bundles) | published /= secondPath && length bundles == 2 -> "distinct"
+            _ -> "missing"]
+        ]
+
+-- A red replay revokes the selected run, while preserving older and later runs.
+replayVoidRows :: FilePath -> IO [[Text]]
+replayVoidRows output = do
+  let root = output </> "fixture-void"
+      generation = Text.replicate 64 "d"
+      candidate = Text.unlines ["candidate\tphase=0\tcapability=documentation_suite", "spec-digest\tspec", "row\tgreen"]
+      killTable = "mutant\tkilled\n"
+      evidence attempt = [("candidate.tsv", candidate), ("kill-table.tsv", killTable), ("outcome.tsv", "green\tTrue\nattempt\t" <> attempt <> "\n"), ("oracle-ledger.tsv", "clean\tgreen\n"), ("observer.tsv", "run\texit-success\n")]
+      receipt = Receipt 0 "documentation_suite" generation "spec" "rendered\nspec"
+        (sha256Hex candidate) (sha256Hex killTable) "closure" (Text.replicate 64 "b")
+        generation "governance" (Text.replicate 64 "c") "commit" [] Nothing Nothing "2026-09-23 00:00:00 UTC"
+      newer = receipt {receiptIssuedAt = "2026-09-23 00:00:01 UTC"}
+      recovered = receipt {receiptIssuedAt = "2026-09-23 00:00:02 UTC"}
+      failure = Text.replicate 64 "e"
+  exists <- doesDirectoryExist root
+  if exists then removePathForcibly root else pure ()
+  old <- writeArchivedReceipt root receipt (evidence "old")
+  latest <- writeArchivedReceipt root newer (evidence "newer")
+  case (old, latest) of
+    (Right oldPath, Right latestPath) -> do
+      before <- readCurrentArchivedBundles root generation
+      tied <- writeArchivedReceipt root newer (evidence "tied")
+      backdated <- writeArchivedReceipt root receipt (evidence "backdated")
+      wrongTarget <- writeReplayVoid root receipt latestPath "gate-red" failure "2026-09-23 00:00:03 UTC"
+      invalid <- writeReplayVoid root newer latestPath "gate-red" "short" "2026-09-23 00:00:03 UTC"
+      voided <- writeReplayVoid root newer latestPath "gate-red" failure "2026-09-23 00:00:03 UTC"
+      case voided of
+        Left problem -> pure [["void", "setup", "refused: " <> problem]]
+        Right voidPath -> do
+          repeated <- writeReplayVoid root newer latestPath "gate-red" failure "2026-09-23 00:00:03 UTC"
+          after <- readCurrentArchivedBundles root generation
+          history <- readArchivedBundles root generation
+          original <- TextIO.readFile voidPath
+          TextIO.writeFile voidPath (Text.replace "reason\tgate-red" "reason\trunner-refusal" original)
+          tampered <- readCurrentArchivedBundles root generation
+          TextIO.writeFile voidPath original
+          stillVoided <- readCurrentArchivedBundles root generation
+          green <- writeArchivedReceipt root recovered (evidence "recovered")
+          current <- readCurrentArchivedBundles root generation
+          pure
+            [ ["void", "setup", "ready"]
+            , ["void", "latest-before-red", if before == Right [(newer, latestPath)] && oldPath /= latestPath then "newer" else "wrong"]
+            , ["void", "tied-publication", either id (const "accepted") tied]
+            , ["void", "backdated-publication", either id (const "accepted") backdated]
+            , ["void", "wrong-target", either id (const "accepted") wrongTarget]
+            , ["void", "invalid-failure", either id (const "accepted") invalid]
+            , ["void", "write", "accepted"]
+            , ["void", "repeat", if repeated == voided then "same" else "different"]
+            , ["void", "no-fallback", if after == Right [] && stillVoided == Right [] then "blocked" else "fell-back"]
+            , ["void", "history-retained", case history of Right bundles | length bundles == 2 -> "two-bundles"; _ -> "missing"]
+            , ["void", "tampered", either (Text.takeWhile (/= ':')) (const "accepted") tampered]
+            , ["void", "green-recovery", case (green, current) of (Right path, Right [(accepted, selected)]) | accepted == recovered && selected == path -> "later-green"; _ -> "missing"]
+            ]
+    _ -> pure [["void", "setup", "refused"]]
 
 statusRows :: FilePath -> IO [[Text]]
 statusRows output = do

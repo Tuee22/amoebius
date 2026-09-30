@@ -13,7 +13,6 @@ module Amoebius.Toolchain.Pins
   , compilerIdentity
   , genesisPins
   , inputsDirectory
-  , keyringFile
   , manifestNameFor
   , packageToolIdentity
   , pinFor
@@ -21,15 +20,14 @@ module Amoebius.Toolchain.Pins
   , renderPin
   , renderPinRole
   , renderPlatform
-  , signatureNameFor
   ) where
 
 import Data.Text (Text)
 import Data.Text qualified as Text
 
 -- | What a pinned file is for. The archives carry the tools, the manifests carry
--- the publisher's digests, and the signatures bind each manifest or archive to
--- the publisher key.
+-- the publisher's digests, and the signature files remain opaque, hash-pinned
+-- observations. Their bytes do not authenticate a publisher identity.
 data PinRole
   = CompilerArchive
   | CompilerArchiveSignature
@@ -65,11 +63,6 @@ data Pin = Pin
 inputsDirectory :: FilePath
 inputsDirectory = ".build/bootstrap-inputs"
 
--- | The operator-supplied publisher keyring beside the pins. It is trusted, not
--- authenticated (phase_01 residue row).
-keyringFile :: FilePath
-keyringFile = "publisher-keyring.gpg"
-
 genesisPins :: [Pin]
 genesisPins =
   [ Pin CompilerArchive "ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz" 302637420 "4da657809c06c1658ae5713911fcb168a32093e239f61fe77be78aba74132cfa"
@@ -86,19 +79,11 @@ pinFor role = case [pin | pin <- genesisPins, pinRole pin == role] of
   [pin] -> Just pin
   _ -> Nothing
 
--- | The manifest that must list an archive's digest, and the signature that
--- binds a signed file, by role.
+-- | The manifest that must list an archive's digest, by role.
 manifestNameFor :: PinRole -> Maybe FilePath
 manifestNameFor role = case role of
   CompilerArchive -> pinName <$> pinFor CompilerManifest
   PackageToolArchive -> pinName <$> pinFor PackageToolManifest
-  _ -> Nothing
-
-signatureNameFor :: PinRole -> Maybe FilePath
-signatureNameFor role = case role of
-  CompilerArchive -> pinName <$> pinFor CompilerArchiveSignature
-  CompilerManifest -> pinName <$> pinFor CompilerManifestSignature
-  PackageToolManifest -> pinName <$> pinFor PackageToolManifestSignature
   _ -> Nothing
 
 renderPin :: Pin -> Text

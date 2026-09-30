@@ -50,12 +50,10 @@ observe workingDirectory executable arguments = do
       ObservedRun executable arguments workingDirectory policy exit (Text.pack out) (Text.pack err) Nothing
  where
   policy = "inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG"
-
 minimalEnvironment :: IO [(String, String)]
 minimalEnvironment = do
   pairs <- mapM (\name -> fmap (fmap (\value -> (name, value))) (lookupEnv name)) ["PATH", "HOME", "CABAL_DIR", "GHCUP_INSTALL_BASE_PREFIX", "XDG_CACHE_HOME", "LANG"]
   pure ([pair | Just pair <- pairs] <> [("LC_ALL", "C.UTF-8")])
-
 observedDigest :: ObservedRun -> Text
 observedDigest run =
   sha256Hex
@@ -73,7 +71,6 @@ observedDigest run =
 -- | Chain the previous digest with this observation.
 chainDigest :: Text -> ObservedRun -> Text
 chainDigest previous run = sha256Hex (previous <> "\n" <> observedDigest run)
-
 renderObserved :: Text -> ObservedRun -> [(Text, Text)]
 renderObserved prefix run =
   [ (prefix <> ".executable", Text.pack (runExecutable run))
@@ -87,10 +84,8 @@ renderObserved prefix run =
   , (prefix <> ".digest", observedDigest run)
   ]
     <> maybe [] (\failure -> [(prefix <> ".spawn-failure", failure)]) (runSpawnFailure run)
-
 sha256Hex :: Text -> Text
 sha256Hex = hex . SHA256.hash . TextEncoding.encodeUtf8
-
 hex :: ByteString.ByteString -> Text
 hex = Text.pack . concatMap byteHex . ByteString.unpack
  where

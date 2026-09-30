@@ -10,7 +10,7 @@ import Amoebius.ControlPlane.Reconcile
 import Amoebius.ControlPlane.Daemon
 import Amoebius.Platform.Types (ResourceEnvelope (..))
 import Control.Monad (forM_, unless)
-import Data.Aeson (FromJSON, eitherDecodeFileStrict', withObject, (.:))
+import Data.Aeson (FromJSON (parseJSON), eitherDecodeFileStrict', withObject, (.:))
 import Data.Aeson qualified as Aeson
 import Data.Set (Set)
 import Data.Set qualified as Set

@@ -13,19 +13,23 @@ module Amoebius.Validation.Runner.Hygiene
   , hygieneRow
   , kernelBudget
   , kernelRoots
+  , trackedFiles
+  , copyTree
   , renderHygiene
   , vocabularyTypes
   ) where
 
-import Control.Monad (filterM, forM)
+import Amoebius.Plan.ValidationRecordPath (validationRecordRoot)
+import Amoebius.Validation.Runner.Observer (observe, runStdout)
+import Control.Monad (filterM, forM, forM_, unless)
 import Data.Char (isDigit)
 import Data.List (isPrefixOf, isSuffixOf, sort)
 import Data.Map.Strict qualified as Map
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as TextIO
-import System.Directory (doesDirectoryExist, listDirectory)
-import System.FilePath (makeRelative, splitDirectories, takeBaseName, (</>))
+import System.Directory (copyFile, createDirectoryIfMissing, doesDirectoryExist, doesFileExist, listDirectory, makeAbsolute)
+import System.FilePath (makeRelative, splitDirectories, takeBaseName, takeDirectory, (</>))
 
 kernelBudget :: Int
 kernelBudget = 14000
@@ -34,16 +38,27 @@ kernelBudget = 14000
 -- gate-specification library.
 kernelRoots :: [FilePath]
 kernelRoots = ["src/validation-kernel", "src/gate-spec"]
-
 docCheckRoot :: FilePath
 docCheckRoot = "src/doc-check"
+
+trackedFiles :: FilePath -> IO [FilePath]
+trackedFiles root = do
+  absolute <- makeAbsolute root
+  listing <- observe root "git" ["-c", "safe.directory=" <> absolute, "ls-files", "-z", "--cached", "--others", "--exclude-standard"]
+  pure (filter (\path -> not (null path) && takeWhile (/= '/') path /= validationRecordRoot) (map Text.unpack (Text.splitOn "\0" (runStdout listing))))
+
+copyTree :: FilePath -> FilePath -> [FilePath] -> IO ()
+copyTree from to files = forM_ files $ \file -> do
+  exists <- doesFileExist (from </> file)
+  unless (not exists) $ do
+    createDirectoryIfMissing True (takeDirectory (to </> file))
+    copyFile (from </> file) (to </> file)
 
 -- | The vocabulary axes that must have exactly one definition inside the validator
 -- roots; duplicates elsewhere under src/ are observed on the row and owed to the
 -- phase that owns the vocabulary library (DL-0012).
 vocabularyTypes :: [Text]
 vocabularyTypes = ["Substrate", "Lane", "Architecture", "ComputeEngine", "EngineRuntime", "ExtensionId", "ResourceVector", "Register"]
-
 data HygieneReport = HygieneReport
   { hygieneKernelLines :: Int
   , hygieneKernelCap :: Int
@@ -122,18 +137,15 @@ phaseLiteral line =
   digitAfter needle (_, rest) =
     let after = Text.drop (Text.length needle) rest
      in not (Text.null after) && isDigit (Text.head after) && not ("--" `Text.isPrefixOf` Text.stripStart line)
-
 phaseTableDefinition :: Text -> Bool
 phaseTableDefinition line =
   any (`Text.isPrefixOf` line) ["canonicalPhaseIdentities ::", "phaseMetadata ::", "canonicalPhaseRegistry ::", "canonicalPhasePaths ::"]
-
 definedType :: Text -> Maybe Text
 definedType line =
   case Text.words line of
     ("data" : name : _) -> Just (Text.takeWhile (/= '(') name)
     ("newtype" : name : _) -> Just name
     _ -> Nothing
-
 hygieneProblems :: HygieneReport -> [Text]
 hygieneProblems report =
   [ "KernelOverBudget: " <> showText (hygieneKernelLines report) <> " lines against a cap of " <> showText (hygieneKernelCap report)
@@ -147,10 +159,8 @@ hygieneProblems report =
     <> ["PhaseLiterals: " <> showText (length (hygienePhaseLiterals report)) | not (null (hygienePhaseLiterals report))]
     <> ["PhaseTables: " <> Text.intercalate "," (map Text.pack (hygienePhaseTables report)) | length (hygienePhaseTables report) > 1]
     <> ["DuplicateVocabulary: " <> Text.intercalate "," (map fst (hygieneDuplicateVocabulary report)) | not (null (hygieneDuplicateVocabulary report))]
-
 hygieneGreen :: HygieneReport -> Bool
 hygieneGreen = null . hygieneProblems
-
 renderHygiene :: HygieneReport -> [(Text, Text)]
 renderHygiene report =
   [ ("hygiene.kernel-lines", showText (hygieneKernelLines report))
@@ -165,7 +175,6 @@ renderHygiene report =
   , ("hygiene.product-duplicate-vocabulary", Text.intercalate "," (map fst (hygieneProductDuplicateVocabulary report)))
   , ("hygiene.verdict", if hygieneGreen report then "green" else Text.intercalate "; " (hygieneProblems report))
   ]
-
 haskellFilesUnder :: FilePath -> FilePath -> IO [FilePath]
 haskellFilesUnder root relative = do
   exists <- doesDirectoryExist (root </> relative)
@@ -176,9 +185,7 @@ haskellFilesUnder root relative = do
     directories <- filterM (doesDirectoryExist . (directory </>)) names
     nested <- concat <$> mapM (walk . (directory </>)) directories
     pure ([directory </> name | name <- names, ".hs" `isSuffixOf` name, name `notElem` directories] <> nested)
-
 showText :: Int -> Text
 showText = Text.pack . show
-
 _unusedPrefix :: String -> String -> Bool
 _unusedPrefix = isPrefixOf

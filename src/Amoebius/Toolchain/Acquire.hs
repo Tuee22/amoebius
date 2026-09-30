@@ -3,8 +3,7 @@
 -- | Contained acquisition from the GenesisTrust pins (phase_01, Sprint 1.1).
 --
 -- Verify the seven pinned files against their sizes and digests, check that the
--- publisher manifests agree with the pins, verify the publisher signatures with
--- the operator-supplied keyring, extract the two archives into an absent root,
+-- publisher manifests agree with the pins, extract the two archives into an absent root,
 -- and record the compiler and package-tool identities observed there. Two
 -- acquisitions from the same pins must agree; the refusals are named so the
 -- oracle can restate each one.
@@ -12,7 +11,6 @@ module Amoebius.Toolchain.Acquire
   ( Acquisition (..)
   , AcquisitionRefusal (..)
   , ChildRecord (..)
-  , SignatureResult (..)
   , VerifiedPins (..)
   , acquire
   , acquireTwice
@@ -24,15 +22,12 @@ module Amoebius.Toolchain.Acquire
   , renderAcquisition
   , renderChild
   , renderRefusal
-  , renderSignature
   , hexEncode
   , sha256Bytes
   , sha256File
-  , signedRoles
   , spawnChild
   , verifyPins
   , verifyPinsWith
-  , verifySignatures
   , writeAcquisitionReceipt
   ) where
 
@@ -70,8 +65,6 @@ data AcquisitionRefusal
   | PinDigestMismatch FilePath Text Text
   | ManifestEntryAbsent FilePath FilePath
   | ManifestDisagrees FilePath Text Text
-  | KeyringMissing FilePath
-  | SignatureRejected FilePath Text
   | RootNotAbsent FilePath
   | ExtractionFailed FilePath Text
   | ToolMissing FilePath
@@ -89,8 +82,6 @@ renderRefusal refusal = case refusal of
   PinDigestMismatch name expected observed -> "PinDigestMismatch: " <> Text.pack name <> " expected=" <> expected <> " observed=" <> observed
   ManifestEntryAbsent manifest archive -> "ManifestEntryAbsent: " <> Text.pack manifest <> " lacks " <> Text.pack archive
   ManifestDisagrees archive claimed observed -> "ManifestDisagrees: " <> Text.pack archive <> " claimed=" <> claimed <> " observed=" <> observed
-  KeyringMissing path -> "KeyringMissing: " <> Text.pack path
-  SignatureRejected name detail -> "SignatureRejected: " <> Text.pack name <> " " <> detail
   RootNotAbsent path -> "RootNotAbsent: " <> Text.pack path
   ExtractionFailed name detail -> "ExtractionFailed: " <> Text.pack name <> " " <> detail
   ToolMissing path -> "ToolMissing: " <> Text.pack path
@@ -210,13 +201,26 @@ verifyPinsWith directory overrides = case admissibleSource directory of
           if not present
             then pure (Left (ManifestEntryAbsent manifestName (pinName archive)))
             else do
-              contents <- TextIO.readFile path
-              archiveDigest <- sha256File (fromMaybe (directory </> pinName archive) (lookup role overrides))
-              pure $ case manifestEntry (pinName archive) contents of
-                Nothing -> Left (ManifestEntryAbsent manifestName (pinName archive))
-                Just claimedDigest
-                  | claimedDigest /= archiveDigest -> Left (ManifestDisagrees (pinName archive) claimedDigest archiveDigest)
-                  | otherwise -> Right (role, claimedDigest)
+              manifestLink <- pathIsSymbolicLink path
+              if manifestLink
+                then pure (Left (PinNotRegular manifestName))
+                else do
+                  contents <- TextIO.readFile path
+                  let archivePath = fromMaybe (directory </> pinName archive) (lookup role overrides)
+                  archivePresent <- doesFileExist archivePath
+                  if not archivePresent
+                    then pure (Left (PinMissing (pinName archive)))
+                    else do
+                      archiveLink <- pathIsSymbolicLink archivePath
+                      if archiveLink
+                        then pure (Left (PinNotRegular (pinName archive)))
+                        else do
+                          archiveDigest <- sha256File archivePath
+                          pure $ case manifestEntry (pinName archive) contents of
+                            Nothing -> Left (ManifestEntryAbsent manifestName (pinName archive))
+                            Just claimedDigest
+                              | claimedDigest /= archiveDigest -> Left (ManifestDisagrees (pinName archive) claimedDigest archiveDigest)
+                              | otherwise -> Right (role, claimedDigest)
         _ -> pure (Left (ManifestEntryAbsent "manifest" "archive"))
     pure $ case refusals <> lefts claimed of
       [] -> Right VerifiedPins {verifiedDirectory = directory, verifiedObserved = good, verifiedClaimed = rights claimed}
@@ -237,42 +241,6 @@ parseManifest contents =
 
 manifestEntry :: FilePath -> Text -> Maybe Text
 manifestEntry name contents = lookup name (parseManifest contents)
-
-data SignatureResult
-  = SignatureGood FilePath Text
-  | SignatureRefused AcquisitionRefusal
-  deriving (Eq, Show)
-
-renderSignature :: SignatureResult -> Text
-renderSignature result = case result of
-  SignatureGood name signer -> "good " <> Text.pack name <> " " <> signer
-  SignatureRefused refusal -> renderRefusal refusal
-
--- | The signed files: the compiler archive and both manifests.
-signedRoles :: [PinRole]
-signedRoles = [CompilerArchive, CompilerManifest, PackageToolManifest]
-
--- | Verify each signature with @gpgv@ against the keyring beside the pins. The
--- keyring is trusted, not authenticated; a missing keyring is a named refusal.
-verifySignatures :: FilePath -> IO ([SignatureResult], [ChildRecord])
-verifySignatures directory = do
-  let keyring = directory </> keyringFile
-  present <- doesFileExist keyring
-  if not present
-    then pure ([SignatureRefused (KeyringMissing keyring)], [])
-    else do
-      results <- forM signedRoles $ \role -> case (pinFor role, signatureNameFor role) of
-        (Just pin, Just signature) -> do
-          (child, _, err) <- spawnChild directory "gpgv" ["--keyring", keyring, directory </> signature, directory </> pinName pin]
-          let goodLine = [Text.strip (Text.drop 1 (snd (Text.breakOn ":" line))) | line <- Text.lines (Text.pack err), "Good signature" `Text.isInfixOf` line]
-          pure
-            ( if childExit child == 0 && not (null goodLine)
-                then SignatureGood (pinName pin) (Text.unwords (take 1 goodLine))
-                else SignatureRefused (SignatureRejected (pinName pin) (Text.strip (Text.pack (take 160 err))))
-            , child
-            )
-        _ -> pure (SignatureRefused (SignatureRejected "signature" "role has no signature"), ChildRecord "gpgv" "" "" [] 1)
-      pure (map fst results, map snd results)
 
 -- | Start one child by name, recording the executable it resolved to and that
 -- executable's digest. A tool that does not resolve is recorded with exit 127.

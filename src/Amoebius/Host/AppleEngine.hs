@@ -118,7 +118,7 @@ applePrerequisites = [minBound .. maxBound]
 
 prerequisiteRemedy :: ApplePrerequisite -> String
 prerequisiteRemedy prerequisite = case prerequisite of
-  AppleSiliconMac -> "run phase 53 on physical Apple Silicon macOS"
+  AppleSiliconMac -> "run Apple engine bringup on physical Apple Silicon macOS"
   HomebrewRoot -> "install Homebrew from https://brew.sh and expose /opt/homebrew/bin/brew"
   XcodeCommandLineTools -> "run xcode-select --install"
 

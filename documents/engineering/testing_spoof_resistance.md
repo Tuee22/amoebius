@@ -266,7 +266,9 @@ is defined by [validation_frame_doctrine.md](./validation_frame_doctrine.md#2-th
 Tokens, filenames, comments, and help output cannot establish either obligation.
 
 Each candidate uses a fresh, isolated run namespace under `.build/**`. Its permitted read-only inputs include
-the exact source snapshot, authenticated toolchain inputs, and required predecessor receipt. Their acquisition
+the exact source snapshot, pin-verified toolchain inputs, and required predecessor receipt. Fixed pins bind
+the admitted bytes without proving publisher identity
+([DL-0021](../decision_log.md#dl-0021--cleanroom-input-names-respect-the-fixed-pin-trust-boundary)). Their acquisition
 and the finite bootstrap exception are owned by
 [validation_frame_doctrine.md](./validation_frame_doctrine.md#4-generated-output-and-cleanroom-execution).
 Unlisted caches and generated fallbacks are unavailable. Production `.data/**` remains inaccessible; validation

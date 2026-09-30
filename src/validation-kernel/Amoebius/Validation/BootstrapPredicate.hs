@@ -19,20 +19,16 @@ import Data.List (isPrefixOf)
 -- if the expected line is absent or duplicated.
 bootstrapDigestMatches :: String -> String -> Bool
 bootstrapDigestMatches actual expected = validLowerSha256 actual && actual == expected
-
 bootstrapSnapshotMatches :: String -> String -> Bool
 bootstrapSnapshotMatches opening closing = validLowerSha256 opening && opening == closing
-
 bootstrapInputPathAllowed :: FilePath -> Bool
 bootstrapInputPathAllowed path = ".build/bootstrap-inputs/" `isPrefixOf` path && boundedRelativePath path
-
 validLowerSha256 :: String -> Bool
 validLowerSha256 value =
   length value == 64
     && all (\character -> isHexDigit character && not (isLetterUpper character)) value
  where
   isLetterUpper character = character >= 'A' && character <= 'F'
-
 boundedRelativePath :: FilePath -> Bool
 boundedRelativePath path =
   not (null path)
@@ -51,7 +47,6 @@ boundedRelativePath path =
       || (character >= 'A' && character <= 'Z')
       || (character >= '0' && character <= '9')
       || character `elem` ("-_." :: String)
-
 splitSlash :: String -> [String]
 splitSlash value = case break (== '/') value of
   (segment, []) -> [segment]

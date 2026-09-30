@@ -23,7 +23,7 @@ renderFixedMsl :: ByteString
 renderFixedMsl = ByteString.intercalate "\n"
   [ "#include <metal_stdlib>"
   , "using namespace metal;"
-  , "kernel void phase53(device const float* input [[buffer(0)]],"
+  , "kernel void referenceKernel(device const float* input [[buffer(0)]],"
   , "                    device float* output [[buffer(1)]],"
   , "                    uint i [[thread_position_in_grid]]) {"
   , "  output[i] = (2.0f * input[i]) + 1.0f;"

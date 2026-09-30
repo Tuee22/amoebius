@@ -5,23 +5,15 @@
 -- package description, refuse any subject outside it, and check the oracle stanza's
 -- hygiene. Nothing here reads a candidate's own claims about its layout.
 module Amoebius.Validation.Runner.Spec
-  ( PackageGraph (..)
-  , SpecProblem (..)
-  , VerifiedSpec (..)
-  , executableClosure
-  , loadPackageGraph
-  , moduleSourcePath
-  , parsePackageGraph
-  , renderSpecProblem
-  , verifySpec
-  , verifySpecAgainst
+  ( PackageGraph (..), SpecProblem (..), VerifiedSpec (..)
+  , executableClosure, loadPackageGraph, moduleSourcePath
+  , parsePackageGraph, renderSpecProblem, verifySpec, verifySpecAgainst
   ) where
 
 import Amoebius.Validation.GateSpec
 import Control.Monad (filterM, forM)
 import Data.ByteString qualified as ByteString
-import Data.List (isInfixOf, isSuffixOf, nub, sort)
-import Data.List.NonEmpty (NonEmpty)
+import Data.List (isSuffixOf, nub, sort)
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
@@ -57,7 +49,6 @@ data PackageGraph = PackageGraph
   , graphTestSuites :: Map Text ([FilePath], Set Text, Bool) -- suite -> (source dirs, package deps by name, depends on amoebius)
   }
   deriving (Eq, Show)
-
 data SpecProblem
   = PackageDescriptionUnparsable Text
   | SubjectNotInPackage ProductionModule
@@ -73,7 +64,6 @@ data SpecProblem
   | OracleForeignImport FilePath
   | OracleEntryNotMain OracleExecutable [FilePath]
   deriving (Eq, Ord, Show)
-
 renderSpecProblem :: SpecProblem -> Text
 renderSpecProblem problem = case problem of
   PackageDescriptionUnparsable detail -> "PACKAGE-UNPARSABLE: " <> detail
@@ -89,7 +79,6 @@ renderSpecProblem problem = case problem of
   OracleTemplateHaskell path -> "ORACLE-TEMPLATE-HASKELL: " <> Text.pack path
   OracleForeignImport path -> "ORACLE-FOREIGN-IMPORT: " <> Text.pack path
   OracleEntryNotMain (OracleExecutable name) files -> "ORACLE-ENTRY: " <> name <> " " <> Text.pack (show files)
-
 data VerifiedSpec = VerifiedSpec
   { verifiedSpec :: GateSpec
   , verifiedStanzaOf :: Map ProductionModule Text
@@ -97,21 +86,16 @@ data VerifiedSpec = VerifiedSpec
   , verifiedOracleDirectories :: [FilePath]
   }
   deriving (Eq, Show)
-
 productExecutable :: Text
 productExecutable = "amoebius"
-
 verifierExecutable :: Text
 verifierExecutable = "amoebius-validate"
-
 loadPackageGraph :: FilePath -> IO (Either SpecProblem PackageGraph)
 loadPackageGraph root = parsePackageGraph <$> ByteString.readFile (root </> "amoebius.cabal")
-
 parsePackageGraph :: ByteString.ByteString -> Either SpecProblem PackageGraph
 parsePackageGraph bytes = case runParseResult (parseGenericPackageDescription bytes) of
   (_, Left (_, problems)) -> Left (PackageDescriptionUnparsable (Text.pack (show (NonEmpty.toList problems))))
   (_, Right description) -> Right (reduce description)
-
 reduce :: GenericPackageDescription -> PackageGraph
 reduce description =
   PackageGraph
@@ -143,7 +127,6 @@ reduce description =
     , internalDependencies (libBuildInfo library)
     , map getSymbolicPath (hsSourceDirs (libBuildInfo library))
     )
-
 internalDependencies :: BuildInfo -> Set Text
 internalDependencies info =
   Set.fromList
@@ -156,7 +139,6 @@ internalDependencies info =
   libraryStanza name = case name of
     LMainLibName -> "amoebius"
     LSubLibName sub -> Text.pack (unUnqualComponentName sub)
-
 flatten :: Monoid a => CondTree v c a -> a
 flatten tree =
   condTreeData tree
@@ -177,7 +159,6 @@ executableClosure graph executable = do
     | otherwise =
         let deps = maybe Set.empty (\(_, internal, _) -> internal) (Map.lookup stanza (graphLibraries graph))
          in close (Set.insert stanza seen) (Set.toList deps <> rest)
-
 verifySpec :: FilePath -> GateSpec -> IO (Either [SpecProblem] VerifiedSpec)
 verifySpec root spec = do
   loaded <- loadPackageGraph root
@@ -236,7 +217,6 @@ verifySpecAgainst root graph spec = do
                   <> [OracleEntryNotMain oracle files | not (any (("Main.hs" `isSuffixOf`)) files)]
               )
       pure ([OracleDependsOnPackage oracle | dependsOnPackage] <> concat scanned)
-
 sourceHygiene :: FilePath -> Text -> [SpecProblem]
 sourceHygiene file contents =
   [OracleConditionalCompilation file | any (\line -> "#" `Text.isPrefixOf` line) lines' || languagePragma "CPP"]
@@ -245,7 +225,6 @@ sourceHygiene file contents =
  where
   lines' = Text.lines contents
   languagePragma extension = any (\line -> "{-# LANGUAGE" `Text.isPrefixOf` line && extension `Text.isInfixOf` line) lines'
-
 haskellFiles :: FilePath -> IO [FilePath]
 haskellFiles directory = do
   names <- listDirectory directory
@@ -266,9 +245,3 @@ moduleSourcePath root graph stanza (ProductionModule name) =
   firstExisting (candidate : rest) = do
     exists <- doesFileExist (root </> candidate)
     if exists then pure (Just candidate) else firstExisting rest
-
-_unusedInfix :: String -> String -> Bool
-_unusedInfix = isInfixOf
-
-_unusedNonEmpty :: NonEmpty Int -> Int
-_unusedNonEmpty = NonEmpty.head

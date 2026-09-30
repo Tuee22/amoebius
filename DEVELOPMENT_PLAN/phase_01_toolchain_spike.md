@@ -39,7 +39,7 @@ in product code. Its predecessor is [Phase 0](phase_00_documentation_suite.md).
 ## Phase Status
 
 ✅ Done.
-**Receipt**: 9e62570b0b492d21fa5cd0a94a8d2f3b6db11526475f7fe504a96bdc0681e0d2
+**Receipt**: e0194987f1554eab7cad21b80fec184f00e64182224f37269af2f05c8b195f80
 
 The contract is reopened under [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) by
 [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice): the subject moves
@@ -51,8 +51,11 @@ Phase-0 predecessor receipt in certification generation 2.
 
 Phase 1 moves the toolchain claim out of the validator and into the product. `Amoebius.Toolchain.Pins` spells
 the seven `GenesisTrust` pins and the compiler and package-tool identities once; `amoebius toolchain-report`
-prints the digests of what it observes; the independent oracle restates the pins from literals and compares.
-Two contained acquisitions from the same pinned files must agree on executable identity and elaborated plan.
+prints its pin checks, manifest agreement, declared identities, and probe outcomes; the independent oracle
+restates the pins from literals and compares. The suite separately performs two contained acquisitions from
+the same pinned files and compares observed executable identity and elaborated plan. The ordinary clean
+`toolchain-report` call does not request its optional `--acquire` mode
+([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)).
 
 The probe set is retained. The in-process decoder, the deterministic simulator, the resolver dependencies, the
 browser-contract generator, and the codegen runtime link into the shipped binary and are exercised by the same
@@ -60,11 +63,12 @@ report; the codegen tool renders bindings beneath the run root, and the fork's u
 against an archive extraction. No resolution output, package-integrity pin, generated code, or host-specific
 path is tracked; every derived product is rendered beneath `.build/**` during the run.
 
-`GenesisTrust` remains the explicit assumption. Agreement between two acquisitions closes `LTD-BOOT-001`; it
-does not turn the root into a theorem, and it does not authenticate the publisher keyring the signature check
-consults.
+`GenesisTrust` remains the explicit assumption. Agreement between two acquisitions closes `LTD-BOOT-001`
+relative to the independently fixed pins; it does not establish the publisher's identity or the origin of
+those pins. The three signature files are pinned opaque bytes, with no operator keyring or GPG check
+([DL-0017](../documents/decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring)).
 
-**Phase scope:** One cohesive claim — the shipped binary's toolchain report equals the product-side pins for two contained acquisitions, and the retained probe set builds and executes offline; it splits if a claim needs compiler-wide source semantics, product behaviour, or a host.
+**Phase scope:** One cohesive claim — the shipped binary's ordinary toolchain report checks the fixed pins and probes, the suite separately compares two contained acquisitions and their elaborated plans, and the retained probe set builds and executes offline; it splits if a claim needs compiler-wide source semantics, product behaviour, or a host.
 **Substrate:** `none`
 **Lane:** `none`
 **Register:** 2
@@ -77,13 +81,13 @@ consults.
 ```gate-spec
 capability: toolchain_spike
 role: ordinary
-claim: From GenesisTrust and its seven pinned files, two contained acquisitions produce the pinned compiler and package tool and agree on executable identity and elaborated plan; the shipped toolchain-report prints the pins, manifests, signatures, identities, and probe outcomes the oracle restates; the retained probe set builds and executes offline and serially; every negative is refused by name at its locus.
+claim: From GenesisTrust and its seven pinned files, two contained acquisitions produce the pinned compiler and package tool and agree on executable identity and elaborated plan; the shipped toolchain-report prints the pin digests, pinned-manifest agreement, identities, and probe outcomes the oracle restates; the retained probe set builds and executes offline and serially; every negative is refused by name at its locus. Publisher identity remains an explicit unverified assumption.
 subjects: Amoebius.Toolchain.Pins, Amoebius.Toolchain.Acquire, Amoebius.Toolchain.Probe, Amoebius.Toolchain.Resolve, Amoebius.Toolchain.Provenance, Amoebius.Toolchain.Report
 suite: toolchain-suite
 oracle: oracle-toolchain
 positive: pinned-acquisition | input=seven pins | expected=agree
 positive: second-acquisition | input=same pins, absent root | expected=same identities and plan
-positive: publisher-signature | input=operator keyring | expected=good
+positive: pinned-manifest-agreement | input=two pinned SHA256SUMS files | expected=archive digests equal pins
 positive: probe-decode | input=positive.dhall | expected=decoded amoebius/3/True
 positive: probe-sim | input=clean schedule | expected=b:2
 positive: probe-codegen | input=probe.proto | expected=Proto/Probe.hs,Proto/Probe_Fields.hs
@@ -91,8 +95,10 @@ positive: probe-bridge | input=ProbeContract | expected=Amoebius/Toolchain/Probe
 positive: probe-plan | input=empty inventory | expected=four ensure steps
 positive: provenance-acquired | input=supernova-0.0.3 | expected=tree digest equal
 negative: MissingPin | input=absent manifest | tag=PinMissing | stage=pins
+negative: MissingArchivePin | input=absent compiler archive | tag=PinMissing | stage=pins
+negative: MissingSignaturePin | input=absent pinned signature bytes | tag=PinMissing | stage=pins
 negative: DigestMismatch | input=corrupted manifest | tag=PinDigestMismatch | stage=pins
-negative: SignatureMismatch | input=corrupted signature | tag=SignatureRejected | stage=signatures
+negative: PinnedSignatureDigestMismatch | input=corrupted pinned signature bytes | tag=PinDigestMismatch | stage=pins
 negative: AmbientNetworkRead | input=URL source | tag=AmbientNetworkRefused | stage=pins
 negative: DisagreeingAcquisition | input=altered identity | tag=AcquisitionsDisagree | stage=acquire
 negative: MistypedDecode | input=mistyped.dhall | tag=type-error | stage=probe
@@ -118,23 +124,23 @@ documentation checker refuses a block that differs from it. Execution evidence r
 
 | Key | Contract |
 |---|---|
-| `Claim` | From `GenesisTrust` and its seven pinned files, two contained acquisitions produce the pinned compiler and package tool, and `amoebius toolchain-report` prints executable, archive, and plan digests equal to the pins the oracle restates. The retained probe set builds offline and serially and prints the oracle's expected outputs. Network, host, product, and source-closure claims are excluded. |
+| `Claim` | From `GenesisTrust` and its seven pinned files, the ordinary `amoebius toolchain-report` prints pin checks, pinned-manifest agreement, declared tool identities, and probe outcomes that the oracle restates. Separately, the suite acquires the pinned compiler and package tool twice and compares observed executable identities and elaborated dependency plans. The retained probe set builds offline and serially and prints the oracle's expected outputs. Publisher identity, network, host, product, and source-closure claims are excluded ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)). |
 | `Subject` | The six stage modules named in the gate specification and the `toolchain-report` subcommand in `app/amoebius/Main.hs`; the maintained fork modules beneath `src/vendor/**` are verified present by `Amoebius.Toolchain.Provenance`, and their own compilation is owed to the Pulsar-client phase. Every subject is inside the closure of `executable amoebius`. |
-| `Command` | Future public spelling is `pb validate phase 01`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 01`; then `amoebius-validate accept --phase 01` records the receipt and applies one phase's status patch. The runner spawns the shipped `amoebius` binary as a child for `toolchain-report`; every Cabal child the acquisition starts carries `--offline` and `--jobs=1`. |
+| `Command` | Future public spelling is `pb validate phase 01`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 01`; then `amoebius-validate accept --phase 01` records the receipt and applies one phase's status patch. The runner spawns the shipped `amoebius` binary for an ordinary `toolchain-report` without `--acquire`; the separate suite calls `acquireTwice` and elaborates two plans. Every Cabal child the suite starts carries `--offline` and `--jobs=1`. |
 | `Oracle` | `test/oracle/toolchain/Main.hs` restates the seven pins, the compiler and package-tool identities, the expected probe outputs, and the refusal loci from literals; it depends on no `amoebius` library. |
-| `Positive controls` | Publisher-signature verification of the pinned manifests, two contained acquisitions agreeing on executable identity and plan, the probe set linked and executed, the positive decode, and the unperturbed simulation terminal state. |
-| `Paired negatives` | A mistyped decode case, a perturbed simulation schedule, a missing required dependency, a mutable acquisition identity, a tracked foreign probe input, a top-level vendor reintroduction, and a tracked resolution output — each refused at its exact locus with its twin accepted. |
+| `Positive controls` | Exact size and SHA-256 checks of all seven pinned files, agreement of the two pinned `SHA256SUMS` archive entries with their independent archive pins, two contained acquisitions agreeing on executable identity and plan, the probe set linked and executed, the positive decode, and the unperturbed simulation terminal state. |
+| `Paired negatives` | A missing or corrupted pinned signature file, a mistyped decode case, a perturbed simulation schedule, a missing required dependency, a mutable acquisition identity, a tracked foreign probe input, a top-level vendor reintroduction, and a tracked resolution output — each refused at its exact locus with its twin accepted. |
 | `Mutants` | Runner-generated from the fixed operator catalogue over the six stage modules, eight per module, at most forty per gate, kill ratio at least 0.6; a mutant in `Amoebius.Toolchain.Pins` is killed by the oracle's pin comparison. No authored mutant seam exists in any subject. |
 | `Discovery` | The package description's stanza module map is compared two-way with the subjects; the probe entry points the report exercises equal the oracle's set; empty discovery refuses. |
 | `Challenge` | After the run starts, the runner copies the pinned compiler manifest beneath the run root and rewrites the compiler archive's digest to a nonce; the report over that copy must carry the nonce as the claimed digest, and the pin comparison must refuse at exactly that archive. |
-| `Observer` | `ProcessObserver` over the shipped binary and the suite; the acquisition records the signature verifier, the extractor, the codegen tool, and every Cabal child it starts by resolved executable and digest; executable identity, argv, environment policy, exit, and complete output are runner-captured. No subject log is trusted. |
+| `Observer` | `ProcessObserver` over the shipped binary and the suite; the acquisition records the extractor, the codegen tool, and every Cabal child it starts by resolved executable and digest; executable identity, argv, environment policy, exit, and complete output are runner-captured. No subject log is trusted. |
 | `Authority/bypass` | Network, `pb`, compiler concurrency above one, a `PATH`-selected compiler, a mutable reference, and tracked generated behaviour are refused by name. `SUBJECT-NOT-SHIPPED` refuses a subject outside the executable's closure; the oracle stanza's hygiene refuses a product dependency. Cabal's user store is a cache, never evidence. |
 | `Freshness` | A unique run root; both acquisition roots absent at acquisition; the verifier digest equals the seed's; opening and closing source identities are equal; no prior candidate can satisfy the nonce. |
 | `Qualification` | The runner-generated mutant matrix over the six stage modules — eight per module, at most forty, kill ratio at least 0.6 — precedes the clean candidate in the same run. |
 | `Cleanroom` | Everything generated lives beneath `.build/runs/phase-01/**` and is absent afterward; the kernel ratchet is recorded. |
 | `Legacy closure` | `LTD-BOOT-001`, `LTD-SRC-007`, and `LTD-SRC-009` close here through the compiled inventory; the due-count for every other identifier is zero. |
 | `Predecessor` | The Phase-0 receipt in certification generation 2, chained by the digest of Phase 0's product closure plus the verifier and governance digests. |
-| `Residue` | `GenesisTrust` remains the explicit local-custody assumption, and the publisher keyring is an operator-supplied input that is trusted rather than authenticated. Phase-2 source closure and every product and hardware claim remain explicit limitations. |
+| `Residue` | `GenesisTrust`, publisher identity, and the origin of the fixed pins remain explicit unverified assumptions; no keyring or GPG result is required. Phase-2 source closure and every product and hardware claim remain explicit limitations ([DL-0017](../documents/decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring)). |
 | `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and `accept` records it. |
 
 ## Resource provision
@@ -163,21 +169,21 @@ documentation checker refuses a block that differs from it. Execution evidence r
 **Status**: Done
 **Implementation**: `src/Amoebius/Toolchain/Pins.hs` and `src/Amoebius/Toolchain/Acquire.hs`
 **Blocked by**: [Phase 0](phase_00_documentation_suite.md) gate pass
-**Independent Validation**: Two contained acquisitions from the seven pinned files that agree on compiler and package-tool executable identity and on the elaborated plan are the positive control. A missing pin, a digest mismatch, a signature mismatch, an ambient-network read, and a disagreeing second acquisition are paired negatives refused by name. A generated mutant in `Amoebius.Toolchain.Pins` is killed by the oracle's pin comparison.
+**Independent Validation**: Two contained acquisitions from the seven pinned files that agree on compiler and package-tool executable identity and on the elaborated plan are the positive control. Both pinned publisher-supplied manifests must name their archives' independently fixed digests. A missing pin, a digest mismatch, a missing or corrupted pinned signature byte file, an ambient-network read, and a disagreeing second acquisition are paired negatives refused by name. A generated mutant in `Amoebius.Toolchain.Pins` is killed by the oracle's pin comparison. Publisher identity is unverified under [DL-0017](../documents/decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring).
 **Oracle**: `test/oracle/toolchain/Main.hs` states the seven pins and the expected executable identities from literals; it imports no `amoebius` module.
-**Legacy IDs**: `LTD-BOOT-001` — authenticated reproducible acquisition
+**Legacy IDs**: `LTD-BOOT-001` — pin-verified reproducible acquisition
 **Docs to update**: `documents/engineering/validation_frame_doctrine.md`
 
 ### Objective
 
-Turn the irreducible `GenesisTrust` input into a reproducible, authenticated contained acquisition whose
-identities are spelled once in product code, without pretending that the resulting binary proves its own
-compiler.
+Turn the irreducible `GenesisTrust` input into a reproducible, pin-verified contained acquisition whose
+identities are spelled once in product code, without claiming publisher identity or pretending that the
+resulting binary proves its own compiler.
 
 ### Deliverables
 
 - `Amoebius.Toolchain.Pins` with the seven pins and the compiler and package-tool identities.
-- `Amoebius.Toolchain.Acquire` verifying the publisher signatures, extracting into two contained roots, and building the same source under both with `--offline --jobs=1`.
+- `Amoebius.Toolchain.Acquire` checking every pinned file's size and digest, comparing both pinned manifest archive entries with the independent archive pins, and extracting into two contained roots; the suite elaborates the same dependency requirements under both acquired toolchains with offline serial Cabal children.
 - A typed acquisition receipt per root, rendered beneath `.build/**` and never tracked.
 
 ### Validation
@@ -187,8 +193,9 @@ locus. Preserve `GenesisTrust` as an explicit assumption in the residue row.
 
 ### Remaining Work
 
-None beyond the gate: the pins, the pin verification, the manifest agreement, the signature verification through
-the operator keyring, the two contained extractions, and their agreement are the implementation the gate runs.
+None beyond the gate: the seven pin checks, both manifest agreements, the two contained extractions, and
+their agreement are the implementation the gate runs. The three pinned signature files have no claimed
+verification role ([DL-0017](../documents/decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring)).
 
 ## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ✅
 

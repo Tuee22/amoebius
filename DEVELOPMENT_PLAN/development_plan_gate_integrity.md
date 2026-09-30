@@ -47,7 +47,7 @@ acquired evidence, status patch, and projected source postimage. Its authenticat
 execution context, predecessor, ordered observations, and scoped limitations. Package visibility and hashes
 alone do not establish that these events occurred.
 
-The patch's closed diff may touch only the typed status frontier derived for the passing phase: its tracker
+The status patch's closed diff may touch only the typed status frontier derived for the passing phase: its tracker
 row and phase-status line, both status surfaces for every sprint it closes, and—except at the terminal
 phase—the successor's tracker row, phase-status line, and first-sprint heading/status activation. Any other
 source, contract, oracle, or documentation change requires a new gate run rather than borrowing the result for
@@ -55,7 +55,9 @@ the pre-edit snapshot.
 
 Independent oracle expectations, changed-subject qualification, and raw observations keep the test meaningful.
 They are test requirements. The validator emits the verified patch beneath `.build/**` and leaves the tracked
-tree unchanged; only `accept` applies it, and writes the receipt's reproducible digest beside the Done status.
+tree unchanged during the candidate gate. After qualification, only `accept` applies the status patch and
+writes the receipt's reproducible digest beside Done status, together with an immutable tracked archive bundle
+outside the source closure ([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 One phase advances per accept.
 
 ### M.0 Accepted baseline and certification generation
@@ -63,21 +65,31 @@ One phase advances per accept.
 The generation-2 reset
 ([DL-0007](../documents/decision_log.md#dl-0007--certification-generation-2-replaces-the-validation-kernel))
 withdraws all generation-1 certification. A generation identifier is the content address of the verifier;
-a generation is entered by the first `accept` or `replay` under that verifier, and the store beneath
-`.build/certification/**` keeps one directory per generation, never deleting an earlier one. The verifier
+a generation is entered by the first `accept` or `replay` under that verifier. The canonical accepted store
+is the immutable `validation-records/generation-<verifier16>/receipts/phase-NN-<reproducible64>-<bundle64>/`
+archive; `.build/certification/**` is disposable scratch or a cache. The verifier
 records phase receipts binding candidate bytes, the verifier digest, the governance digest, the closure-based
 predecessor binding, process observations, and the projected source postimage; each receipt's reproducible
 digest is written beside the Done status it justifies, and `replay` re-derives it
-([DL-0013](../documents/decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible)). The
+([DL-0015](../documents/decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence)). The
 [tracker](README.md#generation-2-reset) records the reset; editing Markdown cannot mint that authority.
+
+A red replay appends one immutable
+`validation-records/generation-<verifier16>/voids/phase-NN-<targetBundle64>-<void64>.tsv` marker binding the
+target bundle path, phase, former reproducible digest, current verifier and governance, failure observation
+digest and reason, and issuance time. The filename's void digest is the SHA-256 of its canonical bytes. The
+marker is historical evidence, never an oracle or source. It leaves Done status in place while preventing a
+voided current receipt from satisfying the next phase
+([DL-0019](../documents/decision_log.md#dl-0019--red-replay-leaves-an-immutable-revocation-record)).
 
 The accepted baseline contains Haskell requirement identities, acceptance predicates, oracle provenance,
 dependency and build closures, verifier identity, and qualification obligations. Candidate code and proposed
 baseline changes are distinct inputs. The candidate cannot select a weaker accepted baseline or replace the
 oracle, observer, verifier, discovery inventory, or expected rejection locus that judges it.
 
-Generated accepted baselines, verifier executables, private authority material, and receipts remain beneath
-repository `.build/**` roots. Their location does not confer trust. An OS-enforced principal or equivalent
+Generated accepted baselines, verifier executables, private authority material, and candidate receipts remain
+beneath repository `.build/**` roots. Only the bounded accepted receipt and observation bundle is copied to
+the tracked archive after the gate; its location does not confer trust or make it an oracle. An OS-enforced principal or equivalent
 protected execution boundary must deny candidate writes and prevent candidate access to receipt-issuing authority.
 The candidate must also lack permission to replace an ancestor directory, read private authority material,
 or impersonate the observer through inherited handles or environment.
@@ -119,7 +131,7 @@ evidence cannot populate authored contract fields.
 |---|---|
 | `Claim` | One falsifiable capability statement and its explicit exclusions. |
 | `Subject` | The production `.hs` module and entry point exercised; a wrapper, manifest, or gate runner alone is not a subject. |
-| `Command` | Future public target: `pb validate phase NN`. Before the `BOOTSTRAP_HANDOFF` gate passes, the candidate command is the exact source-bound verifier invoked directly: `amoebius-validate preview phase NN`, which mints nothing, and `amoebius-validate accept --phase NN`, which records the reproducible receipt and applies one phase's patch, both agent-run; invoking `pb` is inadmissible evidence. The runner spawns the shipped `amoebius` binary as a child for every product command. Phase 0 binds the narrow non-numbered `GenesisTrust` local-custody token, which does not authenticate the actual compiler executable bytes, derivation, loader, broader host, or reproducibility. Phase 1 owns those acquisition/provenance claims for subsequent builds; neither claim lets a binary prove its own compiler. Phase 50 starts the verifier directly and has it invoke `pb` as the externally observed child subject; the public spelling cannot supervise its own handoff. Phase 51 onward may use `pb` only while binding the current Phase-50 gate pass. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
+| `Command` | Future public target: `pb validate phase NN`. Before the `BOOTSTRAP_HANDOFF` gate passes, the candidate command is the exact source-bound verifier invoked directly: `amoebius-validate preview phase NN`, which mints nothing, and `amoebius-validate accept --phase NN`, which records the reproducible receipt and applies one phase's patch, both agent-run; invoking `pb` is inadmissible evidence. The runner spawns the shipped `amoebius` binary as a child for every product command. Phase 0 binds the narrow non-numbered `GenesisTrust` local-custody token, which does not authenticate the actual compiler executable bytes, derivation, loader, broader host, or reproducibility. Phase 1 owns pin-verified acquisition, executable-byte identity, and reproducibility claims for subsequent builds while publisher identity remains unverified ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)); neither claim lets a binary prove its own compiler. Phase 50 starts the verifier directly and has it invoke `pb` as the externally observed child subject; the public spelling cannot supervise its own handoff. Phase 51 onward may use `pb` only while binding the current Phase-50 gate pass. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
 | `Oracle` | A separately authored `.hs` oracle module, its accepted baseline identity, independence boundary, and provenance. The candidate cannot substitute its own expectations. |
 | `Positive controls` | A closed named corpus and the exact observations expected for each member. |
 | `Paired negatives` | For every foreclosed dimension, a minimally different positive/negative pair and the exact rejection locus and reason. |
@@ -130,7 +142,7 @@ evidence cannot populate authored contract fields.
 | `Authority/bypass` | Paired least-privilege success/foreign-scope denial and alternate-path probes, or tested non-applicability. |
 | `Freshness` | How stale state, cached output, prior evidence, and replayed responses are made unable to pass. |
 | `Qualification` | The generated-mutant matrix precedes the clean candidate in the same run and protects every acceptance mechanism when first used. Phase 0 retains its finite protocol in §M.4. The DSL barrier additionally re-runs the union corpus of Phases 3 through 8; earlier mechanisms cannot postpone their own qualification to that barrier. |
-| `Cleanroom` | Candidate products start absent and outputs are derived lazily. Accepted verifier state, authenticated toolchain and dependency inputs, and applicable predecessor evidence are explicit read-only inputs. Undeclared caches or copied candidate products refuse. Phase 0 retains its finite GenesisTrust and cleanup boundary. |
+| `Cleanroom` | Candidate products start absent and outputs are derived lazily. Accepted verifier state, pin-verified toolchain and integrity-checked dependency inputs, and applicable predecessor evidence are explicit read-only inputs. The pin check does not prove publisher identity ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)). Undeclared caches or copied candidate products refuse. Phase 0 retains its finite GenesisTrust and cleanup boundary. |
 | `Legacy closure` | The hygiene row plus the two-way typed inventory join: reader-facing references to the typed Haskell IDs due in this phase, with the compiled owner map and the owning analyzer's independent oracle supplying the zero-finding decision. Phase 0 closes the validator rows `LTD-VAL-001` through `LTD-VAL-004`, `LTD-VAL-006`, and `LTD-KRN-001` through `LTD-KRN-003`, and proves the due-count for every other identifier is zero; its scoped `SourcePb` zero does not retire Phase-2-owned `LTD-SRC-008`. An unavailable analyzer for a due or retired ID refuses; before its owner an active unavailable analyzer is an explicit forward deferral and cannot claim closure. Cell text supplies no executable value. |
 | `Predecessor` | The immediately preceding phase's authenticated pass from the admitted certification generation, with current compatibility established under §M.6. Phase 0 instead binds the irreducible `GenesisTrust`/`BootstrapRoot`, represented structurally as `genesis`. |
 | `Residue` | Typed evidence distinguishes missing required observations, forbidden resource residue, and explicit limitations outside the accepted claim. Missing required evidence or forbidden residue refuses. Assumptions and excluded later-owned capabilities remain visible as `UNVERIFIED`; an empty list is never a universal pass requirement. |
@@ -248,7 +260,8 @@ candidate whose matrix misses the kill ratio is rejected regardless of its own r
 generation 1 — seventeen labelled cases judged by a report checker — is retired under `LTD-KRN-001`; the
 runner has no report checker to sabotage, because it holds every verdict itself.
 
-Phase 1 separately adds authenticated toolchain acquisition and Phase 2 adds the compiler-backed source graph;
+Phase 1 separately adds pin-verified reproducible toolchain acquisition and Phase 2 adds the compiler-backed source graph
+([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope));
 neither is pulled into Phase 0. Later-owned cases are typed forward deferrals and cannot block an earlier
 candidate merely because the closed plan already names their owner.
 
@@ -307,13 +320,23 @@ receipt until `replay` re-derives it. An unrelated edit does not force full-pref
 
 A Done phase has one additional legal execution mode: **receipt refresh**. It reruns the complete
 qualified gate against the exact current source, changes no tracked status, emits an identity status projection,
-and installs a new authenticated receipt. Receipt refresh cannot make a phase Done, skip a failed row, or
+and installs a new immutable archive bundle while refreshing the receipt line. It re-acquires the resulting
+status before another phase's replay. Receipt refresh cannot make a phase Done, skip a failed row, or
 advance the frontier. The accepted impact calculation may require refresh of an affected closure.
 A failed accepted claim or incompatible contract follows the reopening procedure instead.
 
-Repeated runs are interchangeable only when their certification generation, accepted baseline, phase, scope,
-and compatibility closures agree. Acquisition authenticates custody and checks those fields before choosing
-deterministically among equivalent receipts. A malformed, detached, revoked, or conflicting receipt refuses.
+For the current generation and phase, the archive reader selects only the unique latest `receiptIssuedAt`
+bundle before applying void markers. Reader/preflight refuses a tie or a replay bundle whose issuance is not
+newer than the current bundle; it cannot become the current pointer. A marker targeting that bundle cannot be bypassed by choosing an older bundle with the
+same reproducible digest; only a later complete green replay publishing a distinct later-issued bundle or an
+explicit verifier reset changes the state. Red replay writes only its append-only void marker after the
+failed gate, never a status patch
+([DL-0019](../documents/decision_log.md#dl-0019--red-replay-leaves-an-immutable-revocation-record)).
+
+Repeated runs carry comparable historical evidence only when their certification generation, accepted
+baseline, phase, scope, and compatibility closures agree. Acquisition authenticates custody and checks those
+fields, then applies the latest-issued and void-marker rule above to select current evidence. A malformed,
+detached, revoked, tied, or conflicting receipt refuses.
 Two equal JSON files or a lexicographically preferred hash cannot establish equivalence or provenance.
 
 The required dispatcher constructs one opaque acquired run whose owner recomputes the selected Subject from the
@@ -346,6 +369,14 @@ satisfy their accepted predicates.
 The typed predecessor is `GenesisTrust` for Phase 0 or the compatible immediate-predecessor receipt otherwise.
 The token binds the exact proposed patch and projected source postimage.
 
+An immediate predecessor may be a bundle already committed in the current ancestry or the bundle produced
+by an earlier verified `accept` in the same worktree. In the latter case the verifier exact-reads the bundle,
+binds the predecessor's projected status postimage and accepted closure to current source, and fully re-derives
+that predecessor gate at current verifier and governance digests. A matching closure digest alone is
+insufficient. The human commit
+preserves the series; it is not a gate between phases
+([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
+
 Residue is a typed classification, not a demand for an empty list. Required evidence gaps and forbidden
 resource residue refuse. Explicit assumptions and excluded later-owned capabilities remain recorded as
 `UNVERIFIED` without satisfying an acceptance obligation. Removing a limitation to obtain an empty list is
@@ -371,8 +402,10 @@ into candidate evidence. Authorization requires the hidden verified token to mat
 patch digest, and projected whole-source postimage digest exactly, and retains the complete verified pass
 and receipt.
 
-For receipt refresh the exact target set is empty, the projection preimage and postimage are the same current
-source digest, and the phase must already be Done in one canonical frontier. The same hidden verifier, complete
+For receipt refresh the exact status target set is empty except for the refreshed receipt line, the phase
+must already be Done in one canonical frontier, and the candidate's source preimage remains the source used
+for its gate. The archive publication is a separate bounded post-gate output and is excluded from the
+behavioral source closure. The same hidden verifier, complete
 eighteen-row gate, opening/closing equality, qualification, cleanup, and durable-publication checks apply. A
 nonempty refresh projection, a refresh of an Active/Blocked phase, or use of refresh evidence to advance status
 is rejected.
@@ -383,13 +416,16 @@ set, and projected postimage beneath the run-scoped `.build/**` evidence root. T
 reachable only through a direct-source test seam. The validator does not acquire tracked-write authority, lock
 the repository, write a status journal, exchange tracked files, roll back a partial tracked edit, or recover one.
 After emission it re-acquires the Git source snapshot and refuses if that capture is unavailable or differs
-from the opening source identity. A successful gate therefore satisfies tracked-tree immutability for that run.
+from the opening source identity. A successful candidate gate therefore satisfies tracked-tree immutability.
 `accept` re-acquires the tracked preimage, prints the Claim, the
 specification digest, the kill table, the spine outcome, and the corpus delta, and applies the exact emitted
-patch. A stale preimage, symlink, unexpected target bytes, widened target set, patch tamper, or postimage
-mismatch refuses that application and requires a fresh candidate. `preview` performs everything
-up to the receipt and applies nothing. Cross-platform crash recovery belongs to the actor's ordinary
-source-control workflow, not to Phase 0's validation subject.
+patch and publishes the immutable seven-file accepted bundle under the exact
+`validation-records/**` address. A stale preimage, symlink, unexpected target bytes, widened target set,
+patch tamper, archive replacement, or postimage mismatch refuses that application and requires a fresh
+candidate. `preview` performs everything up to the receipt and applies nothing. The verifier exact-reads the
+archive before predecessor use; a tracked bundle is evidence to audit, never a semantic oracle. Cross-platform crash recovery belongs to the actor's ordinary
+source-control workflow, not to Phase 0's validation subject
+([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 
 The gate therefore compares the contract, qualification observations, clean observations, source diff,
 unverified residue, predecessor result, and exact proposed status-only patch before the token can exist.
@@ -496,12 +532,17 @@ Every phase inherits the following postconditions. They are part of the gate, no
    narrowly justified packaging metadata may be tracked. None may encode executable product or validation
    decisions that belong in Haskell.
 6. **No source-adjacent output.** Compilation, generation, resolution, caches, temporary files, interpreter
-   bytecode, evidence, and test discovery remain beneath `.build/**`. There is no cache exception beside
-   authored source, including for `pb`.
+   bytecode, candidate evidence, and test discovery remain beneath `.build/**`. The sole accepted historical
+   bundle is published under `validation-records/**` after a verified gate, never beside source. There is no
+   cache exception beside authored source, including for `pb`
+   ([DL-0015](../documents/decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence)).
 7. **Snapshot closure.** Candidate products and undeclared runtime state start absent. Accepted verifier
-   state, authenticated toolchain and dependency inputs, and applicable predecessor receipts are explicit
-   read-only inputs beneath `.build/**`. Their accepted input manifest binds exact contents, custody,
+   state and pin-verified toolchain and integrity-checked dependency inputs are explicit read-only inputs
+   beneath `.build/**`; the accepted predecessor bundle is exact-read from `validation-records/**`. Their
+   accepted input manifest binds exact contents, custody,
    permissions, and permitted use; directory names or cache-entry counts cannot authenticate them.
+   Publisher identity is unverified under
+   [DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope).
    Phase 0 consumes its seven GenesisTrust inputs and proves its unique qualification leaf absent afterward.
    It does not claim whole-`.build/**` absence or universal replay detection. Later candidates establish
    compatibility under §M.6. Undeclared caches, detached receipts, and reused candidate products refuse.

@@ -85,7 +85,7 @@ renderProjectionError = \case
 
 decodeCheckedTenantGraph :: RawTenantGraph -> Either ProjectionError CheckedTenantGraph
 decodeCheckedTenantGraph raw
-  | schema raw /= "amoebius.phase34.tenant-graph.v1" = Left (SchemaMismatch (schema raw))
+  | schema raw /= "amoebius.tenant-graph.v1" = Left (SchemaMismatch (schema raw))
   | Text.null (appId raw) = Left AppIdInvalid
   | length (tenants raw) /= 2 = Left (RepresentativeTenantCardinality (length (tenants raw)))
   | grant : _ <- providerNativeGrants raw = Left (HandAuthoredProviderGrant grant)
@@ -144,7 +144,7 @@ tenantActions :: Text -> RawTenant -> [ProjectionAction]
 tenantActions app tenant =
   [ action Keycloak "realm-read-role" "RealmRole" ("amoebius/" <> tid) "read"
   , action Keycloak "subject-membership" "GroupRoleMapping" ("amoebius/" <> tid) "member+owner"
-  , action Vault "secret-prefix" "AclPolicy" ("secret/data/amoebius/phase34/" <> app <> "/" <> tid <> "/*") "read+list"
+  , action Vault "secret-prefix" "AclPolicy" ("secret/data/amoebius/tenant-graph/" <> app <> "/" <> tid <> "/*") "read+list"
   , action Pulsar "message-namespace" "NamespacePolicy" (tid <> "/" <> app) "produce+consume"
   , action Minio "object-bucket" "BucketPolicy" (app <> "-" <> tid) "read+write"
   , action KubernetesApi "kubernetes-namespace" "Namespace" (app <> "-" <> tid) "manage"

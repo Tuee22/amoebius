@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving, TemplateHaskell #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Pulsar.AppState where
 
@@ -11,7 +11,6 @@ import qualified Data.Binary                   as B
 import           Data.Foldable                  ( traverse_ )
 import           Data.IORef
 import           Lens.Family
-import           Lens.Family.TH
 import           Pulsar.Protocol.Frame          ( Response(..) )
 
 newtype ReqId = ReqId B.Word64 deriving (Eq, Num, Show)
@@ -36,7 +35,19 @@ data AppState = AppState
   , _appResponse :: [(ReqId, MVar Response)]          -- a list of registered requests that need a Request Id
   , _appSendReceipts :: [(ProducerId, ProducerSeqs)]  -- a list of registered messages sent by a specific producer
   }
-$(makeLenses ''AppState)
+appConsumers f app = fmap (\value -> app { _appConsumers = value }) (f (_appConsumers app))
+
+appConsumerId f app = fmap (\value -> app { _appConsumerId = value }) (f (_appConsumerId app))
+
+appProducerId f app = fmap (\value -> app { _appProducerId = value }) (f (_appProducerId app))
+
+appRequestId f app = fmap (\value -> app { _appRequestId = value }) (f (_appRequestId app))
+
+appWorkers f app = fmap (\value -> app { _appWorkers = value }) (f (_appWorkers app))
+
+appResponse f app = fmap (\value -> app { _appResponse = value }) (f (_appResponse app))
+
+appSendReceipts f app = fmap (\value -> app { _appSendReceipts = value }) (f (_appSendReceipts app))
 
 mkConsumerId :: MonadIO m => InChan Response -> IORef AppState -> m ConsumerId
 mkConsumerId chan ref = liftIO $ atomicModifyIORef ref $ \app ->

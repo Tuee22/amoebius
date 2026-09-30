@@ -1,6 +1,6 @@
 # Phase 0: Documentation, governance, and the validation seed
 
-> **Purpose**: Establish the governance seed (decision log, frozen baseline, standalone documentation checker), the finite bootstrap seed (`GenesisTrust`, the three-case predicate matrix, the seven custody probes), and the validator itself (custody core, generic gate runner, human-only transition commands, kernel budget).
+> **Purpose**: Establish the governance seed (decision log, frozen baseline, standalone documentation checker), the finite bootstrap seed (`GenesisTrust`, the three-case predicate matrix, the six custody controls), and the validator itself (custody core, generic gate runner, mechanical transition commands, kernel budget).
 > **Read this if**: Phase 0's status or contract is being assessed, a cross-cutting rule changes, or a later phase needs the exact boundary between bootstrap assumptions and numbered validation claims.
 
 Phase 0 specifies the seed needed to start ordered validation under certification generation 2; it proves no
@@ -28,7 +28,7 @@ validator that judges every later phase, so nothing product-facing is a Phase-0 
 - [Sprint 0.2: Checker reconciliation](#sprint-02-checker-reconciliation-)
 - [Sprint 0.3: Documentation checker extraction](#sprint-03-documentation-checker-extraction-)
 - [Sprint 0.4: Gate specification and runner core](#sprint-04-gate-specification-and-runner-core-)
-- [Sprint 0.5: Custody core and human commands](#sprint-05-custody-core-and-human-commands-)
+- [Sprint 0.5: Custody core and verifier commands](#sprint-05-custody-core-and-verifier-commands-)
 - [Sprint 0.6: Delete pass, package rewrite, and executable split](#sprint-06-delete-pass-package-rewrite-and-executable-split-)
 - [Sprint 0.7: Phase-0 gate specification, first generation, and receipt-bearing reset](#sprint-07-phase-0-gate-specification-first-generation-and-receipt-bearing-reset-)
 - [Documentation Requirements](#documentation-requirements)
@@ -37,7 +37,7 @@ validator that judges every later phase, so nothing product-facing is a Phase-0 
 ## Phase Status
 
 ✅ Done.
-**Receipt**: e2d57899b2640cdcb535c78059dd8a032fd7824146f9c9db786680a3cb065225
+**Receipt**: b4529d99f6e4afb614273a0d66d7af749e2661e7d8acd12051157e6b243816d8
 
 The generation-2 reset ([DL-0007](../documents/decision_log.md#dl-0007--certification-generation-2-replaces-the-validation-kernel),
 [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice)) withdraws every
@@ -49,7 +49,7 @@ validator it seeds is replaced, not hardened.
 
 Phase 0 establishes a finite root from which the numbered plan can validate in strict numerical order. Its
 subject is the governance surface, the standalone documentation checker, the gate-specification library, the
-generic runner, the retained custody core, the human transition commands, and the three-case bootstrap
+generic runner, the retained custody core, the mechanical transition commands, and the three-case bootstrap
 mutation seed. Every executable decision and independent expectation is Haskell. Python under `pb/**` is
 inspected as source but is not used as validation transport.
 
@@ -61,8 +61,8 @@ and a second-build agreement remain open and belong to Phase 1.
 
 The validator is specified by the [gate-runner doctrine](../documents/engineering/gate_runner_doctrine.md):
 one generic runner consumes one typed `GateSpec` per phase, holds every verdict, generates every mutant, and
-records the kernel line count against a ratchet. The agent command `preview` mints nothing; the human command
-`accept` signs and applies exactly one phase's status patch. This phase owes all of that machinery; nothing in
+records the kernel line count against a ratchet. The agent command `preview` mints nothing; agent-run
+`accept` applies exactly one phase's status patch and publishes its immutable bundle. This phase owes all of that machinery; nothing in
 this document is an observed result.
 
 Numerical order governs gate execution, evidence, and status. It does not prohibit implementation of a later
@@ -70,12 +70,12 @@ Numerical order governs gate execution, evidence, and status. It does not prohib
 cannot validate, mint candidate evidence, use `pb`, consume an absent predecessor, or touch live or hardware
 resources before the validation frontier reaches it.
 
-**Phase scope:** Build and validate the governance seed, the finite bootstrap seed, and the generation-2 validator; split immediately if a requirement needs authenticated reproducible acquisition, compiler semantic analysis, product behavior, or live infrastructure.
+**Phase scope:** Build and validate the governance seed, the finite bootstrap seed, and the generation-2 validator; split immediately if a requirement needs pin-verified reproducible acquisition, compiler semantic analysis, product behavior, or live infrastructure.
 **Substrate:** `none`
 **Lane:** `none`
 **Register:** —
 **Depends on:** genesis
-**Forward-deferred:** authenticated reproducible toolchain acquisition — [Phase 1](phase_01_toolchain_spike.md) `toolchain_spike` / `LTD-BOOT-001`; compiler-backed source closure — [Phase 2](phase_02_repository_layout_conformance.md) `repository_layout_conformance` / `LTD-SRC-000`, `LTD-SRC-008`; the spine fact through the shipped binary — [Phase 3](phase_03_typed_spine.md) `typed_spine` / `LTD-DSL-001`
+**Forward-deferred:** pin-verified reproducible toolchain acquisition, with publisher identity unverified — [Phase 1](phase_01_toolchain_spike.md) `toolchain_spike` / `LTD-BOOT-001`; compiler-backed source closure — [Phase 2](phase_02_repository_layout_conformance.md) `repository_layout_conformance` / `LTD-SRC-000`, `LTD-SRC-008`; the spine fact through the shipped binary — [Phase 3](phase_03_typed_spine.md) `typed_spine` / `LTD-DSL-001`
 **Gate:** `pb validate phase 00`; see [Gate integrity](#gate-integrity).
 
 ### Gate specification
@@ -86,7 +86,7 @@ documentation checker refuses this document when the block and the compiled valu
 ```gate-spec
 capability: documentation_suite
 role: seed
-claim: For one snapshot, the standalone documentation checker reports zero findings on the governed corpus and the named finding on each rendered negative; the three bootstrap predicate mutants are judged by the independent driver; the custody probes pass; the hygiene row is green at the recorded cap; the generation-2 seed is content-addressed and human-issued.
+claim: For one snapshot, the standalone documentation checker reports zero findings on the governed corpus and the named finding on each rendered negative; the three bootstrap predicate mutants are judged by the independent driver; the custody probes pass; the hygiene row is green at the recorded cap; the generation-2 seed is content-addressed and agent-recorded with an immutable accepted bundle.
 subjects: Amoebius.Validation.BootstrapPredicate, Amoebius.Doc.Check, Amoebius.Validation.Runner, Amoebius.Validation.Custody
 suite: plan-decisions-suite
 oracle: oracle-doc
@@ -145,12 +145,13 @@ items is assigned to its numbered owner instead of extending Phase 0.
 - Verify the frozen baseline and the decision-log structure; refuse a frozen body change without an entry.
 - Run the clean bootstrap predicate and exactly three changed-source cases serially; clean must be silent
   and successful, while each mutant must return `ExitFailure 1`, empty stdout, and its exact case-label stderr.
-- Observe the seven custody probes through their separately authored oracle: protected issuer success;
-  old-generation refusal; forged receipt plus matching-copy refusal; candidate baseline replacement denial;
-  authority-ancestor replacement denial; private issuer read denial; inherited-authority impersonation denial.
+- Observe the six compiled custody controls through the independently authored runner oracle: seed-record
+  roundtrip, receipt roundtrip, tampered-receipt refusal, stable reproducible digest, dirty-status refusal,
+  and missing-predecessor refusal. The tracked archive has separate exact-read, tamper, missing-file, and
+  symlink controls ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)).
 - Record the kernel hygiene row: line count at or below the ratchet, no conditional compilation, no `*Run*`
   module, no phase-number literal, one phase table, one definition per vocabulary type.
-- Refuse issuance when agent environment markers are present; refuse `preview` from minting anything.
+- Refuse `preview` from minting anything; allow agent-run `accept` only after the complete qualified gate.
 - Observe that the compiled legacy due-count for Phase 0 covers exactly the validator rows named in the
   `Legacy closure` cell below and nothing product-facing.
 - Produce one complete qualified candidate whose required rows pass, then record it with `accept`.
@@ -163,17 +164,17 @@ remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
-| `Claim` | For one exact source snapshot, the standalone documentation checker reports zero findings on the governed corpus and the named finding on each rendered negative; the three bootstrap mutants are judged by the independent driver; the seven custody probes pass; the kernel hygiene row is green at the recorded ratchet; the generation-2 seed is content-addressed and human-issued. Toolchain reproducibility, source closure, product, and live-resource claims are excluded. |
+| `Claim` | For one exact source snapshot, the standalone documentation checker reports zero findings on the governed corpus and the named finding on each rendered negative; the three bootstrap mutants are judged by the independent driver; the six custody controls pass; the kernel hygiene row is green at the recorded ratchet; the generation-2 seed is content-addressed and agent-recorded with an immutable accepted bundle. Toolchain reproducibility, source closure, product, and live-resource claims are excluded ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)). |
 | `Subject` | The documentation checker under `src/doc-check/**`, the gate-specification library under `src/gate-spec/**`, the plan-decisions library under `src/plan-decisions/**`, the retained custody core, and the runner under `src/validation-kernel/**`. No caller-authored snapshot, digest, row result, predecessor, or status projection can substitute for an acquired value. |
 | `Command` | Future public spelling is `pb validate phase 00`, but `pb` is inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs the shipped verifier directly as `amoebius-validate preview phase 00`, which mints nothing, then `amoebius-validate accept --phase 00`, which records the reproducible receipt and applies one phase's status patch. The seed hook compiles and runs the three-case predicate matrix serially with `-j1`. |
-| `Oracle` | `test/oracle/doc/Main.hs` prints the expected finding ledger from literals and imports no product or validator module. Acquired `test/validation-kernel/BootstrapMutationDriver.hs` independently states the clean-plus-three predicate expectations. `Amoebius.Validation.SeedCustodyOracle.Internal` separately states the closed seven-case custody transcript without importing the supervisor's decision types. |
-| `Positive controls` | The governed corpus; the clean predicate; the seven custody successes; a frozen baseline that matches the tree; a decision log whose entries are well-formed and strictly increasing. |
-| `Paired negatives` | Rendered documentation negatives: broken link, stale backlink, missing status line, non-frontier status vector, unauthorised frozen edit, uncited module claim, gate-specification block mismatch, decision-log order. The three predicate mutants. The six custody refusals. Each is refused with its exact finding or case label at its exact locus. |
+| `Oracle` | `test/oracle/doc/Main.hs` prints the expected finding ledger from literals and imports no product or validator module. Acquired `test/validation-kernel/BootstrapMutationDriver.hs` independently states the clean-plus-three predicate expectations. `test/oracle/runner/Main.hs` independently judges the record, preflight, and archive observations against its own literals. |
+| `Positive controls` | The governed corpus; the clean predicate; the three positive custody controls and accepted archive roundtrip; a frozen baseline that matches the tree; a decision log whose entries are well-formed and strictly increasing. |
+| `Paired negatives` | Rendered documentation negatives: broken link, stale backlink, missing status line, non-frontier status vector, unauthorised frozen edit, uncited module claim, gate-specification block mismatch, decision-log order. The three predicate mutants. Tampered-receipt, dirty-status, missing-predecessor, and archived-evidence tamper/missing/symlink refusals. Each is refused with its exact finding or case label at its exact locus. |
 | `Mutants` | Runner-generated over `Amoebius.Doc.Check`, `Amoebius.Validation.Runner.Spec`, `Amoebius.Validation.Runner.Mutants`, and `Amoebius.Validation.Runner.Hygiene`, eight per module, kill ratio at least 0.6, stillborn excluded. The finite three-case predicate exception in §M.4 is retained as the only authored mutant set. |
 | `Discovery` | The governed path inventory is compared two-way with the frozen baseline; the package description's stanza module map is compared two-way with the subjects named above; empty discovery refuses. |
 | `Challenge` | The runner renders the negative corpus beneath `.build/docs/**` after the run starts, with a nonce in each negative's path; the checker's finding ledger must carry that nonce. |
-| `Observer` | `ProcessObserver` over the checker, the predicate binaries, and the custody supervisor: executable identity, argv, complete output, and exit are runner-captured; no subject log is trusted. |
-| `Authority/bypass` | No `sudo` path in `Dispatch`; the agent user identity cannot issue; the supervisor refuses when agent environment markers are present; `preview` cannot reach the issuer. Direct JSON forgery, candidate-selected baselines, replacement of authority-bearing ancestors, and private issuer reads must refuse. |
+| `Observer` | `ProcessObserver` over the checker, the predicate binaries, and the runner-area suite: executable identity, argv, complete output, and exit are runner-captured; no subject log is trusted. |
+| `Authority/bypass` | No `sudo`, issuer key, or agent-marker tripwire is required. `preview` cannot record status or publish an accepted bundle; `accept` runs the same complete gate and applies one bounded status patch. Direct record forgery, candidate-selected baselines, and altered predecessor evidence must refuse ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)). |
 | `Freshness` | The verifier digest equals the seed's; opening and closing source identities are equal; the negative corpus is rendered fresh under a unique run root. |
 | `Qualification` | The generated-mutant matrix over the modules above, plus the finite three-case predicate matrix, precede the clean candidate in the same run. |
 | `Cleanroom` | All generated material lives beneath one unique `.build/runs/phase-00/**` leaf, which must be absent afterward; the kernel line count is recorded as the ratchet for the next accept. |
@@ -188,7 +189,7 @@ remains phase-local and cannot be supplied by this prose.
 - [`documentation_standards.md` §6 — honesty](../documents/documentation_standards.md#6-honesty-the-proventestedassumed-discipline) — the three-mood rule this checker enforces.
 - [`documentation_standards.md` §17 — the doctrine freeze](../documents/documentation_standards.md#17-the-doctrine-freeze) — the frozen set and its baseline.
 - [`gate_runner_doctrine.md` §2 — the gate-specification vocabulary](../documents/engineering/gate_runner_doctrine.md#2-the-gate-specification-vocabulary) — the typed specification every phase renders.
-- [`gate_runner_doctrine.md` §6 — commands, generations, and receipts](../documents/engineering/gate_runner_doctrine.md#6-commands-generations-and-receipts) — `preview`, `accept`, `reset`, `govern`, `demo`, and reseed.
+- [`gate_runner_doctrine.md` §6 — commands, generations, and receipts](../documents/engineering/gate_runner_doctrine.md#6-commands-generations-and-receipts) — `preview`, `accept`, `replay`, `reset`, and `demo`.
 - [`repository_layout_doctrine.md` §1 — classification rule](../documents/engineering/repository_layout_doctrine.md#1-classification-rule) — Haskell behavioral source and the bounded `pb/**` exception.
 - [`validation_frame_doctrine.md` §1 — native Haskell validation](../documents/engineering/validation_frame_doctrine.md#1-native-haskell-is-the-validation-environment) — the finite seed and explicit exclusions.
 - [`testing_spoof_resistance.md` §12 — spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence) — independent expectations and changed-source witnesses.
@@ -201,7 +202,7 @@ remains phase-local and cannot be supplied by this prose.
 **Status**: Done
 **Implementation**: `AGENTS.md`, `documents/decision_log.md`, `documents/documentation_standards.md`, `src/plan-decisions/Amoebius/Plan/Decisions.hs`, `src/plan-decisions/Amoebius/Plan/PhaseIdentity.hs`, `src/plan-decisions/Amoebius/Plan/Legacy.hs`, `src/validation-kernel/Amoebius/Validation/PolicyContract/Internal.hs`, and `src/validation-kernel/Amoebius/Validation/StatusFrontier.hs`
 **Blocked by**: `genesis`
-**Independent Validation**: The frozen baseline that matches the governed corpus, the ten seeded decision-log entries, the fifty-six-row phase-identity table, and the role-named policy contract are the positive control. A frozen body change without an entry, an entry with a reused identifier, a table with a gap-crossing predecessor, and an ordinal literal in the policy contract are paired negatives refused by name. Generated mutants in `Amoebius.Plan.Decisions` are killed by the doc-check oracle.
+**Independent Validation**: The frozen baseline that matches the governed corpus, the strictly ordered decision-log entries, the fifty-six-row phase-identity table, and the role-named policy contract are the positive control. A frozen body change without an entry, an entry with a reused identifier, a table with a gap-crossing predecessor, and an ordinal literal in the policy contract are paired negatives refused by name. Generated mutants in `Amoebius.Plan.Decisions` are killed by the doc-check oracle.
 **Oracle**: `test/oracle/doc/Main.hs` states the expected baseline rows, entry identifiers, and table cardinality from literals; it imports no plan-decisions module.
 **Legacy IDs**: none
 **Docs to update**: `AGENTS.md`, `documents/documentation_standards.md`, and `documents/decision_log.md`
@@ -346,13 +347,13 @@ product executable still links the validator. A component diagnostic may run the
 preflight to observe them; it cannot mint a green candidate while either row is red
 ([DL-0012](../documents/decision_log.md#dl-0012--the-hygiene-rows-roots-run-module-pattern-and-run-directory-convention)).
 
-## Sprint 0.5: Custody core and human commands ✅
+## Sprint 0.5: Custody core and verifier commands ✅
 
 **Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/Custody.hs`, `src/validation-kernel/Amoebius/Validation/Custody/Store.hs`, `src/validation-kernel/Amoebius/Validation/Custody/Status.hs`, `src/validation-kernel/Amoebius/Validation/Custody/Preflight.hs`, `src/validation-kernel/Amoebius/Validation/Compatibility.hs`, `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs`, and `app/amoebius-validate/Main.hs`
 **Blocked by**: Sprint 0.4
-**Independent Validation**: `preview` runs the complete gate and mints nothing; `accept` from the human account signs and applies exactly one phase's patch; each preflight refusal — `StatusSurfaceDirty`, `PredecessorNotCommitted`, `STATUS-WITHOUT-RECEIPT`, `KERNEL-VERIFIER-DIVERGED`, `GOVERNANCE-UNACCEPTED`, `HARDWARE-BEFORE-BARRIER`, `SUBSTRATE-ABSENT`, `KernelOverBudget`, `SPEC-WEAKENED` — is a paired negative. An agent environment marker refuses issuance. Closure-based chaining keeps a receipt across an edit outside the closure and reopens across an edit inside it.
-**Oracle**: `src/validation-kernel/Amoebius/Validation/SeedCustodyOracle/Internal.hs` for the seven custody probes; `test/oracle/runner/Main.hs` for the refusals and chaining cases.
+**Independent Validation**: `preview` runs the complete gate and mints nothing; agent-run `accept` applies exactly one phase's patch and publishes its immutable accepted bundle. A missing, altered, or incomplete tracked bundle is refused before predecessor use; distinct observed runs with the same reproducible digest retain distinct bundle addresses. Closure-based chaining keeps a receipt across an edit outside the closure and reopens across an edit inside it ([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
+**Oracle**: `test/oracle/runner/Main.hs` for the six custody controls, archive refusals, and predecessor chaining cases.
 **Legacy IDs**: `LTD-VAL-003`, `LTD-VAL-004` — receipt authenticity and status authority, owned here
 **Docs to update**: `documents/engineering/validation_frame_doctrine.md` and `documents/engineering/gate_runner_doctrine.md`
 
@@ -364,20 +365,23 @@ behind it ([DL-0009](../documents/decision_log.md#dl-0009--status-authority-is-o
 
 ### Deliverables
 
-- Content-addressed generations, reseed with a decision identifier, and archived prior stores.
-- The agent command `preview` and the human commands `accept`, `reset`, `govern`, and `demo`.
+- Content-addressed generations and immutable accepted bundles under `validation-records/**`.
+- Agent-run `preview`, `accept`, `reset`, and `demo` commands.
 - The preflight refusals, closure-based predecessor chaining, and refresh as an identity projection.
 - Receipt fields: verifier digest, governance digest, `SubjectChangeWitness`, `ResetCause`, `OperatorDemonstration`.
 
 ### Validation
 
-Run each command from the agent identity and the human identity; require the specified success or refusal.
-Edit a file outside and then inside the predecessor closure and require the receipt to survive and then reopen.
+Run each command from the agent identity; require the specified success or refusal. Edit a file outside and
+then inside the predecessor closure and require the receipt to survive and then reopen. Delete the optional
+`.build/**` receipt cache and require the tracked bundle to remain exact-readable. Remove or tamper with a
+bundle in a negative test and require predecessor refusal
+([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 
 ### Remaining Work
 
 The generation-2 custody core is new code beside the generation-1 modules rather than an edit of them: the
-store beneath `.build/certification/**`, the receipt records with their reproducible digests, the status surface
+accepted archive beneath `validation-records/**`, optional cache beneath `.build/certification/**`, the receipt records with their reproducible digests, the status surface
 and its one-phase patch with the receipt line, the preflight decision as a pure function of gathered facts,
 the closure digest, and `replay`. The generation-1 supervisor, its signed receipt format, the root-owned
 mirror, and the issuer key are retired with
@@ -434,7 +438,7 @@ and listed modules, never as source changes.
 **Status**: Done
 **Implementation**: `src/gate-spec/Amoebius/Validation/GateSpec/Seed.hs`, `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs`, `src/validation-kernel/Amoebius/Validation/BootstrapQualification/Internal.hs`, `src/validation-kernel/Amoebius/Validation/Runner.hs`, and `test/validation-kernel/BootstrapMutationDriver.hs`
 **Blocked by**: Sprint 0.6
-**Independent Validation**: The Phase-0 specification verifies and its fenced block equals the compiled value; the first `accept` enters generation 2 at the verifier's content address; the receipt-bearing reset names `ResetCause { validatorGap = "gates measured the harness", productGap = LTD-DSL-001 }`; a reset without a product gap is refused while any `LTD-DSL-*` row is open. The three predicate cases retain their exact exits and streams; a wiped store is re-established by `replay` and a receipt whose digest does not re-derive is void.
+**Independent Validation**: The Phase-0 specification verifies and its fenced block equals the compiled value; the first `accept` enters generation 2 at the verifier's content address; the receipt-bearing reset names `ResetCause { validatorGap = "gates measured the harness", productGap = LTD-DSL-001 }`; a reset without a product gap is refused while any `LTD-DSL-*` row is open. The three predicate cases retain their exact exits and streams. A wiped scratch cache leaves the tracked bundle intact; a missing historical bundle requires a fresh gate run, and a receipt whose digest does not re-derive is void ([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 **Oracle**: `test/validation-kernel/BootstrapMutationDriver.hs` for the predicate matrix; `test/oracle/runner/Main.hs` for the specification and reset cases.
 **Legacy IDs**: none due here beyond the closures recorded above
 **Docs to update**: `DEVELOPMENT_PLAN/README.md` only through `accept`
@@ -448,13 +452,15 @@ reset that starts the frontier at this phase.
 
 - The Phase-0 `GateSpec` with `gateSeed` present and no `BinaryFact`.
 - The reset with `--decision DL-0008 --product-gap LTD-DSL-001`.
-- The complete Phase-0 candidate recorded by `accept`, with its receipt digest beside the Done status.
+- The complete Phase-0 candidate recorded by `accept`, with its receipt digest beside Done status and its
+  immutable seven-file bundle under `validation-records/**`.
 
 ### Validation
 
 Run `preview phase 00` and require every row green; run `accept --phase 00` and require exactly one phase's
-patch plus the receipt line; delete the store and require `replay` to re-run the gate green and refresh the
-recorded digest.
+patch plus the receipt line and one complete archive bundle; delete the scratch cache and require archive
+verification to succeed. Remove the bundle in a negative test and require `replay` to run the gate green and
+publish a new bundle and refreshed digest.
 
 ### Remaining Work
 
@@ -482,7 +488,7 @@ the registry under its capability, and the fenced block in this document equals 
 ## Related Documents
 
 - [Development-plan tracker](README.md)
-- [Phase 1 toolchain spike](phase_01_toolchain_spike.md) — authenticated reproducible acquisition after the seed
+- [Phase 1 toolchain spike](phase_01_toolchain_spike.md) — pin-verified reproducible acquisition after the seed
 - [Phase 2 repository layout conformance](phase_02_repository_layout_conformance.md) — source closure
 - [Phase 3 typed spine](phase_03_typed_spine.md) — the first product specification
 - [Development-plan standards](development_plan_standards.md)

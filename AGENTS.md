@@ -55,7 +55,10 @@ role. The complete
 closed classification is owned by the
 [repository-layout doctrine](documents/engineering/repository_layout_doctrine.md#1-classification-rule);
 documentation and narrowly defined repository/build
-metadata are non-source inputs, not additional language exceptions.
+metadata are non-source inputs, not additional language exceptions. The one tracked validation-evidence
+class is the verifier-issued, immutable `validation-records/**` archive: it records completed observations
+and supplies neither behavior nor an oracle
+([DL-0015](documents/decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence)).
 
 Markdown may be checked for documentation structure, links, and status syntax, but it must never be parsed
 into product behaviour, a semantic test expectation, a coverage registry, a generator input, or a validation
@@ -106,8 +109,11 @@ all of its predecessors. That barrier requires every source-migration query—in
 through the shipped `amoebius` binary, and every hardware phase binds that receipt and runs a corpus example
 through its own subject. Before `BOOTSTRAP_HANDOFF` passes, `pb` is not an admissible validation transport: every
 phase up to and including `DSL_BARRIER` builds and invokes the exact source-bound Haskell executable directly
-from an authenticated,
-network-independent toolchain input. Their `pb validate phase NN` spelling is the future public target, not
+from a pin-verified, network-independent toolchain input. The seven pinned bootstrap files require no
+operator keyring or GPG verification; their signature files are opaque digest-checked inputs, and publisher
+identity remains unverified
+([DL-0017](documents/decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring)).
+Their `pb validate phase NN` spelling is the future public target, not
 evidence that the unvalidated bootstrap ran correctly.
 
 `BOOTSTRAP_HANDOFF` alone validates the already source-bounded runtime ensure/build/identity-argv/exec handoff
@@ -129,11 +135,21 @@ or hardware-bearing effects or mint phase evidence before its predecessor gate p
 
 A receipt is not a signature; it is a content-addressed record of one runner execution whose reproducible
 digest any later run must re-derive. `amoebius-validate replay` re-runs a recorded gate at the current
-verifier and governance digests: a green re-run refreshes the record, a red one voids the receipt, and the
-next gate refuses `PredecessorNotReproduced` until the replay is green. The verifier never requires or uses `sudo`, holds no issuer key,
-and keeps its store beneath the ignored `.build/**` tree; the receipt digest that justifies a Done status is
-committed beside that status in the phase document, so a wiped store is re-established by replay, never by
-trust ([DL-0013](documents/decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible)).
+verifier and governance digests: a green re-run creates a new immutable record, a red one voids the current
+receipt and appends an immutable `validation-records/**/voids/**` marker, and the next gate refuses
+`PredecessorNotReproduced` until replay is green. The Done line remains until a successful replay or explicit
+verifier reset; neither an older same-digest bundle nor an ignored cache can bypass the marker
+([DL-0019](documents/decision_log.md#dl-0019--red-replay-leaves-an-immutable-revocation-record)). The verifier never
+requires or uses `sudo` and holds no issuer key. The canonical accepted bundle is committed under
+`validation-records/**` with the receipt digest beside Done status in the phase document; the human commits
+that reviewable worktree change for durability. A subsequent numerical phase may use the just-published
+bundle before commit only when the verifier exact-reads it, binds its status postimage and accepted closure,
+and fully re-derives that predecessor gate at the current verifier and governance digests. A closure-digest
+comparison alone is insufficient ([DL-0016](documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
+`.build/**` is disposable scratch and an optional cache. A missing or corrupt bundle fails closed. If historical
+scratch records are lost, a fresh gate run produces new evidence; a digest alone cannot recreate observations
+([DL-0015](documents/decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence),
+[DL-0016](documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 
 ## Doctrine Freeze
 

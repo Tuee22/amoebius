@@ -1,6 +1,6 @@
-# Every pattern here is a claim that the path it names is generated, and that the
-# repository-layout doctrine section 2 target tree contains it, on the same terms as
-# `.gitignore`. This contract is at least as strict as that one for generated content.
+# Every pattern names content excluded from an image build context under the
+# repository-layout doctrine section 2 target tree. This includes generated local
+# state and the tracked historical validation archive, which is not image input.
 
 # Version-control metadata is never a build input.
 .git
@@ -13,8 +13,8 @@
 .data/**
 .test_data
 .test_data/**
-
-test/golden/phase_*_ledger.json
+validation-records
+validation-records/**
 
 # Dependency resolution is refreshed dynamically.
 **/*.lock
@@ -33,8 +33,7 @@ test/golden/phase_*_ledger.json
 **/.cabal-sandbox/**
 **/.ghc.environment.*
 
-# Package-manager dependency trees. Installed beneath `.build/` with `--prefix`, but
-# `package.json` sits at the context root, so a bare `npm install` lands here.
+# Package-manager dependency trees that spill beside source.
 **/node_modules
 **/node_modules/**
 
@@ -46,13 +45,6 @@ test/golden/phase_*_ledger.json
 **/*.hie
 **/*.tla
 **/*.cfg
-ui/.spago
-ui/.spago/**
-ui/output
-ui/output/**
-ui/dist
-ui/dist/**
-
 # Source-adjacent Python interpreter caches are local accelerators, never image
 # build inputs.
 **/__pycache__

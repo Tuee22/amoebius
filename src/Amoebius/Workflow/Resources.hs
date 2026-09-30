@@ -6,7 +6,7 @@ module Amoebius.Workflow.Resources
   , WorkflowRuntimeDemand (..)
   , ProvisionedWorkflowRuntime
   , ProvisionError (..)
-  , phase37RuntimeDemand
+  , workflowRuntimeDemand
   , workflowProvisionTerms
   , provisionWorkflowRuntime
   , provisionedTerms
@@ -57,8 +57,8 @@ data ProvisionError
   | RuntimeAcceleratorForbidden Natural
   deriving stock (Eq, Show)
 
-phase37RuntimeDemand :: WorkflowRuntimeDemand
-phase37RuntimeDemand = WorkflowRuntimeDemand sources (64 * mib) 28 (512 * 1024) 0
+workflowRuntimeDemand :: WorkflowRuntimeDemand
+workflowRuntimeDemand = WorkflowRuntimeDemand sources (64 * mib) 28 (512 * 1024) 0
   where
     mib = 1024 * 1024
     deployment name cpu memory ephemeral image logs projected pulsar workspace =

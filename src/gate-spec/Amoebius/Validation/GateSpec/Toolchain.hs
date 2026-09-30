@@ -1,18 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
-
--- | The toolchain-spike gate specification: the first product specification.
--- Its subjects are the six toolchain stage modules inside the shipped
--- executable's closure; its qualification is the generated mutant matrix; and
--- its binary fact rewrites the pinned compiler manifest's archive digest to the
--- run's nonce, so the shipped report must carry the nonce and refuse at exactly
--- that archive.
+-- | Toolchain gate: shipped stage modules, generated mutants, and manifest-digest challenge.
 module Amoebius.Validation.GateSpec.Toolchain
   ( toolchainCases
   , toolchainSpecInput
   ) where
-
 import Amoebius.Validation.GateSpec
-
 toolchainSubjects :: [ProductionModule]
 toolchainSubjects =
   [ ProductionModule "Amoebius.Toolchain.Pins"
@@ -22,12 +14,11 @@ toolchainSubjects =
   , ProductionModule "Amoebius.Toolchain.Provenance"
   , ProductionModule "Amoebius.Toolchain.Report"
   ]
-
 toolchainCases :: [ExactCase]
 toolchainCases =
   [ PositiveControl "pinned-acquisition" "seven pins" "agree"
   , PositiveControl "second-acquisition" "same pins, absent root" "same identities and plan"
-  , PositiveControl "publisher-signature" "operator keyring" "good"
+  , PositiveControl "pinned-manifest-agreement" "two pinned SHA256SUMS files" "archive digests equal pins"
   , PositiveControl "probe-decode" "positive.dhall" "decoded amoebius/3/True"
   , PositiveControl "probe-sim" "clean schedule" "b:2"
   , PositiveControl "probe-codegen" "probe.proto" "Proto/Probe.hs,Proto/Probe_Fields.hs"
@@ -35,8 +26,10 @@ toolchainCases =
   , PositiveControl "probe-plan" "empty inventory" "four ensure steps"
   , PositiveControl "provenance-acquired" "supernova-0.0.3" "tree digest equal"
   , PairedNegative "MissingPin" "absent manifest" "PinMissing" "pins"
+  , PairedNegative "MissingArchivePin" "absent compiler archive" "PinMissing" "pins"
+  , PairedNegative "MissingSignaturePin" "absent pinned signature bytes" "PinMissing" "pins"
   , PairedNegative "DigestMismatch" "corrupted manifest" "PinDigestMismatch" "pins"
-  , PairedNegative "SignatureMismatch" "corrupted signature" "SignatureRejected" "signatures"
+  , PairedNegative "PinnedSignatureDigestMismatch" "corrupted pinned signature bytes" "PinDigestMismatch" "pins"
   , PairedNegative "AmbientNetworkRead" "URL source" "AmbientNetworkRefused" "pins"
   , PairedNegative "DisagreeingAcquisition" "altered identity" "AcquisitionsDisagree" "acquire"
   , PairedNegative "MistypedDecode" "mistyped.dhall" "type-error" "probe"
@@ -51,13 +44,12 @@ toolchainCases =
   , PairedNegative "OutOfRangeVersion" "ghc 9.10.1" "OutOfRangeVersion" "plan"
   , PairedNegative "NoPlatformAsset" "windows-x86_64" "NoPlatformAsset" "plan"
   ]
-
 toolchainSpecInput :: GateSpecInput
 toolchainSpecInput =
   GateSpecInput
     { inputCapability = "toolchain_spike"
     , inputClaim =
-        "From GenesisTrust and its seven pinned files, two contained acquisitions produce the pinned compiler and package tool and agree on executable identity and elaborated plan; the shipped toolchain-report prints the pins, manifests, signatures, identities, and probe outcomes the oracle restates; the retained probe set builds and executes offline and serially; every negative is refused by name at its locus."
+        "From GenesisTrust and its seven pinned files, two contained acquisitions produce the pinned compiler and package tool and agree on executable identity and elaborated plan; the shipped toolchain-report prints the pin digests, pinned-manifest agreement, identities, and probe outcomes the oracle restates; the retained probe set builds and executes offline and serially; every negative is refused by name at its locus. Publisher identity remains an explicit unverified assumption."
     , inputSubjects = toolchainSubjects
     , inputSuite = CabalTarget "toolchain-suite"
     , inputOracle = OracleExecutable "oracle-toolchain"

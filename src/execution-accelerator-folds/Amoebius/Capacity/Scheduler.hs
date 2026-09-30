@@ -32,7 +32,7 @@ import Amoebius.Capacity.Types
   , envelopeRequests
   , zeroResources
   )
-import Amoebius.Capacity.Phase29Mutation (phase29MutationTargets)
+import Amoebius.Capacity.CapacityMutation (capacityMutationTargets)
 import Control.DeepSeq (NFData)
 import Data.List (sortOn)
 import Data.Map.Strict (Map)
@@ -200,11 +200,11 @@ mutateSchedulerResult
   -> Either SchedulerError ProvisionedExecutionSchedulingGuard
 mutateSchedulerResult outcome = case outcome of
   Left SchedulerCapacityExceeded {}
-    | phase29MutationTargets "scheduler-aggregate-root" -> changed
+    | capacityMutationTargets "scheduler-aggregate-root" -> changed
   Left ReservationProjectionMismatch {}
-    | phase29MutationTargets "scheduler-projection" -> changed
+    | capacityMutationTargets "scheduler-projection" -> changed
   Left SchedulerSnapshotChanged {}
-    | phase29MutationTargets "scheduler-snapshot-cas" -> changed
+    | capacityMutationTargets "scheduler-snapshot-cas" -> changed
   _ -> outcome
  where
   changed = Left (SchedulerStateTransitionInvalid Bound Reserved)

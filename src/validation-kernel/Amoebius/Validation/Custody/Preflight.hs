@@ -33,7 +33,6 @@ data PreflightRefusal
   | KernelOverBudget Text
   | SpecWeakened [Text]
   deriving (Eq, Ord, Show)
-
 renderPreflightRefusal :: PreflightRefusal -> Text
 renderPreflightRefusal refusal = case refusal of
   StatusSurfaceDirty -> "StatusSurfaceDirty: the status surface differs from the last recorded postimage"
@@ -45,7 +44,6 @@ renderPreflightRefusal refusal = case refusal of
   SubstrateAbsent substrate -> "SUBSTRATE-ABSENT: " <> renderSubstrate substrate
   KernelOverBudget detail -> "KernelOverBudget: " <> detail
   SpecWeakened dropped -> "SPEC-WEAKENED: " <> Text.intercalate "; " dropped
-
 data HostFacts = HostFacts
   { hostSubstrates :: [Substrate]
   }
@@ -67,7 +65,6 @@ hostFacts = do
               , [Windows | "mingw" `isPrefixOf` os]
               ]
       }
-
 data PreflightFacts = PreflightFacts
   { factsSpec :: GateSpec
   , factsSurfaceDigest :: Text

@@ -1,14 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Validation.Types
-  ( CheckResult (..)
-  , Finding (..)
-  , Observation (..)
-  , checkPassed
-  , finding
-  , mergeChecks
-  , observation
-  , renderFinding
+  ( CheckResult (..), Finding (..), Observation (..)
+  , checkPassed, finding, mergeChecks, observation, renderFinding
   ) where
 
 import Data.Text (Text)
@@ -20,29 +14,23 @@ data Finding = Finding
   , findingDetail :: Text
   }
   deriving (Eq, Ord, Show)
-
 data Observation = Observation
   { observationKey :: Text
   , observationValue :: Text
   }
   deriving (Eq, Ord, Show)
-
 data CheckResult = CheckResult
   { checkName :: Text
   , checkObservations :: [Observation]
   , checkFindings :: [Finding]
   }
   deriving (Eq, Show)
-
 checkPassed :: CheckResult -> Bool
 checkPassed = null . checkFindings
-
 finding :: Text -> FilePath -> Text -> Finding
 finding = Finding
-
 observation :: Text -> Text -> Observation
 observation = Observation
-
 mergeChecks :: Text -> [CheckResult] -> CheckResult
 mergeChecks name checks =
   CheckResult
@@ -50,7 +38,6 @@ mergeChecks name checks =
     , checkObservations = concatMap checkObservations checks
     , checkFindings = concatMap checkFindings checks
     }
-
 renderFinding :: Finding -> Text
 renderFinding item =
   findingCode item

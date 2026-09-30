@@ -1,4 +1,4 @@
-# Generated Artifacts: emitted from Haskell, never committed
+# Generated Artifacts: behavioral outputs remain untracked
 
 > **Purpose**: State the semantic rule that every non-Haskell behavioral artifact is emitted lazily from
 > Haskell and never committed.
@@ -31,13 +31,16 @@ the doctrine that defines each output.
 
 ## 1. Why this doctrine exists
 
-A committed generated artifact is a second source of truth. It can be edited independently of its generator,
-and both copies can remain well formed while disagreeing. Review cannot reliably determine whether the output
-or generator is authoritative.
+A committed generated artifact is a second source of truth when it is reused as behavior or an expectation. It
+can be edited independently of its generator, and both copies can remain well formed while disagreeing. Review
+cannot reliably determine whether the output or generator is authoritative.
 
-amoebius removes the second copy. A consumer obtains a fresh deterministic materialization from Haskell at the
-moment it is needed. The artifact is stamped, content-addressed where its lifecycle requires identity, written
-beneath `.build/**`, and reaped with its region. A generated file never moves back into an authored root.
+amoebius removes the second behavioral copy. A consumer obtains a fresh deterministic materialization from
+Haskell at the moment it is needed. The artifact is stamped, content-addressed where its lifecycle requires
+identity, written beneath `.build/**`, and reaped with its region. A generated behavioral file never moves
+back into an authored root. A completed gate's bounded accepted bundle and a red replay's immutable void
+marker have distinct historical roles under `validation-records/**`; neither supplies a semantic expectation
+or a current verdict ([DL-0020](../decision_log.md#dl-0020--revocation-observations-share-the-non-source-archive-boundary)).
 
 The stronger tracked-source rule belongs to
 [`repository_layout_doctrine.md` §1](./repository_layout_doctrine.md#1-classification-rule): all tracked
@@ -70,22 +73,33 @@ ignored `.build/**` output.
 | Test enumeration and encoded fixtures/oracles | Haskell declarations and separately authored Haskell expectations | `.build/test-surfaces/**`, `.build/test-corpora/**` |
 | Python outside `pb/**`, shell, and other external-language check helpers | Haskell checker/workflow declarations | `.build/tools/**` |
 | Mutated source and negative corpora | Haskell mutation operators and positive Haskell seeds | `.build/test-corpora/**` |
-| Rendered plans, reports, ledgers, receipts, and traces | Haskell execution and observation values | `.build/runs/**`, `.build/docs/**` |
+| Rendered plans, diagnostic reports, ledgers, candidate receipts, and traces | Haskell execution and observation values | `.build/runs/**`, `.build/docs/**` |
 
 Operator-authored runtime values are a distinct case. They are external or untracked inputs supplied to the
 binary; they are not repository examples, fixtures, or application source. A gate may
 copy such a value into its run root, but that copy remains untracked input or run evidence.
 
+After a green verification, the narrow accepted receipt and bounded evidence named by the
+[repository-layout doctrine §5](./repository_layout_doctrine.md#5-run-evidence-and-phase-status) are copied
+into the tracked, immutable `validation-records/**` archive. A red replay appends the exact verifier-issued
+void marker there. These two historical-observation shapes are the sole archive exception; unbounded run
+output, tools, generated source, and serialized expectations remain in ignored `.build/**`
+([DL-0020](../decision_log.md#dl-0020--revocation-observations-share-the-non-source-archive-boundary)).
+
 ## 3. The rule
 
 1. A Haskell value declares the complete semantic source of every generated artifact.
 2. Materialization occurs only when a typed workflow reaches a consumer that needs the artifact.
-3. Output is written beneath the owning `.build/**` subtree and never into a tracked root.
+3. Behavioral and candidate output is written beneath the owning `.build/**` subtree and never into a
+   tracked root. Only a bounded accepted bundle after a green gate or an exact void marker after a red replay
+   enters `validation-records/**`
+   ([DL-0020](../decision_log.md#dl-0020--revocation-observations-share-the-non-source-archive-boundary)).
 4. A clean materialization is deterministic for the same declared and resolved inputs.
 5. An emitted external-language program cannot decide its own validation result.
 6. A separately authored Haskell oracle judges semantic properties of the output.
 7. A serializer or compiler round trip is a consistency check, not an independent oracle.
-8. The run records resolved compilers, dependencies, paths, and integrity observations without committing them.
+8. The run records resolved compilers, dependencies, paths, and integrity observations beneath `.build/**`;
+   the bounded accepted bundle or void marker retains only fields required by its exact archive contract.
 9. Materialized output is reaped at the end of its artifact region unless a typed retention grant transfers it.
 10. The tracked-source audit rejects an emitted copy regardless of its filename, location, or hand edits.
 

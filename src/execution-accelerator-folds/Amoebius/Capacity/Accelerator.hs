@@ -21,7 +21,7 @@ module Amoebius.Capacity.Accelerator
   , validateExclusiveAcceleratorOwners
   ) where
 
-import Amoebius.Capacity.Phase29Mutation (phase29MutationTargets)
+import Amoebius.Capacity.CapacityMutation (capacityMutationTargets)
 import Control.DeepSeq (NFData)
 import Data.List (sortOn)
 import Data.Map.Strict (Map)
@@ -178,28 +178,28 @@ mutateAcceleratorResult
   -> Either AcceleratorError ProvisionedAccelerator
 mutateAcceleratorResult outcome = case outcome of
   Left AcceleratorFamilyAbsent {}
-    | phase29MutationTargets "cuda-family-absent" -> changed
+    | capacityMutationTargets "cuda-family-absent" -> changed
   Left AcceleratorDeviceCountShortage {}
-    | phase29MutationTargets "cuda-device-count" -> changed
+    | capacityMutationTargets "cuda-device-count" -> changed
   Left AcceleratorResidencyFit {}
-    | phase29MutationTargets "cuda-unsharded-fragmentation" -> changed
+    | capacityMutationTargets "cuda-unsharded-fragmentation" -> changed
   Left AcceleratorShardInvalid {}
-    | phase29MutationTargets "cuda-shard-byte-sum" -> changed
+    | capacityMutationTargets "cuda-shard-byte-sum" -> changed
   Left AcceleratorNetAllocatableViolation {}
-    | phase29MutationTargets "cuda-vram-reserve" -> changed
+    | capacityMutationTargets "cuda-vram-reserve" -> changed
   Left AcceleratorProfileMismatch {}
-    | phase29MutationTargets "metal-profile" -> changed
+    | capacityMutationTargets "metal-profile" -> changed
   Left AcceleratorInterconnectMissing {}
-    | phase29MutationTargets "accelerator-peer-graph" -> changed
+    | capacityMutationTargets "accelerator-peer-graph" -> changed
   _ -> outcome
  where
-  changed = Left (AcceleratorDeviceMissing "phase-29 changed-production accelerator mutation")
+  changed = Left (AcceleratorDeviceMissing "capacity changed-production accelerator mutation")
 
 mutateOwnerResult :: Either AcceleratorError () -> Either AcceleratorError ()
 mutateOwnerResult outcome = case outcome of
   Left AcceleratorSharedDevice {}
-    | phase29MutationTargets "accelerator-shared-owner" ->
-        Left (AcceleratorDeviceMissing "phase-29 changed-production owner mutation")
+    | capacityMutationTargets "accelerator-shared-owner" ->
+        Left (AcceleratorDeviceMissing "capacity changed-production owner mutation")
   _ -> outcome
 
 selectedDevices :: AcceleratorOffering -> Set Text -> Either AcceleratorError (Map Text AcceleratorDevice)

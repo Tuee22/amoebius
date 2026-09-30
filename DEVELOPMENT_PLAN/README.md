@@ -65,12 +65,13 @@ governance digest, and the predecessor's product closure.
 ## Toolchain
 
 The [validation-execution doctrine](../documents/engineering/validation_frame_doctrine.md#2-the-bootstrap-boundary)
-owns the finite bootstrap assumption and authenticated acquisition. Phase 0 states its irreducible trust
-boundary; Phase 1 qualifies broader toolchain claims. Neither phase depends on implementing the DSL barrier.
+owns the finite bootstrap assumption and pin-verified acquisition. Phase 0 states its irreducible trust
+boundary; Phase 1 qualifies reproducibility relative to the seven fixed size-and-digest pins while publisher
+identity and pin origin remain unverified ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)). Neither phase depends on implementing the DSL barrier.
 
 Before the handoff gate passes, validation invokes the exact source-bound verifier `amoebius-validate`
 directly, which spawns the product binary `amoebius` as a child for every product command. Compiler-bearing
-development remains serial. Authenticated, network-independent inputs are required by the phase contract; a
+development remains serial. Pin-verified, network-independent inputs are required by the phase contract; a
 locally available compiler supports only the diagnostics that actually used it.
 
 ## Document index

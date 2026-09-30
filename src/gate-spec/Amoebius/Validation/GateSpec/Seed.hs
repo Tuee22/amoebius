@@ -1,18 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
-
--- | The Phase-0 gate specification: the finite seed (gate integrity section M.4).
--- Its subjects are the validator's own seed vocabulary, which is why the seed
--- role alone may name a validator module; its qualification is the three-case
--- predicate matrix and the custody probes rather than generated mutants; and it
--- carries no binary fact because no product binary exists yet.
+-- | Finite seed: validator predicate subjects, three mutations, and custody probes.
 module Amoebius.Validation.GateSpec.Seed
   ( custodyProbes
   , phaseZeroSpecInput
   , predicateCases
   ) where
-
 import Amoebius.Validation.GateSpec
-
 -- | The three bypass cases the driver must refuse, plus the clean case.
 predicateCases :: [ExactCase]
 predicateCases =
@@ -21,7 +14,6 @@ predicateCases =
   , PairedNegative "snapshot-freshness-bypass" "bootstrapSnapshotMatches" "snapshot-freshness-bypass" "predicate"
   , PairedNegative "bootstrap-path-bypass" "bootstrapInputPathAllowed" "bootstrap-path-bypass" "predicate"
   ]
-
 -- | The custody probes the runner suite states from literals (DL-0013: no
 -- signature, no issuer; a record is trusted only when it re-derives).
 custodyProbes :: [ExactCase]
@@ -33,13 +25,12 @@ custodyProbes =
   , PairedNegative "preflight-status-surface-dirty" "surface digest" "StatusSurfaceDirty" "preflight"
   , PairedNegative "preflight-predecessor-not-reproduced" "receipt digest" "PredecessorNotReproduced" "preflight"
   ]
-
 phaseZeroSpecInput :: GateSpecInput
 phaseZeroSpecInput =
   GateSpecInput
     { inputCapability = "documentation_suite"
     , inputClaim =
-        "For one snapshot, the standalone documentation checker reports zero findings on the governed corpus and the named finding on each rendered negative; the three bootstrap predicate mutants are judged by the independent driver; the custody probes pass; the hygiene row is green at the recorded cap; the generation-2 seed is content-addressed and human-issued."
+        "For one snapshot, the standalone documentation checker reports zero findings on the governed corpus and the named finding on each rendered negative; the three bootstrap predicate mutants are judged by the independent driver; the custody probes pass; the hygiene row is green at the recorded cap; the generation-2 seed is content-addressed and agent-recorded with an immutable accepted bundle."
     , inputSubjects =
         [ ProductionModule "Amoebius.Validation.BootstrapPredicate"
         , ProductionModule "Amoebius.Doc.Check"

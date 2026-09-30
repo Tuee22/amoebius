@@ -54,9 +54,10 @@ generation-2 authority must be enforced by Haskell as specified in
 [gate integrity §M.0](development_plan_gate_integrity.md#m0-accepted-baseline-and-certification-generation).
 This documentation reset does not implement that authority or establish a gate pass.
 
-A complete qualified phase-gate pass is sufficient to change a phase and its sprints to ✅ Done. The human's
-`accept` records the narrow status patch after the validator exits; an agent's `preview` records nothing
-([DL-0009](../documents/decision_log.md#dl-0009--status-authority-is-one-human-act-per-transition)). The
+A complete qualified phase-gate pass is sufficient to change a phase and its sprints to ✅ Done. The agent-run
+`accept` records the narrow status patch and immutable accepted bundle after the candidate gate exits;
+`preview` records nothing
+([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)). The
 gate-pass contract is defined by
 [`development_plan_gate_integrity.md` §M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass).
 
@@ -64,7 +65,17 @@ The pass result binds two explicit source identities: the tested candidate and o
 status-only patch. The patch may change only the tracker plus the named phase and
 sprint status fields for the closing phase and its successor activation. The immutable Gate summary and
 status-free Contents navigation never join that patch. This prevents unrelated edits from borrowing a
-prior pass while keeping status recording mechanical. Any other change requires another gate run.
+prior pass while keeping status recording mechanical. The separate accepted archive is published only after
+the pass against that exact status postimage. It is outside the behavioral source closure and is committed
+with the status change by the human. Any other change requires another gate run
+([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
+
+A red `replay` records an immutable void marker for the selected current bundle. The phase can still display
+Done because replay does not write a status patch, but that voided bundle cannot qualify as a reproduced
+predecessor. The verifier selects the unique latest-issued bundle before applying void markers; it cannot
+fall back to an older bundle with the same receipt digest. A complete green replay publishes a later-issued
+bundle, or an explicit verifier `reset` reopens the status frontier
+([DL-0020](../documents/decision_log.md#dl-0020--revocation-observations-share-the-non-source-archive-boundary)).
 
 Status and implementation progress are separate axes. A dated inspection uses only these terms:
 
@@ -111,7 +122,9 @@ applicability.
   seven exact prepared archive/signature files, compile-time GHC `9.12.4`, absolute reported `ghc` and library
   paths, and Linux/`x86_64`. It does not authenticate publisher identity, actual compiler executable bytes or
   derivation, the loader, the broader host, or reproducibility. It has no phase ordinal, does not advance
-  status, and cannot be proved by the Phase-0 binary it compiled; Phase 1 owns those broader claims.
+  status, and cannot be proved by the Phase-0 binary it compiled. Phase 1 owns executable-byte identity and
+  reproducibility relative to the fixed pins; publisher identity and pin origin remain unverified
+  ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)).
 - The accepted seed verifier and its custody boundary are explicit bootstrap assumptions. Phase 0 qualifies
   only its finite seed; it does not depend on the full language, later host transport, or the DSL barrier's
   union corpus. A later verifier is a new content-addressed generation entered by the first `accept` or
@@ -125,7 +138,7 @@ The ordering has one non-negotiable semantic cut:
 ```text
 GenesisTrust (non-numbered root)
   → Phase 0 governance, validator, and finite bootstrap seed
-  → Phase 1 authenticated and reproducible toolchain acquisition
+  → Phase 1 pin-verified and reproducible toolchain acquisition; publisher identity unverified
   → Phase 2 layout conformance and source closure
   → Phase 3 the typed spine: one spec to fake-applied bytes
   → Phases 4–8 breadth over the same growing corpus
@@ -135,6 +148,9 @@ GenesisTrust (non-numbered root)
   → FIRST_HARDWARE (Phase 52): first hardware bring-up
   → live platform and domain instances
 ```
+
+Phase 1's pin and publisher-identity distinction in this ordering follows
+[DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope).
 
 The DSL barrier is not satisfied by replaying earlier exit codes or by a hand-built stage. Its gate carries a
 `SpineFact`: an operator-authored specification, rewritten by the runner after the run starts, reaches
@@ -193,12 +209,16 @@ as a current candidate. Every phase must satisfy its rewritten gate in table ord
 
 A gate writes a generated candidate ledger beneath `.build/runs/**`. The accepted verifier must authenticate
 its execution, qualification, scope, observations, and custody before issuing the verified status patch.
-A green ledger or content digest alone cannot authorize a transition. After the verifier exits, the human's
-`accept` rechecks the preimage and applies the emitted patch; an agent's `preview` applies nothing.
+A green ledger or content digest alone cannot authorize a transition. After the candidate gate exits,
+agent-run `accept` rechecks the preimage, applies the emitted patch, and publishes the bounded accepted bundle;
+`preview` applies nothing. The human commits the worktree change
+([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 The tracker never embeds or manufactures a run transcript.
 
 An already-Done phase may run a receipt refresh against its exact current source, with an identity status
-projection. A refresh adds authenticated regression evidence without advancing the frontier.
+projection and a new immutable archive bundle. The verifier re-acquires status before it refreshes the next
+Done phase. A refresh adds authenticated regression evidence without advancing the frontier
+([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 The accepted dependency graph determines whether changes require that refresh or reopening under §N.
 Unchanged qualified closures remain reusable; changed closures and affected consumers require revalidation.
 Unknown impact fails closed under [gate integrity §M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass).
@@ -210,8 +230,9 @@ Unknown impact fails closed under [gate integrity §M.6](development_plan_gate_i
 `Substrate: none` means the claim is decidable without hardware-specific or live infrastructure. It does not
 mean “validated inside a container.” Before the Phase-50 gate passes, a pure candidate invokes the exact
 source-bound Haskell binary directly. Phase 0 carries its narrow `GenesisTrust` local-custody and
-compile-time/platform assumption; subsequent builds bind the authenticated, network-independent Phase-1
-acquisition derived from that root;
+compile-time/platform assumption; subsequent builds bind the pin-verified, network-independent Phase-1
+acquisition derived from that root, with publisher identity remaining unverified under
+[DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope);
 it does not trust `pb` as transport. The Phase-50 candidate likewise starts the exact Haskell OS supervisor
 directly; the supervisor invokes `pb` as its observed child, so the public target cannot validate itself. After
 Phase 50 gate pass, later pure work may use that bounded handoff.
@@ -251,6 +272,11 @@ A phase reopens when its accepted claim fails or loses current compatibility. A 
 erase an earlier observation. The accepted verifier computes the affected closure before permitting reuse;
 unknown impact is an unresolved validation dependency.
 
+A red replay alone does not reopen the status projection: its tracked void marker excludes the current
+bundle from predecessor use while Done remains recorded. The verifier requires a new complete green replay
+or an explicit `reset` before later gates may advance
+([DL-0020](../documents/decision_log.md#dl-0020--revocation-observations-share-the-non-source-archive-boundary)).
+
 1. Propose contract changes separately from the candidate that must satisfy them. Preserve existing accepted
    obligations until the baseline-revision procedure admits their replacement.
 2. Move the frontier to the earliest affected phase. Make that phase Active and its successors Blocked,
@@ -273,7 +299,8 @@ Baseline revision cannot authorize a candidate to discard the requirement that m
 An `Invalidated historical record` block may preserve minimal audit context inside `## Phase Status`. It ends
 at the next `##` heading and is always non-normative. It may state what an earlier run claimed, but it may not
 contain an operative command, current path, reusable hash, status rule, dependency, or instruction to
-restore the result. Git history, not a second Markdown archive, retains detail.
+restore the result. Git history and the immutable accepted bundle retain detail; the block is never an
+evidence source ([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 
 No later phase exists to undo an earlier phase. If new understanding makes Phase N wrong, Phase N is reopened
 and the later consumers are updated to the new contract. No finding is deferred out of the phase that owns

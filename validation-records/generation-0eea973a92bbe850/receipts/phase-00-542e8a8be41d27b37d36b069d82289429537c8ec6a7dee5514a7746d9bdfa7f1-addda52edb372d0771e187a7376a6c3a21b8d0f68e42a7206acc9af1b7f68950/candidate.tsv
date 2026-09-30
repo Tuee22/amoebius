@@ -1,0 +1,218 @@
+candidate	phase=0	capability=documentation_suite
+spec-digest	fddcf0e7070fcad3d2c802838bd2fde4d3cc2cda0a54b9788238c6caa2c293c8
+challenge	508f30a5b83b6eb96e205bfb26d8f5f6
+chain	573589f8de8af678bdf0cf0656a55e337e03c49f1a26bd3c916f703f97f0c5bb
+reproducible-core	949ee76dec96e5aea63d66a64a45214a13b43b6f0d19e183e10ce03d1327c6ae
+row	Claim	green
+observation	Claim	claim	For one snapshot, the standalone documentation checker reports zero findings on the governed corpus and the named finding on each rendered negative; the three bootstrap predicate mutants are judged by the independent driver; the custody probes pass; the hygiene row is green at the recorded cap; the generation-2 seed is content-addressed and agent-recorded with an immutable accepted bundle.
+observation	Claim	spec-digest	fddcf0e7070fcad3d2c802838bd2fde4d3cc2cda0a54b9788238c6caa2c293c8
+observation	Claim	role	SeedGate
+row	Subject	green
+observation	Subject	subject.Amoebius.Doc.Check	doc-check
+observation	Subject	subject.Amoebius.Validation.BootstrapPredicate	validation-kernel
+observation	Subject	subject.Amoebius.Validation.Custody	validation-runner
+observation	Subject	subject.Amoebius.Validation.Runner	validation-runner
+row	Command	green
+observation	Command	command	amoebius-validate preview phase 0
+observation	Command	suite	plan-decisions-suite
+observation	Command	oracle	oracle-doc
+row	Oracle	green
+observation	Oracle	oracle.directories	test/oracle/doc
+observation	Oracle	oracle.ledger-sha256	14cfd81ef4db2756460bbbe18a0a8b1d2fc01b26e62ab3dc9393b897f3ca8436
+observation	Oracle	oracle.rows	35
+row	Positive controls	green
+observation	Positive controls	positive.count	4
+observation	Positive controls	ledger.red-rows	
+observation	Positive controls	doc.findings	0
+observation	Positive controls	doc.negatives	broken-link=named,stale-backlink=named,missing-status-line=named,non-frontier-status-vector=named,unauthorised-frozen-edit=named,uncited-module-claim=named,gate-spec-block-mismatch=named,decision-log-out-of-order=named,receipt-line-unexpected=named
+row	Paired negatives	green
+observation	Paired negatives	negative.count	6
+observation	Paired negatives	ledger.red-rows	
+observation	Paired negatives	doc.findings	0
+observation	Paired negatives	doc.negatives	broken-link=named,stale-backlink=named,missing-status-line=named,non-frontier-status-vector=named,unauthorised-frozen-edit=named,uncited-module-claim=named,gate-spec-block-mismatch=named,decision-log-out-of-order=named,receipt-line-unexpected=named
+row	Mutants	green
+observation	Mutants	seed.compiler	/home/matt/.ghcup/ghc/9.12.4/bin/ghc
+observation	Mutants	seed.chain	32fcf57e43db538a2e3311586e9233aa92fc8ab172755ee4c53316b068861e5b
+observation	Mutants	seed.green	True
+observation	Mutants	seed.clean.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/clean/driver
+observation	Mutants	seed.clean.argv	
+observation	Mutants	seed.clean.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/clean
+observation	Mutants	seed.clean.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Mutants	seed.clean.exit	ExitSuccess
+observation	Mutants	seed.clean.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Mutants	seed.clean.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Mutants	seed.clean.stdout-bytes	0
+observation	Mutants	seed.clean.digest	27bca386551084a764a156aebc220561afb9698b3a57255b4cb3c0c6a2cab1cd
+observation	Mutants	seed.digest-equality-bypass.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/digest-equality-bypass/driver
+observation	Mutants	seed.digest-equality-bypass.argv	
+observation	Mutants	seed.digest-equality-bypass.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/digest-equality-bypass
+observation	Mutants	seed.digest-equality-bypass.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Mutants	seed.digest-equality-bypass.exit	ExitFailure 1
+observation	Mutants	seed.digest-equality-bypass.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Mutants	seed.digest-equality-bypass.stderr-sha256	da9cd1b374123f158f6fe7e7bf9975ae76cd36e8977f8154debd1eb0a13f28f0
+observation	Mutants	seed.digest-equality-bypass.stdout-bytes	0
+observation	Mutants	seed.digest-equality-bypass.digest	64c247d0c84b6c7caada0943df4466f86f47c81c8998290d791e17a729446553
+observation	Mutants	seed.snapshot-freshness-bypass.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/snapshot-freshness-bypass/driver
+observation	Mutants	seed.snapshot-freshness-bypass.argv	
+observation	Mutants	seed.snapshot-freshness-bypass.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/snapshot-freshness-bypass
+observation	Mutants	seed.snapshot-freshness-bypass.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Mutants	seed.snapshot-freshness-bypass.exit	ExitFailure 1
+observation	Mutants	seed.snapshot-freshness-bypass.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Mutants	seed.snapshot-freshness-bypass.stderr-sha256	e61150774605dc9e6da61cb9bd975945e42c7db95ce055aba2336f2eef5560b4
+observation	Mutants	seed.snapshot-freshness-bypass.stdout-bytes	0
+observation	Mutants	seed.snapshot-freshness-bypass.digest	2092b94f4986e8de6e7f17873a7995c47154e737adaa8cd53a0a0c6317b14a16
+observation	Mutants	seed.bootstrap-path-bypass.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/bootstrap-path-bypass/driver
+observation	Mutants	seed.bootstrap-path-bypass.argv	
+observation	Mutants	seed.bootstrap-path-bypass.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/bootstrap-path-bypass
+observation	Mutants	seed.bootstrap-path-bypass.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Mutants	seed.bootstrap-path-bypass.exit	ExitFailure 1
+observation	Mutants	seed.bootstrap-path-bypass.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Mutants	seed.bootstrap-path-bypass.stderr-sha256	8544abd7a1b5c85920d6b3d342cbf66650158431ff0c17147bb9da833e071247
+observation	Mutants	seed.bootstrap-path-bypass.stdout-bytes	0
+observation	Mutants	seed.bootstrap-path-bypass.digest	c5905861fe6c8c590ccf9125c65ee73617ffe87914d9d3e7b173392418f23ca6
+row	Discovery	green
+observation	Discovery	closure.stanzas	doc-check,gate-spec,plan-decisions,validation-kernel,validation-runner
+observation	Discovery	subjects.mapped	4
+observation	Discovery	subjects.declared	4
+row	Challenge	green
+observation	Challenge	challenge.nonce	508f30a5b83b6eb96e205bfb26d8f5f6
+observation	Challenge	challenge.kind	pure predicate judged by the independent driver
+observation	Challenge	challenge.binary	absent
+observation	Challenge	challenge.spine	absent
+row	Observer	green
+observation	Observer	run.1.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/clean/driver
+observation	Observer	run.1.argv	
+observation	Observer	run.1.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/clean
+observation	Observer	run.1.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.1.exit	ExitSuccess
+observation	Observer	run.1.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.1.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.1.stdout-bytes	0
+observation	Observer	run.1.digest	27bca386551084a764a156aebc220561afb9698b3a57255b4cb3c0c6a2cab1cd
+observation	Observer	run.2.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/digest-equality-bypass/driver
+observation	Observer	run.2.argv	
+observation	Observer	run.2.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/digest-equality-bypass
+observation	Observer	run.2.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.2.exit	ExitFailure 1
+observation	Observer	run.2.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.2.stderr-sha256	da9cd1b374123f158f6fe7e7bf9975ae76cd36e8977f8154debd1eb0a13f28f0
+observation	Observer	run.2.stdout-bytes	0
+observation	Observer	run.2.digest	64c247d0c84b6c7caada0943df4466f86f47c81c8998290d791e17a729446553
+observation	Observer	run.3.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/snapshot-freshness-bypass/driver
+observation	Observer	run.3.argv	
+observation	Observer	run.3.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/snapshot-freshness-bypass
+observation	Observer	run.3.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.3.exit	ExitFailure 1
+observation	Observer	run.3.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.3.stderr-sha256	e61150774605dc9e6da61cb9bd975945e42c7db95ce055aba2336f2eef5560b4
+observation	Observer	run.3.stdout-bytes	0
+observation	Observer	run.3.digest	2092b94f4986e8de6e7f17873a7995c47154e737adaa8cd53a0a0c6317b14a16
+observation	Observer	run.4.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/bootstrap-path-bypass/driver
+observation	Observer	run.4.argv	
+observation	Observer	run.4.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/bootstrap-path-bypass
+observation	Observer	run.4.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.4.exit	ExitFailure 1
+observation	Observer	run.4.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.4.stderr-sha256	8544abd7a1b5c85920d6b3d342cbf66650158431ff0c17147bb9da833e071247
+observation	Observer	run.4.stdout-bytes	0
+observation	Observer	run.4.digest	c5905861fe6c8c590ccf9125c65ee73617ffe87914d9d3e7b173392418f23ca6
+observation	Observer	run.5.executable	cabal
+observation	Observer	run.5.argv	build -v0 --jobs=1 amoebius:test:plan-decisions-suite amoebius:test:oracle-doc
+observation	Observer	run.5.cwd	.
+observation	Observer	run.5.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.5.exit	ExitSuccess
+observation	Observer	run.5.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.5.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.5.stdout-bytes	0
+observation	Observer	run.5.digest	c110b13056144f161c3588c14d522f999a4aeee69c606825de18fbc595794489
+observation	Observer	run.6.executable	cabal
+observation	Observer	run.6.argv	run -v0 --jobs=1 amoebius:test:plan-decisions-suite -- ./.build/runs/phase-00/clean/suite
+observation	Observer	run.6.cwd	.
+observation	Observer	run.6.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.6.exit	ExitSuccess
+observation	Observer	run.6.stdout-sha256	0672cf5d0dfdb1469f61b689168ca2b50ca54df8d36e99d2d20d5a8edfec80fb
+observation	Observer	run.6.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.6.stdout-bytes	89
+observation	Observer	run.6.digest	15b4fb4eef160c48b8d32c89c5621f1bc33d23a9c538bef8ed04d71cd4c5f485
+observation	Observer	run.7.executable	cabal
+observation	Observer	run.7.argv	run -v0 --jobs=1 amoebius:test:oracle-doc -- ./.build/runs/phase-00/clean/suite
+observation	Observer	run.7.cwd	.
+observation	Observer	run.7.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.7.exit	ExitSuccess
+observation	Observer	run.7.stdout-sha256	14cfd81ef4db2756460bbbe18a0a8b1d2fc01b26e62ab3dc9393b897f3ca8436
+observation	Observer	run.7.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.7.stdout-bytes	9907
+observation	Observer	run.7.digest	d7d5aaa545bd90e574f530f1649329f51fe451ee82faa5f194f2c5b5eb4474fd
+row	Authority/bypass	green
+observation	Authority/bypass	closure.validator-free	True
+observation	Authority/bypass	closure.product	capability-bind,capacity-topology,dsl-core,execution-accelerator-folds,formal-model,manifest-render,offline-language-types,provider-pulumi,provision-seal,storage-geometry-folds,toolchain
+observation	Authority/bypass	subjects.validator	4
+row	Freshness	green
+observation	Freshness	source.opening	e7fedec499e5e4c1d8ed62715b05859595b8ed1d611c0c1dc71b985fe2458174
+observation	Freshness	source.closing	e7fedec499e5e4c1d8ed62715b05859595b8ed1d611c0c1dc71b985fe2458174
+observation	Freshness	run-root	./.build/runs/phase-00
+row	Qualification	green
+observation	Qualification	qualification	finite-seed-protocol
+observation	Qualification	matrix.precedes-clean	true
+observation	Qualification	seed.compiler	/home/matt/.ghcup/ghc/9.12.4/bin/ghc
+observation	Qualification	seed.chain	32fcf57e43db538a2e3311586e9233aa92fc8ab172755ee4c53316b068861e5b
+observation	Qualification	seed.green	True
+observation	Qualification	seed.clean.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/clean/driver
+observation	Qualification	seed.clean.argv	
+observation	Qualification	seed.clean.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/clean
+observation	Qualification	seed.clean.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Qualification	seed.clean.exit	ExitSuccess
+observation	Qualification	seed.clean.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Qualification	seed.clean.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Qualification	seed.clean.stdout-bytes	0
+observation	Qualification	seed.clean.digest	27bca386551084a764a156aebc220561afb9698b3a57255b4cb3c0c6a2cab1cd
+observation	Qualification	seed.digest-equality-bypass.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/digest-equality-bypass/driver
+observation	Qualification	seed.digest-equality-bypass.argv	
+observation	Qualification	seed.digest-equality-bypass.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/digest-equality-bypass
+observation	Qualification	seed.digest-equality-bypass.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Qualification	seed.digest-equality-bypass.exit	ExitFailure 1
+observation	Qualification	seed.digest-equality-bypass.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Qualification	seed.digest-equality-bypass.stderr-sha256	da9cd1b374123f158f6fe7e7bf9975ae76cd36e8977f8154debd1eb0a13f28f0
+observation	Qualification	seed.digest-equality-bypass.stdout-bytes	0
+observation	Qualification	seed.digest-equality-bypass.digest	64c247d0c84b6c7caada0943df4466f86f47c81c8998290d791e17a729446553
+observation	Qualification	seed.snapshot-freshness-bypass.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/snapshot-freshness-bypass/driver
+observation	Qualification	seed.snapshot-freshness-bypass.argv	
+observation	Qualification	seed.snapshot-freshness-bypass.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/snapshot-freshness-bypass
+observation	Qualification	seed.snapshot-freshness-bypass.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Qualification	seed.snapshot-freshness-bypass.exit	ExitFailure 1
+observation	Qualification	seed.snapshot-freshness-bypass.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Qualification	seed.snapshot-freshness-bypass.stderr-sha256	e61150774605dc9e6da61cb9bd975945e42c7db95ce055aba2336f2eef5560b4
+observation	Qualification	seed.snapshot-freshness-bypass.stdout-bytes	0
+observation	Qualification	seed.snapshot-freshness-bypass.digest	2092b94f4986e8de6e7f17873a7995c47154e737adaa8cd53a0a0c6317b14a16
+observation	Qualification	seed.bootstrap-path-bypass.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/bootstrap-path-bypass/driver
+observation	Qualification	seed.bootstrap-path-bypass.argv	
+observation	Qualification	seed.bootstrap-path-bypass.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/bootstrap-path-bypass
+observation	Qualification	seed.bootstrap-path-bypass.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Qualification	seed.bootstrap-path-bypass.exit	ExitFailure 1
+observation	Qualification	seed.bootstrap-path-bypass.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Qualification	seed.bootstrap-path-bypass.stderr-sha256	8544abd7a1b5c85920d6b3d342cbf66650158431ff0c17147bb9da833e071247
+observation	Qualification	seed.bootstrap-path-bypass.stdout-bytes	0
+observation	Qualification	seed.bootstrap-path-bypass.digest	c5905861fe6c8c590ccf9125c65ee73617ffe87914d9d3e7b173392418f23ca6
+row	Cleanroom	green
+observation	Cleanroom	cleanroom.run-root	./.build/runs/phase-00
+observation	Cleanroom	cleanroom.tracked-unchanged	True
+row	Legacy closure	green
+observation	Legacy closure	hygiene.kernel-lines	3434
+observation	Legacy closure	hygiene.kernel-cap	14000
+observation	Legacy closure	hygiene.doc-check-lines	6046
+observation	Legacy closure	hygiene.doc-check-cap	7000
+observation	Legacy closure	hygiene.conditional-compilation-lines	0
+observation	Legacy closure	hygiene.run-modules	0
+observation	Legacy closure	hygiene.phase-literals	0
+observation	Legacy closure	hygiene.phase-tables	0
+observation	Legacy closure	hygiene.duplicate-vocabulary	0
+observation	Legacy closure	hygiene.product-duplicate-vocabulary	EngineRuntime,ResourceVector,Substrate
+observation	Legacy closure	hygiene.verdict	green
+observation	Legacy closure	legacy.due	LTD-VAL-001,LTD-VAL-002,LTD-VAL-003,LTD-VAL-004,LTD-VAL-006,LTD-KRN-001,LTD-KRN-002,LTD-KRN-003
+row	Predecessor	green
+observation	Predecessor	predecessor	genesis
+row	Residue	green
+observation	Residue	residue.tracked-unchanged	True
+observation	Residue	residue.unverified	later-owned capabilities remain UNVERIFIED by construction
+row	Pass criterion	green
+observation	Pass criterion	pass-criterion	qualified-gate-pass

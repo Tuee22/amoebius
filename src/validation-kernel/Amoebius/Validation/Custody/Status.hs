@@ -33,7 +33,6 @@ data StatusSurface = StatusSurface
   , surfaceReceipts :: [(Int, Text)] -- phase, receipt digest recorded beside a Done status
   }
   deriving (Eq, Show)
-
 trackerPath :: FilePath
 trackerPath = "DEVELOPMENT_PLAN/README.md"
 
@@ -55,7 +54,6 @@ statusSurface root = do
               , surfaceReceipts = concat [receipts | (_, _, receipts) <- phases]
               }
         )
-
 trackerRow :: (Int, Text) -> Maybe (Int, Int, Text)
 trackerRow (number, line) = case map Text.strip (Text.splitOn "|" line) of
   ("" : ordinalText : _ : _ : _ : _ : status : _ : _)
@@ -63,7 +61,6 @@ trackerRow (number, line) = case map Text.strip (Text.splitOn "|" line) of
     , not (Text.null ordinalText) ->
         Just (read (Text.unpack ordinalText), number, status)
   _ -> Nothing
-
 readPhase :: FilePath -> PhaseIdentity.PhaseIdentity -> IO ([(Int, Int, Text)], [(Int, Int, Int, Text, Text)], [(Int, Text)])
 readPhase root row = do
   let path = root </> PhaseIdentity.phaseIdentityPath row
@@ -92,10 +89,8 @@ readPhase root row = do
                     [] -> ""
             ]
       pure (statusLine, sprints, receipt)
-
 receiptPrefix :: Text
 receiptPrefix = "**Receipt**: "
-
 sprintOrdinal :: Int -> Text -> Maybe Int
 sprintOrdinal ordinal heading =
   case Text.stripPrefix ("## Sprint " <> Text.pack (show ordinal) <> ".") heading of
@@ -109,7 +104,6 @@ recordedFrontier :: StatusSurface -> Maybe Status.StatusFrontier
 recordedFrontier surface = do
   statuses <- mapM (\ordinal -> lookup ordinal [(phase, status) | (phase, _, status) <- surfaceTracker surface] >>= Status.parseTrackerStatus) PhaseIdentity.phaseOrdinals
   Status.recognizeStatusFrontier statuses
-
 surfaceDigest :: StatusSurface -> Text
 surfaceDigest surface =
   sha256Hex

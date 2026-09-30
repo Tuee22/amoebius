@@ -47,7 +47,10 @@ The rule is about a file's role as well as its suffix. An executable, shebang-be
 serialized predicate, command table, or interpreter input does not become metadata by losing its extension or
 moving into `test/`. A tracked `.json`, `.tsv`, `.yaml`, `.dhall`, `.purs`, `.js`, `.mjs`, `.sh`, `.proto`,
 Pulumi program, Dockerfile, golden, expected-diagnostic file, mutation body, or executable without an extension
-is prohibited when it carries behavior, a test case, or a validation decision.
+is prohibited when it carries behavior, a test case, or a validation decision. The sole validation-decision
+exception is the verifier-issued accepted bundle and void marker specified in
+[§5](#5-run-evidence-and-phase-status); neither can become a test input or oracle
+([DL-0019](../decision_log.md#dl-0019--red-replay-leaves-an-immutable-revocation-record)).
 
 The non-source input set is also closed:
 
@@ -58,6 +61,7 @@ The non-source input set is also closed:
 | Governance prose | Markdown under the root, `documents/**`, and `DEVELOPMENT_PLAN/**` |
 | Build metadata | Cabal package/project descriptions; `pb` has no separately tracked packaging metadata |
 | Repository metadata | ignore files, attributes, licence, and editor-neutral repository policy |
+| Accepted historical evidence | Immutable verifier-issued accepted bundles and red-replay void markers under the exact `validation-records/**` grammar in [§5](#5-run-evidence-and-phase-status); observations only, never semantic expectations or execution authority ([DL-0019](../decision_log.md#dl-0019--red-replay-leaves-an-immutable-revocation-record)) |
 
 `pb` is not a general scripting exception. It cannot implement product behavior, calculate or reinterpret a
 gate verdict, host an oracle, select phase status, or remain in control after the Haskell binary exists. Phase
@@ -108,19 +112,21 @@ Independent expectations are separately authored Haskell values; any textual or 
 values is generated lazily.
 
 A fresh Phase-N candidate ordinarily removes its current `.build/runs/**`, build, dependency, cache, and generated-product
-roots. For N greater than zero, it may retain exactly the read-only content-addressed Phase-(N-1) gate receipt
-under `.build/evidence-store/**`; that receipt is an explicit predecessor input only when its projected postimage
-equals the candidate's opening source. Phase 0 has one finite exception: it reads the seven exact GenesisTrust
+roots. For N greater than zero, it acquires the exact read-only Phase-(N-1) accepted bundle from
+`validation-records/**`; a matching `.build/**` cache is optional and cannot supersede it. That bundle is an
+explicit predecessor input only when its verified postimage and compatibility closure match the candidate's
+opening source ([DL-0015](../decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence)). Phase 0 has one finite exception: it reads the seven exact GenesisTrust
 files beneath `.build/bootstrap-inputs/**`, creates a unique `.build/runs/phase-00/bootstrap-qualification-*`
 leaf, and requires that exact leaf to be absent after qualification. It does not claim the whole `.build/**`
 tree was initially empty or universally detect prior runs; the DSL barrier (Phase 9) owns that closure. Ambiguous, stale, mutable, or
 implicitly discovered evidence is not a cleanroom input.
 
-A status transition is also generated output before it is applied. The validator gives a sealed authorized
+A status transition is generated output before it is applied. The validator gives a sealed authorized
 projection to its production writer, writes the canonical patch and its preimage/postimage identities beneath
-`.build/runs/**`, never a tracked file, and re-acquires Git source after emission. Only after the validator exits
-may `accept` recheck the preimage and apply exactly that patch through the ordinary source-
-control workflow.
+`.build/runs/**`, and re-acquires Git source after emission. After the complete gate passes, `accept`
+rechecks the preimage, applies that bounded status projection, and publishes the immutable accepted bundle
+under `validation-records/**` as one reviewable worktree change
+([DL-0016](../decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 
 ## 2. Complete repository structure
 
@@ -142,6 +148,7 @@ amoebius/
 ├── cabal.project                         authored Haskell project/compatibility description
 ├── DEVELOPMENT_PLAN/**                   authored plan and validation contracts; Markdown only
 ├── documents/**                          authored doctrine; Markdown only
+├── validation-records/**                 immutable verifier-issued accepted evidence; exact grammar in §5
 ├── src/**/*.hs                           product and runtime Haskell
 │   └── vendor/**/*.hs                    maintained Haskell forks, when required
 ├── app/**/*.hs                           the single executable's Haskell entry modules
@@ -213,7 +220,9 @@ root below the appropriate contained-state directory.
 ## 3. Complete generated-output inventory
 
 Every non-Haskell program, test encoding, rendered configuration, compiler product, resolved dependency, and
-run observation is generated beneath `.build/**`.
+candidate run observation is generated beneath `.build/**`. The narrow accepted bundle copied from a
+completed verified run is the historical evidence exception under [§5](#5-run-evidence-and-phase-status),
+never an input to a semantic oracle ([DL-0015](../decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence)).
 
 ### 3.1 Canonical `.build/` tree
 
@@ -226,7 +235,7 @@ run observation is generated beneath `.build/**`.
 ├── dhall/**/*.dhall                      reflected schemas and runtime/test values
 ├── docker/**/Dockerfile                  rendered image recipes
 ├── docs/**                               generated reports and indexes
-├── evidence-store/**                     content-addressed receipts admitted by a complete gate pass
+├── evidence-store/**                     optional disposable cache of accepted receipts
 ├── locks/**                              resolver observations
 ├── manifests/**/*.{yaml,yml,json}        rendered Kubernetes/provider objects
 ├── metal/**                              emitted Objective-C/C bridge and Metal shader source
@@ -267,8 +276,13 @@ reports go to `.build/docs/**`; governed documents declare `**Generated sections
 ### 3.5 TSV inventory and provenance
 
 TSV, JSON, YAML, CSV, golden, expected-output, and diagnostic text are transport formats, never tracked source
-classes. Haskell may render them beneath `.build/**` for a consumer. A semantic expectation that needs one of
-those formats is authored as Haskell and encoded only for the duration of the check.
+classes. Haskell may render them beneath `.build/**` for a consumer. The seven exact TSV and sidecar files in
+the accepted `validation-records/**` bundle are historical observations after the gate, not a serialized
+expectation, oracle, or new source class. A semantic expectation that needs one of those formats is authored
+as Haskell and encoded only for the duration of the check
+([DL-0015](../decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence)).
+An exact `validation-records/**/voids/**` TSV is likewise a verifier-issued historical revocation record,
+not a source input ([DL-0019](../decision_log.md#dl-0019--red-replay-leaves-an-immutable-revocation-record)).
 
 ### 3.6 Authored negative corpora and their audit scope
 
@@ -280,9 +294,12 @@ locus and that the clean control still succeeds; a copied bad file is not an ora
 ## 4. Dependency and toolchain resolution
 
 amoebius records compatibility requirements in Haskell or the minimal bootstrap metadata. Each clean run
-resolves current compatible tools and dependencies, verifies publisher-provided authenticity material, and
-records the result beneath `.build/**`. A missing tool is acquired rather than treated as an undeclared host
-prerequisite.
+resolves current compatible tools and dependencies, verifies the fixed sizes and SHA-256 digests of its pinned
+inputs, and records the result beneath `.build/**`. Phase 1 also compares both pinned `SHA256SUMS` archive
+entries with the independently fixed archive pins; it does not require an operator keyring or claim publisher
+identity from the opaque pinned signature files
+([DL-0017](../decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring)).
+A missing tool is acquired rather than treated as an undeclared host prerequisite.
 
 No tracked file contains a developer-home path, host-specific executable path, resolved archive digest, or
 dependency graph. Standard guest paths are contractual only when the generated guest image owns them.
@@ -300,12 +317,35 @@ vendored.
 
 ## 5. Run evidence and phase status
 
-A gate emits candidate evidence beneath `.build/runs/**` and may install a content-addressed receipt beneath
-`.build/evidence-store/**`. Git contains neither. A digest establishes provenance only; it does not establish
-correctness or change phase status.
+A gate emits candidate evidence beneath `.build/runs/**`; that tree and any `.build/evidence-store/**` cache
+are disposable. After a complete passing gate, `accept` or `replay` publishes exactly one immutable accepted
+bundle at `validation-records/generation-<verifier16>/receipts/phase-NN-<reproducible64>-<bundle64>/`. Its
+closed contents are `receipt.tsv`, `receipt.tsv.sha256`, `candidate.tsv`, `kill-table.tsv`, `outcome.tsv`,
+`oracle-ledger.tsv`, and `observer.tsv`. The second digest names the exact final bundle bytes, so repeated
+runs with the same reproducible result but different observations occupy distinct immutable directories. The
+bundle retains the receipt, ordered gate result, oracle-ledger and observation digests, mutant kill table and
+changed-subject witnesses, and status postimage. The verifier exact-reads, validates, and binds it to the
+phase document's receipt digest before admitting a predecessor; a missing, altered, malformed, or ambiguous
+bundle refuses. An earlier bundle is never overwritten by a refresh. No bundle is semantic source or a
+semantic oracle. A digest establishes provenance only; it does not establish correctness or change phase
+status ([DL-0015](../decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence),
+[DL-0016](../decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
+
+A red `replay` appends one immutable void marker at
+`validation-records/generation-<verifier16>/voids/phase-NN-<targetBundle64>-<void64>.tsv` after the failed
+gate. The marker binds the full target bundle path, phase, old reproducible digest, current verifier and
+governance digests, failure observation digest and reason, and issuance time; `void64` is the SHA-256 of the
+canonical marker bytes. It is the second and only other admitted historical-evidence shape. The verifier
+exact-reads both marker and target and excludes the voided bundle; it cannot choose an older same-digest
+bundle as a fallback. The reader first selects the unique latest `receiptIssuedAt` bundle for the phase in
+the current generation, then applies void markers. Reader/preflight refuses a tie or a replay bundle whose
+issuance is not newer than the current bundle; it cannot become the current pointer. A new green replay must publish a distinct bundle with later issuance time and
+establish it as current, even when the reproducible digest is unchanged. Done status remains
+until that replay or an explicit verifier reset, but a voided current receipt cannot satisfy a predecessor
+([DL-0019](../decision_log.md#dl-0019--red-replay-leaves-an-immutable-revocation-record)).
 
 Only a complete qualified phase gate may move a phase or sprint to Done or Validated. `accept`
-records that result with a reproducible receipt ([DL-0013](../decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible)) after the gate's oracle-independence checks, sabotage controls, predecessor chain, typed
+records that result with a reproducible receipt and its tracked bundle after the gate's oracle-independence checks, sabotage controls, predecessor chain, typed
 Haskell legacy closures, and reader-facing correspondence have all been
 inspected. Doctrine does not record current validation results.
 
@@ -315,14 +355,15 @@ inspected. Doctrine does not record current validation results.
 misdirected command might create. Source-adjacent `__pycache__/` or Python bytecode is a containment failure,
 even when a defensive ignore pattern catches it. An ignore rule does not
 make a path conforming: the source-boundary audit must still reject an ignored source input used to complete a
-build or gate.
+build or gate. It must not ignore `validation-records/**`.
 
 Migration-only ignore rules retire with their paths. An obsolete rule is a finding because it can conceal a
 reintroduced root.
 
 ## 7. `.dockerignore` contract
 
-`.dockerignore` excludes version-control metadata, all three contained-state roots, secrets, evidence, caches,
+`.dockerignore` excludes version-control metadata, all three contained-state roots,
+`validation-records/**`, secrets, evidence, caches,
 resolved dependencies, and every tool-specific spill class. A generated artifact needed by an image build is
 regenerated in a staged build or passed explicitly from the current `.build/**` materialization; the context is
 never broadened to include local state.
@@ -331,7 +372,11 @@ never broadened to include local state.
 
 Every candidate phase gate inherits these fail-closed checks:
 
-1. Classify every tracked path by role, extension, executable bit, shebang, and content signature.
+1. Classify every tracked path by role, extension, executable bit, shebang, and content signature. The only
+   non-source evidence exceptions are the closed accepted-bundle and void-marker shapes above; check their
+   names, exact file sets, receipt or target binding, content digests, and immutability without treating their
+   bytes as behavioral inputs
+   ([DL-0019](../decision_log.md#dl-0019--red-replay-leaves-an-immutable-revocation-record)).
 2. Reject behavioral source that is not `.hs`, except bounded Python under `pb/**`, unless the finding joins
    in both directions to one typed Haskell migration binding owned by a strictly later phase. That temporary
    accounting rule admits no new input and expires at the typed owner phase; the Markdown register is not an
@@ -343,7 +388,10 @@ Every candidate phase gate inherits these fail-closed checks:
 7. Reject any generator or test write beneath an authored root.
 8. Reject any required ignored or untracked worktree input.
 9. Reject generated, evidentiary, secret, cache, or runtime-state bytes in the effective container context.
-10. Leave tracked files unchanged and no unignored output behind.
+10. Leave tracked files unchanged during a candidate gate. Only successful `accept` or `replay` may write the
+    exact status/receipt projection and immutable accepted bundle afterward; a red `replay` may append only
+    its exact void marker afterward. No other unignored output remains
+    ([DL-0019](../decision_log.md#dl-0019--red-replay-leaves-an-immutable-revocation-record)).
 11. Require zero findings for Haskell bindings owned by the candidate or any earlier phase, exact two-way
     equality between remaining findings and strictly-later typed bindings, and no stale, duplicate,
     reassigned, missing, or unbound Haskell entry. Row content and count in the reader-facing register cannot

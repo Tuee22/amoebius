@@ -256,7 +256,7 @@ terminalChecks = do
 
 resourceChecks :: IO ()
 resourceChecks = do
-  let demand = phase37RuntimeDemand
+  let demand = workflowRuntimeDemand
       exact = workflowProvisionTerms demand
   provisioned <- either (fail . ("exact-fit-provision:" <>) . show) pure (provisionWorkflowRuntime demand exact)
   assertEqual "provisioned-terms" exact (provisionedTerms provisioned)

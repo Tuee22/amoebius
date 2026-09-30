@@ -131,9 +131,9 @@ Before any subject runs, the runner refuses with a typed reason when:
 | Refusal | Condition |
 |---|---|
 | `StatusSurfaceDirty` | The tracker, phase, or sprint status surface differs from the postimage of the last accepted receipt. |
-| `PredecessorNotCommitted` | The immediate predecessor's receipt names a postimage that is not an ancestor of the current tree. |
+| `PredecessorNotCommitted` | The immediate predecessor's receipt names a postimage that is neither committed in current source ancestry nor the exact verified postimage of an earlier `accept` in this worktree whose complete gate has just re-derived under the current verifier and governance digests ([DL-0016](../decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)). |
 | `STATUS-WITHOUT-RECEIPT` | A status line is Done without a receipt digest beside it in the phase document. |
-| `PredecessorNotReproduced` | A Done phase's recorded receipt digest has no store record for the current generation and governance digest; `replay` re-runs that gate and a green re-run refreshes the record, so a verifier or doctrine change costs a replay, never a re-accept, while a red re-run voids the receipt ([DL-0013](../decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible)). |
+| `PredecessorNotReproduced` | A Done phase's recorded digest has no valid tracked current bundle for the current verifier and governance digests, or exact-read, artifact, predecessor, compatibility, or void-marker checks fail. A red replay writes an immutable void marker and the Done predecessor cannot advance the next gate until a later green replay or explicit reset ([DL-0019](../decision_log.md#dl-0019--red-replay-leaves-an-immutable-revocation-record)). |
 | `HARDWARE-BEFORE-BARRIER` | The specification names a hardware substrate and no `DSL_BARRIER` receipt exists. |
 | `SUBSTRATE-ABSENT` | The declared substrate is not the host's natural substrate. |
 | `KernelOverBudget` | The hygiene row would fail. |
@@ -142,6 +142,11 @@ Before any subject runs, the runner refuses with a typed reason when:
 Predecessor binding is the digest of the predecessor's product closure plus the verifier and governance
 digests. An edit outside that closure keeps the predecessor receipt valid; an edit inside it reopens the
 predecessor. A receipt refresh is an identity projection that cannot weaken a specification.
+For a same-worktree uncommitted predecessor, the verifier exact-reads its archive, re-derives its accepted
+closure digest from current source, requires the archived status postimage to equal the current status
+surface, and runs the complete predecessor gate again under current verifier and governance digests before
+the next gate starts. A matching closure digest alone does not admit it
+([DL-0016](../decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 
 ## 6. Commands, generations, and receipts
 
@@ -151,13 +156,14 @@ Every command is agent-run; none requires a privilege the agent lacks
 - `amoebius-validate preview phase NN` — runs the complete gate, prints the would-be receipt, and mints
   nothing;
 - `amoebius-validate accept --phase NN` — runs the complete gate again and, when every row is green, prints
-  the Claim, specification digest, kill table, spine outcome, and corpus delta, records the receipt, writes
-  its reproducible digest beside the Done status in the phase document, and applies exactly one phase's
-  status patch;
-- `amoebius-validate replay [--through NN]` — re-runs each Done phase in table order whose store record is
-  absent or was recorded under another verifier or governance digest; a green re-run records the receipt anew
-  and refreshes the digest beside the Done status as an identity status projection, and a red re-run voids
-  that receipt and every later one;
+  the Claim, specification digest, kill table, spine outcome, and corpus delta, applies exactly one phase's
+  status patch and receipt line, and publishes the immutable accepted bundle against that status postimage;
+- `amoebius-validate replay [--through NN]` — re-runs each Done phase in table order whose tracked bundle is
+  absent, malformed, incompatible, or recorded under another verifier or governance digest; a green re-run
+  publishes a new immutable bundle and refreshes the digest beside Done status as an identity status
+  projection, then re-acquires that status before the next phase; a red re-run appends a void marker for the
+  current bundle and makes it and dependent later receipts unusable while the Done line awaits green replay
+  or explicit reset ([DL-0019](../decision_log.md#dl-0019--red-replay-leaves-an-immutable-revocation-record));
 - `amoebius-validate reset --decision DL-NNNN --product-gap LTD-XXX-NNN` — records a receipt-bearing reset
   whose `ResetCause` names a validator gap and a product-gap legacy identifier with an owning phase, and moves
   the frontier no higher than that phase;
@@ -165,15 +171,46 @@ Every command is agent-run; none requires a privilege the agent lacks
   `OperatorDemonstration`.
 
 A generation identifier is the content address of the verifier; a generation is entered by the first
-`accept` or `replay` under that verifier, and the store beneath `.build/certification/**` keeps one directory
-per generation. A governance change needs no separate act: the governance digest is part of every
-reproducible digest, so receipts recorded under an older baseline fail to reproduce until replayed.
+`accept` or `replay` under that verifier. The canonical accepted store is the tracked archive
+`validation-records/generation-<verifier16>/receipts/phase-NN-<reproducible64>-<bundle64>/`; any
+`.build/certification/**` copy is a disposable cache. The exact allowed files are `receipt.tsv`,
+`receipt.tsv.sha256`, `candidate.tsv`, `kill-table.tsv`, `outcome.tsv`, `oracle-ledger.tsv`, and
+`observer.tsv`. The bundle digest names the final exact receipt and evidence bytes, allowing separate
+immutable directories for distinct runs with the same reproducible digest. The first two files identify and
+checksum the receipt; the others retain the bounded ordered gate
+results, independent oracle ledger, changed-subject mutant witnesses, and observed process digests needed to
+inspect the run. The archive is non-source historical evidence and cannot supply an oracle or current verdict.
+A governance change needs no separate act: the governance digest is part of every reproducible digest, so
+receipts recorded under an older baseline fail to reproduce until replayed
+([DL-0015](../decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence)).
+
+A red replay publishes one immutable marker at
+`validation-records/generation-<verifier16>/voids/phase-NN-<targetBundle64>-<void64>.tsv`. Its canonical
+bytes bind the target bundle path, phase, old reproducible digest, current verifier and governance digests,
+failure observation digest and reason, and issuance time; `void64` hashes those bytes. The archive reader
+selects the unique latest `receiptIssuedAt` bundle for each phase in the current generation before applying
+void markers. Reader/preflight refuses ties or a replay bundle whose issuance is not newer than the current
+bundle; it cannot become the current pointer. A marker for the
+selected bundle prevents fallback to any older same-digest bundle. A later green replay creates a distinct
+bundle with later issuance and becomes current even if the receipt digest remains unchanged
+([DL-0019](../decision_log.md#dl-0019--red-replay-leaves-an-immutable-revocation-record)).
 
 A receipt carries the reproducible digest (specification digest, closure digest, verifier digest, governance
 digest, ordered row verdicts, oracle ledger digest, kill-table loci and outcomes), the run-specific chain of
 observed process digests, the `SubjectChangeWitness` for every mutant, the `ResetCause` when it is a reset,
 the `OperatorDemonstration` when it is the barrier, and the status postimage. Its authority is that any run
 can re-derive it by re-running the gate, not that anyone signed it.
+
+Candidate execution and `preview` leave the tracked tree unchanged. Only after the verified pass and status
+postimage may `accept` or green `replay` publish the closed archive bundle; red `replay` may append its exact
+void marker after the failed gate without editing Done status. The verifier exact-reads every required
+file and refuses missing, altered, extra, ambiguous, or mismatched records before relying on a predecessor.
+Publication never replaces an older bundle. The phase status and archive are one reviewable worktree change;
+the human commits them together for durability. A later phase in the same worktree may use the just-produced
+bundle before that commit only after the full current predecessor gate re-derives its result and binds the
+exact archive, status postimage, and accepted closure. If the ignored scratch store was lost, the old receipt digest cannot
+reconstruct observations: fresh gates in numerical order produce new receipts
+([DL-0016](../decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 
 ## 7. The example corpus and the hardware rule
 

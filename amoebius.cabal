@@ -237,7 +237,7 @@ library execution-accelerator-folds
 
     visibility:       public
     hs-source-dirs:   src/execution-accelerator-folds
-    other-modules:    Amoebius.Capacity.Phase29Mutation
+    other-modules:    Amoebius.Capacity.CapacityMutation
     default-language: GHC2024
     ghc-options:
         -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
@@ -258,7 +258,7 @@ library capability-bind
 
     visibility:       public
     hs-source-dirs:   src/capability-bind
-    other-modules:    Amoebius.Capability.Phase30Mutation
+    other-modules:    Amoebius.Capability.CapabilityMutation
     default-language: GHC2024
     ghc-options:
         -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
@@ -569,7 +569,7 @@ library pulsar-client
 
     visibility:         public
     build-tool-depends: proto-lens-protoc:proto-lens-protoc >=0.9 && <0.10
-    hs-source-dirs:     src proto
+    hs-source-dirs:     src
     other-modules:
         Amoebius.Pulsar.Internal.Cbor
         Amoebius.Pulsar.Internal.Frame
@@ -1269,6 +1269,67 @@ library toolchain
         proto-lens >=0.7 && <0.8,
         purescript-bridge ==0.15.0.0,
         text >=2.1 && <2.2
+library layout
+    exposed-modules:
+        Amoebius.Layout.Classify
+        Amoebius.Layout.PackageMap
+        Amoebius.Layout.PbGrammar
+        Amoebius.Layout.Report
+        Amoebius.Layout.SourceGraph
+
+    visibility:       public
+    hs-source-dirs:   src
+    default-language: GHC2024
+    ghc-options:      -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+    build-depends:
+        base >=4.21 && <4.22,
+        aeson ==2.2.5.0,
+        bytestring >=0.12 && <0.13,
+        Cabal-syntax ==3.16.1.0,
+        containers >=0.7 && <0.8,
+        cryptohash-sha256 ==0.11.102.1,
+        directory >=1.3 && <1.4,
+        filepath >=1.5 && <1.6,
+        ghc ==9.12.4,
+        ghc-internal ==9.1204.0,
+        process >=1.6 && <1.7,
+        text >=2.1 && <2.2,
+        unix >=2.8.6 && <2.9
+test-suite layout-suite
+    type:             exitcode-stdio-1.0
+    main-is:          Main.hs
+    hs-source-dirs:   test/layout
+    other-modules:    ClassEffectRoute
+    default-language: GHC2024
+    ghc-options:      -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+    build-depends:
+        amoebius:layout,
+        amoebius:plan-decisions,
+        amoebius:toolchain,
+        base >=4.21 && <4.22,
+        bytestring >=0.12 && <0.13,
+        containers >=0.7 && <0.8,
+        directory >=1.3 && <1.4,
+        filepath >=1.5 && <1.6,
+        process >=1.6 && <1.7,
+        text >=2.1 && <2.2,
+        time >=1.14 && <1.15
+test-suite oracle-layout
+    type:             exitcode-stdio-1.0
+    main-is:          Main.hs
+    hs-source-dirs:   test/oracle/layout
+    default-language: GHC2024
+    ghc-options:      -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+    build-depends:
+        base >=4.21 && <4.22,
+        aeson ==2.2.5.0,
+        bytestring >=0.12 && <0.13,
+        containers >=0.7 && <0.8,
+        cryptohash-sha256 ==0.11.102.1,
+        directory >=1.3 && <1.4,
+        filepath >=1.5 && <1.6,
+        process >=1.6 && <1.7,
+        text >=2.1 && <2.2
 test-suite toolchain-suite
     type:             exitcode-stdio-1.0
     main-is:          Main.hs
@@ -1278,6 +1339,7 @@ test-suite toolchain-suite
     build-depends:
         base >=4.21 && <4.22,
         amoebius:toolchain,
+        bytestring >=0.12 && <0.13,
         directory >=1.3 && <1.4,
         filepath >=1.5 && <1.6,
         text >=2.1 && <2.2
@@ -1303,9 +1365,11 @@ executable amoebius
     ghc-options:      -Wall -Wcompat -Werror=missing-methods -threaded
     build-depends:
         base >=4.21 && <4.22,
+        amoebius:capability-bind,
         amoebius:formal-model,
         amoebius:dsl-core,
         amoebius:toolchain,
+        amoebius:layout,
         aeson ==2.2.5.0,
         base64-bytestring ==1.2.1.0,
         bytestring >=0.12 && <0.13,
@@ -1513,11 +1577,20 @@ test-suite dsl-spec
         StorageGeometryFixtures
         StorageGeometryGate
         StorageGeometryProps
+        CapabilityBindOracle
+        ExecutionAcceleratorOracle
+        RenderGoldenOracle
+        StorageGeometryOracle
         ValidationLocusLedger
 
     default-language: GHC2024
     ghc-options:      -Wall -Wcompat -Werror=missing-methods
     build-depends:
+        amoebius:capability-bind,
+        amoebius:execution-accelerator-folds,
+        amoebius:manifest-render,
+        amoebius:provision-seal,
+        amoebius:storage-geometry-folds,
         base >=4.21 && <4.22,
         amoebius:artifact-calculus,
         amoebius:budget-calculus,
@@ -1586,6 +1659,7 @@ test-suite bootstrap-coordinator-host-spec
     default-language: GHC2024
     ghc-options:      -Wall -Wcompat -Werror=missing-methods
     build-depends:
+        amoebius:execution-accelerator-folds,
         base >=4.21 && <4.22,
         amoebius:dsl-core,
         containers >=0.7 && <0.8
@@ -1624,6 +1698,9 @@ test-suite base-image-registry-spec
         -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
     build-depends:
+        amoebius:execution-accelerator-folds,
+        amoebius:manifest-render,
+        amoebius:provision-seal,
         base >=4.21 && <4.22,
         amoebius:artifact-calculus,
         amoebius:budget-calculus,
@@ -1647,6 +1724,8 @@ test-suite object-reconciler-spec
         -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
     build-depends:
+        amoebius:manifest-render,
+        amoebius:provision-seal,
         base >=4.21 && <4.22,
         amoebius:artifact-calculus,
         amoebius:budget-calculus,
@@ -2119,6 +2198,10 @@ test-suite chain-spec
         -Werror=incomplete-uni-patterns
 
     build-depends:
+        amoebius:capability-bind,
+        amoebius:execution-accelerator-folds,
+        amoebius:manifest-render,
+        amoebius:provision-seal,
         base >=4.21 && <4.22,
         amoebius:artifact-calculus,
         amoebius:budget-calculus,
@@ -2262,6 +2345,7 @@ test-suite reconcile-core-simulation-spec
         -Werror=incomplete-uni-patterns
 
     build-depends:
+        amoebius:execution-accelerator-folds,
         base >=4.21 && <4.22,
         amoebius:dsl-core,
         amoebius:formal-model,
@@ -2526,6 +2610,7 @@ test-suite reconcile-sim
         -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
     build-depends:
+        amoebius:provision-seal,
         base >=4.21 && <4.22,
         amoebius:artifact-calculus,
         amoebius:budget-calculus,
@@ -2554,6 +2639,7 @@ test-suite execution-transition-sim
         -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
     build-depends:
+        amoebius:provision-seal,
         base >=4.21 && <4.22,
         amoebius:deterministic-simulation-substrate,
         amoebius:dsl-core,
@@ -2617,6 +2703,7 @@ test-suite retained-storage-volume-spec
         -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
     build-depends:
+        amoebius:storage-geometry-folds,
         base >=4.21 && <4.22,
         amoebius:dsl-core,
         containers >=0.7 && <0.8,
@@ -2949,6 +3036,7 @@ test-suite platform-backbone-spec
         -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
     build-depends:
+        amoebius:storage-geometry-folds,
         base >=4.21 && <4.22,
         aeson ==2.2.5.0,
         amoebius:dsl-core,
@@ -2976,6 +3064,8 @@ test-suite platform-services-2-services-spec
         -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
     build-depends:
+        amoebius:execution-accelerator-folds,
+        amoebius:storage-geometry-folds,
         base >=4.21 && <4.22,
         aeson ==2.2.5.0,
         amoebius:dsl-core,
@@ -3060,6 +3150,7 @@ test-suite live-dsl-deploy-runtime-storage-spec
         -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
     build-depends:
+        amoebius:execution-accelerator-folds,
         base >=4.21 && <4.22,
         amoebius:dsl-core,
         containers >=0.7 && <0.8,
@@ -3951,6 +4042,7 @@ library plan-decisions
         Amoebius.Plan.Legacy
         Amoebius.Plan.PhaseIdentity
         Amoebius.Plan.StatusFrontier
+        Amoebius.Plan.ValidationRecordPath
 
     visibility:       public
     hs-source-dirs:   src/plan-decisions

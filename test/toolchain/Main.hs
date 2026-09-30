@@ -15,11 +15,13 @@ import Amoebius.Toolchain.Probe
 import Amoebius.Toolchain.Provenance
 import Amoebius.Toolchain.Report
 import Amoebius.Toolchain.Resolve
+import Data.Bits (xor)
+import Data.ByteString qualified as ByteString
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 import Data.Text.IO qualified as TextIO
-import System.Directory (copyFile, createDirectoryIfMissing, createFileLink, findExecutable, getCurrentDirectory, makeAbsolute, removePathForcibly)
+import System.Directory (createDirectoryIfMissing, findExecutable, getCurrentDirectory, makeAbsolute, removePathForcibly)
 import System.Environment (getArgs)
 import System.FilePath ((</>))
 
@@ -42,14 +44,12 @@ main = do
 suiteRows :: FilePath -> FilePath -> FilePath -> IO [(Text, Text)]
 suiteRows root inputs suiteDir = do
   pins <- verifyPins inputs
-  (signatures, _) <- verifySignatures inputs
   let pinRows = case pins of
         Right verified ->
           ("pins.verdict", "ok")
             : [("pin." <> Text.pack (pinName pin), "ok bytes=" <> showText (pinBytes pin) <> " sha256=" <> digest) | (pin, digest) <- verifiedObserved verified]
               <> [("manifest." <> renderPinRole role, "agrees claimed=" <> claimed) | (role, claimed) <- verifiedClaimed verified]
         Left refusals -> [("pins.verdict", Text.intercalate "; " (map renderRefusal refusals))]
-      signatureRows = [("signature." <> showText index, renderSignature result) | (index, result) <- zip [1 :: Int ..] signatures]
   acquisitionRows <- case pins of
     Left _ -> pure [("acquisition.verdict", "pins refused")]
     Right verified -> acquisitionSection root verified suiteDir
@@ -93,18 +93,21 @@ suiteRows root inputs suiteDir = do
         ]
   networkRefusal <- verifyPins "https://downloads.haskell.org/~ghc/9.12.4/.build/bootstrap-inputs"
   missingPin <- verifyPinsWith inputs [(CompilerManifest, suiteDir </> "negatives" </> "absent-manifest")]
+  missingArchive <- verifyPinsWith inputs [(CompilerArchive, suiteDir </> "negatives" </> "absent-archive")]
+  missingSignature <- verifyPinsWith inputs [(PackageToolManifestSignature, suiteDir </> "negatives" </> "absent-signature")]
   corrupted <- corruptedManifest inputs (suiteDir </> "negatives")
-  signatureNegative <- corruptedSignature inputs (suiteDir </> "negatives" </> "inputs")
+  signatureNegative <- corruptedSignature inputs (suiteDir </> "negatives")
   let inputNegatives =
         [ ("negative.AmbientNetworkRead", either (refusalsText . map renderRefusal) (const "accepted") networkRefusal)
         , ("negative.MissingPin", either (refusalsText . map renderRefusal) (const "accepted") missingPin)
+        , ("negative.MissingArchivePin", either (refusalsText . map renderRefusal) (const "accepted") missingArchive)
+        , ("negative.MissingSignaturePin", either (refusalsText . map renderRefusal) (const "accepted") missingSignature)
         , ("negative.DigestMismatch", either (refusalsText . map renderRefusal) (const "accepted") corrupted)
         , ("negative.ManifestDisagrees", either (refusalsText . map renderRefusal) (const "accepted") corrupted)
-        , ("negative.SignatureMismatch", refusalsText (map renderSignature signatureNegative))
+        , ("negative.PinnedSignatureDigestMismatch", either (refusalsText . map renderRefusal) (const "accepted") signatureNegative)
         ]
-  removePathForcibly (suiteDir </> "negatives" </> "inputs")
   reportRowsObserved <- reportSection inputs suiteDir
-  pure (pinRows <> signatureRows <> acquisitionRows <> probeRows <> planRows <> layoutRows <> [row | row <- pureNegatives, fst row /= "negative.AmbientNetworkRead"] <> inputNegatives <> reportRowsObserved)
+  pure (pinRows <> acquisitionRows <> probeRows <> planRows <> layoutRows <> [row | row <- pureNegatives, fst row /= "negative.AmbientNetworkRead"] <> inputNegatives <> reportRowsObserved)
 
 -- | The shipped report's rows over the real pins and over a manifest whose
 -- archive digest is rewritten, plus its argument refusal.
@@ -121,7 +124,6 @@ reportSection inputs suiteDir = do
       carried = ["pins.verdict", "identity.compiler", "identity.package-tool", "identity.platform", "identity.pins", "probe.decode.positive", "probe.decode.mistyped", "probe.sim.clean", "probe.sim.perturbed", "probe.sim.schedule.clean", "probe.codegen.link-token", "probe.bridge.files", "plan.steps", "provenance.upstream", "provenance.fork-modules", "provenance.requirements"]
   pure
     ( [("report." <> key, pick clean key) | key <- carried]
-        <> [("report.signature." <> showText index, Text.take 60 (pick clean ("signature." <> showText index))) | index <- [1 :: Int, 2, 3]]
         <> [ ("report.rows", showText (length clean))
            , ("report.keys", Text.intercalate "," (map fst clean))
            , ("pins.rendered", Text.intercalate "; " (map renderPin genesisPins))
@@ -129,6 +131,7 @@ reportSection inputs suiteDir = do
            , ("positive.GitCommit", either renderProvenanceRefusal renderReference (admitReference (GitCommit "https://github.com/cr-org/supernova" "0123456789abcdef0123456789abcdef01234567")))
            , ("negative.ShortCommit", either renderProvenanceRefusal renderReference (admitReference (GitCommit "https://github.com/cr-org/supernova" "0123456789abcdef0123456789abcdef0123456")))
            , ("report.refused.verdict", pick refused "pins.verdict")
+           , ("report.refused.keys", Text.intercalate "," [key | (key, _) <- refused, "pins.refusal." `Text.isPrefixOf` key])
            , ("report.refused.manifest", Text.intercalate "; " [value | (key, value) <- refused, "pins.refusal." `Text.isPrefixOf` key, "ManifestDisagrees" `Text.isPrefixOf` value])
            , ("negative.ReportUnknownArgument", either id (const "accepted") (parseReportOptions ["--acquire", "x", "--bogus"]))
            , ("report.options", Text.pack (show (either (const Nothing) (Just . optionAcquireRoot) (parseReportOptions ["--acquire", "root", "--output", "out"]))))
@@ -196,16 +199,21 @@ corruptedManifest inputs negatives = do
       TextIO.writeFile path flipped
       verifyPinsWith inputs [(PackageToolManifest, path)]
 
--- | An inputs directory whose package-tool manifest signature is corrupted; the
--- other signed files are linked, not copied.
-corruptedSignature :: FilePath -> FilePath -> IO [SignatureResult]
+-- | A substituted pinned signature with changed bytes must be refused by its
+-- independent size and digest pins, without interpreting the signature format.
+corruptedSignature :: FilePath -> FilePath -> IO (Either [AcquisitionRefusal] VerifiedPins)
 corruptedSignature inputs negatives = do
-  removePathForcibly negatives
   createDirectoryIfMissing True negatives
-  mapM_ (\name -> createFileLink (inputs </> name) (negatives </> name)) [pinName pin | pin <- genesisPins, pinName pin /= "cabal-SHA256SUMS.sig"]
-  copyFile (inputs </> keyringFile) (negatives </> keyringFile)
-  TextIO.writeFile (negatives </> "cabal-SHA256SUMS.sig") "not a signature\n"
-  fst <$> verifySignatures negatives
+  let path = negatives </> "corrupted-signature"
+  case pinFor PackageToolManifestSignature of
+    Nothing -> pure (Left [PinMissing "package-tool-manifest-signature"])
+    Just pin -> do
+      original <- ByteString.readFile (inputs </> pinName pin)
+      let changed = case ByteString.uncons original of
+            Nothing -> ByteString.singleton 0
+            Just (byte, rest) -> ByteString.cons (byte `xor` 1) rest
+      ByteString.writeFile path changed
+      verifyPinsWith inputs [(PackageToolManifestSignature, path)]
 
 showText :: Show value => value -> Text
 showText = Text.pack . show

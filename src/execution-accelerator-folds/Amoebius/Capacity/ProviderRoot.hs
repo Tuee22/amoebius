@@ -21,7 +21,7 @@ import Amoebius.Capacity.Storage
   , presentBytes
   , roundAllocation
   )
-import Amoebius.Capacity.Phase29Mutation (phase29MutationTargets)
+import Amoebius.Capacity.CapacityMutation (capacityMutationTargets)
 import Control.DeepSeq (NFData)
 import Data.List (sortOn)
 import Data.Map.Strict (Map)
@@ -155,13 +155,13 @@ mutateProviderResult
   -> Either ProviderRootError ProvisionedPerInstanceDiskTemplate
 mutateProviderResult outcome = case outcome of
   Left ProviderInstanceStoreRootUnderprovisioned {}
-    | phase29MutationTargets "instance-store-root" -> changed
+    | capacityMutationTargets "instance-store-root" -> changed
   Left (ProviderNodeRootQuotaExceeded requiredBytes availableBytes requiredVolumes availableVolumes)
-    | phase29MutationTargets "root-ebs-bytes-quota" && requiredBytes > availableBytes -> changed
-    | phase29MutationTargets "root-ebs-volume-quota" && requiredVolumes > availableVolumes -> changed
+    | capacityMutationTargets "root-ebs-bytes-quota" && requiredBytes > availableBytes -> changed
+    | capacityMutationTargets "root-ebs-volume-quota" && requiredVolumes > availableVolumes -> changed
   _ -> outcome
  where
-  changed = Left (ProviderRootIdentityInvalid "phase-29 changed-production provider mutation")
+  changed = Left (ProviderRootIdentityInvalid "capacity changed-production provider mutation")
 
 uniqueCarves :: [ProviderUsableDiskCarveTemplate] -> Either ProviderRootError (Map Text Natural)
 uniqueCarves carves

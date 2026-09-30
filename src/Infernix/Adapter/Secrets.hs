@@ -33,7 +33,7 @@ data ServiceCredential = ServiceCredential TenantScope Text
 
 leastPrivilegeCredential :: TenantScope -> ServiceCredential
 leastPrivilegeCredential scope =
-  ServiceCredential scope ("secret/data/infernix/phase49/" <> tenantScopeText scope)
+  ServiceCredential scope ("secret/data/infernix/credentials/" <> tenantScopeText scope)
 
 credentialScope :: ServiceCredential -> TenantScope
 credentialScope (ServiceCredential scope _) = scope

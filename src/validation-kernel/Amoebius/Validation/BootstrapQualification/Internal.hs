@@ -51,7 +51,6 @@ seedCases =
       "bootstrapInputPathAllowed path = \".build/bootstrap-inputs/\" `isPrefixOf` path && boundedRelativePath path"
       "bootstrapInputPathAllowed path = \".build/bootstrap-inputs/\" `isPrefixOf` path"
   ]
-
 data SeedProtocol = SeedProtocol
   { protocolRoot :: FilePath
   , protocolRunRoot :: FilePath
@@ -60,7 +59,6 @@ data SeedProtocol = SeedProtocol
   , protocolCompiler :: Maybe FilePath
   }
   deriving (Eq, Show)
-
 defaultSeedProtocol :: FilePath -> FilePath -> SeedProtocol
 defaultSeedProtocol root runRoot =
   SeedProtocol
@@ -70,7 +68,6 @@ defaultSeedProtocol root runRoot =
     , protocolDriverSource = "test/validation-kernel/BootstrapMutationDriver.hs"
     , protocolCompiler = Nothing
     }
-
 data SeedOutcome = SeedOutcome
   { seedCompiler :: Maybe FilePath
   , seedCleanRun :: Maybe ObservedRun
@@ -92,7 +89,6 @@ seedGreen outcome =
   mutantExact (seedCase, run, problem) =
     problem == Nothing
       && maybe False (\r -> runExit r == ExitFailure 1 && Text.null (runStdout r) && runStderr r == caseLabel seedCase <> "\n") run
-
 renderSeedOutcome :: SeedOutcome -> [(Text, Text)]
 renderSeedOutcome outcome =
   [("seed.compiler", maybe "absent" Text.pack (seedCompiler outcome)), ("seed.chain", seedChain outcome), ("seed.green", Text.pack (show (seedGreen outcome)))]

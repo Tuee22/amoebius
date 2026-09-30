@@ -27,7 +27,7 @@ import Amoebius.Capacity.NodeLocalStorage
   , ProvisionedNodeLocalStorage
   , fitLayoutComponents
   )
-import Amoebius.Capacity.Phase29Mutation (phase29MutationTargets)
+import Amoebius.Capacity.CapacityMutation (capacityMutationTargets)
 import Control.DeepSeq (NFData)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
@@ -170,16 +170,16 @@ mutateRuntimeResult
   -> Either RuntimeStorageError ProvisionedNodeRuntimeStorageAccounting
 mutateRuntimeResult outcome = case outcome of
   Left (RuntimeNodeLocalError (NodeLocalStorageOverBacking "nodefs" _ _))
-    | phase29MutationTargets "runtime-nodefs" -> changed
+    | capacityMutationTargets "runtime-nodefs" -> changed
   Left (RuntimeNodeLocalError (NodeLocalStorageOverBacking "runtime" _ _))
-    | phase29MutationTargets "runtime-imagefs" -> changed
+    | capacityMutationTargets "runtime-imagefs" -> changed
   Left RuntimeMetadataModelMissing {}
-    | phase29MutationTargets "runtime-model" -> changed
+    | capacityMutationTargets "runtime-model" -> changed
   Left RuntimeAccountingDomainMismatch {}
-    | phase29MutationTargets "runtime-scope-domain" -> changed
+    | capacityMutationTargets "runtime-scope-domain" -> changed
   _ -> outcome
  where
-  changed = Left (RuntimeMetadataSourceInvalid "phase-29 changed-production runtime mutation")
+  changed = Left (RuntimeMetadataSourceInvalid "capacity changed-production runtime mutation")
 
 validateSource :: PodRuntimeMetadataSource -> Either RuntimeStorageError ()
 validateSource source

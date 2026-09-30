@@ -158,9 +158,10 @@ gate binds the source snapshot it tested and permits only the tracker, phase, an
 that result to change. The one contiguous frontier advances with the pass: the closing phase and all of its
 sprints become Done, and its immediate successor plus that successor's first sprint become Active when one
 exists; every later phase remains Blocked. The validator emits the verified patch only beneath `.build/**` and
-never changes a tracked file. `accept` applies the exact patch and writes the receipt's reproducible digest as
-`**Receipt**: <digest>` on the line after the Done status; `preview` applies nothing
-([DL-0013](../documents/decision_log.md#dl-0013--validation-authority-is-mechanical-and-receipts-are-reproducible)). Any other byte change creates a new candidate
+the candidate gate leaves tracked files unchanged. After the gate, `accept` applies the exact patch, writes
+the receipt's reproducible digest as `**Receipt**: <digest>` on the line after the Done status, and publishes
+the immutable accepted bundle under `validation-records/**` against the final status postimage. `preview`
+applies nothing ([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)). Any other byte change creates a new candidate
 and requires the gate to run again.
 
 A later edit preserves an earlier run as a historical fact, but current reuse requires an authenticated
@@ -170,9 +171,29 @@ validation-policy closures. Unchanged, qualified closures may reuse evidence; af
 consumers require revalidation. Unknown impact refuses reuse.
 
 An unrelated edit does not require replaying every completed gate. Receipt refresh revalidates a compatible
-Done phase with an identity status projection. A failed or incompatible accepted claim instead follows the
+Done phase with an identity status projection, writes a new immutable bundle, and re-acquires the refreshed
+status before continuing to the next Done phase. The tracked archive is the durable custody record; ignored
+`.build/**` stores are disposable caches. A missing or corrupt bundle requires a fresh gate run, and the old
+digest alone cannot reconstruct observations. A failed or incompatible accepted claim instead follows the
 reopening procedure. Receipt age, filename hashes, copied candidate bytes, and an active phase's assertion of
-compatibility supply no reuse authority.
+compatibility supply no reuse authority
+([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
+
+A red `replay` appends an immutable `validation-records/**/voids/**` marker for the selected current bundle.
+The archive reader chooses the unique latest `receiptIssuedAt` bundle in the current generation before
+applying void markers; reader/preflight refuses ties or a replay bundle whose issuance is not newer than the
+current bundle, and a voided bundle cannot be bypassed by an
+older bundle with the same reproducible digest. Done status remains recorded, but the voided receipt cannot
+satisfy a predecessor until a later complete green replay publishes a newer bundle or the verifier performs
+an explicit reset. The human commits the marker for durable audit
+([DL-0019](../documents/decision_log.md#dl-0019--red-replay-leaves-an-immutable-revocation-record)).
+
+An agent may run the next numerical `accept` before the human commits the previous phase's status and archive.
+The verifier must exact-read the just-produced bundle, bind its status postimage and accepted closure, and
+fully re-derive the predecessor gate under current verifier and governance digests before the next phase.
+A closure digest alone is insufficient. This permits one reviewable worktree change containing separately run phase
+gates; the human commit makes their accepted records durable
+([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 
 Within accepted scope, implementation and qualification continue through sprint seams without confirmation.
 Recording and numerical progression happen one phase per `accept`, which the agent runs; a receipt that does
@@ -245,8 +266,9 @@ Until `BOOTSTRAP_HANDOFF` (Phase 50) passes its qualified gate,
 `pb` is an inadmissible validation transport: Phase 0 through the DSL barrier (Phase 9) invoke the exact
 source-bound Haskell verifier directly. Phase 0 carries only the narrow `GenesisTrust` local-custody and compile-time/platform
 assumption; it does not authenticate the actual compiler executable bytes or derivation. Phase 1 owns the
-authenticated, reproducible toolchain acquisition bound by subsequent builds without retroactively providing
-Phase 0's compiler. Phase 50
+pin-verified, reproducible toolchain acquisition bound by subsequent builds without retroactively providing
+Phase 0's compiler or proving publisher identity
+([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)). Phase 50
 alone places the already source-bounded `pb` ensure/build/unchanged-argv/exec handoff under external runtime
 observation: its candidate starts the exact source-built Haskell supervisor directly, and that supervisor
 invokes `pb` as the child subject. The future public spelling cannot supervise its own handoff. Phase 51 and

@@ -43,7 +43,6 @@ closureDigest root graph verified verifier governance = do
   files <- concat <$> mapM (haskellFilesUnder root) directories
   digests <- mapM (\file -> (\contents -> Text.pack file <> "\t" <> sha256Hex contents) <$> TextIO.readFile (root </> file)) (sort files)
   pure (sha256Hex (Text.unlines (digests <> ["verifier\t" <> verifier, "governance\t" <> governance, "subjects\t" <> Text.pack (show (gateSubjects (verifiedSpec verified)))])))
-
 haskellFilesUnder :: FilePath -> FilePath -> IO [FilePath]
 haskellFilesUnder root relative = do
   exists <- doesDirectoryExist (root </> relative)
@@ -55,6 +54,5 @@ haskellFilesUnder root relative = do
     nested <- concat <$> mapM (walk . (directory </>)) directories
     files <- filterM (doesFileExist . (directory </>)) [name | name <- names, ".hs" `isSuffixOf` name]
     pure ([directory </> name | name <- files] <> nested)
-
 _unusedSpec :: GateSpec -> GateSpec
 _unusedSpec = id

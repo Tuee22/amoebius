@@ -25,6 +25,7 @@ module Amoebius.Doc.Check
 
 import Amoebius.Doc.Governance (checkDecisionLog, checkFrozenDoctrine, checkGateSpecBlocks, checkHonestyCitations)
 import Amoebius.Doc.Phase (checkPhaseContracts)
+import Amoebius.Plan.ValidationRecordPath (validationRecordRoot)
 import Amoebius.Doc.Types
   ( CheckResult (..)
   , Finding (..)
@@ -1079,6 +1080,8 @@ discoverDocuments root = do
 -- only the canonical roots receive header checks.  In particular, vendor
 -- provenance documents can be legitimate inbound-link sources.  Generated
 -- and VCS-private trees are excluded from this mutable diagnostic discovery.
+-- The tracked validation-record archive is evidence, not a Markdown corpus;
+-- traversing it would make unrelated receipts consume the discovery budget.
 walkAuxiliaryMarkdown :: IORef DiscoveryBudget -> FilePath -> [FilePath] -> IO [Either Finding (FilePath, Text)]
 walkAuxiliaryMarkdown budget root canonicalRoots = do
   listed <- boundedDirectoryEntries budget "." root
@@ -1100,7 +1103,7 @@ walkAuxiliaryMarkdown budget root canonicalRoots = do
                     then pure <$> readDocument budget root name
                     else pure []
  where
-  excluded = [canonicalGeneratedRoot, ".git", "dist-newstyle", "documents", "DEVELOPMENT_PLAN"]
+  excluded = [canonicalGeneratedRoot, validationRecordRoot, ".git", "dist-newstyle", "documents", "DEVELOPMENT_PLAN"]
 
 readIfPresent :: IORef DiscoveryBudget -> FilePath -> FilePath -> IO (Either Finding (FilePath, Text))
 readIfPresent budget root relative = do

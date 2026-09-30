@@ -79,9 +79,11 @@ expectedNegatives :: [(Text, Text)]
 expectedNegatives =
   [ ("AmbientNetworkRead", "AmbientNetworkRefused: ")
   , ("MissingPin", "PinMissing: ghc-SHA256SUMS")
+  , ("MissingArchivePin", "PinMissing: ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz")
+  , ("MissingSignaturePin", "PinMissing: cabal-SHA256SUMS.sig")
   , ("DigestMismatch", "PinDigestMismatch: cabal-SHA256SUMS")
   , ("ManifestDisagrees", "ManifestDisagrees: cabal-install-3.16.1.0-x86_64-linux-ubuntu22_04.tar.xz")
-  , ("SignatureMismatch", "SignatureRejected: cabal-SHA256SUMS")
+  , ("PinnedSignatureDigestMismatch", "PinDigestMismatch: cabal-SHA256SUMS.sig")
   , ("RootNotAbsent", "RootNotAbsent: ")
   , ("DisagreeingAcquisition", "AcquisitionsDisagree: compiler.sha256")
   , ("MissingDependency", "MissingDependency: amoebius-absent-probe")
@@ -109,9 +111,6 @@ judge rows =
     <> [expect ("pin." <> name) ("ok bytes=" <> bytes <> " sha256=" <> digest) | (name, bytes, digest) <- expectedPins]
     <> [ expect "manifest.compiler-archive" "agrees claimed=4da657809c06c1658ae5713911fcb168a32093e239f61fe77be78aba74132cfa"
        , expect "manifest.package-tool-archive" "agrees claimed=9d68bd17d4aa87e93eea3f667d3edf41ab1cb2b5194bf1745da9dee678426c17"
-       , prefix "signature.1" "good ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz "
-       , prefix "signature.2" "good ghc-SHA256SUMS "
-       , prefix "signature.3" "good cabal-SHA256SUMS "
        , expect "acquisition.verdict" "agree"
        ]
     <> concat
@@ -163,15 +162,13 @@ judge rows =
        , expect "report.provenance.upstream" ("supernova-0.0.3 " <> upstreamTreeSha256)
        , expect "report.provenance.fork-modules" "17"
        , expect "report.provenance.requirements" "dhall >=1.42 && <1.43; io-sim >=1.10 && <1.11; io-classes >=1.10 && <1.11; proto-lens >=0.7 && <0.8; proto-lens-runtime >=0.7 && <0.8; purescript-bridge >=0.15 && <0.16; tar >=0.6 && <0.8; zlib >=0.7 && <0.8"
-       , expect "report.rows" "32"
+       , expect "report.rows" "26"
        , expect "report.refused.verdict" "refused"
+       , expect "report.refused.keys" "pins.refusal.1,pins.refusal.2"
        , expect "report.refused.manifest" "ManifestDisagrees: ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz claimed=0000000000000000000000000000000000000000000000000000000000000000 observed=4da657809c06c1658ae5713911fcb168a32093e239f61fe77be78aba74132cfa"
        , expect "negative.ReportUnknownArgument" "toolchain-report: unknown argument --bogus"
        , expect "report.options" "Just (Just \"root\")"
-       , expect "report.keys" "pins.verdict,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz.sig,pin.ghc-SHA256SUMS,pin.ghc-SHA256SUMS.sig,pin.cabal-install-3.16.1.0-x86_64-linux-ubuntu22_04.tar.xz,pin.cabal-SHA256SUMS,pin.cabal-SHA256SUMS.sig,manifest.compiler-archive,manifest.package-tool-archive,identity.compiler,identity.package-tool,identity.platform,identity.pins,signature.1,signature.2,signature.3,signature.child.1,signature.child.2,signature.child.3,probe.decode.positive,probe.decode.mistyped,probe.sim.clean,probe.sim.perturbed,probe.sim.schedule.clean,probe.sim.schedule.perturbed,probe.codegen.link-token,probe.bridge.files,plan.steps,provenance.upstream,provenance.fork-modules,provenance.requirements"
-       , prefix "report.signature.1" "good ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz Good"
-       , prefix "report.signature.2" "good ghc-SHA256SUMS Good signature"
-       , prefix "report.signature.3" "good cabal-SHA256SUMS Good signature"
+       , expect "report.keys" "pins.verdict,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz.sig,pin.ghc-SHA256SUMS,pin.ghc-SHA256SUMS.sig,pin.cabal-install-3.16.1.0-x86_64-linux-ubuntu22_04.tar.xz,pin.cabal-SHA256SUMS,pin.cabal-SHA256SUMS.sig,manifest.compiler-archive,manifest.package-tool-archive,identity.compiler,identity.package-tool,identity.platform,identity.pins,probe.decode.positive,probe.decode.mistyped,probe.sim.clean,probe.sim.perturbed,probe.sim.schedule.clean,probe.sim.schedule.perturbed,probe.codegen.link-token,probe.bridge.files,plan.steps,provenance.upstream,provenance.fork-modules,provenance.requirements"
        , expect "pins.rendered" (Text.intercalate "; " [role <> " " <> name <> " " <> bytes <> " " <> digest | ((name, bytes, digest), role) <- zip expectedPins pinRoles])
        , expect "probe.codegen.schema-sha256" "56c70c7e2ec078925245048b18ecaaafb41c4da01524095c6b9d54b1fd68b4bd"
        , expect "positive.GitCommit" "git:https://github.com/cr-org/supernova@0123456789abcdef0123456789abcdef01234567"
@@ -180,7 +177,6 @@ judge rows =
  where
   observed key = Map.findWithDefault "<absent>" key rows
   expect key value = LedgerRow key (observed key == value) (observed key)
-  prefix key value = LedgerRow key (value `Text.isPrefixOf` observed key) (observed key)
   prefixWithin key value = LedgerRow key (value `Text.isInfixOf` observed key) (observed key)
   hex64 key = LedgerRow key (Text.length (observed key) == 64 && Text.all (`elem` ("0123456789abcdef" :: String)) (observed key)) (observed key)
   equalRows name first second = LedgerRow name (observed first == observed second && observed first /= "<absent>") (observed first <> " vs " <> observed second)

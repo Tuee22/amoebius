@@ -102,17 +102,17 @@ renderPulsar provision =
       , "ordinal=${HOSTNAME##*-}; printf '%s\\n' \"$((ordinal + 1))\" > /pulsar/data/zookeeper/myid; exec /pulsar/bin/pulsar zookeeper"
       ] (pulsarZooKeeperResources demand)
   , object "Job" "pulsar-metadata" 1
-      [ "/pulsar/bin/pulsar", "initialize-cluster-metadata", "--cluster", "phase30", "--zookeeper", "zookeeper:2181"
+      [ "/pulsar/bin/pulsar", "initialize-cluster-metadata", "--cluster", "amoebius-pulsar", "--zookeeper", "zookeeper:2181"
       , "--configuration-store", "zookeeper:2181", "--web-service-url", "http://broker.pulsar-system.svc.cluster.local:8080"
       , "--broker-service-url", "pulsar://broker.pulsar-system.svc.cluster.local:6650"
       ] (pulsarMetadataResources demand)
   , object "StatefulSet" "bookkeeper" (pulsarBookieReplicas demand)
       [ "/bin/bash", "-ec"
-      , "cp /phase30-config/bookkeeper.conf /tmp/bookkeeper.conf; printf 'advertisedAddress=%s.bookkeeper.pulsar-system.svc.cluster.local\\n' \"$HOSTNAME\" >> /tmp/bookkeeper.conf; exec /pulsar/bin/pulsar bookie"
+      , "cp /pulsar-config/bookkeeper.conf /tmp/bookkeeper.conf; printf 'advertisedAddress=%s.bookkeeper.pulsar-system.svc.cluster.local\\n' \"$HOSTNAME\" >> /tmp/bookkeeper.conf; exec /pulsar/bin/pulsar bookie"
       ] (pulsarBookieResources demand)
   , object "StatefulSet" "broker" (pulsarBrokerReplicas demand)
       [ "/bin/bash", "-ec"
-      , "cp /phase30-config/broker.conf /tmp/broker.conf; printf 'advertisedAddress=%s.broker-headless.pulsar-system.svc.cluster.local\\n' \"$HOSTNAME\" >> /tmp/broker.conf; exec /pulsar/bin/pulsar broker"
+      , "cp /pulsar-config/broker.conf /tmp/broker.conf; printf 'advertisedAddress=%s.broker-headless.pulsar-system.svc.cluster.local\\n' \"$HOSTNAME\" >> /tmp/broker.conf; exec /pulsar/bin/pulsar broker"
       ] (pulsarBrokerResources demand)
   , object "Deployment" "pulsar-tool" 1
       ["/bin/bash", "-ec", "exec /usr/bin/tail -f /dev/null"] (pulsarToolResources demand)

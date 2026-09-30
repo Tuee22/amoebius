@@ -102,7 +102,7 @@ remains phase-local and cannot be supplied by this prose.
 | `Discovery` | The acquired source inventory must equal the seven host production modules, production caller, Haskell spec, independent oracle, runner, and Cabal declarations in both directions; runtime discovery must produce exactly the closed expected files and row counts. |
 | `Challenge` | Each candidate uses a newly absent run root and two newly absent fake-host roots; a tool created after acquisition must resolve only in its owning root, while the paired foreign root remains empty. |
 | `Observer` | The acquired supervisor retains actual fake-boundary process/file identities, argv/environment, requests, state transitions and cleanup, and observes calls reached from the production binary host-context entry point. |
-| `Authority/bypass` | Only the validated `pb` handoff, authenticated compiler/Cabal/store, offline serial builds, and run-owned `.build/**` fake files are admitted. Network, package-manager mutation, container/VM/cluster/provider calls, hardware discovery, ambient `PATH`, and external roots are forbidden. |
+| `Authority/bypass` | Only the validated `pb` handoff, pin-verified compiler/Cabal and integrity-checked store, offline serial builds, and run-owned `.build/**` fake files are admitted. Network, package-manager mutation, container/VM/cluster/provider calls, hardware discovery, ambient `PATH`, and external roots are forbidden ([DL-0021](../documents/decision_log.md#dl-0021--cleanroom-input-names-respect-the-fixed-pin-trust-boundary)). |
 | `Freshness` | The run root and both fake host roots are unique and absent at acquisition, generated observations are recreated, opening and closing tracked-source identities match, and no prior candidate output can satisfy the new root challenge. |
 | `Qualification` | The generated-mutant matrix precedes the clean candidate in the same run. Generic-failure labelling, wrong-case assertions, failed positive setup, and source-token-only caller checks cannot qualify anything, because the runner holds the verdict and the oracle prints from literals. |
 | `Cleanroom` | All build directories, fake executables, observations, and mutation products are generated beneath the unique `.build/runs/phase-51/**` owner root; tracked behavioral expectations remain Haskell and no live effect or external residue is admitted. |
@@ -113,7 +113,7 @@ remains phase-local and cannot be supplied by this prose.
 
 ## Resource provision
 
-- **Owner marker:** source snapshot, Phase-50 receipt, unique Phase-51 run identity, authenticated toolchain identity, clean/mutant row identity, and fake-host root identity.
+- **Owner marker:** source snapshot, Phase-50 receipt, unique Phase-51 run identity, pin-bound toolchain identity, clean/mutant row identity, and fake-host root identity.
 - **Preflight:** the unique run root and both fake-host roots must be absent; the acquired tracked-source inventory and predecessor receipt must be exact.
 - **Allowed mutation:** create only compiler products, fake executable files, and TSV observations below the owned `.build/runs/phase-51/**` root.
 - **Forbidden mutation:** no host package manager, ambient executable search, network, container engine, VM, cluster, provider, registry, device, credential, `.test_data/**`, or path outside the owner root.

@@ -272,4 +272,4 @@ renderSurfaces observed = unlines
  where present True = "present"; present False = "absent"
 
 imageReference :: String
-imageReference = "amoebius-phase52-cpu-amd64:local"
+imageReference = "amoebius-linux-engine-cpu-amd64:local"

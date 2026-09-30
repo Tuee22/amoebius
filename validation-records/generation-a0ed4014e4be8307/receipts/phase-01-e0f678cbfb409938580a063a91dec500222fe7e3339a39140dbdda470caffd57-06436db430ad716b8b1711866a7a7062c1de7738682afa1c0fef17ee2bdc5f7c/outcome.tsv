@@ -1,0 +1,6 @@
+green	True
+spec-digest	8bebcc99c021f39d2d1dc1b0048c54dba63e9f9851f1f6b9e372c9a91f47c79e
+chain	9655599293770e76543d750d4409df1d3d91d111979b4eda91eefbd3c3a06d36
+reproducible-core	081424cb4b4e910c38340f088f709e021eb08235954b38ce8d67550b0bd86f7c
+capability	toolchain_spike
+claim	From GenesisTrust and its seven pinned files, two contained acquisitions produce the pinned compiler and package tool and agree on executable identity and elaborated plan; the shipped toolchain-report prints the pin digests, pinned-manifest agreement, identities, and probe outcomes the oracle restates; the retained probe set builds and executes offline and serially; every negative is refused by name at its locus. Publisher identity remains an explicit unverified assumption.

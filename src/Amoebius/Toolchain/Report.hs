@@ -3,8 +3,7 @@
 -- | The @amoebius toolchain-report@ subcommand (phase_01, Sprint 1.8).
 --
 -- The shipped binary reports what it observes: each pin's size and digest,
--- whether the publisher manifests agree with the pins, whether the signatures
--- verify against the operator keyring, the identities the pins name, and the
+-- whether the publisher manifests agree with the pins, the identities the pins name, and the
 -- outcome of every in-process probe. With @--acquire ROOT@ it also performs the
 -- two contained acquisitions and elaborates their plans. Every observation is a
 -- row; a refusal is a row too, and the exit is zero whenever the report was
@@ -69,7 +68,7 @@ runToolchainReport arguments = case parseReportOptions arguments of
         createDirectoryIfMissing True (takeDirectory path)
         TextIO.writeFile path rendered
 
--- | The report as rows. Pins and manifests first, then signatures, identities,
+-- | The report as rows. Pins and manifests first, then identities,
 -- the probes, the planner, the provenance identity, and the acquisitions.
 reportRows :: ReportOptions -> IO [(Text, Text)]
 reportRows options = do
@@ -78,7 +77,6 @@ reportRows options = do
   let overrides = [(CompilerManifest, path) | Just path <- [optionCompilerManifest options]] <> [(PackageToolManifest, path) | Just path <- [optionPackageToolManifest options]]
       probeRoot = fromMaybe (takeDirectory inputs </> "probe") (optionProbeRoot options)
   pins <- verifyPinsWith inputs overrides
-  (signatures, signatureChildren) <- verifySignatures inputs
   decodes <- decodeProbe (probeRoot </> "decode")
   bridge <- bridgeProbe (probeRoot </> "purs")
   let pinRows = case pins of
@@ -93,7 +91,6 @@ reportRows options = do
         , ("identity.platform", renderPlatform platform)
         , ("identity.pins", Text.pack (show (length genesisPins)))
         ]
-      signatureRows = [("signature." <> Text.pack (show index), renderSignature result) | (index, result) <- zip [1 :: Int ..] signatures] <> [("signature.child." <> Text.pack (show index), renderChild child) | (index, child) <- zip [1 :: Int ..] signatureChildren]
       probeRows =
         [("probe.decode." <> name, renderDecodeOutcome outcome) | (name, outcome) <- decodes]
           <> [ ("probe.sim.clean", simProbe cleanSchedule)
@@ -130,4 +127,4 @@ reportRows options = do
                 <> [("plan.a", either renderResolveRefusal (planDigest . fst) planA), ("plan.b", either renderResolveRefusal (planDigest . fst) planB)]
             )
     _ -> pure []
-  pure (pinRows <> identityRows <> signatureRows <> probeRows <> planRows <> provenanceRows <> acquisitionRows)
+  pure (pinRows <> identityRows <> probeRows <> planRows <> provenanceRows <> acquisitionRows)

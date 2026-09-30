@@ -3,7 +3,7 @@
 -- | The frozen governance baseline: the closed set of documents whose bodies change
 -- only through a decision-log entry, each with the SHA-256 of its bytes with the
 -- @**Referenced by**:@ line removed and the entry that last amended it
--- (@documentation_standards.md@ section 17, DL-0006 through DL-0010).
+-- (@documentation_standards.md@ section 17 and the decision log).
 --
 -- This module is data. Comparing the baseline with the tree, and refusing a body
 -- change that lands without an entry, is the documentation checker's work.
@@ -37,6 +37,13 @@ data DecisionId
   | DL0012
   | DL0013
   | DL0014
+  | DL0015
+  | DL0016
+  | DL0017
+  | DL0018
+  | DL0019
+  | DL0020
+  | DL0021
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 allDecisionIds :: [DecisionId]
@@ -58,6 +65,13 @@ renderDecisionId identifier = case identifier of
   DL0012 -> "DL-0012"
   DL0013 -> "DL-0013"
   DL0014 -> "DL-0014"
+  DL0015 -> "DL-0015"
+  DL0016 -> "DL-0016"
+  DL0017 -> "DL-0017"
+  DL0018 -> "DL-0018"
+  DL0019 -> "DL-0019"
+  DL0020 -> "DL-0020"
+  DL0021 -> "DL-0021"
 
 parseDecisionId :: Text -> Maybe DecisionId
 parseDecisionId rendered =
@@ -84,7 +98,7 @@ frozenPaths = map frozenPath frozenBaseline
 frozenBaseline :: [FrozenRow]
 frozenBaseline =
   [ FrozenRow "documents/README.md" "52457a50a9e279d1190bf63ac5d6ff0097a4f4f4cdc1fb6f6a5d535333c0a32a" DL0006
-  , FrozenRow "documents/documentation_standards.md" "d7d369cac0007647790fd91b8c7692498073fe3d5b01fb7732dc5e580d44e5d4" DL0011
+  , FrozenRow "documents/documentation_standards.md" "dc00a283b4f6c3a17b9790d6738f1b5d8856e19129e3c3e7915258cdf2f91fff" DL0015
   , FrozenRow "documents/engineering/README.md" "cab4b86e5865d899685dc8c897d745b641c4f8ad49e3f791998dfbfc67b5b910" DL0013
   , FrozenRow "documents/engineering/app_vs_deployment_doctrine.md" "2dc44dae95dd21e1a2f4fbde0116bd2fa2d26ee19e4791afc96266fbeb192c78" DL0003
   , FrozenRow "documents/engineering/apple_metal_headless_builds.md" "b4522cdecff7d4e6dcfcec9989c9460ec39609ae3dfd6f08449c534ae3d4c282" DL0006
@@ -112,10 +126,10 @@ frozenBaseline =
   , FrozenRow "documents/engineering/extension_conformance_security.md" "fd89f3716a43409bd4f7e2042929c83c79f1c4ada2d8a7bdb81c86e5ec389521" DL0006
   , FrozenRow "documents/engineering/extension_conformance_transactions.md" "2f8290034758aaee3ded83ee09b2bcbd4d8696fe5915de57e20ac1eb92321f81" DL0006
   , FrozenRow "documents/engineering/formal_model_doctrine.md" "dc1126d19eeda6837fc1e6ef97ef1c47c80d86590f206aa1560c15ce49c5c38b" DL0006
-  , FrozenRow "documents/engineering/gate_runner_doctrine.md" "a92d2994e8b2f1bdd125cd7f2a6ecb6952138c4889ccf2ce0d98fc391694376e" DL0014
+  , FrozenRow "documents/engineering/gate_runner_doctrine.md" "2e860dc817200dcf5ef9d56fc54482028e3709b89c44caeaca492cc32a4b6f30" DL0019
   , FrozenRow "documents/engineering/gateway_migration_doctrine.md" "d329295176510e255086fe24fc42715ec515e47be6b47a25d6bd1474c80b31df" DL0006
   , FrozenRow "documents/engineering/gateway_migration_model_doctrine.md" "11ee27ac4f7de17a67961be3bfd3d32c6d08d010ea9651e76c20835184e78353" DL0006
-  , FrozenRow "documents/engineering/generated_artifacts_doctrine.md" "76f9975359648dab35937cad321ea3cd2d192762825731685cd4f5a8d35d5cf3" DL0006
+  , FrozenRow "documents/engineering/generated_artifacts_doctrine.md" "5dfae009252ba074136652107c465097eb9ef06dbbaaf7b768f4fdd2109ee763" DL0020
   , FrozenRow "documents/engineering/host_cluster_comms_doctrine.md" "2aa99bf9fd6c6234589496105096ad7a821f75956d05b374d7f1033e6e400582" DL0006
   , FrozenRow "documents/engineering/image_build_doctrine.md" "7fafe3bbf191d466103e49493d361d3b270166b53c920f0de8c8efab6b1f8088" DL0006
   , FrozenRow "documents/engineering/inforcespec_migration_doctrine.md" "a99310c06828c8dff9e0a40f4a599a198e4d2a243a95f09570475a9fadadb431" DL0006
@@ -136,7 +150,7 @@ frozenBaseline =
   , FrozenRow "documents/engineering/pulumi_iac_doctrine.md" "ad2e7aa7043fb08663f09239c3e55b9d621fffeb89b670278bf530a2c40e1ed8" DL0006
   , FrozenRow "documents/engineering/readiness_ordering_doctrine.md" "121debe68a372d858c4d6aeead55d23e2c44b0187dc68df01ba714d2e71e3b82" DL0006
   , FrozenRow "documents/engineering/release_lifecycle_doctrine.md" "081ed5fdfb69190548ebe96c2ad5af1d7b467bb2d1cc1259138e3a77f208ead0" DL0011
-  , FrozenRow "documents/engineering/repository_layout_doctrine.md" "d7c04d49dc93d63f722645f2efb39f3768e4d0d1fae56d163eb0669d39fff92e" DL0013
+  , FrozenRow "documents/engineering/repository_layout_doctrine.md" "3124452f70262d851c54a226cf955b2e9115431236d6c5723c72818ddb1db57f" DL0019
   , FrozenRow "documents/engineering/resource_capacity_construction.md" "2ff08a1fee00539da22df63ddee66d886de5f12024b13d13992a53788832be9c" DL0006
   , FrozenRow "documents/engineering/resource_capacity_doctrine.md" "6f3fdd49b0d9c8349a3b6e2a9cc096e4b1481f0e8abc64b4033c780dd1d4dadd" DL0006
   , FrozenRow "documents/engineering/resource_capacity_folds.md" "c785a578f6837444a93edc2c6b8c399db8919adc20634cde99bd400ce90a22f7" DL0006
@@ -152,9 +166,9 @@ frozenBaseline =
   , FrozenRow "documents/engineering/tenancy_doctrine.md" "282b5959061365be51af5844a7a019aadc11f084eaa27119ab13df042e8bf49e" DL0006
   , FrozenRow "documents/engineering/test_derivation_analysis.md" "a1e66c2df7273a5b180a2b8fa79c89e68cc9a04a539070bcd76a1a05f7338583" DL0006
   , FrozenRow "documents/engineering/testing_doctrine.md" "2532e0fdab05f6671ccd8938737f6a8308e510b0599fa38425f8999ddb47d9d2" DL0006
-  , FrozenRow "documents/engineering/testing_spoof_resistance.md" "e4ee1dae483fd1fb9f758295a75fddad97c0129ac10f898a3b024555113b5b4a" DL0006
+  , FrozenRow "documents/engineering/testing_spoof_resistance.md" "553a845f6f715e661093218a82c168e228abf77733f65d7b8935fdc35f683e8c" DL0021
   , FrozenRow "documents/engineering/ui_realtime_coordination_doctrine.md" "ca85f59e30aee1353a7da820bfdeac47e0afe24af47c087c85180981aa8d6234" DL0006
-  , FrozenRow "documents/engineering/validation_frame_doctrine.md" "01cef7c119558e63ec82ee311a01fc7008cfc87b9b46b31e5235feb3b8561148" DL0013
+  , FrozenRow "documents/engineering/validation_frame_doctrine.md" "6c87f8c8feb3bcb016af14828338a031f235199af3bece61e6c23ca68e3e21a1" DL0021
   , FrozenRow "documents/engineering/vault_pki_doctrine.md" "27e3e5b8ca512fcaf13dc1642397747a6a9a3cc5aedd58552ba034b146c03614" DL0006
   , FrozenRow "documents/engineering/workflow_calculus_doctrine.md" "6a1300faea37155de5c06df36ad6801a4b2f0a9fe37a299ca251a6bcdf905810" DL0006
   , FrozenRow "documents/glossary.md" "af8fadd52a7c96c7b9c52e772305a20ec6dc936d3a133730f4799a4ff194afa4" DL0013
@@ -171,9 +185,9 @@ frozenBaseline =
   , FrozenRow "documents/illegal_state/illegal_state_tenancy.md" "e94e2f42ac06f13843eee3d0834d7a7e7d73aa0d9a5a7b11638a0db74fb390bb" DL0006
   , FrozenRow "documents/illegal_state/illegal_state_topology.md" "a4d7f93855c0939b21ff44d777fef73ee496ba710445c807acc825ade9835120" DL0006
   , FrozenRow "documents/reading_order.md" "730ff7a80452cb90f0d6352702424be39b0e8d23b0a0154dae15ef2f8c5f0567" DL0013
-  , FrozenRow "AGENTS.md" "f61fbfd3d7032543d24b92fad193aeef79a9550632eb9e2f3955a693b05a384b" DL0013
-  , FrozenRow "DEVELOPMENT_PLAN/development_plan_standards.md" "40a9bd322f523fe89816b30d4c8375216e7b78da50885e188d751b12e9c408ac" DL0013
-  , FrozenRow "DEVELOPMENT_PLAN/development_plan_phase_model.md" "3afdd57359e08529e128a7113114202441165eb10e531f85baf834e0329b69ce" DL0013
-  , FrozenRow "DEVELOPMENT_PLAN/development_plan_gate_integrity.md" "33093d2cc3fd90d103c342c9f8ed2cf0cd9fe608a323cbd75c100d5f653e790a" DL0014
-  , FrozenRow "DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md" "4f89e9be76b0f0489cc5b86aab26d291c3fe85268d38398fbfb2507af436babb" DL0013
+  , FrozenRow "AGENTS.md" "f8ccc140627f68ebe65475de2f296b82e567bd76829d78d21a2f16280e1697ef" DL0019
+  , FrozenRow "DEVELOPMENT_PLAN/development_plan_standards.md" "3a2f52668a26a488366038572c4e0ff15c644da71a06307469d984ab55e702c5" DL0019
+  , FrozenRow "DEVELOPMENT_PLAN/development_plan_phase_model.md" "445f50e3de44f577ad4f729473d716330f68f82279b6b97ced71d09ddff7bec6" DL0020
+  , FrozenRow "DEVELOPMENT_PLAN/development_plan_gate_integrity.md" "25f00e1da3d69bc52b9a413812d3875881df1e3f20877c3c03fc9a297e2ae1d0" DL0019
+  , FrozenRow "DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md" "1a8a4cbc9987e83fef478291c588b345dd4e72dbd9bbdb5d358d526415aa1eea" DL0021
   ]
