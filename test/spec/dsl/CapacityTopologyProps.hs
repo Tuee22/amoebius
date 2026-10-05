@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module CapacityTopologyProps
@@ -7,30 +8,11 @@ module CapacityTopologyProps
   , referenceCompatibility
   ) where
 
-import Amoebius.Capacity.Fold (carve, fits, place)
-import Amoebius.Capacity.Types
-  ( Assignment (..)
-  , AvailableCapacity (..)
-  , CandidateNodeClass (..)
-  , CpuOvercommitPolicy (..)
-  , Demand (..)
-  , GrowthQuota (..)
-  , HostEnvironment (..)
-  , MaterializedNode (..)
-  , Node (..)
-  , NodeCapacity (..)
-  , Placement (..)
-  , ResourceVector (..)
-  , StorageDemand (..)
-  , VolumeAttachment (..)
-  , Workload (..)
-  , addResources
-  , envelopeHeadroom
-  , envelopeLimits
-  , envelopeRequests
-  , headroomResources
-  , availableResources
-  )
+import Amoebius.Capacity.Fits (carve, fits)
+import Amoebius.Placement.Witness (placedPlacement, place)
+import Amoebius.Capacity.Types (Assignment (..), AvailableCapacity (..), CandidateNodeClass (..), CpuOvercommitPolicy (..), Demand (..), GrowthQuota (..), HostEnvironment (..), MaterializedNode (..), Node (..), NodeCapacity (..), Placement (..), StorageDemand (..), VolumeAttachment (..), Workload (..), envelopeHeadroom, envelopeLimits, envelopeRequests, headroomResources, availableResources)
+import Amoebius.Capacity.Vector (ResourceVector (..), addResources)
+import Amoebius.Vocabulary (Quantity (..), Unit (..), quantityValue)
 import Amoebius.Dsl.Topology
   ( ComputeEngine (..)
   , NodeSupply (..)
@@ -117,7 +99,7 @@ propFitsEquivalence (ScalarCase required available) = checkCoverage
   $ cover 30 (required > available) "out-of-envelope"
   $ case fits (Demand (resources required 0 0 0)) (resources available 0 0 0) of
       Left _ -> property (required > available)
-      Right headroom -> property (resourceCpu (headroomResources headroom) == available - required)
+      Right headroom -> property (quantityValue (resourceCpu (headroomResources headroom)) == available - required)
 
 propCarveSubtracts :: ScalarCase -> Property
 propCarveSubtracts (ScalarCase required available) = checkCoverage
@@ -125,7 +107,7 @@ propCarveSubtracts (ScalarCase required available) = checkCoverage
   $ cover 30 (required > available) "out-of-envelope"
   $ case carve (AvailableCapacity (resources 0 available 0 0)) (Demand (resources 0 required 0 0)) of
       Left _ -> property (required > available)
-      Right residual -> property (resourceMemory (availableResources residual) == available - required)
+      Right residual -> property (quantityValue (resourceMemory (availableResources residual)) == available - required)
 
 propPlaceSound :: PlacementCase -> Property
 propPlaceSound (PlacementCase required available) = checkCoverage
@@ -133,7 +115,7 @@ propPlaceSound (PlacementCase required available) = checkCoverage
   $ cover 30 (required > available) "place-reject"
   $ case mkTopology Rke2Engine (FixedSupply (node :| [])) of
       Left problem -> counterexample (show problem) False
-      Right topology -> case place topology [workload] of
+      Right topology -> case placedPlacement <$> place topology [workload] of
         Left _ -> property (required > available)
         Right witness ->
           counterexample (show witness) (property (required <= available && validatePlacement ValidateAll topology [workload] witness == Right ()))
@@ -262,10 +244,10 @@ validateAntiAffinity workloads =
 sumResources :: [ResourceVector] -> ResourceVector
 sumResources = foldr addResources (ResourceVector 0 0 0 0)
 
-independentCpuBudget :: CpuOvercommitPolicy -> Natural -> Natural
+independentCpuBudget :: CpuOvercommitPolicy -> Quantity 'CpuUnit -> Quantity 'CpuUnit
 independentCpuBudget policy allocatable = case policy of
   NoCpuOvercommit -> allocatable
-  BoundedCpuOvercommit ratio -> allocatable * max 1 ratio
+  BoundedCpuOvercommit ratio -> allocatable * Quantity (max 1 ratio)
 
 ensure :: Bool -> Text -> Either Text ()
 ensure condition message = if condition then Right () else Left message

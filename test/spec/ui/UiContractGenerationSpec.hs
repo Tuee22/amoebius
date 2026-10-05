@@ -8,7 +8,8 @@ import Amoebius.Calculus.Composition
 import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
 import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Capacity.Vector (ResourceVector (ResourceVector))
+import Amoebius.Vocabulary (quantityText)
 import Amoebius.Scope.Index qualified as CalculusScope
 import Amoebius.Ui.Generate.BrowserContracts
 import Control.Monad (forM_, unless, when)
@@ -69,7 +70,7 @@ checkCalculus = do
           (append (compose (liftComponent scope "browser-contract-inventory" (resources 22) OnHost) (workflowComponent scope "deterministic-render-workflow" (resources 2) emptyLedger)) (singleton (evidenceComponent scope "mutant-evidence" (resources 3) PureRegister)))
         ResourceVector cpu memory ephemeral pods = compositionResource composition
         render = Text.unpack . Text.intercalate ","
-        actual = [["calculus-kinds", render (map calculusTag (compositionKinds composition))], ["component-names", render (compositionNames composition)], ["projection-counts", render (map (Text.pack . show) counts)], ["resource-vector", render (map (Text.pack . show) [cpu,memory,ephemeral,pods])]]
+        actual = [["calculus-kinds", render (map calculusTag (compositionKinds composition))], ["component-names", render (compositionNames composition)], ["projection-counts", render (map (Text.pack . show) counts)], ["resource-vector", render ([quantityText cpu,quantityText memory,quantityText ephemeral,quantityText pods])]]
     assertEqual "five calculus kinds" everyCalculus (compositionKinds composition)
     assertEqual "UI contract calculus projection" Cases.calculusRows actual
   action

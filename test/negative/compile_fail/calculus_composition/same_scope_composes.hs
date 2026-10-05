@@ -11,7 +11,7 @@ import Amoebius.Calculus.Composition
   , compose
   , compositionKinds
   )
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Capacity.Vector (ResourceVector (ResourceVector))
 import Amoebius.Scope.Index
   ( activeMembership
   , trustedSubject

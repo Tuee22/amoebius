@@ -8,6 +8,7 @@ module Amoebius.Validation.Runner
   , defaultRunnerConfig
   , reproducibleCore
   , renderRefusal
+  , roleFor
   , runGate
   , specDigest
   ) where
@@ -70,7 +71,7 @@ defaultRunnerConfig root phase =
 data RunnerRefusal
   = SpecRefused [SpecProblem]
   | HygieneRefused HygieneReport
-  | HardwareBeforeBarrier Substrate
+  | HardwareBeforeBarrier GateSubstrate
   | RunRootNotFresh FilePath
   | ProductBinaryUnavailable Text
   deriving (Eq, Show)
@@ -126,13 +127,15 @@ execute config spec vspec hygiene = do
   documentation <- case gateSeed spec of
     Just _ -> Just <$> seedDocumentation root (runRoot </> "docs") (runRoot </> "clean" </> "suite")
     Nothing -> pure Nothing
-  (cleanRuns, ledger) <- cleanRun config spec (runRoot </> "clean")
+  -- The shipped binary runs before the clean suite, inside its directory, so the independent oracle can judge what it wrote.
+  let binaryRoot = runRoot </> "clean" </> "suite" </> "binary"
   binary <- case (gateBinaryFact spec, runnerProductBinary config) of
-    (Just fact, Just binaryPath) -> Just <$> runBinaryFact root (runRoot </> "binary") binaryPath fact nonce
+    (Just fact, Just binaryPath) -> Just <$> runBinaryFact root binaryRoot binaryPath fact nonce
     _ -> pure Nothing
   spine <- case gateSpineFact spec of
-    Just fact -> Just <$> runSpineFact (runRoot </> "binary") fact
+    Just fact -> Just <$> runSpineFact binaryRoot fact
     Nothing -> pure Nothing
+  (cleanRuns, ledger) <- cleanRun config spec (runRoot </> "clean")
   closing <- treeDigest root
   let productClosure = maybe Set.empty (\g -> maybe Set.empty id (executableClosure g "amoebius")) graph
       seedRuns = maybe [] (\outcome -> maybe [] pure (seedCleanRun outcome) <> [run | (_, Just run, _) <- seedMutantRuns outcome]) seed
@@ -279,7 +282,7 @@ mutantMatrix config spec vspec graph digest = do
         (runs, ledger) <- suiteAndOracle config copyRoot spec copyRoot
         let outcome
               | any (\run -> runExit run /= ExitSuccess && "build" `elem` runArgv run) runs = Stillborn (Text.take 200 (Text.unlines (map runStderr runs)))
-              | ledgerGreen ledger = Survived
+              | ledgerGreen ledger || not (isAttributed (stageArtefacts policy) (locusModule locus) (ledgerRedRows ledger)) = Survived
               | otherwise = Killed (Text.intercalate "," (take 3 (ledgerRedRows ledger)))
         pure ((locus, Just witness, outcome), runs)
   pure (killTable (map fst results), concatMap snd results)
@@ -353,7 +356,7 @@ capture config spec vspec hygiene digest nonce chain (opening, closing) table le
   binaryGreen = case binary of
     Nothing -> isNothing (gateBinaryFact spec)
     Just outcome -> null (binaryProblems outcome) && not (null (binaryRuns outcome)) && not (null (binaryNonceRecovered outcome)) && all snd (binaryNonceRecovered outcome)
-  spineGreen = maybe (isNothing (gateSpineFact spec)) spineDigestsEqual spine
+  spineGreen = maybe (isNothing (gateSpineFact spec)) (\o -> spineDigestsEqual o && all (\stage -> any (\(name, verdict, _) -> verdict == "green" && (stage <> ".") `Text.isPrefixOf` name) (ledgerRows ledger)) (spineStageOrder o)) spine
   predecessorGreen = runnerPhase config == PhaseIdentity.phaseDomainLowerOrdinal || isJust (runnerPredecessorDigest config)
   legacyDue = Legacy.legacyIdsOwnedBy (runnerPhase config)
   verdictOf condition = if condition then Green else Red

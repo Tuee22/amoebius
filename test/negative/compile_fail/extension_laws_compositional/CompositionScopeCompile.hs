@@ -14,7 +14,7 @@ import Amoebius.Calculus.Composition
 import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
 import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types (zeroResources)
+import Amoebius.Capacity.Vector (zeroResources)
 import Amoebius.Extension.Declaration
   ( DeclarationError
   , ExtensionDeclaration

@@ -527,14 +527,19 @@ Their provenance, qualification, and residual assumptions must remain visible.
 
 ### The example corpus
 
-The examples a phase gate consumes are Haskell values in the `Amoebius.Dsl.Examples.*` modules linked by the
-shipped executable, never files under a test directory. Each example is a distinguishing pair with an expected
-manifest delta, or a negative with the exact tag and stage of its refusal. The oracle rows for an example are
-authored from the requirement before the pipeline stage they judge exists. A corpus only grows: a slice phase
-contains its predecessor's corpus and adds pairs, and the `DSL_BARRIER` re-runs the union
+The examples a phase gate consumes are Haskell values in the corpus modules linked by the shipped
+executable, never files under a test directory. Each example is a distinguishing pair with an expected manifest
+delta, or a negative with the exact tag and stage of its refusal. The oracle rows for an example are authored from
+the requirement before the pipeline stage they judge exists. A corpus only grows: a slice phase contains its
+predecessor's corpus and adds pairs, and the `DSL_BARRIER` re-runs the union
 ([`gate_runner_doctrine.md` §7](./gate_runner_doctrine.md#7-the-example-corpus-and-the-hardware-rule)). A field
-an example authors that reaches no byte on the wire is refused as `AuthoredFieldUnconsumed`. The first corpus
-module is owed by [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md).
+an example authors that reaches no byte on the wire is refused as `AuthoredFieldUnconsumed`.
+
+**Observed implementation** ([GateSpec:typed_spine]). The first corpus module, `Amoebius.Dsl.Examples.Spine`, is
+implemented by [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md)
+([DL-0023](../decision_log.md#dl-0023--phase-3-accepted-its-owed-by-paragraphs-become-observed-implementations)): the shipped executable links it,
+`amoebius render-examples` renders it, and the gate's `case:fields-consumed` differential is red when an authored
+field reaches no byte and is not refused.
 
 ---
 

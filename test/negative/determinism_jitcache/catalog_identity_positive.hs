@@ -1,6 +1,6 @@
 module Phase48CatalogIdentityPositive where
 
-import Amoebius.Jit.Resolver (EngineRuntime (LlamaCppCpu))
+import Amoebius.Jit.Resolver (JitEngine (LlamaCppCpu))
 
-selected :: EngineRuntime
+selected :: JitEngine
 selected = LlamaCppCpu

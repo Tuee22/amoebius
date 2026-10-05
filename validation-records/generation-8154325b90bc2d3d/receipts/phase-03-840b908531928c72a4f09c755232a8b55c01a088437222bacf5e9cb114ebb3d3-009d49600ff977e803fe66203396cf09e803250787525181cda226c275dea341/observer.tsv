@@ -1,0 +1,1026 @@
+run.1.executable	cabal
+run.1.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.1.cwd	./.build/runs/phase-03/mutants/1
+run.1.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.1.exit	ExitSuccess
+run.1.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.1.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.1.stdout-bytes	0
+run.1.digest	32751aff3a6cdbe82f377e38e266263869564b54c74e4646ddbe90c09198b26a
+run.2.executable	cabal
+run.2.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/1/suite
+run.2.cwd	./.build/runs/phase-03/mutants/1
+run.2.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.2.exit	ExitSuccess
+run.2.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.2.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.2.stdout-bytes	0
+run.2.digest	aeeabee62d16028726a6cee78141741280c6f5fa6ae3a6e37cf3b20d63fae8b9
+run.3.executable	cabal
+run.3.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/1/suite
+run.3.cwd	./.build/runs/phase-03/mutants/1
+run.3.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.3.exit	ExitFailure 1
+run.3.stdout-sha256	17c1e399fc55431d1d95cd0a89e3110c90c1ed0018bcc7debddf4b3a582cd12c
+run.3.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.3.stdout-bytes	15665
+run.3.digest	a58d3c7abeb3c1a29f5656dc2d059f3bad8cd75886222fe8714c07a6047687a3
+run.4.executable	cabal
+run.4.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.4.cwd	./.build/runs/phase-03/mutants/2
+run.4.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.4.exit	ExitSuccess
+run.4.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.4.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.4.stdout-bytes	0
+run.4.digest	357eda875de6e4bb449e1352949ef038cf2224d541101408f41f4deb3803a359
+run.5.executable	cabal
+run.5.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/2/suite
+run.5.cwd	./.build/runs/phase-03/mutants/2
+run.5.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.5.exit	ExitSuccess
+run.5.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.5.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.5.stdout-bytes	0
+run.5.digest	260b697c3a42cf22d0f0f102d6970eec344ce14cd130a8aad1f4cb9d142dd9ef
+run.6.executable	cabal
+run.6.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/2/suite
+run.6.cwd	./.build/runs/phase-03/mutants/2
+run.6.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.6.exit	ExitFailure 1
+run.6.stdout-sha256	598dc3c85bffe17c05c218ad2f039d8f7a31e4ac064e02812281f91224751130
+run.6.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.6.stdout-bytes	27742
+run.6.digest	158f74ec0ec0812a7c93adf8e1cd6326e6b281cc06d6a2ea5d100a01fc59be1e
+run.7.executable	cabal
+run.7.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.7.cwd	./.build/runs/phase-03/mutants/3
+run.7.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.7.exit	ExitSuccess
+run.7.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.7.stderr-sha256	8714d6e50f776ce36c153a176d0a071acb2b75869fe371c24a010bd19d91db1c
+run.7.stdout-bytes	0
+run.7.digest	b1833718849746220317c2162053cabcce4285f243ddf08cf62a2763d1030cd1
+run.8.executable	cabal
+run.8.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/3/suite
+run.8.cwd	./.build/runs/phase-03/mutants/3
+run.8.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.8.exit	ExitSuccess
+run.8.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.8.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.8.stdout-bytes	0
+run.8.digest	b619cf2f0af9a9467f008ac8c96b3c144b78a891d47e92fc033f1b1a161509f9
+run.9.executable	cabal
+run.9.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/3/suite
+run.9.cwd	./.build/runs/phase-03/mutants/3
+run.9.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.9.exit	ExitFailure 1
+run.9.stdout-sha256	7d6b4014ffe4ab9a6694edc1113460006469e16125228ba91b8f1ac34d613660
+run.9.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.9.stdout-bytes	22916
+run.9.digest	738e4d74dbcf6a7c5f806092c29440e28dbb0a684f76006dbd09212da91c2339
+run.10.executable	cabal
+run.10.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.10.cwd	./.build/runs/phase-03/mutants/4
+run.10.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.10.exit	ExitSuccess
+run.10.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.10.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.10.stdout-bytes	0
+run.10.digest	1b5d31d84c6019d1fb989439e1ab6899dfa3056f9f55e662c3b4931f825c6dc5
+run.11.executable	cabal
+run.11.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/4/suite
+run.11.cwd	./.build/runs/phase-03/mutants/4
+run.11.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.11.exit	ExitSuccess
+run.11.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.11.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.11.stdout-bytes	0
+run.11.digest	a55dc43cbdc38bda40c3992aaacf74298dc7ad1c89b6badd7a9632e55b80fd02
+run.12.executable	cabal
+run.12.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/4/suite
+run.12.cwd	./.build/runs/phase-03/mutants/4
+run.12.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.12.exit	ExitFailure 1
+run.12.stdout-sha256	a5b0a1c8f3e9b95d6884e828a94c6cb1553cdc6df6881f4ebed92dc031e4a600
+run.12.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.12.stdout-bytes	17415
+run.12.digest	810c680feb5760aaee3198155abbcec2b1c4a5d90d6c47c673d1f5075f30572a
+run.13.executable	cabal
+run.13.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.13.cwd	./.build/runs/phase-03/mutants/5
+run.13.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.13.exit	ExitSuccess
+run.13.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.13.stderr-sha256	1037c99a88b649d33a842da397158c2031d382b55dfe2d864e718797a5e45f3c
+run.13.stdout-bytes	0
+run.13.digest	1cac5e716eba0d8aa68d3220fed6dc3f90eda24c6448fc87306b66225afe079e
+run.14.executable	cabal
+run.14.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/5/suite
+run.14.cwd	./.build/runs/phase-03/mutants/5
+run.14.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.14.exit	ExitSuccess
+run.14.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.14.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.14.stdout-bytes	0
+run.14.digest	420a953c8a42ec159c92ecb18abade35f1c1aa63dd830889619dda3441e417ac
+run.15.executable	cabal
+run.15.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/5/suite
+run.15.cwd	./.build/runs/phase-03/mutants/5
+run.15.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.15.exit	ExitFailure 1
+run.15.stdout-sha256	00632bf8e4ab72ed0b332959cebba31b0bc14eeef460d69e1a118dd8d67b6916
+run.15.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.15.stdout-bytes	23295
+run.15.digest	8585e12023e50134a195671d8b18b528c7c1540a87ddd3b7639ff5db355a8531
+run.16.executable	cabal
+run.16.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.16.cwd	./.build/runs/phase-03/mutants/6
+run.16.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.16.exit	ExitSuccess
+run.16.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.16.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.16.stdout-bytes	0
+run.16.digest	385bb38875c5fee7900ae169e4fe0604c092d6eeda65e7e5e629b02e5d2edb59
+run.17.executable	cabal
+run.17.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/6/suite
+run.17.cwd	./.build/runs/phase-03/mutants/6
+run.17.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.17.exit	ExitSuccess
+run.17.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.17.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.17.stdout-bytes	0
+run.17.digest	6ad5e134445c1bbf811a1bf1ebfc3c9d9fc54f89dba7e46daaff3638fb940d04
+run.18.executable	cabal
+run.18.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/6/suite
+run.18.cwd	./.build/runs/phase-03/mutants/6
+run.18.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.18.exit	ExitFailure 1
+run.18.stdout-sha256	19059af5852dd0893eeef54b55cd16dea744d574250f63e074abd34529ea2fd5
+run.18.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.18.stdout-bytes	15837
+run.18.digest	487862b81ceb8b55b9347a4dcdf0dae0f27cc0891252bfdbb81dee95a091a8ec
+run.19.executable	cabal
+run.19.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.19.cwd	./.build/runs/phase-03/mutants/7
+run.19.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.19.exit	ExitSuccess
+run.19.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.19.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.19.stdout-bytes	0
+run.19.digest	ea80cfe13de32ee9e0ed7b01888d1b07388048eb31026ec9c95823b7eba37f4b
+run.20.executable	cabal
+run.20.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/7/suite
+run.20.cwd	./.build/runs/phase-03/mutants/7
+run.20.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.20.exit	ExitSuccess
+run.20.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.20.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.20.stdout-bytes	0
+run.20.digest	9499db2fdfc97f00100e727e7f7bc81d446506a96b4c4baae9b4b9a4cba5febe
+run.21.executable	cabal
+run.21.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/7/suite
+run.21.cwd	./.build/runs/phase-03/mutants/7
+run.21.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.21.exit	ExitFailure 1
+run.21.stdout-sha256	01ccc20e0c02574c171b29122000bf62d90b40ac79e8a8aae45592397c876258
+run.21.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.21.stdout-bytes	17471
+run.21.digest	8a006c178b6f67a846cf204b5f617cfce597e51cac7a8a108743b4dc342b7821
+run.22.executable	cabal
+run.22.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.22.cwd	./.build/runs/phase-03/mutants/8
+run.22.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.22.exit	ExitFailure 1
+run.22.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.22.stderr-sha256	3143b3789897542bb00d5a9745e574e3783a8fa3d303d6bdcecc489a4c2496da
+run.22.stdout-bytes	0
+run.22.digest	d8b11e508e978e40b84a95870208bcc4507fc51009f50f9e175982b4ec127282
+run.23.executable	cabal
+run.23.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.23.cwd	./.build/runs/phase-03/mutants/9
+run.23.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.23.exit	ExitSuccess
+run.23.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.23.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.23.stdout-bytes	0
+run.23.digest	c44a7cf0d37e1ca5ff4880572b754dcee69acc89f95d2e8ff4e83108f1374d21
+run.24.executable	cabal
+run.24.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/9/suite
+run.24.cwd	./.build/runs/phase-03/mutants/9
+run.24.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.24.exit	ExitSuccess
+run.24.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.24.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.24.stdout-bytes	0
+run.24.digest	0da14b83ed0af18a2fdd46449d95af3881d6feaee7b6402abfbf7d25caff87ae
+run.25.executable	cabal
+run.25.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/9/suite
+run.25.cwd	./.build/runs/phase-03/mutants/9
+run.25.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.25.exit	ExitFailure 1
+run.25.stdout-sha256	17c1e399fc55431d1d95cd0a89e3110c90c1ed0018bcc7debddf4b3a582cd12c
+run.25.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.25.stdout-bytes	15665
+run.25.digest	57dd3dc2350a613c7205878d8b25ba771b0c59974e8203822620a0409343296f
+run.26.executable	cabal
+run.26.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.26.cwd	./.build/runs/phase-03/mutants/10
+run.26.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.26.exit	ExitSuccess
+run.26.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.26.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.26.stdout-bytes	0
+run.26.digest	3de667cbfa51daa0b7a7e61aee69d0422451e8e6c0b93af1589f5414a0d33237
+run.27.executable	cabal
+run.27.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/10/suite
+run.27.cwd	./.build/runs/phase-03/mutants/10
+run.27.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.27.exit	ExitSuccess
+run.27.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.27.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.27.stdout-bytes	0
+run.27.digest	d13c3a01a8737881be511b4251ad2d6016d189ce69398f50d5d883c3748c3dc2
+run.28.executable	cabal
+run.28.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/10/suite
+run.28.cwd	./.build/runs/phase-03/mutants/10
+run.28.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.28.exit	ExitFailure 1
+run.28.stdout-sha256	064da32e7418912fd87db493bca7c8db15e950cfb62ab312957550cf9ca94c32
+run.28.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.28.stdout-bytes	27542
+run.28.digest	65785a395cdff9b23bb7ef7b6ca0e1cf40af09c97d72b80acea4b18ecf3ffed3
+run.29.executable	cabal
+run.29.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.29.cwd	./.build/runs/phase-03/mutants/11
+run.29.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.29.exit	ExitSuccess
+run.29.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.29.stderr-sha256	3e5c4c317b4f965afe2a17f2a43cd0c459d1ac56ca38a49a06f4788ff1f97d0c
+run.29.stdout-bytes	0
+run.29.digest	557ec70fe775ffb39031c2aba7aa9965e44fec94d96252290fa52da1c750a915
+run.30.executable	cabal
+run.30.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/11/suite
+run.30.cwd	./.build/runs/phase-03/mutants/11
+run.30.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.30.exit	ExitSuccess
+run.30.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.30.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.30.stdout-bytes	0
+run.30.digest	055b97f2bc52940c24760000fe5f0f1698a1a9eac051308d8e0c4468af8d25dd
+run.31.executable	cabal
+run.31.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/11/suite
+run.31.cwd	./.build/runs/phase-03/mutants/11
+run.31.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.31.exit	ExitFailure 1
+run.31.stdout-sha256	8e39b165ecddab8dbdf514c6c19ed268681633aa2e39518bb4ee46736f5e6a87
+run.31.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.31.stdout-bytes	16892
+run.31.digest	7d5a8f39d642bc13ca2172c714905a2dbe391a6d96f94c0801e1da71b654cd57
+run.32.executable	cabal
+run.32.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.32.cwd	./.build/runs/phase-03/mutants/12
+run.32.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.32.exit	ExitSuccess
+run.32.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.32.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.32.stdout-bytes	0
+run.32.digest	090432e4f3fb2585c038ae989da2a5de55ded93e4c0b79a39602562f1d9d9705
+run.33.executable	cabal
+run.33.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/12/suite
+run.33.cwd	./.build/runs/phase-03/mutants/12
+run.33.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.33.exit	ExitSuccess
+run.33.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.33.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.33.stdout-bytes	0
+run.33.digest	956cd75698d5dc6d5655dc3edf748f849950104c8cd6b94029161dfa4c1f2ff8
+run.34.executable	cabal
+run.34.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/12/suite
+run.34.cwd	./.build/runs/phase-03/mutants/12
+run.34.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.34.exit	ExitFailure 1
+run.34.stdout-sha256	a5b0a1c8f3e9b95d6884e828a94c6cb1553cdc6df6881f4ebed92dc031e4a600
+run.34.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.34.stdout-bytes	17415
+run.34.digest	d5034b6fbc347e212d29904270d05dd43893b73689f2470caebc6b18bf78f48e
+run.35.executable	cabal
+run.35.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.35.cwd	./.build/runs/phase-03/mutants/13
+run.35.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.35.exit	ExitSuccess
+run.35.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.35.stderr-sha256	ce8e6469a4e3b2a99061c0b2ab2e75f5fc3c2f7c3245d7fc250565f088e26505
+run.35.stdout-bytes	0
+run.35.digest	9ce9e3cb66973b5b14f043d37a837418709595a2d5844f1effaad3ff18805eaf
+run.36.executable	cabal
+run.36.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/13/suite
+run.36.cwd	./.build/runs/phase-03/mutants/13
+run.36.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.36.exit	ExitSuccess
+run.36.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.36.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.36.stdout-bytes	0
+run.36.digest	275912e4bff5e04e5a71900a320bfdbfdb52481d9dd14e0ccf6f5c0314f79cff
+run.37.executable	cabal
+run.37.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/13/suite
+run.37.cwd	./.build/runs/phase-03/mutants/13
+run.37.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.37.exit	ExitFailure 1
+run.37.stdout-sha256	d1db8c43d1e7cba9704d7987fc6258a9ea81137c98c990b77bd427599b3b65c0
+run.37.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.37.stdout-bytes	21663
+run.37.digest	30336a4e26d25da55d9d6b4cdef245b0a6699cf83a751136e81e79e71fc57d9c
+run.38.executable	cabal
+run.38.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.38.cwd	./.build/runs/phase-03/mutants/14
+run.38.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.38.exit	ExitSuccess
+run.38.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.38.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.38.stdout-bytes	0
+run.38.digest	b3b92422d1c4bc77446fc338e4a3b4c2f0621714e2cb726c3147ca8fcc6cf368
+run.39.executable	cabal
+run.39.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/14/suite
+run.39.cwd	./.build/runs/phase-03/mutants/14
+run.39.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.39.exit	ExitSuccess
+run.39.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.39.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.39.stdout-bytes	0
+run.39.digest	c1860a2e7371486e1cd403e461efdbf099d708312cb08e8fced2ba6a2d76de1a
+run.40.executable	cabal
+run.40.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/14/suite
+run.40.cwd	./.build/runs/phase-03/mutants/14
+run.40.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.40.exit	ExitFailure 1
+run.40.stdout-sha256	0a2afefe09088980ef744e6bc7887e6a7eebd0ca59436fad992552768936a4a5
+run.40.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.40.stdout-bytes	23069
+run.40.digest	7366bf7ff56b76295457ece83129374121e9702680f080adb9190ed1354696dd
+run.41.executable	cabal
+run.41.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.41.cwd	./.build/runs/phase-03/mutants/15
+run.41.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.41.exit	ExitSuccess
+run.41.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.41.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.41.stdout-bytes	0
+run.41.digest	3a8ebd0eab69aa28bbdd491e2329c53c606c0f5d0a0b6dbe64ea6c440cdb394f
+run.42.executable	cabal
+run.42.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/15/suite
+run.42.cwd	./.build/runs/phase-03/mutants/15
+run.42.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.42.exit	ExitSuccess
+run.42.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.42.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.42.stdout-bytes	0
+run.42.digest	784a0a986e6381a556ede5fd417ded4f09802e3b4756abdedd3faeef5712f164
+run.43.executable	cabal
+run.43.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/15/suite
+run.43.cwd	./.build/runs/phase-03/mutants/15
+run.43.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.43.exit	ExitFailure 1
+run.43.stdout-sha256	23190c8cac412acbd8302af359f1c811f9125a154021852799d5000a68d220aa
+run.43.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.43.stdout-bytes	18702
+run.43.digest	29ac344d20ce16d108299fb5e4a974ceb008ab1f036266166cb5aa8c7d2ed91b
+run.44.executable	cabal
+run.44.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.44.cwd	./.build/runs/phase-03/mutants/16
+run.44.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.44.exit	ExitFailure 1
+run.44.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.44.stderr-sha256	e5db209d24ed6f0c396cf77cd3978441db142cd90c35bd5107d018f325431287
+run.44.stdout-bytes	0
+run.44.digest	566cba29d51b093461404273815020eaed9d481caca3a55729cc9c3071872453
+run.45.executable	cabal
+run.45.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.45.cwd	./.build/runs/phase-03/mutants/17
+run.45.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.45.exit	ExitSuccess
+run.45.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.45.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.45.stdout-bytes	0
+run.45.digest	8a66b966d4f40f43809ee1745ca1dcfb078393611f367c0734a35a1857a4cfc0
+run.46.executable	cabal
+run.46.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/17/suite
+run.46.cwd	./.build/runs/phase-03/mutants/17
+run.46.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.46.exit	ExitSuccess
+run.46.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.46.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.46.stdout-bytes	0
+run.46.digest	cded57c0bf4eead336399c57317effb831203b2bc357e22ad81cfa689aaa2619
+run.47.executable	cabal
+run.47.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/17/suite
+run.47.cwd	./.build/runs/phase-03/mutants/17
+run.47.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.47.exit	ExitFailure 1
+run.47.stdout-sha256	17c1e399fc55431d1d95cd0a89e3110c90c1ed0018bcc7debddf4b3a582cd12c
+run.47.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.47.stdout-bytes	15665
+run.47.digest	630ddf0886a9cf42abb720e88a303f645b90d392256bb11eec92e1b9c72c7ca4
+run.48.executable	cabal
+run.48.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.48.cwd	./.build/runs/phase-03/mutants/18
+run.48.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.48.exit	ExitSuccess
+run.48.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.48.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.48.stdout-bytes	0
+run.48.digest	ea6c36013b3b25f4ff04aea190966dbba8ab3d58620fbf734633ef8eef3feac2
+run.49.executable	cabal
+run.49.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/18/suite
+run.49.cwd	./.build/runs/phase-03/mutants/18
+run.49.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.49.exit	ExitSuccess
+run.49.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.49.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.49.stdout-bytes	0
+run.49.digest	04ce880b9d4dd2a240100c343a8972407e61de5bb1f94e00d78aa087e910662c
+run.50.executable	cabal
+run.50.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/18/suite
+run.50.cwd	./.build/runs/phase-03/mutants/18
+run.50.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.50.exit	ExitFailure 1
+run.50.stdout-sha256	3cb4c490d0332eae541210bbf0170914b8c1d781529a7bc36fbd0c7740cfefdc
+run.50.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.50.stdout-bytes	27487
+run.50.digest	0a228a744e54024c876ff0af682cdcbe2b1010202d2a561cb0d772d3bcd25fca
+run.51.executable	cabal
+run.51.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.51.cwd	./.build/runs/phase-03/mutants/19
+run.51.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.51.exit	ExitSuccess
+run.51.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.51.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.51.stdout-bytes	0
+run.51.digest	80e39876eb6517400fe8348ae294ee30f6c9fd0da3e0e0bdc8e44eb69684feab
+run.52.executable	cabal
+run.52.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/19/suite
+run.52.cwd	./.build/runs/phase-03/mutants/19
+run.52.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.52.exit	ExitSuccess
+run.52.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.52.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.52.stdout-bytes	0
+run.52.digest	33f954e1216180afa9f89bb3309ddb741bdf2f7c696e7b71642427d37369878b
+run.53.executable	cabal
+run.53.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/19/suite
+run.53.cwd	./.build/runs/phase-03/mutants/19
+run.53.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.53.exit	ExitFailure 1
+run.53.stdout-sha256	73cb2a6d4ad6c05e1d1e5a135478877462a0463122ed85d94b5e9b4f5a10d217
+run.53.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.53.stdout-bytes	18665
+run.53.digest	e2f4533727ff773d48414aa3504a14e68c89633524424d980de0b8febbd731a0
+run.54.executable	cabal
+run.54.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.54.cwd	./.build/runs/phase-03/mutants/20
+run.54.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.54.exit	ExitFailure 1
+run.54.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.54.stderr-sha256	222e10d09cc88059fad5bae98ee3f0fe700b001285a44aec616fe9befc0ea29b
+run.54.stdout-bytes	0
+run.54.digest	4058aeb6a15b76e92b4230b8bfa12238ab3dfacb37cee7a3e4fcf3ac7c5adbf5
+run.55.executable	cabal
+run.55.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.55.cwd	./.build/runs/phase-03/mutants/21
+run.55.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.55.exit	ExitSuccess
+run.55.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.55.stderr-sha256	1b4578709c536f7da04b7a76e971e2115f082402b962fc0dc6ca2773894b1fa7
+run.55.stdout-bytes	0
+run.55.digest	7b8bc3a3e20b722eedb73285019bef66754d46086ebf5dd05958d9ce93bc44e9
+run.56.executable	cabal
+run.56.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/21/suite
+run.56.cwd	./.build/runs/phase-03/mutants/21
+run.56.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.56.exit	ExitSuccess
+run.56.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.56.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.56.stdout-bytes	0
+run.56.digest	a8b14d3e470be24475e5658063c8104e456942d13948a1be99dd8bc00d73e6a6
+run.57.executable	cabal
+run.57.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/21/suite
+run.57.cwd	./.build/runs/phase-03/mutants/21
+run.57.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.57.exit	ExitFailure 1
+run.57.stdout-sha256	2b7788875d6074ea35b4e9c260c0f48e0f83d06457a4b5d812a527da1cb04337
+run.57.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.57.stdout-bytes	21306
+run.57.digest	7c81d43c3bb2a23813b5a8b7b76679108101894088f1f270657f875e023e47cd
+run.58.executable	cabal
+run.58.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.58.cwd	./.build/runs/phase-03/mutants/22
+run.58.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.58.exit	ExitSuccess
+run.58.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.58.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.58.stdout-bytes	0
+run.58.digest	8fe6131a1be1a5ace375a618f1688f6e92ac47a7bdf6b3899713272f3bc2efc4
+run.59.executable	cabal
+run.59.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/22/suite
+run.59.cwd	./.build/runs/phase-03/mutants/22
+run.59.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.59.exit	ExitSuccess
+run.59.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.59.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.59.stdout-bytes	0
+run.59.digest	9e2fe0e5498c1811e82952b89a3f9ab4f8f8c61c93aecd5278b4b7202b0ca362
+run.60.executable	cabal
+run.60.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/22/suite
+run.60.cwd	./.build/runs/phase-03/mutants/22
+run.60.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.60.exit	ExitFailure 1
+run.60.stdout-sha256	d6996db45b801b05ea49113d0d06c3aac9a8e863cb09b5c1fc0573e8bcabb196
+run.60.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.60.stdout-bytes	23069
+run.60.digest	0d4558dd0262d8adb2cc53adf7a48f112950b9d431934cfd1ebfbebdcc0a4399
+run.61.executable	cabal
+run.61.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.61.cwd	./.build/runs/phase-03/mutants/23
+run.61.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.61.exit	ExitSuccess
+run.61.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.61.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.61.stdout-bytes	0
+run.61.digest	8308d72d3222df8abebf633fa1e97dd61e5e3753903fb1562828871430c460ec
+run.62.executable	cabal
+run.62.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/23/suite
+run.62.cwd	./.build/runs/phase-03/mutants/23
+run.62.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.62.exit	ExitSuccess
+run.62.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.62.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.62.stdout-bytes	0
+run.62.digest	20a9bbf56a04d149664c037df319aae7906bce88712fa540427160fb4cbab0c4
+run.63.executable	cabal
+run.63.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/23/suite
+run.63.cwd	./.build/runs/phase-03/mutants/23
+run.63.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.63.exit	ExitFailure 1
+run.63.stdout-sha256	b2844819762dff36e9fb8075779131923625a89449fc58524a5546be4f47019e
+run.63.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.63.stdout-bytes	18574
+run.63.digest	cae790d768e8621f1c8eb8082446cdcfb11ebf64e4c44b84ab6c25f5594e239f
+run.64.executable	cabal
+run.64.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.64.cwd	./.build/runs/phase-03/mutants/24
+run.64.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.64.exit	ExitSuccess
+run.64.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.64.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.64.stdout-bytes	0
+run.64.digest	8146abe7dce250d78d1352d9e1434fd1416dd8f3e7a482c64f3c1ef194282dd5
+run.65.executable	cabal
+run.65.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/24/suite
+run.65.cwd	./.build/runs/phase-03/mutants/24
+run.65.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.65.exit	ExitSuccess
+run.65.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.65.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.65.stdout-bytes	0
+run.65.digest	682f150ce8b1a7669140e7af62a11c4d77a03b8a9dcaae9531c9bf4194d71416
+run.66.executable	cabal
+run.66.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/24/suite
+run.66.cwd	./.build/runs/phase-03/mutants/24
+run.66.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.66.exit	ExitFailure 1
+run.66.stdout-sha256	0ad3e41d57de78f0ef39dd7cfd9c7f176f15148eec109012409e07d88297d302
+run.66.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.66.stdout-bytes	17801
+run.66.digest	333b0bbca0bce80c2855179706d22ab982363cff11f2b2e83176feea519f55cb
+run.67.executable	cabal
+run.67.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.67.cwd	./.build/runs/phase-03/mutants/25
+run.67.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.67.exit	ExitSuccess
+run.67.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.67.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.67.stdout-bytes	0
+run.67.digest	3b07e44e5f569f1bfdc1b19963315319be9b5e04365ce9ebdebb3319f45643c9
+run.68.executable	cabal
+run.68.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/25/suite
+run.68.cwd	./.build/runs/phase-03/mutants/25
+run.68.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.68.exit	ExitSuccess
+run.68.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.68.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.68.stdout-bytes	0
+run.68.digest	88cd11f2e8f5057b5a9efc33e5cd0489d2c372bd0b14ff9eb5b6c56b8aa54d2c
+run.69.executable	cabal
+run.69.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/25/suite
+run.69.cwd	./.build/runs/phase-03/mutants/25
+run.69.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.69.exit	ExitFailure 1
+run.69.stdout-sha256	17298db7272b6012c1036ac79735b94148203b09667e151b4ad39bded17c888b
+run.69.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.69.stdout-bytes	15727
+run.69.digest	55daa42b193d899f87851c767e443b9ebafb803ec68e83e7de9851a60f21f310
+run.70.executable	cabal
+run.70.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.70.cwd	./.build/runs/phase-03/mutants/26
+run.70.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.70.exit	ExitSuccess
+run.70.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.70.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.70.stdout-bytes	0
+run.70.digest	d7cb43741e0892b1467b54a02372e182b063000f74107947259502c82c4668a8
+run.71.executable	cabal
+run.71.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/26/suite
+run.71.cwd	./.build/runs/phase-03/mutants/26
+run.71.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.71.exit	ExitSuccess
+run.71.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.71.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.71.stdout-bytes	0
+run.71.digest	7d7101dd158971d46e092dd1361fc5cc01508eddec80784ec9d4f0978472609c
+run.72.executable	cabal
+run.72.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/26/suite
+run.72.cwd	./.build/runs/phase-03/mutants/26
+run.72.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.72.exit	ExitFailure 1
+run.72.stdout-sha256	cfb60f307f566828ab1aad9251e5ba2f7527a87f41b06d9129827a44b41eae4b
+run.72.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.72.stdout-bytes	16308
+run.72.digest	6fc5568708f8ea75acc1292862e7486c4f79aa8b8da407a241c225da74826445
+run.73.executable	cabal
+run.73.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.73.cwd	./.build/runs/phase-03/mutants/27
+run.73.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.73.exit	ExitFailure 1
+run.73.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.73.stderr-sha256	699b884d187614a024dcbbb22598c8f70e108f874fc67c6536f92ae7d33bef5b
+run.73.stdout-bytes	0
+run.73.digest	320238257b219d9c50c5bd21aac997f0c4198f29ef741a0caf1a5c4043f1ac05
+run.74.executable	cabal
+run.74.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.74.cwd	./.build/runs/phase-03/mutants/28
+run.74.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.74.exit	ExitSuccess
+run.74.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.74.stderr-sha256	21457a2b62e05da73d40b1da8a8cb62b67482e7573a6b90fd6bfcdc524c9ab52
+run.74.stdout-bytes	0
+run.74.digest	fd0f64697e934208baa086ba2a158d527e9a70f4f46777a35f0798d37458da64
+run.75.executable	cabal
+run.75.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/28/suite
+run.75.cwd	./.build/runs/phase-03/mutants/28
+run.75.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.75.exit	ExitSuccess
+run.75.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.75.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.75.stdout-bytes	0
+run.75.digest	ea67571e1607f761eed2404b7c55c2f1a3d8a2fef63429ab728fed9dce84ae45
+run.76.executable	cabal
+run.76.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/28/suite
+run.76.cwd	./.build/runs/phase-03/mutants/28
+run.76.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.76.exit	ExitFailure 1
+run.76.stdout-sha256	d1db8c43d1e7cba9704d7987fc6258a9ea81137c98c990b77bd427599b3b65c0
+run.76.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.76.stdout-bytes	21663
+run.76.digest	a56145c6350457f780b37a3c79fd604ee687f66ad0a4accffe750bcee8165240
+run.77.executable	cabal
+run.77.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.77.cwd	./.build/runs/phase-03/mutants/29
+run.77.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.77.exit	ExitSuccess
+run.77.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.77.stderr-sha256	328b92676c8d19bb84a31468b35f610e2c9225f43a457dad9e5f63714c7069f1
+run.77.stdout-bytes	0
+run.77.digest	758d6caa8428cbb9bf6d5d16c857472e222b59a27a9a329f6a2c4bbbcc64754e
+run.78.executable	cabal
+run.78.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/29/suite
+run.78.cwd	./.build/runs/phase-03/mutants/29
+run.78.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.78.exit	ExitSuccess
+run.78.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.78.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.78.stdout-bytes	0
+run.78.digest	69e5ccaa5b87f5aae9f942c877d8e889e6845a6cab443f87a4eba645aa5aa503
+run.79.executable	cabal
+run.79.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/29/suite
+run.79.cwd	./.build/runs/phase-03/mutants/29
+run.79.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.79.exit	ExitFailure 1
+run.79.stdout-sha256	d6996db45b801b05ea49113d0d06c3aac9a8e863cb09b5c1fc0573e8bcabb196
+run.79.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.79.stdout-bytes	23069
+run.79.digest	1f51599ab10c440f491eb4a0b33721fdf7423a2deef32759678f0518a7a36c6d
+run.80.executable	cabal
+run.80.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.80.cwd	./.build/runs/phase-03/mutants/30
+run.80.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.80.exit	ExitSuccess
+run.80.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.80.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.80.stdout-bytes	0
+run.80.digest	f83bacbb4fad9995cb432678eb97ef7d9230667ac481858736549a5e638d809c
+run.81.executable	cabal
+run.81.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/30/suite
+run.81.cwd	./.build/runs/phase-03/mutants/30
+run.81.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.81.exit	ExitSuccess
+run.81.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.81.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.81.stdout-bytes	0
+run.81.digest	5785d37f1e1b55375be25e6247dbf6d878db45845cdd5577bd6feb7862e7150a
+run.82.executable	cabal
+run.82.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/30/suite
+run.82.cwd	./.build/runs/phase-03/mutants/30
+run.82.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.82.exit	ExitFailure 1
+run.82.stdout-sha256	f690d62618ac67411acc6452642ccc4233bdddec05d8a6f4426f4ecefefd48ab
+run.82.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.82.stdout-bytes	16934
+run.82.digest	aa27ced1b37a1067270d6dd4f541ff714ff23b52c07df324ba0eca1f109d0704
+run.83.executable	cabal
+run.83.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.83.cwd	./.build/runs/phase-03/mutants/31
+run.83.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.83.exit	ExitSuccess
+run.83.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.83.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.83.stdout-bytes	0
+run.83.digest	c5facdbd80f0a482a5d2b6a0484df137dee3fb9f3270479e2bb2fc43617f8fef
+run.84.executable	cabal
+run.84.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/31/suite
+run.84.cwd	./.build/runs/phase-03/mutants/31
+run.84.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.84.exit	ExitSuccess
+run.84.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.84.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.84.stdout-bytes	0
+run.84.digest	4d54770fa4278d0a657790b5af8a82a6e25097e7cac8dbdad0cb57257db5e25e
+run.85.executable	cabal
+run.85.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/31/suite
+run.85.cwd	./.build/runs/phase-03/mutants/31
+run.85.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.85.exit	ExitFailure 1
+run.85.stdout-sha256	a697757edffffd62291a55cb6c3e06d0b94d067319f76465ac613c1c0b778a5c
+run.85.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.85.stdout-bytes	15683
+run.85.digest	295c1b1b7d65ae8068a94c00a3900ef51747fcd2ec624ec0d7490f271bd2498d
+run.86.executable	cabal
+run.86.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.86.cwd	./.build/runs/phase-03/mutants/32
+run.86.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.86.exit	ExitSuccess
+run.86.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.86.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.86.stdout-bytes	0
+run.86.digest	12c3afe090b0f2dfe5f0c55077c3fbda81d9dd91bd8057ee6eac0432d29c5745
+run.87.executable	cabal
+run.87.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/32/suite
+run.87.cwd	./.build/runs/phase-03/mutants/32
+run.87.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.87.exit	ExitSuccess
+run.87.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.87.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.87.stdout-bytes	0
+run.87.digest	5dabbafe9047107b845cae14f1cba73d620282c4c4f00f49640fa4f3fe04af73
+run.88.executable	cabal
+run.88.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/32/suite
+run.88.cwd	./.build/runs/phase-03/mutants/32
+run.88.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.88.exit	ExitFailure 1
+run.88.stdout-sha256	4632a8ff4807b40fb89bcfa4625fb9f0a1c8c610ce8f9ce92c1bb9b6d0f0de94
+run.88.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.88.stdout-bytes	15852
+run.88.digest	6e7de8d609d86c0b0c011b6c485c5370cf5d4ba936fd4659af4f95cc6e600d32
+run.89.executable	cabal
+run.89.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.89.cwd	./.build/runs/phase-03/mutants/33
+run.89.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.89.exit	ExitFailure 1
+run.89.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.89.stderr-sha256	04f9c33ae8acfa2380af7690ba84dc23b506ccdabd2badacbd822e3c41962b38
+run.89.stdout-bytes	0
+run.89.digest	70a5627df18a14c6424db9203f62b85e2411e90e7112dd959213a48c38b3cd02
+run.90.executable	cabal
+run.90.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.90.cwd	./.build/runs/phase-03/mutants/34
+run.90.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.90.exit	ExitSuccess
+run.90.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.90.stderr-sha256	ce79a4315a317ea5ef3c0e86d5f5bdca9f966705b864cf1fa2ab91aac40fc774
+run.90.stdout-bytes	0
+run.90.digest	6511a613afa21b2c136d3622f4b54ce21364be639abdaff19d1694358f2167ff
+run.91.executable	cabal
+run.91.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/34/suite
+run.91.cwd	./.build/runs/phase-03/mutants/34
+run.91.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.91.exit	ExitSuccess
+run.91.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.91.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.91.stdout-bytes	0
+run.91.digest	31d1c30862a8170d1d66e9089dbc4eee865d5ebde7554bf208ae1cdf2dc3c4a6
+run.92.executable	cabal
+run.92.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/34/suite
+run.92.cwd	./.build/runs/phase-03/mutants/34
+run.92.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.92.exit	ExitFailure 1
+run.92.stdout-sha256	2b7788875d6074ea35b4e9c260c0f48e0f83d06457a4b5d812a527da1cb04337
+run.92.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.92.stdout-bytes	21306
+run.92.digest	56ddef067b13ce2ccb023a2116e5d44888d1ddd3acbe84290c28c20701df5f61
+run.93.executable	cabal
+run.93.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.93.cwd	./.build/runs/phase-03/mutants/35
+run.93.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.93.exit	ExitSuccess
+run.93.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.93.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.93.stdout-bytes	0
+run.93.digest	871c225d9c5331065aafdaa241d54c58f143fe3a66bc2c21befe61bf270b198a
+run.94.executable	cabal
+run.94.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/35/suite
+run.94.cwd	./.build/runs/phase-03/mutants/35
+run.94.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.94.exit	ExitSuccess
+run.94.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.94.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.94.stdout-bytes	0
+run.94.digest	182cad9555ecf467ce03592c929ad90e7640d9ade8be75b3c6c4092debb26533
+run.95.executable	cabal
+run.95.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/35/suite
+run.95.cwd	./.build/runs/phase-03/mutants/35
+run.95.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.95.exit	ExitFailure 1
+run.95.stdout-sha256	d837e36761f699a6648a1a834f1d8299c21b5c78383f6d8df41afaad341a0a56
+run.95.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.95.stdout-bytes	15686
+run.95.digest	160216fca8e3e8bb42c230759fcae3cc110e5b82b4f18c7048e32479e058e1d8
+run.96.executable	cabal
+run.96.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.96.cwd	./.build/runs/phase-03/mutants/36
+run.96.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.96.exit	ExitFailure 1
+run.96.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.96.stderr-sha256	f07931d079d74319d9826149596840191c2ec316e50cf996e84b1eb6501992f6
+run.96.stdout-bytes	0
+run.96.digest	a7af4920364365599262f5b783503d01023e717523845d18bc3b2eaea1ded656
+run.97.executable	cabal
+run.97.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.97.cwd	./.build/runs/phase-03/mutants/37
+run.97.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.97.exit	ExitSuccess
+run.97.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.97.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.97.stdout-bytes	0
+run.97.digest	c073bb9428d2c083c387d4145a319ad0c9cf6dc70edc8fa16070a92917bb5324
+run.98.executable	cabal
+run.98.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/37/suite
+run.98.cwd	./.build/runs/phase-03/mutants/37
+run.98.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.98.exit	ExitSuccess
+run.98.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.98.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.98.stdout-bytes	0
+run.98.digest	bc71804d8bbd330ac51332bb8c6821e684f751519b657302c6cfa0b30703de93
+run.99.executable	cabal
+run.99.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/37/suite
+run.99.cwd	./.build/runs/phase-03/mutants/37
+run.99.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.99.exit	ExitFailure 1
+run.99.stdout-sha256	74e8065018b0f767f2d287926d319a03c938fcdd7579feb24d1abd43da276e37
+run.99.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.99.stdout-bytes	27511
+run.99.digest	1f680bac6c691d1e4c0dac086bac74c8a29a36b6588aad683343d014153f3c50
+run.100.executable	cabal
+run.100.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.100.cwd	./.build/runs/phase-03/mutants/38
+run.100.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.100.exit	ExitSuccess
+run.100.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.100.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.100.stdout-bytes	0
+run.100.digest	46852e99f46e510502f33a74dc04c0d1f474d41a323d5ee94237d18e9f028bea
+run.101.executable	cabal
+run.101.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/38/suite
+run.101.cwd	./.build/runs/phase-03/mutants/38
+run.101.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.101.exit	ExitSuccess
+run.101.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.101.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.101.stdout-bytes	0
+run.101.digest	cb3a330fe73b2f54741792378089170f5e22589fa9d6c90fefcf518578164180
+run.102.executable	cabal
+run.102.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/38/suite
+run.102.cwd	./.build/runs/phase-03/mutants/38
+run.102.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.102.exit	ExitFailure 1
+run.102.stdout-sha256	266e9d68872bff3ca84be0d9baa1be880f3d5f1819df9f7cd5c89bfccf737c11
+run.102.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.102.stdout-bytes	15903
+run.102.digest	c021c8cca67e399252627e475c39d03cfc278e292cda4c61196f1ad67a8e994e
+run.103.executable	cabal
+run.103.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.103.cwd	./.build/runs/phase-03/mutants/39
+run.103.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.103.exit	ExitSuccess
+run.103.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.103.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.103.stdout-bytes	0
+run.103.digest	311e97629ef1e700d4dddf0ffbdf9f3c6401b8dde09cf00684cbc5c823a6849b
+run.104.executable	cabal
+run.104.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/39/suite
+run.104.cwd	./.build/runs/phase-03/mutants/39
+run.104.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.104.exit	ExitSuccess
+run.104.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.104.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.104.stdout-bytes	0
+run.104.digest	192c1ca55a683fe247e5d3a8df5da29f5651f280cfd45345bbad4cfe1f1076b8
+run.105.executable	cabal
+run.105.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/39/suite
+run.105.cwd	./.build/runs/phase-03/mutants/39
+run.105.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.105.exit	ExitFailure 1
+run.105.stdout-sha256	8ae566405efc18e5cbd5ae777429902cf45a23ae0f50f4673023c8faa0d8d646
+run.105.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.105.stdout-bytes	17756
+run.105.digest	f4e3f8a63d8ae0238cdd8cdd665d64349d040232e866c8026e59790779c1e9d9
+run.106.executable	cabal
+run.106.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.106.cwd	./.build/runs/phase-03/mutants/40
+run.106.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.106.exit	ExitSuccess
+run.106.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.106.stderr-sha256	cd704e9a6037d5ffeaf30248e8f1d6717f8e59bde39b96855ecf9bd90da8f5a5
+run.106.stdout-bytes	0
+run.106.digest	70e8f79bd1064ccd0c19f8ffec9f2788e959112fb2e636845f9c6e1db2a48665
+run.107.executable	cabal
+run.107.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/40/suite
+run.107.cwd	./.build/runs/phase-03/mutants/40
+run.107.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.107.exit	ExitSuccess
+run.107.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.107.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.107.stdout-bytes	0
+run.107.digest	c8693580361d3d5accae2b05b218bf9970d26f5f56e0e02c80dd01f5cc2462b5
+run.108.executable	cabal
+run.108.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/40/suite
+run.108.cwd	./.build/runs/phase-03/mutants/40
+run.108.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.108.exit	ExitFailure 1
+run.108.stdout-sha256	95976994c52d7f2f466a698e9f04ef8e6305268739752d1b5314ddca32a2ee0b
+run.108.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.108.stdout-bytes	22172
+run.108.digest	6e4c1013b8caeb0e59e55c9663179ca77b9e54ab92e67ae596bce3f497253b02
+run.109.executable	cabal
+run.109.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.109.cwd	.
+run.109.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.109.exit	ExitSuccess
+run.109.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.109.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.109.stdout-bytes	0
+run.109.digest	736d829c4d860c55ee52fb67672f43828e16576a69e751d6170c99b5328f68ce
+run.110.executable	cabal
+run.110.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/clean/suite
+run.110.cwd	.
+run.110.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.110.exit	ExitSuccess
+run.110.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.110.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.110.stdout-bytes	0
+run.110.digest	1be7fd89ab1dd564713f2ed962ee96bc3ab3343859c307f555cd8d20625de332
+run.111.executable	cabal
+run.111.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/clean/suite
+run.111.cwd	.
+run.111.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.111.exit	ExitSuccess
+run.111.stdout-sha256	c80240cc20c8c5e91ac729e6c24517561e61e2feadd4ed89ca96ee005e45b9af
+run.111.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.111.stdout-bytes	16539
+run.111.digest	cf3cecd306a937e5d44625bc0cfb135ae1ced97f4213d366602b681aaaebbff6
+run.112.executable	/home/matt/amoebius/dist-newstyle/build/x86_64-linux/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+run.112.argv	render-examples --example kind-single-objectstore --output ./.build/runs/phase-03/clean/suite/binary/input/root.dhall
+run.112.cwd	.
+run.112.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.112.exit	ExitSuccess
+run.112.stdout-sha256	79113e042131f468751ca5188a16e1a50451038ef873ffbde3ec6a7e3ce4a79e
+run.112.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.112.stdout-bytes	125
+run.112.digest	4c423fe03d59537d778cf37656c9ad97ab248046544c31d0b5edb45ec94eb099
+run.113.executable	/home/matt/amoebius/dist-newstyle/build/x86_64-linux/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+run.113.argv	compile --input ./.build/runs/phase-03/clean/suite/binary/input/root.dhall --out ./.build/runs/phase-03/clean/suite/binary/compiled
+run.113.cwd	.
+run.113.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.113.exit	ExitSuccess
+run.113.stdout-sha256	9061059486ac10d6434ddf4ad1de75646fafe2a49711651fe507ccb15d0b6676
+run.113.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.113.stdout-bytes	12
+run.113.digest	14b8c411caf9197fb88ef7ced925fdf4e01066061d571ec82def18018add5da5
+run.114.executable	/home/matt/amoebius/dist-newstyle/build/x86_64-linux/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+run.114.argv	apply --executor fake --input ./.build/runs/phase-03/clean/suite/binary/input/root.dhall --out ./.build/runs/phase-03/clean/suite/binary/applied
+run.114.cwd	.
+run.114.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.114.exit	ExitSuccess
+run.114.stdout-sha256	f23a7f728dae87b390fef6d466baad0c44409dc5d564b59c9eae03373565c166
+run.114.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.114.stdout-bytes	11
+run.114.digest	9a13042ab8c2dc9b95950e9c42272fdaa46272a863e445cec0ff765ccb124560

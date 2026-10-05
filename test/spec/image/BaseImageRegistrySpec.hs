@@ -21,7 +21,8 @@ import Amoebius.Image.Registry qualified as Registry
 import Amoebius.Image.RenderDockerfile qualified as Dockerfile
 import Amoebius.Capacity.NodeLocalStorage qualified as NodeStorage
 import Amoebius.Capacity.RenderSource (K8sObjectIdentity (..))
-import Amoebius.Capacity.Types (ResourceVector (..))
+import Amoebius.Capacity.Vector (ResourceVector (..))
+import Amoebius.Vocabulary (quantityText)
 import Amoebius.Manifest.K8sObject (K8sObjectKind (..))
 import Control.Monad (forM_, unless)
 import Data.List (isPrefixOf, sort)
@@ -784,12 +785,12 @@ bootstrapSpec oracle = do
           [ ("role", role)
           , ("image", "amoebius-base@" <> Artifact.imageIndexDigest artifact)
           , ("node-name", "amoebius-control-plane")
-          , ("cpu-request", naturalText (resourceCpu (Bootstrap.bootstrapContainerRequests container)))
-          , ("cpu-limit", naturalText (resourceCpu (Bootstrap.bootstrapContainerLimits container)))
-          , ("memory-request", naturalText (resourceMemory (Bootstrap.bootstrapContainerRequests container)))
-          , ("memory-limit", naturalText (resourceMemory (Bootstrap.bootstrapContainerLimits container)))
-          , ("ephemeral-request", naturalText (resourceEphemeralStorage (Bootstrap.bootstrapContainerRequests container)))
-          , ("ephemeral-limit", naturalText (resourceEphemeralStorage (Bootstrap.bootstrapContainerLimits container)))
+          , ("cpu-request", quantityText (resourceCpu (Bootstrap.bootstrapContainerRequests container)))
+          , ("cpu-limit", quantityText (resourceCpu (Bootstrap.bootstrapContainerLimits container)))
+          , ("memory-request", quantityText (resourceMemory (Bootstrap.bootstrapContainerRequests container)))
+          , ("memory-limit", quantityText (resourceMemory (Bootstrap.bootstrapContainerLimits container)))
+          , ("ephemeral-request", quantityText (resourceEphemeralStorage (Bootstrap.bootstrapContainerRequests container)))
+          , ("ephemeral-limit", quantityText (resourceEphemeralStorage (Bootstrap.bootstrapContainerLimits container)))
           ] <> extra
       namespace = Bootstrap.BootstrapObjectSource (K8sObjectIdentity (oracle.identities !! 0)) NamespaceKind Nothing Map.empty
       config = Bootstrap.BootstrapObjectSource (K8sObjectIdentity (oracle.identities !! 1)) ConfigMapKind (Just "amoebius-bootstrap") (Map.singleton "registry-config" "filesystem")

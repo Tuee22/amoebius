@@ -29,11 +29,7 @@ module Amoebius.Extension.Laws.Compositional
   , contentAddress
   ) where
 
-import Amoebius.Capacity.Types
-  ( ResourceVector
-  , addResources
-  , zeroResources
-  )
+import Amoebius.Capacity.Vector (ResourceVector, addResources, zeroResources)
 import Amoebius.Extension.Declaration
   ( ExtensionDeclaration
   , declarationDigest

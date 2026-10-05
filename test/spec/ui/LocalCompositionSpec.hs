@@ -8,7 +8,8 @@ import Amoebius.Calculus.Composition
 import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
 import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Capacity.Vector (ResourceVector (ResourceVector))
+import Amoebius.Vocabulary (quantityText)
 import Amoebius.Scope.Index qualified as CalculusScope
 import Amoebius.Ui.LocalComposition
 import Control.Monad (unless)
@@ -103,7 +104,7 @@ checkCalculus = do
           [ ["calculus-kinds", render (map calculusTag (compositionKinds composition))]
           , ["component-names", render (compositionNames composition)]
           , ["projection-counts", render (map (Text.pack . show) counts)]
-          , ["resource-vector", render (map (Text.pack . show) [cpu, memory, ephemeral, pods])]
+          , ["resource-vector", render ([quantityText cpu, quantityText memory, quantityText ephemeral, quantityText pods])]
           ]
     assertEqual "five calculus kinds" everyCalculus (compositionKinds composition)
     assertEqual "composition calculus projection" Cases.calculusRows actual

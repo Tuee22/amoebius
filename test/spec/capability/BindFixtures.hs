@@ -14,10 +14,10 @@ import Amoebius.Capability.Types
   , CapabilityBinding (CapabilityBinding)
   , CapabilityNeed (..)
   , CapabilityProvider (CanonicalProvider)
-  , EngineRuntime (Cuda)
   , InferenceEngineNeed (InferenceEngineNeed)
   , ServiceShape (..)
   )
+import Amoebius.Vocabulary (EngineRuntime (Cuda))
 import Data.Text (Text)
 import Data.Text qualified as Text
 

@@ -8,9 +8,9 @@ import Amoebius.Capability.Binding (bind)
 import Amoebius.Capability.Types
   ( CapabilityArm (..)
   , CapabilityNeed (..)
-  , EngineRuntime (..)
   , InferenceEngineNeed (InferenceEngineNeed)
   )
+import Amoebius.Vocabulary (EngineRuntime (..))
 import BindFixtures (distributedBinding, singleBinding)
 import Control.Monad (unless)
 import ShapeOracle (structurallyDifferentByNodeMultiset, validateBoundExecutionInventory)
@@ -88,7 +88,7 @@ engineRuntimeGen = do
   pure $ case lane of
     0 -> AppleMetal "metal-catalog"
     1 -> Cuda "cuda-catalog"
-    _ -> LinuxCpu "cpu-catalog"
+    _ -> CpuRuntime "cpu-catalog"
 
 armOf :: CapabilityNeed -> CapabilityArm
 armOf need = case need of

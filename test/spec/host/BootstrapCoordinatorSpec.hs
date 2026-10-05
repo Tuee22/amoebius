@@ -25,12 +25,6 @@ main = do
   unless (length rows == 18) (die "Phase-24 substrate oracle must have 18 cells")
   forM_ rows $ \(Row os arch gpu expected) ->
     assertEqual (show (os, arch, gpu)) expected (renderClassification (classify os arch gpu))
-  let mutantFailures =
-        [ ()
-        | Row os arch gpu expected <- rows
-        , renderClassification (classifyMutantDropGpuPromotion os arch gpu) /= expected
-        ]
-  unless (length mutantFailures == 2) (die "M1 must be caught by exactly the two Linux+GPU cells")
   verifyUniversalLinuxCpu
   verifyHostTools
   verifyEngineAdmission
@@ -39,7 +33,7 @@ main = do
   verifyEtcdTransitionModel
   observed <- detect
   putStrLn ("phase24-host-detect: " <> renderClassification observed)
-  putStrLn "bootstrap-coordinator-host-spec: PASS (18 decisions, 4 universal linux-cpu routes, 20 install rows, 9 AbsExe rows, 4 admissions, 4 reconciles, 8 inventory axes, etcd transition geometry, model mutation checks; live mutation rows are sealed by tools/bootstrap_coordinator_gate.py)"
+  putStrLn "bootstrap-coordinator-host-spec: PASS (18 decisions, 4 universal linux-cpu routes, 20 install rows, 9 AbsExe rows, 4 admissions, 4 reconciles, 8 inventory axes, etcd transition geometry; live mutation rows are sealed by tools/bootstrap_coordinator_gate.py)"
 
 verifyUniversalLinuxCpu :: IO ()
 verifyUniversalLinuxCpu = do

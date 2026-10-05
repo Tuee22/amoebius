@@ -20,15 +20,6 @@ import Amoebius.Dsl.Decision
   , mkDecisionFragment
   , rke2ServerCount
   )
-import Amoebius.Dsl.SmartConstructors (mkComputeHeadroom, mkDeploymentUnit, mkPositiveReplicated)
-import Amoebius.Dsl.Types
-  ( Cardinality (..)
-  , DeploymentProgress (..)
-  , ExecutionIdentity (ExecutionIdentity)
-  , ExecutionUnit (DeploymentUnit)
-  , ResourceArm (PodResource)
-  , ResourceEnvelope (ResourceEnvelope)
-  )
 import Control.Monad (unless)
 import Data.Either (isLeft)
 import Data.List (nub)
@@ -54,20 +45,6 @@ import Test.QuickCheck
   , vectorOf
   , Args (chatty, maxSuccess)
   )
-
-data SmartCase
-  = ReplicaCase Natural
-  | RolloutCase Natural Natural
-  | HeadroomCase Natural Natural Natural
-  deriving stock (Show)
-
-instance Arbitrary SmartCase where
-  arbitrary = do
-    family <- elements [0 :: Int, 1, 2]
-    case family of
-      0 -> ReplicaCase . fromIntegral <$> chooseInt (0, 6)
-      1 -> RolloutCase <$> natural 0 2 <*> natural 0 2
-      _ -> HeadroomCase <$> natural 0 10 <*> natural 0 10 <*> natural 0 10
 
 data FragmentCase = FragmentCase DecisionFragment
   deriving stock (Show)
@@ -111,8 +88,7 @@ instance Arbitrary CompositionCase where
 runDecisionPropSpec :: IO ()
 runDecisionPropSpec = do
   results <- sequence
-    [ runProperty "prop_smartCtorClosure" prop_smartCtorClosure
-    , runProperty "prop_decodeRoundTrip" prop_decodeRoundTrip
+    [ runProperty "prop_decodeRoundTrip" prop_decodeRoundTrip
     , runProperty "prop_foldTotal" prop_foldTotal
     , runProperty "prop_compositionPreservesWellFormedness" prop_compositionPreservesWellFormedness
     ]
@@ -120,29 +96,7 @@ runDecisionPropSpec = do
   mapM_ (putStrLn . ("decision-property: RED " <>)) failures
   unless (null failures) (fail ("decision properties failed: " <> show failures))
   assert (fmap rke2ServerCount allRke2Servers == [1, 3, 5]) "Rke2Servers finite exhaustion changed"
-  putStrLn "decision-properties: TESTED sampled (4); PROVEN exhausted Rke2Servers (3/3 arms)"
-
-prop_smartCtorClosure :: SmartCase -> Property
-prop_smartCtorClosure smartCase = checkCoverage
-  $ cover 15 (isReplica smartCase) "replica-smart-constructor"
-  $ cover 15 (isRollout smartCase) "rollout-smart-constructor"
-  $ cover 15 (isHeadroom smartCase) "headroom-smart-constructor"
-  $ counterexample (show smartCase) (property (closed smartCase))
- where
-  closed value = case value of
-    ReplicaCase count -> case mkPositiveReplicated count of
-      Left _ -> count == 0
-      Right cardinality -> cardinality == Replicated count && count > 0
-    RolloutCase surge unavailable ->
-      let result = mkDeploymentUnit identity Once (RollingProgress surge unavailable) podResources
-       in case result of
-            Left _ -> surge == 0 && unavailable == 0
-            Right (DeploymentUnit _ _ _ _) -> surge > 0 || unavailable > 0
-    HeadroomCase requests limits padding -> case mkComputeHeadroom [(requests, limits, padding)] of
-      Left _ -> padding == 0 || requests + padding > limits
-      Right totals -> padding > 0 && requests + padding <= limits && totals == [requests + padding]
-  identity = ExecutionIdentity "property" 1
-  podResources = ResourceEnvelope PodResource []
+  putStrLn "decision-properties: TESTED sampled (3); PROVEN exhausted Rke2Servers (3/3 arms)"
 
 prop_decodeRoundTrip :: FragmentCase -> Property
 prop_decodeRoundTrip (FragmentCase fragment) = checkCoverage
@@ -190,14 +144,6 @@ buildFragment :: [Text] -> [Text] -> [Natural] -> Gen DecisionFragment
 buildFragment substrates services resources = case mkDecisionFragment substrates services resources of
   Right fragment -> pure fragment
   Left _ -> buildFragment ["fallback-substrate"] ["fallback-service"] []
-
-isReplica, isRollout, isHeadroom :: SmartCase -> Bool
-isReplica ReplicaCase {} = True
-isReplica _ = False
-isRollout RolloutCase {} = True
-isRollout _ = False
-isHeadroom HeadroomCase {} = True
-isHeadroom _ = False
 
 isResource, isServer, isHost, isBoundary :: FoldCase -> Bool
 isResource ResourceFold {} = True

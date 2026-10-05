@@ -12,7 +12,7 @@ import Amoebius.Capacity.Scheduler
   , confirmBound
   , ledgerOnlyAbsentRecovery
   )
-import Amoebius.Capacity.Types (ResourceVector (..))
+import Amoebius.Capacity.Vector (ResourceVector (..))
 import Amoebius.Formal.Dsl.Models (dslModels)
 import Amoebius.Formal.Model qualified as Formal
 import Amoebius.Reconcile.Core

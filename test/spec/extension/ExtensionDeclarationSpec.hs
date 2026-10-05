@@ -17,7 +17,7 @@ import Amoebius.Calculus.Composition
 import Amoebius.Calculus.Evidence.Register (Register (..))
 import Amoebius.Calculus.Lift.Layer (Layer (..))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types (ResourceVector (..), addResources, zeroResources)
+import Amoebius.Capacity.Vector (ResourceVector (..), addResources, zeroResources)
 import Amoebius.Extension.Declaration
 import Amoebius.Scope.Index
   ( RequestScope

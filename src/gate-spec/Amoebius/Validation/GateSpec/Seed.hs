@@ -40,7 +40,7 @@ phaseZeroSpecInput =
     , inputSuite = CabalTarget "plan-decisions-suite"
     , inputOracle = OracleExecutable "oracle-doc"
     , inputCases = predicateCases <> custodyProbes
-    , inputMutants = MutantPolicy {stageModules = [], perModule = 8, perGateCap = 40, killRatio = 3 / 5}
+    , inputMutants = MutantPolicy {stageModules = [], perModule = 8, perGateCap = 40, killRatio = 3 / 5, stageArtefacts = []}
     , inputBinaryFact = Nothing
     , inputSpineFact = Nothing
     , inputSubstrate = HardwareFree

@@ -1,0 +1,936 @@
+run.1.executable	cabal
+run.1.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.1.cwd	./.build/runs/phase-02/mutants/1
+run.1.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.1.exit	ExitSuccess
+run.1.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.1.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.1.stdout-bytes	0
+run.1.digest	50203f2d144ce0ca402b6d4acdbe6f42bd6a35b5917b9651a8f4e67ccd8a9ba7
+run.2.executable	cabal
+run.2.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/1/suite
+run.2.cwd	./.build/runs/phase-02/mutants/1
+run.2.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.2.exit	ExitSuccess
+run.2.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.2.stderr-sha256	fc4df698f0dcfc678165137d3d5937099f4cda958b8209e558b24e675ff2b0c3
+run.2.stdout-bytes	0
+run.2.digest	fc3ddc57ef9e345412f3f7e6fc41616c275125fff4b65c253a70aaa0472d1326
+run.3.executable	cabal
+run.3.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/1/suite
+run.3.cwd	./.build/runs/phase-02/mutants/1
+run.3.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.3.exit	ExitSuccess
+run.3.stdout-sha256	fca8fe6236d2363a6f8df597b447ad990a82942b74b64814076c6c813df733fc
+run.3.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.3.stdout-bytes	86658
+run.3.digest	b30e36913f4e03bbd97a77ff71670fcee3d5125dfaf98a37b8ac60569aa1fcdf
+run.4.executable	cabal
+run.4.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.4.cwd	./.build/runs/phase-02/mutants/2
+run.4.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.4.exit	ExitSuccess
+run.4.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.4.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.4.stdout-bytes	0
+run.4.digest	a78e70b0f7f1969eefb809ff3f89f54474b473d203b1a510eecc63aa1666c714
+run.5.executable	cabal
+run.5.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/2/suite
+run.5.cwd	./.build/runs/phase-02/mutants/2
+run.5.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.5.exit	ExitSuccess
+run.5.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.5.stderr-sha256	d284348fa0acf9d72221fa6e9b469cfc2027e37f1a096cbeb2aa5f27353a0e53
+run.5.stdout-bytes	0
+run.5.digest	8293b7ecae647b4a00089a46f6e6acca7bbbc31fd485982ac9b70f54d291a768
+run.6.executable	cabal
+run.6.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/2/suite
+run.6.cwd	./.build/runs/phase-02/mutants/2
+run.6.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.6.exit	ExitFailure 1
+run.6.stdout-sha256	e8bd334373323f4135044647888d6e298559365617641ef89225156875e56641
+run.6.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.6.stdout-bytes	86637
+run.6.digest	d1ffe0603327c2cea506d4395b7f7436005743483cc4d8ea9cc5c0672d6fefad
+run.7.executable	cabal
+run.7.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.7.cwd	./.build/runs/phase-02/mutants/3
+run.7.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.7.exit	ExitSuccess
+run.7.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.7.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.7.stdout-bytes	0
+run.7.digest	4c83c9ab56ffb35d55caafc938c53fe738257fb93cd9963a2edbe40caae3be1f
+run.8.executable	cabal
+run.8.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/3/suite
+run.8.cwd	./.build/runs/phase-02/mutants/3
+run.8.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.8.exit	ExitSuccess
+run.8.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.8.stderr-sha256	72aba26311acaf0a2b076f6d541b73b2eaeee167f531c330837d05dcfb128de6
+run.8.stdout-bytes	0
+run.8.digest	be809877cccdb0185ebc40eebffcd2472f2ab20e28feb38d74e89ef1d52f9754
+run.9.executable	cabal
+run.9.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/3/suite
+run.9.cwd	./.build/runs/phase-02/mutants/3
+run.9.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.9.exit	ExitFailure 1
+run.9.stdout-sha256	415c67352248327e97a654e2dbd6938527a1869bc2dc30317758d386c97d7354
+run.9.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.9.stdout-bytes	85866
+run.9.digest	ec8a0251c8d9a40e89cc3b272bfa65eea30e194325143c84e5cc294359b6f8ec
+run.10.executable	cabal
+run.10.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.10.cwd	./.build/runs/phase-02/mutants/4
+run.10.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.10.exit	ExitSuccess
+run.10.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.10.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.10.stdout-bytes	0
+run.10.digest	7b7391a0e1e06242fe46ea3809fcacc4778a90cfebfe985ea0de3ab507772f7a
+run.11.executable	cabal
+run.11.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/4/suite
+run.11.cwd	./.build/runs/phase-02/mutants/4
+run.11.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.11.exit	ExitSuccess
+run.11.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.11.stderr-sha256	1ac6350c4da66a414241a3acda278fbb4fe0519eff431dbeaab3406a596a44c8
+run.11.stdout-bytes	0
+run.11.digest	f92dcd93cc35be778e7698d466b8be493c7a43601adef2f5fd1f550590cf75b5
+run.12.executable	cabal
+run.12.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/4/suite
+run.12.cwd	./.build/runs/phase-02/mutants/4
+run.12.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.12.exit	ExitFailure 1
+run.12.stdout-sha256	854ef93e2f0f104a234579da5ebaa61d567c69bf77f2865c9c419290e2c9f702
+run.12.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.12.stdout-bytes	86271
+run.12.digest	3e5cd35caacefa2ac3ef03827aaf7dc2cf071e9906762bc78ddc32ed406c7268
+run.13.executable	cabal
+run.13.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.13.cwd	./.build/runs/phase-02/mutants/5
+run.13.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.13.exit	ExitFailure 1
+run.13.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.13.stderr-sha256	45c47015e2c79e8e21db57bfb32b71b404893b2d784e8b18ccbd80ffb090e144
+run.13.stdout-bytes	0
+run.13.digest	0f1bf8abe034d22144544ea859aa87d6a5f3658d209b0c200bd4611579ed5299
+run.14.executable	cabal
+run.14.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.14.cwd	./.build/runs/phase-02/mutants/6
+run.14.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.14.exit	ExitSuccess
+run.14.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.14.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.14.stdout-bytes	0
+run.14.digest	bf7060d307745f2bdfb3447f50605f42b351f19f0fda2e5e0f064f7f5fcb318b
+run.15.executable	cabal
+run.15.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/6/suite
+run.15.cwd	./.build/runs/phase-02/mutants/6
+run.15.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.15.exit	ExitFailure 1
+run.15.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.15.stderr-sha256	ec3b6a9a7b79dd5b4c2627108bd6e57bba2cbe0a78ec765938fbf6d74e1296e9
+run.15.stdout-bytes	0
+run.15.digest	dd48f95c49829b0231865fd0a0c680954d67ed0af8d6715e64b59fb742bddc92
+run.16.executable	cabal
+run.16.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/6/suite
+run.16.cwd	./.build/runs/phase-02/mutants/6
+run.16.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.16.exit	ExitFailure 1
+run.16.stdout-sha256	0dd491947aee10877e7c0be93166b4eab718116d2b96742f816696fd5f129c0c
+run.16.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.16.stdout-bytes	188971
+run.16.digest	b36c3a44a6d02ad386ea10419e7396b15a01f2bfdc5895ce40c96751494a1019
+run.17.executable	cabal
+run.17.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.17.cwd	./.build/runs/phase-02/mutants/7
+run.17.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.17.exit	ExitFailure 1
+run.17.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.17.stderr-sha256	064d647fd588698470958694c519eebf1c01ca76f7eef549f31b9ca10782809f
+run.17.stdout-bytes	0
+run.17.digest	4347fb18b80786fc81101f6bcc6c411caa0d40e5e75ae1cb95b96c367c371f4b
+run.18.executable	cabal
+run.18.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.18.cwd	./.build/runs/phase-02/mutants/8
+run.18.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.18.exit	ExitSuccess
+run.18.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.18.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.18.stdout-bytes	0
+run.18.digest	f7239c1ff8ac2c14f89843a6bb2e371c8f99f90c4a74090e712999b192587279
+run.19.executable	cabal
+run.19.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/8/suite
+run.19.cwd	./.build/runs/phase-02/mutants/8
+run.19.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.19.exit	ExitSuccess
+run.19.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.19.stderr-sha256	9e1e095dcce2c6d1275a07712a9341333ebcac4a96a13a56b4cfd1415d63c761
+run.19.stdout-bytes	0
+run.19.digest	76c6ea9efaa180f9d41f0fb3b3d9a78b04b42b68e9e0715b078641f38c303a26
+run.20.executable	cabal
+run.20.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/8/suite
+run.20.cwd	./.build/runs/phase-02/mutants/8
+run.20.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.20.exit	ExitFailure 1
+run.20.stdout-sha256	e88c96735b12b7cdd93fdc9a9206746b2d58511328ff36f31cb61f42d32bed73
+run.20.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.20.stdout-bytes	86616
+run.20.digest	005c7f7dfc354cecca01dc929107027eedb7df239608b381762d70101dcb0c2f
+run.21.executable	cabal
+run.21.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.21.cwd	./.build/runs/phase-02/mutants/9
+run.21.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.21.exit	ExitSuccess
+run.21.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.21.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.21.stdout-bytes	0
+run.21.digest	4afa95eb4b92b5c22eebcaf786f7aead6a56c9a80b53e034b3adcea184be8aa7
+run.22.executable	cabal
+run.22.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/9/suite
+run.22.cwd	./.build/runs/phase-02/mutants/9
+run.22.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.22.exit	ExitSuccess
+run.22.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.22.stderr-sha256	78ebda90535e6c5444b06f7cd58b9499deba0991de6d7cd476401fd98cd7456c
+run.22.stdout-bytes	0
+run.22.digest	cfd45c914fb338cf6d2752f07d1714ca07eed72ab05e7935bb446953221413a1
+run.23.executable	cabal
+run.23.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/9/suite
+run.23.cwd	./.build/runs/phase-02/mutants/9
+run.23.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.23.exit	ExitFailure 1
+run.23.stdout-sha256	dc1c66c442e6022e7ffb6a54deaf95b87b0b109ed6805e7f3a994cf5b6a8efb7
+run.23.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.23.stdout-bytes	86654
+run.23.digest	2075200146cf52189436baebba88b3e24109ccfe0be8bf815fe899cbc3e4204d
+run.24.executable	cabal
+run.24.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.24.cwd	./.build/runs/phase-02/mutants/10
+run.24.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.24.exit	ExitFailure 1
+run.24.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.24.stderr-sha256	00a3a7e80109f5de86e9cdd49826f8abaa767ea4ab9dcce0af51cbc531855676
+run.24.stdout-bytes	0
+run.24.digest	b8a787adde8262d9812eebdbeaad05dae488ed6e83f63db52b14870690487679
+run.25.executable	cabal
+run.25.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.25.cwd	./.build/runs/phase-02/mutants/11
+run.25.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.25.exit	ExitSuccess
+run.25.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.25.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.25.stdout-bytes	0
+run.25.digest	ae698f8ba9afa04d9ea638572140257d527cb53d1facaedeb8db6a35708e210d
+run.26.executable	cabal
+run.26.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/11/suite
+run.26.cwd	./.build/runs/phase-02/mutants/11
+run.26.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.26.exit	ExitFailure 1
+run.26.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.26.stderr-sha256	d63d9373bd78cbf96186f9a8cc6db29a9a97336474380b2a0f91dd7301f9c487
+run.26.stdout-bytes	0
+run.26.digest	9ad29c4ffb0ff898732517ebe8a2254f89e176db92d1df969923ffbe1fa8d0d9
+run.27.executable	cabal
+run.27.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/11/suite
+run.27.cwd	./.build/runs/phase-02/mutants/11
+run.27.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.27.exit	ExitFailure 1
+run.27.stdout-sha256	f6ab70f281e5a2634bc75e3328883c1cc9239132c670f993402750cd35fba2c2
+run.27.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.27.stdout-bytes	87847
+run.27.digest	c91b28a3cec303df1c8aeaa8d6aacb8fae5f2f0e6141bc3fdcdfc6320682fb4f
+run.28.executable	cabal
+run.28.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.28.cwd	./.build/runs/phase-02/mutants/12
+run.28.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.28.exit	ExitSuccess
+run.28.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.28.stderr-sha256	0324955d6eb6afb91b0f044de356af5e163ff373d3184cf633f220ae36099e3b
+run.28.stdout-bytes	0
+run.28.digest	407938cb6dc4e4d289a796493e3f9d3e842a264b56f8beecece1005baed2329f
+run.29.executable	cabal
+run.29.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/12/suite
+run.29.cwd	./.build/runs/phase-02/mutants/12
+run.29.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.29.exit	ExitFailure 1
+run.29.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.29.stderr-sha256	bc06993a36c832692cdd4dbab4744bba81c9a1d29cc322e614124ae3443c0c74
+run.29.stdout-bytes	0
+run.29.digest	32876c23986fe3aad4bc37dee306b8c854b5db55572f9b0ac1bb49c1db8e2676
+run.30.executable	cabal
+run.30.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/12/suite
+run.30.cwd	./.build/runs/phase-02/mutants/12
+run.30.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.30.exit	ExitFailure 1
+run.30.stdout-sha256	c4519c9f65845860cf3b291e556d64cb8eec936483794f489e0ddb052544fbce
+run.30.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.30.stdout-bytes	112835
+run.30.digest	fede517a5efc85d8fed2a59a834054f2eb2a5bfde87a6d20f199fc5c2aa49afd
+run.31.executable	cabal
+run.31.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.31.cwd	./.build/runs/phase-02/mutants/13
+run.31.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.31.exit	ExitSuccess
+run.31.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.31.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.31.stdout-bytes	0
+run.31.digest	5d6aafb6bf6dc178adaaa5be80285375e5b3f470886f70d9f129631e72fcd423
+run.32.executable	cabal
+run.32.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/13/suite
+run.32.cwd	./.build/runs/phase-02/mutants/13
+run.32.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.32.exit	ExitSuccess
+run.32.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.32.stderr-sha256	aefa4769c89d7ec1627607bb4bc45f7d7939e6eff70fd9842f0fca54cce3b859
+run.32.stdout-bytes	0
+run.32.digest	4429c5d637ebf4660e580a968300fa9e3f1c142afebab5d2ae121cecff1b5edf
+run.33.executable	cabal
+run.33.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/13/suite
+run.33.cwd	./.build/runs/phase-02/mutants/13
+run.33.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.33.exit	ExitFailure 1
+run.33.stdout-sha256	c0aa29d5c173cbd61f00531594aad373dd57a0b0dad510e508da82ed66ae4eec
+run.33.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.33.stdout-bytes	86587
+run.33.digest	448d285e62666f43079f345426d31dc0171b730e3db3645225d55d0034fdc8ea
+run.34.executable	cabal
+run.34.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.34.cwd	./.build/runs/phase-02/mutants/14
+run.34.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.34.exit	ExitSuccess
+run.34.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.34.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.34.stdout-bytes	0
+run.34.digest	110b6dc56e78c0d73c13d393011926f039a395b52c7b6da39f21f15754004046
+run.35.executable	cabal
+run.35.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/14/suite
+run.35.cwd	./.build/runs/phase-02/mutants/14
+run.35.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.35.exit	ExitFailure 1
+run.35.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.35.stderr-sha256	cb84bb2a4337de6bce7d941293274c0a74f6d7e03a914348fab66d80c505e77f
+run.35.stdout-bytes	0
+run.35.digest	4d8876e05d5abaf9633a85e3094231dbd48c6c072fe8669519fab8016ac74773
+run.36.executable	cabal
+run.36.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/14/suite
+run.36.cwd	./.build/runs/phase-02/mutants/14
+run.36.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.36.exit	ExitFailure 1
+run.36.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.36.stderr-sha256	bd715c3489d0cb2925897995864d41fa1cc9f4766ffed4e690ad011ddb0a4535
+run.36.stdout-bytes	0
+run.36.digest	47245d47cbc9d3197fe2356fa081128c0401402409231c20fe86241e4b905908
+run.37.executable	cabal
+run.37.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.37.cwd	./.build/runs/phase-02/mutants/15
+run.37.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.37.exit	ExitFailure 1
+run.37.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.37.stderr-sha256	8e621b097343a66734f81142c2a3c7186ab434c6e7853e76f86e0952c6bd8b67
+run.37.stdout-bytes	0
+run.37.digest	b7863a49a7e4662b51cf88d13980f7dfccb9a8bd3ed34f325d63ca25833c6806
+run.38.executable	cabal
+run.38.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.38.cwd	./.build/runs/phase-02/mutants/16
+run.38.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.38.exit	ExitFailure 1
+run.38.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.38.stderr-sha256	1bb2b701d5bde6dbcd7cc703d186429c9817cc70772563b989ced0eeb051bc47
+run.38.stdout-bytes	0
+run.38.digest	ae84457305ff3817db6ab036a7c5c835358997d88140aba1aff77ee1fc93b164
+run.39.executable	cabal
+run.39.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.39.cwd	./.build/runs/phase-02/mutants/17
+run.39.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.39.exit	ExitFailure 1
+run.39.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.39.stderr-sha256	5c0bd5184c4538deaae36ece1360ae85531904a0b752f27c76079148f94b914e
+run.39.stdout-bytes	0
+run.39.digest	aa67487950812fc7a11ba13389888a2c6bc275e8c0d3fbc6dfda3baf3d8b285f
+run.40.executable	cabal
+run.40.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.40.cwd	./.build/runs/phase-02/mutants/18
+run.40.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.40.exit	ExitSuccess
+run.40.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.40.stderr-sha256	bbacd061bd6bcae053c6b5dd1f4de661dc19b0cccf100cdd70d90404cb55ffa0
+run.40.stdout-bytes	0
+run.40.digest	8582176f05b29318dc81be69cb6d0131da141c421a0810f701ffe4bbdbbd1f30
+run.41.executable	cabal
+run.41.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/18/suite
+run.41.cwd	./.build/runs/phase-02/mutants/18
+run.41.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.41.exit	ExitFailure 1
+run.41.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.41.stderr-sha256	477fc422230a1e45417989691d35f5e6141b27c8ed6b981a0eed9fdcc3b28ec9
+run.41.stdout-bytes	0
+run.41.digest	177709f895b7fb58cc2a02421c7278e9d63f12185cf7d660f4ea258a01346904
+run.42.executable	cabal
+run.42.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/18/suite
+run.42.cwd	./.build/runs/phase-02/mutants/18
+run.42.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.42.exit	ExitFailure 1
+run.42.stdout-sha256	dffcdade6f728c07a053bca79942b78b824279db14bdb26db7ebb2f39c998ad8
+run.42.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.42.stdout-bytes	84784
+run.42.digest	acdc57453fddb59de7aebca791098904ad92afa8e0d98975173266559ba26fb8
+run.43.executable	cabal
+run.43.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.43.cwd	./.build/runs/phase-02/mutants/19
+run.43.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.43.exit	ExitSuccess
+run.43.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.43.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.43.stdout-bytes	0
+run.43.digest	4d53a6c1a495bc31de0ef4b2b16bb688119d1749012ae92f9f747d1f51b49c72
+run.44.executable	cabal
+run.44.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/19/suite
+run.44.cwd	./.build/runs/phase-02/mutants/19
+run.44.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.44.exit	ExitFailure 1
+run.44.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.44.stderr-sha256	5ceda04614cf1654ee5ba5f208bf37a15407f9984bd0a45b89b1c9c9f7085378
+run.44.stdout-bytes	0
+run.44.digest	d76fcca7167a6fb24e8238358a1cf43b64e4ac7e21b36ab9f0f9393cabd62be4
+run.45.executable	cabal
+run.45.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/19/suite
+run.45.cwd	./.build/runs/phase-02/mutants/19
+run.45.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.45.exit	ExitFailure 1
+run.45.stdout-sha256	0e400ae2eb5c40a142692693b3a72a3940f235dcd527c9494ea44ce1267d652e
+run.45.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.45.stdout-bytes	86652
+run.45.digest	de795337ae464aa0f6feb6030e0972cdd9f6bf249eb94efa5323eabbff57c83b
+run.46.executable	cabal
+run.46.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.46.cwd	./.build/runs/phase-02/mutants/20
+run.46.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.46.exit	ExitFailure 1
+run.46.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.46.stderr-sha256	3f6db99b60d7be74a87b27dfaa5d9d8827047dbd11739f13c54e2ebe6d98af79
+run.46.stdout-bytes	0
+run.46.digest	749727f18166e54f758739447775289fe34b78b09c734c7295a63c0786f4fe9e
+run.47.executable	cabal
+run.47.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.47.cwd	./.build/runs/phase-02/mutants/21
+run.47.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.47.exit	ExitFailure 1
+run.47.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.47.stderr-sha256	ebbdafbc5380cbd20203194d98f3376de93470fba9aee0c165479b8cad27d276
+run.47.stdout-bytes	0
+run.47.digest	1d709d23676c05317595d725c6696209247cb87937297700ad4ea1680bba449b
+run.48.executable	cabal
+run.48.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.48.cwd	./.build/runs/phase-02/mutants/22
+run.48.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.48.exit	ExitFailure 1
+run.48.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.48.stderr-sha256	2ec33357690e27fafc1b0800dfc54b521ef328f1582e5be29b4e5a151659e545
+run.48.stdout-bytes	0
+run.48.digest	b7f57141dd96a999db923913c8f6bb53bdf95336db0f86ee745e356c503a8b1c
+run.49.executable	cabal
+run.49.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.49.cwd	./.build/runs/phase-02/mutants/23
+run.49.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.49.exit	ExitSuccess
+run.49.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.49.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.49.stdout-bytes	0
+run.49.digest	69dd5fe14ca30c8ca945bc18c6567cb0f45ee25c910c98b2131c16f741461814
+run.50.executable	cabal
+run.50.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/23/suite
+run.50.cwd	./.build/runs/phase-02/mutants/23
+run.50.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.50.exit	ExitFailure 1
+run.50.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.50.stderr-sha256	9367b800f5d693210d3b55d0b0571f361570a8ce6a1adeb03d952bd9216f3241
+run.50.stdout-bytes	0
+run.50.digest	d8ed804c2451272dffd5d7f1c6d7b120249dcedd046cfb569913cd3bade6ac46
+run.51.executable	cabal
+run.51.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/23/suite
+run.51.cwd	./.build/runs/phase-02/mutants/23
+run.51.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.51.exit	ExitFailure 1
+run.51.stdout-sha256	9d2e4ad84e56a6bdbccdb9cb300837b0c7e4ca0f6d90d68108d7bb5804592ceb
+run.51.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.51.stdout-bytes	84765
+run.51.digest	e283957e806fe526858dc3edc968f4bdda3f5acc1d9d2e26d20906b77cd3a69d
+run.52.executable	cabal
+run.52.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.52.cwd	./.build/runs/phase-02/mutants/24
+run.52.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.52.exit	ExitSuccess
+run.52.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.52.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.52.stdout-bytes	0
+run.52.digest	f21858c8ee71e865e73e3bc51782e3c426b3bdc6f9a21c2ddb5c1fe077513880
+run.53.executable	cabal
+run.53.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/24/suite
+run.53.cwd	./.build/runs/phase-02/mutants/24
+run.53.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.53.exit	ExitSuccess
+run.53.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.53.stderr-sha256	f6a05e33c312e8a5357bf477d43fb2a4bafdab525e928291b385c3c7275ed0a5
+run.53.stdout-bytes	0
+run.53.digest	ff6a5b7fbd7132f27a89e8f44e4522556446b10923f0fb26de324fae5eb67771
+run.54.executable	cabal
+run.54.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/24/suite
+run.54.cwd	./.build/runs/phase-02/mutants/24
+run.54.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.54.exit	ExitFailure 1
+run.54.stdout-sha256	4d1785d214757c00b04c9a920d23558ff4d4acf1b79071d628c5e34b5e670607
+run.54.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.54.stdout-bytes	86642
+run.54.digest	3acc172bfa4c0b1a333ea662badd840cf9c66eb887f4d2ce6071be568ca6f967
+run.55.executable	cabal
+run.55.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.55.cwd	./.build/runs/phase-02/mutants/25
+run.55.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.55.exit	ExitSuccess
+run.55.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.55.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.55.stdout-bytes	0
+run.55.digest	12959d57b4717f7eed813f5354f768d25afe77ed91116a6d6ae2629144473f9c
+run.56.executable	cabal
+run.56.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/25/suite
+run.56.cwd	./.build/runs/phase-02/mutants/25
+run.56.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.56.exit	ExitSuccess
+run.56.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.56.stderr-sha256	1ea112cda82689ad983b750263febeabca60ef12731369a571425a74d790c60f
+run.56.stdout-bytes	0
+run.56.digest	f27d7d370b896cf64d963e510421fe572dc8743a6aef7791d32e8656435f6eaa
+run.57.executable	cabal
+run.57.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/25/suite
+run.57.cwd	./.build/runs/phase-02/mutants/25
+run.57.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.57.exit	ExitFailure 1
+run.57.stdout-sha256	ee09e84012211c517c7f66c38a848a2b363e1d908e2d442f1e7192e2bf35ecec
+run.57.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.57.stdout-bytes	86647
+run.57.digest	31069fc2df0f7107aa46953dcc06c299c3d327ae58068d13d394246b74f8d238
+run.58.executable	cabal
+run.58.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.58.cwd	./.build/runs/phase-02/mutants/26
+run.58.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.58.exit	ExitSuccess
+run.58.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.58.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.58.stdout-bytes	0
+run.58.digest	fa5f2f0f5616752f5451a80a6f66cd3ffeaa90daddb0d9423cba3a6e98b34b01
+run.59.executable	cabal
+run.59.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/26/suite
+run.59.cwd	./.build/runs/phase-02/mutants/26
+run.59.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.59.exit	ExitSuccess
+run.59.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.59.stderr-sha256	537ac7abaead4815647d4d1d47eac7b8546ee5556c0d2073b1ff6ac7a31bdeb0
+run.59.stdout-bytes	0
+run.59.digest	760b93d51a3122c4220494e89c55a78d093d77c6267bdbca3a281c96aff7f854
+run.60.executable	cabal
+run.60.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/26/suite
+run.60.cwd	./.build/runs/phase-02/mutants/26
+run.60.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.60.exit	ExitFailure 1
+run.60.stdout-sha256	61bd52e869f468fef240818570bce38e5c282eac4598a3f701f4bb8060cc6e09
+run.60.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.60.stdout-bytes	86665
+run.60.digest	06f6c0e78e47634080dbbbf32790b70d1660803b535612728ca9a844b8374f9b
+run.61.executable	cabal
+run.61.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.61.cwd	./.build/runs/phase-02/mutants/27
+run.61.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.61.exit	ExitSuccess
+run.61.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.61.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.61.stdout-bytes	0
+run.61.digest	b1c867f1d8b00a919933822a760bd2583f526b9bf96d225b8e9ecb64deac8e65
+run.62.executable	cabal
+run.62.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/27/suite
+run.62.cwd	./.build/runs/phase-02/mutants/27
+run.62.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.62.exit	ExitFailure 1
+run.62.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.62.stderr-sha256	e0b10fbe95b36baa53e3492beb06704de5362c153d46755221263772747ced86
+run.62.stdout-bytes	0
+run.62.digest	1443039a8f93062d0da00c730be4bf73a297007c3844f4fc94ac484c53a2b3d1
+run.63.executable	cabal
+run.63.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/27/suite
+run.63.cwd	./.build/runs/phase-02/mutants/27
+run.63.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.63.exit	ExitFailure 1
+run.63.stdout-sha256	ad7219bc37f2578d2f7233f7f2ff041fd60fc3aba68e1c30909b7d74a4022d42
+run.63.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.63.stdout-bytes	112871
+run.63.digest	13be312fff69c627b825b52b0c90fec51222f45a7e8562a1a6e6622c5fbbb090
+run.64.executable	cabal
+run.64.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.64.cwd	./.build/runs/phase-02/mutants/28
+run.64.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.64.exit	ExitSuccess
+run.64.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.64.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.64.stdout-bytes	0
+run.64.digest	549c10fa1a03e5929e4ba717cd6f5a2382f945f3cf325086364467d45fa25cc9
+run.65.executable	cabal
+run.65.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/28/suite
+run.65.cwd	./.build/runs/phase-02/mutants/28
+run.65.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.65.exit	ExitFailure 1
+run.65.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.65.stderr-sha256	dae00367329ac24a420b3c5389ac148bfcde00764ad68c00e7da13e53d8fa802
+run.65.stdout-bytes	0
+run.65.digest	f5c6857795dfd49e2c645b6011fbe37b11af1cf5f98611467b829b5b09f00db2
+run.66.executable	cabal
+run.66.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/28/suite
+run.66.cwd	./.build/runs/phase-02/mutants/28
+run.66.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.66.exit	ExitFailure 1
+run.66.stdout-sha256	106383972b4ba90afd1d8a0cf0040398ab3e0967b5bdc0df807d6f3cfcec0a2f
+run.66.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.66.stdout-bytes	84976
+run.66.digest	c24e4a0f5471e7225d6d42615ec4b8185ba58bd4c203f2b9488cdd9b8504fb1d
+run.67.executable	cabal
+run.67.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.67.cwd	./.build/runs/phase-02/mutants/29
+run.67.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.67.exit	ExitSuccess
+run.67.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.67.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.67.stdout-bytes	0
+run.67.digest	92a20dafc7128606f50462eb0fef7e5541faf95de6fefc194af1e012584c5685
+run.68.executable	cabal
+run.68.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/29/suite
+run.68.cwd	./.build/runs/phase-02/mutants/29
+run.68.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.68.exit	ExitSuccess
+run.68.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.68.stderr-sha256	ba14764388fdc41c98bd7fd785a8337f57b496656c12e92be00bf814d0ac8b0a
+run.68.stdout-bytes	0
+run.68.digest	aa98f06a90c2c89ed7a5ef3f6c8283a6e49f43b4c53d0e4e7fc55d13add694c8
+run.69.executable	cabal
+run.69.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/29/suite
+run.69.cwd	./.build/runs/phase-02/mutants/29
+run.69.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.69.exit	ExitFailure 1
+run.69.stdout-sha256	1350c4a55905b0c7a37f6194d2c26a6694cda5fd424c3c9c4221849683e64d61
+run.69.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.69.stdout-bytes	86652
+run.69.digest	e494b01ce9915dd56e8b4b1f9cdc615f25a576c4ca78e6a1a14130383ec177de
+run.70.executable	cabal
+run.70.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.70.cwd	./.build/runs/phase-02/mutants/30
+run.70.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.70.exit	ExitFailure 1
+run.70.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.70.stderr-sha256	42847d05f2f661df73e8b6b1efc8fa3d65160380f73abe6d1e8051474958eacc
+run.70.stdout-bytes	0
+run.70.digest	393e89cfff1a9e03ca21b86381408dde4df0b8731e6b9c1476424eb0687364a7
+run.71.executable	cabal
+run.71.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.71.cwd	./.build/runs/phase-02/mutants/31
+run.71.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.71.exit	ExitSuccess
+run.71.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.71.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.71.stdout-bytes	0
+run.71.digest	833ace3978488a4b2a8283205649abfdc7d738753740ebdc00fc4aea67824ba0
+run.72.executable	cabal
+run.72.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/31/suite
+run.72.cwd	./.build/runs/phase-02/mutants/31
+run.72.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.72.exit	ExitSuccess
+run.72.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.72.stderr-sha256	9501bdfa58e50bd4bfd4c1037e89c8286f844eddd6ca96da7e7ad03582cd0dcb
+run.72.stdout-bytes	0
+run.72.digest	636c9a967054a1d5c05f924be1d973569a4bae337f43db70e213627824468f17
+run.73.executable	cabal
+run.73.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/31/suite
+run.73.cwd	./.build/runs/phase-02/mutants/31
+run.73.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.73.exit	ExitFailure 1
+run.73.stdout-sha256	ef0575b35a54ca6cc14da144675290516587eaf142e21a8dbb6fbf2fe74678bb
+run.73.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.73.stdout-bytes	86665
+run.73.digest	f0f413f74ed76ed76b696fe9ee7cb7f934be6442eec023a959966ea208164654
+run.74.executable	cabal
+run.74.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.74.cwd	./.build/runs/phase-02/mutants/32
+run.74.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.74.exit	ExitSuccess
+run.74.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.74.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.74.stdout-bytes	0
+run.74.digest	9bfc119d55841418149a63bc881ac49d4b4858f32d96847c87aed219eb283d94
+run.75.executable	cabal
+run.75.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/32/suite
+run.75.cwd	./.build/runs/phase-02/mutants/32
+run.75.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.75.exit	ExitFailure 1
+run.75.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.75.stderr-sha256	f0ab0888b7a42658fbb4af47a09916fa9448777ecb7b0a5e7f1c571db0a39a6f
+run.75.stdout-bytes	0
+run.75.digest	35fc263aa178245e7230125fb185b9d8d6e0df0a8cf1b7b56e1867b55263f7ba
+run.76.executable	cabal
+run.76.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/32/suite
+run.76.cwd	./.build/runs/phase-02/mutants/32
+run.76.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.76.exit	ExitFailure 1
+run.76.stdout-sha256	aac54055df1f47ed07b0b6ee220b078bbdd24cbf926b4666698624b7ba29640c
+run.76.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.76.stdout-bytes	112787
+run.76.digest	c5fa861a71d716787ef734a9e8555e28671969e3e89144a4f7e41905035548c1
+run.77.executable	cabal
+run.77.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.77.cwd	./.build/runs/phase-02/mutants/33
+run.77.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.77.exit	ExitSuccess
+run.77.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.77.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.77.stdout-bytes	0
+run.77.digest	c645ae65084912fa02530d152fdb7183698346408b4430f29cd4865ce127ed7d
+run.78.executable	cabal
+run.78.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/33/suite
+run.78.cwd	./.build/runs/phase-02/mutants/33
+run.78.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.78.exit	ExitFailure 1
+run.78.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.78.stderr-sha256	974813f495e5698679cb8d6c74bb06e1aabca2ace289f546ab973d43a333245b
+run.78.stdout-bytes	0
+run.78.digest	e140e1b90bc4f39085cd73156a5a691b52d6613f6145625ac531d7054dd724e9
+run.79.executable	cabal
+run.79.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/33/suite
+run.79.cwd	./.build/runs/phase-02/mutants/33
+run.79.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.79.exit	ExitFailure 1
+run.79.stdout-sha256	f73e28083f6e43e7cdfab5cfa6f5e466a3a454251e107e75fac7949fcadfdab7
+run.79.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.79.stdout-bytes	86031
+run.79.digest	8447239a523da568fd8420e369c27342b8c37f41c99f401d60cd4b4510eaa68b
+run.80.executable	cabal
+run.80.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.80.cwd	./.build/runs/phase-02/mutants/34
+run.80.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.80.exit	ExitSuccess
+run.80.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.80.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.80.stdout-bytes	0
+run.80.digest	b1658ba8643a21a3b1eceacd850eaca52d2097aee3afc39aeeebc7833a0cd2f8
+run.81.executable	cabal
+run.81.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/34/suite
+run.81.cwd	./.build/runs/phase-02/mutants/34
+run.81.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.81.exit	ExitFailure 1
+run.81.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.81.stderr-sha256	51363f9189ed82e981d45b86e7ded8d88ece8bd54b0cceb7eb06f7c8e6c752b6
+run.81.stdout-bytes	0
+run.81.digest	a2c722ad0d7ccef38ad1d9c34e6d605a7309c7dc7a14098f20a46093c194ea0a
+run.82.executable	cabal
+run.82.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/34/suite
+run.82.cwd	./.build/runs/phase-02/mutants/34
+run.82.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.82.exit	ExitFailure 1
+run.82.stdout-sha256	59c065e32838a5ee02d3b5e60dd15be29145bff92acc6d1b968296cb05d70bea
+run.82.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.82.stdout-bytes	654562
+run.82.digest	cd47942b77d1b7776a229501ce591dc36a5ca7f4e08a217540354e91673d4f2a
+run.83.executable	cabal
+run.83.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.83.cwd	./.build/runs/phase-02/mutants/35
+run.83.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.83.exit	ExitSuccess
+run.83.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.83.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.83.stdout-bytes	0
+run.83.digest	897c574425c3017161fa5bdb2bce8cf5a2064c1675d7afc8e7eea2e0e7476d18
+run.84.executable	cabal
+run.84.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/35/suite
+run.84.cwd	./.build/runs/phase-02/mutants/35
+run.84.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.84.exit	ExitSuccess
+run.84.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.84.stderr-sha256	7cd3db4319122e6d64c6cbe98a71ff0cad4bb381fdc55673d2bce0f80c8d5861
+run.84.stdout-bytes	0
+run.84.digest	b204252aa87e1b4b326963b183c881e5244d7dbbb2b9fb7ae43f5b3f3a652f55
+run.85.executable	cabal
+run.85.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/35/suite
+run.85.cwd	./.build/runs/phase-02/mutants/35
+run.85.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.85.exit	ExitFailure 1
+run.85.stdout-sha256	866b89277ffe294e05d9f3bf247f40ec1f83914092745576ba3357c5a0114c87
+run.85.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.85.stdout-bytes	90154
+run.85.digest	63317cd4a0e0815b0f08acc17d5b77b0814b0fcf8e167b76cfa6740d40c5307d
+run.86.executable	cabal
+run.86.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.86.cwd	./.build/runs/phase-02/mutants/36
+run.86.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.86.exit	ExitSuccess
+run.86.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.86.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.86.stdout-bytes	0
+run.86.digest	0c9a179f9518bca4e909005576c67b0c111087ed0634affbfb96e71f21d832c3
+run.87.executable	cabal
+run.87.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/36/suite
+run.87.cwd	./.build/runs/phase-02/mutants/36
+run.87.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.87.exit	ExitSuccess
+run.87.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.87.stderr-sha256	2b21d43182c596c89461f19c8cd4cda3d06985057842a77aabe7f3e07798bec0
+run.87.stdout-bytes	0
+run.87.digest	c4987d452d4881d2b282b46bd41f7ae335bfbaead37df89802ec27a8adc824a8
+run.88.executable	cabal
+run.88.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/36/suite
+run.88.cwd	./.build/runs/phase-02/mutants/36
+run.88.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.88.exit	ExitFailure 1
+run.88.stdout-sha256	ab14ab456c4bd68d7e86dbc391c85796d449ec3d92db7162a327c147af204714
+run.88.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.88.stdout-bytes	86650
+run.88.digest	2881b8bd0ec600e6a358f8275129c751b78418d9890e410549c76f21a23acf63
+run.89.executable	cabal
+run.89.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.89.cwd	./.build/runs/phase-02/mutants/37
+run.89.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.89.exit	ExitFailure 1
+run.89.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.89.stderr-sha256	2ee3d7e00e9c219bf86b4b5e7e3d26d5b72551a7402cddbc1a4783ea8c0d8b7a
+run.89.stdout-bytes	0
+run.89.digest	e8e03761f3100f6006ac9e6e091a1178494f5a509768f93250cee976564921d6
+run.90.executable	cabal
+run.90.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.90.cwd	./.build/runs/phase-02/mutants/38
+run.90.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.90.exit	ExitSuccess
+run.90.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.90.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.90.stdout-bytes	0
+run.90.digest	673f9d9e6df9e66dad885934ed7656f1f97c5b18f4c2cfa5cc8997723f911256
+run.91.executable	cabal
+run.91.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/38/suite
+run.91.cwd	./.build/runs/phase-02/mutants/38
+run.91.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.91.exit	ExitFailure 1
+run.91.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.91.stderr-sha256	bcf3c86b184d4b7e5a0686201aea68b44ed56d8fc00513bd12ca1a962ba00cdb
+run.91.stdout-bytes	0
+run.91.digest	30724eff6b3c3084423019e1c9955b656be3ad7d3b70bd12a5df937446ee6b4e
+run.92.executable	cabal
+run.92.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/38/suite
+run.92.cwd	./.build/runs/phase-02/mutants/38
+run.92.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.92.exit	ExitFailure 1
+run.92.stdout-sha256	508f222a28c542c861691db48f026e7c00319d609c4da43ffbeb5af22f5a7347
+run.92.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.92.stdout-bytes	84855
+run.92.digest	6137650e57078e5b604d6bb59f21d6e51422a7836e2eb4c49e5e2c0b18f0541c
+run.93.executable	cabal
+run.93.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.93.cwd	./.build/runs/phase-02/mutants/39
+run.93.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.93.exit	ExitSuccess
+run.93.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.93.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.93.stdout-bytes	0
+run.93.digest	326ac1446c08dd1b9bde61956d494e32d9d2abc4308e24ef5cc46e60edac55fc
+run.94.executable	cabal
+run.94.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/39/suite
+run.94.cwd	./.build/runs/phase-02/mutants/39
+run.94.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.94.exit	ExitFailure 1
+run.94.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.94.stderr-sha256	91aba084fd3ecc38ae67ef4285fa6935c650145c5ec8eb2cd6cf82a1b78e8854
+run.94.stdout-bytes	0
+run.94.digest	30f372368be710cedaae8bd1e4d1ca296e49a5f4b7dcc3de45c03e1c500fb6e0
+run.95.executable	cabal
+run.95.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/39/suite
+run.95.cwd	./.build/runs/phase-02/mutants/39
+run.95.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.95.exit	ExitFailure 1
+run.95.stdout-sha256	5fc8095460db9d59fbf5ecff60592cf79be3c8bc8e15540d464a528d197f6f6d
+run.95.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.95.stdout-bytes	601537
+run.95.digest	11e674ca3ca129629ff8d22bd4e0d2b52e7e81bc597b7c596f3b3ca8429cb1cc
+run.96.executable	cabal
+run.96.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.96.cwd	./.build/runs/phase-02/mutants/40
+run.96.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.96.exit	ExitSuccess
+run.96.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.96.stderr-sha256	f47932482d1993ee8473ef9f2af6f54bc2a7da207c68bdec898a89adca20f0ad
+run.96.stdout-bytes	0
+run.96.digest	658864b700ff3a1b4b87de18c11c439d70ae7d7a1de00e3164f696cdcf4054a0
+run.97.executable	cabal
+run.97.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/mutants/40/suite
+run.97.cwd	./.build/runs/phase-02/mutants/40
+run.97.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.97.exit	ExitSuccess
+run.97.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.97.stderr-sha256	af08aebb877f705bf102b1970c69e015a607cb4733130b5bbf33656d691ce3fa
+run.97.stdout-bytes	0
+run.97.digest	e63f5a3d4bed92576945be180605753382e20b71b18f50ccfc3de0fee3418702
+run.98.executable	cabal
+run.98.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/mutants/40/suite
+run.98.cwd	./.build/runs/phase-02/mutants/40
+run.98.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.98.exit	ExitFailure 1
+run.98.stdout-sha256	fa7ad8c80e481c6558ffc50a1c28e3a0b96eeeff0376ed1da1c3ffd84b767746
+run.98.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.98.stdout-bytes	86652
+run.98.digest	6ed481c55f120e08bd6709d2bad2d62631e18beadec7ad4a658f65cae2a925d2
+run.99.executable	cabal
+run.99.argv	build -v0 --jobs=1 amoebius:test:layout-suite amoebius:test:oracle-layout
+run.99.cwd	.
+run.99.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.99.exit	ExitSuccess
+run.99.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.99.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.99.stdout-bytes	0
+run.99.digest	075cfe7818c6dc32c5ec5bd9f10bf1271d6848498c48186a4749d07c0f6c6952
+run.100.executable	cabal
+run.100.argv	run -v0 --jobs=1 amoebius:test:layout-suite -- ./.build/runs/phase-02/clean/suite
+run.100.cwd	.
+run.100.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.100.exit	ExitSuccess
+run.100.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.100.stderr-sha256	f10bf59c0cc03a4fc89d79756019c655da4ae9cd9ed7142be53f985d9b15479e
+run.100.stdout-bytes	0
+run.100.digest	080dd74621745021e155d3051cb63994a31e9ed7d53b2704fd9e01e7c9ce60e3
+run.101.executable	cabal
+run.101.argv	run -v0 --jobs=1 amoebius:test:oracle-layout -- ./.build/runs/phase-02/clean/suite
+run.101.cwd	.
+run.101.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.101.exit	ExitSuccess
+run.101.stdout-sha256	f0dba20941130b222bd4546709ab73f97e11fd67857ec97586eb4cfb627bccf8
+run.101.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.101.stdout-bytes	86658
+run.101.digest	0db5a149995b0764b35e8099cf195626eb0dafcafb95a936f548bbb5e54b85b3
+run.102.executable	/home/matt/amoebius/dist-newstyle/build/x86_64-linux/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+run.102.argv	layout-report --root ./.build/runs/phase-02/binary/1/tree --paths-file ./.build/runs/phase-02/binary/1/input/paths.txt --output ./.build/runs/phase-02/binary/1/layout-report.tsv
+run.102.cwd	.
+run.102.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.102.exit	ExitFailure 1
+run.102.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.102.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.102.stdout-bytes	0
+run.102.digest	8a17ff3c8970b1ef4e410df62d99600fbd3ac6cad0fa28fa296e73e983356c79
+run.103.executable	/home/matt/amoebius/dist-newstyle/build/x86_64-linux/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+run.103.argv	layout-report --root ./.build/runs/phase-02/binary/2/tree --paths-file ./.build/runs/phase-02/binary/2/input/paths.txt --output ./.build/runs/phase-02/binary/2/layout-report.tsv
+run.103.cwd	.
+run.103.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.103.exit	ExitFailure 1
+run.103.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.103.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.103.stdout-bytes	0
+run.103.digest	316eb958cc217e6767457ea1fc2c7b91d745f76ba394ff61235799c46f2f1d21
+run.104.executable	/home/matt/amoebius/dist-newstyle/build/x86_64-linux/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+run.104.argv	layout-report --root ./.build/runs/phase-02/binary/3/tree --paths-file ./.build/runs/phase-02/binary/3/input/paths.txt --output ./.build/runs/phase-02/binary/3/layout-report.tsv
+run.104.cwd	.
+run.104.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.104.exit	ExitFailure 1
+run.104.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.104.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.104.stdout-bytes	0
+run.104.digest	349b9f6252178ff5445262733ac616cff92eb7085873edf7a9bf4e77809726bb

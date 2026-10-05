@@ -15,7 +15,8 @@ import Amoebius.Calculus.Composition
   , compositionKinds
   , compositionResource
   )
-import Amoebius.Capacity.Types (ResourceVector (..))
+import Amoebius.Capacity.Vector (ResourceVector (..))
+import Amoebius.Vocabulary (quantityValue)
 import Amoebius.Formal.Model
 import Data.Text qualified as Text
 
@@ -29,19 +30,19 @@ compositionModel composition = Model
   , modelVariables = ["componentCount", "cpu", "memory", "ephemeral", "pods"]
   , modelInit =
       [ ("componentCount", integer (fromIntegral (length kinds)))
-      , ("cpu", natural (resourceCpu resources))
-      , ("memory", natural (resourceMemory resources))
-      , ("ephemeral", natural (resourceEphemeralStorage resources))
-      , ("pods", natural (resourcePodSlots resources))
+      , ("cpu", natural (quantityValue (resourceCpu resources)))
+      , ("memory", natural (quantityValue (resourceMemory resources)))
+      , ("ephemeral", natural (quantityValue (resourceEphemeralStorage resources)))
+      , ("pods", natural (quantityValue (resourcePodSlots resources)))
       ]
   , modelActions = []
   , modelInvariants =
       [ NamedExpr "CompositionProjectionExact" (And
           [ Equal (Ref "componentCount") (integer (fromIntegral (length kinds)))
-          , Equal (Ref "cpu") (natural (resourceCpu resources))
-          , Equal (Ref "memory") (natural (resourceMemory resources))
-          , Equal (Ref "ephemeral") (natural (resourceEphemeralStorage resources))
-          , Equal (Ref "pods") (natural (resourcePodSlots resources))
+          , Equal (Ref "cpu") (natural (quantityValue (resourceCpu resources)))
+          , Equal (Ref "memory") (natural (quantityValue (resourceMemory resources)))
+          , Equal (Ref "ephemeral") (natural (quantityValue (resourceEphemeralStorage resources)))
+          , Equal (Ref "pods") (natural (quantityValue (resourcePodSlots resources)))
           ])
       , NamedExpr "CompositionIndicesNonNegative" (And
           [ ArithmeticComparison GreaterThanOrEqual (Ref name) (integer 0)

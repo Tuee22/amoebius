@@ -13,7 +13,7 @@ import Amoebius.Calculus.Composition
 import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
 import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types qualified as Capacity
+import Amoebius.Capacity.Vector qualified as Capacity
 import Amoebius.Scope.Index qualified as CalculusScope
 import Amoebius.Test.WorkflowAlgebra qualified as Algebra
 import Control.Monad (forM_, unless)
@@ -183,7 +183,7 @@ checkCalculus = do
       assertEqual "calculus resource" (Capacity.ResourceVector 5 31 0 0) (Capacity.ResourceVector cpu memory ephemeral pods)
   action
 
-model :: Text -> Algebra.Branch -> Algebra.ResourceVector -> [Algebra.FaultIntent] -> Algebra.SuppliedTestModel
+model :: Text -> Algebra.Branch -> Algebra.TestResourceVector -> [Algebra.FaultIntent] -> Algebra.SuppliedTestModel
 model name branch capacity faults = Algebra.SuppliedTestModel
   name Algebra.LinuxCpu branch (Algebra.FlaggedTestAuthority validAuthority) (Just Algebra.TestOwnedIntent)
   capacity faults [Algebra.WorkflowCompletes, Algebra.CleanupObserved, Algebra.NoModeledResidue]
@@ -191,8 +191,8 @@ model name branch capacity faults = Algebra.SuppliedTestModel
 validAuthority :: Algebra.AuthorityRef
 validAuthority = fromJust (Algebra.authorityRef "authority/test-workflow")
 
-ample :: Algebra.ResourceVector
-ample = Algebra.ResourceVector 10000 20000000000 70000000000 10000000000 5000000000 32 32 8 100
+ample :: Algebra.TestResourceVector
+ample = Algebra.TestResourceVector 10000 20000000000 70000000000 10000000000 5000000000 32 32 8 100
 
 allBranches :: [Algebra.Branch]
 allBranches = [minBound .. maxBound]
@@ -208,19 +208,19 @@ coreOracleDemand = case Oracle.expectedBranchDemands of
   first : _ -> Oracle.oracleDemand first
   [] -> error "independent branch oracle is empty"
 
-vectorList :: Algebra.ResourceVector -> [Integer]
+vectorList :: Algebra.TestResourceVector -> [Integer]
 vectorList vector = map fromIntegral
   [ Algebra.resourceCpu vector, Algebra.resourceMemory vector, Algebra.resourceEphemeral vector
   , Algebra.resourceDurable vector, Algebra.resourceCache vector, Algebra.resourcePods vector
   , Algebra.resourceIps vector, Algebra.resourceCsi vector, Algebra.resourceQuota vector
   ]
 
-vectorFromList :: [Integer] -> Algebra.ResourceVector
+vectorFromList :: [Integer] -> Algebra.TestResourceVector
 vectorFromList values = case map fromIntegral values of
-  [cpu, memory, ephemeral, durable, cache, pods, ips, csi, quota] -> Algebra.ResourceVector cpu memory ephemeral durable cache pods ips csi quota
+  [cpu, memory, ephemeral, durable, cache, pods, ips, csi, quota] -> Algebra.TestResourceVector cpu memory ephemeral durable cache pods ips csi quota
   _ -> error "independent oracle supplied a non-nine-axis vector"
 
-shorten :: Algebra.ResourceAxis -> Algebra.ResourceVector -> Algebra.ResourceVector
+shorten :: Algebra.ResourceAxis -> Algebra.TestResourceVector -> Algebra.TestResourceVector
 shorten axis vector = case axis of
   Algebra.Cpu -> vector {Algebra.resourceCpu = Algebra.resourceCpu vector - 1}
   Algebra.Memory -> vector {Algebra.resourceMemory = Algebra.resourceMemory vector - 1}

@@ -11,7 +11,7 @@ module Amoebius.Capacity.HostReservation
   , releaseHostReservation
   ) where
 
-import Amoebius.Capacity.Types (ResourceVector (..), addResources, zeroResources)
+import Amoebius.Capacity.Vector (ResourceVector (..), addResources, zeroResources)
 import Control.DeepSeq (NFData)
 import Data.Text (Text)
 import GHC.Generics (Generic)

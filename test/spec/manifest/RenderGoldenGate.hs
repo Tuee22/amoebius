@@ -27,7 +27,8 @@ import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
 import Amoebius.Capacity.Provision (ProvisionedSpec)
 import Amoebius.Capacity.RenderSource (K8sObjectIdentity (K8sObjectIdentity))
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Capacity.Vector (ResourceVector (ResourceVector))
+import Amoebius.Vocabulary (quantityText)
 import Amoebius.Capability.Types (ServiceShape (..))
 import Amoebius.Manifest (renderAll)
 import Amoebius.Manifest.K8sObject
@@ -74,6 +75,7 @@ runRenderGoldenGate = do
           , ServiceKind
           , ConfigMapKind
           , NetworkPolicyKind
+          , PersistentVolumeClaimKind
           , ValidatingWebhookConfigurationKind
           ]
       podCount = length [() | object <- objects, WorkloadSpec {} <- [objectSpec object]]
@@ -96,7 +98,7 @@ runRenderGoldenGate = do
         <> show (Set.toList renderedWireFields)
     )
   assert (Map.size oracle == 18 && deploymentCount == 18) "semantic oracle no longer covers exactly nine arms in two shapes"
-  assert (variants == expectedVariants) "render corpus no longer covers the exact nine emitted object variants"
+  assert (variants == expectedVariants) "render corpus no longer covers the exact ten emitted object variants"
   assert (podCount > 0 && policyCount > 0) "render safety predicates became vacuous"
   assert (length expectedLocusEntries == 33 && Set.size (Set.fromList expectedLocusEntries) == 33) "render validation-locus oracle must contain exactly 33 unique entries"
   checkPureBoundary
@@ -116,7 +118,7 @@ runRenderGoldenGate = do
         <> show deploymentCount
         <> " semantic projections, "
         <> show objectCount
-        <> " objects, 9 object variants, 3 non-vacuous safety predicates, "
+        <> " objects, 10 object variants, 3 non-vacuous safety predicates, "
         <> show mutantCount
         <> " mutants, 1 covered property)"
     )
@@ -124,7 +126,7 @@ runRenderGoldenGate = do
 checkFixture :: Map Text [Text] -> CapabilityFixture -> IO [(ProvisionedSpec, [K8sObject])]
 checkFixture oracle fixture = forM [SingleNode, Distributed 3] $ \shape -> do
   sealed <- either (fail . show) pure (provisionFixture fixture shape)
-  let objects = renderAll sealed
+  let objects = either (error . show) id (renderAll sealed)
       identities = fmap objectIdentity objects
       failures = renderInvariantFailures sealed objects
       deployment = deploymentName fixture shape
@@ -140,7 +142,7 @@ printRenderSemanticOracle = do
   Text.putStrLn "deployment\tobjects\tidentities\tkinds\tactivations\treconcile_modes\tworkloads\tnetwork_policies\tload_balancers\taccelerator_claims"
   forM_ capabilityFixtures $ \fixture -> forM_ [SingleNode, Distributed 3] $ \shape -> do
     sealed <- either (fail . show) pure (provisionFixture fixture shape)
-    Text.putStrLn (Text.intercalate "\t" (deploymentName fixture shape : semanticFields (renderAll sealed)))
+    Text.putStrLn (Text.intercalate "\t" (deploymentName fixture shape : semanticFields (either (error . show) id (renderAll sealed))))
 
 deploymentName :: CapabilityFixture -> ServiceShape -> Text
 deploymentName fixture shape = fixtureSlug fixture <> "_" <> case shape of
@@ -180,7 +182,7 @@ checkPureBoundary :: IO ()
 checkPureBoundary = do
   facade <- Text.readFile "src/manifest-render/Amoebius/Manifest.hs"
   renderAllSource <- Text.readFile "src/manifest-render/Amoebius/Manifest/RenderAll.hs"
-  renderSource <- Text.readFile "src/manifest-render/Amoebius/Manifest/Render.hs"
+  renderSource <- (<>) <$> Text.readFile "src/manifest-render/Amoebius/Manifest/Render.hs" <*> Text.readFile "src/manifest-render/Amoebius/Manifest/Sources.hs"
   let surface = facade <> renderAllSource <> renderSource
       prohibited = ["unsafePerformIO", "fromJust", "undefined", "error ", "head ", "tail ", "!!", " IO "]
   assert (all (not . (`Text.isInfixOf` surface)) prohibited) "renderAll transitive surface contains an effectful, partial, or unsafe token"
@@ -206,7 +208,7 @@ checkRenderCalculusProjection deployments objects safety properties mutants = do
           [ ("calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition)))
           , ("component-names", Text.intercalate "," (compositionNames composition))
           , ("projection-counts", Text.intercalate "," (map (Text.pack . show) [deployments, objects, safety, properties, mutants]))
-          , ("resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods]))
+          , ("resource-vector", Text.intercalate "," ([quantityText cpu, quantityText memory, quantityText ephemeral, quantityText pods]))
           ]
     assert (compositionKinds composition == everyCalculus) "render manifest projection omitted or reordered a calculus"
     assert (actual == expectedCalculusProjection) ("render manifest calculus projection changed: " <> show actual)

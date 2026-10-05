@@ -23,15 +23,8 @@ module Amoebius.Capacity.Scheduler
   , confirmBound
   ) where
 
-import Amoebius.Capacity.Types
-  ( Axis (..)
-  , ResourceEnvelope
-  , ResourceVector (..)
-  , addResources
-  , envelopeHeadroom
-  , envelopeRequests
-  , zeroResources
-  )
+import Amoebius.Capacity.Types (Axis (..), Overcommit (..), ResourceEnvelope, envelopeHeadroom, envelopeRequests, firstExceeded)
+import Amoebius.Capacity.Vector (ResourceVector (..), addResources, zeroResources)
 import Amoebius.Capacity.CapacityMutation (capacityMutationTargets)
 import Control.DeepSeq (NFData)
 import Data.List (sortOn)
@@ -243,14 +236,9 @@ retainedOnly reservation =
     }
 
 ensureResources :: ResourceVector -> ResourceVector -> Either SchedulerError ()
-ensureResources required available
-  | resourceCpu required > resourceCpu available = exceeded CpuAxis resourceCpu
-  | resourceMemory required > resourceMemory available = exceeded MemoryAxis resourceMemory
-  | resourceEphemeralStorage required > resourceEphemeralStorage available = exceeded EphemeralStorageAxis resourceEphemeralStorage
-  | resourcePodSlots required > resourcePodSlots available = exceeded PodSlotsAxis resourcePodSlots
-  | otherwise = Right ()
- where
-  exceeded axis project = Left (SchedulerCapacityExceeded axis (project required) (project available))
+ensureResources required available = case firstExceeded required available of
+  Just excess -> Left (SchedulerCapacityExceeded (overcommitAxis excess) (overcommitRequired excess) (overcommitAvailable excess))
+  Nothing -> Right ()
 
 unionCsi :: Map Text Natural -> [CompleteResourceReservation] -> Either SchedulerError (Set (Text, Text))
 unionCsi limits reservations = do

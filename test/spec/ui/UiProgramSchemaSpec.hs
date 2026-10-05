@@ -22,7 +22,8 @@ import Amoebius.Calculus.Composition (
 import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
 import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Capacity.Vector (ResourceVector (ResourceVector))
+import Amoebius.Vocabulary (quantityText)
 import Amoebius.Scope.Index (activeMembership, trustedSubject, trustedTenant, withRequestScope)
 import Amoebius.Ui.Check
 import Amoebius.Ui.Source
@@ -243,7 +244,7 @@ checkCalculus = do
                 [ ["calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition))]
                 , ["component-names", Text.intercalate "," (compositionNames composition)]
                 , ["projection-counts", Text.intercalate "," (map showText counts)]
-                , ["resource-vector", Text.intercalate "," (map showText [cpu, memory, ephemeral, pods])]
+                , ["resource-vector", Text.intercalate "," ([quantityText cpu, quantityText memory, quantityText ephemeral, quantityText pods])]
                 ]
         assertEqual "five calculus kinds" everyCalculus (compositionKinds composition)
         assertEqual "five-calculus semantic projection" Oracle.calculusOracle actual

@@ -2,6 +2,7 @@ module Main (main) where
 
 import Amoebius.Cli.Formal (runFormalCommand)
 import Amoebius.Cluster.Bootstrap (runBootstrap)
+import Amoebius.Dsl.Commands (runApply, runCompile, runRenderExamples)
 import Amoebius.Entry.ServeUi (runServeUi)
 import Amoebius.Entry.ControlPlane (runControlPlaneDaemon)
 import Amoebius.Exec.Boundary (mkBoundaryTools, runBoundaryCorpus)
@@ -9,6 +10,7 @@ import Amoebius.Image.Resolver (runResolverCommand)
 import Amoebius.Layout.Report (runLayoutReport)
 import Amoebius.Host.LinuxEngine (runLinuxEngineGuestPass)
 import Amoebius.Image.Build (runAdmittedBuildxOci, runBakeInventory, runRenderBakeDockerfile)
+import Amoebius.Kernel.Interpret (runFakeKubectl)
 import Amoebius.Toolchain.Report (runToolchainReport)
 import Amoebius.Vault.Client (runVaultPromptWriteCommand, runVaultReadCommand, runVaultTransitCommand)
 import Amoebius.Vault.Seal (openUnlockMaterial, sealUnlockMaterialIO)
@@ -16,15 +18,19 @@ import Data.ByteString.Base64 qualified as Base64
 import Data.ByteString.Char8 qualified as StrictByteString
 import Data.ByteString.Lazy qualified as ByteString
 import System.Directory (doesFileExist, findExecutable)
-import System.Environment (getArgs, getExecutablePath)
+import System.Environment (getArgs, getExecutablePath, getProgName)
 import System.Exit (ExitCode (..), exitWith)
 import System.FilePath (takeDirectory, (</>))
 import System.IO (hPutStrLn, stderr)
 import System.Posix.Process (executeFile)
 import Text.Read (readMaybe)
 
+-- | The program image is also the fake @kubectl@ the fake executor spawns: invoked under
+-- that name it records the call it receives and does nothing else.
 main :: IO ()
-main = getArgs >>= dispatch
+main = do
+  name <- getProgName
+  if name == "kubectl" then runFakeKubectl else getArgs >>= dispatch
 
 dispatch :: [String] -> IO ()
 dispatch arguments =
@@ -42,6 +48,9 @@ dispatch arguments =
     "validate" : options -> delegateValidate options
     "toolchain-report" : options -> runToolchainReport options
     "layout-report" : options -> runLayoutReport options
+    "render-examples" : options -> runRenderExamples options
+    "compile" : options -> runCompile options
+    "apply" : options -> runApply options
     ["--version"] -> putStrLn "amoebius 0.1.0.0"
     ["dev", "linux-engine-guest-pass", passText, outputRoot]
       | Just pass <- readMaybe passText -> runLinuxEngineGuestPass pass outputRoot

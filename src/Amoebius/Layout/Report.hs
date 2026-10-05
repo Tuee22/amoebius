@@ -28,10 +28,11 @@ data Options = Options
   { optionRoot :: FilePath
   , optionPathsFile :: Maybe FilePath
   , optionOutput :: Maybe FilePath
+  , optionGraph :: Bool
   }
 
 runLayoutReport :: [String] -> IO ()
-runLayoutReport arguments = case parseOptions (Options "." Nothing Nothing) arguments of
+runLayoutReport arguments = case parseOptions (Options "." Nothing Nothing True) arguments of
   Left problem -> hPutStrLn stderr problem >> exitWith (ExitFailure 2)
   Right options -> do
     acquired <- acquirePaths options
@@ -49,13 +50,17 @@ runLayoutReport arguments = case parseOptions (Options "." Nothing Nothing) argu
               (Left _, _) -> ([LayoutFinding "PackageDescriptionUnreadable" "amoebius.cabal"], [], mempty, mempty, mempty, mempty)
               (_, Left _) -> ([LayoutFinding "PackageDescriptionUnreadable" "probe/probe.cabal"], [], mempty, mempty, mempty, mempty)
               (Right mainPackage, Right probePackage) -> packageMapReport mainPackage probePackage paths
-        catalogResult <- if null packageFindings then loadPackageCatalog packageMap
+        catalogResult <- if null packageFindings && optionGraph options then loadPackageCatalog packageMap
           else pure (Right (emptyPackageCatalog, []))
         let (catalogFindings, catalogRows, catalog) = case catalogResult of
               Left problem -> ([problem], [], emptyPackageCatalog)
               Right (loaded, rows) -> ([], rows, loaded)
-        (graphFindings, graphRows) <- sourceGraphWithPackageCatalog
-          (optionRoot options) paths componentMap dependencyMap catalog forwardOwned
+        -- The graph is the report's costliest stage. A caller that judges only the
+        -- classification may skip it; the report then says so and states no stage.
+        (graphFindings, graphRows) <- if optionGraph options
+          then sourceGraphWithPackageCatalog
+            (optionRoot options) paths componentMap dependencyMap catalog forwardOwned
+          else pure ([], ["graph-stage\tnot-computed"])
         let rows =
               [Text.intercalate "\t" ["path", Text.pack path, renderPathClass pathClass] | (path, pathClass) <- classified]
                 <> ["finding\t" <> renderFinding finding | finding <- pathFindings]
@@ -86,7 +91,8 @@ parseOptions options arguments = case arguments of
   "--root" : value : rest -> parseOptions options {optionRoot = value} rest
   "--paths-file" : value : rest -> parseOptions options {optionPathsFile = Just value} rest
   "--output" : value : rest -> parseOptions options {optionOutput = Just value} rest
-  _ -> Left "layout-report: expected [--root DIR] [--paths-file FILE] [--output FILE]"
+  "--no-graph" : rest -> parseOptions options {optionGraph = False} rest
+  _ -> Left "layout-report: expected [--root DIR] [--paths-file FILE] [--output FILE] [--no-graph]"
 
 acquirePaths :: Options -> IO (Either String [FilePath])
 acquirePaths options = case optionPathsFile options of

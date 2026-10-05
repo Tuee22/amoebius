@@ -1,0 +1,55 @@
+record	amoebius-phase-receipt.v2
+phase	3
+capability	typed_spine
+generation	8154325b90bc2d3d0ebbf41f2205434c828e520fcf05ba8f6f66f89cb9f62ee3
+spec-digest	6f6fce16a6379fb25375b2051e26ebceba2408d79b67003946dc31f7dc894ce7
+spec	capability: typed_spine\nrole: ordinary\nclaim: From one operator-authored Dhall specification the shipped render-examples, compile, and apply commands freeze, decode, lower, plan, provision, render, chain, dry-run, and apply it through a separate fake kubectl process image. The runner rewrites the rendered example after the run starts, planting a nonce in the authored names and changing the replica count, and recovers the nonce from every stage artefact. The independent oracle judges every stage artefact of the corpus examples and of that run from literals, the fake's per-step stdin bytes concatenate to the compile output, and every refusal is observed at its exact tag and stage. Witness-driven rendering, capacity over application workloads beyond fit, substrates other than kind on one host, extensions, children, and the UI language are excluded.\nsubjects: Amoebius.Vocabulary, Amoebius.Dsl.Spec, Amoebius.Dsl.Import, Amoebius.Dsl.Decode, Amoebius.Dsl.Lower, Amoebius.Kernel.Step, Amoebius.Kernel.Interpret, Amoebius.Dsl.Pipeline\nsuite: spine-suite\noracle: oracle-dsl\npositive: case:kind-single-objectstore | input=kind-single-objectstore.dhall | expected=ten objects\npositive: case:shape-swap-sibling | input=shape-swap-sibling.dhall | expected=provider objects change, application bytes do not\npositive: case:replicas-3-sibling | input=replicas-3-sibling.dhall | expected=one differing path\npositive: case:local-import-twin | input=local-import-twin.dhall | expected=freezes to the baseline\npositive: case:lanes-of | input=host grid | expected=total lane table\npositive: case:round-trip | input=encode then decode | expected=equal values\npositive: case:step-sequence | input=chain order | expected=frame then identity\npositive: case:dry-run-zero | input=dry run | expected=no step executed\npositive: case:fake-relay | input=fake kubectl | expected=stdin equals payload\npositive: case:endpoint-digest | input=control-plane endpoint | expected=manifest digest\npositive: case:fields-consumed | input=authored leaves | expected=each reaches a byte\npositive: case:corpus-discovery | input=rendered files | expected=equals inventory\npositive: case:shipped-binary | input=perturbed run | expected=nonce in every artefact\nnegative: case:AppleNeedsArm64 | input=darwin amd64 | tag=NotNaturalArchitecture | stage=vocabulary\nnegative: case:WindowsNeedsAmd64 | input=windows arm64 | tag=NotNaturalArchitecture | stage=vocabulary\nnegative: case:ForbiddenImportEnv | input=forbidden-env.dhall | tag=ForbiddenImport | stage=freeze\nnegative: case:ForbiddenImportRemote | input=forbidden-remote.dhall | tag=ForbiddenImport | stage=freeze\nnegative: case:ForbiddenImportAlternative | input=forbidden-alternative.dhall | tag=ForbiddenImport | stage=freeze\nnegative: case:ForbiddenImportTransitive | input=forbidden-transitive.dhall | tag=ForbiddenImport | stage=freeze\nnegative: case:AbsoluteImport | input=forbidden-absolute.dhall | tag=AbsolutePath | stage=freeze\nnegative: case:HomeImport | input=forbidden-home.dhall | tag=HomePath | stage=freeze\nnegative: case:NonCodeImport | input=non-code-import.dhall | tag=NonCodeMode | stage=freeze\nnegative: case:ParseFailure | input=parse-failure.dhall | tag=ParseFailure | stage=freeze\nnegative: case:IllTypedAlternative | input=ill-typed-alternative.dhall | tag=IllTyped | stage=freeze\nnegative: case:RequestsAboveLimits | input=requests-above-limits.dhall | tag=RequestsAboveLimits | stage=decode\nnegative: case:EmptyNeeds | input=empty-needs.dhall | tag=EmptyNeeds | stage=decode\nnegative: case:ZeroReplicas | input=zero-replicas.dhall | tag=ZeroReplicas | stage=decode\nnegative: case:HeadroomAllZero | input=headroom-all-zero.dhall | tag=HeadroomAllZero | stage=decode\nnegative: case:ProductNamedInApp | input=product-named-in-app.dhall | tag=DhallFailure | stage=decode\nnegative: case:ShapeInApp | input=shape-in-app.dhall | tag=DhallFailure | stage=decode\nnegative: case:UnboundNeed | input=unbound-need.dhall | tag=UnboundNeed | stage=lower\nnegative: case:DanglingBinding | input=dangling-binding.dhall | tag=DanglingBinding | stage=lower\nnegative: case:UnknownDeployment | input=unknown-deployment.dhall | tag=UnknownDeployment | stage=lower\nnegative: case:HostShort | input=host-short.dhall | tag=InfrastructureDemandExceeded | stage=plan\nnegative: case:ReplicasOverCapacity | input=replicas-over-capacity.dhall | tag=PostBindExpansionOvercommit | stage=provision\nnegative: case:DetectedAppleAmd64 | input=Detected Apple Amd64 | tag=ConstructorNotExported | stage=compile\nnegative: case:BoundDeploymentOutsideLower | input=BoundDeployment construction | tag=ConstructorNotExported | stage=compile\nnegative: case:StepCarriesIO | input=Step with IO | tag=StepHasNoFunctionSlot | stage=compile\nnegative: case:TwoServerQuorum | input=two-server quorum | tag=EvenQuorumUnspellable | stage=compile\nmutants: stages=Amoebius.Vocabulary,Amoebius.Dsl.Spec,Amoebius.Dsl.Import,Amoebius.Dsl.Decode,Amoebius.Dsl.Lower,Amoebius.Kernel.Step,Amoebius.Kernel.Interpret,Amoebius.Dsl.Pipeline per-module=8 cap=40 kill-ratio=3/5 artefacts=Amoebius.Vocabulary:vocab.,Amoebius.Dsl.Spec:spec.,Amoebius.Dsl.Import:freeze.,Amoebius.Dsl.Decode:decode.,Amoebius.Dsl.Lower:lower.,Amoebius.Kernel.Step:chain.,Amoebius.Kernel.Interpret:dry-run.,Amoebius.Kernel.Interpret:fake-apply.,Amoebius.Dsl.Pipeline:plan.,Amoebius.Dsl.Pipeline:provision.,Amoebius.Dsl.Pipeline:render.,Amoebius.Dsl.Pipeline:pipeline.,Amoebius.Dsl.Pipeline:endpoint.\nbinary-fact: command=compile --input {input} --out {run}/compiled | input=root.dhall | perturbation=staged(pre=render-examples --example kind-single-objectstore --output {input} post=apply --executor fake --input {input} --out {run}/applied then=sentinel-to-nonce(0b5e17e11a0c0ffee0de1e9a7e5ba5ed),replica-count(1->3)) | outputs={run}/compiled/frozen.dhall,{run}/compiled/decoded.dump,{run}/compiled/lowered.dump,{run}/compiled/plan.dump,{run}/compiled/provisioned.dump,{run}/compiled/manifest.json,{run}/compiled/chain.dump,{run}/compiled/dry-run.dump,{run}/applied/fake/stdin.combined\nspine-fact: rendered=compiled/manifest.json | stages=freeze,decode,lower,plan,provision,render,chain,dry-run,fake-apply | applied-digest=applied/fake/applied.sha256\nsubstrate: none\n
+candidate-digest	f303502f9b73866b89ca0047e3a2fd260b55e56fcb91ab812be64923c003c715
+kill-table-digest	20dc9de59f304b0513f1c35d6e3afa336282273bf4537e36ed7143d55f50991d
+closure-digest	55fcd03790fa9e55400b4b5ce63d311d5dc65c62633cba2f3899e46184e44464
+reproducible-digest	840b908531928c72a4f09c755232a8b55c01a088437222bacf5e9cb114ebb3d3
+verifier-digest	8154325b90bc2d3d0ebbf41f2205434c828e520fcf05ba8f6f66f89cb9f62ee3
+governance-digest	bb9aea4fda8f50239bd5168d439cd5e9d9eccc4242c595d1d626a9e0174badc7
+status-postimage	1c7009717123298470ddd01bd47c4d7db3ed927daefc61eb92196fb3699fe432
+tree-commit	fdec157bad9dacf54257df2ca097d69ebd321cad
+issued-at	2026-10-01 09:56:48.851092262 UTC
+witness	src/vocabulary/Amoebius/Vocabulary.hs:106 branch-swap fd7b9ef49c29->12949fdedb80
+witness	src/dsl-spine/Amoebius/Dsl/Spec.hs:161 branch-swap 0280799a510d->53c295962c7f
+witness	src/dsl-spine/Amoebius/Dsl/Import.hs:88 field-drop 2b6d506f4bee->982e87093c8d
+witness	src/dsl-spine/Amoebius/Dsl/Decode.hs:146 constant-flip ac23abfa0265->29d12b6acc5c
+witness	src/dsl-spine/Amoebius/Dsl/Lower.hs:119 field-drop 0afe8e3364b4->28339b4cc483
+witness	src/kernel-steps/Amoebius/Kernel/Step.hs:96 branch-swap 5be0dae83c1a->0a14a8d60aaa
+witness	src/kernel-steps/Amoebius/Kernel/Interpret.hs:117 constant-flip 91748d57bbd6->26fca8e56605
+witness	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:146 list-truncation e9e5288e6c22->cddeea99b427
+witness	src/vocabulary/Amoebius/Vocabulary.hs:124 list-truncation fd7b9ef49c29->7d2d77853c79
+witness	src/dsl-spine/Amoebius/Dsl/Spec.hs:185 boundary-shift 0280799a510d->f6cabac78a2a
+witness	src/dsl-spine/Amoebius/Dsl/Import.hs:89 field-drop 2b6d506f4bee->a8ff65a8f074
+witness	src/dsl-spine/Amoebius/Dsl/Decode.hs:149 constant-flip ac23abfa0265->2ccb95430577
+witness	src/dsl-spine/Amoebius/Dsl/Lower.hs:120 field-drop 0afe8e3364b4->94df7852ce9c
+witness	src/kernel-steps/Amoebius/Kernel/Step.hs:97 branch-swap 5be0dae83c1a->9728b055a00d
+witness	src/kernel-steps/Amoebius/Kernel/Interpret.hs:122 constant-flip 91748d57bbd6->fd15ff1ca3c6
+witness	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:217 list-truncation e9e5288e6c22->6b8aa3494e89
+witness	src/vocabulary/Amoebius/Vocabulary.hs:125 list-truncation fd7b9ef49c29->ab10d283a60a
+witness	src/dsl-spine/Amoebius/Dsl/Spec.hs:188 branch-swap 0280799a510d->139a9fde177c
+witness	src/dsl-spine/Amoebius/Dsl/Import.hs:119 branch-swap 2b6d506f4bee->5eb7f7f8693e
+witness	src/dsl-spine/Amoebius/Dsl/Decode.hs:157 list-truncation ac23abfa0265->c7200d6deaed
+witness	src/dsl-spine/Amoebius/Dsl/Lower.hs:121 field-drop 0afe8e3364b4->38e35c97ae70
+witness	src/kernel-steps/Amoebius/Kernel/Step.hs:141 boundary-shift 5be0dae83c1a->e9c534981967
+witness	src/kernel-steps/Amoebius/Kernel/Interpret.hs:122 list-truncation 91748d57bbd6->23601848f570
+witness	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:228 constant-flip e9e5288e6c22->83616567b547
+witness	src/vocabulary/Amoebius/Vocabulary.hs:178 constant-flip fd7b9ef49c29->df6eddb4fdf7
+witness	src/dsl-spine/Amoebius/Dsl/Spec.hs:219 boundary-shift 0280799a510d->a96c45208fad
+witness	src/dsl-spine/Amoebius/Dsl/Decode.hs:172 field-drop ac23abfa0265->77b7d3e13988
+witness	src/dsl-spine/Amoebius/Dsl/Lower.hs:141 field-drop 0afe8e3364b4->89a8b362ea51
+witness	src/kernel-steps/Amoebius/Kernel/Step.hs:141 list-truncation 5be0dae83c1a->4a25d74f449f
+witness	src/kernel-steps/Amoebius/Kernel/Interpret.hs:135 constant-flip 91748d57bbd6->96fa1153f301
+witness	src/vocabulary/Amoebius/Vocabulary.hs:178 boundary-shift fd7b9ef49c29->f4bb0ab70a40
+witness	src/dsl-spine/Amoebius/Dsl/Spec.hs:220 boundary-shift 0280799a510d->66a95b9293cc
+witness	src/dsl-spine/Amoebius/Dsl/Decode.hs:173 field-drop ac23abfa0265->a90cd52de9e7
+witness	src/dsl-spine/Amoebius/Dsl/Lower.hs:151 field-drop 0afe8e3364b4->1667cca0b4b7
+witness	src/kernel-steps/Amoebius/Kernel/Step.hs:144 constant-flip 5be0dae83c1a->38ec43651939
+witness	src/kernel-steps/Amoebius/Kernel/Interpret.hs:143 list-truncation 91748d57bbd6->da35d62de65f
+witness	src/vocabulary/Amoebius/Vocabulary.hs:179 branch-swap fd7b9ef49c29->0b8f848f808d
+witness	src/dsl-spine/Amoebius/Dsl/Spec.hs:221 boundary-shift 0280799a510d->772b7be563ec
+witness	src/dsl-spine/Amoebius/Dsl/Decode.hs:198 list-truncation ac23abfa0265->c65b8c28c92a
+witness	src/dsl-spine/Amoebius/Dsl/Lower.hs:181 list-truncation 0afe8e3364b4->8fe754a2731a

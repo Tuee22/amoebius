@@ -2,7 +2,6 @@
 
 module Amoebius.Pulsar.Topology
   ( Topic
-  , Lane (..)
   , RouteDirection (..)
   , RouteEntry (..)
   , StorageBudgetId (..)
@@ -16,6 +15,7 @@ module Amoebius.Pulsar.Topology
   ) where
 
 import Amoebius.Pulsar.Internal.Types (Topic (..))
+import Amoebius.Vocabulary (Substrate (..))
 import Data.List (group, sort)
 import Data.Map.Strict qualified as Map
 import Data.Set (Set)
@@ -23,16 +23,13 @@ import Data.Set qualified as Set
 import Data.Text (Text)
 import Numeric.Natural (Natural)
 
-data Lane = LinuxCpu | LinuxCuda | Apple | Windows
-  deriving stock (Bounded, Enum, Eq, Ord, Show)
-
 data RouteDirection = Input | Report
   deriving stock (Eq, Ord, Show)
 
 data RouteEntry = RouteEntry
   { routeWorkflow :: Text
   , routePhase :: Text
-  , routeLanes :: Set Lane
+  , routeLanes :: Set Substrate
   , routeDirection :: RouteDirection
   , routeEmitOnly :: Bool
   , routeMonitoringOwner :: Maybe Text
@@ -65,18 +62,18 @@ data TopicDescriptor = TopicDescriptor
 data TopologyViolation
   = DuplicateTopic Text
   | EmptyLaneSet Text
-  | OneSidedLink Text Lane
+  | OneSidedLink Text Substrate
   | MonitoringInfeasible Text
   | UnroutedMonitor Text
   deriving stock (Eq, Ord, Show)
 
-laneText :: Lane -> Text
+laneText :: Substrate -> Text
 laneText LinuxCpu = "linux-cpu"
 laneText LinuxCuda = "linux-cuda"
 laneText Apple = "apple"
 laneText Windows = "windows"
 
-topicFor :: Text -> Text -> RouteEntry -> Lane -> Topic
+topicFor :: Text -> Text -> RouteEntry -> Substrate -> Topic
 topicFor tenant namespace route lane =
   Topic
     ( "persistent://" <> tenant <> "/" <> namespace <> "/"

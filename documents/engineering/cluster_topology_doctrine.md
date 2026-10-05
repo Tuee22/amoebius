@@ -56,13 +56,17 @@ substrate doctrine already owns (Lima on apple, WSL2 on windows). This document 
 topology it induces; it owns **no** substrate names, no detection, no VM-provider mechanics, and no capacity
 numbers (those are [substrate_doctrine.md](./substrate_doctrine.md) and [resource_capacity_doctrine.md](./resource_capacity_doctrine.md)).
 
-The pure relation is owed by [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md),
-its reflected schema/decoder consumers by [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md), and
+**Observed implementation** ([GateSpec:typed_spine]). The reflected schema and decoder consumers of this
+relation are implemented by [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md)
+([DL-0023](../decision_log.md#dl-0023--phase-3-accepted-its-owed-by-paragraphs-become-observed-implementations)): `Amoebius.Dsl.Spec` types the cluster's
+host records and refuses an undeclared, an unreferenced, and a duplicated host, and `Amoebius.Dsl.Decode` decodes
+them from the frozen Dhall. The relation itself and its engine/environment matrix are not part of that claim.
+
+The pure relation is owed by [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md), and
 runtime engine realization by Phases 52–54. Phase 4 must validate `Amoebius.Dsl.Topology` at Register 1:
 compile-time index pairs, the exhausted engine/environment compatibility matrix, host distinctness, fixed
-placement, and elastic growth are accepted only with every generated production mutant red. The corresponding
-Dhall-typecheck loci remain Phase 3 work rather than a backward dependency. No EKS resource, VM, or node join
-is claimed; those runtime facts remain **UNVERIFIED**. Status and gates live only in
+placement, and elastic growth are accepted only with every generated production mutant red. No EKS resource, VM,
+or node join is claimed; those runtime facts remain **UNVERIFIED**. Status and gates live only in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---

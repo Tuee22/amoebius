@@ -13,6 +13,7 @@ import Amoebius.Pulsar.Provision
 import Amoebius.Pulsar.Seek
 import Amoebius.Pulsar.Subscription
 import Amoebius.Pulsar.Topology
+import Amoebius.Vocabulary (Substrate (..))
 import Codec.Serialise (Serialise)
 import Control.Exception (bracket, finally)
 import Control.Monad (forM, unless)

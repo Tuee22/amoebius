@@ -4,7 +4,7 @@ module Amoebius.Validation.GateSpec
   ( GateSpec, GateSpecInput (..), GateRole (..), GateCategory (..)
   , ProductionModule (..), OracleExecutable (..), CabalTarget (..), ExactCase (..)
   , MutantPolicy (..), BinaryFact (..), Perturbation (..), SpineFact (..)
-  , Substrate (..), SeedSpec (..), SpecRefusal (..), allGateCategories
+  , GateSubstrate (..), SeedSpec (..), SpecRefusal (..), allGateCategories
   , defaultMutantPolicy, gateBinaryFact, gateCapability, gateCases
   , gateClaim, gateMutants, gateOracle, gateRole, gateSeed
   , gateSpineFact, gateSubjects, gateSubstrate, gateSuite
@@ -44,15 +44,17 @@ data MutantPolicy = MutantPolicy
   , perModule :: Int
   , perGateCap :: Int
   , killRatio :: Rational
+  , stageArtefacts :: [(Text, Text)]
   }
   deriving (Eq, Ord, Show)
 defaultMutantPolicy :: [ProductionModule] -> MutantPolicy
-defaultMutantPolicy modules = MutantPolicy modules 8 40 (3 / 5)
+defaultMutantPolicy modules = MutantPolicy modules 8 40 (3 / 5) []
 -- | The runner's rewrite of a binary-fact input after the run starts.
 data Perturbation
   = SentinelToNonce {perturbationSentinel :: Text}
   | ReplicaCount {perturbationFrom :: Int, perturbationTo :: Int}
-  | PlantHaskellPath
+  | Rewrite {perturbationNeedle :: Text, perturbationReplacement :: Text}
+  | Staged {stagePrelude :: [[Text]], stagePostlude :: [[Text]], stageInner :: [Perturbation]}
   | PlantForeignPaths [(FilePath, Text)]
   deriving (Eq, Ord, Show)
 -- | Product command, runner perturbation, and output files to digest.
@@ -71,16 +73,16 @@ data SpineFact = SpineFact
   }
   deriving (Eq, Ord, Show)
 -- | @HardwareFree@ or one member of the closed substrate catalogue (DL-0001).
-data Substrate
+data GateSubstrate
   = HardwareFree
   | LinuxCpu
   | LinuxCuda
   | Apple
   | Windows
   deriving (Bounded, Enum, Eq, Ord, Show)
-substrateCatalogue :: [Substrate]
+substrateCatalogue :: [GateSubstrate]
 substrateCatalogue = [minBound .. maxBound]
-renderSubstrate :: Substrate -> Text
+renderSubstrate :: GateSubstrate -> Text
 renderSubstrate substrate = case substrate of
   HardwareFree -> "none"
   LinuxCpu -> "linux-cpu"
@@ -156,7 +158,7 @@ data GateSpecInput = GateSpecInput
   , inputMutants :: MutantPolicy
   , inputBinaryFact :: Maybe BinaryFact
   , inputSpineFact :: Maybe SpineFact
-  , inputSubstrate :: Substrate
+  , inputSubstrate :: GateSubstrate
   , inputSeed :: Maybe SeedSpec
   }
   deriving (Eq, Show)
@@ -172,7 +174,7 @@ data GateSpec = GateSpec
   , gateMutants :: MutantPolicy
   , gateBinaryFact :: Maybe BinaryFact
   , gateSpineFact :: Maybe SpineFact
-  , gateSubstrate :: Substrate
+  , gateSubstrate :: GateSubstrate
   , gateSeed :: Maybe SeedSpec
   }
   deriving (Eq, Show)
@@ -187,8 +189,7 @@ data SpecRefusal
   | SeedCarriesSpineFact
   | SeedAbsent
   | SeedOutsideSeedRole
-  | SpineOutsideBarrier
-  | HardwareSubstrateOutsideHardwareRole Substrate
+  | HardwareSubstrateOutsideHardwareRole GateSubstrate
   | HardwareRoleWithoutSubstrate
   | StageModuleNotSubject ProductionModule
   | MutantPolicyOutOfBounds
@@ -207,7 +208,6 @@ renderSpecRefusal refusal = case refusal of
   SeedCarriesSpineFact -> "SEED-CARRIES-SPINE-FACT"
   SeedAbsent -> "SEED-ABSENT"
   SeedOutsideSeedRole -> "SEED-OUTSIDE-SEED-ROLE"
-  SpineOutsideBarrier -> "SPINE-OUTSIDE-BARRIER"
   HardwareSubstrateOutsideHardwareRole substrate -> "HARDWARE-BEFORE-BARRIER: " <> renderSubstrate substrate
   HardwareRoleWithoutSubstrate -> "SUBSTRATE-ABSENT"
   StageModuleNotSubject (ProductionModule name) -> "STAGE-MODULE-NOT-SUBJECT: " <> name
@@ -250,7 +250,6 @@ mkGateSpec role input = case refusals of
       , [EmptyCases | null (inputCases input)]
       , [MissingBinaryFact | role /= SeedGate, inputBinaryFact input == Nothing]
       , [MissingSpineFact | role == BarrierGate, inputSpineFact input == Nothing]
-      , [SpineOutsideBarrier | role /= BarrierGate, inputSpineFact input /= Nothing]
       , [SeedCarriesBinaryFact | role == SeedGate, inputBinaryFact input /= Nothing]
       , [SeedCarriesSpineFact | role == SeedGate, inputSpineFact input /= Nothing]
       , [SeedAbsent | role == SeedGate, inputSeed input == Nothing]
@@ -301,6 +300,7 @@ renderGateSpec spec =
       <> showText (numerator (killRatio policy))
       <> "/"
       <> showText (denominator (killRatio policy))
+      <> (if null (stageArtefacts policy) then "" else " artefacts=" <> Text.intercalate "," [module' <> ":" <> prefix | (module', prefix) <- stageArtefacts policy])
   renderBinaryFact fact =
     "binary-fact: command="
       <> Text.unwords (factCommand fact)
@@ -313,8 +313,10 @@ renderGateSpec spec =
   renderPerturbation perturbation = case perturbation of
     SentinelToNonce sentinel -> "sentinel-to-nonce(" <> sentinel <> ")"
     ReplicaCount from to -> "replica-count(" <> showText from <> "->" <> showText to <> ")"
-    PlantHaskellPath -> "plant-haskell-path"
+    Rewrite needle replacement -> "rewrite(" <> needle <> " => " <> replacement <> ")"
+    Staged prelude postlude inner -> "staged(pre=" <> renderCommands prelude <> " post=" <> renderCommands postlude <> " then=" <> Text.intercalate "," (map renderPerturbation inner) <> ")"
     PlantForeignPaths paths -> "plant-foreign-paths(" <> Text.intercalate "," [Text.pack path <> "=" <> tag | (path, tag) <- paths] <> ")"
+  renderCommands = Text.intercalate ";" . map Text.unwords
   renderSpineFact fact =
     "spine-fact: rendered="
       <> Text.pack (spineRendered fact)

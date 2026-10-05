@@ -186,15 +186,18 @@ would be reporting a designed extension point as a built one.
 
 ## 4. Capability → provider → shape: the binding
 
-This representational seam in `src/capability-bind/Amoebius/Capability/{Types,Binding}.hs` is owed by [Phase
-3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md). Its NOT-VALIDATED contract requires all nine arms under
-both shapes, exact graph semantics, app-byte invariance, and an independent object-node-multiset oracle.
-Provision and runtime provider health remain outside that contract. The post-bind planner/seal in
-`src/provision-seal/Amoebius/Capacity/{Provision,RenderSource}.hs`, with runtime accounting supplied by
-`src/execution-accelerator-folds/Amoebius/Capacity/RuntimeStorage.hs`, is owed by the same phase; its
-NOT-VALIDATED contract requires every bound shape, both planner arms, the opaque identity-keyed source set,
-the activation stages, and distinct seal-locus failures. Generated production mutants must cover replay,
-readback, execution-expansion, and runtime-accounting faults; live realization remains later-owned.
+**Observed implementation** ([GateSpec:typed_spine]). The binding seam in
+`src/capability-bind/Amoebius/Capability/Binding.hs` and the post-bind planner and seal in
+`src/provision-seal/Amoebius/Capacity/Provision.hs` are implemented by
+[Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md)
+([DL-0023](../decision_log.md#dl-0023--phase-3-accepted-its-owed-by-paragraphs-become-observed-implementations)) as stages of the typed spine. The
+object-store capability bound under both shapes reaches fake-applied bytes whose application objects are identical
+across the shape swap, an independent oracle judges the rendered object multiset from literals, and an unbound
+need, a dangling binding, an unknown deployment, an overcommitted demand, and a post-bind expansion overcommit are
+each refused at their exact tag and stage. The oracle's source scan allows no importer of the assembler other than
+`Amoebius.Dsl.Lower`. The other eight arms, the remaining planner arms, the activation stages, and runtime
+accounting are exercised only by component suites, which are development diagnostics that no phase gate records;
+provision and runtime provider health, and live realization, remain later-owned.
 
 A capability becomes a running service through a **three-part binding**, and the three parts live on different
 surfaces:

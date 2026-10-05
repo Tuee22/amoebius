@@ -4,13 +4,9 @@
 module Amoebius.Entry.ControlPlane (runControlPlaneDaemon) where
 
 import Amoebius.ControlPlane.AdminApi
-import Amoebius.ControlPlane.Deploy
-import Amoebius.ControlPlane.Reconcile (ObjectIdentity (..))
-import Amoebius.ControlPlane.Daemon (ControlPlaneStateKind)
-import Amoebius.Dsl.Decode (decodeCluster)
-import Amoebius.Dsl.Error (DecodeError (..), decodeErrorTag)
+import Amoebius.Dsl.Pipeline (EndpointOutcome (..), endpointOutcome)
 import Control.Concurrent (MVar, forkFinally, newMVar, withMVar)
-import Control.Exception (bracket, finally)
+import Control.Exception (bracket)
 import Control.Monad (forever, unless, void)
 import Data.Aeson (FromJSON (..), ToJSON, Value, eitherDecodeStrict', encode, object, withObject, (.:), (.:?), (.!=), (.=))
 import Data.Aeson.Types (Pair)
@@ -20,14 +16,12 @@ import Data.ByteString.Lazy qualified as LazyByteString
 import Data.IORef (IORef, newIORef, readIORef, writeIORef)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
-import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as TextIO
 import GHC.Generics (Generic)
 import Network.Socket
 import Network.Socket.ByteString qualified as Socket
-import System.Directory (removeFile)
 import System.Exit (ExitCode (..), die)
 import System.IO (hFlush, stdout)
 import System.Process (proc, readCreateProcessWithExitCode)
@@ -35,8 +29,9 @@ import System.Process (proc, readCreateProcessWithExitCode)
 helperPath :: FilePath
 helperPath = "/live-dsl-deploy-artifacts/control_plane_runtime_helper.py"
 
-uploadPath :: FilePath
-uploadPath = "/live-dsl-deploy-dhall/examples/live-dsl-deploy-upload.dhall"
+-- | The directory an uploaded specification's relative imports resolve beneath.
+uploadDirectory :: FilePath
+uploadDirectory = "/live-dsl-deploy-dhall/examples"
 
 data AdminRequest = AdminRequest
   { password :: Text
@@ -136,26 +131,21 @@ dhallEndpoint podUid ready authorityLock request = withAdmission DhallUpdate req
     Right _ -> withFreshAuthority podUid ready authorityLock $ case dhallSource decoded of
         Nothing -> pure (jsonResponse 400 (object ["tag" .= ("dhall-source-absent" :: Text)]))
         Just source -> do
-          TextIO.writeFile uploadPath source
-          decodedSpec <- decodeCluster uploadPath `finally` removeFile uploadPath
-          case decodedSpec of
-            Left problem ->
-              pure (jsonResponse 422 (object ["gate" .= rejectionGate problem, "tag" .= decodeErrorTag problem]))
-            Right _ -> case provisionDeploy (deployDemand uploadPath) of
-              Left problem ->
-                pure (jsonResponse 422 (object ["tag" .= ("ProvisionError" :: Text), "detail" .= show problem]))
-              Right _ -> do
-                persisted <- runHelper ["persist-state"] (Char8.unpack (requestBody request))
-                reconciled <- runHelper ["reconcile"] (Char8.unpack (requestBody request))
-                case (persisted, reconciled) of
-                  (Right durable, Right enactment) -> do
-                    logEvent podUid "dhall-update" ["durableState" .= Text.strip (Text.pack durable)]
-                    case (decodeHelperValue durable, decodeHelperValue enactment) of
-                      (Right durableValue, Right enactmentValue) ->
-                        pure (jsonResponse 200 (object ["result" .= ("converged" :: Text), "durable" .= durableValue, "enact" .= enactmentValue]))
-                      _ -> pure (jsonResponse 500 (object ["tag" .= ("helper-json-invalid" :: Text)]))
-                  (Left problem, _) -> pure (jsonResponse 500 (object ["tag" .= ("state-persist-failed" :: Text), "detail" .= problem]))
-                  (_, Left problem) -> pure (jsonResponse 500 (object ["tag" .= ("reconcile-failed" :: Text), "detail" .= problem]))
+          outcome <- endpointOutcome uploadDirectory source
+          case outcome of
+            EndpointRefused tag stage -> pure (jsonResponse 422 (object ["tag" .= tag, "stage" .= stage]))
+            EndpointRendered digest -> do
+              persisted <- runHelper ["persist-state"] (Char8.unpack (requestBody request))
+              reconciled <- runHelper ["reconcile"] (Char8.unpack (requestBody request))
+              case (persisted, reconciled) of
+                (Right durable, Right enactment) -> do
+                  logEvent podUid "dhall-update" ["durableState" .= Text.strip (Text.pack durable)]
+                  case (decodeHelperValue durable, decodeHelperValue enactment) of
+                    (Right durableValue, Right enactmentValue) ->
+                      pure (jsonResponse 200 (object ["result" .= ("converged" :: Text), "rendered" .= digest, "durable" .= durableValue, "enact" .= enactmentValue]))
+                    _ -> pure (jsonResponse 500 (object ["tag" .= ("helper-json-invalid" :: Text)]))
+                (Left problem, _) -> pure (jsonResponse 500 (object ["tag" .= ("state-persist-failed" :: Text), "detail" .= problem]))
+                (_, Left problem) -> pure (jsonResponse 500 (object ["tag" .= ("reconcile-failed" :: Text), "detail" .= problem]))
 
 withFreshAuthority :: Text -> IORef Bool -> MVar () -> IO StrictByteString.ByteString -> IO StrictByteString.ByteString
 withFreshAuthority podUid ready authorityLock continuation = do
@@ -182,33 +172,6 @@ parseReach request = case Map.lookup "x-amoebius-reach" (requestHeaders request)
   Just "Lan" -> Right Lan
   Just "WildIngress" -> Right WildIngress
   _ -> Left "admin-reach-unclassified"
-
-deployDemand :: FilePath -> DeployDemand
-deployDemand path = DeployDemand
-  { deployDhallPath = path
-  , deployTargetAuthenticated = True
-  , deployCapacityFits = True
-  , deployEnvelopes = Set.fromList [minBound .. maxBound]
-  , deployProducerArms = Set.fromList [minBound .. maxBound]
-  , deployStateKinds = Set.fromList [minBound .. maxBound :: ControlPlaneStateKind]
-  , deployDesiredObjects = Set.fromList (fmap ObjectIdentity desiredObjects)
-  }
-
-desiredObjects :: [Text]
-desiredObjects =
-  [ "ConfigMap/edge-system/keycloak-ingress-envoy"
-  , "Deployment/edge-system/envoy"
-  , "Deployment/observability/prometheus-query-proxy"
-  , "Deployment/edge-system/live-dsl-deploy-trivial"
-  , "HTTPRoute/edge-system/live-dsl-deploy-trivial"
-  , "Service/observability/prometheus-query-proxy"
-  , "Service/edge-system/live-dsl-deploy-trivial"
-  ]
-
-rejectionGate :: DecodeError -> Text
-rejectionGate problem = case problem of
-  DhallFailure _ -> "Gate-1"
-  _ -> "Gate-2"
 
 receiveRequest :: Socket -> IO HttpRequest
 receiveRequest connection = do

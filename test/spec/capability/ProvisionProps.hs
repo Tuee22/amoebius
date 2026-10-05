@@ -14,7 +14,7 @@ import Amoebius.Capacity.Provision
   , planInfrastructure
   , provisionErrorTag
   )
-import Amoebius.Capacity.Types (ResourceVector (..))
+import Amoebius.Capacity.Vector (ResourceVector (..))
 import Amoebius.Capability.Types (BoundDeployment, ServiceShape (SingleNode))
 import BindFixtures (CapabilityFixture)
 import Control.Monad (unless)

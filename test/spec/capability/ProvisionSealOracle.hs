@@ -29,7 +29,7 @@ data MutantOracle = MutantOracle
 
 expectedNegatives :: [NegativeOracle]
 expectedNegatives =
-  [ NegativeOracle "illegal_post_bind_expansion_overcommit" "PostBindExpansionOvercommit" "legal_post_bind_expansion_exact"
+  [ NegativeOracle "illegal_placement_over_capacity" "OverCapacity" "legal_placement_exact"
   , NegativeOracle "illegal_monitoring_work_over_budget" "MonitoringBudgetExceeded" "legal_monitoring_work_exact"
   , NegativeOracle "illegal_accelerator_vram_shortage" "VramOvercommit" "legal_accelerator_vram_exact"
   , NegativeOracle "illegal_cuda_on_cpu_target" "MissingCapability" "legal_cuda_on_cuda_target"
@@ -77,7 +77,7 @@ expectedLocusEntries =
   , "legal_edge_singlenode", "legal_edge_distributed"
   , "legal_inferenceengine_singlenode", "legal_inferenceengine_distributed"
   , "planner_preexisting", "planner_creation"
-  , "illegal_post_bind_expansion_overcommit"
+  , "illegal_placement_over_capacity"
   , "illegal_monitoring_work_over_budget"
   , "illegal_accelerator_vram_shortage"
   , "illegal_cuda_on_cpu_target"

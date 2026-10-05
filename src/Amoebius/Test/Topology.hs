@@ -2,7 +2,7 @@
 
 module Amoebius.Test.Topology
   ( TestSubstrate (..)
-  , ResourceVector (..)
+  , TestResourceVector (..)
   , AcceleratorRequirement (..)
   , Allocation (..)
   , Fault (..)
@@ -21,7 +21,7 @@ import Data.Word (Word64)
 data TestSubstrate = TestLinuxCpu | TestLinuxCuda | TestApple | TestWindows
   deriving stock (Eq, Ord, Show, Enum, Bounded)
 
-data ResourceVector = ResourceVector
+data TestResourceVector = TestResourceVector
   { resourceCpuMillis :: Word64
   , resourceMemoryBytes :: Word64
   , resourceEphemeralBytes :: Word64
@@ -63,8 +63,8 @@ data TestTopology = TestTopology
   , topologyFaults :: [Fault]
   , topologyExpectations :: [Expectation]
   , topologyTeardownRequired :: Bool
-  , topologySupply :: ResourceVector
-  , topologyDemand :: ResourceVector
+  , topologySupply :: TestResourceVector
+  , topologyDemand :: TestResourceVector
   , topologyAcceleratorRequirement :: AcceleratorRequirement
   , topologyAcceleratorOffering :: Maybe Text
   }

@@ -38,7 +38,9 @@ import Amoebius.Capacity.NodeLocalStorage
   , NodeStorageRole (KubeletNodefs)
   )
 import Amoebius.Capacity.RenderSource (K8sObjectIdentity (..))
-import Amoebius.Capacity.Types (ResourceVector (..), addResources)
+import Amoebius.Capacity.Types (Axis (..), Overcommit (..), firstExceeded)
+import Amoebius.Capacity.Vector (ResourceVector (..), addResources)
+import Amoebius.Vocabulary (quantityValue)
 import Amoebius.Image.Artifact (ImageArtifact (..), ImagePlatform)
 import Amoebius.Image.NodeLoad
   ( NodeLoadError
@@ -55,7 +57,7 @@ import Amoebius.Image.Registry
   , provisionedRegistryPeakBytes
   )
 import Amoebius.Manifest.K8sObject (K8sObject, K8sObjectKind (..))
-import Amoebius.Manifest.Render
+import Amoebius.Manifest.Sources
   ( BootstrapRenderSource (..)
   , renderBootstrapSourcePrivate
   )
@@ -401,7 +403,7 @@ validateSpec spec = do
   validateDigest (bootstrapRegistryHandoffDigest spec)
   validateExecution (bootstrapRegistryExecution spec)
   storage <- either (Left . BootstrapRegistryStorageRejected) Right (provisionRegistryStorage (bootstrapRegistryStorageDemand spec))
-  let registryEphemeral = resourceEphemeralStorage (bootstrapContainerRequests (bootstrapRegistryContainer (bootstrapRegistryExecution spec)))
+  let registryEphemeral = quantityValue (resourceEphemeralStorage (bootstrapContainerRequests (bootstrapRegistryContainer (bootstrapRegistryExecution spec))))
       required = provisionedRegistryPeakBytes storage + bootstrapContainerPrivateEphemeralBytes (bootstrapRegistryContainer (bootstrapRegistryExecution spec))
   if required <= registryEphemeral
     then Right ()
@@ -514,12 +516,15 @@ requireResources
   -> ResourceVector
   -> ResourceVector
   -> Either BootstrapRegistryError ()
-requireResources constructor required available
-  | resourceCpu required > resourceCpu available = Left (constructor "Cpu" (resourceCpu required) (resourceCpu available))
-  | resourceMemory required > resourceMemory available = Left (constructor "Memory" (resourceMemory required) (resourceMemory available))
-  | resourceEphemeralStorage required > resourceEphemeralStorage available = Left (constructor "Ephemeral" (resourceEphemeralStorage required) (resourceEphemeralStorage available))
-  | resourcePodSlots required > resourcePodSlots available = Left (constructor "PodSlots" (resourcePodSlots required) (resourcePodSlots available))
-  | otherwise = Right ()
+requireResources constructor required available = case firstExceeded required available of
+  Just excess -> Left (constructor (axisText (overcommitAxis excess)) (overcommitRequired excess) (overcommitAvailable excess))
+  Nothing -> Right ()
+ where
+  axisText axis = case axis of
+    CpuAxis -> "Cpu"
+    MemoryAxis -> "Memory"
+    EphemeralStorageAxis -> "Ephemeral"
+    _ -> "PodSlots"
 
 requireApiVersion :: ObservedBootstrapRegistryInventory -> K8sObjectKind -> Either BootstrapRegistryError ()
 requireApiVersion observed kind = case Map.lookup kind (observedBootstrapRegistryApiVersions observed) of

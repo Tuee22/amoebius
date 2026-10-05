@@ -14,7 +14,7 @@ predecessor is [Phase 7](phase_07_child_clusters_obligation_teardown.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_07_child_clusters_obligation_teardown.md, DEVELOPMENT_PLAN/phase_09_dsl_barrier.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/decision_log.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_security.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_03_typed_spine.md, DEVELOPMENT_PLAN/phase_07_child_clusters_obligation_teardown.md, DEVELOPMENT_PLAN/phase_09_dsl_barrier.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/decision_log.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
@@ -194,7 +194,7 @@ Implement the two modules and the compile-negative twin.
 ## Sprint 8.3: Program-joined binding and plans ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/ui-core/Amoebius/Ui/Bind.hs`, `src/ui-core/Amoebius/Ui/Plan.hs`, and `src/Amoebius/Dsl/Lower.hs`
+**Implementation**: `src/ui-core/Amoebius/Ui/Bind.hs`, `src/ui-core/Amoebius/Ui/Plan.hs`, and `src/dsl-spine/Amoebius/Dsl/Lower.hs`
 **Blocked by**: Sprint 8.2
 **Independent Validation**: `bindUiProgram` derives requirements from the program's port nodes and refuses `UnboundPort` and `RequirementWithoutPort` by name; the plan compiler's output equals the oracle rows over every arm; `appUi` is decoded through `decodeFrozen` and lowered so the `ui-server` Deployment and ConfigMap render on the wire.
 **Oracle**: `test/oracle/dsl/Main.hs` states the expected plans and the expected manifest objects from literals.

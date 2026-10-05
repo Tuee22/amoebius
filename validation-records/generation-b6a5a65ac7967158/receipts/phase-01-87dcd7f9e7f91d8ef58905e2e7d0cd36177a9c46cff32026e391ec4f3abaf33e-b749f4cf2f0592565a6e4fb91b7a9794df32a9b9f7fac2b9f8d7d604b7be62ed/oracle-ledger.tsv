@@ -1,0 +1,95 @@
+pins.verdict	green	ok
+identity.pins	green	7
+identity.platform	green	linux-x86_64
+pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz	green	ok bytes=302637420 sha256=4da657809c06c1658ae5713911fcb168a32093e239f61fe77be78aba74132cfa
+pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz.sig	green	ok bytes=438 sha256=a5c8828b3c1c53cfc8d5e4459de0790efa5a8dea96cc16dd564382f005280cc5
+pin.ghc-SHA256SUMS	green	ok bytes=6585 sha256=67869bc776c7f0ffe76226a689c234b367b2194aececbb53da2275892040053b
+pin.ghc-SHA256SUMS.sig	green	ok bytes=438 sha256=9db94ced16b87713e89a41c408bf5efcb29462971c2494fbfec7e05a33de6bad
+pin.cabal-install-3.16.1.0-x86_64-linux-ubuntu22_04.tar.xz	green	ok bytes=5288744 sha256=9d68bd17d4aa87e93eea3f667d3edf41ab1cb2b5194bf1745da9dee678426c17
+pin.cabal-SHA256SUMS	green	ok bytes=2799 sha256=19ef5e11a70d6d06ae23a2b4cae6b52bcf19575be7343fc9dfcce4104bce8bb3
+pin.cabal-SHA256SUMS.sig	green	ok bytes=95 sha256=59fa7dbebd873bd1714f440111fe1607148d25afd23450e4c5ee9afdc38c4eb3
+manifest.compiler-archive	green	agrees claimed=4da657809c06c1658ae5713911fcb168a32093e239f61fe77be78aba74132cfa
+manifest.package-tool-archive	green	agrees claimed=9d68bd17d4aa87e93eea3f667d3edf41ab1cb2b5194bf1745da9dee678426c17
+acquisition.verdict	green	agree
+acquisition.a.compiler.sha256	green	29b0a853efd81eeed37f5d5ffe8add38f3bd0daa87a8838deaf088ec458e99fc
+acquisition.a.package-tool.sha256	green	27a896cd2389c336d8c492dbb4d49dd22148a278150f9e4619a84c0ea6a307fb
+acquisition.a.compiler.version	green	9.12.4
+acquisition.a.package-tool.version	green	3.16.1.0
+acquisition.a.compiler.target	green	x86_64-unknown-linux
+acquisition.b.compiler.sha256	green	29b0a853efd81eeed37f5d5ffe8add38f3bd0daa87a8838deaf088ec458e99fc
+acquisition.b.package-tool.sha256	green	27a896cd2389c336d8c492dbb4d49dd22148a278150f9e4619a84c0ea6a307fb
+acquisition.b.compiler.version	green	9.12.4
+acquisition.b.package-tool.version	green	3.16.1.0
+acquisition.b.compiler.target	green	x86_64-unknown-linux
+plan.a.digest	green	625a475c8600b02347cf5a5a9c4ecf7a866f73ae078c641f3fd5135188990ba8
+plan.b.digest	green	625a475c8600b02347cf5a5a9c4ecf7a866f73ae078c641f3fd5135188990ba8
+plan.digests-agree	green	625a475c8600b02347cf5a5a9c4ecf7a866f73ae078c641f3fd5135188990ba8 vs 625a475c8600b02347cf5a5a9c4ecf7a866f73ae078c641f3fd5135188990ba8
+plan.agree	green	True
+plan.a.packages	green	Diff,OneTuple,QuickCheck,StateVar,adjunctions,aeson,aeson-pretty,ansi-terminal,ansi-terminal-types,appar,array,assoc,async,atomic-counter,atomic-write,attoparsec,attoparsec-aeson,base,base-compat,base-orphans,base16,base16-bytestring,base64,base64-bytestring,bifunctors,binary,blaze-builder,byteorder,bytestring,call-stack,case-insensitive,cborg,cborg-json,cereal,character-ps,charset,cmdargs,colour,comonad,containers,contravariant,cookie,cryptohash-md5,cryptohash-sha256,crypton,crypton-asn1-encoding,crypton-asn1-parse,crypton-asn1-types,crypton-connection,crypton-pem,crypton-socks,crypton-x509,crypton-x509-store,crypton-x509-system,crypton-x509-validation,data-default,data-default-class,data-fix,deepseq,dhall,directory,directory-ospath-streaming,distributive,dlist,dotgen,ech-config,either,exceptions,file-io,filepath,free,generic-deriving,ghc-bignum,ghc-boot-th,ghc-heap,ghc-internal,ghc-prim,half,hashable,haskeline,hpke,hsc2hs,http-client,http-client-tls,http-types,indexed-traversable,indexed-traversable-instances,integer-conversion,integer-gmp,integer-logarithms,invariant,io-classes,io-sim,iproute,kan-extensions,lens,lens-family,lens-family-core,megaparsec,microlens,microlens-mtl,mime-types,mlkem,mmorph,mtl,network,network-byte-order,network-uri,nothunks,optparse-applicative,os-string,parallel,parsec,parser-combinators,parsers,pretty,pretty-simple,prettyprinter,prettyprinter-ansi-terminal,primitive,probe-plan,process,profunctors,proto-lens,proto-lens-runtime,psqueues,purescript-bridge,quiet,ram,random,reflection,repline,rts,scientific,semialign,semigroupoids,serialise,splitmix,stm,streaming-commons,strict,tagged,tar,tasty,template-haskell,temporary,terminfo,text,text-iso8601,text-manipulate,text-short,th-abstraction,th-compat,th-lift,th-lift-instances,these,time,time-compat,time-hourglass,tls,transformers,transformers-base,transformers-compat,unix,unix-compat,unix-time,unordered-containers,uuid-types,vector,vector-stream,wherefrom-compat,witherable,zlib
+probe.decode.positive	green	decoded amoebius/3/True
+probe.decode.mistyped	green	refused type-error
+probe.sim.clean	green	b:2
+probe.sim.perturbed	green	a:1
+probe.codegen.link-token	green	0a08616d6f65626975731003
+probe.codegen.files	green	Proto/Probe.hs,Proto/Probe_Fields.hs
+probe.bridge.files	green	Amoebius/Toolchain/Probe.purs
+plan.steps	green	ensure ghc 9.12.4 pinned via compiler-archive; ensure cabal-install 3.16.1.0 pinned via package-tool-archive; ensure proto-lens-protoc 0.9.0.1 managed via cabal-install; ensure protoc 3.21.12 managed via package-manager
+plan.present	green	present ghc 9.12.4; present cabal-install 3.16.1.0
+upstream.verdict	green	acquired
+upstream.identity	green	supernova-0.0.3
+upstream.tree-sha256	green	2e2f01be19b08128cd8549befcc1da3fea172b1f5b3471845d05ef8dc06dda33
+upstream.files	green	22
+fork.missing	green	none
+fork.modules	green	17
+layout.resolve-refusals	green	none
+layout.provenance-refusals	green	none
+negative.AmbientNetworkRead	green	AmbientNetworkRefused: https://downloads.haskell.org/~ghc/9.12.4/.build/bootstrap-inputs
+negative.MissingPin	green	PinMissing: ghc-SHA256SUMS; ManifestEntryAbsent: ghc-SHA256SUMS lacks ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz
+negative.MissingArchivePin	green	PinMissing: ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz; PinMissing: ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz
+negative.MissingSignaturePin	green	PinMissing: cabal-SHA256SUMS.sig
+negative.DigestMismatch	green	PinDigestMismatch: cabal-SHA256SUMS expected=19ef5e11a70d6d06ae23a2b4cae6b52bcf19575be7343fc9dfcce4104bce8bb3 observed=d96bd64c1f408b84508672ed2005b9a405fdbb30f0f0c7a491666336f91e7329; ManifestDisagrees: cabal-install-3.16.1.0-x86_64-linux-ubuntu22_04.tar.xz claimed=8d68bd17d4aa87e83eea3f667d3edf41ab1cb2b5184bf1745da8dee678426c17 observed=9d68bd17d4aa87e93eea3f667d3edf41ab1cb2b5194bf1745da9dee678426c17
+negative.ManifestDisagrees	green	PinDigestMismatch: cabal-SHA256SUMS expected=19ef5e11a70d6d06ae23a2b4cae6b52bcf19575be7343fc9dfcce4104bce8bb3 observed=d96bd64c1f408b84508672ed2005b9a405fdbb30f0f0c7a491666336f91e7329; ManifestDisagrees: cabal-install-3.16.1.0-x86_64-linux-ubuntu22_04.tar.xz claimed=8d68bd17d4aa87e83eea3f667d3edf41ab1cb2b5184bf1745da8dee678426c17 observed=9d68bd17d4aa87e93eea3f667d3edf41ab1cb2b5194bf1745da9dee678426c17
+negative.PinnedSignatureDigestMismatch	green	PinDigestMismatch: cabal-SHA256SUMS.sig expected=59fa7dbebd873bd1714f440111fe1607148d25afd23450e4c5ee9afdc38c4eb3 observed=3f5ffe54d0b2a359c79d0653e7cf20e01ec9392db9ae018a754fa24236e4af0c
+negative.RootNotAbsent	green	RootNotAbsent: /home/matt/amoebius/.build/runs/phase-01/clean/suite/acquire/a
+negative.DisagreeingAcquisition	green	AcquisitionsDisagree: compiler.sha256 29b0a853efd81eeed37f5d5ffe8add38f3bd0daa87a8838deaf088ec458e99fc /= 0000000000000000000000000000000000000000000000000000000000000000
+negative.MissingDependency	green	MissingDependency: amoebius-absent-probe
+negative.TrackedResolutionOutput	green	TrackedResolutionOutput: cabal.project.freeze
+negative.DeveloperHomePath	green	DeveloperHomePath: /home/developer/amoebius/probe.cabal
+negative.TrackedProbeInput	green	TrackedProbeInput: test/fixture/probe.dhall
+negative.MutableIdentity	green	MutableIdentity: git:https://github.com/cr-org/supernova#main
+negative.AbsentIdentity	green	AbsentIdentity: hackage:-
+negative.ProvenanceDeveloperHome	green	DeveloperHomePath: /home/developer/supernova
+negative.UpstreamDigestMismatch	green	DigestMismatch: expected=0000000000000000000000000000000000000000000000000000000000000000 observed=2e2f01be19b08128cd8549befcc1da3fea172b1f5b3471845d05ef8dc06dda33
+negative.TopLevelVendor	green	TopLevelVendor: vendor/supernova/src/Pulsar.hs
+negative.PatchProgram	green	PatchProgram: patches/supernova.patch
+negative.TrackedForeignPackage	green	TopLevelVendor: vendor/supernova/supernova.cabal; TrackedForeignPackage: vendor/supernova/supernova.cabal
+negative.AbsentTool	green	AbsentTool: absent-tool
+negative.OutOfRangeVersion	green	OutOfRangeVersion: ghc 9.10.1
+negative.NoPlatformAsset	green	NoPlatformAsset: ghc windows-x86_64
+report.pins.verdict	green	ok
+report.identity.compiler	green	ghc 9.12.4 29b0a853efd81eeed37f5d5ffe8add38f3bd0daa87a8838deaf088ec458e99fc
+report.identity.package-tool	green	cabal-install 3.16.1.0 27a896cd2389c336d8c492dbb4d49dd22148a278150f9e4619a84c0ea6a307fb
+report.identity.platform	green	linux-x86_64
+report.identity.pins	green	7
+report.probe.decode.positive	green	decoded amoebius/3/True
+report.probe.decode.mistyped	green	refused type-error
+report.probe.sim.clean	green	b:2
+report.probe.sim.perturbed	green	a:1
+report.probe.sim.schedule.clean	green	a@10=1,b@20=2
+report.probe.codegen.link-token	green	0a08616d6f65626975731003
+report.probe.bridge.files	green	Amoebius/Toolchain/Probe.purs
+report.plan.steps	green	ensure ghc 9.12.4 pinned via compiler-archive; ensure cabal-install 3.16.1.0 pinned via package-tool-archive; ensure proto-lens-protoc 0.9.0.1 managed via cabal-install; ensure protoc 3.21.12 managed via package-manager
+report.provenance.upstream	green	supernova-0.0.3 2e2f01be19b08128cd8549befcc1da3fea172b1f5b3471845d05ef8dc06dda33
+report.provenance.fork-modules	green	17
+report.provenance.requirements	green	dhall >=1.42 && <1.43; io-sim >=1.10 && <1.11; io-classes >=1.10 && <1.11; proto-lens >=0.7 && <0.8; proto-lens-runtime >=0.7 && <0.8; purescript-bridge >=0.15 && <0.16; tar >=0.6 && <0.8; zlib >=0.7 && <0.8
+report.rows	green	26
+report.refused.verdict	green	refused
+report.refused.keys	green	pins.refusal.1,pins.refusal.2
+report.refused.manifest	green	ManifestDisagrees: ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz claimed=0000000000000000000000000000000000000000000000000000000000000000 observed=4da657809c06c1658ae5713911fcb168a32093e239f61fe77be78aba74132cfa
+negative.ReportUnknownArgument	green	toolchain-report: unknown argument --bogus
+report.options	green	Just (Just "root")
+report.keys	green	pins.verdict,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz.sig,pin.ghc-SHA256SUMS,pin.ghc-SHA256SUMS.sig,pin.cabal-install-3.16.1.0-x86_64-linux-ubuntu22_04.tar.xz,pin.cabal-SHA256SUMS,pin.cabal-SHA256SUMS.sig,manifest.compiler-archive,manifest.package-tool-archive,identity.compiler,identity.package-tool,identity.platform,identity.pins,probe.decode.positive,probe.decode.mistyped,probe.sim.clean,probe.sim.perturbed,probe.sim.schedule.clean,probe.sim.schedule.perturbed,probe.codegen.link-token,probe.bridge.files,plan.steps,provenance.upstream,provenance.fork-modules,provenance.requirements
+pins.rendered	green	compiler-archive ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz 302637420 4da657809c06c1658ae5713911fcb168a32093e239f61fe77be78aba74132cfa; compiler-archive-signature ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz.sig 438 a5c8828b3c1c53cfc8d5e4459de0790efa5a8dea96cc16dd564382f005280cc5; compiler-manifest ghc-SHA256SUMS 6585 67869bc776c7f0ffe76226a689c234b367b2194aececbb53da2275892040053b; compiler-manifest-signature ghc-SHA256SUMS.sig 438 9db94ced16b87713e89a41c408bf5efcb29462971c2494fbfec7e05a33de6bad; package-tool-archive cabal-install-3.16.1.0-x86_64-linux-ubuntu22_04.tar.xz 5288744 9d68bd17d4aa87e93eea3f667d3edf41ab1cb2b5194bf1745da9dee678426c17; package-tool-manifest cabal-SHA256SUMS 2799 19ef5e11a70d6d06ae23a2b4cae6b52bcf19575be7343fc9dfcce4104bce8bb3; package-tool-manifest-signature cabal-SHA256SUMS.sig 95 59fa7dbebd873bd1714f440111fe1607148d25afd23450e4c5ee9afdc38c4eb3
+probe.codegen.schema-sha256	green	56c70c7e2ec078925245048b18ecaaafb41c4da01524095c6b9d54b1fd68b4bd
+positive.GitCommit	green	git:https://github.com/cr-org/supernova@0123456789abcdef0123456789abcdef01234567
+negative.ShortCommit	green	MutableIdentity: git:https://github.com/cr-org/supernova@0123456789abcdef0123456789abcdef0123456

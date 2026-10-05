@@ -13,7 +13,7 @@ import Amoebius.Calculus.Composition
 import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
 import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types (ResourceVector (..))
+import Amoebius.Capacity.Vector (ResourceVector (..))
 import Amoebius.Formal.CalculusComposition (compositionModel)
 import Amoebius.Formal.EmitTLA (Cfg (..), Tla (..), emitTLA)
 import Amoebius.Formal.Explore (ExploreResult (..), canonicalFingerprint, explore)
@@ -22,6 +22,7 @@ import Amoebius.Formal.Model
 import Amoebius.Formal.ToyModel (toyModel)
 import Amoebius.Scope.Index
   ( RequestScope, activeMembership, trustedSubject, trustedTenant, withRequestScope )
+import Amoebius.Vocabulary (quantityValue)
 import Control.Monad (forM_, unless)
 import Data.List (find, intercalate, isInfixOf, isPrefixOf, isSuffixOf, tails)
 import Data.Map.Strict qualified as Map
@@ -300,8 +301,8 @@ checkComposition output = do
     explored <- requireRight "composition-explorer" (explore model)
     let actual = Map.fromList
           [ ("calculus-kinds", kinds), ("component-count", show (length (compositionKinds composition)))
-          , ("cpu", show (resourceCpu resources)), ("memory", show (resourceMemory resources))
-          , ("ephemeral", show (resourceEphemeralStorage resources)), ("pods", show (resourcePodSlots resources))
+          , ("cpu", show (quantityValue (resourceCpu resources))), ("memory", show (quantityValue (resourceMemory resources)))
+          , ("ephemeral", show (quantityValue (resourceEphemeralStorage resources))), ("pods", show (quantityValue (resourcePodSlots resources)))
           , ("formal-distinct-state-count", show (Map.size (exploreStates explored)))
           , ("formal-safety", if exploreViolation explored == Nothing then "green" else "red") ]
         (Tla tla, Cfg cfg) = emitTLA model

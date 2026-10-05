@@ -48,14 +48,13 @@ import Amoebius.Capacity.Types
   , HostEnvironment (..)
   , Node (..)
   )
+import Amoebius.Vocabulary (ComputeEngine (..), Substrate (..))
 import Control.DeepSeq (NFData)
 import Data.List.NonEmpty (NonEmpty)
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.Set qualified as Set
 import Data.Text (Text)
 import GHC.Generics (Generic)
-
-data Substrate = LinuxCpu | LinuxCuda | Apple | Windows
 
 data SubstrateToken (substrate :: Substrate) where
   LinuxCpuToken :: SubstrateToken 'LinuxCpu
@@ -127,10 +126,6 @@ mkStretchedAgent _ (HostAt host) = AgentReach host
 
 mkHostWorkerReach :: ReachToken 'HostWorker -> HostAt site -> HostWorkerReach site
 mkHostWorkerReach _ (HostAt host) = HostWorkerReach host
-
-data ComputeEngine = KindEngine | Rke2Engine | ManagedEksEngine
-  deriving stock (Eq, Generic, Ord, Show)
-  deriving anyclass (NFData)
 
 data NodeSupply
   = FixedSupply (NonEmpty Node)

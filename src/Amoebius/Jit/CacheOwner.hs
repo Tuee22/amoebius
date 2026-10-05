@@ -18,7 +18,7 @@ data OwnerRoundTrip = OwnerRoundTrip
   }
   deriving stock (Eq, Show)
 
-serveTwoClients :: ResolveArm -> EngineRuntime -> Either ResolverError OwnerRoundTrip
+serveTwoClients :: ResolveArm -> JitEngine -> Either ResolverError OwnerRoundTrip
 serveTwoClients arm runtime = do
   (firstHandle, afterFirst, firstReceipt) <- resolveEngine arm runtime emptyCache
   (secondHandle, afterSecond, secondReceipt) <- resolveEngine arm runtime afterFirst
@@ -33,7 +33,7 @@ serveTwoClients arm runtime = do
             else "version-mismatch"
       }
 
-convergeSameDigestMisses :: ResolveArm -> EngineRuntime -> Either ResolverError CacheState
+convergeSameDigestMisses :: ResolveArm -> JitEngine -> Either ResolverError CacheState
 convergeSameDigestMisses arm runtime = do
   (_, afterFirst, _) <- resolveEngine arm runtime emptyCache
   (_, afterSecond, _) <- resolveEngine arm runtime afterFirst

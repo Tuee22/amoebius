@@ -1,0 +1,6 @@
+green	True
+spec-digest	ca656f581506c752a1545c7876746ba6c51ddcdc064527dfae239a0e62e0a440
+chain	d11922cefabbdbb03f5bb14928523010c4b6903e88c342bbfc91cb53bc235e52
+reproducible-core	8f8fba1103556611cee35b7e312a9e76432cf9f9e00edc58b8ee35d1fbe12bc5
+capability	repository_layout_conformance
+claim	The shipped layout-report classifies every present source path, enforces the six admitted metadata paths and bounded bootstrap bytes, and resolves the compiler-backed whole-source graph; the independent oracle judges planted foreign inputs and typed legacy ownership. Archive custody remains verifier-owned.

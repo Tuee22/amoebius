@@ -17,7 +17,7 @@ module Amoebius.Test.WorkflowAlgebra
   , ModeledResource (..)
   , OwnershipIntent (..)
   , ResourceAxis (..)
-  , ResourceVector (..)
+  , TestResourceVector (..)
   , ResidueClassification (..)
   , SuggestionRefusal (..)
   , SuppliedTestModel (..)
@@ -63,7 +63,7 @@ data Branch = CoreBranch | RegistryBranch | ProviderBranch | MigrationBranch | A
 data ResourceAxis = Cpu | Memory | Ephemeral | Durable | Cache | Pods | Ips | Csi | Quota
   deriving stock (Bounded, Enum, Eq, Ord, Show)
 
-data ResourceVector = ResourceVector
+data TestResourceVector = TestResourceVector
   { resourceCpu :: Word64
   , resourceMemory :: Word64
   , resourceEphemeral :: Word64
@@ -99,7 +99,7 @@ data SuppliedTestModel = SuppliedTestModel
   , suppliedBranch :: Branch
   , suppliedAuthority :: AuthorityIntent
   , suppliedOwnership :: Maybe OwnershipIntent
-  , suppliedCapacity :: ResourceVector
+  , suppliedCapacity :: TestResourceVector
   , suppliedFaults :: [FaultIntent]
   , suppliedExpectations :: [Expectation]
   }
@@ -130,7 +130,7 @@ data TerminalResult
 
 data TopologyBody = TopologyBody
   { bodyModel :: SuppliedTestModel
-  , bodyDemand :: ResourceVector
+  , bodyDemand :: TestResourceVector
   , bodyWorkflowOutcome :: Maybe WorkflowOutcome
   , bodyTeardownOutcome :: Maybe TeardownOutcome
   }
@@ -161,7 +161,7 @@ suggestTest model = do
 topologyName :: TestTopology state -> Text
 topologyName (TestTopology body) = suppliedName (bodyModel body)
 
-topologyDemand :: TestTopology state -> ResourceVector
+topologyDemand :: TestTopology state -> TestResourceVector
 topologyDemand (TestTopology body) = bodyDemand body
 
 topologyOwnership :: TestTopology state -> OwnershipIntent
@@ -255,15 +255,15 @@ projectionRelativePath runIdentity topology =
  where
   digest = hex (SHA256.hash (TextEncoding.encodeUtf8 (renderSuggestedTopology topology)))
 
-requiredDemand :: Branch -> ResourceVector
+requiredDemand :: Branch -> TestResourceVector
 requiredDemand branch = case branch of
-  CoreBranch -> ResourceVector 3000 3221225472 8589934592 1073741824 536870912 4 4 1 1
-  RegistryBranch -> ResourceVector 3500 4294967296 12884901888 3221225472 536870912 5 5 2 2
-  ProviderBranch -> ResourceVector 4000 5368709120 12884901888 2147483648 1073741824 6 6 3 8
-  MigrationBranch -> ResourceVector 4500 6442450944 17179869184 4294967296 536870912 7 7 4 4
-  AcceleratorBranch -> ResourceVector 5000 8589934592 21474836480 2147483648 2147483648 8 8 4 6
+  CoreBranch -> TestResourceVector 3000 3221225472 8589934592 1073741824 536870912 4 4 1 1
+  RegistryBranch -> TestResourceVector 3500 4294967296 12884901888 3221225472 536870912 5 5 2 2
+  ProviderBranch -> TestResourceVector 4000 5368709120 12884901888 2147483648 1073741824 6 6 3 8
+  MigrationBranch -> TestResourceVector 4500 6442450944 17179869184 4294967296 536870912 7 7 4 4
+  AcceleratorBranch -> TestResourceVector 5000 8589934592 21474836480 2147483648 2147483648 8 8 4 6
 
-checkSupply :: ResourceVector -> ResourceVector -> Either SuggestionRefusal ()
+checkSupply :: TestResourceVector -> TestResourceVector -> Either SuggestionRefusal ()
 checkSupply supply demand = go [minBound .. maxBound]
  where
   go [] = Right ()
@@ -271,7 +271,7 @@ checkSupply supply demand = go [minBound .. maxBound]
     | at axis demand <= at axis supply = go rest
     | otherwise = Left (Insufficient axis)
 
-at :: ResourceAxis -> ResourceVector -> Word64
+at :: ResourceAxis -> TestResourceVector -> Word64
 at axis vector = case axis of
   Cpu -> resourceCpu vector
   Memory -> resourceMemory vector
@@ -283,7 +283,7 @@ at axis vector = case axis of
   Csi -> resourceCsi vector
   Quota -> resourceQuota vector
 
-renderVector :: ResourceVector -> Text
+renderVector :: TestResourceVector -> Text
 renderVector vector = Text.intercalate "," (map (Text.pack . show)
   [ resourceCpu vector, resourceMemory vector, resourceEphemeral vector
   , resourceDurable vector, resourceCache vector, resourcePods vector

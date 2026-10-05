@@ -21,7 +21,9 @@ module Amoebius.Capacity.PulumiExecution
   , provisionPulumiExecution
   ) where
 
-import Amoebius.Capacity.Types (ResourceVector (..), addResources, zeroResources)
+import Amoebius.Capacity.Types (maxResources, scaleResources)
+import Amoebius.Capacity.Vector (ResourceVector (..), addResources, zeroResources)
+import Amoebius.Vocabulary (Quantity (..))
 import Control.DeepSeq (NFData)
 import Data.List (sortOn)
 import Data.Set qualified as Set
@@ -159,7 +161,7 @@ provisionMonitoringWork budget
   evaluationCpu = monitoringWorkflows budget + monitoringRules budget + monitoringSamplesPerSecond budget
   queryCpu = monitoringConcurrentQueries budget * (monitoringSeriesPerQuery budget + monitoringProxyCpuPerQuery budget)
   memory = monitoringSeries budget * monitoringMemoryPerSeries budget + monitoringConcurrentQueries budget * monitoringSamplesPerQuery budget
-  compute = ResourceVector (evaluationCpu + queryCpu) memory 0 1
+  compute = ResourceVector (Quantity (evaluationCpu + queryCpu)) (Quantity memory) 0 1
   storage = monitoringTsdbResidentBytes budget + monitoringTsdbTemporaryBytes budget
 
 provisionPulumiExecution :: PulumiExecutionDemand -> Either HostComputeError ProvisionedPulumiExecutionDemand
@@ -174,26 +176,8 @@ provisionPulumiExecution demand
  where
   joined = foldl addResources (pulumiDeployResources demand) (pulumiPluginResources demand)
 
-scaleResources :: Natural -> ResourceVector -> ResourceVector
-scaleResources amount resources =
-  ResourceVector
-    { resourceCpu = amount * resourceCpu resources
-    , resourceMemory = amount * resourceMemory resources
-    , resourceEphemeralStorage = amount * resourceEphemeralStorage resources
-    , resourcePodSlots = amount * resourcePodSlots resources
-    }
-
 resourcePeak :: [ResourceVector] -> ResourceVector
 resourcePeak rows = foldl maxResources zeroResources rows
-
-maxResources :: ResourceVector -> ResourceVector -> ResourceVector
-maxResources left right =
-  ResourceVector
-    { resourceCpu = max (resourceCpu left) (resourceCpu right)
-    , resourceMemory = max (resourceMemory left) (resourceMemory right)
-    , resourceEphemeralStorage = max (resourceEphemeralStorage left) (resourceEphemeralStorage right)
-    , resourcePodSlots = max (resourcePodSlots left) (resourcePodSlots right)
-    }
 
 maximumTotal :: [Natural] -> Natural
 maximumTotal = foldl max 0

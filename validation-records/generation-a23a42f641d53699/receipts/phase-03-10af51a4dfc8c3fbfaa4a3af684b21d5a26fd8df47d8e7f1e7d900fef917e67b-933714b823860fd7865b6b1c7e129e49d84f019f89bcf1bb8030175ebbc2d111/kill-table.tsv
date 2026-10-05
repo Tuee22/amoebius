@@ -1,0 +1,41 @@
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:108	branch-swap	4843039378b7->ad71558aa7fc	killed@vocab.host-grid,case:lanes-of
+Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:162	branch-swap	5adfa4df0f13->28198a46e886	killed@decode.section,spec.kind-replicas.zero,spec.kind-replicas.one
+Amoebius.Dsl.Import	src/dsl-spine/Amoebius/Dsl/Import.hs:88	field-drop	2b6d506f4bee->982e87093c8d	killed@consume.section,fake-apply.section,freeze.kind-single-objectstore.equivalent
+Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:157	list-truncation	dcdcfd508061->adb247dccb2c	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:810:27: warning: [GHC-40910] [
+Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:109	field-drop	2f4ad62d0d0a->640f8146c9a4	killed@consume.section,chain.section,fake-apply.section
+Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:97	branch-swap	5be0dae83c1a->9728b055a00d	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.kind-single-objectstore.app-deployment
+Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:117	constant-flip	91748d57bbd6->26fca8e56605	killed@dry-run.kind-single-objectstore.dump,dry-run.shape-swap-sibling.dump,dry-run.replicas-3-sibling.dump
+Amoebius.Dsl.Pipeline	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:151	list-truncation	4be864a505d7->397e1328e7c4	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:810:27: warning: [GHC-40910] [
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:126	list-truncation	4843039378b7->2a5dbe2852dd	killed@vocab.host-grid,case:lanes-of
+Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:189	list-truncation	5adfa4df0f13->741d9099453e	killed@decode.section,spec.cluster.ok,spec.root.ok
+Amoebius.Dsl.Import	src/dsl-spine/Amoebius/Dsl/Import.hs:89	field-drop	2b6d506f4bee->a8ff65a8f074	killed@freeze.section,freeze.hash.format,freeze.hash.independent
+Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:171	constant-flip	dcdcfd508061->cf006920a493	killed@decode.kind-single-objectstore.dump,decode.shape-swap-sibling.dump,decode.replicas-3-sibling.dump
+Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:110	field-drop	2f4ad62d0d0a->cf6243c587bb	killed@consume.section,chain.section,fake-apply.section
+Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:141	boundary-shift	5be0dae83c1a->e9c534981967	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.kind-single-objectstore.app-deployment
+Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:122	constant-flip	91748d57bbd6->fd15ff1ca3c6	killed@dry-run.kind-single-objectstore.dump,dry-run.shape-swap-sibling.dump,dry-run.replicas-3-sibling.dump
+Amoebius.Dsl.Pipeline	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:224	list-truncation	4be864a505d7->3bc084b445d2	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:810:27: warning: [GHC-40910] [
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:127	list-truncation	4843039378b7->e8d49c10f870	killed@vocab.host-grid,case:lanes-of
+Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:217	constant-flip	5adfa4df0f13->ff7f4c5c4980	killed@spec.workload.pad-zero,decode.example.headroom-all-zero,pipeline.refusal.headroom-all-zero
+Amoebius.Dsl.Import	src/dsl-spine/Amoebius/Dsl/Import.hs:119	branch-swap	2b6d506f4bee->5eb7f7f8693e	killed@freeze.hash.twin,freeze.nested,freeze.parent
+Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:172	field-drop	dcdcfd508061->bed3a6d78488	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:810:27: warning: [GHC-40910] [
+Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:129	field-drop	2f4ad62d0d0a->afe46f5bb9b0	killed@decode.section,consume.section,chain.section
+Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:144	constant-flip	5be0dae83c1a->38ec43651939	killed@chain.table,case:step-sequence
+Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:122	list-truncation	91748d57bbd6->23601848f570	killed@dry-run.kind-single-objectstore.dump,dry-run.shape-swap-sibling.dump,dry-run.replicas-3-sibling.dump
+Amoebius.Dsl.Pipeline	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:226	list-truncation	4be864a505d7->fb213a27431d	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:810:27: warning: [GHC-40910] [
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:190	constant-flip	4843039378b7->b3a9ff9bccc3	killed@vocab.labels,spec.name.host.long,case:lanes-of
+Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:220	boundary-shift	5adfa4df0f13->dcd08cf4990d	killed@spec.workload.exact,spec.workload.pad-exact,spec.app.ok
+Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:186	constant-flip	dcdcfd508061->09c8dc9dc0e0	killed@decode.kind-single-objectstore.dump,decode.shape-swap-sibling.dump,decode.replicas-3-sibling.dump
+Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:130	field-drop	2f4ad62d0d0a->0e1279d25be6	killed@consume.section,fake-apply.section,lower.kind-single-objectstore.dump
+Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:144	boundary-shift	5be0dae83c1a->3d8f7c34503a	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.kind-single-objectstore.app-deployment
+Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:135	constant-flip	91748d57bbd6->96fa1153f301	killed@fake-apply.section,fake-apply.full.result,fake-apply.from-cutover.result
+Amoebius.Dsl.Pipeline	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:237	constant-flip	4be864a505d7->1cade9712bec	killed@freeze.kind-single-objectstore.equivalent,decode.kind-single-objectstore.dump,lower.kind-single-objectstore.dump
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:190	boundary-shift	4843039378b7->82f912be3959	killed@vocab.labels,case:lanes-of
+Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:222	boundary-shift	5adfa4df0f13->a206a4c17f9a	killed@spec.workload.exact,spec.workload.pad-exact,spec.workload.pad-one-axis
+Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:187	field-drop	dcdcfd508061->35b378f8021d	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:810:27: warning: [GHC-40910] [
+Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:161	branch-swap	2f4ad62d0d0a->61cb6ce888ce	killed@lower.example.kind-single-objectstore,lower.example.shape-swap-sibling,lower.example.replicas-3-sibling
+Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:144	list-truncation	5be0dae83c1a->bbd83739e9ca	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.kind-single-objectstore.app-deployment
+Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:143	list-truncation	91748d57bbd6->da35d62de65f	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:810:27: warning: [GHC-40910] [
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:191	branch-swap	4843039378b7->24c654788a23	killed@decode.section,vocab.labels,spec.name.app.underscore
+Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:240	boundary-shift	5adfa4df0f13->1c23c8c06a63	killed@decode.section,spec.app.ok,freeze.hash.format
+Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:208	constant-flip	dcdcfd508061->17d742e3a9cc	killed@decode.kind-single-objectstore.dump,decode.shape-swap-sibling.dump,decode.replicas-3-sibling.dump
+summary	killed=33	viable=33	stillborn=7

@@ -29,7 +29,7 @@ data PreflightRefusal
   | PredecessorNotReproduced [Int]
   | GovernanceUnaccepted Text
   | HardwareBeforeBarrier
-  | SubstrateAbsent Substrate
+  | SubstrateAbsent GateSubstrate
   | KernelOverBudget Text
   | SpecWeakened [Text]
   deriving (Eq, Ord, Show)
@@ -45,7 +45,7 @@ renderPreflightRefusal refusal = case refusal of
   KernelOverBudget detail -> "KernelOverBudget: " <> detail
   SpecWeakened dropped -> "SPEC-WEAKENED: " <> Text.intercalate "; " dropped
 data HostFacts = HostFacts
-  { hostSubstrates :: [Substrate]
+  { hostSubstrates :: [GateSubstrate]
   }
   deriving (Eq, Show)
 

@@ -56,6 +56,7 @@ data ReconcileMode = ServerSideApply | CreateBeforeDelete | ReplaceOnChange
 data RenderSourceOwner
   = DeploymentGlobalOwner
   | CapabilityServiceOwner Text
+  | AppOwner Text
   deriving stock (Eq, Generic, Ord, Show)
   deriving anyclass (NFData)
 
@@ -68,6 +69,9 @@ data ProvisionedPartWitness
   | ServiceEndpointPart Text
   | ServiceWorkloadPart Text
   | ServicePolicyPart Text
+  | AppNamespacePart Text
+  | AppWorkloadPart Text
+  | AppEndpointPart Text
   deriving stock (Eq, Generic, Ord, Show)
   deriving anyclass (NFData)
 
@@ -172,6 +176,9 @@ activationForWitness witness = case witness of
   ServiceEndpointPart _ -> AfterBootstrapAddonCutover
   ServiceWorkloadPart _ -> AfterBootstrapAddonCutover
   ServicePolicyPart _ -> AfterManagedCapacityReady
+  AppNamespacePart _ -> Immediate
+  AppWorkloadPart _ -> AfterManagedCapacityReady
+  AppEndpointPart _ -> AfterManagedCapacityReady
 
 ownerForWitness :: ProvisionedPartWitness -> RenderSourceOwner
 ownerForWitness witness = case witness of
@@ -183,3 +190,6 @@ ownerForWitness witness = case witness of
   ServiceEndpointPart service -> CapabilityServiceOwner service
   ServiceWorkloadPart service -> CapabilityServiceOwner service
   ServicePolicyPart service -> CapabilityServiceOwner service
+  AppNamespacePart app -> AppOwner app
+  AppWorkloadPart app -> AppOwner app
+  AppEndpointPart app -> AppOwner app

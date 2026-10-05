@@ -41,6 +41,7 @@ module Amoebius.Capacity.Provision
   , ProvisionedCapacitySchedulerSystem (..)
   , ProvisionedSpec
   , provisionedPlacement
+  , provisionedEpoch
   , provisionedExecution
   , provisionedRuntimeStorage
   , provisionedMonitoring
@@ -57,6 +58,7 @@ module Amoebius.Capacity.Provision
 import Amoebius.Capacity.Execution
   ( BoundExecutionInventory (BoundExecutionInventory)
   , BoundExecutionUnit (..)
+  , ControllerBody (..)
   , ExecutionError (..)
   , MaterializedExecutionInstance (..)
   , PriorExecutionProvision
@@ -71,7 +73,7 @@ import Amoebius.Capacity.Accelerator
   , InterconnectRequirement (NoPeerRequirement)
   , ResidencyPlacement (Unsharded)
   )
-import Amoebius.Capacity.Fold (effectiveReserved, place)
+import Amoebius.Capacity.Fits (effectiveReserved)
 import Amoebius.Capacity.NodeLocalStorage
   ( ImageMetadataCatalog (ImageMetadataCatalog)
   , KubeletFilesystemLayout (Unified)
@@ -118,17 +120,11 @@ import Amoebius.Capacity.Storage
   , StorageWitness
   , fitBacking
   )
-import Amoebius.Capacity.Types
-  ( Placement
-  , PlacementError
-  , ResourceVector (..)
-  , Workload (..)
-  , addResources
-  , emptyStorageDemand
-  , zeroResources
-  )
+import Amoebius.Capacity.Types (Axis, Overcommit (..), PlacementError (..), Workload (..), divideResources, emptyStorageDemand, envelopeLimits, envelopeRequests, firstExceeded)
+import Amoebius.Capacity.Vector (ResourceVector (..), addResources, zeroResources)
 import Amoebius.Capability.Types
-  ( BoundDeployment (..)
+  ( BoundApp (..)
+  , BoundDeployment (..)
   , BoundExecutionSet (BoundExecutionSet)
   , BoundServiceSpec (..)
   , CapabilityArm (..)
@@ -159,6 +155,9 @@ import Amoebius.Capability.Engine
   , provisionEngineOwner
   )
 import Amoebius.Dsl.Topology (NodeSupply (ElasticSupply), Topology, topologySupply)
+import Amoebius.Placement.Witness (Epoch, Placed, epochNamed, place)
+import Amoebius.Storage.Catalog (volumeBytesFor)
+import Amoebius.Vocabulary (Quantity, Unit (..), quantityText, quantityValue)
 import Control.DeepSeq (NFData)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
@@ -358,7 +357,8 @@ data ProvisionedCapacitySchedulerSystem = ProvisionedCapacitySchedulerSystem
   deriving anyclass (NFData)
 
 data ProvisionedSpec = ProvisionedSpec
-  { provisionedPlacement :: Placement
+  { provisionedPlacement :: Placed
+  , provisionedEpoch :: Epoch
   , provisionedExecution :: ProvisionedExecutionEpochs
   , provisionedRuntimeStorage :: [ProvisionedNodeRuntimeStorageAccounting]
   , provisionedMonitoring :: Maybe ProvisionedMonitoringWork
@@ -389,6 +389,8 @@ data ProvisionError
   | WrongGenerationPriorProvisionRef Text Natural Natural
   | WrongArmPriorProvisionRef Text PriorArtifactArm PriorArtifactArm
   | PlacementProvisionFailure PlacementError
+  | OneShort Axis Natural Natural
+  | OverCapacity Axis Natural Natural
   | ExecutionProvisionFailure ExecutionError
   | RuntimeStorageProvisionFailure RuntimeStorageError
   | StorageProvisionFailure StorageError
@@ -422,6 +424,8 @@ provisionErrorTag problem = case problem of
   WrongGenerationPriorProvisionRef {} -> "WrongGenerationPriorProvisionRef"
   WrongArmPriorProvisionRef {} -> "WrongArmPriorProvisionRef"
   PlacementProvisionFailure {} -> "PlacementProvisionFailure"
+  OneShort {} -> "OneShort"
+  OverCapacity {} -> "OverCapacity"
   ExecutionProvisionFailure {} -> "ExecutionProvisionFailure"
   RuntimeStorageProvisionFailure {} -> "RuntimeStorageProvisionFailure"
   StorageProvisionFailure {} -> "StorageProvisionFailure"
@@ -552,8 +556,7 @@ provision context topology deployment = do
   validateControllerChildren deployment unitMap
   resolveArtifactRefs context deployment
   placement <- mapPlacementFor topology (place topology (fmap unitWorkload units))
-  executionCandidate <- mapExecution (provisionExecutionEpochs (priorExecutionCatalog (contextPriorCatalog context)) available (BoundExecutionInventory (boundDeploymentTransition deployment) units))
-  let execution = mutateExecutionCandidate executionCandidate
+  execution <- mapExecution (provisionExecutionEpochs (priorExecutionCatalog (contextPriorCatalog context)) available (BoundExecutionInventory (boundDeploymentTransition deployment) units))
   runtime <- provisionRuntime context execution
   monitoring <- provisionMonitoring context deployment
   accelerators <- provisionAccelerators context deployment
@@ -572,6 +575,7 @@ provision context topology deployment = do
   Right
     ProvisionedSpec
       { provisionedPlacement = placement
+      , provisionedEpoch = epochNamed ("generation-" <> naturalText (contextGeneration context))
       , provisionedExecution = execution
       , provisionedRuntimeStorage = [runtime]
       , provisionedMonitoring = monitoring
@@ -581,9 +585,6 @@ provision context topology deployment = do
       , provisionedRenderSources = renderSources
       , provisionedEngineAccelerators = accelerators
       }
-
-mutateExecutionCandidate :: ProvisionedExecutionEpochs -> ProvisionedExecutionEpochs
-mutateExecutionCandidate = id
 
 supplyProjection :: ProvisionTargetSupply -> (InfrastructureState, ResourceVector, Set Text, Natural)
 supplyProjection supply = case supply of
@@ -616,24 +617,10 @@ perActionResources demand
   | infrastructureRequiredUnits demand == 0 = zeroResources
   | otherwise = divideResources (infrastructureRequiredUnits demand) (infrastructureRequiredResources demand)
 
-divideResources :: Natural -> ResourceVector -> ResourceVector
-divideResources divisor resources =
-  ResourceVector
-    { resourceCpu = resourceCpu resources `div` divisor
-    , resourceMemory = resourceMemory resources `div` divisor
-    , resourceEphemeralStorage = resourceEphemeralStorage resources `div` divisor
-    , resourcePodSlots = resourcePodSlots resources `div` divisor
-    }
-
 ensureResources :: ResourceVector -> ResourceVector -> Either ProvisionError ()
-ensureResources required available
-  | resourceCpu required > resourceCpu available = exceeded
-  | resourceMemory required > resourceMemory available = exceeded
-  | resourceEphemeralStorage required > resourceEphemeralStorage available = exceeded
-  | resourcePodSlots required > resourcePodSlots available = exceeded
-  | otherwise = Right ()
- where
-  exceeded = Left (InfrastructureDemandExceeded required available)
+ensureResources required available = case firstExceeded required available of
+  Just _ -> Left (InfrastructureDemandExceeded required available)
+  Nothing -> Right ()
 
 ensureExactIdentities :: Set Text -> Set Text -> Either ProvisionError ()
 ensureExactIdentities expected observed = case Set.lookupMin (expected Set.\\ observed) of
@@ -778,7 +765,7 @@ ownerDemandFor :: Text -> EngineRuntime -> TargetOffering -> EngineOwnerDemand
 ownerDemandFor owner runtime offering = case runtime of
   Cuda _ -> CudaEngineOwner (CudaOwnerDemand owner profile deviceIds deviceCount sources workloads policy)
   AppleMetal _ -> MetalEngineOwner (MetalOwnerDemand owner profile deviceIds sources workloads policy)
-  LinuxCpu _ -> CpuEngineOwner owner
+  CpuRuntime _ -> CpuEngineOwner owner
  where
   devices = case offeringAccelerators offering of
     AcceleratorOffering rows -> rows
@@ -834,7 +821,7 @@ provisionServices context deployment = traverse provisionOne (boundDeploymentSer
  where
   provisionOne service = do
     let name = capabilityResourceName (boundCapabilityNeed service)
-        required = fromIntegral (length (boundProviderGraph service)) * 2
+        required = sum [quantityValue size | object <- boundProviderGraph service, Just size <- [memberVolume (capabilityArm (boundCapabilityNeed service)) object]]
         backing = StorageBacking (BackingId ("service:" <> name)) (policyStorageBackingBytes (contextPolicy context)) (BackingAllocationPolicy 0 1)
     storage <- mapStorage (fitBacking backing required)
     Right
@@ -850,7 +837,10 @@ pulumiDemand :: InfrastructureDemand -> PulumiExecutionDemand
 pulumiDemand demand = PulumiExecutionDemand (infrastructureRequiredResources demand) [] 1 1
 
 renderCandidates :: BoundDeployment -> [RenderSourceCandidate]
-renderCandidates deployment = globalCandidates <> concatMap serviceCandidates (Map.elems (boundDeploymentServices deployment))
+renderCandidates deployment =
+  globalCandidates
+    <> concatMap serviceCandidates (Map.elems (boundDeploymentServices deployment))
+    <> concatMap appCandidates (boundDeploymentApps deployment)
 
 globalCandidates :: [RenderSourceCandidate]
 globalCandidates =
@@ -860,10 +850,17 @@ globalCandidates =
   , candidate "global/managed-capacity-admission" ManagedCapacityAdmissionPart Map.empty ServerSideApply
   ]
 
+-- | The explicit size of the volume a provider object owns: only a StatefulSet member does.
+memberVolume :: CapabilityArm -> ProviderObject -> Maybe (Quantity 'DurableUnit)
+memberVolume arm object
+  | providerObjectKind object == "StatefulSet" && providerObjectRole object == "member" = volumeBytesFor arm
+  | otherwise = Nothing
+
 serviceCandidates :: BoundServiceSpec -> [RenderSourceCandidate]
 serviceCandidates service = fmap fromObject (boundProviderGraph service)
  where
   name = capabilityResourceName (boundCapabilityNeed service)
+  arm = capabilityArm (boundCapabilityNeed service)
   BoundExecutionSet executionUnits = boundServiceExecutions service
   fromObject object =
     candidate
@@ -871,8 +868,45 @@ serviceCandidates service = fmap fromObject (boundProviderGraph service)
       (witnessFor name object)
       ( Map.fromList [("kind", providerObjectKind object), ("role", providerObjectRole object)]
           <> executionFields (Map.lookup (providerObjectIdentity object) executionUnits)
+          <> Map.fromList [("volume-bytes", quantityText size) | Just size <- [memberVolume arm object]]
       )
       (if providerObjectKind object == "Job" then ReplaceOnChange else ServerSideApply)
+
+-- | An application renders as its own namespace, its workload, and its endpoint,
+-- all named after the application.  The workload carries the authored requests,
+-- limits, and replica count.
+appCandidates :: BoundApp -> [RenderSourceCandidate]
+appCandidates app =
+  [ candidate ("app/" <> name <> "/namespace") (AppNamespacePart name) Map.empty ServerSideApply
+  , candidate ("app/" <> name <> "/deployment") (AppWorkloadPart name) (appWorkloadFields (boundAppExecution app)) ServerSideApply
+  , candidate ("app/" <> name <> "/service") (AppEndpointPart name) Map.empty ServerSideApply
+  ]
+ where
+  name = boundAppName app
+
+appWorkloadFields :: BoundExecutionUnit -> Map Text Text
+appWorkloadFields unit =
+  Map.fromList
+    [ ("kind", "Deployment")
+    , ("role", "app-workload")
+    , ("cpu", quantityText (resourceCpu requests))
+    , ("memory", quantityText (resourceMemory requests))
+    , ("ephemeral-storage", quantityText (resourceEphemeralStorage requests))
+    , ("pod-slots", quantityText (resourcePodSlots requests))
+    , ("limit-cpu", quantityText (resourceCpu limits))
+    , ("limit-memory", quantityText (resourceMemory limits))
+    , ("limit-ephemeral-storage", quantityText (resourceEphemeralStorage limits))
+    , ("limit-pod-slots", quantityText (resourcePodSlots limits))
+    , ("replicas", naturalText replicas)
+    , ("revision", naturalText (executionRevision unit))
+    ]
+ where
+  requests = envelopeRequests (executionResource unit)
+  limits = envelopeLimits (executionResource unit)
+  replicas = case executionBody unit of
+    DeploymentBody count _ -> count
+    StatefulSetBody count _ -> count
+    _ -> 1
 
 executionFields :: Maybe BoundExecutionUnit -> Map Text Text
 executionFields maybeUnit = case maybeUnit of
@@ -880,10 +914,10 @@ executionFields maybeUnit = case maybeUnit of
   Just unit ->
     let reservedResources = effectiveReserved (executionResource unit)
      in Map.fromList
-          [ ("cpu", naturalText (resourceCpu reservedResources))
-          , ("memory", naturalText (resourceMemory reservedResources))
-          , ("ephemeral-storage", naturalText (resourceEphemeralStorage reservedResources))
-          , ("pod-slots", naturalText (resourcePodSlots reservedResources))
+          [ ("cpu", quantityText (resourceCpu reservedResources))
+          , ("memory", quantityText (resourceMemory reservedResources))
+          , ("ephemeral-storage", quantityText (resourceEphemeralStorage reservedResources))
+          , ("pod-slots", quantityText (resourcePodSlots reservedResources))
           , ("revision", naturalText (executionRevision unit))
           ]
 
@@ -908,7 +942,11 @@ mapPlacementFor :: Topology -> Either PlacementError value -> Either ProvisionEr
 mapPlacementFor topology outcome = case outcome of
   Left problem -> case topologySupply topology of
     ElasticSupply {} -> Left (ElasticPerNodeExpansionOvercommit (Text.pack (show problem)))
-    _ -> Left (PostBindExpansionOvercommit (Text.pack (show problem)))
+    _ -> case problem of
+      CapacityOvercommit (Overcommit axis required available)
+        | required == available + 1 -> Left (OneShort axis required available)
+        | otherwise -> Left (OverCapacity axis required available)
+      _ -> Left (PostBindExpansionOvercommit (Text.pack (show problem)))
   Right value -> Right value
 
 mapExecution :: Either ExecutionError value -> Either ProvisionError value

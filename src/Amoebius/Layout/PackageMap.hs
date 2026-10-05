@@ -35,11 +35,14 @@ module Amoebius.Layout.PackageMap
   , implicitPreludeUnit
   , packageCatalogHasComponent
   , packageCatalogFromInputs
+  , packageCatalogWithForks
   , packageCatalogWithPrelude
   , packageCatalogWithModuleExports
   , packageCatalogWithModuleMembers
   , loadExternalInterfaces
   , maintainedForkPaths
+  , maintainedForkPackages
+  , maintainedForkOwedModules
   ) where
 
 import Amoebius.Layout.Classify (LayoutFinding (..))
@@ -170,6 +173,29 @@ packageMapReport mainBytes probeBytes present = case (parse "amoebius.cabal" mai
   parse path bytes = case runParseResult (parseGenericPackageDescription bytes) of
     (_, Left _) -> Left (LayoutFinding "PackageDescriptionUnparsable" path)
     (_, Right description) -> Right description
+
+-- | External packages, each at the version the maintained fork tracks, that the
+-- fork imports beyond the planned dependency universe. The fork has no Cabal
+-- component until its compilation is owed, so adding these to a planned component
+-- would re-solve the whole project. The real catalog loader instead requires
+-- exactly one registered unit of each pinned version and treats it as an available
+-- unit for standalone sources. The units are installed into the user-level Cabal
+-- store from Hackage at these versions (@cabal install --lib logging-3.0.6
+-- managed-1.0.11 unagi-chan-0.4.1.4@); other versions of the same packages in the
+-- store are ignored.
+maintainedForkPackages :: [(Text, Text)]
+maintainedForkPackages = [("logging", "3.0.6"), ("managed", "1.0.11"), ("unagi-chan", "0.4.1.4")]
+
+-- | Modules the maintained fork imports that no registered package supplies: the
+-- generated Proto bindings owed by the typed spine, and the path module Cabal
+-- generates for the fork's own package once its compilation is owed. Each is a
+-- recorded absence with its expected path and role, never an unresolved import.
+maintainedForkOwedModules :: [(Text, (FilePath, Text))]
+maintainedForkOwedModules =
+  [ ("Proto.PulsarApi", ("Proto/PulsarApi.hs", "generated-proto"))
+  , ("Proto.PulsarApi_Fields", ("Proto/PulsarApi_Fields.hs", "generated-proto"))
+  , ("Paths_supernova", ("Paths_supernova.hs", "generated-cabal-paths"))
+  ]
 
 -- This layout-owned list is cross-checked with the independently maintained
 -- toolchain provenance declaration by the separate suite.
@@ -461,7 +487,7 @@ loadPackageCatalog declared = do
                       Nothing -> pure (Left (LayoutFinding "PackageDatabaseUnreadable" database))
                       Just dumped ->
                         let registered = parsePackageDump dumped
-                        in case catalogue declared plan registered of
+                        in case catalogFromParts maintainedForkPackages declared plan registered of
                           Left problem -> pure (Left problem)
                           Right selected -> do
                             libdir <- runTool "ghc" ["--print-libdir"]
@@ -495,12 +521,39 @@ loadPackageCatalog declared = do
 
 -- | A pure seam for paired package-plan and registered-module challenges.
 packageCatalogFromInputs :: ComponentPackageMap -> ByteString.ByteString -> Text -> Either LayoutFinding PackageCatalog
-packageCatalogFromInputs declared planBytes dumped = case eitherDecodeStrict' planBytes of
-  Left _ -> Left (LayoutFinding "PackagePlanUnparsable" "plan")
-  Right plan -> catalogue declared plan (parsePackageDump dumped)
+packageCatalogFromInputs = packageCatalogWithForks []
 
-catalogue :: ComponentPackageMap -> BuildPlan -> Map Text RegisteredUnit -> Either LayoutFinding PackageCatalog
-catalogue declared (BuildPlan _ _ entries) registered = do
+-- | The same seam with declared fork packages: the entry the real loader takes
+-- after it reads the plan and the registered units.
+packageCatalogWithForks :: [(Text, Text)] -> ComponentPackageMap -> ByteString.ByteString -> Text
+  -> Either LayoutFinding PackageCatalog
+packageCatalogWithForks forks declared planBytes dumped = case eitherDecodeStrict' planBytes of
+  Left _ -> Left (LayoutFinding "PackagePlanUnparsable" "plan")
+  Right plan -> catalogFromParts forks declared plan (parsePackageDump dumped)
+
+catalogFromParts :: [(Text, Text)] -> ComponentPackageMap -> BuildPlan -> Map Text RegisteredUnit
+  -> Either LayoutFinding PackageCatalog
+catalogFromParts forks declared plan registered = case forkRegistration forks registered of
+  Just problem -> Left problem
+  Nothing -> catalogue forks declared plan registered
+
+-- | The registered units of a fork package at its pinned version.
+forkUnits :: (Text, Text) -> Map Text RegisteredUnit -> [(Text, RegisteredUnit)]
+forkUnits (package, version) registered =
+  [(unit, record) | (unit, record) <- Map.toAscList registered
+  , registeredPackage record == package
+  , (Text.takeWhile (/= '-') <$> Text.stripPrefix (package <> "-") unit) == Just version]
+
+-- | Each declared fork package must have exactly one registered unit at its pinned
+-- version; a unit of another version is not a candidate and is ignored.
+forkRegistration :: [(Text, Text)] -> Map Text RegisteredUnit -> Maybe LayoutFinding
+forkRegistration forks registered = case
+  [package <> "-" <> version | fork@(package, version) <- forks, length (forkUnits fork registered) /= 1] of
+    pinned : _ -> Just (LayoutFinding "ForkDependencyUnregistered" (Text.unpack pinned))
+    [] -> Nothing
+
+catalogue :: [(Text, Text)] -> ComponentPackageMap -> BuildPlan -> Map Text RegisteredUnit -> Either LayoutFinding PackageCatalog
+catalogue forkPackages declared (BuildPlan _ _ entries) registered = do
   let units = Map.fromList [(planUnit entry, planPackage entry) | entry <- entries]
       own = [entry | entry <- entries, planPackage entry `elem` ["amoebius", "probe"]
                  , Just _ <- [planComponent entry]]
@@ -510,11 +563,16 @@ catalogue declared (BuildPlan _ _ entries) registered = do
     then Left (LayoutFinding "PackagePlanDuplicateUnit" "install-plan")
     else do
       selected <- mapM (selectComponent units) components
-      let available = [(package, unit, modules)
+      let planned = [(package, unit, modules)
             | (unit, package) <- Map.toAscList units
             , Just record <- [Map.lookup unit registered]
             , registeredPackage record == package
             , let modules = registeredModules record]
+          declaredFork = [(registeredPackage record, unit, registeredModules record)
+            | fork <- forkPackages
+            , (unit, record) <- forkUnits fork registered
+            , unit `Map.notMember` units]
+          available = planned <> declaredFork
       pure (PackageCatalog (Map.fromList selected) declared available Map.empty Map.empty Map.empty registered Nothing)
  where
   selectComponent units (component, entry) = do

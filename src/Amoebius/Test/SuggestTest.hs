@@ -18,7 +18,7 @@ data OptionalBranch = NoOptionalBranch | RegistryPublication | PulumiExecution |
 
 data SuggestInput = SuggestInput
   { suggestSubstrate :: TestSubstrate
-  , suggestSupply :: ResourceVector
+  , suggestSupply :: TestResourceVector
   , suggestCredential :: TestCredential
   , suggestBranch :: OptionalBranch
   , suggestAcceleratorOffering :: Maybe Text
@@ -44,8 +44,8 @@ suggestTest input = either (Left . NoRepresentativeTopologyFits) Right (provisio
     , topologyAcceleratorOffering = suggestAcceleratorOffering input
     }
 
-branchDemand :: OptionalBranch -> ResourceVector
-branchDemand branch = ResourceVector 3000 3221225472 8589934592 durable cache 4 4 0 0
+branchDemand :: OptionalBranch -> TestResourceVector
+branchDemand branch = TestResourceVector 3000 3221225472 8589934592 durable cache 4 4 0 0
  where
   (durable, cache) = case branch of
     NoOptionalBranch -> (1073741824, 536870912)

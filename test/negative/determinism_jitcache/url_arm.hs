@@ -1,6 +1,6 @@
 module Phase48UrlArm where
 
-import Amoebius.Jit.Resolver (EngineRuntime)
+import Amoebius.Jit.Resolver (JitEngine)
 
-authored :: EngineRuntime
+authored :: JitEngine
 authored = Url "https://example.invalid/engine"

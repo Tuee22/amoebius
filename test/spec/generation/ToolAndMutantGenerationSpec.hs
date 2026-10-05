@@ -22,7 +22,7 @@ import Amoebius.Calculus.Composition
 import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
 import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Capacity.Vector (ResourceVector (ResourceVector))
 import Amoebius.Generate.CheckingCorpus
 import Amoebius.Scope.Index qualified as CalculusScope
 import Control.Monad (forM_, unless, when)

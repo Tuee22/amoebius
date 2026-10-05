@@ -108,10 +108,14 @@ or host-floor policy, implement help/version or another public command, perform 
 after establish/build, the exact argv reaches Haskell by exec. A Python exit-code wrapper around another gate
 is prohibited.
 
-Phase 0 requires the exact current captured bootstrap bytes; the pin of `pb/__main__.py` by its SHA-256 as
-the one admitted non-Haskell behavioral file and compiler-backed source closure are owed by
-[Phase 2](../../DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md). That static admission
-does not establish that an effect or exec occurred. Every phase through the DSL barrier (Phase 9) invokes the
+**Observed implementation** ([GateSpec:repository_layout_conformance]). Phase 0 requires the exact current
+captured bootstrap bytes; the pin of `pb/__main__.py` by its SHA-256 as the one admitted non-Haskell behavioral
+file and the compiler-backed source closure are implemented and receipt-backed by
+[Phase 2](../../DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md)
+([DL-0022](../decision_log.md#dl-0022--phase-2-accepted-its-owed-by-paragraphs-become-observed-implementations)).
+That static admission does not establish that an effect or exec occurred.
+
+Every phase through the DSL barrier (Phase 9) invokes the
 verifier directly; the Phase-50 candidate has the runner's `ProcessObserver` launch `pb` as the observed
 child ([`gate_runner_doctrine.md` §3](./gate_runner_doctrine.md#3-the-runner)) and records the adapter plus
 ensure/build/executable-identity/unchanged-argv/exec runtime handoff. The future public spelling cannot

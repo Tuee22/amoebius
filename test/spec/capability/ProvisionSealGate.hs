@@ -77,7 +77,8 @@ import Amoebius.Capacity.RenderSource
 import Amoebius.Capacity.RuntimeStorage
   ( ProvisionedNodeRuntimeStorageAccounting (..)
   )
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Capacity.Vector (ResourceVector (ResourceVector))
+import Amoebius.Vocabulary (quantityText)
 import Amoebius.Capability.Types
   ( BoundDeployment (..)
   , BoundServiceSpec (..)
@@ -227,6 +228,9 @@ expectedOwner witness = case witness of
   ServiceEndpointPart service -> CapabilityServiceOwner service
   ServiceWorkloadPart service -> CapabilityServiceOwner service
   ServicePolicyPart service -> CapabilityServiceOwner service
+  AppNamespacePart app -> AppOwner app
+  AppWorkloadPart app -> AppOwner app
+  AppEndpointPart app -> AppOwner app
 
 checkInfrastructurePlanner :: CapabilityFixture -> IO PlannerCounts
 checkInfrastructurePlanner fixture = do
@@ -404,7 +408,7 @@ checkProvisionCalculusProjection positives planners negatives properties mutants
           [ ("calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition)))
           , ("component-names", Text.intercalate "," (compositionNames composition))
           , ("projection-counts", Text.intercalate "," (map (Text.pack . show) [positives, planners, negatives, properties, mutants]))
-          , ("resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods]))
+          , ("resource-vector", Text.intercalate "," ([quantityText cpu, quantityText memory, quantityText ephemeral, quantityText pods]))
           ]
     assert (compositionKinds composition == everyCalculus) "provision seal projection omitted or reordered a calculus"
     assert (actual == expectedCalculusProjection) ("provision seal calculus projection changed: " <> show actual)

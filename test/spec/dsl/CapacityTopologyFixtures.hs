@@ -12,27 +12,11 @@ module CapacityTopologyFixtures
   , tagTopology
   ) where
 
-import Amoebius.Capacity.Fold (carve, fits, place)
-import Amoebius.Capacity.Types
-  ( AvailableCapacity (..)
-  , Axis (..)
-  , CandidateNodeClass (..)
-  , CpuOvercommitPolicy (..)
-  , Demand (..)
-  , GrowthQuota (..)
-  , HostEnvironment (..)
-  , Node (..)
-  , NodeCapacity (..)
-  , Overcommit (..)
-  , Placement
-  , PlacementError (..)
-  , ResourceVector (..)
-  , StorageDemand (..)
-  , Workload (..)
-  , emptyStorageDemand
-  , mkResourceEnvelope
-  , zeroResources
-  )
+import Amoebius.Capacity.Fits (carve, fits)
+import Amoebius.Placement.Witness (placedPlacement, place)
+import Amoebius.Capacity.Types (AvailableCapacity (..), Axis (..), CandidateNodeClass (..), CpuOvercommitPolicy (..), Demand (..), GrowthQuota (..), HostEnvironment (..), Node (..), NodeCapacity (..), Overcommit (..), Placement, PlacementError (..), StorageDemand (..), Workload (..), emptyStorageDemand, mkResourceEnvelope)
+import Amoebius.Capacity.Vector (ResourceVector (..), zeroResources)
+import Amoebius.Vocabulary (Quantity (..))
 import Amoebius.Dsl.Topology
   ( ComputeEngine (..)
   , NodeSupply (..)
@@ -144,14 +128,14 @@ positiveFixed :: Either Text (Topology, [Workload], Placement)
 positiveFixed = do
   topology <- firstTopology (mkTopology Rke2Engine (FixedSupply (baseNode "linux" "host-linux" :| [virtualNode "lima" "host-lima"])))
   let workloads = [smallWorkload "fixed-a", smallWorkload "fixed-b"]
-  placement <- firstPlacement (place topology workloads)
+  placement <- firstPlacement (placedPlacement <$> place topology workloads)
   pure (topology, workloads, placement)
 
 positiveElastic :: Either Text (Topology, [Workload], Placement)
 positiveElastic = do
   topology <- firstTopology (mkTopology ManagedEksEngine (ElasticSupply [] (baseCandidate {candidateMaxCount = 2} :| []) (GrowthQuota 2 8)))
   let workloads = [antiWorkload "elastic-a", antiWorkload "elastic-b"]
-  placement <- firstPlacement (place topology workloads)
+  placement <- firstPlacement (placedPlacement <$> place topology workloads)
   pure (topology, workloads, placement)
 
 baseNode :: Text -> Text -> Node
@@ -189,7 +173,7 @@ baseCandidate =
     }
 
 resources :: Natural -> Natural -> Natural -> Natural -> ResourceVector
-resources = ResourceVector
+resources cpu memory ephemeral pods = ResourceVector (Quantity cpu) (Quantity memory) (Quantity ephemeral) (Quantity pods)
 
 baseWorkload :: Text -> ResourceVector -> ResourceVector -> ResourceVector -> Workload
 baseWorkload name requests limits padding =
@@ -230,7 +214,7 @@ antiWorkload name = (threeCpu name) {workloadAntiAffinity = Just "spread"}
 storageWorkload :: Text -> Natural -> Natural -> Natural -> Bool -> Workload
 storageWorkload name requestedMemory initBytes appBytes persists =
   (baseWorkload name (resources 1 requestedMemory 1 1) (resources 1 requestedMemory 1 1) zeroResources)
-    { workloadStorage = StorageDemand 0 0 initBytes appBytes persists
+    { workloadStorage = StorageDemand 0 0 (Quantity initBytes) (Quantity appBytes) persists
     }
 
 fixedResult :: Node -> [Workload] -> Either Text ()

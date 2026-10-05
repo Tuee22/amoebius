@@ -4,7 +4,7 @@ module CapacityTopologyGate
   ( runCapacityTopologyGate
   ) where
 
-import Amoebius.Capacity.Fold (podFits)
+import Amoebius.Placement.Witness (podFits)
 import Amoebius.Capacity.Types
   ( HostEnvironment (..)
   , Node (..)

@@ -23,15 +23,8 @@ module Amoebius.Capacity.Execution
   , resourcePeak
   ) where
 
-import Amoebius.Capacity.Types
-  ( Axis (..)
-  , ResourceEnvelope
-  , ResourceVector (..)
-  , addResources
-  , envelopeHeadroom
-  , envelopeRequests
-  , zeroResources
-  )
+import Amoebius.Capacity.Types (Axis (..), Overcommit (..), ResourceEnvelope, envelopeHeadroom, envelopeRequests, firstExceeded, maxResources)
+import Amoebius.Capacity.Vector (ResourceVector (..), addResources, zeroResources)
 import Amoebius.Capacity.CapacityMutation (capacityMutationTargets)
 import Control.DeepSeq (NFData)
 import Data.List (sortOn)
@@ -343,7 +336,7 @@ mkEpoch ordinal rows =
 ensureEpochFits :: ResourceVector -> ExecutionEpoch -> Either ExecutionError ()
 ensureEpochFits available epoch = case firstExceeded (executionEpochResources epoch) available of
   Nothing -> Right ()
-  Just (axis, required, capacity) -> Left (ExecutionOvercommit (executionEpochName epoch) axis required capacity)
+  Just excess -> Left (ExecutionOvercommit (executionEpochName epoch) (overcommitAxis excess) (overcommitRequired excess) (overcommitAvailable excess))
 
 resourcePeak :: [ResourceVector] -> ResourceVector
 resourcePeak rows = case rows of
@@ -355,24 +348,6 @@ reserved envelope = addResources (envelopeRequests envelope) (envelopeHeadroom e
 
 foldMapResources :: [ResourceVector] -> ResourceVector
 foldMapResources = foldl addResources zeroResources
-
-maxResources :: ResourceVector -> ResourceVector -> ResourceVector
-maxResources left right =
-  ResourceVector
-    { resourceCpu = max (resourceCpu left) (resourceCpu right)
-    , resourceMemory = max (resourceMemory left) (resourceMemory right)
-    , resourceEphemeralStorage = max (resourceEphemeralStorage left) (resourceEphemeralStorage right)
-    , resourcePodSlots = max (resourcePodSlots left) (resourcePodSlots right)
-    }
-
-firstExceeded :: ResourceVector -> ResourceVector -> Maybe (Axis, Natural, Natural)
-firstExceeded required available
-  | resourceCpu required > resourceCpu available = Just (CpuAxis, resourceCpu required, resourceCpu available)
-  | resourceMemory required > resourceMemory available = Just (MemoryAxis, resourceMemory required, resourceMemory available)
-  | resourceEphemeralStorage required > resourceEphemeralStorage available =
-      Just (EphemeralStorageAxis, resourceEphemeralStorage required, resourceEphemeralStorage available)
-  | resourcePodSlots required > resourcePodSlots available = Just (PodSlotsAxis, resourcePodSlots required, resourcePodSlots available)
-  | otherwise = Nothing
 
 ordinals :: Natural -> [Natural]
 ordinals count = go 0 count

@@ -218,7 +218,7 @@ expectedLegacy =
   ]
 
 expectedDecisions :: [Text]
-expectedDecisions = ["DL-0001", "DL-0002", "DL-0003", "DL-0004", "DL-0005", "DL-0006", "DL-0007", "DL-0008", "DL-0009", "DL-0010", "DL-0011", "DL-0012", "DL-0013", "DL-0014", "DL-0015", "DL-0016", "DL-0017", "DL-0018", "DL-0019", "DL-0020", "DL-0021"]
+expectedDecisions = ["DL-0001", "DL-0002", "DL-0003", "DL-0004", "DL-0005", "DL-0006", "DL-0007", "DL-0008", "DL-0009", "DL-0010", "DL-0011", "DL-0012", "DL-0013", "DL-0014", "DL-0015", "DL-0016", "DL-0017", "DL-0018", "DL-0019", "DL-0020", "DL-0021", "DL-0022", "DL-0023"]
 
 expectedFrozenAmendments :: [(Text, Text)]
 expectedFrozenAmendments =
@@ -226,13 +226,17 @@ expectedFrozenAmendments =
   , ("documents/documentation_standards.md", "DL-0015")
   , ("documents/engineering/repository_layout_doctrine.md", "DL-0019")
   , ("documents/engineering/generated_artifacts_doctrine.md", "DL-0020")
-  , ("documents/engineering/validation_frame_doctrine.md", "DL-0021")
+  , ("documents/engineering/validation_frame_doctrine.md", "DL-0022")
+  , ("documents/engineering/substrate_doctrine.md", "DL-0022")
   , ("documents/engineering/gate_runner_doctrine.md", "DL-0019")
   , ("documents/engineering/testing_spoof_resistance.md", "DL-0021")
   , ("DEVELOPMENT_PLAN/development_plan_standards.md", "DL-0019")
-  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "DL-0019")
+  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "DL-0022")
   , ("DEVELOPMENT_PLAN/development_plan_phase_model.md", "DL-0020")
   , ("DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md", "DL-0021")
+  , ("documents/engineering/cluster_topology_doctrine.md", "DL-0023")
+  , ("documents/engineering/service_capability_doctrine.md", "DL-0023")
+  , ("documents/engineering/testing_doctrine.md", "DL-0023")
   ]
 
 -- These are independent exact expectations for every frozen body amended in
@@ -243,13 +247,17 @@ expectedFrozenAmendmentDigests =
   , ("documents/documentation_standards.md", "dc00a283b4f6c3a17b9790d6738f1b5d8856e19129e3c3e7915258cdf2f91fff")
   , ("documents/engineering/repository_layout_doctrine.md", "3124452f70262d851c54a226cf955b2e9115431236d6c5723c72818ddb1db57f")
   , ("documents/engineering/generated_artifacts_doctrine.md", "5dfae009252ba074136652107c465097eb9ef06dbbaaf7b768f4fdd2109ee763")
-  , ("documents/engineering/validation_frame_doctrine.md", "6c87f8c8feb3bcb016af14828338a031f235199af3bece61e6c23ca68e3e21a1")
+  , ("documents/engineering/validation_frame_doctrine.md", "d6959a127d938e597257c74c5f0e5e090de721a94e3a90f96613000a0f3196b5")
+  , ("documents/engineering/substrate_doctrine.md", "382de47ea27e3404d43f36f1e3541aa3cd98f0cdea8c6eb25d14fd8c8bae0c78")
   , ("documents/engineering/gate_runner_doctrine.md", "2e860dc817200dcf5ef9d56fc54482028e3709b89c44caeaca492cc32a4b6f30")
   , ("documents/engineering/testing_spoof_resistance.md", "553a845f6f715e661093218a82c168e228abf77733f65d7b8935fdc35f683e8c")
   , ("DEVELOPMENT_PLAN/development_plan_standards.md", "3a2f52668a26a488366038572c4e0ff15c644da71a06307469d984ab55e702c5")
-  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "25f00e1da3d69bc52b9a413812d3875881df1e3f20877c3c03fc9a297e2ae1d0")
+  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "db119e16d46d3f14e8c648dcb49c4c91fda35dda7e9a0db80d063720fdf2d6cc")
   , ("DEVELOPMENT_PLAN/development_plan_phase_model.md", "445f50e3de44f577ad4f729473d716330f68f82279b6b97ced71d09ddff7bec6")
   , ("DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md", "1a8a4cbc9987e83fef478291c588b345dd4e72dbd9bbdb5d358d526415aa1eea")
+  , ("documents/engineering/cluster_topology_doctrine.md", "24634261aba8b9038afa8080a26d2be3f0485632fe61f5399adc46652fd62ff9")
+  , ("documents/engineering/service_capability_doctrine.md", "e728bf72bf98f534ddfb8fa25b5c6ebbe9cb48aa0745ae9b1e859b9ded45b5d5")
+  , ("documents/engineering/testing_doctrine.md", "9c0303f08df8dd1c76e15020f2713a81e93eaf3b10b04793f898ccf1960d0050")
   ]
 
 -- Independent admission expectations for the narrow tracked evidence class.

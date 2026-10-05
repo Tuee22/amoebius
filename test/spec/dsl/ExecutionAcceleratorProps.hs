@@ -42,13 +42,10 @@ import Amoebius.Capacity.Storage
   , StorageAmount (..)
   , StorageWitness (..)
   )
-import Amoebius.Capacity.Types
-  ( Placement (..)
-  , ResourceEnvelope
-  , ResourceVector (..)
-  , mkResourceEnvelope
-  , zeroResources
-  )
+import Amoebius.Capacity.Types (ResourceEnvelope, mkResourceEnvelope)
+import Amoebius.Placement.Witness (placedAssignments)
+import Amoebius.Vocabulary (Quantity (..))
+import Amoebius.Capacity.Vector (ResourceVector (..), zeroResources)
 import Control.Monad (unless)
 import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
@@ -107,7 +104,7 @@ propExecutionEpochEquivalence (FitCase replicas shouldFit margin) = decisionCove
   required = replicas * 2
   available = capacityFor required shouldFit margin
   unit = BoundExecutionUnit "deployment" 1 baseEnvelope (DeploymentBody replicas recreateRollout)
-  outcome = provisionExecutionEpochs Map.empty (ResourceVector available 100 100 100) (BoundExecutionInventory FirstDeployment [unit])
+  outcome = provisionExecutionEpochs Map.empty (ResourceVector (Quantity available) 100 100 100) (BoundExecutionInventory FirstDeployment [unit])
 
 propImagePeakEquivalence :: FitCase -> Property
 propImagePeakEquivalence (FitCase workspace shouldFit margin) = decisionCoverage shouldFit outcome
@@ -165,7 +162,7 @@ propComposedIndependentValidator =
 validateComposedWitnessIndependent :: ComposedPlacementWitness -> Bool
 validateComposedWitnessIndependent witness =
   vectorWithin (composedRequiredResources witness) (composedExecutionPeakResources witness)
-    && fromIntegral (length (placementAssignments (composedBasePlacement witness))) == resourcePodSlots (composedRequiredResources witness)
+    && fromIntegral (length (placedAssignments (composedBasePlacement witness))) == resourcePodSlots (composedRequiredResources witness)
     && all validatesStorage (composedStorageWitnesses witness)
     && all validatesRoot (composedProviderRootWitnesses witness)
     && all validatesRuntime (composedRuntimeStorageWitnesses witness)

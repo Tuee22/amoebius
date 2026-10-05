@@ -39,7 +39,7 @@ import Amoebius.Calculus.Composition
   , compositionResource
   , singleton
   )
-import Amoebius.Capacity.Types (ResourceVector (..))
+import Amoebius.Capacity.Vector (ResourceVector (..))
 import Crypto.Hash.SHA256 qualified as SHA256
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString

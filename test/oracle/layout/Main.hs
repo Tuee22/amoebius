@@ -10,7 +10,7 @@ import Crypto.Hash.SHA256 qualified as SHA256
 import Data.Aeson (Value, eitherDecodeStrict', withObject, (.:))
 import Data.Aeson.Types (Parser, parseEither)
 import Data.ByteString qualified as ByteString
-import Data.Char (intToDigit)
+import Data.Char (intToDigit, isControl, isLower, isUpper)
 import Data.List (sort)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
@@ -18,12 +18,14 @@ import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
+import Data.Text.Encoding.Error (lenientDecode)
 import Data.Text.IO qualified as TextIO
 import System.Directory (createDirectoryIfMissing)
 import System.Environment (getArgs)
 import System.Exit (ExitCode (..), exitFailure)
-import System.FilePath (takeExtension, (</>))
+import System.FilePath (normalise, takeExtension, (</>))
 import System.Process (readProcessWithExitCode)
+import SourceScan
 
 main :: IO ()
 main = do
@@ -46,9 +48,19 @@ main = do
   familySource <- TextIO.readFile "src/Amoebius/Calculus/Workflow/Obligation.hs"
   foreignSource <- TextIO.readFile "test/fixture/chain_boundary/astcheck/negative_foreign.hs"
   liveGateSource <- TextIO.readFile "test/spec/integration/LiveDslDeployGate.hs"
+  sourceTexts <- Map.fromList <$> mapM
+    (\path -> (,) (Text.pack path) . TextEncoding.decodeUtf8With lenientDecode <$> ByteString.readFile path)
+    [path | path <- expectedPaths, takeExtension path == ".hs"]
+  fixtureRoutes <- Text.lines <$> TextIO.readFile (directory </> "fixture-routes.tsv")
+  fixtureRoutesUnresolved <- Text.lines <$> TextIO.readFile (directory </> "fixture-routes-unresolved.tsv")
+  fixtureSinks <- Text.lines <$> TextIO.readFile (directory </> "fixture-sinks.tsv")
+  fixtureStages <- Text.lines <$> TextIO.readFile (directory </> "fixture-stages.tsv")
+  fixtureForks <- Text.lines <$> TextIO.readFile (directory </> "fixture-forks.tsv")
+  fixtureFindings <- Text.lines <$> TextIO.readFile (directory </> "fixture-findings.tsv")
   challengePaths <- parseChallenges <$> TextIO.readFile (directory </> "challenge-paths.tsv")
   challengeFindings <- mapM (readChallengeFinding directory) challengePaths
-  let observedPaths = Map.fromList
+  let masked = maskNonce (challengeNonce challengePaths)
+      observedPaths = Map.fromList
         [(Text.unpack path, className) | line <- report, ["path", path, className] <- [Text.splitOn "\t" line]]
       findings = [line | line <- report, "finding\t" `Text.isPrefixOf` line]
       pathSet = Set.fromList expectedPaths
@@ -459,6 +471,10 @@ main = do
         ["graph-import-available-unit", component, consumer, name, package, unit] <- [Text.splitOn "\t" line]]
       graphStandaloneAvailableUnits = Set.fromList [(path, name, package, unit) | line <- report,
         ["graph-import-standalone-available-unit", path, name, package, unit] <- [Text.splitOn "\t" line]]
+      graphStandaloneForwardOwned = Set.fromList [(path, name, expected, role) | line <- report,
+        ["graph-import-standalone-forward-owned", path, name, expected, role] <- [Text.splitOn "\t" line]]
+      graphStandaloneUnresolved = Set.fromList [(path, name, reason) | line <- report,
+        ["graph-import-standalone-unresolved", path, name, reason] <- [Text.splitOn "\t" line]]
       graphStandaloneRegisteredOnlyUnits = Set.fromList [(path, name, package, unit) | line <- report,
         ["graph-import-standalone-registered-only-unit", path, name, package, unit]
           <- [Text.splitOn "\t" line]]
@@ -501,6 +517,20 @@ main = do
         , (path, component) <- Set.toList graphComponents, path == consumer
         , component == "library:pulsar-client"
         , name `elem` ["Proto.PulsarApi", "Proto.PulsarApi_Fields"]]
+      -- A source with no component has its imports accounted apart: each is a source
+      -- provider, an available registered unit, a recorded owed module, or an open
+      -- unresolved import, and an unresolved import is never also accounted otherwise.
+      ownedPaths = Set.map fst graphComponents
+      standaloneImportKeys = Set.filter (\(path, _) -> Set.notMember path ownedPaths) graphImports
+      standaloneModuleNames = Set.map snd graphModules
+      standaloneSourceKeys = Set.filter (\(_, name) -> Set.member name standaloneModuleNames) standaloneImportKeys
+      standaloneAvailableKeys = Set.map (\(path, name, _, _) -> (path, name)) graphStandaloneAvailableUnits
+      standaloneOwedKeys = Set.map (\(path, name, _, _) -> (path, name)) graphStandaloneForwardOwned
+      standaloneUnresolvedKeys = Set.map (\(path, name, _) -> (path, name)) graphStandaloneUnresolved
+      standaloneAccounted = Set.unions [standaloneSourceKeys, standaloneAvailableKeys, standaloneOwedKeys]
+      standalonePartition = standaloneImportKeys == Set.union standaloneAccounted standaloneUnresolvedKeys
+        && Set.null (Set.intersection standaloneAccounted standaloneUnresolvedKeys)
+        && Set.null (Set.intersection standaloneAvailableKeys standaloneOwedKeys)
       importPartition = componentImportKeys == Set.unions
           [internalImportKeys, externalImportKeys, availableImportKeys,
            forwardImportKeys, deferredImportKeys, unresolvedImportKeys]
@@ -541,12 +571,258 @@ main = do
           | (component, path, owner, _, _, _, instanceComponent,
              instancePath, _, _, _, methodOwner) <-
               Set.toList graphClassMethodBodyRoutes]]) effectSeeds)
+      -- Declaration routes, sinks, and consumers. Each binding reads the report or
+      -- recomputes from raw source text through SourceScan; none uses a product module.
+      rowsOf kind = [fields | line <- report, (key : fields) <- [Text.splitOn "\t" line], key == kind]
+      graphDerivedRoutes = Set.fromList
+        [(path, typeName, classText, classHead, strategy, declaredAs, generation, delegate, disposition, provider)
+        | [path, typeName, classText, classHead, strategy, declaredAs, generation, delegate, disposition, provider]
+            <- rowsOf "graph-derived-route"]
+      graphDerivedRouteTargets = Set.fromList
+        [(path, typeName, classText, targetPath, targetHead)
+        | [path, typeName, classText, targetPath, targetHead] <- rowsOf "graph-derived-route-target"]
+      graphStandaloneRoutes = Set.fromList
+        [(path, instanceType, classHead, strategy, declaredAs, generation, delegate, disposition, provider)
+        | [path, instanceType, classHead, strategy, declaredAs, generation, delegate, disposition, provider]
+            <- rowsOf "graph-standalone-deriving-route"]
+      graphStandaloneRouteTargets = Set.fromList
+        [(path, instanceType, targetPath, targetHead)
+        | [path, instanceType, targetPath, targetHead] <- rowsOf "graph-standalone-deriving-route-target"]
+      graphInstanceRoutes = Set.fromList
+        [(path, headText, className, kind, provider)
+        | [path, headText, className, kind, provider] <- rowsOf "graph-instance-route"]
+      graphSinkUses = Set.fromList
+        [(path, owner, site, target, moduleName, name, kind, via)
+        | [path, owner, site, target, moduleName, name, kind, via] <- rowsOf "graph-effect-sink-external"]
+      graphConsumers = Set.fromList
+        [(path, owner, site, target, moduleName, name, kind, position, literal, role, origin)
+        | [path, owner, site, target, moduleName, name, kind, position, literal, role, origin] <- rowsOf "graph-file-consumer"]
+      rowCountsByPath kind = Map.fromListWith (+) [(path, 1 :: Int) | (path : _) <- rowsOf kind]
+      textCounts count = Map.filter (> 0) (Map.map (count . blankSource) sourceTexts)
+      countDifferences left right = take 5
+        [(path, Map.lookup path left, Map.lookup path right)
+        | path <- Set.toList (Set.union (Map.keysSet left) (Map.keysSet right))
+        , Map.lookup path left /= Map.lookup path right]
+      isQualifiedName name = maybe False (isUpper . fst) (Text.uncons name) && Text.any (== '.') name
+      baseName name = if isQualifiedName name then Text.takeWhileEnd (/= '.') name else name
+      stockClassNames = ["Bounded", "Data", "Enum", "Eq", "Foldable", "Functor", "Generic", "Generic1",
+                         "Ix", "Lift", "Ord", "Read", "Show", "Traversable"] :: [Text]
+      expectedGeneration anyClassOn strategy declaredAs classHead
+        | strategy == "stock" = "stock-generated"
+        | strategy == "newtype" = "newtype-representation"
+        | strategy == "anyclass" = "anyclass-default"
+        | strategy == "via" = "via-representation"
+        | declaredAs == ("newtype" :: Text) = expectedNewtypeGeneration anyClassOn (baseName classHead)
+        | baseName classHead `elem` stockClassNames = "stock-generated"
+        | otherwise = "anyclass-default" :: Text
+      expectedNewtypeGeneration anyClassOn named
+        | named `elem` ["Show", "Read", "Data", "Generic", "Generic1", "Lift", "Traversable"] = "stock-generated"
+        | named `elem` ["Eq", "Ord", "Ix", "Bounded"] = "newtype-representation"
+        | not anyClassOn = "newtype-representation"
+        | named `elem` stockClassNames = "stock-generated"
+        | otherwise = "anyclass-default" :: Text
+      routeConsistent classHead generation delegate disposition provider targetCount = case generation of
+        "stock-generated" -> delegate == "-" && disposition == "generated" && targetCount == (0 :: Int)
+        "anyclass-default" -> delegate == baseName classHead && targetCount == 0
+          && disposition == (if provider == "local" || "source:" `Text.isPrefixOf` provider
+               then "source-class-default" else "external-class-default")
+        _ | targetCount > 0 -> disposition == "source-instance" && delegate /= "-"
+          | delegate == "-" -> disposition == "delegate-unresolved"
+          | maybe False (\(first, _) -> isLower first || first == '_') (Text.uncons delegate) -> disposition == "context-instance"
+          | provider == "local" || "source:" `Text.isPrefixOf` provider -> disposition == "delegate-unresolved"
+          | otherwise -> disposition == "external-instance"
+      externalUnitKeys = Set.fromList
+        ([(consumer, name, package, unit) | (_, consumer, name, package, unit) <- Set.toList graphExternalImports]
+          <> [(consumer, name, package, unit) | (_, consumer, name, package, unit) <- Set.toList graphAvailableUnits]
+          <> Set.toList graphStandaloneAvailableUnits)
+      preludeUnitKeys = Set.fromList
+        ([(consumer, package, unit) | (_, consumer, package, unit) <- Set.toList graphImplicitPreludeImports]
+          <> [(consumer, package, unit) | (_, consumer, package, unit) <- Set.toList graphAvailablePreludeImports]
+          <> Set.toList graphStandalonePreludeImports)
+      providerAnchored path className provider = case Text.splitOn ":" provider of
+        ["local"] -> Set.member (path, baseName className) graphClassDeclarations
+        ("source" : rest) ->
+          let providerPath = Text.intercalate ":" rest
+          in Set.member (providerPath, baseName className) graphClassDeclarations
+               && any (\(filePath, moduleName) -> filePath == providerPath && Set.member (path, moduleName) graphImports)
+                    (Set.toList graphModules)
+        ["external", moduleName, package, unit] ->
+          Set.member (path, moduleName) graphImports && Set.member (path, moduleName, package, unit) externalUnitKeys
+        ["prelude", package, unit] -> Set.member (path, package, unit) preludeUnitKeys
+        _ -> False
+      derivedTargetMap = Map.fromListWith (<>)
+        [((path, typeName, classText), [(targetPath, targetHead)])
+        | (path, typeName, classText, targetPath, targetHead) <- Set.toList graphDerivedRouteTargets]
+      standaloneTargetMap = Map.fromListWith (<>)
+        [((path, instanceType), [(targetPath, targetHead)])
+        | (path, instanceType, targetPath, targetHead) <- Set.toList graphStandaloneRouteTargets]
+      targetValid classHead delegate (targetPath, targetHead) =
+        any (\(path, headText, className) -> path == targetPath && headText == targetHead
+               && baseName className == baseName classHead
+               && delegate `elem` Text.words (Text.filter (`notElem` ("()" :: String)) targetHead))
+          (Set.toList graphInstanceDeclarations)
+      derivedRuleHolds (path, typeName, classText, classHead, strategy, declaredAs, generation, delegate, disposition, provider) =
+          let anyClassOn = maybe False (languagePragmaEnabled "DeriveAnyClass") (Map.lookup path sourceTexts)
+              targets = Map.findWithDefault [] (path, typeName, classText) derivedTargetMap
+              textDeclared = declaredAsNewtype typeName (maybe "" blankSource (Map.lookup path sourceTexts))
+          in generation == expectedGeneration anyClassOn strategy declaredAs classHead
+               && maybe True (\isNewtype -> declaredAs == (if isNewtype then "newtype" else "data")) textDeclared
+               && (generation /= "newtype-representation" || declaredAs /= "newtype"
+                     || maybe True (== delegate) (Map.lookup path sourceTexts >>= newtypeRepresentation typeName . blankSource))
+               && routeConsistent classHead generation delegate disposition provider (length targets)
+               && all (targetValid classHead delegate) targets
+               && providerAnchored path classHead provider
+      derivedRuleFailures = [route | route <- Set.toList graphDerivedRoutes, not (derivedRuleHolds route)]
+      derivedRulesHold = null derivedRuleFailures
+      standaloneRulesHold = all (\(path, instanceType, classHead, strategy, declaredAs, generation, delegate, disposition, provider) ->
+          let anyClassOn = maybe False (languagePragmaEnabled "DeriveAnyClass") (Map.lookup path sourceTexts)
+              targets = Map.findWithDefault [] (path, instanceType) standaloneTargetMap
+          in generation == expectedGeneration anyClassOn strategy declaredAs classHead
+               && routeConsistent classHead generation delegate disposition provider (length targets)
+               && all (targetValid classHead delegate) targets
+               && providerAnchored path classHead provider)
+        (Set.toList graphStandaloneRoutes)
+      instanceMethodHeads = Set.fromList [(path, headText) | (path, headText, _, _) <- Set.toList graphInstanceMethods]
+      instanceRulesHold = all (\(path, headText, className, kind, provider) ->
+          kind == (if Set.member (path, headText) instanceMethodHeads then "methods" else "defaults")
+            && providerAnchored path className provider)
+        (Set.toList graphInstanceRoutes)
+      sinkKindsOf moduleName name = [kind | (candidate, entryName, kind, _, _) <- expectedSinkTable
+        , candidate == moduleName, entryName == name]
+      sinkEntitiesOf moduleName name = [entity | (candidate, entryName, _, entity, _) <- expectedSinkTable
+        , candidate == moduleName, entryName == name]
+      sinkPairsReported = Set.fromList
+        [(path, entity, kind) | (path, _, _, _, moduleName, name, kind, _) <- Set.toList graphSinkUses
+        , entity <- sinkEntitiesOf moduleName name]
+      sinkPairsExpected = Set.fromList
+        [(path, entity, kind)
+        | (path, text) <- Map.toList sourceTexts
+        , (moduleName, name, kind) <- Set.toList (sinkHits [(m, n, k) | (m, n, k, _, _) <- expectedSinkTable] text (blankSource text))
+        , entity <- sinkEntitiesOf moduleName name]
+      sinkSlice path site = case (parseSite site, Map.lookup path sourceTexts) of
+        (Just bounds, Just text) -> Just (sliceSpan (Text.lines text) bounds)
+        _ -> Nothing
+      sinkAnchored (path, _, site, target, moduleName, name, kind, via) =
+        case sinkSlice path site of
+          Just slice -> (target `Text.isPrefixOf` slice || ("`" <> target <> "`") `Text.isInfixOf` slice)
+            && baseName target == name && kind `elem` sinkKindsOf moduleName name
+            && via == (if slice == target then "reference" else "call")
+          Nothing -> False
+      sinkUseKeys = Set.fromList
+        [(path, owner, site, target, moduleName, name, kind) | (path, owner, site, target, moduleName, name, kind, _) <- Set.toList graphSinkUses]
+      consumersByUse = Map.fromListWith Set.union
+        [((path, owner, site, target, moduleName, name, kind), Set.singleton (position, literal, role, origin))
+        | (path, owner, site, target, moduleName, name, kind, position, literal, role, origin) <- Set.toList graphConsumers]
+      -- The consumer rows one use must have, recomputed from the raw text of its own
+      -- span and the oracle's own argument positions; Nothing where the text is not
+      -- a form the oracle reads.
+      expectedConsumersOf (path, _, site, _, moduleName, name, kind, _) = do
+        slice <- sinkSlice path site
+        applied <- useArguments slice
+        let declared = concat [positions | (candidate, entryName, entryKind, _, positions) <- expectedSinkTable
+                              , candidate == moduleName, entryName == name, entryKind == kind]
+        pure (Set.fromList (concat
+          [ case [run | (at, runs) <- applied, at == position, run <- runs, representable (snd run)] of
+              [] -> [(Text.pack (show position), "-", "-", "dynamic")]
+              runs -> [ (Text.pack (show position), literal, role, origin)
+                      | (rooted, literal) <- runs, let (role, origin) = expectedConsumerClass argumentRole rooted literal ]
+          | (position, argumentRole) <- declared ]))
+      representable literal = not (Text.null literal) && Text.length literal <= 200 && not (Text.any isControl literal)
+      consumerVerdicts =
+        [ (use, expectedConsumersOf use, Map.findWithDefault Set.empty (useKey use) consumersByUse)
+        | use <- Set.toList graphSinkUses ]
+      useKey (path, owner, site, target, moduleName, name, kind, _) = (path, owner, site, target, moduleName, name, kind)
+      consumerMismatches = [use | (use, Just expected, actual) <- consumerVerdicts, expected /= actual]
+      consumerUnread = length [() | (_, Nothing, _) <- consumerVerdicts]
+      consumerRowKnown (path, owner, site, target, moduleName, name, kind, position, literal, role, origin) =
+        Set.member (path, owner, site, target, moduleName, name, kind) sinkUseKeys
+          && (position, literal, role, origin) `Set.member` Map.findWithDefault Set.empty
+               (path, owner, site, target, moduleName, name, kind) consumersByUse
+      sinkSiteGroups = Map.fromListWith (+)
+        [((path, owner, target, entity, fmap fst (parseSite site)), 1 :: Int)
+        | (path, owner, site, target, moduleName, name, _, "call") <- Set.toList graphSinkUses
+        , entity <- sinkEntitiesOf moduleName name]
+      routeChecks =
+        [ ("route-derived-coverage",
+             Set.map (\(path, typeName, classText, _, strategy, _, _, _, _, _) -> (path, typeName, classText, strategy)) graphDerivedRoutes
+               == graphDerivedInstances
+               && rowCountsByPath "graph-derived-route" == rowCountsByPath "graph-derived-instance"
+               && rowCountsByPath "graph-derived-instance" == textCounts derivedClassCount,
+           Text.pack (show (Set.size graphDerivedRoutes, Map.size (textCounts derivedClassCount),
+             countDifferences (rowCountsByPath "graph-derived-instance") (textCounts derivedClassCount))))
+        , ("route-derived-rules", derivedRulesHold, Text.pack (show (Set.size graphDerivedRoutes, take 3 derivedRuleFailures)))
+        , ("route-standalone-coverage",
+             Set.map (\(path, instanceType, _, strategy, _, _, _, _, _) -> (path, instanceType, strategy)) graphStandaloneRoutes
+               == graphStandaloneDeriving
+               && rowCountsByPath "graph-standalone-deriving-route" == rowCountsByPath "graph-standalone-deriving"
+               && rowCountsByPath "graph-standalone-deriving" == textCounts standaloneDerivingCount
+               && standaloneRulesHold,
+           Text.pack (show (Set.size graphStandaloneRoutes)))
+        , ("route-instance-coverage",
+             Set.map (\(path, headText, className, _, _) -> (path, headText, className)) graphInstanceRoutes
+               == graphInstanceDeclarations
+               && rowCountsByPath "graph-instance-route" == rowCountsByPath "graph-instance-declaration"
+               && rowCountsByPath "graph-instance-declaration" == textCounts instanceDeclarationCount
+               && instanceRulesHold,
+           Text.pack (show (Set.size graphInstanceRoutes)))
+        , ("route-no-open-declaration",
+             Set.null graphDeclarationGaps && Set.null graphStandaloneRegisteredOnlyUnits
+               && Set.null graphStandaloneRegisteredOnlyCalls,
+           Text.pack (show (Set.size graphDeclarationGaps, Set.size graphStandaloneRegisteredOnlyUnits)))
+        , ("fork-declared-packages",
+             let forkPackageOf moduleName = lookup moduleName
+                   [("Control.Monad.Managed", "managed"), ("Control.Concurrent.Chan.Unagi", "unagi-chan"),
+                    ("Control.Logging", "logging")]
+                 expected = Set.fromList
+                   [(Text.pack path, importModule statement, package)
+                   | path <- expectedForkPaths
+                   , Just text <- [Map.lookup (Text.pack path) sourceTexts]
+                   , statement <- importStatements (blankSource text)
+                   , Just package <- [forkPackageOf (importModule statement)]]
+                 observed = Set.fromList
+                   [(path, name, package)
+                   | (path, name, package, _) <- Set.toList graphStandaloneAvailableUnits
+                   , Just package == forkPackageOf name]
+             in not (Set.null expected) && expected == observed,
+           Text.pack (show (Set.size graphStandaloneAvailableUnits)))
+        , ("sink-catalogue-recomputed", sinkPairsReported == sinkPairsExpected,
+           Text.pack (show (Set.size sinkPairsReported, Set.size sinkPairsExpected,
+             take 6 (Set.toList (sinkPairsReported `Set.difference` sinkPairsExpected)),
+             take 6 (Set.toList (sinkPairsExpected `Set.difference` sinkPairsReported)))))
+        , ("sink-use-anchors", all sinkAnchored (Set.toList graphSinkUses),
+           Text.pack (show (Set.size graphSinkUses, take 3 [use | use <- Set.toList graphSinkUses, not (sinkAnchored use)])))
+        , ("sink-use-single-report", all (== 1) (Map.elems sinkSiteGroups), Text.pack (show (Map.size sinkSiteGroups)))
+        , ("consumer-rows", null consumerMismatches && all consumerRowKnown (Set.toList graphConsumers),
+           Text.pack (show (Set.size graphConsumers, length consumerVerdicts, take 3 consumerMismatches)))
+        , ("consumer-text-read", consumerUnread * 10 <= length consumerVerdicts,
+           Text.pack (show (consumerUnread, length consumerVerdicts)))
+        , ("consumer-coverage",
+             all (\(path, owner, site, target, moduleName, name, kind, _) ->
+                    null (concat [positions | (candidate, entryName, entryKind, _, positions) <- expectedSinkTable
+                                 , candidate == moduleName, entryName == name, entryKind == kind])
+                      || Map.member (path, owner, site, target, moduleName, name, kind) consumersByUse)
+               (Set.toList graphSinkUses),
+           Text.pack (show (Map.size consumersByUse)))
+        , ("fixture-routes", Set.fromList fixtureRoutes == expectedRoutesFixture && length fixtureRoutes == Set.size expectedRoutesFixture,
+           Text.pack (show (length fixtureRoutes)))
+        , ("fixture-routes-unresolved",
+             Set.fromList fixtureRoutesUnresolved == expectedUnresolvedRoutesFixture
+               && length fixtureRoutesUnresolved == Set.size expectedUnresolvedRoutesFixture,
+           Text.pack (show (length fixtureRoutesUnresolved)))
+        , ("fixture-sinks", Set.fromList fixtureSinks == expectedSinksFixture && length fixtureSinks == Set.size expectedSinksFixture,
+           Text.pack (show (length fixtureSinks)))
+        , ("fixture-stages", Set.fromList fixtureStages == expectedStagesFixture && length fixtureStages == Set.size expectedStagesFixture,
+           Text.pack (show (length fixtureStages)))
+        , ("fixture-forks", Set.fromList fixtureForks == expectedForksFixture && length fixtureForks == Set.size expectedForksFixture,
+           Text.pack (show (length fixtureForks)))
+        , ("fixture-findings", fixtureFindings == replicate 9 "0", Text.intercalate "," fixtureFindings)
+        ]
       checks =
         [ ("path-set", pathSet == reportSet, Text.pack (show (Set.size reportSet)))
         , ("finding-set", null findings, Text.pack (show findings))
         , ("case:six-metadata-files", length (filter (`elem` metadata) expectedPaths) == 6, Text.pack (show (filter (`elem` metadata) expectedPaths)))
         , ("challenge-set", Set.fromList [(name, tag) | (name, _, tag) <- challengePaths] == Set.fromList expectedChallengeTags,
-           Text.pack (show challengePaths))
+           Text.pack (show [(name, masked path, tag) | (name, path, tag) <- challengePaths]))
         , ("compiler-parsed-source-set", graphFiles == Set.filter ((== ".hs") . takeExtension) pathSet,
            Text.pack (show (Set.size graphFiles)))
         , ("compiler-import-control", Set.member ("src/Amoebius/Layout/SourceGraph.hs", "GHC.Parser") graphImports,
@@ -609,10 +885,7 @@ main = do
                     "runDirectIo") effectSeeds,
            Text.pack (show (Set.size graphClassEffectTypeCandidates)))
         , ("compiler-instance-declaration-control",
-             Set.fromList [path | (path, _, _) <- Set.toList graphInstanceDeclarations]
-               == Set.fromList [path | (path, tag) <- Set.toList graphDeclarationGaps,
-                 tag == "InstanceDispatch"]
-               && Set.member ("src/Amoebius/Calculus/Artifact/Region.hs",
+             Set.member ("src/Amoebius/Calculus/Artifact/Region.hs",
                     "Functor (Region s)", "Functor", "fmap") graphInstanceMethods
                && all (\(path, headText, className, method) ->
                     Set.member (path, headText, className) graphInstanceDeclarations
@@ -640,7 +913,7 @@ main = do
                   (Set.toList graphInstanceSourceContracts),
            Text.pack (show (Set.size graphInstanceSourceContracts)))
         , ("compiler-instance-external-contract-control",
-             Set.size graphInstanceExternalContracts == 297
+             Set.size graphInstanceExternalContracts == 292
                && Set.null uncontractedInstanceMethods
                && methodImportValid
                && "import Data.Aeson (FromJSON (parseJSON),"
@@ -929,9 +1202,8 @@ main = do
                && Set.member ("src/Amoebius/Layout/Report.hs", "Options", "optionRoot") graphSelectors,
            Text.pack (show (Set.size graphData, Set.size graphConstructors, Set.size graphSelectors)))
         , ("compiler-data-declaration-gap-control",
-             graphDerivedTypes == Set.fromList
-               [path | (path, tag) <- Set.toList graphDeclarationGaps, tag == "DataDerivingDispatch"]
-               && not (any ((== "DataConstructorAndDeriving") . snd) (Set.toList graphDeclarationGaps)),
+             graphDerivedTypes == Set.map (\(path, _, _, _, _, _, _, _, _, _) -> path) graphDerivedRoutes
+               && Set.null graphDeclarationGaps,
            Text.pack (show (Set.size graphDerivedTypes)))
         , ("compiler-local-call-candidate-control", Set.member
              ("library:layout", "src/Amoebius/Layout/Report.hs", "runLayoutReport", "library:layout", "src/Amoebius/Layout/Report.hs", "parseOptions") graphLocalCallCandidates,
@@ -1120,6 +1392,9 @@ main = do
                 ("executable:amoebius", "aeson")]
                && all (not . Text.null . snd) (Set.toList packageBuildDependencies),
            Text.pack (show (Set.size packageBuildDependencies)))
+        , ("compiler-standalone-import-partition", standalonePartition,
+           Text.pack (show (Set.size standaloneImportKeys, Set.size standaloneSourceKeys,
+             Set.size standaloneAvailableKeys, Set.size standaloneOwedKeys, Set.size standaloneUnresolvedKeys)))
         , ("compiler-import-partition-control", importPartition,
            Text.pack (show (Set.size componentImportKeys, Set.size internalImportKeys,
              Set.size externalImportKeys, Set.size forwardImportKeys, Set.size unresolvedImportKeys)))
@@ -1411,6 +1686,7 @@ main = do
            Text.pack (show (Set.size graphInaccessible)))
         , ("case:graph-qualified",
              graphStages == ["resolved"] && importPartition && Set.null graphUnresolved
+               && standalonePartition && Set.null graphStandaloneUnresolved
                && Set.null graphUnscanned && Set.null graphDeclarationGaps
                && Set.null graphOpaqueCallSites
                && graphForwardOwned == expectedForwardOwned
@@ -1431,6 +1707,7 @@ main = do
               ("library:pulsar-client:Proto/PulsarApi_Fields.hs", "generated-proto")],
            Text.pack (show packageOwed))
         ]
+          <> routeChecks
           <> [ ("path:" <> Text.pack path, Map.lookup path observedPaths == Just className, maybe "absent" id (Map.lookup path observedPaths))
              | path <- expectedPaths
              , let className = expectedClass path
@@ -1440,7 +1717,7 @@ main = do
                pathMatches name path && maybe False (\wanted -> sort found == sort
                  (["finding\t" <> wanted <> "\t" <> path <> (if name == "ordinal" then ":2" else "")]
                    <> ["finding\tUnmappedHaskellSource\t" <> path | name == "ordinal"])) (lookup name expectedChallengeTags),
-               Text.intercalate "," found)
+               Text.intercalate "," (map masked found))
              | (name, path, _, found) <- challengeFindings]
   mapM_ (TextIO.putStrLn . renderCheck) checks
   unless (all (\(_, green, _) -> green) checks) exitFailure
@@ -1530,7 +1807,7 @@ observeMethodImportTwin directory = do
       illegalValid = case illegal of
         Right (ExitFailure _, _, stderrText) -> case parseCompilerLines stderrText of
           Right [CompilerDiagnostic "ghc-9.12.4" "Error" 54721 path 5 3 messages] ->
-            path == illegalPath
+            normalise path == normalise illegalPath
               && "parseJSON" `Text.isInfixOf` Text.intercalate "\n" messages
               && "visible" `Text.isInfixOf` Text.intercalate "\n" messages
           _ -> False
@@ -1857,6 +2134,12 @@ expectedCases =
   , ("report.nested-output", "success")
   , ("report.shebang-exit", "exit-1")
   , ("report.default-exit", "success")
+  , ("report.paths-file-missing", "exit-2")
+  , ("report.inventory-failure", "exit-2")
+  , ("report.no-graph", "not-computed")
+  , ("package.absent-module-reported", "missing")
+  , ("package.absent-module-not-owed", "not-forward-owned")
+  , ("package.unselected-module-membership", "([(\"provider\",\"provider-unit\")],[])")
   , ("graph.local-link", "linked")
   , ("graph.ambiguous-import", "refused")
   , ("graph.component-select", "selected")
@@ -1945,6 +2228,12 @@ expectedCases =
   , ("graph.implicit-sequence-call", "projected")
   , ("graph.pattern-binding", "accounted")
   , ("graph.declaration-gap", "accounted")
+  , ("package.fork-missing", "ForkDependencyUnregistered logging-3.0.6")
+  , ("package.fork-complete", "accepted")
+  , ("package.fork-duplicate", "ForkDependencyUnregistered managed-1.0.11")
+  , ("package.fork-other-version", "ForkDependencyUnregistered managed-1.0.11")
+  , ("package.fork-store-growth", "accepted")
+
   , ("graph.plain-data-declaration", "projected")
   , ("graph.class-default-call", "accounted")
   , ("graph.instance-method-call", "accounted")
@@ -2008,6 +2297,16 @@ parsePairs contents = Map.fromList [(name, Text.intercalate "\t" rest) | line <-
 parseChallenges :: Text -> [(Text, Text, Text)]
 parseChallenges contents = [(name, path, tag) | line <- Text.lines contents, [name, path, tag] <- [Text.splitOn "\t" line]]
 
+-- | The suite plants every challenge under a fresh nonce, so a ledger that printed the planted paths could never
+-- be derived twice. The ledger records them with the nonce replaced; the verdicts still judge the real paths.
+challengeNonce :: [(Text, Text, Text)] -> Text
+challengeNonce challenges = case [nonce | ("python", path, _) <- challenges, Just nonce <- [Text.stripPrefix "src/Challenge" path >>= Text.stripSuffix ".py"]] of
+  nonce : _ -> nonce
+  [] -> ""
+
+maskNonce :: Text -> Text -> Text
+maskNonce nonce text = if Text.null nonce then text else Text.replace nonce "<nonce>" text
+
 readChallengeFinding :: FilePath -> (Text, Text, Text) -> IO (Text, Text, Text, [Text])
 readChallengeFinding directory (name, path, tag) = do
   rows <- Text.lines <$> TextIO.readFile (directory </> "challenge-" <> Text.unpack name <> ".tsv")
@@ -2015,3 +2314,273 @@ readChallengeFinding directory (name, path, tag) = do
 
 renderCheck :: (Text, Bool, Text) -> Text
 renderCheck (name, green, observed) = Text.intercalate "\t" [name, if green then "green" else "red", observed]
+
+-- | The oracle's own catalogue of external effect primitives: for each kind and module,
+-- the names that reach outside the process with the argument positions that carry a
+-- path, an executable, or a command line. A primitive with no position takes no path.
+expectedSinkEntries :: [(Text, Text, [(Int, Text)], [Text])]
+expectedSinkEntries =
+  [ ("process-exec", "System.Process", executable0,
+      ["proc", "callProcess", "spawnProcess", "readProcess", "readProcessWithExitCode", "rawSystem",
+       "runProcess", "runInteractiveProcess"])
+  , ("process-exec", "System.Process", commandLine0,
+      ["shell", "callCommand", "spawnCommand", "system", "runCommand", "runInteractiveCommand"])
+  , ("process-exec", "System.Process", [],
+      ["createProcess", "createProcess_", "withCreateProcess", "readCreateProcess", "readCreateProcessWithExitCode"])
+  , ("process-exec", "System.Process.Typed", executable0, ["proc"])
+  , ("process-exec", "System.Process.Typed", commandLine0, ["shell"])
+  , ("process-exec", "System.Process.Typed", [],
+      ["runProcess", "runProcess_", "readProcess", "readProcess_", "readProcessStdout", "readProcessStdout_",
+       "startProcess", "withProcessWait", "withProcessTerm", "withProcessWait_", "withProcessTerm_",
+       "readProcessInterleaved", "readProcessInterleaved_"])
+  , ("process-exec", "System.Posix.Process", executable0, ["executeFile"])
+  , ("process-exec", "System.Posix.Process", [], ["forkProcess"])
+  ]
+  <> concat
+    [ [("file-read", moduleName, path0, ["readFile"]), ("file-write", moduleName, path0, ["writeFile", "appendFile"])]
+    | moduleName <- ["Prelude", "System.IO"] <> contentModules ]
+  <>
+  [ ("file-read", "System.IO", path0, ["readFile'"])
+  , ("file-open", "System.IO", path0,
+      ["openFile", "withFile", "openBinaryFile", "withBinaryFile", "openTempFile", "openBinaryTempFile",
+       "openTempFileWithDefaultPermissions", "openBinaryTempFileWithDefaultPermissions"])
+  , ("file-write", "Data.ByteString.Builder", path0, ["writeFile"])
+  , ("file-write", "System.IO.Temp", [], ["withSystemTempDirectory", "withSystemTempFile", "writeSystemTempFile"])
+  , ("file-write", "System.IO.Temp", path0, ["withTempDirectory", "withTempFile", "createTempDirectory", "writeTempFile"])
+  , ("file-read", "GHC.Data.StringBuffer", path0, ["hGetStringBuffer"])
+  , ("file-read", "Data.Aeson", path0,
+      ["eitherDecodeFileStrict", "eitherDecodeFileStrict'", "decodeFileStrict", "decodeFileStrict'"])
+  , ("file-write", "Data.Aeson", path0, ["encodeFile"])
+  , ("file-read", "Dhall", [(1, "path")], ["inputFile", "input"])
+  , ("file-read", "Dhall", [(2, "path")], ["inputFileWithSettings", "inputWithSettings"])
+  , ("file-read", "Dhall", path0, ["inputExpr"])
+  , ("file-read", "Dhall", [(1, "path")], ["inputExprWithSettings"])
+  , ("file-write", "Control.Logging", path0, ["withFileLogging"])
+  , ("file-write", "System.Directory", path0,
+      ["removeFile", "removeDirectory", "removeDirectoryRecursive", "removePathForcibly", "createDirectory",
+       "removeDirectoryLink", "setPermissions", "setModificationTime", "setAccessTime", "setCurrentDirectory",
+       "withCurrentDirectory"])
+  , ("file-write", "System.Directory", [(0, "path"), (1, "path")],
+      ["copyFile", "copyFileWithMetadata", "renameFile", "renameDirectory", "renamePath", "createFileLink",
+       "createDirectoryLink", "copyPermissions"])
+  , ("file-write", "System.Directory", [(1, "path")], ["createDirectoryIfMissing"])
+  , ("file-query", "System.Directory", path0,
+      ["doesFileExist", "doesDirectoryExist", "doesPathExist", "listDirectory", "getDirectoryContents",
+       "getFileSize", "getModificationTime", "getAccessTime", "getPermissions", "canonicalizePath", "makeAbsolute",
+       "makeRelativeToCurrentDirectory", "pathIsSymbolicLink", "getSymbolicLinkTarget"])
+  , ("file-query", "System.Directory", executable0, ["findExecutable", "findExecutables"])
+  , ("file-query", "System.Directory", [(1, "path")], ["findFile", "findFiles", "findFileWith"])
+  , ("environment", "System.Directory", [],
+      ["getCurrentDirectory", "getHomeDirectory", "getTemporaryDirectory", "getXdgDirectory",
+       "getUserDocumentsDirectory", "getAppUserDataDirectory"])
+  , ("file-write", "System.Posix.Files", path0,
+      ["setFileMode", "removeLink", "setOwnerAndGroup", "setFileTimes", "touchFile", "createNamedPipe"])
+  , ("file-write", "System.Posix.Files", [(0, "path"), (1, "path")], ["createSymbolicLink", "rename", "createLink"])
+  , ("file-query", "System.Posix.Files", path0,
+      ["getFileStatus", "getSymbolicLinkStatus", "fileExist", "readSymbolicLink"])
+  , ("file-write", "System.Posix.Directory", path0, ["createDirectory", "removeDirectory", "changeWorkingDirectory"])
+  , ("file-query", "System.Posix.Directory", path0, ["openDirStream"])
+  , ("file-query", "System.Posix.Directory", [], ["readDirStream"])
+  , ("environment", "System.Environment", [],
+      ["getEnv", "lookupEnv", "getEnvironment", "setEnv", "unsetEnv", "getExecutablePath", "getArgs", "getProgName"])
+  , ("network", "Network.Socket", [], ["socket", "connect", "bind", "listen", "accept", "getAddrInfo", "openSocket"])
+  , ("network", "Network.Socket.ByteString", [], ["sendAll", "send", "recv"])
+  , ("network", "Network.Socket.ByteString.Lazy", [], ["sendAll", "send", "recv"])
+  , ("network", "Network.HTTP.Client", [], ["httpLbs", "httpNoBody", "withResponse", "newManager"])
+  , ("network", "Network.HTTP.Client.TLS", [], ["newTlsManager", "tlsManagerSettings"])
+  , ("dynamic-load", "Language.Haskell.TH", [], ["runIO"])
+  , ("dynamic-load", "Language.Haskell.TH.Syntax", [], ["runIO"])
+  , ("dynamic-load", "System.Posix.DynamicLinker", [], ["dlopen", "dlsym"])
+  ]
+  <> [ ("unsafe-effect", moduleName, [], ["unsafePerformIO", "unsafeInterleaveIO", "unsafeDupablePerformIO"])
+     | moduleName <- ["System.IO.Unsafe", "GHC.IO", "GHC.IO.Unsafe"] ]
+ where
+  path0 = [(0, "path")]
+  executable0 = [(0, "executable")]
+  commandLine0 = [(0, "command-line")]
+  contentModules = ["Data.Text.IO", "Data.Text.Lazy.IO", "Data.ByteString", "Data.ByteString.Char8",
+                    "Data.ByteString.Lazy", "Data.ByteString.Lazy.Char8"]
+
+-- | The catalogue one name at a time: module, name, kind, the function the name denotes
+-- (a module that re-exports another's function names the same function), and the
+-- argument positions with their roles.
+expectedSinkTable :: [(Text, Text, Text, Text, [(Int, Text)])]
+expectedSinkTable =
+  [(moduleName, name, kind, home moduleName <> "." <> name, arguments)
+  | (kind, moduleName, arguments, names) <- expectedSinkEntries, name <- names]
+ where
+  home moduleName = case moduleName of
+    "Prelude" -> "System.IO"
+    "Data.ByteString.Char8" -> "Data.ByteString"
+    "Data.ByteString.Lazy.Char8" -> "Data.ByteString.Lazy"
+    "Language.Haskell.TH.Syntax" -> "Language.Haskell.TH"
+    "GHC.IO" -> "System.IO.Unsafe"
+    "GHC.IO.Unsafe" -> "System.IO.Unsafe"
+    _ -> moduleName
+
+-- | The role and origin of a consumed argument, by the argument's role, whether the
+-- literal begins the argument's own path expression, and the literal.
+expectedConsumerClass :: Text -> Bool -> Text -> (Text, Text)
+expectedConsumerClass argumentRole rooted literal = case argumentRole of
+  "executable" -> ("executable", if not rooted then "dynamic-root"
+                                  else if "/" `Text.isInfixOf` literal then expectedOrigin literal else "path-lookup")
+  "command-line" -> ("command-line", if rooted then "shell" else "dynamic-root")
+  _ -> (expectedRole literal, if rooted then expectedOrigin literal else "dynamic-root")
+
+-- | The content role of a literal path fragment, by the extension of its last component.
+expectedRole :: Text -> Text
+expectedRole literal
+  | Just role <- lookup extension
+      [ (".hs", "haskell-source"), (".lhs", "haskell-source"), (".hsc", "haskell-source")
+      , (".md", "documentation"), (".cabal", "package-metadata")
+      , (".py", "foreign-source"), (".sh", "foreign-source"), (".js", "foreign-source")
+      , (".purs", "foreign-source"), (".dhall", "foreign-source"), (".proto", "foreign-source")
+      , (".yaml", "foreign-source"), (".yml", "foreign-source"), (".sql", "foreign-source")
+      , (".tla", "foreign-source"), (".cfg", "foreign-source")
+      , (".tsv", "data"), (".csv", "data"), (".json", "data"), (".txt", "data")
+      , (".o", "artifact"), (".hi", "artifact"), (".a", "artifact"), (".so", "artifact")
+      , (".tar", "artifact"), (".xz", "artifact"), (".gz", "artifact"), (".sig", "artifact") ] = role
+  | Just role <- lookup lastComponent
+      [ ("cabal.project", "package-metadata"), (".gitignore", "ignore-metadata")
+      , (".dockerignore", "ignore-metadata"), ("LICENSE", "licence"), ("Dockerfile", "foreign-source") ] = role
+  | otherwise = "unclassified"
+ where
+  lastComponent = Text.takeWhileEnd (/= '/') literal
+  extension = case Text.breakOnEnd "." lastComponent of
+    (before, after) | not (Text.null before), not (Text.null after) -> "." <> after
+    _ -> ""
+
+-- | Where a literal path lives, by its leading component.
+expectedOrigin :: Text -> Text
+expectedOrigin literal
+  | leading == ".build" = "generated"
+  | leading `elem` [".data", ".test_data"] = "state"
+  | "/" `Text.isPrefixOf` literal || "~" `Text.isPrefixOf` literal = "external"
+  | leading `elem` [ "src", "app", "test", "probe", "pb", "documents", "DEVELOPMENT_PLAN", "validation-records"
+                   , "README.md", "AGENTS.md", "CLAUDE.md", "LICENSE", "amoebius.cabal", "cabal.project"
+                   , ".gitignore", ".dockerignore" ] = "tracked"
+  | otherwise = "unclassified"
+ where
+  leading = Text.takeWhile (/= '/') literal
+
+expectedRow :: [Text] -> Text
+expectedRow = Text.intercalate "\t"
+
+-- | The rows the route fixture must produce, written from the fixture's source text.
+expectedRoutesFixture :: Set.Set Text
+expectedRoutesFixture = Set.fromList (map expectedRow
+  [ ["graph-stage", "resolved"]
+  , ["graph-derived-route", "Routes.hs", "Inferred", "Eq", "Eq", "inferred", "data", "stock-generated", "-", "generated", prelude]
+  , ["graph-derived-route", "Routes.hs", "Inferred", "Show", "Show", "inferred", "data", "stock-generated", "-", "generated", prelude]
+  , ["graph-derived-route", "Routes.hs", "External", "Show", "Show", "anyclass", "data", "anyclass-default", "Show", "external-class-default", prelude]
+  , ["graph-derived-route", "Routes.hs", "Counter", "Eq", "Eq", "inferred", "newtype", "newtype-representation", "Int", "external-instance", prelude]
+  , ["graph-derived-route", "Routes.hs", "Counter", "Ord", "Ord", "inferred", "newtype", "newtype-representation", "Int", "external-instance", prelude]
+  , ["graph-derived-route", "Routes.hs", "Counter", "Show", "Show", "inferred", "newtype", "stock-generated", "-", "generated", prelude]
+  , ["graph-derived-route", "Routes.hs", "Listed", "Functor", "Functor", "inferred", "newtype", "stock-generated", "-", "generated", prelude]
+  , ["graph-derived-route", "Routes.hs", "Paired", "Eq", "Eq", "inferred", "newtype", "newtype-representation", "(,)", "external-instance", prelude]
+  , ["graph-derived-route", "Routes.hs", "Poly", "Eq", "Eq", "newtype", "newtype", "newtype-representation", "f", "context-instance", prelude]
+  , ["graph-derived-route", "Routes.hs", "Outer", "Marker", "Marker", "newtype", "newtype", "newtype-representation", "Inner", "source-instance", "local"]
+  , ["graph-derived-route", "Routes.hs", "Plain", "Marker", "Marker", "anyclass", "data", "anyclass-default", "Marker", "source-class-default", "local"]
+  , ["graph-derived-route", "Routes.hs", "Stock", "Eq", "Eq", "stock", "data", "stock-generated", "-", "generated", prelude]
+  , ["graph-derived-route", "Routes.hs", "Wrapped", "Marker", "Marker", "via", "newtype", "via-representation", "Inner", "source-instance", "local"]
+  , ["graph-derived-route-target", "Routes.hs", "Outer", "Marker", "Routes.hs", "Marker Inner"]
+  , ["graph-derived-route-target", "Routes.hs", "Wrapped", "Marker", "Routes.hs", "Marker Inner"]
+  , ["graph-standalone-deriving-route", "Routes.hs", "Eq Tagged", "Eq", "stock", "data", "stock-generated", "-", "generated", prelude]
+  , ["graph-standalone-deriving-route", "Routes.hs", "Marker Loose", "Marker", "newtype", "newtype", "newtype-representation", "Inner", "source-instance", "local"]
+  , ["graph-standalone-deriving-route-target", "Routes.hs", "Marker Loose", "Routes.hs", "Marker Inner"]
+  , ["graph-instance-route", "Routes.hs", "Eq Manual", "Eq", "defaults", prelude]
+  , ["graph-instance-route", "Routes.hs", "Marker Inner", "Marker", "methods", "local"]
+  , ["graph-instance-route", "Routes.hs", "Marker Manual", "Marker", "methods", "local"]
+  ])
+ where
+  prelude = "prelude:base:base-unit"
+
+-- | The rows the unresolved-class fixture must produce: no route, and one named gap
+-- per family, with the stage left partial.
+expectedUnresolvedRoutesFixture :: Set.Set Text
+expectedUnresolvedRoutesFixture = Set.fromList (map expectedRow
+  [ ["graph-stage", "partial-calls"]
+  , ["graph-derived-route", "RoutesUnresolved.hs", "Own", "Marker", "Marker", "newtype", "newtype", "newtype-representation", "Mystery", "delegate-unresolved", "local"]
+  , ["graph-unscanned-declaration", "RoutesUnresolved.hs", "DerivedDelegateUnresolved"]
+  , ["graph-unscanned-declaration", "RoutesUnresolved.hs", "DerivedClassUnresolved"]
+  , ["graph-unscanned-declaration", "RoutesUnresolved.hs", "InstanceClassUnresolved"]
+  , ["graph-unscanned-declaration", "RoutesUnresolved.hs", "StandaloneDerivingClassUnresolved"]
+  ])
+
+-- | The sink and consumer rows the sink fixture must produce. Shadowed names
+-- (a parameter and a local binding called @readFile@) produce none.
+expectedSinksFixture :: Set.Set Text
+expectedSinksFixture = Set.fromList (map expectedRow
+  [ ["graph-effect-sink-external", "Sinks.hs", "fetchNamed", "8:19-8:62", "TextIO.readFile", "Data.Text.IO", "readFile", "file-read", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "fetchLiteral", "9:16-9:48", "TextIO.readFile", "Data.Text.IO", "readFile", "file-read", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "storeGenerated", "10:23-10:68", "TextIO.writeFile", "Data.Text.IO", "writeFile", "file-write", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "copyBoth", "11:12-11:45", "copyFile", "System.Directory", "copyFile", "file-write", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "dollarForm", "12:14-12:57", "ByteString.readFile", "Data.ByteString", "readFile", "file-read", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "dollarChain", "13:15-13:60", "TextIO.readFile", "Data.Text.IO", "readFile", "file-read", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "dollarDynamic", "14:22-14:55", "TextIO.readFile", "Data.Text.IO", "readFile", "file-read", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "backtick", "15:12-15:47", "copyFile", "System.Directory", "copyFile", "file-write", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "referenceOnly", "16:28-16:43", "TextIO.readFile", "Data.Text.IO", "readFile", "file-read", "reference"]
+  , ["graph-effect-sink-external", "Sinks.hs", "processCommand", "19:18-19:49", "readProcess", "System.Process", "readProcess", "process-exec", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "exists", "20:10-20:37", "doesFileExist", "System.Directory", "doesFileExist", "file-query", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "environment", "21:15-21:31", "lookupEnv", "System.Environment", "lookupEnv", "environment", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "implicitPrelude", "22:19-22:37", "readFile", "Prelude", "readFile", "file-read", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "absolute", "23:12-23:36", "readFile", "Prelude", "readFile", "file-read", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "contentOnly", "24:20-24:107", "TextIO.writeFile", "Data.Text.IO", "writeFile", "file-write", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "nestedProcess", "25:26-25:100", "readCreateProcessWithExitCode", "System.Process", "readCreateProcessWithExitCode", "process-exec", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "nestedProcess", "25:57-25:96", "proc", "System.Process", "proc", "process-exec", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "dynamicMiddle", "26:21-26:54", "readFile", "Prelude", "readFile", "file-read", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "joined", "27:17-27:77", "writeFile", "Prelude", "writeFile", "file-write", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "commandLine", "28:15-28:39", "callCommand", "System.Process", "callCommand", "process-exec", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "controlLiteral", "29:18-29:46", "callCommand", "System.Process", "callCommand", "process-exec", "call"]
+  , ["graph-effect-sink-external", "Sinks.hs", "ambient", "30:11-30:30", "getCurrentDirectory", "System.Directory", "getCurrentDirectory", "environment", "reference"]
+  , ["graph-file-consumer", "Sinks.hs", "fetchNamed", "8:19-8:62", "TextIO.readFile", "Data.Text.IO", "readFile", "file-read", "0", "amoebius.cabal", "package-metadata", "dynamic-root"]
+  , ["graph-file-consumer", "Sinks.hs", "fetchLiteral", "9:16-9:48", "TextIO.readFile", "Data.Text.IO", "readFile", "file-read", "0", "pb/__main__.py", "foreign-source", "tracked"]
+  , ["graph-file-consumer", "Sinks.hs", "storeGenerated", "10:23-10:68", "TextIO.writeFile", "Data.Text.IO", "writeFile", "file-write", "0", ".build/out/report.tsv", "data", "generated"]
+  , ["graph-file-consumer", "Sinks.hs", "copyBoth", "11:12-11:45", "copyFile", "System.Directory", "copyFile", "file-write", "0", "src/A.hs", "haskell-source", "tracked"]
+  , ["graph-file-consumer", "Sinks.hs", "copyBoth", "11:12-11:45", "copyFile", "System.Directory", "copyFile", "file-write", "1", ".build/A.hs", "haskell-source", "generated"]
+  , ["graph-file-consumer", "Sinks.hs", "dollarForm", "12:14-12:57", "ByteString.readFile", "Data.ByteString", "readFile", "file-read", "0", "documents/README.md", "documentation", "tracked"]
+  , ["graph-file-consumer", "Sinks.hs", "dollarChain", "13:15-13:60", "TextIO.readFile", "Data.Text.IO", "readFile", "file-read", "0", "documents/README.md", "documentation", "tracked"]
+  , ["graph-file-consumer", "Sinks.hs", "dollarDynamic", "14:22-14:55", "TextIO.readFile", "Data.Text.IO", "readFile", "file-read", "0", "x.hs", "haskell-source", "dynamic-root"]
+  , ["graph-file-consumer", "Sinks.hs", "backtick", "15:12-15:47", "copyFile", "System.Directory", "copyFile", "file-write", "0", "src/A.hs", "haskell-source", "tracked"]
+  , ["graph-file-consumer", "Sinks.hs", "backtick", "15:12-15:47", "copyFile", "System.Directory", "copyFile", "file-write", "1", ".build/B.hs", "haskell-source", "generated"]
+  , ["graph-file-consumer", "Sinks.hs", "referenceOnly", "16:28-16:43", "TextIO.readFile", "Data.Text.IO", "readFile", "file-read", "0", "-", "-", "dynamic"]
+  , ["graph-file-consumer", "Sinks.hs", "processCommand", "19:18-19:49", "readProcess", "System.Process", "readProcess", "process-exec", "0", "git", "executable", "path-lookup"]
+  , ["graph-file-consumer", "Sinks.hs", "exists", "20:10-20:37", "doesFileExist", "System.Directory", "doesFileExist", "file-query", "0", "src/Main.hs", "haskell-source", "tracked"]
+  , ["graph-file-consumer", "Sinks.hs", "implicitPrelude", "22:19-22:37", "readFile", "Prelude", "readFile", "file-read", "0", "LICENSE", "licence", "tracked"]
+  , ["graph-file-consumer", "Sinks.hs", "absolute", "23:12-23:36", "readFile", "Prelude", "readFile", "file-read", "0", "/proc/meminfo", "unclassified", "external"]
+  , ["graph-file-consumer", "Sinks.hs", "contentOnly", "24:20-24:107", "TextIO.writeFile", "Data.Text.IO", "writeFile", "file-write", "0", "-", "-", "dynamic"]
+  , ["graph-file-consumer", "Sinks.hs", "nestedProcess", "25:57-25:96", "proc", "System.Process", "proc", "process-exec", "0", "-", "-", "dynamic"]
+  , ["graph-file-consumer", "Sinks.hs", "dynamicMiddle", "26:21-26:54", "readFile", "Prelude", "readFile", "file-read", "0", "a", "unclassified", "unclassified"]
+  , ["graph-file-consumer", "Sinks.hs", "dynamicMiddle", "26:21-26:54", "readFile", "Prelude", "readFile", "file-read", "0", "b.hs", "haskell-source", "dynamic-root"]
+  , ["graph-file-consumer", "Sinks.hs", "joined", "27:17-27:77", "writeFile", "Prelude", "writeFile", "file-write", "0", "pass-", "unclassified", "dynamic-root"]
+  , ["graph-file-consumer", "Sinks.hs", "joined", "27:17-27:77", "writeFile", "Prelude", "writeFile", "file-write", "0", "-ledger.tsv", "data", "dynamic-root"]
+  , ["graph-file-consumer", "Sinks.hs", "commandLine", "28:15-28:39", "callCommand", "System.Process", "callCommand", "process-exec", "0", "git status", "command-line", "shell"]
+  , ["graph-file-consumer", "Sinks.hs", "controlLiteral", "29:18-29:46", "callCommand", "System.Process", "callCommand", "process-exec", "0", "-", "-", "dynamic"]
+  ])
+
+-- | The stage and the open rows each stage fixture must produce, written from the
+-- fixtures' source text: a clean module is resolved, and each fixture with exactly one
+-- kind of open item is not.
+expectedStagesFixture :: Set.Set Text
+expectedStagesFixture = Set.fromList (map expectedRow
+  [ ["clean", "graph-stage", "resolved"]
+  , ["import", "graph-stage", "partial-calls"]
+  , ["import", "graph-import-unresolved", "test:graph", "StageImport.hs", "Missing.Module", "component-not-in-plan"]
+  , ["standalone", "graph-stage", "partial-calls"]
+  , ["standalone", "graph-import-standalone-unresolved", "StageStandalone.hs", "Missing.Standalone", "standalone-unresolved"]
+  , ["opaque", "graph-stage", "partial-calls"]
+  , ["opaque", "graph-call-site-opaque", "test:graph", "StageOpaque.hs", "use", "2:7-2:16", "helper", "unattributed"]
+  , ["expression", "graph-stage", "partial-calls"]
+  , ["expression", "graph-unscanned", "StageExpression.hs", "hole", "UnboundVar"]
+  , ["declaration", "graph-stage", "partial-calls"]
+  , ["declaration", "graph-unscanned-declaration", "StageDeclaration.hs", "Annotation"]
+  ])
+
+-- | A standalone source importing a fork package's module is an available unit when the
+-- catalogue declares the fork at its pinned version, and an open unresolved import when
+-- it declares none: the declaration, not the registration alone, decides.
+expectedForksFixture :: Set.Set Text
+expectedForksFixture = Set.fromList (map expectedRow
+  [ ["declared", "graph-import-standalone-available-unit", "ForkUser.hs", "Control.Logging", "logging", "logging-3.0.6-aa"]
+  , ["undeclared", "graph-import-standalone-unresolved", "ForkUser.hs", "Control.Logging", "standalone-unresolved"]
+  ])

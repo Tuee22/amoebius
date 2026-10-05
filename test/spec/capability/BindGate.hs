@@ -30,10 +30,11 @@ import Amoebius.Capacity.Execution
   , ControllerBody (..)
   , ExecutionTransitionSource (FirstDeployment)
   )
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Vocabulary (quantityText)
+import Amoebius.Capacity.Vector (ResourceVector (ResourceVector))
+import Amoebius.Capability.Assemble (assembleBoundDeployment)
 import Amoebius.Capability.Binding
-  ( assembleBoundDeployment
-  , bind
+  ( bind
   , boundDeploymentIsUnprovisioned
   , decodeCapabilityProvider
   , validateBindingCoverage
@@ -47,19 +48,16 @@ import Amoebius.Capability.Types
   , CapabilityBinding (CapabilityBinding)
   , CapabilityNeed (..)
   , CapabilityProvider (CanonicalProvider)
-  , EngineRuntime (Cuda)
   , ExtensionDescriptor (ExtensionDescriptor)
   , ExtensionName (..)
   , InferenceEngineNeed (InferenceEngineNeed)
   , ProviderObject (..)
   , ServiceShape (..)
   , capabilityArm
-  , renderAppCapabilityNeedDhallType
-  , renderCapabilityArmDhallType
   , renderCapabilityNeedSurface
-  , renderEngineRuntimeDhallType
   )
 import Amoebius.Dsl.Error (DecodeError, decodeErrorTag)
+import Amoebius.Vocabulary (EngineRuntime (Cuda))
 import Amoebius.Scope.Index
   ( activeMembership
   , trustedSubject
@@ -75,19 +73,17 @@ import CapabilityBindOracle
   , expectedRows
   , mutantSpecs
   )
-import Control.Exception (SomeException, catch)
 import Control.Monad (unless)
 import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
-import Dhall qualified
 import ShapeOracle (structurallyDifferentByNodeMultiset, validateBoundExecutionInventory)
 
 runBindGate :: IO ()
 runBindGate = do
   assert (length expectedRows == 9) "independent capability oracle did not retain nine arms"
-  assert (length expectedNegatives == 7) "independent negative oracle did not retain seven pairs"
+  assert (length expectedNegatives == 4) "independent negative oracle did not retain four pairs"
   assert (length mutantSpecs == 4) "independent mutation oracle did not retain four changed-production subjects"
   services <- mapM checkArm expectedRows
   checkNegatives
@@ -95,7 +91,7 @@ runBindGate = do
   propertyCount <- runBindProps
   checkCapabilityBindCalculusProjection propertyCount
   putStrLn
-    "capability-bind-spec: PASS (9 arms, 18 shapes, 7 paired negatives, 1 property, 4 changed-production mutants)"
+    "capability-bind-spec: PASS (9 arms, 18 shapes, 4 paired negatives, 1 property, 4 changed-production mutants)"
 
 checkArm :: OracleRow -> IO BoundServiceSpec
 checkArm oracle = do
@@ -182,13 +178,6 @@ checkNegatives = do
   let byName name = case [row | row <- expectedNegatives, negativeName row == name] of
         [row] -> row
         _ -> error ("missing independent negative row: " <> Text.unpack name)
-  checkDhallPair (byName "illegal_product_in_app")
-    ("let Capability = " <> renderCapabilityArmDhallType <> " in Capability.ObjectStore")
-    ("let Capability = " <> renderCapabilityArmDhallType <> " in Capability.MinIO")
-  checkDhallPair (byName "illegal_engine_by_url")
-    ("let EngineRuntime = " <> renderEngineRuntimeDhallType <> " in EngineRuntime.Cuda \"catalog\"")
-    ("let EngineRuntime = " <> renderEngineRuntimeDhallType <> " in EngineRuntime.Url \"https://invalid\"")
-  checkDhallPair (byName "illegal_shape_in_app") (appRecord False) (appRecord True)
   checkDecodePair (byName "illegal_unbuilt_provider")
     (decodeCapabilityProvider "Canonical")
     (decodeCapabilityProvider "Alternate")
@@ -210,24 +199,6 @@ checkNegatives = do
     [ ExtensionDescriptor InfernixExtension (Set.singleton InferenceEngine) Set.empty
     , ExtensionDescriptor JitMLExtension (Set.singleton ObjectStore) Set.empty
     ]
-  appRecord includeBinding =
-    "let Capability = " <> renderCapabilityArmDhallType
-      <> " in ({ capability = Capability.ObjectStore, name = \"assets\""
-      <> (if includeBinding then ", shape = \"Distributed\", provider = \"Canonical\"" else "")
-      <> " } : " <> renderAppCapabilityNeedDhallType <> ")"
-
-checkDhallPair :: NegativeRow -> Text -> Text -> IO ()
-checkDhallPair row positive negative = do
-  positiveAccepted <- dhallTypechecks positive
-  negativeAccepted <- dhallTypechecks negative
-  assert positiveAccepted (Text.unpack (negativeName row) <> " paired positive failed at " <> Text.unpack (negativeLocus row))
-  assert (not negativeAccepted && negativeTag row == "DhallTypeError")
-    (Text.unpack (negativeName row) <> " did not fail Dhall typechecking at " <> Text.unpack (negativeLocus row))
-
-dhallTypechecks :: Text -> IO Bool
-dhallTypechecks source =
-  (Dhall.inputExpr source >> pure True)
-    `catch` \(_problem :: SomeException) -> pure False
 
 checkDecodePair :: NegativeRow -> Either DecodeError value -> Either DecodeError value -> IO ()
 checkDecodePair row positive negative = do
@@ -256,7 +227,7 @@ checkCapabilityBindCalculusProjection propertyCount = do
         resources count = ResourceVector 1 (fromIntegral count) 0 0
         artifact = artifactComponent scope "capability-arms" (resources 9) (RecipeId "capability-bind-corpus" 1)
         budget = budgetComponent scope "bound-service-shapes" (resources 18) (allowance (Bytes 18) (Slots 1) (Bytes 18))
-        lift = liftComponent scope "boundary-negatives" (resources 7) OnHost
+        lift = liftComponent scope "boundary-negatives" (resources 4) OnHost
         workflow = workflowComponent scope "bind-property" (resources propertyCount) emptyLedger
         evidence = evidenceComponent scope "mutant-evidence" (resources 4) PureRegister
         composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
@@ -264,8 +235,8 @@ checkCapabilityBindCalculusProjection propertyCount = do
         actual =
           [ ("calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition)))
           , ("component-names", Text.intercalate "," (compositionNames composition))
-          , ("projection-counts", Text.intercalate "," (map (Text.pack . show) [9, 18, 7, propertyCount, 4 :: Int]))
-          , ("resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods]))
+          , ("projection-counts", Text.intercalate "," (map (Text.pack . show) [9, 18, 4, propertyCount, 4 :: Int]))
+          , ("resource-vector", Text.intercalate "," ([quantityText cpu, quantityText memory, quantityText ephemeral, quantityText pods]))
           ]
     assert (compositionKinds composition == everyCalculus) "capability bind projection omitted or reordered a calculus"
     assert (actual == expectedCalculusProjection) ("capability bind calculus projection changed: " <> show actual)

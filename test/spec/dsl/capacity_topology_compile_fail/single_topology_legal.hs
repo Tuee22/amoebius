@@ -1,6 +1,6 @@
 module SingleTopologyLegal where
-import Amoebius.Capacity.Fold (place)
-import Amoebius.Capacity.Types (Placement, PlacementError, Workload)
+import Amoebius.Capacity.Types (PlacementError, Workload)
+import Amoebius.Placement.Witness (Placed, place)
 import Amoebius.Dsl.Topology (Topology)
-single :: Topology -> [Workload] -> Either PlacementError Placement
+single :: Topology -> [Workload] -> Either PlacementError Placed
 single = place

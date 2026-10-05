@@ -2,8 +2,10 @@
 
 module Main (main) where
 
-import Amoebius.Capacity.Fold (fits)
-import Amoebius.Capacity.Types (Demand (..), Headroom (..), ResourceVector (..))
+import Amoebius.Capacity.Fits (fits)
+import Amoebius.Capacity.Types (Demand (..), Headroom (..))
+import Amoebius.Capacity.Vector (ResourceVector (..))
+import Amoebius.Vocabulary (Quantity (..))
 import Amoebius.Cluster.NodeProvisioner
 import Amoebius.Formal.Dsl.Models
 import Amoebius.Formal.EmitTLA
@@ -108,7 +110,7 @@ resolveTool root variable relative = do
 checkCapacityProjection :: IO Int
 checkCapacityProjection = do
   let vectors =
-        [ ResourceVector cpu memory ephemeral pods
+        [ ResourceVector (Quantity cpu) (Quantity memory) (Quantity ephemeral) (Quantity pods)
         | cpu <- [0 .. 2], memory <- [0 .. 2], ephemeral <- [0 .. 2], pods <- [0 .. 2]
         ]
       capacityCases = [(demand, capacity) | demand <- vectors, capacity <- vectors]

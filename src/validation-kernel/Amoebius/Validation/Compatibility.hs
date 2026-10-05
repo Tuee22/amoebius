@@ -10,7 +10,7 @@ module Amoebius.Validation.Compatibility
   , closureStanzas
   ) where
 
-import Amoebius.Validation.GateSpec (GateSpec, gateSubjects)
+import Amoebius.Validation.GateSpec (gateSubjects)
 import Amoebius.Validation.Runner.Observer (sha256Hex)
 import Amoebius.Validation.Runner.Spec (PackageGraph (..), VerifiedSpec (..))
 import Control.Monad (filterM)
@@ -54,5 +54,3 @@ haskellFilesUnder root relative = do
     nested <- concat <$> mapM (walk . (directory </>)) directories
     files <- filterM (doesFileExist . (directory </>)) [name | name <- names, ".hs" `isSuffixOf` name]
     pure ([directory </> name | name <- files] <> nested)
-_unusedSpec :: GateSpec -> GateSpec
-_unusedSpec = id

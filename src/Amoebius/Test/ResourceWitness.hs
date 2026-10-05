@@ -7,7 +7,7 @@ module Amoebius.Test.ResourceWitness
 
 import Amoebius.Test.Topology
 
-data ResourceWitness = ResourceWitness ResourceVector ResourceVector
+data ResourceWitness = ResourceWitness TestResourceVector TestResourceVector
   deriving stock (Eq, Show)
 
 resourceWitness :: ProvisionedTestTopology -> ResourceWitness
@@ -17,8 +17,8 @@ resourceWitness provisioned = ResourceWitness
  where
   topology = provisionedTopology provisioned
 
-witnessedSupply :: ResourceWitness -> ResourceVector
+witnessedSupply :: ResourceWitness -> TestResourceVector
 witnessedSupply (ResourceWitness supply _) = supply
 
-witnessedDemand :: ResourceWitness -> ResourceVector
+witnessedDemand :: ResourceWitness -> TestResourceVector
 witnessedDemand (ResourceWitness _ demand) = demand

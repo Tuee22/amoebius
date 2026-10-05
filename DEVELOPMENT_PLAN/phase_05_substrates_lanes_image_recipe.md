@@ -35,7 +35,7 @@ publishing an image; publication is owed by Phase 56. Its predecessor is
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+🔄 Active — NOT VALIDATED.
 
 Gate execution is held shut by the Phase-4 predecessor receipt in certification generation 2. Hardware-free
 implementation may proceed ahead of the frontier as component diagnostics under
@@ -143,10 +143,10 @@ documentation checker refuses a block that differs from it. Execution evidence r
 
 ## Sprints
 
-## Sprint 5.1: Payload-bearing Rke2Quorum, taints, and DuplicateHostId ⏸️
+## Sprint 5.1: Payload-bearing Rke2Quorum, taints, and DuplicateHostId 🔄
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Topology/Rke2.hs`, `src/Amoebius/Placement/Taints.hs`, and `src/Amoebius/Dsl/Lower.hs`
+**Status**: Active — NOT VALIDATED
+**Implementation**: `src/Amoebius/Topology/Rke2.hs`, `src/Amoebius/Placement/Taints.hs`, and `src/dsl-spine/Amoebius/Dsl/Lower.hs`
 **Blocked by**: [Phase 4](phase_04_witness_manifests_capacity_storage.md) gate pass
 **Independent Validation**: `Rke2Quorum` carries its server hosts as payload in `Three` and `Five` arms, so `rke2_two_servers` is a compile-negative twin of the accepted three-server value. A topology naming one host twice is refused at lowering as `DuplicateHostId` with the distinct-id twin accepted. A tainted host receives no placement, and a topology whose only host is tainted is refused at provision as `TaintedOnlyHost`.
 **Oracle**: `test/oracle/dsl/Main.hs` states the node roles, the host identities, and the taint-respecting placement per example from literals.

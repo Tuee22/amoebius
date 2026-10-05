@@ -5,7 +5,6 @@ module Amoebius.Host.Substrate
   , Substrate (..)
   , PristineLinuxProvider (..)
   , classify
-  , classifyMutantDropGpuPromotion
   , detect
   , pristineLinuxProvider
   , renderPristineLinuxProvider
@@ -13,54 +12,26 @@ module Amoebius.Host.Substrate
   , renderSubstrate
   ) where
 
+import Amoebius.Vocabulary
+  ( Gpu (..)
+  , OsName (..)
+  , RawArch (..)
+  , Substrate (..)
+  , detectedSubstrate
+  , hostEnvironment
+  , hostRefusalTag
+  , substrateName
+  )
 import System.Directory (doesPathExist)
 import System.Info qualified as Info
-
-newtype OsName = OsName String
-  deriving stock (Eq, Ord, Show)
-
-newtype RawArch = RawArch String
-  deriving stock (Eq, Ord, Show)
-
-data Gpu = GpuPresent | GpuAbsent
-  deriving stock (Eq, Ord, Show, Enum, Bounded)
-
-data Substrate = LinuxCpu | LinuxCuda | Apple | Windows
-  deriving stock (Eq, Ord, Show, Enum, Bounded)
 
 data PristineLinuxProvider = Incus | Lima | Wsl2
   deriving stock (Eq, Ord, Show, Enum, Bounded)
 
-data NormalArch = X86_64 | Arm64
-
+-- | The substrate a host's three reads classify to, with the refusal's tag when they
+-- classify to none. The classification itself is the vocabulary's total function.
 classify :: OsName -> RawArch -> Gpu -> Either String Substrate
-classify = classifyWithGpuPromotion True
-
--- | Committed M1: the Linux GPU-promotion rule is deliberately dropped.
-classifyMutantDropGpuPromotion :: OsName -> RawArch -> Gpu -> Either String Substrate
-classifyMutantDropGpuPromotion = classifyWithGpuPromotion False
-
-classifyWithGpuPromotion :: Bool -> OsName -> RawArch -> Gpu -> Either String Substrate
-classifyWithGpuPromotion promote (OsName rawOs) rawArch gpu = do
-  arch <- normalizeArch rawArch
-  case rawOs of
-    "linux"
-      | promote && gpu == GpuPresent -> Right LinuxCuda
-      | otherwise -> Right LinuxCpu
-    "darwin" -> case arch of
-      Arm64 -> Right Apple
-      X86_64 -> Left "apple-arm64-only"
-    "mingw32" -> Right Windows
-    "windows" -> Right Windows
-    _ -> Left "unknown-os"
-
-normalizeArch :: RawArch -> Either String NormalArch
-normalizeArch (RawArch raw) = case raw of
-  "x86_64" -> Right X86_64
-  "amd64" -> Right X86_64
-  "aarch64" -> Right Arm64
-  "arm64" -> Right Arm64
-  _ -> Left "unknown-arch"
+classify os arch gpu = either (Left . hostRefusalTag) (Right . detectedSubstrate) (hostEnvironment os arch gpu)
 
 detect :: IO (Either String Substrate)
 detect = do
@@ -82,11 +53,7 @@ renderPristineLinuxProvider provider = case provider of
   Wsl2 -> "wsl2"
 
 renderSubstrate :: Substrate -> String
-renderSubstrate substrate = case substrate of
-  LinuxCpu -> "linux-cpu"
-  LinuxCuda -> "linux-cuda"
-  Apple -> "apple"
-  Windows -> "windows"
+renderSubstrate = substrateName
 
 renderClassification :: Either String Substrate -> String
 renderClassification result = case result of

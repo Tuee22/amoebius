@@ -7,7 +7,7 @@
 -- mutant records a 'SubjectChangeWitness'.
 module Amoebius.Validation.Runner.Mutants
   ( KillTable (..), Locus (..), MutantOutcome (..), Operator (..)
-  , SubjectChangeWitness (..), allOperators, applyLocus, enumerateLoci
+  , SubjectChangeWitness (..), allOperators, applyLocus, enumerateLoci, isAttributed
   , killTable, renderKillTable, renderOperator, sampleLoci
   ) where
 
@@ -28,6 +28,12 @@ data Operator
   deriving (Bounded, Enum, Eq, Ord, Show)
 allOperators :: [Operator]
 allOperators = [minBound .. maxBound]
+-- | A kill counts for a module only when a red row carries a prefix the module owns; a
+-- module that owns none keeps the rule that any red row kills.
+isAttributed :: [(Text, Text)] -> Text -> [Text] -> Bool
+isAttributed owned moduleName reds = null mine || any (\row -> any (`Text.isPrefixOf` row) mine) reds
+ where
+  mine = [prefix | (owner, prefix) <- owned, owner == moduleName]
 renderOperator :: Operator -> Text
 renderOperator operator = case operator of
   ConstantFlip -> "constant-flip"

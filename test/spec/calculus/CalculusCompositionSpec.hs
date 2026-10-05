@@ -33,7 +33,8 @@ import Amoebius.Calculus.Composition
 import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
 import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types (ResourceVector (..), addResources)
+import Amoebius.Capacity.Vector (ResourceVector (..), addResources)
+import Amoebius.Vocabulary (Quantity (..))
 import Amoebius.Scope.Index
   ( RequestScope
   , activeMembership
@@ -292,4 +293,4 @@ authoredPairRows =
   ]
  where
   row left right units =
-    PairRow left right (ResourceVector units (units * 10) (units * 100) units)
+    PairRow left right (ResourceVector (Quantity units) (Quantity (units * 10)) (Quantity (units * 100)) (Quantity units))

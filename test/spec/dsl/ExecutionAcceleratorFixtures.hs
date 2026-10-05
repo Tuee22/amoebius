@@ -131,13 +131,8 @@ import Amoebius.Capacity.Storage
   , StorageBacking (..)
   , fitBacking
   )
-import Amoebius.Capacity.Types
-  ( Axis (..)
-  , ResourceEnvelope
-  , Workload (..)
-  , mkResourceEnvelope
-  , zeroResources
-  )
+import Amoebius.Capacity.Types (Axis (..), ResourceEnvelope, Workload (..), mkResourceEnvelope)
+import Amoebius.Capacity.Vector (zeroResources)
 import CapacityTopologyFixtures (positiveCases, resources)
 import Control.Monad (unless)
 import Data.Map.Strict (Map)

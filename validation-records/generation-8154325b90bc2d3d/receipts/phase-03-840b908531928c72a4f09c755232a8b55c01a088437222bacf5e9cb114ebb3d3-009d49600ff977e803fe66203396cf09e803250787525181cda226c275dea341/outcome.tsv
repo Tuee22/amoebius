@@ -1,0 +1,6 @@
+green	True
+spec-digest	6f6fce16a6379fb25375b2051e26ebceba2408d79b67003946dc31f7dc894ce7
+chain	c06c8b03b42ca92fcd7994d8825c20b3582356c600e4881d2318937e37c290e5
+reproducible-core	39014c0f0b83e752476d412ec683e15f8b6398d5848c28ef2fc2328c55e50853
+capability	typed_spine
+claim	From one operator-authored Dhall specification the shipped render-examples, compile, and apply commands freeze, decode, lower, plan, provision, render, chain, dry-run, and apply it through a separate fake kubectl process image. The runner rewrites the rendered example after the run starts, planting a nonce in the authored names and changing the replica count, and recovers the nonce from every stage artefact. The independent oracle judges every stage artefact of the corpus examples and of that run from literals, the fake's per-step stdin bytes concatenate to the compile output, and every refusal is observed at its exact tag and stage. Witness-driven rendering, capacity over application workloads beyond fit, substrates other than kind on one host, extensions, children, and the UI language are excluded.

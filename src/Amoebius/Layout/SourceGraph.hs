@@ -19,7 +19,7 @@ import Amoebius.Layout.PackageMap
   , lookupStandaloneExternalMemberExport
   , packageCatalogMemberNames
   , lookupExternalMemberExport, lookupAvailableExternalMemberExport
-  , lookupDeferredSeedModule
+  , lookupDeferredSeedModule, maintainedForkOwedModules
   , loadExternalInterfaces, packageCatalogHasComponent, packageCatalogHasModuleInterface)
 import Control.Applicative ((<|>))
 import Control.Exception (IOException, SomeException, try)
@@ -27,11 +27,12 @@ import Crypto.Hash.SHA256 qualified as SHA256
 import Data.Aeson (Value, eitherDecodeStrict', withObject, (.:))
 import Data.Aeson.Types (Parser, parseEither)
 import Data.ByteString qualified as ByteString
-import Data.Char (intToDigit, isUpper)
+import Data.Char (intToDigit, isAlpha, isAlphaNum, isControl, isLower, isUpper)
 import Data.Foldable (toList)
 import Data.List (isPrefixOf, isSuffixOf, sort, stripPrefix)
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.Map.Strict qualified as Map
+import Data.Maybe (fromMaybe, isJust, listToMaybe)
 import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
@@ -43,10 +44,11 @@ import GHC.Builtin.Types (consDataConName, tupleDataCon)
 import GHC.Core.DataCon (dataConName)
 import GHC.Hs
   ( ArithSeqInfo (..), CImportSpec (..), ClsInstDecl (..), ConDecl (..), ConDeclField (..)
-  , DerivClauseTys (..), DerivDecl (..), DerivStrategy (..)
+  , DataDefnCons (..), DerivClauseTys (..), DerivDecl (..), DerivStrategy (..)
+  , HsScaled (..), XViaStrategyPs (..)
   , DotFieldOcc (..), FieldOcc (..), GhcPs, GRHS (..), GRHSs (..)
   , ForeignDecl (..), ForeignExport (..), ForeignImport (..)
-  , HsBindLR (..), HsConDeclGADTDetails (..), HsConDetails (..)
+  , HsBindLR (..), HsConDeclGADTDetails (..), HsConDetails (..), HsLit (..)
   , FamilyDecl (..), HsDataDefn (..), HsDecl (..), HsDerivingClause (..), HsSigType (..), HsType (..)
   , HsUntypedSplice (..), InstDecl (..), LHsDecl
   , HsExpr (..), HsLocalBindsLR (..), HsRecFields (..), HsTupArg (..)
@@ -76,7 +78,7 @@ import GHC.Unit.Types (unitIdString)
 import Language.Haskell.Syntax.Basic (Boxity (..), FieldLabelString (..))
 import GHC.Utils.Error (emptyDiagOpts)
 import GHC.Utils.Outputable (Outputable, ppr, showSDocUnsafe)
-import System.Directory (createDirectoryIfMissing, makeAbsolute)
+import System.Directory (createDirectoryIfMissing, doesDirectoryExist, makeAbsolute)
 import System.Exit (ExitCode (..))
 import System.FilePath (takeDirectory, takeExtension, (</>))
 import System.Process (CreateProcess (cwd), proc, readCreateProcessWithExitCode)
@@ -223,6 +225,246 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
            , (package, unit) <- implicitProviders entry
            , packageCatalogHasModuleInterface catalog unit "Prelude"
            , member <- packageCatalogMemberNames catalog unit "Prelude" classHead]
+      -- Declaration-family accounting: every derived instance, standalone
+      -- deriving declaration, and class instance is bound to the provider of its
+      -- class, and every derivation to the generated or delegated body it routes
+      -- to. A declaration whose class has no provider is reported as a gap.
+      unqualifiedName name = if looksQualified name then Text.takeWhileEnd (/= '.') name else name
+      stockDerivableClasses = Set.fromList
+        ["Bounded", "Data", "Enum", "Eq", "Foldable", "Functor", "Generic", "Generic1",
+         "Ix", "Lift", "Ord", "Read", "Show", "Traversable"] :: Set.Set Text
+      externalClassProviders entry moduleName className =
+        Set.toAscList . Set.fromList $ case Map.findWithDefault [] (entryPath entry) componentMap of
+          [] -> lookupStandaloneExternalExport catalog moduleName className
+          components -> concatMap (\component ->
+            if packageCatalogHasComponent catalog component
+              then lookupExternalExport catalog component moduleName className
+              else lookupAvailableExternalExport catalog component moduleName className) components
+      implicitClassProviders entry className =
+        Set.toAscList . Set.fromList $ case Map.findWithDefault [] (entryPath entry) componentMap of
+          [] -> lookupImplicitStandalonePrelude catalog className
+          components -> concatMap (\component ->
+            lookupImplicitPrelude catalog component className
+              <> lookupImplicitAvailablePrelude catalog component className) components
+      declarationClassProvider entry className = listToMaybe . Set.toAscList . Set.fromList . concat $
+        [ ["local" | className `elem` entryClassNames entry]
+        , [ "source:" <> Text.pack providerPath
+          | importRef <- entryImports entry
+          , importPackageFree importRef
+          , Just name <- [importedCallName importRef className]
+          , classTypeImportPermits importRef name
+          , providerPath <- Set.toAscList (sourceProviders importRef)
+          , providerPath /= entryPath entry
+          , Just provider <- [Map.lookup providerPath byPath]
+          , name `elem` entryClassNames provider ]
+        , [ "external:" <> importName importRef <> ":" <> package <> ":" <> unit
+          | importRef <- entryImports entry
+          , importPackageFree importRef
+          , null (Map.findWithDefault [] (importName importRef) byModuleName)
+          , Just name <- [importedCallName importRef className]
+          , classTypeImportPermits importRef name
+          , (package, unit) <- externalClassProviders entry (importName importRef) name ]
+        , [ "prelude:" <> package <> ":" <> unit
+          | entryImplicitPrelude entry
+          , not (looksQualified className)
+          , (package, unit) <- implicitClassProviders entry className ] ]
+      -- The source modules an import can supply names from: the named module and
+      -- every source module it re-exports, transitively.
+      sourceProviders importRef = reexportClosure Set.empty (Map.findWithDefault [] (importName importRef) byModuleName)
+      reexportClosure seen [] = seen
+      reexportClosure seen (path : rest)
+        | path `Set.member` seen = reexportClosure seen rest
+        | otherwise = reexportClosure (Set.insert path seen) (rest <> reexportedFrom path)
+      reexportedFrom path = case Map.lookup path byPath of
+        Nothing -> []
+        Just provider ->
+          [target
+          | moduleName <- entryReexports provider
+          , importRef <- entryImports provider
+          , importQualifier importRef == moduleName || importName importRef == moduleName
+          , target <- Map.findWithDefault [] (importName importRef) byModuleName]
+      derivedDeclarations = Set.fromList
+        [(entryPath entry, symbolType symbols, unqualifiedName classHead)
+        | entry <- modules, symbols <- entryData entry, (_, classHead, _) <- symbolDerivedTypes symbols]
+      sourceInstances = Set.toAscList . Set.fromList $
+        [(entryPath entry, instanceHead instance_, unqualifiedName (instanceClass instance_), tycon)
+        | entry <- modules
+        , instance_ <- entryClassInstances entry
+        , Just tycon <- [instanceTypeHead instance_]]
+      instanceVisibleTo entry instancePath =
+        instancePath == entryPath entry
+          || or [instanceComponent `Set.member` Map.findWithDefault Set.empty component componentReachability
+                | component <- Map.findWithDefault [] (entryPath entry) componentMap
+                , instanceComponent <- Map.findWithDefault [] instancePath componentMap]
+          || or [instancePath `Set.member` sourceProviders importRef
+                | importRef <- entryImports entry, importPackageFree importRef]
+      -- The default strategy of a clause with none written follows GHC: a data type
+      -- derives a stock class by the stock strategy and anything else by anyclass; a
+      -- newtype derives Show, Read, Data, Generic, Generic1, Lift and Traversable by
+      -- the stock strategy, Eq, Ord, Ix and Bounded by its representation, and any
+      -- other class by its representation unless DeriveAnyClass is on, in which case
+      -- a stock-derivable class stays stock and any other class is anyclass. The
+      -- generalised newtype extension is on under the GHC2021 and GHC2024 languages.
+      derivationRoute entry strategy declaredAs classHead representation viaHead provider =
+        let baseClass = unqualifiedName classHead
+            generation = case strategy of
+              "stock" -> "stock-generated"
+              "newtype" -> "newtype-representation"
+              "anyclass" -> "anyclass-default"
+              "via" -> "via-representation"
+              _ | declaredAs == "newtype" -> inferredForNewtype baseClass
+                | baseClass `Set.member` stockDerivableClasses -> "stock-generated"
+                | otherwise -> "anyclass-default"
+            inferredForNewtype named
+              | named `elem` ["Show", "Read", "Data", "Generic", "Generic1", "Lift", "Traversable"] = "stock-generated"
+              | named `elem` ["Eq", "Ord", "Ix", "Bounded"] = "newtype-representation"
+              | not (entryDeriveAnyClass entry) = "newtype-representation"
+              | named `Set.member` stockDerivableClasses = "stock-generated"
+              | otherwise = "anyclass-default"
+            delegate = case generation of
+              "newtype-representation" -> fromMaybe "-" representation
+              "via-representation" -> fromMaybe "-" viaHead
+              "anyclass-default" -> baseClass
+              _ -> "-"
+            representationKind = generation `elem` ["newtype-representation", "via-representation"]
+            targets = if representationKind
+              then [(instancePath, headText)
+                   | (instancePath, headText, className, tycon) <- sourceInstances
+                   , className == baseClass
+                   , unqualifiedName tycon == unqualifiedName delegate
+                   , instanceVisibleTo entry instancePath]
+                <> [(declPath, "derived " <> declType)
+                   | (declPath, declType, declClass) <- Set.toAscList derivedDeclarations
+                   , declClass == baseClass
+                   , declType == unqualifiedName delegate
+                   , instanceVisibleTo entry declPath]
+              else []
+            ownClass = provider == "local" || "source:" `Text.isPrefixOf` provider
+            typeVariable = maybe False (\(first, _) -> isLower first || first == '_') (Text.uncons delegate)
+            disposition
+              | generation == "stock-generated" = "generated"
+              | generation == "anyclass-default" = if ownClass then "source-class-default" else "external-class-default"
+              | delegate == "-" = "delegate-unresolved"
+              | not (null targets) = "source-instance"
+              | typeVariable = "context-instance"
+              | ownClass = "delegate-unresolved"
+              | otherwise = "external-instance"
+        in (generation, delegate, disposition, targets)
+      derivedRoutes = Set.toAscList . Set.fromList $
+        [(entryPath entry, symbolType symbols, classText, classHead, strategy, declaredAs,
+          generation, delegate, disposition, provider, targets)
+        | entry <- modules
+        , symbols <- entryData entry
+        , (classText, classHead, strategy) <- symbolDerivedTypes symbols
+        , Just provider <- [declarationClassProvider entry classHead]
+        , let declaredAs = if symbolNewtype symbols then "newtype" else "data" :: Text
+        , let (generation, delegate, disposition, targets) = derivationRoute entry strategy declaredAs
+                classHead (symbolRepresentation symbols) (lookup classText (symbolViaHeads symbols)) provider]
+      standaloneDerivingRoutes = Set.toAscList . Set.fromList $
+        [(entryPath entry, instanceType, classHead, strategy, declaredAs,
+          generation, delegate, disposition, provider, targets)
+        | entry <- modules
+        , (instanceType, classHead, strategy) <- entryStandaloneDeriving entry
+        , Just provider <- [declarationClassProvider entry classHead]
+        , let (typeHead, viaHead) = fromMaybe (Nothing, Nothing) (listToMaybe
+                [(headName, viaName) | (candidate, headName, viaName) <- entryStandaloneDetails entry
+                , candidate == instanceType])
+        , let declared = listToMaybe [symbols | Just headName <- [typeHead]
+                , symbols <- entryData entry, symbolType symbols == headName]
+        , let declaredAs = maybe "data" (\symbols -> if symbolNewtype symbols then "newtype" else "data") declared :: Text
+        , let (generation, delegate, disposition, targets) = derivationRoute entry strategy declaredAs
+                classHead (declared >>= symbolRepresentation) viaHead provider]
+      instanceRoutes = Set.toAscList . Set.fromList $
+        [(entryPath entry, instanceHead instance_, instanceClass instance_,
+          if null (instanceMethods instance_) then "defaults" else "methods" :: Text, provider)
+        | entry <- modules
+        , instance_ <- entryClassInstances entry
+        , Just provider <- [declarationClassProvider entry (instanceClass instance_)]]
+      routeGaps = Set.toAscList . Set.fromList $
+        [(entryPath entry, "DerivedClassUnresolved")
+        | entry <- modules, symbols <- entryData entry
+        , (_, classHead, _) <- symbolDerivedTypes symbols
+        , Nothing <- [declarationClassProvider entry classHead]]
+        <> [(entryPath entry, "StandaloneDerivingClassUnresolved")
+           | entry <- modules
+           , (_, classHead, _) <- entryStandaloneDeriving entry
+           , Nothing <- [declarationClassProvider entry classHead]]
+        <> [(entryPath entry, "InstanceClassUnresolved")
+           | entry <- modules, instance_ <- entryClassInstances entry
+           , Nothing <- [declarationClassProvider entry (instanceClass instance_)]]
+        <> [(path, "DerivedDelegateUnresolved")
+           | (path, _, _, _, _, _, _, _, "delegate-unresolved", _, _) <- derivedRoutes]
+        <> [(path, "DerivedDelegateUnresolved")
+           | (path, _, _, _, _, _, _, "delegate-unresolved", _, _) <- standaloneDerivingRoutes]
+      -- Sinks and consumers: a use of a catalogued external effect primitive,
+      -- resolved through the module's imports, and the literal path fragments
+      -- visible at the use. A use with no literal reads or writes a dynamic path.
+      sinkResolutions entry target = fmap sinkRowIdentity . Map.elems $ Map.fromListWith preferModule
+        [(sinkEntity row, row)
+        | row <- concat
+            [ Map.findWithDefault [] (importName importRef, name) sinkIndex
+            | importRef <- entryImports entry
+            , importPackageFree importRef
+            , null (Map.findWithDefault [] (importName importRef) byModuleName)
+            , Just name <- [externalCallName importRef target <|> externalOpenCallName importRef target]]
+            <> [row
+               | entryImplicitPrelude entry
+               , not (looksQualified target)
+               , target `notElem` entryValueNames entry
+               , row <- Map.findWithDefault [] ("Prelude", target) sinkIndex]]
+      preferModule rowA rowB = if sinkModule rowA <= sinkModule rowB then rowA else rowB
+      sinkRowIdentity row = (sinkModule row, sinkName row, sinkKind row)
+      sinkCallUses = Set.toAscList . Set.fromList $
+        [(entryPath entry, owner, site, target, moduleName, name, kind)
+        | entry <- modules
+        , (owner, target, site, False) <- entryCalls entry
+        , (moduleName, name, kind) <- sinkResolutions entry target]
+      -- A nested application shares its start with the whole application; keep
+      -- the widest so one use is reported once.
+      widestSinkCallUses =
+        [use | (_, (_, use)) <- Map.toAscList (Map.fromListWith widerUse
+          [((path, owner, target, moduleName, name, kind, fmap fst (siteBounds site)), (siteBounds site, use))
+          | use@(path, owner, site, target, moduleName, name, kind) <- sinkCallUses])]
+      widerUse (boundsA, useA) (boundsB, useB)
+        | fmap snd boundsA >= fmap snd boundsB = (boundsA, useA)
+        | otherwise = (boundsB, useB)
+      sinkCallStarts = Set.fromList
+        [(path, owner, target, fmap fst (siteBounds site))
+        | (path, owner, site, target, _, _, _) <- widestSinkCallUses]
+      sinkReferenceUses = Set.toAscList . Set.fromList $
+        [(entryPath entry, owner, site, target, moduleName, name, kind)
+        | entry <- modules
+        , (owner, target, site, False) <- entryReferences entry
+        , (entryPath entry, owner, target, fmap fst (siteBounds site)) `Set.notMember` sinkCallStarts
+        , (moduleName, name, kind) <- sinkResolutions entry target]
+      sinkUses = [(path, owner, site, target, moduleName, name, kind, "call")
+                 | (path, owner, site, target, moduleName, name, kind) <- widestSinkCallUses]
+        <> [(path, owner, site, target, moduleName, name, kind, "reference")
+           | (path, owner, site, target, moduleName, name, kind) <- sinkReferenceUses]
+      -- Argument literals keep source order; later entries at one site append.
+      callLiteralIndex = Map.fromListWith (flip (<>))
+        [((entryPath entry, owner, target, site), literals)
+        | entry <- modules
+        , (owner, target, site, literals) <- entryCallLiterals entry]
+      -- A consumer is a literal at an argument position the catalogue names for
+      -- the sink; a named position with no representable literal is dynamic.
+      consumerLiterals literals position =
+        nubOrdered [(rooted, text) | (at, rooted, text) <- literals, at == position
+                   , not (Text.null text), Text.length text <= 200, not (Text.any isControl text)]
+      consumerClassification argumentRole rooted text = case argumentRole of
+        "executable" -> ("executable", if not rooted then "dynamic-root"
+                                        else if "/" `Text.isInfixOf` text then literalOrigin text else "path-lookup")
+        "command-line" -> ("command-line", if rooted then "shell" else "dynamic-root")
+        _ -> (literalRole text, if rooted then literalOrigin text else "dynamic-root")
+      fileConsumers = Set.toAscList . Set.fromList $
+        [(path, owner, site, target, moduleName, name, kind, Text.pack (show position), literal, role, origin)
+        | (path, owner, site, target, moduleName, name, kind, _) <- sinkUses
+        , (position, argumentRole) <- concat
+            [sinkArguments row | row <- Map.findWithDefault [] (moduleName, name) sinkIndex, sinkKind row == kind]
+        , let literals = consumerLiterals (Map.findWithDefault [] (path, owner, target, site) callLiteralIndex) position
+        , (literal, role, origin) <- if null literals then [("-", "-", "dynamic")]
+            else [(text, role', origin')
+                 | (rooted, text) <- literals, let (role', origin') = consumerClassification argumentRole rooted text]]
       externalProviders entry imported = case Map.findWithDefault [] (entryPath entry) componentMap of
         [] -> lookupStandaloneExternalModule catalog imported
         components -> concatMap (\component ->
@@ -338,6 +580,28 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , null (lookupStandaloneExternalModule catalog (importName importRef))
         , (package, unit) <- lookupStandaloneRegisteredOnlyModule catalog (importName importRef)
         , packageCatalogHasModuleInterface catalog unit (importName importRef)]
+      standaloneAvailableKeys = Set.fromList [(path, name) | (path, name, _, _) <- standaloneAvailableLinks]
+      standaloneForwardOwned = Set.toAscList . Set.fromList $
+        [(entryPath entry, importName importRef, owedPath, role)
+        | entry <- modules
+        , Map.notMember (entryPath entry) componentMap
+        , importRef <- entryImports entry
+        , importPackageFree importRef
+        , null (Map.findWithDefault [] (importName importRef) byModuleName)
+        , (entryPath entry, importName importRef) `Set.notMember` standaloneAvailableKeys
+        , Just (owedPath, role) <- [lookup (importName importRef) maintainedForkOwedModules]]
+      -- A standalone source has no component, so its imports have their own closed
+      -- partition: a source provider, an available unit, or a recorded owed module.
+      standaloneUnresolved = Set.toAscList . Set.fromList $
+        [(entryPath entry, imported, if importPackageFree importRef then "standalone-unresolved" else "package-qualified")
+        | entry <- modules
+        , Map.notMember (entryPath entry) componentMap
+        , importRef <- entryImports entry
+        , let imported = importName importRef
+        , not (importPackageFree importRef)
+            || not (not (null (Map.findWithDefault [] imported byModuleName))
+                || (entryPath entry, imported) `Set.member` standaloneAvailableKeys
+                || isJust (lookup imported maintainedForkOwedModules))]
       forwardLinks = Set.toAscList . Set.fromList $
         [(component, entryPath entry, imported, expectedPath, role)
         | entry <- modules
@@ -918,6 +1182,18 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
       closedExportRefusalKeys = Set.fromList
         [(path, owner, site, target)
         | (path, owner, site, target, _, _, _) <- standaloneClosedExportRefusals]
+      reportedOpaqueSites =
+        [site
+        | (_, path, owner, site, target) <- opaqueCallSites
+        , (path, owner, site, target) `Set.notMember` rejectedCallKeys
+        , (path, owner, site, target) `Set.notMember` closedExportRefusalKeys]
+      -- The stage is derived from the rows below: it is resolved only when no
+      -- import, expression, declaration, route, or call site remains open.
+      graphStage :: Text
+      graphStage
+        | null unresolved && null standaloneUnresolved && null routeGaps && null reportedOpaqueSites
+            && all (null . entryGaps) modules && all (null . entryDeclarationGaps) modules = "resolved"
+        | otherwise = "partial-calls"
   pure
     ( interfaceFindings <> [finding | Left finding <- parsed]
         <> [LayoutFinding "ModuleDeclarationPathMismatch" (entryPath entry)
@@ -935,7 +1211,7 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         <> [LayoutFinding "AmbiguousPackageImport"
               (Text.unpack component <> ":" <> consumer <> ":" <> Text.unpack imported)
            | (component, consumer, imported, "external-ambiguous") <- unresolved],
-      "graph-stage\tpartial-calls" : interfaceRows
+      ("graph-stage\t" <> graphStage) : interfaceRows
         <> concatMap renderEntry modules
         <> [Text.intercalate "\t" ["graph-component", Text.pack path, component]
            | (path, components) <- Map.toAscList componentMap, component <- components]
@@ -1017,6 +1293,38 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
              instanceType, classHead, strategy, imported, package, unit, member, mode]
            | (path, instanceType, classHead, strategy, imported, package, unit, member, mode)
                <- standaloneDerivingMemberCandidates]
+        <> [Text.intercalate "\t" ["graph-import-standalone-forward-owned", Text.pack path, imported,
+             Text.pack owedPath, role]
+           | (path, imported, owedPath, role) <- standaloneForwardOwned]
+        <> [Text.intercalate "\t" ["graph-import-standalone-unresolved", Text.pack path, imported, reason]
+           | (path, imported, reason) <- standaloneUnresolved]
+        <> [Text.intercalate "\t" ["graph-unscanned-declaration", Text.pack path, tag]
+           | (path, tag) <- routeGaps]
+        <> [Text.intercalate "\t" ["graph-derived-route", Text.pack path, typeName, classText,
+             classHead, strategy, declaredAs, generation, delegate, disposition, provider]
+           | (path, typeName, classText, classHead, strategy, declaredAs,
+              generation, delegate, disposition, provider, _) <- derivedRoutes]
+        <> [Text.intercalate "\t" ["graph-derived-route-target", Text.pack path, typeName, classText,
+             Text.pack targetPath, targetHead]
+           | (path, typeName, classText, _, _, _, _, _, _, _, targets) <- derivedRoutes
+           , (targetPath, targetHead) <- targets]
+        <> [Text.intercalate "\t" ["graph-standalone-deriving-route", Text.pack path, instanceType,
+             classHead, strategy, declaredAs, generation, delegate, disposition, provider]
+           | (path, instanceType, classHead, strategy, declaredAs,
+              generation, delegate, disposition, provider, _) <- standaloneDerivingRoutes]
+        <> [Text.intercalate "\t" ["graph-standalone-deriving-route-target", Text.pack path,
+             instanceType, Text.pack targetPath, targetHead]
+           | (path, instanceType, _, _, _, _, _, _, _, targets) <- standaloneDerivingRoutes
+           , (targetPath, targetHead) <- targets]
+        <> [Text.intercalate "\t" ["graph-instance-route", Text.pack path, headText, className,
+             kind, provider]
+           | (path, headText, className, kind, provider) <- instanceRoutes]
+        <> [Text.intercalate "\t" ["graph-effect-sink-external", Text.pack path, owner, site, target,
+             moduleName, name, kind, via]
+           | (path, owner, site, target, moduleName, name, kind, via) <- sinkUses]
+        <> [Text.intercalate "\t" ["graph-file-consumer", Text.pack path, owner, site, target,
+             moduleName, name, kind, position, literal, role, origin]
+           | (path, owner, site, target, moduleName, name, kind, position, literal, role, origin) <- fileConsumers]
         <> [Text.intercalate "\t" ["graph-call-standalone-external-candidate", Text.pack path,
              owner, site, target, imported, package, unit, callee]
            | (path, owner, site, target, imported, package, unit, callee) <- standaloneExternalCallSiteCandidates]
@@ -1195,6 +1503,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
                 typeFamilies = concatMap typeFamilySymbols (hsmodDecls parsedModule)
                 standaloneDeriving = concatMap standaloneDerivingSymbol (hsmodDecls parsedModule)
                 classInstances = concatMap (classInstanceSymbols . unLoc) (hsmodDecls parsedModule)
+                deriveAnyClass = Extension.DeriveAnyClass `elem` extensionsFor options
+                standaloneDetails = concatMap standaloneDerivingDetails (hsmodDecls parsedModule)
                 topLevel = map fst topBindings
                 signatures = concatMap (topLevelSignature . unLoc) (hsmodDecls parsedModule)
                 observed =
@@ -1225,6 +1535,7 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
                   | (owner, RecordField site receiver field) <- observed]
                 projections = [(owner, site, field)
                   | (owner, RecordProjection site field) <- observed]
+                callLiterals = [(owner, target, site, literals) | (owner, CallLiteral site target literals) <- observed]
                 gaps = [(owner, tag) | (owner, Unscanned tag) <- observed]
                 declarationGaps =
                   [tag | declaration <- hsmodDecls parsedModule
@@ -1232,7 +1543,7 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
                 exportItems = unLoc <$> hsmodExports parsedModule
                 exports = exportedValueNames dataDeclarations classDeclarations <$> exportItems
                 reexports = maybe [] (reexportedModuleNames . unLoc) (hsmodExports parsedModule)
-            in Right (SourceEntry path (Text.pack moduleName) exports exportItems reexports imports implicitPrelude topLevel signatures calls lexicalBindingCalls localBinders parameterBinders localAliases references controls dynamicLoads recordFields projections gaps declarationGaps dataDeclarations classDeclarations classNames classDefaults classSignatures classSuperclasses foreignDeclarations typeFamilies standaloneDeriving classInstances)
+            in Right (SourceEntry path (Text.pack moduleName) exports exportItems reexports imports implicitPrelude topLevel signatures calls lexicalBindingCalls localBinders parameterBinders localAliases references controls dynamicLoads recordFields projections gaps declarationGaps dataDeclarations classDeclarations classNames classDefaults classSignatures classSuperclasses foreignDeclarations typeFamilies standaloneDeriving classInstances deriveAnyClass standaloneDetails callLiterals)
 
 reverseReachable :: Ord node => Map.Map node (Set.Set node) -> Set.Set node -> Set.Set node
 reverseReachable predecessors seeds = visit seeds (Set.toList seeds)
@@ -1291,6 +1602,9 @@ data SourceEntry = SourceEntry
   , entryTypeFamilies :: [(Text, Text)]
   , entryStandaloneDeriving :: [(Text, Text, Text)]
   , entryClassInstances :: [ClassInstance]
+  , entryDeriveAnyClass :: Bool
+  , entryStandaloneDetails :: [(Text, Maybe Text, Maybe Text)]
+  , entryCallLiterals :: [(Text, Text, Text, [(Int, Bool, Text)])]
   }
 
 data CompilerRejection = CompilerRejection Text Int FilePath Int Int [Text]
@@ -1312,12 +1626,17 @@ parseCompilerRejection = withObject "CompilerRejection" $ \record -> do
     then pure (CompilerRejection severity diagnosticCode path line column messages)
     else fail "not a pinned compiler error"
 
+-- | The compiler is reached through @cabal exec@, which needs the root's local
+-- package database. A copied tree has none, so it yields no observation and its
+-- compile-negative calls stay in the opaque partition of that copy's report.
 observeRejectedNegativeCalls :: FilePath -> [SourceEntry] -> Map.Map Text [FilePath]
   -> [(FilePath, Text, Text, Text)]
   -> IO [(FilePath, Text, Text, Text, Int, Text, Text)]
 observeRejectedNegativeCalls root modules byModuleName calls = do
   absoluteRoot <- makeAbsolute root
-  concat <$> mapM (observeFile absoluteRoot) (zip [1 :: Int ..] (Map.toAscList grouped))
+  built <- doesDirectoryExist (absoluteRoot </> "dist-newstyle" </> "packagedb")
+  if not built then pure [] else
+    concat <$> mapM (observeFile absoluteRoot) (zip [1 :: Int ..] (Map.toAscList grouped))
  where
   grouped = Map.fromListWith (<>)
     [(path, [(owner, site, target)])
@@ -1415,6 +1734,173 @@ observeRejectedNegativeCalls root modules byModuleName calls = do
     [intToDigit (fromIntegral byte `div` 16), intToDigit (fromIntegral byte `mod` 16)])
     . ByteString.unpack . SHA256.hash
 
+-- | One catalogued external effect primitive: a module a program may import, a
+-- name it exports that reaches outside the process, the kind of effect, the entity
+-- the name denotes (one entity may be exported by several modules), and the
+-- zero-based argument positions that carry a path, an executable, or a command line.
+data SinkRow = SinkRow
+  { sinkModule :: Text
+  , sinkName :: Text
+  , sinkKind :: Text
+  , sinkEntity :: Text
+  , sinkArguments :: [(Int, Text)]
+  }
+
+-- | The closed catalogue of external effect primitives. A use resolved through an
+-- import of the module is a sink; a primitive with no argument position takes no
+-- path (an ambient read, a configuration value, or a handle).
+sinkCatalogue :: [SinkRow]
+sinkCatalogue = concat
+  [ carrying "process-exec" [(0, "executable")] "System.Process"
+      ["proc", "callProcess", "spawnProcess", "readProcess", "readProcessWithExitCode", "rawSystem",
+       "runProcess", "runInteractiveProcess"]
+  , carrying "process-exec" [(0, "command-line")] "System.Process"
+      ["shell", "callCommand", "spawnCommand", "system", "runCommand", "runInteractiveCommand"]
+  , carrying "process-exec" [] "System.Process"
+      ["createProcess", "createProcess_", "withCreateProcess", "readCreateProcess",
+       "readCreateProcessWithExitCode"]
+  , carrying "process-exec" [(0, "executable")] "System.Process.Typed" ["proc"]
+  , carrying "process-exec" [(0, "command-line")] "System.Process.Typed" ["shell"]
+  , carrying "process-exec" [] "System.Process.Typed"
+      ["runProcess", "runProcess_", "readProcess", "readProcess_", "readProcessStdout",
+       "readProcessStdout_", "startProcess", "withProcessWait", "withProcessTerm", "withProcessWait_",
+       "withProcessTerm_", "readProcessInterleaved", "readProcessInterleaved_"]
+  , carrying "process-exec" [(0, "executable")] "System.Posix.Process" ["executeFile"]
+  , carrying "process-exec" [] "System.Posix.Process" ["forkProcess"]
+  , concat [ pathsAt "file-read" [0] moduleName ["readFile"] <> pathsAt "file-write" [0] moduleName ["writeFile", "appendFile"]
+           | moduleName <- ["Prelude", "System.IO", "Data.Text.IO", "Data.Text.Lazy.IO", "Data.ByteString",
+                            "Data.ByteString.Char8", "Data.ByteString.Lazy", "Data.ByteString.Lazy.Char8"]]
+  , pathsAt "file-read" [0] "System.IO" ["readFile'"]
+  , pathsAt "file-open" [0] "System.IO"
+      ["openFile", "withFile", "openBinaryFile", "withBinaryFile", "openTempFile", "openBinaryTempFile",
+       "openTempFileWithDefaultPermissions", "openBinaryTempFileWithDefaultPermissions"]
+  , pathsAt "file-write" [0] "Data.ByteString.Builder" ["writeFile"]
+  , pathsAt "file-write" [] "System.IO.Temp"
+      ["withSystemTempDirectory", "withSystemTempFile", "writeSystemTempFile"]
+  , pathsAt "file-write" [0] "System.IO.Temp"
+      ["withTempDirectory", "withTempFile", "createTempDirectory", "writeTempFile"]
+  , pathsAt "file-read" [0] "GHC.Data.StringBuffer" ["hGetStringBuffer"]
+  , pathsAt "file-read" [0] "Data.Aeson"
+      ["eitherDecodeFileStrict", "eitherDecodeFileStrict'", "decodeFileStrict", "decodeFileStrict'"]
+  , pathsAt "file-write" [0] "Data.Aeson" ["encodeFile"]
+  , pathsAt "file-read" [1] "Dhall" ["inputFile", "input"]
+  , pathsAt "file-read" [2] "Dhall" ["inputFileWithSettings", "inputWithSettings"]
+  , pathsAt "file-read" [0] "Dhall" ["inputExpr"]
+  , pathsAt "file-read" [1] "Dhall" ["inputExprWithSettings"]
+  , pathsAt "file-write" [0] "Control.Logging" ["withFileLogging"]
+  , pathsAt "file-write" [0] "System.Directory"
+      ["removeFile", "removeDirectory", "removeDirectoryRecursive", "removePathForcibly", "createDirectory",
+       "removeDirectoryLink", "setPermissions", "setModificationTime", "setAccessTime", "setCurrentDirectory",
+       "withCurrentDirectory"]
+  , pathsAt "file-write" [0, 1] "System.Directory"
+      ["copyFile", "copyFileWithMetadata", "renameFile", "renameDirectory", "renamePath", "createFileLink",
+       "createDirectoryLink", "copyPermissions"]
+  , pathsAt "file-write" [1] "System.Directory" ["createDirectoryIfMissing"]
+  , pathsAt "file-query" [0] "System.Directory"
+      ["doesFileExist", "doesDirectoryExist", "doesPathExist", "listDirectory", "getDirectoryContents",
+       "getFileSize", "getModificationTime", "getAccessTime", "getPermissions", "canonicalizePath", "makeAbsolute",
+       "makeRelativeToCurrentDirectory", "pathIsSymbolicLink", "getSymbolicLinkTarget"]
+  , carrying "file-query" [(0, "executable")] "System.Directory" ["findExecutable", "findExecutables"]
+  , pathsAt "file-query" [1] "System.Directory" ["findFile", "findFiles", "findFileWith"]
+  , pathsAt "environment" [] "System.Directory"
+      ["getCurrentDirectory", "getHomeDirectory", "getTemporaryDirectory", "getXdgDirectory",
+       "getUserDocumentsDirectory", "getAppUserDataDirectory"]
+  , pathsAt "file-write" [0] "System.Posix.Files"
+      ["setFileMode", "removeLink", "setOwnerAndGroup", "setFileTimes", "touchFile", "createNamedPipe"]
+  , pathsAt "file-write" [0, 1] "System.Posix.Files" ["createSymbolicLink", "rename", "createLink"]
+  , pathsAt "file-query" [0] "System.Posix.Files"
+      ["getFileStatus", "getSymbolicLinkStatus", "fileExist", "readSymbolicLink"]
+  , pathsAt "file-write" [0] "System.Posix.Directory" ["createDirectory", "removeDirectory", "changeWorkingDirectory"]
+  , pathsAt "file-query" [0] "System.Posix.Directory" ["openDirStream"]
+  , pathsAt "file-query" [] "System.Posix.Directory" ["readDirStream"]
+  , pathsAt "environment" [] "System.Environment"
+      ["getEnv", "lookupEnv", "getEnvironment", "setEnv", "unsetEnv", "getExecutablePath", "getArgs", "getProgName"]
+  , pathsAt "network" [] "Network.Socket" ["socket", "connect", "bind", "listen", "accept", "getAddrInfo", "openSocket"]
+  , pathsAt "network" [] "Network.Socket.ByteString" ["sendAll", "send", "recv"]
+  , pathsAt "network" [] "Network.Socket.ByteString.Lazy" ["sendAll", "send", "recv"]
+  , pathsAt "network" [] "Network.HTTP.Client" ["httpLbs", "httpNoBody", "withResponse", "newManager"]
+  , pathsAt "network" [] "Network.HTTP.Client.TLS" ["newTlsManager", "tlsManagerSettings"]
+  , pathsAt "dynamic-load" [] "Language.Haskell.TH" ["runIO"]
+  , pathsAt "dynamic-load" [] "Language.Haskell.TH.Syntax" ["runIO"]
+  , pathsAt "dynamic-load" [] "System.Posix.DynamicLinker" ["dlopen", "dlsym"]
+  , concat [pathsAt "unsafe-effect" [] moduleName ["unsafePerformIO", "unsafeInterleaveIO", "unsafeDupablePerformIO"]
+           | moduleName <- ["System.IO.Unsafe", "GHC.IO", "GHC.IO.Unsafe"]]
+  ]
+ where
+  pathsAt kind positions = carrying kind [(position, "path") | position <- positions]
+  carrying kind arguments moduleName names =
+    [SinkRow moduleName name kind (sinkEntityOf moduleName name) arguments | name <- names]
+
+-- | The entity a module's export denotes: a module that re-exports another
+-- module's function names the same entity.
+sinkEntityOf :: Text -> Text -> Text
+sinkEntityOf moduleName name = canonicalModule <> "." <> name
+ where
+  canonicalModule = case moduleName of
+    "Prelude" | name `elem` ["readFile", "writeFile", "appendFile"] -> "System.IO"
+    "Data.ByteString.Char8" -> "Data.ByteString"
+    "Data.ByteString.Lazy.Char8" -> "Data.ByteString.Lazy"
+    "Language.Haskell.TH.Syntax" -> "Language.Haskell.TH"
+    "GHC.IO" -> "System.IO.Unsafe"
+    "GHC.IO.Unsafe" -> "System.IO.Unsafe"
+    _ -> moduleName
+
+nubOrdered :: Ord a => [a] -> [a]
+nubOrdered = go Set.empty
+ where
+  go _ [] = []
+  go seen (item : rest)
+    | item `Set.member` seen = go seen rest
+    | otherwise = item : go (Set.insert item seen) rest
+
+-- | The start and end positions of a rendered @line:column-line:column@ span.
+siteBounds :: Text -> Maybe ((Int, Int), (Int, Int))
+siteBounds site = case Text.splitOn "-" site of
+  [start, end] -> (,) <$> position start <*> position end
+  _ -> Nothing
+ where
+  position value = case Text.splitOn ":" value of
+    [line, column] -> (,) <$> number line <*> number column
+    _ -> Nothing
+  number value = case reads (Text.unpack value) of
+    [(parsed, "")] -> Just parsed
+    _ -> Nothing
+
+sinkIndex :: Map.Map (Text, Text) [SinkRow]
+sinkIndex = Map.fromListWith (flip (<>)) [((sinkModule row, sinkName row), [row]) | row <- sinkCatalogue]
+
+-- | The content role of a literal path fragment, by its final component.
+literalRole :: Text -> Text
+literalRole literal
+  | extension `elem` [".hs", ".lhs", ".hsc"] = "haskell-source"
+  | extension == ".md" = "documentation"
+  | extension == ".cabal" || base == "cabal.project" = "package-metadata"
+  | base `elem` [".gitignore", ".dockerignore"] = "ignore-metadata"
+  | base == "LICENSE" = "licence"
+  | extension `elem` [".py", ".sh", ".js", ".purs", ".dhall", ".proto", ".yaml", ".yml", ".sql", ".tla", ".cfg"]
+      || base == "Dockerfile" = "foreign-source"
+  | extension `elem` [".tsv", ".csv", ".json", ".txt"] = "data"
+  | extension `elem` [".o", ".hi", ".a", ".so", ".tar", ".xz", ".gz", ".sig"] = "artifact"
+  | otherwise = "unclassified"
+ where
+  base = Text.takeWhileEnd (/= '/') literal
+  extension = case Text.breakOnEnd "." base of
+    (before, after) | not (Text.null before), not (Text.null after) -> "." <> after
+    _ -> ""
+
+-- | Where the bytes of a literal path live, by its leading component.
+literalOrigin :: Text -> Text
+literalOrigin literal
+  | first == ".build" = "generated"
+  | first `elem` [".data", ".test_data"] = "state"
+  | "/" `Text.isPrefixOf` literal || "~" `Text.isPrefixOf` literal = "external"
+  | first `elem` ["src", "app", "test", "probe", "pb", "documents", "DEVELOPMENT_PLAN", "validation-records",
+                  "README.md", "AGENTS.md", "CLAUDE.md", "LICENSE", "amoebius.cabal", "cabal.project",
+                  ".gitignore", ".dockerignore"] = "tracked"
+  | otherwise = "unclassified"
+ where
+  first = Text.takeWhile (/= '/') literal
+
 data ScanObservation
   = DirectCall Text Text
   | LexicalCall Text Text (Maybe Text)
@@ -1427,6 +1913,7 @@ data ScanObservation
   | DynamicLoad Text Text Text
   | RecordField Text Text Text
   | RecordProjection Text Text
+  | CallLiteral Text Text [(Int, Bool, Text)]
   | Unscanned Text
 
 data DataSymbols = DataSymbols
@@ -1435,6 +1922,9 @@ data DataSymbols = DataSymbols
   , symbolSelectors :: [Text]
   , symbolDeriving :: Bool
   , symbolDerivedTypes :: [(Text, Text, Text)]
+  , symbolNewtype :: Bool
+  , symbolRepresentation :: Maybe Text
+  , symbolViaHeads :: [(Text, Text)]
   }
 
 data ForeignSymbol = ForeignSymbol
@@ -1448,6 +1938,7 @@ data ClassInstance = ClassInstance
   { instanceHead :: Text
   , instanceClass :: Text
   , instanceMethods :: [Text]
+  , instanceTypeHead :: Maybe Text
   }
 
 entryValueNames :: SourceEntry -> [Text]
@@ -1549,9 +2040,7 @@ unscannedDeclaration declaration = case declaration of
   TyClD _ typeDecl -> case typeDecl of
     FamDecl {} -> []
     SynDecl {} -> []
-    DataDecl {tcdDataDefn = definition}
-      | null (dd_derivs definition) -> []
-      | otherwise -> ["DataDerivingDispatch"]
+    DataDecl {} -> []
     ClassDecl {tcdSigs = signatures, tcdMeths = methods,
                tcdATs = associatedTypes, tcdATDefs = associatedDefaults,
                tcdFDs = dependencies}
@@ -1559,10 +2048,12 @@ unscannedDeclaration declaration = case declaration of
           && null dependencies && all isMethodSignature signatures -> []
       | otherwise -> ["ClassDispatch"]
   InstD _ instanceDecl -> case instanceDecl of
-    ClsInstD {} -> ["InstanceDispatch"]
+    ClsInstD {cid_inst = instanceBody}
+      | not (null (cid_tyfam_insts instanceBody)) || not (null (cid_datafam_insts instanceBody)) -> ["InstanceFamily"]
+      | otherwise -> []
     DataFamInstD {} -> ["DataFamily"]
     TyFamInstD {} -> ["TypeFamilyInstance"]
-  DerivD {} -> ["Deriving"]
+  DerivD {} -> []
   ForD {} -> []
   AnnD {} -> ["Annotation"]
   RuleD {} -> ["Rule"]
@@ -1577,12 +2068,19 @@ dataSymbols :: HsDecl GhcPs -> [DataSymbols]
 dataSymbols declaration = case declaration of
   TyClD _ DataDecl {tcdLName = typeName, tcdDataDefn = definition} ->
     let constructors = map unLoc (toList (dd_cons definition))
+        isNewtype = case dd_cons definition of
+          NewTypeCon _ -> True
+          DataTypeCons _ _ -> False
     in [DataSymbols
       { symbolType = renderRdr (unLoc typeName)
       , symbolConstructors = concatMap constructorNames constructors
       , symbolSelectors = concatMap selectorNames constructors
       , symbolDeriving = not (null (dd_derivs definition))
       , symbolDerivedTypes = derivingSymbols definition
+      , symbolNewtype = isNewtype
+      , symbolRepresentation = if isNewtype
+          then listToMaybe (concatMap constructorFieldHeads constructors) else Nothing
+      , symbolViaHeads = viaHeadSymbols definition
       }]
   _ -> []
 
@@ -1635,8 +2133,8 @@ classInstanceSymbols declaration = case declaration of
         headText = renderType signature
         methods = Set.toAscList (Set.fromList
           (concatMap (bindingNames . unLoc) (cid_binds instanceDecl)))
-    in [ClassInstance headText className methods
-       | Just className <- [typeConstructorHead (sig_body (unLoc signature))]]
+    in [ClassInstance headText (fromMaybe "unresolved" (typeConstructorHead (sig_body (unLoc signature))))
+          methods (lastArgumentHead (sig_body (unLoc signature)))]
   _ -> []
 
 typeConstructorHead :: LHsType GhcPs -> Maybe Text
@@ -1646,8 +2144,52 @@ typeConstructorHead located = case unLoc located of
   HsAppTy _ constructor _ -> typeConstructorHead constructor
   HsAppKindTy _ constructor _ -> typeConstructorHead constructor
   HsParTy _ body -> typeConstructorHead body
+  HsBangTy _ _ body -> typeConstructorHead body
+  HsKindSig _ body _ -> typeConstructorHead body
   HsTyVar _ _ name -> Just (renderRdr (unLoc name))
+  HsDocTy _ body _ -> typeConstructorHead body
+  HsListTy {} -> Just "[]"
+  HsExplicitListTy {} -> Just "[]"
+  HsTupleTy {} -> Just "(,)"
+  HsExplicitTupleTy {} -> Just "(,)"
+  HsFunTy {} -> Just "->"
+  HsOpTy _ _ _ operator _ -> Just (renderRdr (unLoc operator))
   _ -> Nothing
+
+-- | The head type constructor of the last type argument of an instance head, so
+-- @MonadReader Ctx App@ and @Eq (Target k)@ report @App@ and @Target@.
+lastArgumentHead :: LHsType GhcPs -> Maybe Text
+lastArgumentHead located = case unLoc located of
+  HsForAllTy {hst_body = body} -> lastArgumentHead body
+  HsQualTy {hst_body = body} -> lastArgumentHead body
+  HsParTy _ body -> lastArgumentHead body
+  HsAppTy _ _ argument -> typeConstructorHead argument
+  _ -> Nothing
+
+-- | Head type constructors of a constructor's field types, used to name the
+-- representation type a newtype derivation delegates to.
+constructorFieldHeads :: ConDecl GhcPs -> [Text]
+constructorFieldHeads constructor = case constructor of
+  ConDeclH98 {con_args = arguments} -> case arguments of
+    PrefixCon _ scaled -> [name | HsScaled _ fieldType <- scaled, Just name <- [typeConstructorHead fieldType]]
+    RecCon fields -> [name | field <- unLoc fields, Just name <- [typeConstructorHead (cd_fld_type (unLoc field))]]
+    InfixCon (HsScaled _ left) (HsScaled _ right) ->
+      [name | fieldType <- [left, right], Just name <- [typeConstructorHead fieldType]]
+  ConDeclGADT {} -> []
+
+-- | For each derived class written under a @via@ strategy, the head type
+-- constructor of the via type.
+viaHeadSymbols :: HsDataDefn GhcPs -> [(Text, Text)]
+viaHeadSymbols definition =
+  [(renderType (sig_body (unLoc signature)), viaHead)
+  | locatedClause <- dd_derivs definition
+  , let clause = unLoc locatedClause
+  , Just strategy <- [deriv_clause_strategy clause]
+  , ViaStrategy (XViaStrategyPs _ viaType) <- [unLoc strategy]
+  , Just viaHead <- [typeConstructorHead (sig_body (unLoc viaType))]
+  , signature <- case unLoc (deriv_clause_tys clause) of
+      DctSingle _ single -> [single]
+      DctMulti _ multiple -> multiple]
 
 constructorNames :: ConDecl GhcPs -> [Text]
 constructorNames constructor = case constructor of
@@ -1683,6 +2225,20 @@ standaloneDerivingSymbol located = case unLoc located of
         (typeConstructorHead (sig_body (unLoc (hswc_body signature)))),
       strategyName (deriv_strategy declaration))]
     where signature = deriv_type declaration
+  _ -> []
+
+-- | Per standalone deriving declaration: the instance type text, the head type
+-- constructor of its last argument, and the via type head when the strategy is @via@.
+standaloneDerivingDetails :: LHsDecl GhcPs -> [(Text, Maybe Text, Maybe Text)]
+standaloneDerivingDetails located = case unLoc located of
+  DerivD _ declaration ->
+    let signature = deriv_type declaration
+        viaHead = listToMaybe
+          [name
+          | Just strategy <- [deriv_strategy declaration]
+          , ViaStrategy (XViaStrategyPs _ viaType) <- [unLoc strategy]
+          , Just name <- [typeConstructorHead (sig_body (unLoc viaType))]]
+    in [(renderType signature, lastArgumentHead (sig_body (unLoc (hswc_body signature))), viaHead)]
   _ -> []
 
 strategyName :: Maybe (GenLocated l (DerivStrategy GhcPs)) -> Text
@@ -2026,9 +2582,9 @@ scanExpr scope located = case unLoc located of
   HsOverLit {} -> []
   HsLit {} -> []
   HsLam _ _ alternatives -> scanMatches scope alternatives
-  HsApp _ function argument -> maybe [] (pure . observeCall scope (sourceSpanText located)) (callHead function) <> scanExpr scope function <> scanExpr scope argument
+  HsApp _ function argument -> maybe [] (\name -> [observeCall scope (sourceSpanText located) name, CallLiteral (sourceSpanText located) name (applicationLiterals located)]) (callHead function) <> scanExpr scope function <> scanExpr scope argument
   HsAppType _ function _ -> scanExpr scope function
-  OpApp _ left operator right -> maybe [] (pure . observeCall scope (sourceSpanText located)) (callHead operator) <> scanExpr scope left <> scanExpr scope right
+  OpApp {} -> scanOperatorChain scope located
   NegApp _ argument _ -> observeCall scope (sourceSpanText located) "negate" : scanExpr scope argument
   HsPar _ inner -> scanExpr scope inner
   SectionL _ left operator -> maybe [] (pure . observeCall scope (sourceSpanText located)) (callHead operator) <> scanExpr scope left <> scanExpr scope operator
@@ -2118,6 +2674,132 @@ callHead located = case unLoc located of
   HsAppType _ inner _ -> callHead inner
   HsApp _ inner _ -> callHead inner
   _ -> Nothing
+
+data PathToken = PathLit Text | PathDyn | PathSep Text
+
+-- | The string literals in the arguments applied within an application, each with
+-- the zero-based position of its argument and whether it begins its path
+-- expression. Only path-preserving forms are read: literals, parentheses, slash
+-- and concatenation chains, and a few conversions. Any other operand is dynamic.
+applicationLiterals :: LHsExpr GhcPs -> [(Int, Bool, Text)]
+applicationLiterals located = case unLoc located of
+  HsApp _ function argument ->
+    applicationLiterals function
+      <> [(applicationArity function, rooted, text) | (rooted, text) <- pathLiterals (pathTokens argument)]
+  HsPar _ inner -> applicationLiterals inner
+  HsAppType _ inner _ -> applicationLiterals inner
+  _ -> []
+
+-- | How many arguments an application expression has already been given.
+applicationArity :: LHsExpr GhcPs -> Int
+applicationArity located = case unLoc located of
+  HsApp _ function _ -> 1 + applicationArity function
+  HsPar _ inner -> applicationArity inner
+  HsAppType _ inner _ -> applicationArity inner
+  _ -> 0
+
+pathTokens :: LHsExpr GhcPs -> [PathToken]
+pathTokens located = case unLoc located of
+  HsLit _ (HsString _ fragment) -> [PathLit (Text.pack (unpackFS fragment))]
+  HsPar _ inner -> pathTokens inner
+  OpApp _ left operator right -> case callHead operator >>= pathJoiner of
+    Just joiner -> pathTokens left <> [PathSep joiner] <> pathTokens right
+    Nothing -> [PathDyn]
+  HsApp _ function argument
+    | Just name <- callHead function
+    , occurrenceName name `elem` pathPreserving -> pathTokens argument
+  _ -> [PathDyn]
+ where
+  pathPreserving = ["pack", "unpack", "fromString", "toString", "normalise"]
+
+-- | How a path operator joins its operands: a slash operator inserts a separator,
+-- a concatenation operator inserts none, and any other operator hides its operands.
+pathJoiner :: Text -> Maybe Text
+pathJoiner name = case occurrenceName name of
+  "</>" -> Just "/"
+  "<.>" -> Just "."
+  "<>" -> Just ""
+  "++" -> Just ""
+  _ -> Nothing
+
+-- | A possibly qualified name without its module qualifier.
+occurrenceName :: Text -> Text
+occurrenceName name = case Text.break (== '.') name of
+  (segment, rest)
+    | Just (initial, _) <- Text.uncons segment
+    , isUpper initial
+    , Text.all (\character -> isAlphaNum character || character == '_' || character == '\'') segment
+    , Just (_, remainder) <- Text.uncons rest
+    , not (Text.null remainder) -> occurrenceName remainder
+  _ -> name
+
+-- | Maximal runs of literals between dynamic operands, joined by their operators;
+-- only a run at the very start of the expression is rooted.
+pathLiterals :: [PathToken] -> [(Bool, Text)]
+pathLiterals tokens = collect startsRooted tokens
+ where
+  startsRooted = case tokens of
+    PathLit _ : _ -> True
+    _ -> False
+  collect _ [] = []
+  collect rooted remaining =
+    let (run, rest) = break isDynamic remaining
+        text = fst (foldl' step ("", Nothing) run)
+    in [(rooted, text) | not (Text.null text)] <> collect False (dropWhile isDynamic rest)
+  isDynamic token = case token of
+    PathDyn -> True
+    _ -> False
+  step (accumulated, pending) token = case token of
+    PathLit text -> (if Text.null accumulated then text else accumulated <> fromMaybe "" pending <> text, Nothing)
+    PathSep joiner -> (accumulated, Just joiner)
+    PathDyn -> (accumulated, pending)
+
+-- | A left-nested run of infix operators, scanned as one spine: the parser leaves
+-- operator fixity unresolved, so everything after a leading dollar belongs to the
+-- applied argument, and a named function used infix at the start of the run has
+-- exactly its two operands.
+scanOperatorChain :: Scope -> LHsExpr GhcPs -> [ScanObservation]
+scanOperatorChain scope located =
+  scanExpr scope start
+    <> concat [maybe [] (pure . observeCall scope (sourceSpanText node)) (callHead operator) <> scanExpr scope right
+              | (node, operator, right) <- steps]
+    <> chainApplication
+ where
+  (start, steps) = operatorSpine located
+  site = sourceSpanText located
+  chainApplication = case steps of
+    (node, operator, right) : more
+      | Just operatorName <- callHead operator
+      , occurrenceName operatorName `elem` ["$", "$!"]
+      , Just name <- callHead start ->
+          [ observeCall scope site name
+          , CallLiteral site name
+              (applicationLiterals start
+                <> [ (applicationArity start, rooted, text)
+                   | (rooted, text) <- pathLiterals (argumentTokens right [(op, operand) | (_, op, operand) <- more])])]
+      | Just operatorName <- callHead operator
+      , identifierLike operatorName ->
+          [ CallLiteral (sourceSpanText node) operatorName
+              ([(0, rooted, text) | (rooted, text) <- pathLiterals (pathTokens start)]
+                <> [(1, rooted, text) | (rooted, text) <- pathLiterals (pathTokens right)])]
+    _ -> []
+  identifierLike name = maybe False (isAlpha . fst) (Text.uncons (occurrenceName name))
+
+-- | The path tokens of an argument that runs on through further operators: only a
+-- run of path joiners keeps the argument a path; any other operator hides it.
+argumentTokens :: LHsExpr GhcPs -> [(LHsExpr GhcPs, LHsExpr GhcPs)] -> [PathToken]
+argumentTokens first rest
+  | all (isJust . (>>= pathJoiner) . callHead . fst) rest =
+      pathTokens first <> concat
+        [maybe [PathDyn] (\joiner -> PathSep joiner : pathTokens operand) (callHead operator >>= pathJoiner)
+        | (operator, operand) <- rest]
+  | otherwise = [PathDyn]
+
+operatorSpine :: LHsExpr GhcPs -> (LHsExpr GhcPs, [(LHsExpr GhcPs, LHsExpr GhcPs, LHsExpr GhcPs)])
+operatorSpine located = case unLoc located of
+  OpApp _ left operator right ->
+    let (start, steps) = operatorSpine left in (start, steps <> [(located, operator, right)])
+  _ -> (located, [])
 
 renderRdr :: RdrName -> Text
 renderRdr name = case name of

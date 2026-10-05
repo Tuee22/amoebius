@@ -6,7 +6,8 @@ import Amoebius.Calculus.Composition
 import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
 import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Capacity.Vector (ResourceVector (ResourceVector))
+import Amoebius.Vocabulary (quantityText)
 import Amoebius.Scope.Index qualified as CalculusScope
 import Amoebius.Ui.Realtime.Envelope
 import Amoebius.Ui.Server.Dispatch
@@ -72,7 +73,7 @@ checkCalculus = do
         budget=budgetComponent scope "closed-authority-budget" (resources 5) (allowance (Bytes 5) (Slots 1) (Bytes 5)); lift=liftComponent scope "server-boundary-corpus" (resources 55) OnHost
         workflow=workflowComponent scope "startup-admission-workflow" (resources 6) emptyLedger; evidence=evidenceComponent scope "mutant-evidence" (resources 9) PureRegister
         composition=append (compose artifact budget) (append (compose lift workflow) (singleton evidence)); ResourceVector cpu memory ephemeral pods=compositionResource composition
-        render=Text.unpack . Text.intercalate ","; actual=[["calculus-kinds",render(map calculusTag(compositionKinds composition))],["component-names",render(compositionNames composition)],["projection-counts",render(map(Text.pack.show)counts)],["resource-vector",render(map(Text.pack.show)[cpu,memory,ephemeral,pods])]]
+        render=Text.unpack . Text.intercalate ","; actual=[["calculus-kinds",render(map calculusTag(compositionKinds composition))],["component-names",render(compositionNames composition)],["projection-counts",render(map(Text.pack.show)counts)],["resource-vector",render([quantityText cpu,quantityText memory,quantityText ephemeral,quantityText pods])]]
     assertEqual "five calculus kinds" everyCalculus (compositionKinds composition); assertEqual "server calculus projection" Cases.calculusRows actual
   action
 

@@ -1,0 +1,47 @@
+Amoebius.Toolchain.Pins	src/Amoebius/Toolchain/Pins.hs:68	constant-flip	c9807f7a8732->e24f1a16d2d6	killed@pins.verdict,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz.sig
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:232	list-truncation	bec576e2d102->e961bb452fb7	stillborn:src/Amoebius/Toolchain/Acquire.hs:232:36: error: [GHC-58481]
+    parse error on 
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:81	constant-flip	67edf3dae93d->cf7aa875dde9	killed@probe.decode.positive,report.probe.decode.positive
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:173	list-truncation	0bb75460fad1->d52d6995f2fe	survived
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:56	field-drop	443c7d5340d9->e1a44b53c7b0	killed@
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:61	constant-flip	a99347a52f0f->fb48031d7851	survived
+Amoebius.Toolchain.Pins	src/Amoebius/Toolchain/Pins.hs:69	constant-flip	c9807f7a8732->9a58b60b9e2d	killed@pins.verdict,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz.sig
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:298	branch-swap	bec576e2d102->843144ba246f	killed@acquisition.verdict,acquisition.a.compiler.sha256,acquisition.a.package-tool.sha256
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:112	list-truncation	67edf3dae93d->f03f3b94243c	stillborn:src/Amoebius/Toolchain/Probe.hs:112:37: error: [GHC-58481]
+    parse error on in
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:187	constant-flip	0bb75460fad1->c5edc78a2c35	killed@probe.codegen.files
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:58	constant-flip	443c7d5340d9->2973cf565176	killed@upstream.verdict,upstream.identity,upstream.tree-sha256
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:64	list-truncation	a99347a52f0f->72aeec382936	stillborn:src/Amoebius/Toolchain/Report.hs:64:61: error: [GHC-58481]
+    parse error on in
+Amoebius.Toolchain.Pins	src/Amoebius/Toolchain/Pins.hs:71	constant-flip	c9807f7a8732->53e612d7b415	killed@pins.verdict,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz.sig
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:306	field-drop	bec576e2d102->afff7ca0c068	killed@
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:136	constant-flip	67edf3dae93d->f84994de6515	killed@report.probe.sim.schedule.clean
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:286	list-truncation	0bb75460fad1->d076cae0e66e	killed@plan.steps,plan.present,report.plan.steps
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:132	constant-flip	443c7d5340d9->c3c2ebf9b73e	killed@positive.GitCommit
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:68	constant-flip	a99347a52f0f->71a456a0f398	survived
+Amoebius.Toolchain.Pins	src/Amoebius/Toolchain/Pins.hs:73	constant-flip	c9807f7a8732->bfd41a4fab39	killed@pins.verdict,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz.sig
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:309	field-drop	bec576e2d102->e52b33b0c617	killed@
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:162	constant-flip	67edf3dae93d->34ad0134c411	killed@probe.codegen.files,probe.codegen.schema-sha256
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:287	list-truncation	0bb75460fad1->10297391fd34	killed@plan.steps,report.plan.steps,report.keys
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:151	list-truncation	443c7d5340d9->e8a79985c698	killed@
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:85	list-truncation	a99347a52f0f->65615db38237	stillborn:src/Amoebius/Toolchain/Report.hs:85:131: error: [GHC-58481]
+    parse error on i
+Amoebius.Toolchain.Pins	src/Amoebius/Toolchain/Pins.hs:90	list-truncation	c9807f7a8732->cbbbfab05f07	killed@pins.rendered
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:312	field-drop	bec576e2d102->9881b8e19199	killed@
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:163	constant-flip	67edf3dae93d->09f8f799c2dd	killed@probe.codegen.schema-sha256
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:297	list-truncation	0bb75460fad1->bc018b5eb50e	killed@plan.steps,report.plan.steps
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:162	list-truncation	443c7d5340d9->824608caa249	stillborn:src/Amoebius/Toolchain/Provenance.hs:162:53: error: [GHC-58481]
+    parse error 
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:86	list-truncation	a99347a52f0f->2cdf66515faa	stillborn:src/Amoebius/Toolchain/Report.hs:86:90: error: [GHC-58481]
+    parse error on in
+Amoebius.Toolchain.Pins	src/Amoebius/Toolchain/Pins.hs:106	field-drop	c9807f7a8732->68b582ec037c	killed@
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:313	list-truncation	bec576e2d102->25e29d8b5ba8	survived
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:173	list-truncation	67edf3dae93d->7b995cfc7d70	killed@probe.codegen.link-token,report.probe.codegen.link-token
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:299	list-truncation	0bb75460fad1->cc8b50404a22	survived
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:175	constant-flip	443c7d5340d9->0c8498e093c5	survived
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:87	constant-flip	a99347a52f0f->4d706d11027f	killed@report.refused.keys
+Amoebius.Toolchain.Pins	src/Amoebius/Toolchain/Pins.hs:108	field-drop	c9807f7a8732->409a5e281d28	killed@
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:371	constant-flip	bec576e2d102->45c98f39fad3	survived
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:205	constant-flip	67edf3dae93d->65820c36a7c2	survived
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:303	boundary-shift	0bb75460fad1->4283512c1779	survived
+summary	killed=25	viable=34	stillborn=6

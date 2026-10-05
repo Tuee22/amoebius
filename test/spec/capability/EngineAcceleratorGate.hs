@@ -28,7 +28,8 @@ import Amoebius.Calculus.Composition
 import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
 import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Capacity.Vector (ResourceVector (ResourceVector))
+import Amoebius.Vocabulary (quantityText)
 import Amoebius.Capacity.Provision
   ( provisionedEngineAccelerators
   )
@@ -212,7 +213,7 @@ checkEngineAcceleratorCalculusProjection positives availability negatives proper
           [ ("calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition)))
           , ("component-names", Text.intercalate "," (compositionNames composition))
           , ("projection-counts", Text.intercalate "," (map (Text.pack . show) [positives, availability, negatives, properties, mutants]))
-          , ("resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods]))
+          , ("resource-vector", Text.intercalate "," ([quantityText cpu, quantityText memory, quantityText ephemeral, quantityText pods]))
           ]
     assert (compositionKinds composition == everyCalculus) "inference accelerator projection omitted or reordered a calculus"
     assert (actual == expectedCalculusProjection) ("inference accelerator calculus projection changed: " <> show actual)

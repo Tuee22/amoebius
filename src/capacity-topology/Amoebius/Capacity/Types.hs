@@ -4,9 +4,6 @@
 
 module Amoebius.Capacity.Types
   ( Axis (..)
-  , ResourceVector (..)
-  , zeroResources
-  , addResources
   , Demand (..)
   , AvailableCapacity (..)
   , Headroom (..)
@@ -32,8 +29,16 @@ module Amoebius.Capacity.Types
   , MaterializedNode (..)
   , PlacementKind (..)
   , Placement (..)
+  , firstExceeded
+  , scaleQuantity
+  , scaleResources
+  , divideResources
+  , maxResources
+  , storageReservation
   ) where
 
+import Amoebius.Capacity.Vector (ResourceVector (..), addResources, zeroResources)
+import Amoebius.Vocabulary (Quantity (..), Unit (..), quantityValue)
 import Control.DeepSeq (NFData)
 import Data.Map.Strict (Map)
 import Data.Set (Set)
@@ -52,27 +57,6 @@ data Axis
   | ClassMaximumAxis Text
   deriving stock (Eq, Generic, Ord, Show)
   deriving anyclass (NFData)
-
-data ResourceVector = ResourceVector
-  { resourceCpu :: Natural
-  , resourceMemory :: Natural
-  , resourceEphemeralStorage :: Natural
-  , resourcePodSlots :: Natural
-  }
-  deriving stock (Eq, Generic, Ord, Show)
-  deriving anyclass (NFData)
-
-zeroResources :: ResourceVector
-zeroResources = ResourceVector 0 0 0 0
-
-addResources :: ResourceVector -> ResourceVector -> ResourceVector
-addResources left right =
-  ResourceVector
-    { resourceCpu = resourceCpu left + resourceCpu right
-    , resourceMemory = resourceMemory left + resourceMemory right
-    , resourceEphemeralStorage = resourceEphemeralStorage left + resourceEphemeralStorage right
-    , resourcePodSlots = resourcePodSlots left + resourcePodSlots right
-    }
 
 newtype Demand = Demand {demandResources :: ResourceVector}
   deriving stock (Eq, Generic, Ord, Show)
@@ -121,10 +105,10 @@ exactResourceEnvelope :: ResourceVector -> ResourceEnvelope
 exactResourceEnvelope resources = ResourceEnvelope resources resources zeroResources
 
 data StorageDemand = StorageDemand
-  { storageDiskBackedBytes :: Natural
-  , storagePrivateEphemeralBytes :: Natural
-  , storageTmpfsInitBytes :: Natural
-  , storageTmpfsAppBytes :: Natural
+  { storageDiskBackedBytes :: Quantity 'EphemeralUnit
+  , storagePrivateEphemeralBytes :: Quantity 'EphemeralUnit
+  , storageTmpfsInitBytes :: Quantity 'MemoryUnit
+  , storageTmpfsAppBytes :: Quantity 'MemoryUnit
   , storageTmpfsPersistsIntoApp :: Bool
   }
   deriving stock (Eq, Generic, Ord, Show)
@@ -236,11 +220,59 @@ data Placement = Placement
 firstExceeded :: ResourceVector -> ResourceVector -> Maybe Overcommit
 firstExceeded required available
   | resourceCpu required > resourceCpu available =
-      Just (Overcommit CpuAxis (resourceCpu required) (resourceCpu available))
+      Just (Overcommit CpuAxis (quantityValue (resourceCpu required)) (quantityValue (resourceCpu available)))
   | resourceMemory required > resourceMemory available =
-      Just (Overcommit MemoryAxis (resourceMemory required) (resourceMemory available))
+      Just (Overcommit MemoryAxis (quantityValue (resourceMemory required)) (quantityValue (resourceMemory available)))
   | resourceEphemeralStorage required > resourceEphemeralStorage available =
-      Just (Overcommit EphemeralStorageAxis (resourceEphemeralStorage required) (resourceEphemeralStorage available))
+      Just (Overcommit EphemeralStorageAxis (quantityValue (resourceEphemeralStorage required)) (quantityValue (resourceEphemeralStorage available)))
   | resourcePodSlots required > resourcePodSlots available =
-      Just (Overcommit PodSlotsAxis (resourcePodSlots required) (resourcePodSlots available))
+      Just (Overcommit PodSlotsAxis (quantityValue (resourcePodSlots required)) (quantityValue (resourcePodSlots available)))
   | otherwise = Nothing
+
+-- | One quantity repeated a whole number of times.
+scaleQuantity :: Natural -> Quantity unit -> Quantity unit
+scaleQuantity count (Quantity magnitude) = Quantity (count * magnitude)
+
+-- | The vector repeated a whole number of times.
+scaleResources :: Natural -> ResourceVector -> ResourceVector
+scaleResources count resources =
+  ResourceVector
+    { resourceCpu = scaleQuantity count (resourceCpu resources)
+    , resourceMemory = scaleQuantity count (resourceMemory resources)
+    , resourceEphemeralStorage = scaleQuantity count (resourceEphemeralStorage resources)
+    , resourcePodSlots = scaleQuantity count (resourcePodSlots resources)
+    }
+
+-- | The vector with every axis divided by a whole number, rounded down.
+divideResources :: Natural -> ResourceVector -> ResourceVector
+divideResources divisor resources =
+  ResourceVector
+    { resourceCpu = divideQuantity (resourceCpu resources)
+    , resourceMemory = divideQuantity (resourceMemory resources)
+    , resourceEphemeralStorage = divideQuantity (resourceEphemeralStorage resources)
+    , resourcePodSlots = divideQuantity (resourcePodSlots resources)
+    }
+ where
+  divideQuantity :: Quantity unit -> Quantity unit
+  divideQuantity (Quantity magnitude) = Quantity (magnitude `div` divisor)
+
+-- | The larger of two vectors on each axis.
+maxResources :: ResourceVector -> ResourceVector -> ResourceVector
+maxResources left right =
+  ResourceVector
+    { resourceCpu = max (resourceCpu left) (resourceCpu right)
+    , resourceMemory = max (resourceMemory left) (resourceMemory right)
+    , resourceEphemeralStorage = max (resourceEphemeralStorage left) (resourceEphemeralStorage right)
+    , resourcePodSlots = max (resourcePodSlots left) (resourcePodSlots right)
+    }
+
+-- | The ephemeral storage and the memory a pod's volumes force it to request: disk-backed
+-- and private ephemeral bytes against ephemeral storage, and the larger of the two tmpfs
+-- volumes (their sum when the init volume persists into the app) against memory.
+storageReservation :: StorageDemand -> (Quantity 'EphemeralUnit, Quantity 'MemoryUnit)
+storageReservation storage =
+  ( storageDiskBackedBytes storage + storagePrivateEphemeralBytes storage
+  , if storageTmpfsPersistsIntoApp storage
+      then storageTmpfsInitBytes storage + storageTmpfsAppBytes storage
+      else max (storageTmpfsInitBytes storage) (storageTmpfsAppBytes storage)
+  )

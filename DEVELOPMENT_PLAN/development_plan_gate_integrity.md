@@ -596,10 +596,10 @@ Every phase inherits the following postconditions. They are part of the gate, no
     type has exactly one definition under `src/`.
 21. **No authored mutant.** No `_MUTANT` symbol exists under `src/`, `app/`, or `test/`; every mutant is
     runner-generated beneath `.build/runs/**`.
-22. **Admitted non-Haskell set.** The tracked non-`.hs`, non-`.md` set is exactly the six admitted
-    build, ignore, licence, and packaging files that
-    [Phase 2](phase_02_repository_layout_conformance.md) names; the pin of `pb/__main__.py` by its SHA-256 is
-    owed by that phase.
+22. **Observed implementation** ([GateSpec:repository_layout_conformance]). The admitted non-Haskell set: the
+    tracked non-`.hs`, non-`.md` set is exactly the six admitted build, ignore, licence, and packaging files that
+    [Phase 2](phase_02_repository_layout_conformance.md) names, and the pin of `pb/__main__.py` by its SHA-256 is
+    enforced by that gate ([DL-0022](../documents/decision_log.md#dl-0022--phase-2-accepted-its-owed-by-paragraphs-become-observed-implementations)).
 
 <a id="s-commit-timing"></a>
 

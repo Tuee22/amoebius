@@ -14,9 +14,12 @@ module Amoebius.Manifest.Types
   , ServiceExposure (..)
   , DependencyEdge (..)
   , ObjectSpec (..)
+  , ClaimBody
   ) where
 
-import Amoebius.Capacity.Types (ResourceVector (..))
+import Amoebius.Capacity.Vector (ResourceVector (..))
+import Amoebius.Manifest.Types.Internal (ClaimBody)
+import Amoebius.Vocabulary (Quantity (..), quantityValue)
 import Control.DeepSeq (NFData)
 import Data.Aeson
   ( FromJSON (parseJSON)
@@ -144,19 +147,19 @@ instance FromJSON ResourceRequirements where
 resourceVectorValue :: ResourceVector -> Value
 resourceVectorValue resources =
   object
-    [ "resourceCpu" .= resourceCpu resources
-    , "resourceMemory" .= resourceMemory resources
-    , "resourceEphemeralStorage" .= resourceEphemeralStorage resources
-    , "resourcePodSlots" .= resourcePodSlots resources
+    [ "resourceCpu" .= quantityValue (resourceCpu resources)
+    , "resourceMemory" .= quantityValue (resourceMemory resources)
+    , "resourceEphemeralStorage" .= quantityValue (resourceEphemeralStorage resources)
+    , "resourcePodSlots" .= quantityValue (resourcePodSlots resources)
     ]
 
 parseResourceVector :: Value -> Parser ResourceVector
 parseResourceVector = withObject "ResourceVector" $ \fields ->
   ResourceVector
-    <$> fields .: "resourceCpu"
-    <*> fields .: "resourceMemory"
-    <*> fields .: "resourceEphemeralStorage"
-    <*> fields .: "resourcePodSlots"
+    <$> (Quantity <$> fields .: "resourceCpu")
+    <*> (Quantity <$> fields .: "resourceMemory")
+    <*> (Quantity <$> fields .: "resourceEphemeralStorage")
+    <*> (Quantity <$> fields .: "resourcePodSlots")
 
 data SecurityContext = SecurityContext
   { securityRunAsNonRoot :: Bool
@@ -181,6 +184,7 @@ data PodTemplate = PodTemplate
   , podImage :: Text
   , podVolumesBounded :: Bool
   , podAcceleratorClaim :: Maybe Natural
+  , podReplicas :: Maybe Natural
   }
   deriving stock (Eq, Generic, Show)
   deriving anyclass (FromJSON, NFData, ToJSON)
@@ -204,6 +208,7 @@ data ObjectSpec
   | ConfigurationSpec (Map Text Text)
   | GlobalControlSpec (Map Text Text)
   | SecretReferenceSpec Text Text
+  | ClaimSpec ClaimBody
   | ExtensionSpec (Map Text Value)
   deriving stock (Eq, Generic, Show)
   deriving anyclass (FromJSON, NFData, ToJSON)

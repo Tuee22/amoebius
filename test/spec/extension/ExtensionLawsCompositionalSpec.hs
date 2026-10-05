@@ -3,7 +3,8 @@
 
 module Main (main) where
 
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector), zeroResources)
+import Amoebius.Capacity.Vector (ResourceVector (ResourceVector), zeroResources)
+import Amoebius.Vocabulary (Quantity (..))
 import Amoebius.Extension.Declaration (declarationDigest)
 import Amoebius.Extension.Laws.Compositional
   ( ArtifactAddressObservation (..)
@@ -259,7 +260,7 @@ withFixtureSet continuation = do
   either (die . show) id nested
 
 tupleResource :: (Natural, Natural, Natural, Natural) -> ResourceVector
-tupleResource (cpu, memory, ephemeral, pods) = ResourceVector cpu memory ephemeral pods
+tupleResource (cpu, memory, ephemeral, pods) = ResourceVector (Quantity cpu) (Quantity memory) (Quantity ephemeral) (Quantity pods)
 
 label :: OracleCompositionCase -> String -> String
 label entry suffix = Text.unpack (oracleCaseName entry) <> " " <> suffix

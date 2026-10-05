@@ -39,7 +39,7 @@ in product code. Its predecessor is [Phase 0](phase_00_documentation_suite.md).
 ## Phase Status
 
 ✅ Done.
-**Receipt**: e0194987f1554eab7cad21b80fec184f00e64182224f37269af2f05c8b195f80
+**Receipt**: c1cd255cbb2285b85cf2a7d4080f4a45007d3d0a123d6d18cabb2ce36ff8cc6a
 
 The contract is reopened under [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) by
 [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice): the subject moves

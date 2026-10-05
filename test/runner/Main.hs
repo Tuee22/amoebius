@@ -16,6 +16,7 @@ import Amoebius.Validation.Custody.Preflight
 import Amoebius.Validation.Custody.Status
 import Amoebius.Validation.Custody.Store
 import Amoebius.Validation.GateSpec
+import Amoebius.Validation.Runner.Binary (Nonce (..), perturbInput)
 import Amoebius.Validation.Runner.Capture
 import Amoebius.Validation.Runner (reproducibleCore)
 import Data.ByteString qualified as ByteString
@@ -77,6 +78,9 @@ constructorRows =
     , ["refusal", "duplicate-case", outcome OrdinaryGate legalInput {inputCases = [PositiveControl "a" "x" "y", PositiveControl "a" "x" "z"]}]
     , ["refusal", "legal-seed", outcome SeedGate legalInput {inputBinaryFact = Nothing, inputSeed = Just (SeedSpec ["clean", "digest-equality-bypass"] ["probe-1"])}]
     , ["render", "legal-ordinary", either (const "refused") (Text.pack . show . length . Text.lines . renderGateSpec) (mkGateSpec OrdinaryGate legalInput)]
+    , ["refusal", "ordinary-with-spine", outcome OrdinaryGate legalInput {inputSpineFact = Just (SpineFact "out/manifest.yaml" ["freeze"] "applied.sha256")}]
+    , ["render", "staged", either (const "refused") (\spec -> Text.concat [line | line <- Text.lines (renderGateSpec spec), "binary-fact: " `Text.isPrefixOf` line]) (mkGateSpec OrdinaryGate legalInput {inputBinaryFact = Just (BinaryFact ["compile", "{input}"] "examples/root.dhall" (Staged [["render", "x", "--output", "{input}"]] [["apply", "y"]] [SentinelToNonce "S", ReplicaCount 1 3]) ["{run}/out/m"])})]
+    , ["perturb", "staged-direct", either (const "refused") (const "applied") (perturbInput (Staged [] [] []) (Nonce "n") "x")]
     ]
  where
   outcome role input = either (Text.intercalate "," . sort . map renderSpecRefusal) (const "ok") (mkGateSpec role input)
@@ -261,6 +265,10 @@ killRows' = do
     , ["kill", "stillborn", Text.pack (show (stillbornCount table))]
     , ["kill", "ratio", Text.pack (show (killRatioObserved table))]
     , ["kill", "rows", Text.pack (show (length (renderKillTable table)))]
+    , ["attribution", "owned-red", Text.pack (show (isAttributed [("M", "a.")] "M" ["a.x", "b.y"]))]
+    , ["attribution", "unowned-red", Text.pack (show (isAttributed [("M", "a.")] "M" ["b.y"]))]
+    , ["attribution", "no-policy", Text.pack (show (isAttributed [("N", "a.")] "M" ["b.y"]))]
+    , ["attribution", "empty-ledger", Text.pack (show (isAttributed [("M", "a.")] "M" []))]
     ]
 
 hygieneRows :: FilePath -> IO [[Text]]
@@ -296,6 +304,7 @@ hygieneRows output = do
       , ["hygiene", "fixture.problems", Text.pack (show (length (hygieneProblems report)))]
       , ["hygiene", "clean.green", Text.pack (show (hygieneGreen clean))]
       , ["hygiene", "clean.cap", Text.pack (show (hygieneKernelCap clean))]
+      , ["hygiene", "vocabulary", Text.intercalate "," (sort vocabularyTypes)]
       ]
         <> maybe [] (\r -> [["hygiene", "real.kernel-lines", Text.pack (show (hygieneKernelLines r))], ["hygiene", "real.green", Text.pack (show (hygieneGreen r))], ["hygiene", "real.doc-check-lines", Text.pack (show (hygieneDocCheckLines r))]]) real
     )

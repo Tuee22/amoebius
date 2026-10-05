@@ -52,13 +52,13 @@ verifySuggestAndProvision :: IO ProvisionedTestTopology
 verifySuggestAndProvision = do
   ref <- either (die . show) pure (secretRef "vault/test/phase54")
   credential <- either (die . show) pure (flaggedTestCredential ref True)
-  let supply = ResourceVector 8000 17179869184 68719476736 4294967296 1073741824 32 32 0 0
+  let supply = TestResourceVector 8000 17179869184 68719476736 4294967296 1073741824 32 32 0 0
       input branch = SuggestInput TestLinuxCpu supply credential branch Nothing
   outputs <- traverse (either (die . show) pure . suggestTest . input) [minBound .. maxBound]
   assertEqual "closed optional branch cardinality" 4 (length outputs)
   let provisioned = head outputs
       witness = resourceWitness provisioned
-      expected = ResourceVector 3000 3221225472 8589934592 1073741824 536870912 4 4 0 0
+      expected = TestResourceVector 3000 3221225472 8589934592 1073741824 536870912 4 4 0 0
   assertEqual "canonical demand" expected (witnessedDemand witness)
   let firstRender = renderSuggestedDhall provisioned
       secondRender = renderSuggestedDhall provisioned

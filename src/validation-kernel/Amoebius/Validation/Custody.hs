@@ -64,12 +64,6 @@ data CommandOutcome = CommandOutcome
   deriving (Eq, Show)
 refuse :: [Text] -> CommandOutcome
 refuse = CommandOutcome (ExitFailure 1)
-roleFor :: Int -> GateRole
-roleFor ordinal
-  | ordinal == PhaseIdentity.phaseDomainLowerOrdinal = SeedGate
-  | Just ordinal == PhaseIdentity.roleOrdinal PhaseIdentity.DslBarrier = BarrierGate
-  | maybe False (ordinal >=) (PhaseIdentity.roleOrdinal PhaseIdentity.FirstHardware) = HardwareGate
-  | otherwise = OrdinaryGate
 -- | Resolve an ordinal to its identity row and specification.
 resolveSpec :: Int -> Either [Text] (PhaseIdentity.PhaseIdentity, GateSpec)
 resolveSpec ordinal = do

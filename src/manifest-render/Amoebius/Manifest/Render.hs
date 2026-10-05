@@ -1,273 +1,79 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-- | The witness-driven render. The sealed source inventory becomes objects only through a
+-- placement witness and an epoch: a workload names the node the fold assigned it, a StatefulSet
+-- carries the claim its volume witness sizes, and every object names the epoch it was
+-- rendered for.
 module Amoebius.Manifest.Render
-  ( renderSourcePrivate
-  , BootstrapRenderSource (..)
-  , renderBootstrapSourcePrivate
+  ( RenderRefusal (..)
+  , renderRefusalTag
+  , renderCandidates
   ) where
 
 import Amoebius.Capacity.RenderSource
   ( K8sObjectIdentity (K8sObjectIdentity)
   , ProvisionedPartWitness (..)
   , ProvisionedRenderSource
-  , ReconcileMode (..)
-  , RenderActivation (..)
-  , RenderSourceOwner (..)
-  , renderSourceActivation
+  , ProvisionedRenderSourceSet
+  , provisionedRenderSourceMap
   , renderSourceFields
   , renderSourceIdentity
-  , renderSourceOwner
-  , renderSourceReconcileMode
   , renderSourceWitness
   )
-import Amoebius.Capacity.Types (ResourceVector (..))
 import Amoebius.Manifest.K8sObject
-import Data.Map.Strict (Map)
+import Amoebius.Manifest.Sources (renderSourcePrivate)
+import Amoebius.Manifest.StatefulSet (renderStatefulSet)
+import Amoebius.Placement.Witness (Epoch, Placed, epochName, placedNode)
+import Amoebius.Storage.Witness (VolumeRefusal, volumeRefusalTag)
+import Amoebius.Vocabulary (Quantity (..))
 import Data.Map.Strict qualified as Map
-import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
-import Numeric.Natural (Natural)
 import Text.Read (readMaybe)
 
--- | Package-private Phase-25 cycle-break input.  It deliberately lives in
--- the private serializer module: callers can obtain bootstrap objects only
--- through 'ProvisionedBootstrapRegistry', never through a public per-service
--- render function.
-data BootstrapRenderSource = BootstrapRenderSource
-  { bootstrapRenderIdentity :: K8sObjectIdentity
-  , bootstrapRenderKind :: K8sObjectKind
-  , bootstrapRenderNamespace :: Maybe Text
-  , bootstrapRenderFields :: Map Text Text
-  , bootstrapRenderSourceDigest :: Text
-  }
+-- | Why a render refused.
+data RenderRefusal
+  = PvcWithoutStatefulSet Text
+  | VolumeRefused Text VolumeRefusal
   deriving stock (Eq, Show)
 
-renderBootstrapSourcePrivate :: BootstrapRenderSource -> K8sObject
-renderBootstrapSourcePrivate source =
-  K8sObject
-    { objectIdentity = bootstrapRenderIdentity source
-    , objectApiVersion = apiVersionFor (bootstrapRenderKind source)
-    , objectKind = bootstrapRenderKind source
-    , objectMetadata =
-        ObjectMetadata
-          { metadataName = objectName (bootstrapRenderIdentity source)
-          , metadataNamespace = bootstrapRenderNamespace source
-          , metadataLabels = Map.fromList [("app.kubernetes.io/managed-by", "amoebius"), ("amoebius.io/bootstrap", "registry")]
-          , metadataAnnotations = Map.singleton "amoebius.io/source-digest" (bootstrapRenderSourceDigest source)
-          }
-    , objectSpec = bootstrapSpec source
-    , objectActivation = Immediate
-    , objectReconcileMode = ServerSideApply
-    }
+renderRefusalTag :: RenderRefusal -> Text
+renderRefusalTag refusal = case refusal of
+  PvcWithoutStatefulSet _ -> "PvcWithoutStatefulSet"
+  VolumeRefused _ problem -> volumeRefusalTag problem
 
-bootstrapSpec :: BootstrapRenderSource -> ObjectSpec
-bootstrapSpec source = case bootstrapRenderKind source of
-  NamespaceKind -> NamespaceSpec
-  ConfigMapKind -> ConfigurationSpec fields
-  ServiceKind -> ServiceSpec ClusterInternal
-  DeploymentKind ->
-    WorkloadSpec
-      DeploymentWorkload
-      PodTemplate
-        { podSchedulerName = "default-scheduler"
-        , podNodeName = Map.lookup "node-name" fields
-        , podSecurityContext = SecurityContext True True False
-        , podResources = ResourceRequirements resources limits
-        , podImage = Map.findWithDefault "invalid@sha256:missing" "image" fields
-        , podVolumesBounded = Map.member "empty-dir-size-limit" fields || Map.lookup "role" fields == Just "mutation-proxy"
-        , podAcceleratorClaim = Nothing
-        }
-  _ -> GlobalControlSpec fields
+-- | The one entry into rendering. Every object the sealed source inventory carries is
+-- rendered in identity order; a workload names the node the placement witness assigned
+-- it, a StatefulSet carries the claim its volume witness sizes, and every object carries the
+-- epoch the provision stage rendered for. A volume on any other kind of source is refused.
+renderCandidates :: Placed -> Epoch -> ProvisionedRenderSourceSet -> Either RenderRefusal [K8sObject]
+renderCandidates placed epoch sources = concat <$> mapM expand (Map.elems (provisionedRenderSourceMap sources))
  where
-  fields = bootstrapRenderFields source
-  resources =
-    ResourceVector
-      (natural "cpu-request" fields)
-      (natural "memory-request" fields)
-      (natural "ephemeral-request" fields)
-      1
-  limits =
-    ResourceVector
-      (natural "cpu-limit" fields)
-      (natural "memory-limit" fields)
-      (natural "ephemeral-limit" fields)
-      1
+  expand source
+    | Just size <- volumeOf source, objectKind object == StatefulSetKind = either (Left . VolumeRefused identity) Right (renderStatefulSet object size)
+    | Just _ <- volumeOf source = Left (PvcWithoutStatefulSet identity)
+    | otherwise = Right [object]
+   where
+    -- The object passes through the two witnesses in order: the node, then the epoch.
+    object = foldl (\current witness -> witness current) (renderSourcePrivate source) [assignNode source, stampEpoch]
+    K8sObjectIdentity identity = renderSourceIdentity source
+  volumeOf source = Quantity <$> (Map.lookup "volume-bytes" (renderSourceFields source) >>= readMaybe . Text.unpack)
+  stampEpoch object =
+    object {objectMetadata = (objectMetadata object) {metadataLabels = Map.insert epochLabel (epochName epoch) (metadataLabels (objectMetadata object))}}
+  assignNode source object = case (objectSpec object, workloadOf source) of
+    (WorkloadSpec kind pod, Just workload) -> object {objectSpec = WorkloadSpec kind pod {podNodeName = placedNode placed workload}}
+    _ -> object
 
-natural :: Text -> Map Text Text -> Natural
-natural key fields = case Map.lookup key fields >>= readMaybe . Text.unpack of
-  Just value -> value
-  Nothing -> 0
+-- | The label that names the epoch an object was rendered for.
+epochLabel :: Text
+epochLabel = "amoebius.io/epoch"
 
-renderSourcePrivate :: ProvisionedRenderSource -> K8sObject
-renderSourcePrivate source =
-  K8sObject
-    { objectIdentity = renderSourceIdentity source
-    , objectApiVersion = apiVersionFor kind
-    , objectKind = kind
-    , objectMetadata = metadataFor source
-    , objectSpec = specFor source kind
-    , objectActivation = renderSourceActivation source
-    , objectReconcileMode = renderSourceReconcileMode source
-    }
- where
-  kind = kindFor source
-
-kindFor :: ProvisionedRenderSource -> K8sObjectKind
-kindFor source = case renderSourceWitness source of
-  NamespacePart -> NamespaceKind
-  CapacitySchedulerPart -> DeploymentKind
-  BootstrapAddonCutoverPart -> ConfigMapKind
-  ManagedCapacityAdmissionPart -> ValidatingWebhookConfigurationKind
-  ServiceConfigurationPart _ -> ConfigMapKind
-  ServiceEndpointPart _ -> ServiceKind
-  ServicePolicyPart _ -> NetworkPolicyKind
-  ServiceWorkloadPart _ -> workloadObjectKind (Map.findWithDefault "Deployment" "kind" (renderSourceFields source))
-
-workloadObjectKind :: Text -> K8sObjectKind
-workloadObjectKind raw = case raw of
-  "StatefulSet" -> StatefulSetKind
-  "DaemonSet" -> DaemonSetKind
-  "EngineWorkload" -> DaemonSetKind
-  "Job" -> JobKind
-  "HostProcess" -> CustomResourceKind
-  _ -> DeploymentKind
-
-apiVersionFor :: K8sObjectKind -> String
-apiVersionFor kind = case kind of
-  NamespaceKind -> "v1"
-  ServiceKind -> "v1"
-  ConfigMapKind -> "v1"
-  PersistentVolumeKind -> "v1"
-  PersistentVolumeClaimKind -> "v1"
-  ResourceQuotaKind -> "v1"
-  LimitRangeKind -> "v1"
-  SecretReferenceKind -> "v1"
-  DeploymentKind -> "apps/v1"
-  StatefulSetKind -> "apps/v1"
-  DaemonSetKind -> "apps/v1"
-  JobKind -> "batch/v1"
-  NetworkPolicyKind -> "networking.k8s.io/v1"
-  ValidatingWebhookConfigurationKind -> "admissionregistration.k8s.io/v1"
-  MutatingWebhookConfigurationKind -> "admissionregistration.k8s.io/v1"
-  LeaseKind -> "coordination.k8s.io/v1"
-  HTTPRouteKind -> "gateway.networking.k8s.io/v1"
-  GatewayKind -> "gateway.networking.k8s.io/v1"
-  CustomResourceDefinitionKind -> "apiextensions.k8s.io/v1"
-  _ -> "amoebius.io/v1"
-
-metadataFor :: ProvisionedRenderSource -> ObjectMetadata
-metadataFor source =
-  ObjectMetadata
-    { metadataName = objectName (renderSourceIdentity source)
-          , metadataNamespace = namespaceFor (renderSourceIdentity source) (renderSourceWitness source)
-    , metadataLabels = Map.fromList [("app.kubernetes.io/managed-by", "amoebius"), ("amoebius.io/owner", ownerText (renderSourceOwner source))]
-    , metadataAnnotations = rendererAnnotations identity (renderSourceActivation source)
-    }
+-- | The identifier the placement fold used for the workload a source renders.
+workloadOf :: ProvisionedRenderSource -> Maybe Text
+workloadOf source = case renderSourceWitness source of
+  AppWorkloadPart app -> Just ("app/" <> app)
+  ServiceWorkloadPart _ -> Just identity
+  _ -> Nothing
  where
   K8sObjectIdentity identity = renderSourceIdentity source
 
-namespaceFor :: K8sObjectIdentity -> ProvisionedPartWitness -> Maybe Text
-namespaceFor identity witness = case witness of
-  NamespacePart -> Nothing
-  ManagedCapacityAdmissionPart -> Nothing
-  CapacitySchedulerPart -> Just "amoebius-capacity-scheduler"
-  BootstrapAddonCutoverPart -> Just "amoebius-capacity-scheduler"
-  _ -> Just (capabilityNamespace identity)
-
-capabilityNamespace :: K8sObjectIdentity -> Text
-capabilityNamespace (K8sObjectIdentity identity) = case Text.takeWhile (/= '/') identity of
-  "objectstore" -> "amoebius-minio"
-  "secretstore" -> "amoebius-vault"
-  "messagebus" -> "amoebius-pulsar"
-  "sql" -> "amoebius-postgres"
-  "identity" -> "amoebius-keycloak"
-  "observability" -> "amoebius-observability"
-  "registry" -> "amoebius-registry"
-  "edge" -> "amoebius-edge"
-  "inferenceengine" -> "amoebius-inference"
-  capability -> "amoebius-" <> sanitize capability
-
-specFor :: ProvisionedRenderSource -> K8sObjectKind -> ObjectSpec
-specFor source kind = case kind of
-  NamespaceKind -> NamespaceSpec
-  DeploymentKind -> WorkloadSpec rendererDeploymentKind (podFor source)
-  StatefulSetKind -> WorkloadSpec StatefulSetWorkload (podFor source)
-  DaemonSetKind -> WorkloadSpec DaemonSetWorkload (podFor source)
-  JobKind -> WorkloadSpec JobWorkload (podFor source)
-  ServiceKind -> ServiceSpec (serviceExposure source)
-  NetworkPolicyKind -> NetworkPolicySpec True (Set.singleton (dependencyEdge source))
-  ConfigMapKind -> ConfigurationSpec (renderSourceFields source)
-  ValidatingWebhookConfigurationKind -> GlobalControlSpec (Map.singleton "failurePolicy" "Fail")
-  CustomResourceKind -> ExtensionSpec Map.empty
-  _ -> GlobalControlSpec (renderSourceFields source)
-
-podFor :: ProvisionedRenderSource -> PodTemplate
-podFor source =
-  PodTemplate
-    { podSchedulerName = case renderSourceWitness source of CapacitySchedulerPart -> "default-scheduler"; _ -> "amoebius-capacity"
-    , podNodeName = Nothing
-    , podSecurityContext = rendererSecurityContext
-    , podResources = rendererResources resources
-    , podImage = rendererImage identity
-    , podVolumesBounded = rendererVolumesBounded
-    , podAcceleratorClaim = rendererAcceleratorClaim fields
-    }
- where
-  identity = renderSourceIdentity source
-  fields = renderSourceFields source
-  resources =
-    ResourceVector
-      (positiveNatural "cpu" fields)
-      (positiveNatural "memory" fields)
-      (positiveNatural "ephemeral-storage" fields)
-      (positiveNatural "pod-slots" fields)
-
-positiveNatural :: Text -> Map Text Text -> Natural
-positiveNatural key fields = case Map.lookup key fields >>= readMaybe . Text.unpack of
-  Just value -> max 1 value
-  Nothing -> 1
-
-serviceExposure :: ProvisionedRenderSource -> ServiceExposure
-serviceExposure source = case renderSourceOwner source of
-  CapabilityServiceOwner "public-edge" -> DeclaredEdgeLoadBalancer
-  _ -> ClusterInternal
-
-dependencyEdge :: ProvisionedRenderSource -> DependencyEdge
-dependencyEdge source = case renderSourceOwner source of
-  CapabilityServiceOwner service -> DependencyEdge service service
-  DeploymentGlobalOwner -> DependencyEdge "amoebius-system" "amoebius-system"
-
-rendererAnnotations :: Text -> RenderActivation -> Map Text Text
-rendererAnnotations identity activation = Map.fromList [("amoebius.io/source", identity), ("amoebius.io/activation", Text.pack (show activation))]
-
-rendererDeploymentKind :: WorkloadKind
-rendererDeploymentKind = DeploymentWorkload
-
-rendererSecurityContext :: SecurityContext
-rendererSecurityContext = SecurityContext True True False
-
-rendererResources :: ResourceVector -> ResourceRequirements
-rendererResources resources = ResourceRequirements resources resources
-
-rendererImage :: K8sObjectIdentity -> Text
-rendererImage identity = "registry.amoebius.invalid/" <> objectName identity <> "@sha256:provisioned"
-
-rendererVolumesBounded :: Bool
-rendererVolumesBounded = True
-
-rendererAcceleratorClaim :: Map Text Text -> Maybe Natural
-rendererAcceleratorClaim fields = if Map.lookup "kind" fields == Just "EngineWorkload" then Just 1 else Nothing
-
-ownerText :: RenderSourceOwner -> Text
-ownerText owner = case owner of
-  DeploymentGlobalOwner -> "deployment-global"
-  CapabilityServiceOwner service -> service
-
-objectName :: K8sObjectIdentity -> Text
-objectName (K8sObjectIdentity identity) = case reverse (Text.splitOn "/" identity) of
-  [] -> sanitize identity
-  name : _ -> sanitize name
-
-sanitize :: Text -> Text
-sanitize = Text.map (\character -> if character == '_' then '-' else character) . Text.toLower

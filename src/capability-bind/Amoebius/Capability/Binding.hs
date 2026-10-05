@@ -4,7 +4,6 @@
 -- deliberately imports no provision, capacity fold, or renderer.
 module Amoebius.Capability.Binding
   ( bind
-  , assembleBoundDeployment
   , decodeCapabilityProvider
   , validateBindingCoverage
   , validateExtensionGraph
@@ -15,14 +14,11 @@ import Amoebius.Capacity.Execution
   ( BoundExecutionUnit (..)
   , ControllerBody (..)
   , DaemonSetRollout (DaemonSetOnDelete)
-  , ExecutionTransitionSource
   , StatefulSetRollout (StatefulSetNativeSerial)
   , recreateRollout
   )
-import Amoebius.Capacity.Types
-  ( ResourceVector (ResourceVector)
-  , exactResourceEnvelope
-  )
+import Amoebius.Capacity.Types (exactResourceEnvelope)
+import Amoebius.Capacity.Vector (ResourceVector (ResourceVector))
 import Amoebius.Capability.Types
 import Amoebius.Dsl.Error (DecodeError (..))
 import Data.Map.Strict (Map)
@@ -53,30 +49,6 @@ bind need binding =
   units = fmap (executionFor need) runnable
   executionMap = Map.fromList [(executionUnitId unit, unit) | unit <- units]
   children = zipWith (childFor name) runnable units
-
-assembleBoundDeployment
-  :: ExecutionTransitionSource
-  -> Maybe PriorVolumeProvisionRef
-  -> Maybe PriorRegistryProvisionRef
-  -> [BoundServiceSpec]
-  -> Either DecodeError BoundDeployment
-assembleBoundDeployment transition volumeRef registryRef services = do
-  serviceMap <- uniqueBy capabilityResourceNameFromSpec services
-  executionMap <- mergeExecutionSets (fmap boundServiceExecutions services)
-  let children = concatMap boundControllerChildren services
-      childKeys = Set.fromList (fmap childIdentity children)
-  if childKeys /= Map.keysSet executionMap || length children /= Map.size executionMap
-    then Left (SchemaMismatch "bound-execution-set/controller-child inventory mismatch")
-    else
-      Right
-        BoundDeployment
-          { boundDeploymentTransition = transition
-          , boundDeploymentServices = serviceMap
-          , boundDeploymentExecutions = BoundExecutionSet executionMap
-          , boundDeploymentControllerExplanations = children
-          , boundPriorVolumeRef = volumeRef
-          , boundPriorRegistryRef = registryRef
-          }
 
 -- | The representational bind boundary must not contain a provision result.
 -- Phase 31 is the sole owner of the transition out of this state.
@@ -187,7 +159,7 @@ controllerFor need object
       InferenceEngineCapabilityNeed inference -> case inferenceRuntime inference of
         AppleMetal _ -> HostProcessBody ["eligible-metal-host"] "release-drain-replace"
         Cuda _ -> DaemonSetBody ["eligible-cuda-node"] DaemonSetOnDelete
-        LinuxCpu _ -> DeploymentBody 1 recreateRollout
+        CpuRuntime _ -> DeploymentBody 1 recreateRollout
       ObjectStoreNeed _ -> StatefulSetBody 1 StatefulSetNativeSerial
       SecretStoreNeed _ -> StatefulSetBody 1 StatefulSetNativeSerial
       MessageBusNeed _ -> StatefulSetBody 1 StatefulSetNativeSerial
@@ -227,28 +199,6 @@ childFor resource object unit =
 
 isRunnable :: ProviderObject -> Bool
 isRunnable object = providerObjectRole object `elem` ["member", "bootstrap"]
-
-mergeExecutionSets :: [BoundExecutionSet] -> Either DecodeError (Map Text BoundExecutionUnit)
-mergeExecutionSets = foldl merge (Right Map.empty)
- where
-  merge outcome (BoundExecutionSet incoming) = do
-    accumulated <- outcome
-    case Set.lookupMin (Map.keysSet accumulated `Set.intersection` Map.keysSet incoming) of
-      Just duplicate -> Left (SchemaMismatch ("duplicate bound execution identity: " <> duplicate))
-      Nothing -> Right (Map.union accumulated incoming)
-
-uniqueBy :: Ord key => (value -> key) -> [value] -> Either DecodeError (Map key value)
-uniqueBy project = foldl insertOne (Right Map.empty)
- where
-  insertOne outcome value = do
-    accumulated <- outcome
-    let key = project value
-    if Map.member key accumulated
-      then Left (SchemaMismatch "duplicate bound service identity")
-      else Right (Map.insert key value accumulated)
-
-capabilityResourceNameFromSpec :: BoundServiceSpec -> Text
-capabilityResourceNameFromSpec = capabilityResourceName . boundCapabilityNeed
 
 shapeNodes :: ServiceShape -> Natural
 shapeNodes shape = case shape of

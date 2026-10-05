@@ -10,6 +10,7 @@ import Amoebius.Pulsar.Consumer qualified as Consumer
 import Amoebius.Pulsar.Producer qualified as Producer
 import Amoebius.Pulsar.Subscription (SubscriptionType (..))
 import Amoebius.Pulsar.Topology hiding (StorageBudgetId)
+import Amoebius.Vocabulary (Substrate (..))
 import Amoebius.Store.Budget
 import Amoebius.Store.ContentAddress
 import Amoebius.Store.Manifest

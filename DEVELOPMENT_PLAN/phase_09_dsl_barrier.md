@@ -159,7 +159,7 @@ Implement the union module.
 ## Sprint 9.2: The control-plane endpoint as subject ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `app/amoebius/Amoebius/Entry/ControlPlane.hs` and `src/Amoebius/Dsl/Pipeline.hs`
+**Implementation**: `app/amoebius/Amoebius/Entry/ControlPlane.hs` and `src/dsl-spine/Amoebius/Dsl/Pipeline.hs`
 **Blocked by**: Sprint 9.1
 **Independent Validation**: The endpoint's response digest equals the pipeline's digest for every union member; the mutant class "endpoint discards the decoded value" has at least one kill; a request body that fails `decodeFrozen` is refused with the decoder's tag, never with a constant demand.
 **Oracle**: `test/oracle/dsl/Main.hs` states the expected endpoint digest per member from literals.

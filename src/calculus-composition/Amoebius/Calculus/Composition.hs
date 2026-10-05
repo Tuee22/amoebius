@@ -61,11 +61,7 @@ import Amoebius.Calculus.Workflow.Ledger
   , ledgerProvisioned
   , ledgerReleased
   )
-import Amoebius.Capacity.Types
-  ( ResourceVector (..)
-  , addResources
-  , zeroResources
-  )
+import Amoebius.Capacity.Vector (ResourceVector (..), addResources, zeroResources)
 import Amoebius.Scope.Index (RequestScope)
 import Data.Text (Text)
 import Data.Text qualified as Text

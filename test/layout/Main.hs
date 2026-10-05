@@ -5,9 +5,9 @@ module Main (main) where
 
 import Amoebius.Layout.Classify
 import Amoebius.Layout.PackageMap
-  ( emptyPackageCatalog, maintainedForkPaths, packageCatalogFromInputs
-  , packageCatalogWithPrelude, packageCatalogWithModuleExports
-  , packageCatalogWithModuleMembers)
+  ( emptyPackageCatalog, lookupUnselectedModule, maintainedForkPaths, packageCatalogFromInputs
+  , packageCatalogWithForks, packageCatalogWithPrelude, packageCatalogWithModuleExports
+  , packageCatalogWithModuleMembers, packageMapReport)
 import Amoebius.Layout.PbGrammar
 import Amoebius.Layout.Report (runLayoutReport)
 import Amoebius.Layout.SourceGraph (sourceGraph, sourceGraphWithPackageCatalog)
@@ -51,13 +51,16 @@ main = do
   mapM_ (copyInto root miniature) miniaturePaths
   TextIO.writeFile miniaturePathFile (Text.unlines (map Text.pack miniaturePaths))
   badOptions <- reportExit (runLayoutReport ["--unexpected"])
-  nestedOutput <- reportExit (runLayoutReport ["--root", miniature, "--paths-file", miniaturePathFile, "--output", directory </> "nested" </> "output" </> "report.tsv"])
+  nestedOutput <- reportExit (runLayoutReport ["--no-graph", "--root", miniature, "--paths-file", miniaturePathFile, "--output", directory </> "nested" </> "output" </> "report.tsv"])
   createDirectoryIfMissing True (miniature </> "test")
   TextIO.writeFile (miniature </> "test" </> "shebang.hs") "#!/bin/sh\n"
   TextIO.writeFile (directory </> "shebang-paths.txt") (Text.unlines (map Text.pack (miniaturePaths <> ["test/shebang.hs"])))
-  shebangExit <- reportExit (runLayoutReport ["--root", miniature, "--paths-file", directory </> "shebang-paths.txt", "--output", directory </> "shebang.tsv"])
+  shebangExit <- reportExit (runLayoutReport ["--no-graph", "--root", miniature, "--paths-file", directory </> "shebang-paths.txt", "--output", directory </> "shebang.tsv"])
   gitRoot <- Text.strip . Text.pack <$> readProcess "git" ["rev-parse", "--show-toplevel"] ""
-  defaultExit <- reportExit (runLayoutReport ["--root", Text.unpack gitRoot, "--output", directory </> "default.tsv"])
+  defaultExit <- reportExit (runLayoutReport ["--no-graph", "--root", Text.unpack gitRoot, "--output", directory </> "default.tsv"])
+  missingPathsExit <- reportExit (runLayoutReport ["--no-graph", "--root", miniature, "--paths-file", directory </> "no-such-paths.txt", "--output", directory </> "missing-paths.tsv"])
+  inventoryExit <- reportExit (runLayoutReport ["--no-graph", "--root", directory </> "no-such-root", "--output", directory </> "no-such-root.tsv"])
+  noGraphRows <- Text.lines <$> TextIO.readFile (directory </> "nested" </> "output" </> "report.tsv")
   let graphRoot = directory </> "graph-challenge"
   createDirectoryIfMissing True graphRoot
   createDirectoryIfMissing True (graphRoot </> "other")
@@ -179,6 +182,82 @@ main = do
     "{-# LANGUAGE NoImplicitPrelude #-}\nmodule NoPreludeDerive where\ndata Mark = Mark deriving (Eq)\n"
   TextIO.writeFile (graphRoot </> "ExplicitPreludeDerive.hs")
     "{-# LANGUAGE NoImplicitPrelude #-}\nmodule ExplicitPreludeDerive where\nimport Prelude (Eq(..))\ndata Mark = Mark deriving (Eq)\n"
+  TextIO.writeFile (graphRoot </> "Routes.hs") (Text.unlines
+    [ "{-# LANGUAGE DerivingStrategies, DeriveAnyClass, GeneralizedNewtypeDeriving, DerivingVia, StandaloneDeriving #-}"
+    , "module Routes where"
+    , "class Marker a where"
+    , "  mark :: a -> Int"
+    , "newtype Inner = Inner Int"
+    , "instance Marker Inner where"
+    , "  mark (Inner n) = n"
+    , "newtype Outer = Outer Inner deriving newtype (Marker)"
+    , "newtype Wrapped = Wrapped Int deriving (Marker) via Inner"
+    , "data Plain = Plain deriving anyclass (Marker)"
+    , "data Stock = Stock deriving stock (Eq)"
+    , "data Inferred = Inferred deriving (Eq, Show)"
+    , "data External = External deriving anyclass (Show)"
+    , "newtype Counter = Counter Int deriving (Eq, Ord, Show)"
+    , "newtype Listed a = Listed [a] deriving (Functor)"
+    , "newtype Paired = Paired (Int, Int) deriving (Eq)"
+    , "newtype Poly f = Poly (f Int) deriving newtype (Eq)"
+    , "data Tagged = Tagged"
+    , "deriving stock instance Eq Tagged"
+    , "newtype Loose = Loose Inner"
+    , "deriving newtype instance Marker Loose"
+    , "data Manual = Manual"
+    , "instance Eq Manual"
+    , "instance Marker Manual where"
+    , "  mark _ = 1"
+    ])
+  TextIO.writeFile (graphRoot </> "RoutesUnresolved.hs") (Text.unlines
+    [ "{-# LANGUAGE StandaloneDeriving, DerivingStrategies, GeneralizedNewtypeDeriving #-}"
+    , "module RoutesUnresolved where"
+    , "class Marker a where"
+    , "  mark :: a -> Int"
+    , "newtype Own = Own Mystery deriving newtype (Marker)"
+    , "data Broken = Broken deriving (NoSuchClass)"
+    , "instance NoSuchInstanceClass Broken"
+    , "deriving instance NoSuchStandaloneClass Broken"
+    ])
+  TextIO.writeFile (graphRoot </> "Sinks.hs") (Text.unlines
+    [ "module Sinks where"
+    , "import qualified Data.Text.IO as TextIO"
+    , "import qualified Data.ByteString as ByteString"
+    , "import System.Directory (copyFile, doesFileExist, getCurrentDirectory)"
+    , "import System.IO"
+    , "import System.Process (callCommand, proc, readCreateProcessWithExitCode, readProcess)"
+    , "import System.Environment"
+    , "fetchNamed root = TextIO.readFile (root </> \"amoebius.cabal\")"
+    , "fetchLiteral = TextIO.readFile \"pb/__main__.py\""
+    , "storeGenerated body = TextIO.writeFile \".build/out/report.tsv\" body"
+    , "copyBoth = copyFile \"src/A.hs\" \".build/A.hs\""
+    , "dollarForm = ByteString.readFile $ \"documents/README.md\""
+    , "dollarChain = TextIO.readFile $ \"documents\" </> \"README.md\""
+    , "dollarDynamic root = TextIO.readFile $ root </> \"x.hs\""
+    , "backtick = \"src/A.hs\" `copyFile` \".build/B.hs\""
+    , "referenceOnly paths = mapM TextIO.readFile paths"
+    , "shadowed readFile = readFile \"x.py\""
+    , "localDefinition = readFile \"y.py\" where readFile = id"
+    , "processCommand = readProcess \"git\" [\"status\"] \"\""
+    , "exists = doesFileExist \"src/Main.hs\""
+    , "environment = lookupEnv \"HOME\""
+    , "implicitPrelude = readFile \"LICENSE\""
+    , "absolute = readFile \"/proc/meminfo\""
+    , "contentOnly path = TextIO.writeFile path (Text.replace \"documentation_suite\" \"documentation_suitx\" \"body\")"
+    , "nestedProcess selected = readCreateProcessWithExitCode (proc dhall [\"type\", \"--file\", selected]) \"\""
+    , "dynamicMiddle dir = readFile (\"a\" </> dir </> \"b.hs\")"
+    , "joined root n = writeFile (root </> (\"pass-\" <> show n <> \"-ledger.tsv\")) \"\""
+    , "commandLine = callCommand \"git status\""
+    , "controlLiteral = callCommand \"cd build\\nmake\""
+    , "ambient = getCurrentDirectory"
+    ])
+  TextIO.writeFile (graphRoot </> "StageClean.hs") "module StageClean where\nfoo = 1\n"
+  TextIO.writeFile (graphRoot </> "StageImport.hs") "module StageImport where\nimport Missing.Module\n"
+  TextIO.writeFile (graphRoot </> "StageStandalone.hs") "module StageStandalone where\nimport Missing.Standalone\n"
+  TextIO.writeFile (graphRoot </> "StageOpaque.hs") "module StageOpaque where\nuse = helper ()\n"
+  TextIO.writeFile (graphRoot </> "StageExpression.hs") "module StageExpression where\nhole = _\n"
+  TextIO.writeFile (graphRoot </> "StageDeclaration.hs") "module StageDeclaration where\nfoo = 1\n{-# ANN foo \"note\" #-}\n"
+  TextIO.writeFile (graphRoot </> "ForkUser.hs") "module ForkUser where\nimport Control.Logging\n"
   let selectedPlan = ByteString8.pack
         "{\"compiler-id\":\"ghc-9.12.4\",\"compiler-abi\":\"5301\",\"install-plan\":[{\"id\":\"provider-unit\",\"pkg-name\":\"provider\"},{\"id\":\"consumer-unit\",\"pkg-name\":\"amoebius\",\"component-name\":\"test:consumer\",\"depends\":[\"provider-unit\"]}]}"
       registeredProvider = "name: provider\nid:\n    provider-unit\nexposed-modules:\n    Example.Provider\n"
@@ -439,6 +518,81 @@ main = do
     (Map.singleton "Calls.hs" ["test:graph"]) Map.empty
   (plainDataFindings, plainDataRows) <- sourceGraph graphRoot ["PlainData.hs"]
     (Map.singleton "PlainData.hs" ["test:graph"]) Map.empty
+  let routeCatalog catalog = packageCatalogWithPrelude
+        (Map.singleton "base-unit" (Set.fromList ["Eq", "Ord", "Show", "Functor", "==", "/=", "readFile"])) catalog
+  (routeFindings, routeRows) <- case preludeCatalog of
+    Left problem -> pure ([problem], [])
+    Right catalog -> sourceGraphWithPackageCatalog graphRoot ["Routes.hs"]
+      (Map.singleton "Routes.hs" ["test:consumer"]) Map.empty (routeCatalog catalog) Map.empty
+  (unresolvedRouteFindings, unresolvedRouteRows) <- case preludeCatalog of
+    Left problem -> pure ([problem], [])
+    Right catalog -> sourceGraphWithPackageCatalog graphRoot ["RoutesUnresolved.hs"]
+      (Map.singleton "RoutesUnresolved.hs" ["test:consumer"]) Map.empty (routeCatalog catalog) Map.empty
+  (sinkFindings, sinkRows) <- sourceGraph graphRoot ["Sinks.hs"]
+    (Map.singleton "Sinks.hs" ["test:graph"]) Map.empty
+  stageRuns <- mapM
+    (\(name, file, owned) -> do
+      (found, rows) <- sourceGraph graphRoot [file] (if owned then Map.singleton file ["test:graph"] else Map.empty) Map.empty
+      pure (name, length found, rows))
+    [ ("clean", "StageClean.hs", True), ("import", "StageImport.hs", True)
+    , ("standalone", "StageStandalone.hs", False), ("opaque", "StageOpaque.hs", True)
+    , ("expression", "StageExpression.hs", True), ("declaration", "StageDeclaration.hs", True) ]
+  let forkPins = [("logging", "3.0.6"), ("managed", "1.0.11"), ("unagi-chan", "0.4.1.4")]
+      forkEntry (package, version, suffix, moduleName) = Text.concat
+        [ "name: ", package, "\nid:\n    ", package, "-", version, "-", suffix
+        , "\nexposed-modules:\n    ", moduleName, "\n" ]
+      forkDump entries = Text.intercalate "\n---\n" (map forkEntry entries)
+      completeForks =
+        [ ("logging", "3.0.6", "aa", "Control.Logging"), ("managed", "1.0.11", "bb", "Control.Monad.Managed")
+        , ("unagi-chan", "0.4.1.4", "cc", "Control.Concurrent.Chan.Unagi") ]
+      forkPlan = ByteString8.pack "{\"compiler-id\":\"ghc-9.12.4\",\"compiler-abi\":\"5301\",\"install-plan\":[]}"
+      forkOutcome entries = case packageCatalogWithForks forkPins Map.empty forkPlan (forkDump entries) of
+        Left finding -> Text.replace "\t" " " (renderFinding finding)
+        Right _ -> "accepted"
+      forkStandalone declared = case packageCatalogWithForks declared Map.empty forkPlan (forkDump completeForks) of
+        Left finding -> pure [renderFinding finding]
+        Right catalog -> snd <$> sourceGraphWithPackageCatalog graphRoot ["ForkUser.hs"] Map.empty Map.empty
+          (packageCatalogWithModuleExports
+            (Map.singleton ("logging-3.0.6-aa", "Control.Logging") (Set.singleton "withFileLogging")) catalog)
+          Map.empty
+  let absentCabal name modules = ByteString8.pack (unlines
+        [ "cabal-version: 3.12", "name: " <> name, "version: 0.1.0.0", "build-type: Simple", "library"
+        , "  exposed-modules: " <> modules, "  hs-source-dirs: src", "  default-language: GHC2024"
+        , "  build-depends: base" ])
+      (absentFindings, absentRows, _, _, _, absentOwned) = packageMapReport
+        (absentCabal "amoebius" "Present.Module, Absent.Module") (absentCabal "probe" "Probe.Module")
+        ["src/Present/Module.hs", "probe/src/Probe/Module.hs"]
+  forkDeclaredRows <- forkStandalone forkPins
+  forkUndeclaredRows <- forkStandalone []
+  -- The fixtures' rows are persisted for the oracle, which holds the expected
+  -- rows as its own literals. The suite states no expectation for them.
+  let fixtureRows kinds rows = Text.unlines
+        [row | row <- rows, any (\kind -> (kind <> "\t") `Text.isPrefixOf` row) kinds]
+  TextIO.writeFile (directory </> "fixture-routes.tsv")
+    (fixtureRows ["graph-derived-route", "graph-derived-route-target", "graph-standalone-deriving-route",
+                  "graph-standalone-deriving-route-target", "graph-instance-route",
+                  "graph-unscanned-declaration", "graph-stage"] routeRows)
+  TextIO.writeFile (directory </> "fixture-routes-unresolved.tsv")
+    (fixtureRows ["graph-derived-route", "graph-standalone-deriving-route", "graph-instance-route",
+                  "graph-unscanned-declaration", "graph-stage"] unresolvedRouteRows)
+  TextIO.writeFile (directory </> "fixture-sinks.tsv")
+    (fixtureRows ["graph-effect-sink-external", "graph-file-consumer"] sinkRows)
+  TextIO.writeFile (directory </> "fixture-stages.tsv") (Text.unlines
+    [ Text.pack name <> "\t" <> row
+    | (name, _, rows) <- stageRuns
+    , row <- rows
+    , any (\kind -> (kind <> "\t") `Text.isPrefixOf` row)
+        ["graph-stage", "graph-import-unresolved", "graph-import-standalone-unresolved", "graph-call-site-opaque",
+         "graph-unscanned", "graph-unscanned-declaration"] ])
+  TextIO.writeFile (directory </> "fixture-forks.tsv") (Text.unlines
+    [ label <> "\t" <> row
+    | (label, rows) <- [("declared", forkDeclaredRows), ("undeclared", forkUndeclaredRows)]
+    , row <- rows
+    , any (\kind -> (kind <> "\t") `Text.isPrefixOf` row)
+        ["graph-import-standalone-available-unit", "graph-import-standalone-unresolved"] ])
+  TextIO.writeFile (directory </> "fixture-findings.tsv")
+    (Text.unlines (map (Text.pack . show)
+      (map length [routeFindings, unresolvedRouteFindings, sinkFindings] <> [count | (_, count, _) <- stageRuns])))
   issued <- getPOSIXTime
   let nonce = filter isAlphaNum (show issued)
       challenges =
@@ -487,6 +641,23 @@ main = do
         , ("report.nested-output", nestedOutput)
         , ("report.shebang-exit", shebangExit)
         , ("report.default-exit", defaultExit)
+        , ("report.paths-file-missing", missingPathsExit)
+        , ("report.inventory-failure", inventoryExit)
+        , ("report.no-graph", if "graph-stage\tnot-computed" `elem` noGraphRows
+              && not (any ("graph-file\t" `Text.isPrefixOf`) noGraphRows)
+              then "not-computed" else "computed")
+        , ("package.absent-module-reported", case absentFindings of
+              [LayoutFinding "DeclaredModuleMissing" "library:Absent/Module.hs"] -> "missing"
+              _ -> "unexpected")
+        , ("package.absent-module-not-owed", if Map.null absentOwned && null [row | row <- absentRows, "package-owed" `Text.isPrefixOf` row]
+              then "not-forward-owned" else "forward-owned")
+        , ("package.unselected-module-membership", case unselectedCatalog of
+              Left _ -> "catalog-refused"
+              Right catalog ->
+                ( lookupUnselectedModule catalog "test:unplanned" "Example.Provider"
+                , lookupUnselectedModule catalog "test:unplanned" "Example.Absent") `seq`
+                  Text.pack (show (lookupUnselectedModule catalog "test:unplanned" "Example.Provider",
+                    lookupUnselectedModule catalog "test:unplanned" "Example.Absent")))
         , ("graph.local-link", if null localFindings &&
               "graph-link\ttest:first\tUse.hs\ttest:first\tDuplicate.hs\tDuplicate" `elem` localRows then "linked" else "missing")
         , ("graph.ambiguous-import", if ambiguousFindings ==
@@ -944,10 +1115,20 @@ main = do
               then "accounted" else "missing")
         , ("graph.declaration-gap", if
               all (`elem` callRows)
+                ["graph-unscanned-declaration\tCalls.hs\tClassDispatch",
+                 "graph-unscanned-declaration\tCalls.hs\tDerivedClassUnresolved",
+                 "graph-instance-route\tCalls.hs\tC Int\tC\tmethods\tlocal"]
+              && not (any (`elem` callRows)
                 ["graph-unscanned-declaration\tCalls.hs\tDataDerivingDispatch",
-                 "graph-unscanned-declaration\tCalls.hs\tClassDispatch",
-                 "graph-unscanned-declaration\tCalls.hs\tInstanceDispatch"]
+                 "graph-unscanned-declaration\tCalls.hs\tInstanceDispatch"])
               then "accounted" else "missing")
+        , ("package.fork-missing", forkOutcome (drop 1 completeForks))
+        , ("package.fork-complete", forkOutcome completeForks)
+        , ("package.fork-duplicate", forkOutcome (completeForks <> [("managed", "1.0.11", "bc", "Control.Monad.Managed")]))
+        , ("package.fork-other-version", forkOutcome
+            ([unit | unit@(package, _, _, _) <- completeForks, package /= "managed"]
+              <> [("managed", "1.0.12", "bb", "Control.Monad.Managed")]))
+        , ("package.fork-store-growth", forkOutcome (completeForks <> [("managed", "1.0.12", "bd", "Control.Monad.Managed")]))
         , ("graph.plain-data-declaration", if null plainDataFindings &&
               all (`elem` plainDataRows)
                 ["graph-data\tPlainData.hs\tPlain",
@@ -1094,7 +1275,9 @@ runChallenge root directory basePaths (name, planted, _) = do
       else if name `elem` ["unmapped", "vendor"] then "module Amoebius.Challenge where\nchallenge = ()\n"
       else if name == "syntax" then "module Bad where\nvalue = (\n" else "challenge\n")
   TextIO.writeFile manifest (Text.unlines (map Text.pack (basePaths <> [planted])))
-  result <- reportExit (runLayoutReport ["--root", tree, "--paths-file", manifest, "--output", output])
+  -- Only the syntax challenge is judged by the graph, which parses every source.
+  result <- reportExit (runLayoutReport (["--root", tree, "--paths-file", manifest, "--output", output]
+    <> ["--no-graph" | name /= "syntax"]))
   pure (name, result)
 
 sourceRoots :: [FilePath]

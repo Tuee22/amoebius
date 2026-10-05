@@ -16,5 +16,5 @@ model :: SuppliedTestModel
 model = SuppliedTestModel "compile-illegal" LinuxCpu CoreBranch
   (FlaggedTestAuthority (fromJust (authorityRef "authority/compile-test")))
   (Just TestOwnedIntent)
-  (ResourceVector 10000 20000000000 70000000000 10000000000 5000000000 32 32 8 100)
+  (TestResourceVector 10000 20000000000 70000000000 10000000000 5000000000 32 32 8 100)
   [] [WorkflowCompletes, CleanupObserved]

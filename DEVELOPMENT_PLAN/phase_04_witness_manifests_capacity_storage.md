@@ -34,23 +34,31 @@ extensions, child clusters, or the UI language, which the later slice phases own
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
+**Receipt**: 829c1389d2c8612f2462d67a0e8b2126c035e4b17a481c188ba4025fe9e91a9b
 
-Gate execution is held shut by the Phase-3 predecessor receipt in certification generation 2. Hardware-free
-implementation may proceed ahead of the frontier as component diagnostics under
-[§O](development_plan_phase_model.md#o-sprint-sized-seams-and-bounded-phase-gates); it mints no evidence.
+The four sprints are implemented in the working tree and judged by the shared spine suite and the independent
+`oracle-dsl`; no complete gate result for the exact current source has been recorded, so none of it is validated.
+Registering this gate changed the verifier (the specification registry, the `Rewrite` perturbation, the vocabulary
+check's list of closed axes, and the oracle's binary rows), so `replay` must re-derive the receipts of Phases 0
+through 3 under the resulting generation before `accept`. Hardware-free implementation ahead of the frontier
+yields component diagnostics only, under
+[§O](development_plan_phase_model.md#o-sprint-sized-seams-and-bounded-phase-gates); it mints no evidence. The
+gate's `Residue` row lists what a pass will not establish.
 
 ## Phase Summary
 
 Phase 4 makes the render stage consume the witnesses the pipeline already computes
 ([DL-0004](../documents/decision_log.md#dl-0004--the-typed-spec-records-are-spelled-once)). On the Phase-3
 spine the render stage reads the bound deployment alone, so placement, capacity, and storage decisions reach
-no byte. Here `renderCandidates` takes a `Placed` witness and an `Epoch`, the StatefulSet takes a storage
-witness that becomes PVC bytes, and every quantity carries its unit in its type. The corpus grows by four
-pairs over the same shipped binary, and the runner perturbs one host's capacity as well as the sentinel.
+no byte. Here the provision stage returns a `Placed` witness, which only the first-fit-decreasing fold can
+construct, and an `Epoch`; `renderCandidates` takes both, a workload names the node the fold assigned it, a
+StatefulSet carries the claim its `VolumeWitness` sizes, and every capacity is a `Quantity` that carries its unit in
+its type. The corpus grows by six examples over the same shipped binary, and the runner raises one host's
+capacity by one unit as well as planting the nonce, so the application's placement flips.
 
-The claim adds a second capability with a distributed shape and an app with two needs, so the shape swap of
-Phase 3 is re-observed with provider objects that differ in count while application bytes stay unchanged.
+The claim adds a second capability with a distributed shape and an application with two needs, so the shape swap
+of Phase 3 is re-observed with provider objects that differ in count while application bytes stay unchanged.
 This phase folds the former capacity, formal-model, and manifest slices into one claim
 ([DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice)).
 
@@ -64,41 +72,87 @@ This phase folds the former capacity, formal-model, and manifest slices into one
 ### Corpus
 
 The corpus module is `Amoebius.Dsl.Examples.Capacity`, linked by the `amoebius` executable and rendered by
-`amoebius render-examples`. It contains the Phase-3 corpus and adds at least four distinguishing pairs:
+`amoebius render-examples`. Nothing it renders is tracked. It contains the Phase-3 corpus unchanged and adds
+four distinguishing rows, the boundary row carrying two refused twins:
 
 | Example | Distinguishes | Expected delta or refusal |
 |---|---|---|
-| `kind-two-hosts` pair | placement across two hosts | two rows on the wire with the same identities; `nodeName` differs per row and equals the placement witness |
-| `kind-sql-distributed3` | a second capability with a distributed shape | one StatefulSet with three replicas, one headless Service, and PVC objects whose bytes equal the storage witness |
-| `kind-two-needs` | one app needing two capabilities | two provider object sets; application bytes carry both bindings and nothing else changes |
-| exact-fit sibling and its refused twins | capacity on the boundary | the exact fit is accepted; `OverCapacity` and `OneShort` are refused at provision with the same identities |
+| `kind-two-nodes` | placement across two nodes | two kind nodes of three processors: the provider's member, the heaviest workload, fills the first node and the application lands on the second; the eleven identities equal the baseline's and the application Deployment's `podNodeName` is the one differing path |
+| `exact-fit-sibling` and its refused twins | capacity on the boundary | three nodes of eight ephemeral units each is accepted with every node full on that axis; `one-short-twin` at seven units is refused at provision as `OneShort`, and `over-capacity-twin`, four nodes of three units, as `OverCapacity` |
+| `kind-sql-distributed3` | a second capability with a distributed shape | eighteen objects: the application's three and four global objects, and eleven for the relational provider — three StatefulSet members, each with one claim whose bytes equal the storage witness, the schema-bootstrap Job, and the provider's discovery and quorum objects |
+| `kind-two-needs` | one application needing two capabilities | sixteen objects: both providers' object sets beside the application's three and the four global objects; the application's bytes carry both bindings |
 
-New tags: `sql`, `distributed`, `pvc`. Oracle rows are authored before the witness edge exists; a field the
-witness supplies that reaches no byte is refused as `AuthoredFieldUnconsumed`, as on the Phase-3 spine.
+The shape-swap sibling now renders seventeen objects and the baseline eleven, because each StatefulSet
+member carries its claim. New tags: `sql`, `distributed`, `pvc`. The oracle's literals are typed from this
+contract and the doctrine, never read from product output; the suite's differential refuses an authored
+field that reaches no byte and is not refused.
 
 ### Gate specification
 
 ```gate-spec
 capability: witness_manifests_capacity_storage
-subjects:
-  - Amoebius.Manifest.Render
-  - Amoebius.Manifest.StatefulSet
-  - Amoebius.Placement.Witness
-  - Amoebius.Storage.Witness
-  - Amoebius.Capacity.Vector
-  - Amoebius.Capacity.Fits
-  - Amoebius.Dsl.Pipeline
-suite: capacity-suite
+role: ordinary
+claim: The two-node corpus example reaches fake-applied bytes whose node names, replica counts, resource requests, and claim bytes equal the placement, envelope, and storage witnesses, and every capacity is a unit-tagged quantity. The runner rewrites the rendered example after the run starts, planting a nonce and raising one host capacity by one unit so the application's placement flips, and the oracle judges every stage artefact from literals. The total fit over every pair of three-valued vectors, the volume identities, and the render of a claim without a StatefulSet are judged from the suite's bytes, and the over-capacity twins are refused at provision with the exact-fit twin accepted. Substrates, taints, extensions, children, and the UI language are excluded.
+subjects: Amoebius.Capacity.Vector, Amoebius.Capacity.Fits, Amoebius.Placement.Witness, Amoebius.Storage.Witness, Amoebius.Manifest.StatefulSet, Amoebius.Manifest.Render
+suite: spine-suite
 oracle: oracle-dsl
-positives: [kind-two-hosts, kind-sql-distributed3, kind-two-needs, exact-fit-sibling]
-negatives: [OverCapacity, OneShort, PvcWithoutStatefulSet, UnitMismatch]
-mutants: { perModule: 8, perGateCap: 40, killRatio: 0.6 }
-binaryFact:
-  command: amoebius compile
-  perturbation: sentinel-to-nonce
-  outputs: [decoded-dump, manifest, fake-kubectl-stdin]
-substrate: HardwareFree
-corpus: { module: Amoebius.Dsl.Examples.Capacity, minimumPairs: 4 }
+positive: case:kind-single-objectstore | input=kind-single-objectstore.dhall | expected=objects equal the oracle rows
+positive: case:shape-swap-sibling | input=shape-swap-sibling.dhall | expected=provider objects change, application bytes do not
+positive: case:replicas-3-sibling | input=replicas-3-sibling.dhall | expected=one differing path
+positive: case:local-import-twin | input=local-import-twin.dhall | expected=freezes to the baseline
+positive: case:lanes-of | input=host grid | expected=total lane table
+positive: case:round-trip | input=encode then decode | expected=equal values
+positive: case:step-sequence | input=chain order | expected=frame then identity
+positive: case:dry-run-zero | input=dry run | expected=no step executed
+positive: case:fake-relay | input=fake kubectl | expected=stdin equals payload
+positive: case:endpoint-digest | input=control-plane endpoint | expected=manifest digest
+positive: case:fields-consumed | input=authored leaves | expected=each reaches a byte
+positive: case:corpus-discovery | input=rendered files | expected=equals inventory
+positive: case:shipped-binary | input=perturbed run | expected=nonce in every artefact
+positive: case:kind-two-nodes | input=kind-two-nodes.dhall | expected=application on the second node
+positive: case:exact-fit-sibling | input=exact-fit-sibling.dhall | expected=accepted on the boundary
+positive: case:kind-sql-distributed3 | input=kind-sql-distributed3.dhall | expected=one claim per member
+positive: case:kind-two-needs | input=kind-two-needs.dhall | expected=both providers' objects
+positive: case:fits-total | input=three-valued vectors | expected=every pair judged
+positive: case:volume-witness | input=volume identities | expected=names from identity
+positive: case:statefulset-claims | input=statefulset render | expected=claim bytes equal the witness
+negative: case:AppleNeedsArm64 | input=darwin amd64 | tag=NotNaturalArchitecture | stage=vocabulary
+negative: case:WindowsNeedsAmd64 | input=windows arm64 | tag=NotNaturalArchitecture | stage=vocabulary
+negative: case:ForbiddenImportEnv | input=forbidden-env.dhall | tag=ForbiddenImport | stage=freeze
+negative: case:ForbiddenImportRemote | input=forbidden-remote.dhall | tag=ForbiddenImport | stage=freeze
+negative: case:ForbiddenImportAlternative | input=forbidden-alternative.dhall | tag=ForbiddenImport | stage=freeze
+negative: case:ForbiddenImportTransitive | input=forbidden-transitive.dhall | tag=ForbiddenImport | stage=freeze
+negative: case:AbsoluteImport | input=forbidden-absolute.dhall | tag=AbsolutePath | stage=freeze
+negative: case:HomeImport | input=forbidden-home.dhall | tag=HomePath | stage=freeze
+negative: case:NonCodeImport | input=non-code-import.dhall | tag=NonCodeMode | stage=freeze
+negative: case:ParseFailure | input=parse-failure.dhall | tag=ParseFailure | stage=freeze
+negative: case:IllTypedAlternative | input=ill-typed-alternative.dhall | tag=IllTyped | stage=freeze
+negative: case:RequestsAboveLimits | input=requests-above-limits.dhall | tag=RequestsAboveLimits | stage=decode
+negative: case:EmptyNeeds | input=empty-needs.dhall | tag=EmptyNeeds | stage=decode
+negative: case:ZeroReplicas | input=zero-replicas.dhall | tag=ZeroReplicas | stage=decode
+negative: case:HeadroomAllZero | input=headroom-all-zero.dhall | tag=HeadroomAllZero | stage=decode
+negative: case:ProductNamedInApp | input=product-named-in-app.dhall | tag=DhallFailure | stage=decode
+negative: case:ShapeInApp | input=shape-in-app.dhall | tag=DhallFailure | stage=decode
+negative: case:UnboundNeed | input=unbound-need.dhall | tag=UnboundNeed | stage=lower
+negative: case:DanglingBinding | input=dangling-binding.dhall | tag=DanglingBinding | stage=lower
+negative: case:UnknownDeployment | input=unknown-deployment.dhall | tag=UnknownDeployment | stage=lower
+negative: case:HostShort | input=host-short.dhall | tag=InfrastructureDemandExceeded | stage=plan
+negative: case:ReplicasOverCapacity | input=replicas-over-capacity.dhall | tag=PostBindExpansionOvercommit | stage=provision
+negative: case:DetectedAppleAmd64 | input=Detected Apple Amd64 | tag=ConstructorNotExported | stage=compile
+negative: case:BoundDeploymentOutsideLower | input=BoundDeployment construction | tag=ConstructorNotExported | stage=compile
+negative: case:StepCarriesIO | input=Step with IO | tag=StepHasNoFunctionSlot | stage=compile
+negative: case:TwoServerQuorum | input=two-server quorum | tag=EvenQuorumUnspellable | stage=compile
+negative: case:OneShort | input=one-short-twin.dhall | tag=OneShort | stage=provision
+negative: case:OverCapacity | input=over-capacity-twin.dhall | tag=OverCapacity | stage=provision
+negative: case:UnitMismatch | input=cpu plus memory | tag=UnitsDoNotMix | stage=compile
+negative: case:RenderWithoutWitness | input=render without a placement | tag=WitnessRequired | stage=compile
+negative: case:PlacedOutsideFold | input=Placed construction | tag=ConstructorNotExported | stage=compile
+negative: case:PvcWithoutStatefulSet | input=claim on a Deployment | tag=PvcWithoutStatefulSet | stage=render
+negative: case:VolumeOutsideWitness | input=VolumeWitness construction | tag=ConstructorNotExported | stage=compile
+mutants: stages=Amoebius.Capacity.Vector,Amoebius.Capacity.Fits,Amoebius.Placement.Witness,Amoebius.Storage.Witness,Amoebius.Manifest.StatefulSet,Amoebius.Manifest.Render per-module=8 cap=40 kill-ratio=3/5 artefacts=Amoebius.Capacity.Vector:fits.,Amoebius.Capacity.Fits:fits.,Amoebius.Placement.Witness:place.,Amoebius.Placement.Witness:provision.,Amoebius.Storage.Witness:volume.,Amoebius.Storage.Witness:claims.,Amoebius.Manifest.StatefulSet:claims.,Amoebius.Manifest.StatefulSet:render.,Amoebius.Manifest.Render:render.,Amoebius.Manifest.Render:claims.
+binary-fact: command=compile --input {input} --out {run}/compiled | input=root.dhall | perturbation=staged(pre=render-examples --example kind-two-nodes --output {input} post=apply --executor fake --input {input} --out {run}/applied then=sentinel-to-nonce(0b5e17e11a0c0ffee0de1e9a7e5ba5ed),rewrite(hostCpu = 3 => hostCpu = 4)) | outputs={run}/compiled/frozen.dhall,{run}/compiled/decoded.dump,{run}/compiled/lowered.dump,{run}/compiled/plan.dump,{run}/compiled/provisioned.dump,{run}/compiled/manifest.json,{run}/compiled/chain.dump,{run}/compiled/dry-run.dump,{run}/applied/fake/stdin.combined
+spine-fact: rendered=compiled/manifest.json | stages=freeze,decode,lower,plan,provision,render,chain,dry-run,fake-apply | applied-digest=applied/fake/applied.sha256
+substrate: none
 ```
 
 ## Gate integrity
@@ -108,23 +162,23 @@ documentation checker refuses a block that differs from it. Execution evidence r
 
 | Key | Contract |
 |---|---|
-| `Claim` | The two-host corpus example, rewritten by the runner with a nonce and a capacity one unit lower on one host, passes through `amoebius compile` and `amoebius apply --executor fake`. Each row on the wire carries the `nodeName` the placement witness assigns; replicas and requests equal the authored envelope through unit-tagged quantities; PVC bytes equal the storage witness; the over-capacity twin is refused at provision. Substrates, taints, extensions, children, and UI are excluded. |
-| `Subject` | The seven modules named in the gate specification, every one inside the closure of `executable amoebius`. `Amoebius.Dsl.Pipeline` is re-subjected because its render stage now takes the witnesses. |
-| `Command` | Future public spelling is `pb validate phase 04`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 04`; then `amoebius-validate accept --phase 04` records the receipt and applies one phase's status patch. The runner spawns the shipped `amoebius` binary as a child for `render-examples`, `compile`, and `apply --executor fake`. |
-| `Oracle` | `test/oracle/dsl/Main.hs` parses the decoded dump, the manifest, and the fake's stdin; it states the placement rows, the envelope, the PVC bytes, and the `fits` predicate from literal rows and depends on no `amoebius` library. |
-| `Positive controls` | Every accepted corpus example renders to objects equal to its oracle row; the fake's stdin byte-equals the compile output; the nonce is recovered from all three outputs; the exact-fit sibling is accepted at provision. |
-| `Paired negatives` | `OverCapacity` and `OneShort` refused at provision with the exact-fit twin accepted; `PvcWithoutStatefulSet` refused at render with the StatefulSet twin accepted; `UnitMismatch` as a compile-negative twin of a well-typed sum — each at its exact tag and stage. |
-| `Mutants` | Runner-generated from the fixed operator catalogue, eight per subject module, at most forty per gate, kill ratio at least 0.6. A render that ignores the placement witness is killed at the `nodeName` row; a StatefulSet that drops the storage witness is killed at the PVC bytes; a `fits` that widens one axis is killed by the differential. No authored mutant seam exists in any subject. |
-| `Discovery` | The package description's stanza module map is compared two-way with the subjects; the corpus example count equals the rendered file count; the `fits` enumeration's cardinality equals the product of its axis arities; empty discovery or an empty enumeration refuses. |
-| `Challenge` | After the run starts, the runner rewrites the rendered example's sentinel to a nonce and lowers one host's capacity by one unit. The nonce must appear in the decoded dump, the manifest, and the fake's stdin; the lowered capacity must flip the boundary twin from accepted to `OneShort`. |
-| `Observer` | `ProcessObserver` over the shipped binary and the fake `kubectl`, which is a separate process image; argv, environment policy, exit, and complete output are runner-captured. |
-| `Authority/bypass` | `SUBJECT-NOT-SHIPPED` refuses a subject outside the executable's closure; the oracle stanza's hygiene refuses a product dependency; `renderCandidates` takes a `Placed` witness only and no PVC is constructible outside `Amoebius.Manifest.StatefulSet`, each checked by a compile-negative twin. |
+| `Claim` | The two-node corpus example, rewritten by the runner with a nonce and one host's processors raised by one unit, passes through `amoebius compile` and `amoebius apply --executor fake`. Each workload on the wire carries the `podNodeName` the placement witness assigns, so the application's node flips with the raised capacity; replicas and requests equal the authored envelope through unit-tagged quantities; claim bytes equal the storage witness; the over-capacity twins are refused at provision with the exact-fit sibling accepted. The total `fits`, the volume identities, and the render of a claim without a StatefulSet are judged from the suite's bytes. Substrates, taints, extensions, children, and UI are excluded. |
+| `Subject` | The six modules named in the gate specification, every one inside the closure of `executable amoebius`. The render stage reaches the witnesses through `Amoebius.Manifest.Render`; `Amoebius.Dsl.Pipeline` stays a Phase-3 subject and its stage rows are re-judged here. |
+| `Command` | Future public spelling is `pb validate phase 04`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 04`; then `amoebius-validate accept --phase 04` records the receipt and applies one phase's status patch. The runner spawns the shipped `amoebius` binary as a child three times for its challenge: `render-examples --example kind-two-nodes --output <input>`, then `compile --input <input> --out <run>/compiled` on the perturbed input, then `apply --executor fake --input <input> --out <run>/applied`; it then runs the shared spine suite and the oracle with those outputs beneath the suite directory. |
+| `Oracle` | `test/oracle/dsl/Main.hs`, with its modules beside it, reads the suite's tables and stage artefacts and the runner's own outputs and prints the ledger from literals typed in `test/oracle/dsl/DslTables.hs` and `test/oracle/dsl/DslCapacity.hs`. It states the placement rows, the envelope, the claim bytes, and the `fits` predicate itself, reads the nodes, host capacity, and replica count of the challenge from the input the runner authored, and writes and compiles its own compile-negative twins; it depends on no `amoebius` library. |
+| `Positive controls` | The Phase-3 positives are re-judged over the changed objects. `kind-two-nodes` puts the application on the second node and renders the baseline's identities; the exact-fit sibling is accepted at provision; the SQL example renders one claim per member; the two-needs example renders both providers' objects; `fits` agrees with the oracle's predicate over every pair of three-valued four-axis vectors, and its sum and zero are the componentwise sum and the identity; the volume witness names every volume from its identity and refuses the identities that could collide; a StatefulSet renders its claim and a bare one renders none. |
+| `Paired negatives` | Thirty-three, each differing from its positive twin in one dimension and each refused at its exact tag and stage: the twenty-six of Phase 3, and seven added here — `OneShort` and `OverCapacity` at provision with the exact-fit sibling accepted; `PvcWithoutStatefulSet` at render with the StatefulSet twin accepted; and four compile-negative twins the oracle writes and compiles itself (a sum of two units, a render without a placement witness, a `Placed` built outside the fold, and a `VolumeWitness` built outside its constructor). |
+| `Mutants` | Runner-generated from the fixed operator catalogue over the six subject modules, eight per module, at most forty per gate, kill ratio at least 0.6, stillborn excluded, each recorded with its operator, production locus, and applied-change witness. A kill requires a red oracle row whose name begins with a prefix the mutated module owns (the `artefacts` of the gate specification): the vector and fit modules own the `fits.` rows, the placement witness the `place.` and `provision.` rows, the volume witness the `volume.` and `claims.` rows, and the StatefulSet and render modules the `claims.` and `render.` rows. A crash, an empty ledger, or a red row owned by another module leaves the mutant a survivor, and every subject module must be killed at least once. No authored mutant seam exists in any subject. |
+| `Discovery` | The package description's stanza module map is compared two-way with the subjects; the corpus example count equals the rendered file count; the `fits` enumeration's cardinality equals the product of its axis arities and its pairs are every pair exactly once; empty discovery or an empty enumeration refuses. |
+| `Challenge` | After the run starts, the runner renders `kind-two-nodes`, rewrites its sentinel to the run's nonce and `hostCpu = 3` to `hostCpu = 4`, and runs `compile` and `apply` on the result. The oracle discovers the nonce in the decoded dump, finds the sentinel absent from every output, reads the node count, host capacity, and replica count from the perturbed input, and judges every artefact from literals that substitute the nonce and those numbers, so the application lands on the first node where the shipped example puts it on the second; the nonce must also appear in the manifest and in the fake's stdin, and every declared stage family must have a green oracle row. |
+| `Observer` | `ProcessObserver` records argv, environment policy, exit, and complete output of every build and run of the suite and the oracle and of the three product commands. The fake `kubectl` is a grandchild of the apply command and the same program image invoked under another name, so it is observed through the transcript it writes, which the oracle judges, and through the digest cross-check of the applied bytes. |
+| `Authority/bypass` | `SUBJECT-NOT-SHIPPED` refuses a subject outside the executable's closure; the oracle stanza's hygiene refuses a product dependency and a second definition of any vocabulary type, including the resource vector, anywhere beneath `src/`. `renderCandidates` takes a `Placed` witness and an `Epoch` and nothing that can stand in for them; `Placed` and `VolumeWitness` have private constructors and the claim body's constructor sits in a hidden module, so no placement, volume, or claim is constructible outside its owner, each checked by a compile-negative twin the oracle writes. |
 | `Freshness` | A unique run root; a fresh render every run; the verifier digest equals the seed's; opening and closing source identities are equal. |
-| `Qualification` | The generated-mutant matrix over the seven subject modules and the `fits` differential component row precede the clean candidate in the same run. |
+| `Qualification` | The generated-mutant matrix over the six subject modules and the `fits` enumeration precede the clean candidate in the same run. |
 | `Cleanroom` | Everything generated lives beneath `.build/runs/phase-04/**` and is absent afterward; the kernel ratchet is recorded. |
 | `Legacy closure` | `LTD-DSL-003` closes here; `LTD-DSL-004` closes its unit share here, after its vocabulary share in Phase 3 and before its substrate-enum share in Phase 5. |
 | `Predecessor` | The Phase 3 receipt in certification generation 2, chained by the digest of Phase 3's product closure plus the verifier and governance digests. |
-| `Residue` | Phases 5 through 9 and every phase from 50 onward remain explicit limitations; the substrate-enum share of `LTD-DSL-004` remains visible until Phase 5; `LTD-HELPER-001` remains visible until Phase 50. |
+| `Residue` | Phases 5 through 9 and every phase from 50 onward remain explicit limitations; the substrate-enum share of `LTD-DSL-004` remains visible until Phase 5; `LTD-HELPER-001` remains visible until Phase 50. The corpus reaches the fixed-supply arm of the placement fold on kind hosts only: taints, anti-affinity, attach limits, bounded processor overcommit, elastic growth, and the accelerator and Pulumi execution folds stay component suites that this gate does not record. The fake is the product's own program image, so a fault the stages share with the fake is outside what the gate observes. The volume sizes of the five capability arms the corpus does not author, and those arms' provider objects, are not judged from the suite's bytes. |
 | `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and `accept` records it. |
 
 ## Doctrine adopted
@@ -140,13 +194,13 @@ documentation checker refuses a block that differs from it. Execution evidence r
 
 ## Sprints
 
-## Sprint 4.1: renderCandidates after placement and epochs ⏸️
+## Sprint 4.1: renderCandidates after placement and epochs ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Manifest/Render.hs` and `src/Amoebius/Placement/Witness.hs`
+**Status**: Done
+**Implementation**: `src/manifest-render/Amoebius/Manifest/Render.hs` and `src/capacity-topology/Amoebius/Placement/Witness.hs`
 **Blocked by**: [Phase 3](phase_03_typed_spine.md) gate pass
-**Independent Validation**: `renderCandidates` accepts only a `Placed` witness and an `Epoch`, and every Deployment on the wire carries the `nodeName` the witness assigns; the two-host example yields two rows with the same identities. A render that reads the bound deployment without the witness is a compile-negative twin. A mutant that ignores the witness is killed by the oracle's placement row.
-**Oracle**: `test/oracle/dsl/Main.hs` states the expected `nodeName` per row and the epoch label from literals.
+**Independent Validation**: `renderCandidates` accepts only a `Placed` witness and an `Epoch`; every workload on the wire carries the `podNodeName` the witness assigns and every object the epoch label `amoebius.io/epoch`; `kind-two-nodes` renders the baseline's eleven identities with the application Deployment's node the one differing path. A render without a placement witness and a `Placed` built outside the fold are compile-negative twins the oracle writes and compiles. A mutant that ignores the witness or drops the epoch is killed by the oracle's render and placement rows.
+**Oracle**: `test/oracle/dsl/DslStages.hs` states the expected `podNodeName` per workload and the epoch label from literals.
 **Legacy IDs**: `LTD-DSL-003` — `renderAll` ignores witnesses, placement share
 **Docs to update**: `documents/engineering/manifest_generation_doctrine.md`
 
@@ -156,26 +210,27 @@ Move rendering after placement so the manifest is a projection of a decision, no
 
 ### Deliverables
 
-- `Placed` as a witness constructible only by `Amoebius.Placement.Witness.place` over the node inventory.
-- `Epoch` threaded from provision into every rendered object's labels.
-- `renderCandidates :: Placed -> Epoch -> BoundDeployment -> Objects` as the one entry into rendering.
+- `Placed`, a witness whose constructor is private to `Amoebius.Placement.Witness`, produced only by `place`, the first-fit-decreasing fold over the node inventory; `placedNode` answers which node a workload was assigned.
+- `Epoch`, named by the provision stage from its generation and stamped on every rendered object.
+- `renderCandidates :: Placed -> Epoch -> ProvisionedRenderSourceSet -> Either RenderRefusal [K8sObject]` as the one entry into rendering, with the provision stage returning the `Placed` and `Epoch` the pipeline renders through.
 
 ### Validation
 
-Render the two-host example and compare each row's `nodeName` and epoch label with the oracle; require the
-witness-free render to fail at the type.
+Render the two-node example and compare each row's `podNodeName` and epoch label with the oracle; require the
+witness-free render and the `Placed` built outside the fold to fail at the type.
 
 ### Remaining Work
 
-Implement the two modules and delete the render path that reads the bound deployment alone.
+The two modules are implemented and the render path that read the bound deployment alone is deleted. The complete
+gate is the remaining work.
 
-## Sprint 4.2: StatefulSet and the storage witness to PVC ⏸️
+## Sprint 4.2: StatefulSet and the storage witness to PVC ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Manifest/StatefulSet.hs` and `src/Amoebius/Storage/Witness.hs`
+**Status**: Done
+**Implementation**: `src/manifest-render/Amoebius/Manifest/StatefulSet.hs` and `src/storage-geometry-folds/Amoebius/Storage/Witness.hs`
 **Blocked by**: Sprint 4.1
-**Independent Validation**: `kind-sql-distributed3` renders one StatefulSet, one headless Service, and PVC objects whose bytes equal the storage witness's size, class, and deterministic name. A PVC rendered from any object other than a StatefulSet is refused as `PvcWithoutStatefulSet`. A mutant that drops the witness's size is killed at the PVC bytes.
-**Oracle**: `test/oracle/dsl/Main.hs` states the PVC names, sizes, and `claimRef` values from literals.
+**Independent Validation**: `kind-sql-distributed3` renders three StatefulSet members, each with one claim whose bytes equal the volume witness's size, storage class, owner, and deterministic names; `kind-single-objectstore` renders its one. The volume witness names each volume from its identity and refuses a volume of zero bytes and an identity whose parts could make two witnesses name one volume. A claim on any source that is not a StatefulSet is refused as `PvcWithoutStatefulSet`, and a `VolumeWitness` built outside its constructor is a compile-negative twin. A mutant that drops a claim, its size, or its owner is killed at the claim rows.
+**Oracle**: `test/oracle/dsl/DslCapacity.hs` and `test/oracle/dsl/DslStages.hs` state the claim names, sizes, classes, owners, and pre-bound volume names from literals.
 **Legacy IDs**: `LTD-DSL-003` — `renderAll` ignores witnesses, storage share
 **Docs to update**: `documents/engineering/storage_lifecycle_doctrine.md`
 
@@ -185,26 +240,26 @@ Give the second capability a distributed shape whose storage is born from the St
 
 ### Deliverables
 
-- `StorageWitness` with an explicit size, the one storage class, and the deterministic PV name.
-- `renderStatefulSet` producing the StatefulSet, its headless Service, and its PVC objects from the witness.
-- The `sql` capability with a `distributed3` shape in the corpus.
+- `VolumeWitness` with an explicit size, the one storage class `amoebius-retained`, and names that are pure functions of identity — the claim `data-<member>-<ordinal>` and the volume `<namespace>.<member>.pv-<ordinal>` — constructed only by `mkVolumeWitness`, which refuses an empty volume and a non-label identity.
+- `renderStatefulSet` producing the StatefulSet and the claim of its one ordinal; the claim body's constructor lives in a hidden module, so no other module can build a claim.
+- The volume size each capability's members receive, and the `sql` capability with a `distributed3` shape in the corpus.
 
 ### Validation
 
-Render the example and compare the PVC bytes with the oracle; require the free-standing PVC to be refused
-at its tag.
+Render the example and compare the claim bytes with the oracle; require the claim on a Deployment to be refused
+at its tag and the volume built outside its constructor to fail at the type.
 
 ### Remaining Work
 
-Implement the two modules and the corpus additions.
+The modules and the corpus additions are implemented. The complete gate is the remaining work.
 
-## Sprint 4.3: Unit-tagged ResourceVector and the fits differential ⏸️
+## Sprint 4.3: Unit-tagged ResourceVector and the fits differential ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Capacity/Vector.hs` and `src/Amoebius/Capacity/Fits.hs`
+**Status**: Done
+**Implementation**: `src/capacity-topology/Amoebius/Capacity/Vector.hs` and `src/capacity-topology/Amoebius/Capacity/Fits.hs`
 **Blocked by**: Sprint 4.2
-**Independent Validation**: `ResourceVector` carries `Quantity (u :: Unit)` per axis, so cross-unit arithmetic is a compile-negative twin. `fits` is total and agrees with the oracle's authored predicate over a generated enumeration of 6,561 cases, three values on each of eight axes, run as a component row within the gate. `OverCapacity` and `OneShort` are refused at provision with the exact-fit twin accepted.
-**Oracle**: `test/oracle/dsl/Main.hs` states the `fits` predicate independently from literal axis bounds and compares it case by case with the output the suite writes.
+**Independent Validation**: `ResourceVector` carries a `Quantity (u :: Unit)` per axis, so a sum of two units is a compile-negative twin. `fits` is total and agrees with the oracle's authored predicate over every pair of three-valued four-axis vectors, 6,561 pairs written by the suite; the oracle judges the verdict, the first exceeded axis in a fixed order, the headroom, the exact fit, the componentwise sum, and the zero identity. `OverCapacity` and `OneShort` are refused at provision with the exact-fit sibling accepted.
+**Oracle**: `test/oracle/dsl/DslCapacity.hs` states the `fits` predicate independently from literal axis values and compares it case by case with the output the suite writes.
 **Legacy IDs**: `LTD-DSL-004` — unitless quantities, unit share
 **Docs to update**: `documents/engineering/resource_capacity_folds.md`
 
@@ -214,26 +269,26 @@ Make capacity arithmetic total and unit-safe, and settle `fits` by differential 
 
 ### Deliverables
 
-- `ResourceVector` over the `Quantity` type introduced in Phase 3, with `carve` and `place` total.
-- `fits` with the boundary twins `OverCapacity` and `OneShort` in the corpus.
+- `ResourceVector` over the `Quantity` type introduced in Phase 3, with a saturating difference and `carve` total.
+- `fits` with the boundary twins `OverCapacity` and `OneShort` in the corpus, the provision stage naming a shortfall of exactly one unit as `OneShort`.
 - The enumeration generated in the suite and judged by the oracle's independent predicate.
 
 ### Validation
 
-Run the enumeration as a component row and require every case to agree; require the cross-unit sum to fail
-at the type.
+Run the enumeration and require every case to agree; require the sum of two units to fail at the type.
 
 ### Remaining Work
 
-Implement the two modules and delete every unitless quantity path.
+The modules are implemented and every unitless quantity path is gone from the product. The complete gate is the
+remaining work.
 
-## Sprint 4.4: The Phase-4 gate specification ⏸️
+## Sprint 4.4: The Phase-4 gate specification ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/gate-spec/Amoebius/Validation/GateSpec/Capacity.hs` and `amoebius.cabal`
+**Status**: Done
+**Implementation**: `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs` and `amoebius.cabal`
 **Blocked by**: Sprint 4.3
 **Independent Validation**: The compiled specification equals the fenced block above; `verifySpec` accepts it; the corpus module contains the Phase-3 corpus. A specification whose negatives omit `OverCapacity` is refused as `SPEC-WEAKENED`.
-**Oracle**: `test/oracle/runner/Main.hs` states the expected specification digest and closure from literals.
+**Oracle**: `test/oracle/runner/Main.hs` states the rewrite perturbation's rendering, the kill-attribution cases, and the vocabulary list from literals.
 **Legacy IDs**: none
 **Docs to update**: `DEVELOPMENT_PLAN/README.md` only through `accept`
 
@@ -243,8 +298,8 @@ Author the specification the runner executes for this phase.
 
 ### Deliverables
 
-- The Phase-4 `GateSpec` with its `BinaryFact` and the seven subjects.
-- The `capacity-suite` stanza writing the enumeration bytes the oracle judges.
+- The Phase-4 `GateSpec` with its `BinaryFact` carrying the rewrite perturbation, its six subjects, and the artefact prefixes each owns, registered in `Registry.hs`.
+- The capacity section of the shared spine suite writing the enumeration, volume, and claim bytes the oracle judges.
 
 ### Validation
 
@@ -253,7 +308,7 @@ phase's patch.
 
 ### Remaining Work
 
-Everything above. The `accept` ends this phase.
+The specification is registered. The complete gate is the remaining work; the `accept` ends this phase.
 
 ## Documentation Requirements
 

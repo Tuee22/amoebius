@@ -77,7 +77,7 @@ capability: child_clusters_obligation_teardown
 subjects:
   - Amoebius.Dsl.Children
   - Amoebius.Dsl.Lower
-  - Amoebius.Kernel.Chain
+  - Amoebius.Kernel.Step
   - Amoebius.Calculus.Workflow.Obligation
 suite: children-suite
 oracle: oracle-dsl
@@ -100,7 +100,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 | Key | Contract |
 |---|---|
 | `Claim` | For every corpus example with children, `amoebius compile` over the projected child subtree byte-equals `amoebius compile` over the root for the child's deployment; `chain` is typed `ProvisionedSpec -> Workflow '[] '[] [Step]`, so a chain provisioning without release does not compile; the test-topology ledger balances. Live children, multi-cluster spawn, and UI are excluded. |
-| `Subject` | `Amoebius.Dsl.Children`, `Amoebius.Dsl.Lower`, `Amoebius.Kernel.Chain`, and `Amoebius.Calculus.Workflow.Obligation`, all inside the closure of `executable amoebius`. |
+| `Subject` | `Amoebius.Dsl.Children`, `Amoebius.Dsl.Lower`, `Amoebius.Kernel.Step`, and `Amoebius.Calculus.Workflow.Obligation`, all inside the closure of `executable amoebius`. |
 | `Command` | Future public spelling is `pb validate phase 07`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 07`; then `amoebius-validate accept --phase 07` records the receipt and applies one phase's status patch. The runner spawns the shipped binary for `compile` over the root and over each projected child. |
 | `Oracle` | `test/oracle/dsl/Main.hs` compares the child and root manifests and reads the release ledger; it depends on no `amoebius` library. |
 | `Positive controls` | The forest example: child and root compilation byte-equal; the test-topology example: the ledger reports zero owned resources and the release steps appear in reverse provisioning order. |
@@ -131,7 +131,7 @@ documentation checker refuses a block that differs from it. Execution evidence r
 ## Sprint 7.1: Forest adjacency and the typed child projection ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Dsl/Children.hs` and `src/Amoebius/Dsl/Lower.hs`
+**Implementation**: `src/dsl-spine/Amoebius/Dsl/Children.hs` and `src/dsl-spine/Amoebius/Dsl/Lower.hs`
 **Blocked by**: [Phase 6](phase_06_extension_admission_attested_scope.md) gate pass
 **Independent Validation**: The forest example's child projection lowers to the same `BoundDeployment` as the root for the child's deployment; `ChildNamesUnknownParent` and `CyclicForest` are refused at the forest stage by name; a mutant that projects the parent's deployments into the child is killed by the byte comparison.
 **Oracle**: `test/oracle/dsl/Main.hs` states the expected child manifest per example from literals.
@@ -159,7 +159,7 @@ Implement the module and the forest refusals.
 ## Sprint 7.2: The obligation-indexed chain ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Kernel/Chain.hs` and `src/Amoebius/Calculus/Workflow/Obligation.hs`
+**Implementation**: `src/kernel-steps/Amoebius/Kernel/Step.hs` and `src/Amoebius/Calculus/Workflow/Obligation.hs`
 **Blocked by**: Sprint 7.1
 **Independent Validation**: `chain` returns `Workflow '[] '[] [Step]` for every corpus example; the release-less twin does not compile at the obligation index; the fake boundary observes the release steps in reverse provisioning order and the ledger balances to zero.
 **Oracle**: `test/oracle/dsl/Main.hs` states the expected step and release order from literals.

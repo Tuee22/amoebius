@@ -5,7 +5,8 @@ module RenderGoldenProps
   , runRenderGoldenProps
   ) where
 
-import Amoebius.Capacity.Provision (ProvisionedSpec, provisionedRenderSources)
+import Amoebius.Capacity.Provision (ProvisionedSpec, provisionedPlacement, provisionedRenderSources)
+import Amoebius.Capacity.Types (MaterializedNode (..), Node (..), Placement (..))
 import Amoebius.Capacity.RenderSource
   ( K8sObjectIdentity (K8sObjectIdentity)
   , ProvisionedPartWitness (..)
@@ -17,10 +18,12 @@ import Amoebius.Capacity.RenderSource
   , renderSourceReconcileMode
   , renderSourceWitness
   )
-import Amoebius.Capacity.Types (ResourceVector (..))
+import Amoebius.Capacity.Vector (ResourceVector (..))
+import Amoebius.Vocabulary (Quantity (..))
 import Amoebius.Capability.Types qualified as Capability
 import Amoebius.Manifest (renderAll)
 import Amoebius.Manifest.K8sObject
+import Amoebius.Placement.Witness (placedPlacement)
 import BindFixtures (CapabilityFixture (..), capabilityFixtures)
 import Control.Monad (unless)
 import Data.Map.Strict qualified as Map
@@ -51,9 +54,12 @@ renderInvariantFailures sealed objects =
  where
   sourceMap = provisionedRenderSourceMap (provisionedRenderSources sealed)
   objectMap = Map.fromList [(objectIdentity object, object) | object <- objects]
+  -- A StatefulSet source that carries a volume renders its claim as a second object, named after it.
+  claimKeys = Set.fromList [K8sObjectIdentity (identity <> "/pvc") | (K8sObjectIdentity identity, source) <- Map.toList sourceMap, ownsClaim source]
+  nodes = [nodeId (materializedNode member) | member <- placementNodes (placedPlacement (provisionedPlacement sealed))]
   domainFailures =
     [ "render-domain"
-    | Map.keysSet sourceMap /= Map.keysSet objectMap || Map.size objectMap /= length objects
+    | Set.union (Map.keysSet sourceMap) claimKeys /= Map.keysSet objectMap || Map.size objectMap /= length objects
     ]
   stageFailures =
     [ "activation-domain"
@@ -62,14 +68,34 @@ renderInvariantFailures sealed objects =
   ingressFailures = concatMap validateIngress objects
 
   validateObject object = case Map.lookup (objectIdentity object) sourceMap of
-    Nothing -> ["unknown-object"]
+    Nothing -> case claimOwner object of
+      Just owner -> claimFailures owner object
+      Nothing -> ["unknown-object"]
     Just source ->
       identityFailures source object
         <> namespaceFailures source object
         <> apiVersionFailures source object
         <> activationFailures source object
         <> kindFailures source object
-        <> specFailures source object
+        <> specFailures nodes source object
+
+  claimOwner object = case objectIdentity object of
+    K8sObjectIdentity identity -> Text.stripSuffix "/pvc" identity >>= \owner -> Map.lookup (K8sObjectIdentity owner) sourceMap
+
+-- | A source that renders a claim: a StatefulSet that carries the size of its volume.
+ownsClaim :: ProvisionedRenderSource -> Bool
+ownsClaim source = expectedKind source == StatefulSetKind && Map.member "volume-bytes" (renderSourceFields source)
+
+-- | A claim carries the identity, namespace, and activation of the StatefulSet that owns it, and is a
+-- persistent volume claim.
+claimFailures :: ProvisionedRenderSource -> K8sObject -> [Text]
+claimFailures owner object =
+  identityFailures owner object
+    <> namespaceFailures owner object
+    <> activationFailures owner object
+    <> ["claim-kind" | objectKind object /= PersistentVolumeClaimKind]
+    <> ["claim-api-version" | objectApiVersion object /= "v1"]
+    <> ["claim-owner" | not (ownsClaim owner)]
 
 identityFailures :: ProvisionedRenderSource -> K8sObject -> [Text]
 identityFailures source object =
@@ -151,6 +177,9 @@ expectedKind source = case renderSourceWitness source of
   ServiceConfigurationPart _ -> ConfigMapKind
   ServiceEndpointPart _ -> ServiceKind
   ServicePolicyPart _ -> NetworkPolicyKind
+  AppNamespacePart _ -> NamespaceKind
+  AppWorkloadPart _ -> DeploymentKind
+  AppEndpointPart _ -> ServiceKind
   ServiceWorkloadPart _ -> case Map.lookup "kind" (renderSourceFields source) of
     Just "StatefulSet" -> StatefulSetKind
     Just "DaemonSet" -> DaemonSetKind
@@ -159,11 +188,11 @@ expectedKind source = case renderSourceWitness source of
     Just "HostProcess" -> CustomResourceKind
     _ -> DeploymentKind
 
-specFailures :: ProvisionedRenderSource -> K8sObject -> [Text]
-specFailures source object = case objectSpec object of
+specFailures :: [Text] -> ProvisionedRenderSource -> K8sObject -> [Text]
+specFailures nodes source object = case objectSpec object of
   WorkloadSpec workloadKind pod ->
     workloadKindFailures object workloadKind
-      <> podFailures source pod
+      <> podFailures nodes source pod
   NetworkPolicySpec defaultDeny edges ->
     ["network-policy-default-deny" | not defaultDeny]
       <> ["network-policy-edge-set" | edges /= expectedAllowEdges object]
@@ -182,8 +211,8 @@ workloadKindFailures object workloadKind =
         ]
   ]
 
-podFailures :: ProvisionedRenderSource -> PodTemplate -> [Text]
-podFailures source pod =
+podFailures :: [Text] -> ProvisionedRenderSource -> PodTemplate -> [Text]
+podFailures nodes source pod =
   securityFailures
     <> resourceFailures
     <> schedulerFailures
@@ -204,9 +233,14 @@ podFailures source pod =
     [ "resource-projection"
     | requests /= expected || limits /= expected || not (nonZeroResources requests)
     ]
+  -- An application workload and a provider workload name a node of the placement; every other workload names none.
+  nodeNamed = case renderSourceWitness source of
+    AppWorkloadPart _ -> maybe False (`elem` nodes) (podNodeName pod)
+    ServiceWorkloadPart _ -> maybe False (`elem` nodes) (podNodeName pod)
+    _ -> podNodeName pod == Nothing
   schedulerFailures =
     [ "scheduler-or-node-name"
-    | podNodeName pod /= Nothing
+    | not nodeNamed
         || podSchedulerName pod /= expectedScheduler (renderSourceWitness source)
     ]
   imageFailures = ["image-digest" | not ("@sha256:" `Text.isInfixOf` podImage pod)]
@@ -224,8 +258,9 @@ expectedResources fields =
     (positive "ephemeral-storage")
     (positive "pod-slots")
  where
+  positive :: Text -> Quantity unit
   positive key = case Map.lookup key fields >>= readMaybe . Text.unpack of
-    Just value -> max 1 value
+    Just value -> max 1 (Quantity value)
     Nothing -> 1
 
 nonZeroResources :: ResourceVector -> Bool
@@ -282,5 +317,5 @@ propLegalRender (GeneratedRenderCase selected) =
   assertion = case provisionFixture fixture shape of
     Left problem -> counterexample (show problem) (property False)
     Right sealed ->
-      let failures = renderInvariantFailures sealed (renderAll sealed)
+      let failures = renderInvariantFailures sealed (either (error . show) id (renderAll sealed))
        in counterexample (show failures) (property (null failures))

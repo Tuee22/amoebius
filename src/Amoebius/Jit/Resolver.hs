@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Jit.Resolver
-  ( EngineRuntime (..)
+  ( JitEngine (..)
   , ResolveArm (..)
   , EngineHandle
   , engineHandleKey
@@ -18,7 +18,7 @@ import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
 import Data.Text (Text)
 
-data EngineRuntime = LlamaCppCpu
+data JitEngine = LlamaCppCpu
   deriving stock (Bounded, Enum, Eq, Ord, Show)
 
 data ResolveArm = Build | Download
@@ -40,10 +40,10 @@ data ResolverError
   | ResolvedSizeMismatch Int Int
   deriving stock (Eq, Ord, Show)
 
-catalogPayload :: EngineRuntime -> ByteString
+catalogPayload :: JitEngine -> ByteString
 catalogPayload LlamaCppCpu = "#!/bin/sh\nprintf 'llama.cpp-cpu 0.1.0\\n'\n"
 
-catalogVersion :: EngineRuntime -> Text
+catalogVersion :: JitEngine -> Text
 catalogVersion LlamaCppCpu = "llama.cpp-cpu 0.1.0"
 
 engineHandleKey :: EngineHandle -> CacheKey
@@ -52,7 +52,7 @@ engineHandleKey (EngineHandle key _) = key
 engineHandleVersion :: EngineHandle -> Text
 engineHandleVersion (EngineHandle _ version) = version
 
-resolveEngine :: ResolveArm -> EngineRuntime -> CacheState -> Either ResolverError (EngineHandle, CacheState, ResolveReceipt)
+resolveEngine :: ResolveArm -> JitEngine -> CacheState -> Either ResolverError (EngineHandle, CacheState, ResolveReceipt)
 resolveEngine arm runtime state =
   case lookupResident expectedKey state of
     Just resident -> Right (handle, state, receipt True Nothing resident)
@@ -72,6 +72,6 @@ resolveEngine arm runtime state =
   handle = EngineHandle expectedKey (catalogVersion runtime)
   receipt hit executed resident = ResolveReceipt hit executed (residentKey resident) (fromIntegral (residentSizeBytes resident))
 
-materialize :: EngineRuntime -> ByteString
+materialize :: JitEngine -> ByteString
 materialize runtime =
   catalogPayload runtime

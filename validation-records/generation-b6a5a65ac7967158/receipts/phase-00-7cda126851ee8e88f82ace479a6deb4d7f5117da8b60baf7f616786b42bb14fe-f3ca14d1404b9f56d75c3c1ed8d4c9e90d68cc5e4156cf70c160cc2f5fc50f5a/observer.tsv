@@ -1,0 +1,63 @@
+run.1.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/clean/driver
+run.1.argv	
+run.1.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/clean
+run.1.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.1.exit	ExitSuccess
+run.1.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.1.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.1.stdout-bytes	0
+run.1.digest	27bca386551084a764a156aebc220561afb9698b3a57255b4cb3c0c6a2cab1cd
+run.2.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/digest-equality-bypass/driver
+run.2.argv	
+run.2.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/digest-equality-bypass
+run.2.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.2.exit	ExitFailure 1
+run.2.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.2.stderr-sha256	da9cd1b374123f158f6fe7e7bf9975ae76cd36e8977f8154debd1eb0a13f28f0
+run.2.stdout-bytes	0
+run.2.digest	64c247d0c84b6c7caada0943df4466f86f47c81c8998290d791e17a729446553
+run.3.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/snapshot-freshness-bypass/driver
+run.3.argv	
+run.3.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/snapshot-freshness-bypass
+run.3.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.3.exit	ExitFailure 1
+run.3.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.3.stderr-sha256	e61150774605dc9e6da61cb9bd975945e42c7db95ce055aba2336f2eef5560b4
+run.3.stdout-bytes	0
+run.3.digest	2092b94f4986e8de6e7f17873a7995c47154e737adaa8cd53a0a0c6317b14a16
+run.4.executable	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/bootstrap-path-bypass/driver
+run.4.argv	
+run.4.cwd	/home/matt/amoebius/.build/runs/phase-00/seed-protocol/seed/bootstrap-path-bypass
+run.4.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.4.exit	ExitFailure 1
+run.4.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.4.stderr-sha256	8544abd7a1b5c85920d6b3d342cbf66650158431ff0c17147bb9da833e071247
+run.4.stdout-bytes	0
+run.4.digest	c5905861fe6c8c590ccf9125c65ee73617ffe87914d9d3e7b173392418f23ca6
+run.5.executable	cabal
+run.5.argv	build -v0 --jobs=1 amoebius:test:plan-decisions-suite amoebius:test:oracle-doc
+run.5.cwd	.
+run.5.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.5.exit	ExitSuccess
+run.5.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.5.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.5.stdout-bytes	0
+run.5.digest	c110b13056144f161c3588c14d522f999a4aeee69c606825de18fbc595794489
+run.6.executable	cabal
+run.6.argv	run -v0 --jobs=1 amoebius:test:plan-decisions-suite -- ./.build/runs/phase-00/clean/suite
+run.6.cwd	.
+run.6.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.6.exit	ExitSuccess
+run.6.stdout-sha256	0672cf5d0dfdb1469f61b689168ca2b50ca54df8d36e99d2d20d5a8edfec80fb
+run.6.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.6.stdout-bytes	89
+run.6.digest	15b4fb4eef160c48b8d32c89c5621f1bc33d23a9c538bef8ed04d71cd4c5f485
+run.7.executable	cabal
+run.7.argv	run -v0 --jobs=1 amoebius:test:oracle-doc -- ./.build/runs/phase-00/clean/suite
+run.7.cwd	.
+run.7.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.7.exit	ExitSuccess
+run.7.stdout-sha256	cae256e46c657ff425e8bcc7fd8473f0cae6ea329b379789d0f55dfd3eaa9287
+run.7.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.7.stdout-bytes	12015
+run.7.digest	5db20c69efa1e4d48e942a4524dfc4412fde6e3ebb45d280a20b6f047b840f55

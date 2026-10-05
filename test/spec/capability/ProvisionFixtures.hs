@@ -39,16 +39,10 @@ import Amoebius.Capacity.Provision
   , deriveInfrastructureDemand
   , infrastructureRequiredResources
   )
-import Amoebius.Capacity.Types
-  ( CandidateNodeClass (CandidateNodeClass)
-  , CpuOvercommitPolicy (NoCpuOvercommit)
-  , GrowthQuota (GrowthQuota)
-  , HostEnvironment (NativeLinux)
-  , Node (Node)
-  , NodeCapacity (NodeCapacity)
-  , ResourceVector (..)
-  )
-import Amoebius.Capability.Binding (assembleBoundDeployment, bind)
+import Amoebius.Capacity.Types (CandidateNodeClass (CandidateNodeClass), CpuOvercommitPolicy (NoCpuOvercommit), GrowthQuota (GrowthQuota), HostEnvironment (NativeLinux), Node (Node), NodeCapacity (NodeCapacity))
+import Amoebius.Capacity.Vector (ResourceVector (..))
+import Amoebius.Capability.Assemble (assembleBoundDeployment)
+import Amoebius.Capability.Binding (bind)
 import Amoebius.Capability.Engine (TargetOffering (LinuxCudaOffering))
 import Amoebius.Capability.Types
   ( BoundDeployment (..)
@@ -81,7 +75,7 @@ baselinePolicy :: ProvisionPolicy
 baselinePolicy =
   ProvisionPolicy
     { policyRuntimeBackingBytes = 100000
-    , policyStorageBackingBytes = 100000
+    , policyStorageBackingBytes = 1099511627776
     , policyMonitoringWorkflowLimit = 1000
     , policyMonitoringRuleLimit = 2000
     , policyMonitoringSeriesLimit = 10000
@@ -174,7 +168,7 @@ data ProvisionNegative = ProvisionNegative
 
 provisionNegatives :: CapabilityFixture -> CapabilityFixture -> [ProvisionNegative]
 provisionNegatives observabilityFixture cudaFixture =
-  [ negativeWithTwin "illegal_post_bind_expansion_overcommit" "PostBindExpansionOvercommit" "legal_post_bind_expansion_exact" postBindOutcome postBindTwin
+  [ negativeWithTwin "illegal_placement_over_capacity" "OverCapacity" "legal_placement_exact" postBindOutcome postBindTwin
   , negativeWithTwin "illegal_monitoring_work_over_budget" "MonitoringBudgetExceeded" "legal_monitoring_work_exact" (policyOutcome observabilityFixture monitoringShort) (policyOutcome observabilityFixture monitoringExact)
   , negativeWithTwin "illegal_accelerator_vram_shortage" "VramOvercommit" "legal_accelerator_vram_exact" (policyOutcome cudaFixture vramShort) (policyOutcome cudaFixture vramExact)
   , negative "illegal_cuda_on_cpu_target" "MissingCapability" "legal_cuda_on_cuda_target" (policyOutcome cudaFixture cpuOnly)

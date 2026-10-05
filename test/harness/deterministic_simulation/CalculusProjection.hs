@@ -26,7 +26,8 @@ import Amoebius.Calculus.Composition
 import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
 import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types (ResourceVector (..))
+import Amoebius.Capacity.Vector (ResourceVector (..))
+import Amoebius.Vocabulary (Quantity (..), quantityText)
 import Amoebius.Formal.CalculusComposition (compositionModel)
 import Amoebius.Formal.Model (Model)
 import Amoebius.Scope.Index
@@ -84,17 +85,14 @@ withReferenceComposition continuation = do
      in continuation composition
 
 resources :: Natural -> ResourceVector
-resources value = ResourceVector value (value * 10) (value * 100) value
+resources value = ResourceVector (Quantity value) (Quantity (value * 10)) (Quantity (value * 100)) (Quantity value)
 
 renderResources :: ResourceVector -> Text
 renderResources value =
   Text.intercalate
     ","
-    ( map
-        (Text.pack . show)
-        [ resourceCpu value
-        , resourceMemory value
-        , resourceEphemeralStorage value
-        , resourcePodSlots value
-        ]
-    )
+    [ quantityText (resourceCpu value)
+    , quantityText (resourceMemory value)
+    , quantityText (resourceEphemeralStorage value)
+    , quantityText (resourcePodSlots value)
+    ]

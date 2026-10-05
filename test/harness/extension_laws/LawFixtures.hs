@@ -19,7 +19,7 @@ import Amoebius.Calculus.Composition
 import Amoebius.Calculus.Evidence.Register (Register (..))
 import Amoebius.Calculus.Lift.Layer (Layer (..))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Capacity.Vector (ResourceVector (ResourceVector))
 import Amoebius.Extension.Declaration
   ( DeclarationError
   , ExtensionDeclaration

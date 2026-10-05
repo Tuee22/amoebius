@@ -1,0 +1,1131 @@
+candidate	phase=3	capability=typed_spine
+spec-digest	a42bbb4b081d5b76811d0a4fe99b8f96e7f052ca00a409af7797a1d65757ab57
+challenge	692205f892dcc34f40022c2498b83f18
+chain	f5b7cebd2be580ac4af8e47c722d48ab0a1fc8b477daf38b235e946af637cd40
+reproducible-core	5900741a16233de7741f5c068147c8af3e14ba753effbdf0c999bfb3d71475d5
+row	Claim	green
+observation	Claim	claim	From one operator-authored Dhall specification the shipped render-examples, compile, and apply commands freeze, decode, lower, plan, provision, render, chain, dry-run, and apply it through a separate fake kubectl process image. The runner rewrites the rendered example after the run starts, planting a nonce in the authored names and changing the replica count, and recovers the nonce from every stage artefact. The independent oracle judges every stage artefact of the corpus examples and of that run from literals, the fake's per-step stdin bytes concatenate to the compile output, and every refusal is observed at its exact tag and stage. Witness-driven rendering, capacity over application workloads beyond fit, substrates other than kind on one host, extensions, children, and the UI language are excluded.
+observation	Claim	spec-digest	a42bbb4b081d5b76811d0a4fe99b8f96e7f052ca00a409af7797a1d65757ab57
+observation	Claim	role	OrdinaryGate
+row	Subject	green
+observation	Subject	subject.Amoebius.Dsl.Decode	dsl-spine
+observation	Subject	subject.Amoebius.Dsl.Import	dsl-spine
+observation	Subject	subject.Amoebius.Dsl.Lower	dsl-spine
+observation	Subject	subject.Amoebius.Dsl.Pipeline	dsl-spine
+observation	Subject	subject.Amoebius.Dsl.Spec	dsl-spine
+observation	Subject	subject.Amoebius.Kernel.Interpret	kernel-steps
+observation	Subject	subject.Amoebius.Kernel.Step	kernel-steps
+observation	Subject	subject.Amoebius.Vocabulary	vocabulary
+row	Command	green
+observation	Command	command	amoebius-validate preview phase 3
+observation	Command	suite	spine-suite
+observation	Command	oracle	oracle-dsl
+row	Oracle	green
+observation	Oracle	oracle.directories	test/oracle/dsl
+observation	Oracle	oracle.ledger-sha256	68d0a19ad47973e2dc192b96f9864cfb26c1581ce3fe92dafd787dd01bfb94a4
+observation	Oracle	oracle.rows	574
+row	Positive controls	green
+observation	Positive controls	positive.count	13
+observation	Positive controls	ledger.red-rows	
+row	Paired negatives	green
+observation	Paired negatives	negative.count	26
+observation	Paired negatives	ledger.red-rows	
+row	Mutants	green
+observation	Mutants	mutants.killed	33
+observation	Mutants	mutants.viable	33
+observation	Mutants	mutants.stillborn	7
+observation	Mutants	mutants.ratio	1 % 1
+observation	Mutants	mutants.rows	40
+observation	Mutants	mutant.1	Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:108	branch-swap	4843039378b7->ad71558aa7fc	killed@vocab.host-grid,case:lanes-of
+observation	Mutants	mutant.2	Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:162	branch-swap	5adfa4df0f13->28198a46e886	killed@decode.section,spec.kind-replicas.zero,spec.kind-replicas.one
+observation	Mutants	mutant.3	Amoebius.Dsl.Import	src/dsl-spine/Amoebius/Dsl/Import.hs:88	field-drop	2b6d506f4bee->982e87093c8d	killed@consume.section,fake-apply.section,freeze.kind-single-objectstore.equivalent
+observation	Mutants	mutant.4	Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:157	list-truncation	dcdcfd508061->adb247dccb2c	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:810:27: warning: [GHC-40910] [
+observation	Mutants	mutant.5	Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:109	field-drop	2f4ad62d0d0a->640f8146c9a4	killed@consume.section,chain.section,fake-apply.section
+observation	Mutants	mutant.6	Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:97	branch-swap	5be0dae83c1a->9728b055a00d	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.kind-single-objectstore.app-deployment
+observation	Mutants	mutant.7	Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:117	constant-flip	91748d57bbd6->26fca8e56605	killed@dry-run.kind-single-objectstore.dump,dry-run.shape-swap-sibling.dump,dry-run.replicas-3-sibling.dump
+observation	Mutants	mutant.8	Amoebius.Dsl.Pipeline	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:151	list-truncation	4be864a505d7->397e1328e7c4	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:810:27: warning: [GHC-40910] [
+observation	Mutants	mutant.9	Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:126	list-truncation	4843039378b7->2a5dbe2852dd	killed@vocab.host-grid,case:lanes-of
+observation	Mutants	mutant.10	Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:189	list-truncation	5adfa4df0f13->741d9099453e	killed@decode.section,spec.cluster.ok,spec.root.ok
+observation	Mutants	mutant.11	Amoebius.Dsl.Import	src/dsl-spine/Amoebius/Dsl/Import.hs:89	field-drop	2b6d506f4bee->a8ff65a8f074	killed@freeze.section,freeze.hash.format,freeze.hash.independent
+observation	Mutants	mutant.12	Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:171	constant-flip	dcdcfd508061->cf006920a493	killed@decode.kind-single-objectstore.dump,decode.shape-swap-sibling.dump,decode.replicas-3-sibling.dump
+observation	Mutants	mutant.13	Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:110	field-drop	2f4ad62d0d0a->cf6243c587bb	killed@consume.section,chain.section,fake-apply.section
+observation	Mutants	mutant.14	Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:141	boundary-shift	5be0dae83c1a->e9c534981967	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.kind-single-objectstore.app-deployment
+observation	Mutants	mutant.15	Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:122	constant-flip	91748d57bbd6->fd15ff1ca3c6	killed@dry-run.kind-single-objectstore.dump,dry-run.shape-swap-sibling.dump,dry-run.replicas-3-sibling.dump
+observation	Mutants	mutant.16	Amoebius.Dsl.Pipeline	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:224	list-truncation	4be864a505d7->3bc084b445d2	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:810:27: warning: [GHC-40910] [
+observation	Mutants	mutant.17	Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:127	list-truncation	4843039378b7->e8d49c10f870	killed@vocab.host-grid,case:lanes-of
+observation	Mutants	mutant.18	Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:217	constant-flip	5adfa4df0f13->ff7f4c5c4980	killed@spec.workload.pad-zero,decode.example.headroom-all-zero,pipeline.refusal.headroom-all-zero
+observation	Mutants	mutant.19	Amoebius.Dsl.Import	src/dsl-spine/Amoebius/Dsl/Import.hs:119	branch-swap	2b6d506f4bee->5eb7f7f8693e	killed@freeze.hash.twin,freeze.nested,freeze.parent
+observation	Mutants	mutant.20	Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:172	field-drop	dcdcfd508061->bed3a6d78488	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:810:27: warning: [GHC-40910] [
+observation	Mutants	mutant.21	Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:129	field-drop	2f4ad62d0d0a->afe46f5bb9b0	killed@decode.section,consume.section,chain.section
+observation	Mutants	mutant.22	Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:144	constant-flip	5be0dae83c1a->38ec43651939	killed@chain.table,case:step-sequence
+observation	Mutants	mutant.23	Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:122	list-truncation	91748d57bbd6->23601848f570	killed@dry-run.kind-single-objectstore.dump,dry-run.shape-swap-sibling.dump,dry-run.replicas-3-sibling.dump
+observation	Mutants	mutant.24	Amoebius.Dsl.Pipeline	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:226	list-truncation	4be864a505d7->fb213a27431d	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:810:27: warning: [GHC-40910] [
+observation	Mutants	mutant.25	Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:190	constant-flip	4843039378b7->b3a9ff9bccc3	killed@vocab.labels,spec.name.host.long,case:lanes-of
+observation	Mutants	mutant.26	Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:220	boundary-shift	5adfa4df0f13->dcd08cf4990d	killed@spec.workload.exact,spec.workload.pad-exact,spec.app.ok
+observation	Mutants	mutant.27	Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:186	constant-flip	dcdcfd508061->09c8dc9dc0e0	killed@decode.kind-single-objectstore.dump,decode.shape-swap-sibling.dump,decode.replicas-3-sibling.dump
+observation	Mutants	mutant.28	Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:130	field-drop	2f4ad62d0d0a->0e1279d25be6	killed@consume.section,fake-apply.section,lower.kind-single-objectstore.dump
+observation	Mutants	mutant.29	Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:144	boundary-shift	5be0dae83c1a->3d8f7c34503a	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.kind-single-objectstore.app-deployment
+observation	Mutants	mutant.30	Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:135	constant-flip	91748d57bbd6->96fa1153f301	killed@fake-apply.section,fake-apply.full.result,fake-apply.from-cutover.result
+observation	Mutants	mutant.31	Amoebius.Dsl.Pipeline	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:237	constant-flip	4be864a505d7->1cade9712bec	killed@freeze.kind-single-objectstore.equivalent,decode.kind-single-objectstore.dump,lower.kind-single-objectstore.dump
+observation	Mutants	mutant.32	Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:190	boundary-shift	4843039378b7->82f912be3959	killed@vocab.labels,case:lanes-of
+observation	Mutants	mutant.33	Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:222	boundary-shift	5adfa4df0f13->a206a4c17f9a	killed@spec.workload.exact,spec.workload.pad-exact,spec.workload.pad-one-axis
+observation	Mutants	mutant.34	Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:187	field-drop	dcdcfd508061->35b378f8021d	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:810:27: warning: [GHC-40910] [
+observation	Mutants	mutant.35	Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:161	branch-swap	2f4ad62d0d0a->61cb6ce888ce	killed@lower.example.kind-single-objectstore,lower.example.shape-swap-sibling,lower.example.replicas-3-sibling
+observation	Mutants	mutant.36	Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:144	list-truncation	5be0dae83c1a->bbd83739e9ca	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.kind-single-objectstore.app-deployment
+observation	Mutants	mutant.37	Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:143	list-truncation	91748d57bbd6->da35d62de65f	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:810:27: warning: [GHC-40910] [
+observation	Mutants	mutant.38	Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:191	branch-swap	4843039378b7->24c654788a23	killed@decode.section,vocab.labels,spec.name.app.underscore
+observation	Mutants	mutant.39	Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:240	boundary-shift	5adfa4df0f13->1c23c8c06a63	killed@decode.section,spec.app.ok,freeze.hash.format
+observation	Mutants	mutant.40	Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:208	constant-flip	dcdcfd508061->17d742e3a9cc	killed@decode.kind-single-objectstore.dump,decode.shape-swap-sibling.dump,decode.replicas-3-sibling.dump
+observation	Mutants	mutant.41	summary	killed=33	viable=33	stillborn=7
+row	Discovery	green
+observation	Discovery	closure.stanzas	capability-bind,capacity-topology,dsl-core,dsl-spine,execution-accelerator-folds,formal-model,kernel-steps,layout,manifest-render,offline-language-types,provider-pulumi,provision-seal,storage-geometry-folds,toolchain,vocabulary
+observation	Discovery	subjects.mapped	8
+observation	Discovery	subjects.declared	8
+row	Challenge	green
+observation	Challenge	challenge.nonce	692205f892dcc34f40022c2498b83f18
+observation	Challenge	challenge.kind	runner-perturbed input
+observation	Challenge	challenge.binary	[("./.build/runs/phase-03/clean/suite/binary/compiled/frozen.dhall",True),("./.build/runs/phase-03/clean/suite/binary/compiled/decoded.dump",True),("./.build/runs/phase-03/clean/suite/binary/compiled/lowered.dump",True),("./.build/runs/phase-03/clean/suite/binary/compiled/plan.dump",True),("./.build/runs/phase-03/clean/suite/binary/compiled/provisioned.dump",True),("./.build/runs/phase-03/clean/suite/binary/compiled/manifest.json",True),("./.build/runs/phase-03/clean/suite/binary/compiled/chain.dump",True),("./.build/runs/phase-03/clean/suite/binary/compiled/dry-run.dump",True),("./.build/runs/phase-03/clean/suite/binary/applied/fake/stdin.combined",True)]
+observation	Challenge	challenge.spine	True
+row	Observer	green
+observation	Observer	run.1.executable	cabal
+observation	Observer	run.1.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.1.cwd	./.build/runs/phase-03/mutants/1
+observation	Observer	run.1.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.1.exit	ExitSuccess
+observation	Observer	run.1.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.1.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.1.stdout-bytes	0
+observation	Observer	run.1.digest	3b617ffb56883820046d91015491cf70881c6d2d613ec0efdd7705152566f2ed
+observation	Observer	run.2.executable	cabal
+observation	Observer	run.2.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/1/suite
+observation	Observer	run.2.cwd	./.build/runs/phase-03/mutants/1
+observation	Observer	run.2.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.2.exit	ExitSuccess
+observation	Observer	run.2.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.2.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.2.stdout-bytes	0
+observation	Observer	run.2.digest	aeeabee62d16028726a6cee78141741280c6f5fa6ae3a6e37cf3b20d63fae8b9
+observation	Observer	run.3.executable	cabal
+observation	Observer	run.3.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/1/suite
+observation	Observer	run.3.cwd	./.build/runs/phase-03/mutants/1
+observation	Observer	run.3.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.3.exit	ExitFailure 1
+observation	Observer	run.3.stdout-sha256	deb0fc4df004021c4f2f8406cbf170615f6460aba1e77780c491f230fd4d1738
+observation	Observer	run.3.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.3.stdout-bytes	20751
+observation	Observer	run.3.digest	49f2445cdfb017b5138e5af9b6336cf69117c7efaf89cc7442d34f99eeb37c24
+observation	Observer	run.4.executable	cabal
+observation	Observer	run.4.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.4.cwd	./.build/runs/phase-03/mutants/2
+observation	Observer	run.4.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.4.exit	ExitSuccess
+observation	Observer	run.4.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.4.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.4.stdout-bytes	0
+observation	Observer	run.4.digest	cc65602daedd063abe30ab1b3abfb4c057544e4aaf3a2065c7fb75c47037e9f7
+observation	Observer	run.5.executable	cabal
+observation	Observer	run.5.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/2/suite
+observation	Observer	run.5.cwd	./.build/runs/phase-03/mutants/2
+observation	Observer	run.5.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.5.exit	ExitSuccess
+observation	Observer	run.5.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.5.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.5.stdout-bytes	0
+observation	Observer	run.5.digest	260b697c3a42cf22d0f0f102d6970eec344ce14cd130a8aad1f4cb9d142dd9ef
+observation	Observer	run.6.executable	cabal
+observation	Observer	run.6.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/2/suite
+observation	Observer	run.6.cwd	./.build/runs/phase-03/mutants/2
+observation	Observer	run.6.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.6.exit	ExitFailure 1
+observation	Observer	run.6.stdout-sha256	7d20213a1b44612f168f3201c6eb3342698b43b96a27bddd20112f3caf6ea172
+observation	Observer	run.6.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.6.stdout-bytes	37987
+observation	Observer	run.6.digest	ad4e94ee27b0af35fafcaa47ffec273048fdc68672c6cfba1e67d9b2c563c65f
+observation	Observer	run.7.executable	cabal
+observation	Observer	run.7.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.7.cwd	./.build/runs/phase-03/mutants/3
+observation	Observer	run.7.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.7.exit	ExitSuccess
+observation	Observer	run.7.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.7.stderr-sha256	7637627616f6fbd1437454a59796c9278793b17aaecffc5b18c663d47ca23c27
+observation	Observer	run.7.stdout-bytes	0
+observation	Observer	run.7.digest	c7b22169773ca1646949c36fdea7b0bc4b2443d8858b6d88b8c590c66a812b2f
+observation	Observer	run.8.executable	cabal
+observation	Observer	run.8.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/3/suite
+observation	Observer	run.8.cwd	./.build/runs/phase-03/mutants/3
+observation	Observer	run.8.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.8.exit	ExitSuccess
+observation	Observer	run.8.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.8.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.8.stdout-bytes	0
+observation	Observer	run.8.digest	b619cf2f0af9a9467f008ac8c96b3c144b78a891d47e92fc033f1b1a161509f9
+observation	Observer	run.9.executable	cabal
+observation	Observer	run.9.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/3/suite
+observation	Observer	run.9.cwd	./.build/runs/phase-03/mutants/3
+observation	Observer	run.9.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.9.exit	ExitFailure 1
+observation	Observer	run.9.stdout-sha256	7137e26529825c63cd2f77a5016fc0a75436878133b6e9b7807e3e54e4ba12dd
+observation	Observer	run.9.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.9.stdout-bytes	32799
+observation	Observer	run.9.digest	4879fdb70733de935601092c39c47b20b81869534fafb70a8f75ac12f422f970
+observation	Observer	run.10.executable	cabal
+observation	Observer	run.10.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.10.cwd	./.build/runs/phase-03/mutants/4
+observation	Observer	run.10.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.10.exit	ExitFailure 1
+observation	Observer	run.10.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.10.stderr-sha256	56e9ecf422dc8d5e93e1602b0db4fb7b591614dd776c4ec310332160e27608a8
+observation	Observer	run.10.stdout-bytes	0
+observation	Observer	run.10.digest	5f82ff628f18c575923d3568f6fb8c57ecd9a170e615c0be091dca1da8b8ae26
+observation	Observer	run.11.executable	cabal
+observation	Observer	run.11.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.11.cwd	./.build/runs/phase-03/mutants/5
+observation	Observer	run.11.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.11.exit	ExitSuccess
+observation	Observer	run.11.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.11.stderr-sha256	9627992d12f7b33c0ca7ac765704f30feb506dbc99c37c64e4a3ab1426573116
+observation	Observer	run.11.stdout-bytes	0
+observation	Observer	run.11.digest	a9236b7e5fe48c9e51a518a30ebf123ca337648567bae0635a93875e78bbf6a8
+observation	Observer	run.12.executable	cabal
+observation	Observer	run.12.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/5/suite
+observation	Observer	run.12.cwd	./.build/runs/phase-03/mutants/5
+observation	Observer	run.12.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.12.exit	ExitSuccess
+observation	Observer	run.12.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.12.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.12.stdout-bytes	0
+observation	Observer	run.12.digest	420a953c8a42ec159c92ecb18abade35f1c1aa63dd830889619dda3441e417ac
+observation	Observer	run.13.executable	cabal
+observation	Observer	run.13.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/5/suite
+observation	Observer	run.13.cwd	./.build/runs/phase-03/mutants/5
+observation	Observer	run.13.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.13.exit	ExitFailure 1
+observation	Observer	run.13.stdout-sha256	0637f54429797d128ba65c1ae0b99283df92c75ddd32549bef7c9f5f7cd8ec81
+observation	Observer	run.13.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.13.stdout-bytes	30801
+observation	Observer	run.13.digest	184a45ee0dd6148ce9ddf3cf01d9cb36f5403d084de72581a7d53fc624f6eef8
+observation	Observer	run.14.executable	cabal
+observation	Observer	run.14.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.14.cwd	./.build/runs/phase-03/mutants/6
+observation	Observer	run.14.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.14.exit	ExitSuccess
+observation	Observer	run.14.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.14.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.14.stdout-bytes	0
+observation	Observer	run.14.digest	c41d9e95f71fdb07c9b0994598016e2a68799a9e12777c584ce2221a9fe37a0b
+observation	Observer	run.15.executable	cabal
+observation	Observer	run.15.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/6/suite
+observation	Observer	run.15.cwd	./.build/runs/phase-03/mutants/6
+observation	Observer	run.15.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.15.exit	ExitSuccess
+observation	Observer	run.15.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.15.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.15.stdout-bytes	0
+observation	Observer	run.15.digest	6ad5e134445c1bbf811a1bf1ebfc3c9d9fc54f89dba7e46daaff3638fb940d04
+observation	Observer	run.16.executable	cabal
+observation	Observer	run.16.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/6/suite
+observation	Observer	run.16.cwd	./.build/runs/phase-03/mutants/6
+observation	Observer	run.16.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.16.exit	ExitFailure 1
+observation	Observer	run.16.stdout-sha256	819ccde1811f0d4ab579999587f234959ed21dbff4cfd3b4a6d2eb523935dd60
+observation	Observer	run.16.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.16.stdout-bytes	32520
+observation	Observer	run.16.digest	a196e164835fe738b4e5c9fc270d3f59da3fa3d453720f13147477de18865537
+observation	Observer	run.17.executable	cabal
+observation	Observer	run.17.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.17.cwd	./.build/runs/phase-03/mutants/7
+observation	Observer	run.17.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.17.exit	ExitSuccess
+observation	Observer	run.17.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.17.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.17.stdout-bytes	0
+observation	Observer	run.17.digest	359f7215fafc7cc99aae1d45c5833b2b768ede474d4c959557269c7888dd8eac
+observation	Observer	run.18.executable	cabal
+observation	Observer	run.18.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/7/suite
+observation	Observer	run.18.cwd	./.build/runs/phase-03/mutants/7
+observation	Observer	run.18.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.18.exit	ExitSuccess
+observation	Observer	run.18.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.18.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.18.stdout-bytes	0
+observation	Observer	run.18.digest	9499db2fdfc97f00100e727e7f7bc81d446506a96b4c4baae9b4b9a4cba5febe
+observation	Observer	run.19.executable	cabal
+observation	Observer	run.19.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/7/suite
+observation	Observer	run.19.cwd	./.build/runs/phase-03/mutants/7
+observation	Observer	run.19.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.19.exit	ExitFailure 1
+observation	Observer	run.19.stdout-sha256	3b14521c3b851763a224600043c6427344d51258b33885704b54abdaf1dece85
+observation	Observer	run.19.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.19.stdout-bytes	24335
+observation	Observer	run.19.digest	15fe9e760d0a4a9c440fc8897e7a519aff4dd191fda0f1b5a78f4df09e8ab315
+observation	Observer	run.20.executable	cabal
+observation	Observer	run.20.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.20.cwd	./.build/runs/phase-03/mutants/8
+observation	Observer	run.20.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.20.exit	ExitFailure 1
+observation	Observer	run.20.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.20.stderr-sha256	75694abb56cafef343c6a64bc4c99f4d215cbc6bf60ab7de7d2a10e013ee4681
+observation	Observer	run.20.stdout-bytes	0
+observation	Observer	run.20.digest	89d48482135fc762015f9447a2048dc0385bebabe770fb568c6b8974b8b617a3
+observation	Observer	run.21.executable	cabal
+observation	Observer	run.21.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.21.cwd	./.build/runs/phase-03/mutants/9
+observation	Observer	run.21.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.21.exit	ExitSuccess
+observation	Observer	run.21.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.21.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.21.stdout-bytes	0
+observation	Observer	run.21.digest	c05d1b510f9097600a3a1803938db39d2eb26ceed261ab3480dfcbe480ca92fa
+observation	Observer	run.22.executable	cabal
+observation	Observer	run.22.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/9/suite
+observation	Observer	run.22.cwd	./.build/runs/phase-03/mutants/9
+observation	Observer	run.22.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.22.exit	ExitSuccess
+observation	Observer	run.22.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.22.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.22.stdout-bytes	0
+observation	Observer	run.22.digest	0da14b83ed0af18a2fdd46449d95af3881d6feaee7b6402abfbf7d25caff87ae
+observation	Observer	run.23.executable	cabal
+observation	Observer	run.23.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/9/suite
+observation	Observer	run.23.cwd	./.build/runs/phase-03/mutants/9
+observation	Observer	run.23.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.23.exit	ExitFailure 1
+observation	Observer	run.23.stdout-sha256	deb0fc4df004021c4f2f8406cbf170615f6460aba1e77780c491f230fd4d1738
+observation	Observer	run.23.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.23.stdout-bytes	20751
+observation	Observer	run.23.digest	c17be2f82ad0ed624d143210a90e7056a509f639c2a1735d8d5df02934e3b1f5
+observation	Observer	run.24.executable	cabal
+observation	Observer	run.24.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.24.cwd	./.build/runs/phase-03/mutants/10
+observation	Observer	run.24.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.24.exit	ExitSuccess
+observation	Observer	run.24.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.24.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.24.stdout-bytes	0
+observation	Observer	run.24.digest	0197b823a7dee89aa17594612dbc3fc5ecaded762e57dbad00ddfe2dbb54b966
+observation	Observer	run.25.executable	cabal
+observation	Observer	run.25.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/10/suite
+observation	Observer	run.25.cwd	./.build/runs/phase-03/mutants/10
+observation	Observer	run.25.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.25.exit	ExitSuccess
+observation	Observer	run.25.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.25.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.25.stdout-bytes	0
+observation	Observer	run.25.digest	d13c3a01a8737881be511b4251ad2d6016d189ce69398f50d5d883c3748c3dc2
+observation	Observer	run.26.executable	cabal
+observation	Observer	run.26.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/10/suite
+observation	Observer	run.26.cwd	./.build/runs/phase-03/mutants/10
+observation	Observer	run.26.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.26.exit	ExitFailure 1
+observation	Observer	run.26.stdout-sha256	cd6e08949ec9a9a0974aa80971d27f1dca2bbab826f7c5283b73241fb333a42d
+observation	Observer	run.26.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.26.stdout-bytes	37732
+observation	Observer	run.26.digest	f0ac2ec710b9d19c0f2e8a7baff4a397560a9fcff04379d18b008287dcd0d6e2
+observation	Observer	run.27.executable	cabal
+observation	Observer	run.27.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.27.cwd	./.build/runs/phase-03/mutants/11
+observation	Observer	run.27.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.27.exit	ExitSuccess
+observation	Observer	run.27.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.27.stderr-sha256	fb86fcbc671cd81b296aee52a53a0bc78fde02857f7c1134ec74dfa4459aed2f
+observation	Observer	run.27.stdout-bytes	0
+observation	Observer	run.27.digest	d3a77d10da3970fc028952e8416f7745974d2b6fdd31656fa0a935cbb3b4b8dc
+observation	Observer	run.28.executable	cabal
+observation	Observer	run.28.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/11/suite
+observation	Observer	run.28.cwd	./.build/runs/phase-03/mutants/11
+observation	Observer	run.28.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.28.exit	ExitSuccess
+observation	Observer	run.28.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.28.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.28.stdout-bytes	0
+observation	Observer	run.28.digest	055b97f2bc52940c24760000fe5f0f1698a1a9eac051308d8e0c4468af8d25dd
+observation	Observer	run.29.executable	cabal
+observation	Observer	run.29.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/11/suite
+observation	Observer	run.29.cwd	./.build/runs/phase-03/mutants/11
+observation	Observer	run.29.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.29.exit	ExitFailure 1
+observation	Observer	run.29.stdout-sha256	8fa4f85b4593a5201a8d3795169f420a2bb2c93e280cf39c528f6c28a0d1c39d
+observation	Observer	run.29.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.29.stdout-bytes	21978
+observation	Observer	run.29.digest	cc11599b5a7c10ca81d5a0304ecb3b152f06e3b591e727eb965ecd698747ffc9
+observation	Observer	run.30.executable	cabal
+observation	Observer	run.30.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.30.cwd	./.build/runs/phase-03/mutants/12
+observation	Observer	run.30.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.30.exit	ExitSuccess
+observation	Observer	run.30.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.30.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.30.stdout-bytes	0
+observation	Observer	run.30.digest	f0df2d01b9daa130a244b0c654f0173fed81b37ba4952b89bfca8d8e7d0946ef
+observation	Observer	run.31.executable	cabal
+observation	Observer	run.31.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/12/suite
+observation	Observer	run.31.cwd	./.build/runs/phase-03/mutants/12
+observation	Observer	run.31.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.31.exit	ExitSuccess
+observation	Observer	run.31.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.31.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.31.stdout-bytes	0
+observation	Observer	run.31.digest	956cd75698d5dc6d5655dc3edf748f849950104c8cd6b94029161dfa4c1f2ff8
+observation	Observer	run.32.executable	cabal
+observation	Observer	run.32.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/12/suite
+observation	Observer	run.32.cwd	./.build/runs/phase-03/mutants/12
+observation	Observer	run.32.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.32.exit	ExitFailure 1
+observation	Observer	run.32.stdout-sha256	86ac15ccda567cfa6183d6fc93f3366ffac70a25f7006da2817efe975eced492
+observation	Observer	run.32.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.32.stdout-bytes	24275
+observation	Observer	run.32.digest	db03d6a3beaa380741de82f8216b40925e79136ab6ba5b025308b28240a02435
+observation	Observer	run.33.executable	cabal
+observation	Observer	run.33.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.33.cwd	./.build/runs/phase-03/mutants/13
+observation	Observer	run.33.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.33.exit	ExitSuccess
+observation	Observer	run.33.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.33.stderr-sha256	b3919d5f12b8b46e82eb20c44381e76033f0948633e9f09f880e93e35261e4f3
+observation	Observer	run.33.stdout-bytes	0
+observation	Observer	run.33.digest	e2874bb97b78cf551cf5993bedbff0cd868f508ea3c9984eee47ea3aa9343488
+observation	Observer	run.34.executable	cabal
+observation	Observer	run.34.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/13/suite
+observation	Observer	run.34.cwd	./.build/runs/phase-03/mutants/13
+observation	Observer	run.34.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.34.exit	ExitSuccess
+observation	Observer	run.34.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.34.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.34.stdout-bytes	0
+observation	Observer	run.34.digest	275912e4bff5e04e5a71900a320bfdbfdb52481d9dd14e0ccf6f5c0314f79cff
+observation	Observer	run.35.executable	cabal
+observation	Observer	run.35.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/13/suite
+observation	Observer	run.35.cwd	./.build/runs/phase-03/mutants/13
+observation	Observer	run.35.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.35.exit	ExitFailure 1
+observation	Observer	run.35.stdout-sha256	940a552122e17bf5c8c838e82a4439f1106a2bfae692ce899c21ebf07e8d8c5c
+observation	Observer	run.35.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.35.stdout-bytes	30846
+observation	Observer	run.35.digest	5b534ac5481dc785117b7ed68a8dab5afa8cf39d9356a7678e79659e23b7b492
+observation	Observer	run.36.executable	cabal
+observation	Observer	run.36.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.36.cwd	./.build/runs/phase-03/mutants/14
+observation	Observer	run.36.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.36.exit	ExitSuccess
+observation	Observer	run.36.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.36.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.36.stdout-bytes	0
+observation	Observer	run.36.digest	1101921b4dcf7519b6ee898d741d02405d46d75e83b1f336983ae4c7ecb9f7f2
+observation	Observer	run.37.executable	cabal
+observation	Observer	run.37.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/14/suite
+observation	Observer	run.37.cwd	./.build/runs/phase-03/mutants/14
+observation	Observer	run.37.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.37.exit	ExitSuccess
+observation	Observer	run.37.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.37.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.37.stdout-bytes	0
+observation	Observer	run.37.digest	c1860a2e7371486e1cd403e461efdbf099d708312cb08e8fced2ba6a2d76de1a
+observation	Observer	run.38.executable	cabal
+observation	Observer	run.38.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/14/suite
+observation	Observer	run.38.cwd	./.build/runs/phase-03/mutants/14
+observation	Observer	run.38.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.38.exit	ExitFailure 1
+observation	Observer	run.38.stdout-sha256	6b1a8bf574b9051325d244383daf680ffffd3d63984598bc468f47aa0dd36a93
+observation	Observer	run.38.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.38.stdout-bytes	32520
+observation	Observer	run.38.digest	e6f49a2a7ea7710232f2e0890fa02285ec64485ebedbdc1e4ccea29a0b54c8e3
+observation	Observer	run.39.executable	cabal
+observation	Observer	run.39.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.39.cwd	./.build/runs/phase-03/mutants/15
+observation	Observer	run.39.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.39.exit	ExitSuccess
+observation	Observer	run.39.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.39.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.39.stdout-bytes	0
+observation	Observer	run.39.digest	dcc7cde89453b67ab2e7f0f5248166df9bafdd13877fc49c59dfe29402eac692
+observation	Observer	run.40.executable	cabal
+observation	Observer	run.40.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/15/suite
+observation	Observer	run.40.cwd	./.build/runs/phase-03/mutants/15
+observation	Observer	run.40.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.40.exit	ExitSuccess
+observation	Observer	run.40.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.40.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.40.stdout-bytes	0
+observation	Observer	run.40.digest	784a0a986e6381a556ede5fd417ded4f09802e3b4756abdedd3faeef5712f164
+observation	Observer	run.41.executable	cabal
+observation	Observer	run.41.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/15/suite
+observation	Observer	run.41.cwd	./.build/runs/phase-03/mutants/15
+observation	Observer	run.41.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.41.exit	ExitFailure 1
+observation	Observer	run.41.stdout-sha256	4f36f2a6158f49902d96143543103801e7aa398384e460e07c866177e09f8f88
+observation	Observer	run.41.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.41.stdout-bytes	26064
+observation	Observer	run.41.digest	2a3933bbb4ad16ecbab7145562b85e934d9c6e2af0a1c4942ac2e428442bfb82
+observation	Observer	run.42.executable	cabal
+observation	Observer	run.42.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.42.cwd	./.build/runs/phase-03/mutants/16
+observation	Observer	run.42.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.42.exit	ExitFailure 1
+observation	Observer	run.42.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.42.stderr-sha256	6dfc5af308ae88124cf1ac095d08bbb460e325c471fb1871555b14e0645fde34
+observation	Observer	run.42.stdout-bytes	0
+observation	Observer	run.42.digest	299653886f549e155cffeb6af183445ce8f0d2764a6fc5db2f1a3e4bfad00bf1
+observation	Observer	run.43.executable	cabal
+observation	Observer	run.43.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.43.cwd	./.build/runs/phase-03/mutants/17
+observation	Observer	run.43.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.43.exit	ExitSuccess
+observation	Observer	run.43.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.43.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.43.stdout-bytes	0
+observation	Observer	run.43.digest	f0897e42141586035f23079c157226d53c55db5db70f8c6fe7810fde48f1ff4b
+observation	Observer	run.44.executable	cabal
+observation	Observer	run.44.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/17/suite
+observation	Observer	run.44.cwd	./.build/runs/phase-03/mutants/17
+observation	Observer	run.44.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.44.exit	ExitSuccess
+observation	Observer	run.44.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.44.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.44.stdout-bytes	0
+observation	Observer	run.44.digest	cded57c0bf4eead336399c57317effb831203b2bc357e22ad81cfa689aaa2619
+observation	Observer	run.45.executable	cabal
+observation	Observer	run.45.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/17/suite
+observation	Observer	run.45.cwd	./.build/runs/phase-03/mutants/17
+observation	Observer	run.45.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.45.exit	ExitFailure 1
+observation	Observer	run.45.stdout-sha256	deb0fc4df004021c4f2f8406cbf170615f6460aba1e77780c491f230fd4d1738
+observation	Observer	run.45.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.45.stdout-bytes	20751
+observation	Observer	run.45.digest	0a41eb9f615e95cd47948e268e30c75395920887ac2574fbfd32c857405cf25d
+observation	Observer	run.46.executable	cabal
+observation	Observer	run.46.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.46.cwd	./.build/runs/phase-03/mutants/18
+observation	Observer	run.46.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.46.exit	ExitSuccess
+observation	Observer	run.46.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.46.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.46.stdout-bytes	0
+observation	Observer	run.46.digest	e27b8fd446cd2ab185949b746c1edf62d9977f3557151b9769bf289e055e0041
+observation	Observer	run.47.executable	cabal
+observation	Observer	run.47.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/18/suite
+observation	Observer	run.47.cwd	./.build/runs/phase-03/mutants/18
+observation	Observer	run.47.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.47.exit	ExitSuccess
+observation	Observer	run.47.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.47.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.47.stdout-bytes	0
+observation	Observer	run.47.digest	04ce880b9d4dd2a240100c343a8972407e61de5bb1f94e00d78aa087e910662c
+observation	Observer	run.48.executable	cabal
+observation	Observer	run.48.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/18/suite
+observation	Observer	run.48.cwd	./.build/runs/phase-03/mutants/18
+observation	Observer	run.48.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.48.exit	ExitFailure 1
+observation	Observer	run.48.stdout-sha256	2a91cc8e6e1fc0f5b09e815e3bf1b430b87cca93fdd23e0a9e9dbdda874084a8
+observation	Observer	run.48.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.48.stdout-bytes	21304
+observation	Observer	run.48.digest	4289f09848d2cf76b5b32fdb61e600e4a66dac3dc9afc5bb55b2a87e062c1f39
+observation	Observer	run.49.executable	cabal
+observation	Observer	run.49.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.49.cwd	./.build/runs/phase-03/mutants/19
+observation	Observer	run.49.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.49.exit	ExitSuccess
+observation	Observer	run.49.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.49.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.49.stdout-bytes	0
+observation	Observer	run.49.digest	f1ad02b31bb51d5e89f359dfe403fc5c044861deabb15faeb4bd1d4001d2e65b
+observation	Observer	run.50.executable	cabal
+observation	Observer	run.50.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/19/suite
+observation	Observer	run.50.cwd	./.build/runs/phase-03/mutants/19
+observation	Observer	run.50.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.50.exit	ExitSuccess
+observation	Observer	run.50.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.50.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.50.stdout-bytes	0
+observation	Observer	run.50.digest	33f954e1216180afa9f89bb3309ddb741bdf2f7c696e7b71642427d37369878b
+observation	Observer	run.51.executable	cabal
+observation	Observer	run.51.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/19/suite
+observation	Observer	run.51.cwd	./.build/runs/phase-03/mutants/19
+observation	Observer	run.51.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.51.exit	ExitFailure 1
+observation	Observer	run.51.stdout-sha256	1face6b485090d90252b2e16cbb1782c6da1feb6a49a42dc4703d461ed85f624
+observation	Observer	run.51.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.51.stdout-bytes	23854
+observation	Observer	run.51.digest	649375562385cd54063634213a0594d88e0a92669db2e07642928ed97e1193ee
+observation	Observer	run.52.executable	cabal
+observation	Observer	run.52.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.52.cwd	./.build/runs/phase-03/mutants/20
+observation	Observer	run.52.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.52.exit	ExitFailure 1
+observation	Observer	run.52.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.52.stderr-sha256	9325cb1d194a7ad6cc90c9b85510ba42f78ecfabb9c0bba59bfaeeb87565fb30
+observation	Observer	run.52.stdout-bytes	0
+observation	Observer	run.52.digest	68203a2a4ea187c92854203cc0a00872b4fcfa3394f4828f7c6433ee253a294f
+observation	Observer	run.53.executable	cabal
+observation	Observer	run.53.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.53.cwd	./.build/runs/phase-03/mutants/21
+observation	Observer	run.53.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.53.exit	ExitSuccess
+observation	Observer	run.53.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.53.stderr-sha256	80b1f5cd3e09c76ac11cc6280f90514fb636fe331c1bb548d763e652345ff055
+observation	Observer	run.53.stdout-bytes	0
+observation	Observer	run.53.digest	1e4e7cc2048e5d0ed7f658faad372fa1e8df37814a2aa85e7685eaefa439f802
+observation	Observer	run.54.executable	cabal
+observation	Observer	run.54.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/21/suite
+observation	Observer	run.54.cwd	./.build/runs/phase-03/mutants/21
+observation	Observer	run.54.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.54.exit	ExitSuccess
+observation	Observer	run.54.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.54.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.54.stdout-bytes	0
+observation	Observer	run.54.digest	a8b14d3e470be24475e5658063c8104e456942d13948a1be99dd8bc00d73e6a6
+observation	Observer	run.55.executable	cabal
+observation	Observer	run.55.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/21/suite
+observation	Observer	run.55.cwd	./.build/runs/phase-03/mutants/21
+observation	Observer	run.55.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.55.exit	ExitFailure 1
+observation	Observer	run.55.stdout-sha256	2197a02a3811e4453312d7e85320c74a59321eacd070b08ba0bd401bc72e5bef
+observation	Observer	run.55.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.55.stdout-bytes	31284
+observation	Observer	run.55.digest	49aad6cec36a3133a5ea3b64ba6eaa3f6a54f88bd2aef77f8ff87214bc842966
+observation	Observer	run.56.executable	cabal
+observation	Observer	run.56.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.56.cwd	./.build/runs/phase-03/mutants/22
+observation	Observer	run.56.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.56.exit	ExitSuccess
+observation	Observer	run.56.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.56.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.56.stdout-bytes	0
+observation	Observer	run.56.digest	1c660734bb4a6a9a31bb4395b2cd3d5a480b6030fc69c6790284491c777e71cb
+observation	Observer	run.57.executable	cabal
+observation	Observer	run.57.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/22/suite
+observation	Observer	run.57.cwd	./.build/runs/phase-03/mutants/22
+observation	Observer	run.57.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.57.exit	ExitSuccess
+observation	Observer	run.57.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.57.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.57.stdout-bytes	0
+observation	Observer	run.57.digest	9e2fe0e5498c1811e82952b89a3f9ab4f8f8c61c93aecd5278b4b7202b0ca362
+observation	Observer	run.58.executable	cabal
+observation	Observer	run.58.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/22/suite
+observation	Observer	run.58.cwd	./.build/runs/phase-03/mutants/22
+observation	Observer	run.58.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.58.exit	ExitFailure 1
+observation	Observer	run.58.stdout-sha256	69e70d2df6f8d9fe706cca31ca63110f6ebb1913b4b6f8138b22bc6b58f26de1
+observation	Observer	run.58.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.58.stdout-bytes	20772
+observation	Observer	run.58.digest	4afac9b2c5d6492b89cd2c3a8aead4ff3b03f03ed549402b3a9eea228c796058
+observation	Observer	run.59.executable	cabal
+observation	Observer	run.59.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.59.cwd	./.build/runs/phase-03/mutants/23
+observation	Observer	run.59.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.59.exit	ExitSuccess
+observation	Observer	run.59.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.59.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.59.stdout-bytes	0
+observation	Observer	run.59.digest	8ce54844a0d622666fe810725353820bf37c6027b3cb48b8b05a1bd1dfc29e27
+observation	Observer	run.60.executable	cabal
+observation	Observer	run.60.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/23/suite
+observation	Observer	run.60.cwd	./.build/runs/phase-03/mutants/23
+observation	Observer	run.60.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.60.exit	ExitSuccess
+observation	Observer	run.60.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.60.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.60.stdout-bytes	0
+observation	Observer	run.60.digest	20a9bbf56a04d149664c037df319aae7906bce88712fa540427160fb4cbab0c4
+observation	Observer	run.61.executable	cabal
+observation	Observer	run.61.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/23/suite
+observation	Observer	run.61.cwd	./.build/runs/phase-03/mutants/23
+observation	Observer	run.61.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.61.exit	ExitFailure 1
+observation	Observer	run.61.stdout-sha256	1cdcee64cd7e13f681f79b7b900f9b3fe853e838c1bab6d1a33c4a93807b3e55
+observation	Observer	run.61.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.61.stdout-bytes	25808
+observation	Observer	run.61.digest	83dfaedc995ffed0cef2b47e1ca42f949b659938efd3afdff95877ec093f790e
+observation	Observer	run.62.executable	cabal
+observation	Observer	run.62.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.62.cwd	./.build/runs/phase-03/mutants/24
+observation	Observer	run.62.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.62.exit	ExitFailure 1
+observation	Observer	run.62.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.62.stderr-sha256	f422128e04d979a14850667e6863e45bec6b91605b44dda172556aa1d39f852c
+observation	Observer	run.62.stdout-bytes	0
+observation	Observer	run.62.digest	5dc43c3cb74adc806255c5050a64f809235924e8d4a1350df697d381d8b47c4d
+observation	Observer	run.63.executable	cabal
+observation	Observer	run.63.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.63.cwd	./.build/runs/phase-03/mutants/25
+observation	Observer	run.63.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.63.exit	ExitSuccess
+observation	Observer	run.63.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.63.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.63.stdout-bytes	0
+observation	Observer	run.63.digest	d04720cb992603986c17c8a6e34594326a199c4bd4fb1464a5e9ddab3158bf8a
+observation	Observer	run.64.executable	cabal
+observation	Observer	run.64.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/25/suite
+observation	Observer	run.64.cwd	./.build/runs/phase-03/mutants/25
+observation	Observer	run.64.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.64.exit	ExitSuccess
+observation	Observer	run.64.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.64.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.64.stdout-bytes	0
+observation	Observer	run.64.digest	88cd11f2e8f5057b5a9efc33e5cd0489d2c372bd0b14ff9eb5b6c56b8aa54d2c
+observation	Observer	run.65.executable	cabal
+observation	Observer	run.65.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/25/suite
+observation	Observer	run.65.cwd	./.build/runs/phase-03/mutants/25
+observation	Observer	run.65.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.65.exit	ExitFailure 1
+observation	Observer	run.65.stdout-sha256	b84e81ac7c0233ed3d5a0939fe211c121bba28dd6ff322d23d786ae42c204db3
+observation	Observer	run.65.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.65.stdout-bytes	20813
+observation	Observer	run.65.digest	b804a98c0b2a0115a73beb8a39fad89e7a11db2e07f75f05b9f6a44e51876bc7
+observation	Observer	run.66.executable	cabal
+observation	Observer	run.66.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.66.cwd	./.build/runs/phase-03/mutants/26
+observation	Observer	run.66.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.66.exit	ExitSuccess
+observation	Observer	run.66.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.66.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.66.stdout-bytes	0
+observation	Observer	run.66.digest	4db389a1fedeeec1ecee34716566cb511a64a8777cc9cc95b946c180bc4c7eb4
+observation	Observer	run.67.executable	cabal
+observation	Observer	run.67.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/26/suite
+observation	Observer	run.67.cwd	./.build/runs/phase-03/mutants/26
+observation	Observer	run.67.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.67.exit	ExitSuccess
+observation	Observer	run.67.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.67.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.67.stdout-bytes	0
+observation	Observer	run.67.digest	7d7101dd158971d46e092dd1361fc5cc01508eddec80784ec9d4f0978472609c
+observation	Observer	run.68.executable	cabal
+observation	Observer	run.68.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/26/suite
+observation	Observer	run.68.cwd	./.build/runs/phase-03/mutants/26
+observation	Observer	run.68.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.68.exit	ExitFailure 1
+observation	Observer	run.68.stdout-sha256	2fad3b3cdd3131836a0686985a0365b17260f4df7ad2705b140b98d341ce1fa4
+observation	Observer	run.68.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.68.stdout-bytes	21394
+observation	Observer	run.68.digest	63481df8fde8e26417fb63a8e52e1f00e262051c27fb70a0024e82441675da6f
+observation	Observer	run.69.executable	cabal
+observation	Observer	run.69.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.69.cwd	./.build/runs/phase-03/mutants/27
+observation	Observer	run.69.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.69.exit	ExitSuccess
+observation	Observer	run.69.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.69.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.69.stdout-bytes	0
+observation	Observer	run.69.digest	a4dcf342c99f80328d854dda2b12e98401ef46a88bce5fd0ad542e8453f1e3b9
+observation	Observer	run.70.executable	cabal
+observation	Observer	run.70.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/27/suite
+observation	Observer	run.70.cwd	./.build/runs/phase-03/mutants/27
+observation	Observer	run.70.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.70.exit	ExitSuccess
+observation	Observer	run.70.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.70.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.70.stdout-bytes	0
+observation	Observer	run.70.digest	c5c48f2926024f06f0354468d4889c5b7941aa9ee0e71d42ce8c1319f81d1708
+observation	Observer	run.71.executable	cabal
+observation	Observer	run.71.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/27/suite
+observation	Observer	run.71.cwd	./.build/runs/phase-03/mutants/27
+observation	Observer	run.71.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.71.exit	ExitFailure 1
+observation	Observer	run.71.stdout-sha256	86ac15ccda567cfa6183d6fc93f3366ffac70a25f7006da2817efe975eced492
+observation	Observer	run.71.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.71.stdout-bytes	24275
+observation	Observer	run.71.digest	253e7a59e1de234058dc392f2c2ddb967789050c4a671f00137dabd636190a12
+observation	Observer	run.72.executable	cabal
+observation	Observer	run.72.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.72.cwd	./.build/runs/phase-03/mutants/28
+observation	Observer	run.72.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.72.exit	ExitSuccess
+observation	Observer	run.72.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.72.stderr-sha256	226600505712d765011a81a811c81243b0a0559bb28ac826718740eb953b01d0
+observation	Observer	run.72.stdout-bytes	0
+observation	Observer	run.72.digest	b30089e889e4606ee52c497e69a60bf808b6eeb8afc126478813d8650656ae03
+observation	Observer	run.73.executable	cabal
+observation	Observer	run.73.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/28/suite
+observation	Observer	run.73.cwd	./.build/runs/phase-03/mutants/28
+observation	Observer	run.73.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.73.exit	ExitSuccess
+observation	Observer	run.73.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.73.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.73.stdout-bytes	0
+observation	Observer	run.73.digest	ea67571e1607f761eed2404b7c55c2f1a3d8a2fef63429ab728fed9dce84ae45
+observation	Observer	run.74.executable	cabal
+observation	Observer	run.74.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/28/suite
+observation	Observer	run.74.cwd	./.build/runs/phase-03/mutants/28
+observation	Observer	run.74.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.74.exit	ExitFailure 1
+observation	Observer	run.74.stdout-sha256	584a7600daf8c05db5fc8c35b290dfb691206bf9bb1fbc5bd87683f2c63ed528
+observation	Observer	run.74.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.74.stdout-bytes	34586
+observation	Observer	run.74.digest	8ba4eabe0c03e621613b79785396cfa6955c927f651a52cc368b6a3effbb90d6
+observation	Observer	run.75.executable	cabal
+observation	Observer	run.75.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.75.cwd	./.build/runs/phase-03/mutants/29
+observation	Observer	run.75.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.75.exit	ExitSuccess
+observation	Observer	run.75.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.75.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.75.stdout-bytes	0
+observation	Observer	run.75.digest	a548bc3b36a9752160a437a9edfaeac7c6682994de3015ee7e4095557e3d6b3b
+observation	Observer	run.76.executable	cabal
+observation	Observer	run.76.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/29/suite
+observation	Observer	run.76.cwd	./.build/runs/phase-03/mutants/29
+observation	Observer	run.76.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.76.exit	ExitSuccess
+observation	Observer	run.76.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.76.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.76.stdout-bytes	0
+observation	Observer	run.76.digest	69e5ccaa5b87f5aae9f942c877d8e889e6845a6cab443f87a4eba645aa5aa503
+observation	Observer	run.77.executable	cabal
+observation	Observer	run.77.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/29/suite
+observation	Observer	run.77.cwd	./.build/runs/phase-03/mutants/29
+observation	Observer	run.77.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.77.exit	ExitFailure 1
+observation	Observer	run.77.stdout-sha256	4983a6ebe856b5e6767f94a1cdda291b3dc483430518bc591ac4c2f45c1f0dda
+observation	Observer	run.77.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.77.stdout-bytes	32550
+observation	Observer	run.77.digest	08295d44a218298c4d108e0b02a998efc44e0d7fd53a4ab644adfd5aa41d9560
+observation	Observer	run.78.executable	cabal
+observation	Observer	run.78.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.78.cwd	./.build/runs/phase-03/mutants/30
+observation	Observer	run.78.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.78.exit	ExitSuccess
+observation	Observer	run.78.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.78.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.78.stdout-bytes	0
+observation	Observer	run.78.digest	2063d7f65387d5e20d3d034b4fb95f039469775c7500df09f2afba3a7a140680
+observation	Observer	run.79.executable	cabal
+observation	Observer	run.79.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/30/suite
+observation	Observer	run.79.cwd	./.build/runs/phase-03/mutants/30
+observation	Observer	run.79.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.79.exit	ExitSuccess
+observation	Observer	run.79.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.79.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.79.stdout-bytes	0
+observation	Observer	run.79.digest	5785d37f1e1b55375be25e6247dbf6d878db45845cdd5577bd6feb7862e7150a
+observation	Observer	run.80.executable	cabal
+observation	Observer	run.80.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/30/suite
+observation	Observer	run.80.cwd	./.build/runs/phase-03/mutants/30
+observation	Observer	run.80.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.80.exit	ExitFailure 1
+observation	Observer	run.80.stdout-sha256	f6065409fa154eb663bbd3094dfee447f2935398852d100436d0a9d4b43e1ee4
+observation	Observer	run.80.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.80.stdout-bytes	22020
+observation	Observer	run.80.digest	f1eeb69dd10eab5829d99a45bd756d43e051df38c32e0629f8aab3f24535c2ea
+observation	Observer	run.81.executable	cabal
+observation	Observer	run.81.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.81.cwd	./.build/runs/phase-03/mutants/31
+observation	Observer	run.81.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.81.exit	ExitSuccess
+observation	Observer	run.81.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.81.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.81.stdout-bytes	0
+observation	Observer	run.81.digest	67b4a45cfcf93608c3e1d909046b9a9d235e04c281220b93220b91b89b5702b8
+observation	Observer	run.82.executable	cabal
+observation	Observer	run.82.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/31/suite
+observation	Observer	run.82.cwd	./.build/runs/phase-03/mutants/31
+observation	Observer	run.82.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.82.exit	ExitSuccess
+observation	Observer	run.82.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.82.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.82.stdout-bytes	0
+observation	Observer	run.82.digest	4d54770fa4278d0a657790b5af8a82a6e25097e7cac8dbdad0cb57257db5e25e
+observation	Observer	run.83.executable	cabal
+observation	Observer	run.83.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/31/suite
+observation	Observer	run.83.cwd	./.build/runs/phase-03/mutants/31
+observation	Observer	run.83.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.83.exit	ExitFailure 1
+observation	Observer	run.83.stdout-sha256	a1cf75f061d81b7fcce854359cd57897f7cafca224fa154a2e5dfbd04f1deaf4
+observation	Observer	run.83.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.83.stdout-bytes	23025
+observation	Observer	run.83.digest	8392d201006c9a3174a3d19129aaa7e720c21004fd98c8a74d6140e79ae4db3f
+observation	Observer	run.84.executable	cabal
+observation	Observer	run.84.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.84.cwd	./.build/runs/phase-03/mutants/32
+observation	Observer	run.84.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.84.exit	ExitSuccess
+observation	Observer	run.84.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.84.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.84.stdout-bytes	0
+observation	Observer	run.84.digest	4718db11d6edfd1e58e7ac490b6c389190f206338c58a82f265e2bd23fa0193e
+observation	Observer	run.85.executable	cabal
+observation	Observer	run.85.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/32/suite
+observation	Observer	run.85.cwd	./.build/runs/phase-03/mutants/32
+observation	Observer	run.85.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.85.exit	ExitSuccess
+observation	Observer	run.85.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.85.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.85.stdout-bytes	0
+observation	Observer	run.85.digest	5dabbafe9047107b845cae14f1cba73d620282c4c4f00f49640fa4f3fe04af73
+observation	Observer	run.86.executable	cabal
+observation	Observer	run.86.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/32/suite
+observation	Observer	run.86.cwd	./.build/runs/phase-03/mutants/32
+observation	Observer	run.86.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.86.exit	ExitFailure 1
+observation	Observer	run.86.stdout-sha256	f23cf2f53d8f2f78d6a740c8a6cfc24c4d79ed8094ba6b30aa01157decc5c434
+observation	Observer	run.86.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.86.stdout-bytes	20769
+observation	Observer	run.86.digest	0eb13f305414dcb943fe52fd1d966af712eeb064d758709aa4bf3c46b8e6c2da
+observation	Observer	run.87.executable	cabal
+observation	Observer	run.87.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.87.cwd	./.build/runs/phase-03/mutants/33
+observation	Observer	run.87.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.87.exit	ExitSuccess
+observation	Observer	run.87.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.87.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.87.stdout-bytes	0
+observation	Observer	run.87.digest	211869a563951f03f542abd85ad3849d125a45614678d17d4cad2c82b0ea3584
+observation	Observer	run.88.executable	cabal
+observation	Observer	run.88.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/33/suite
+observation	Observer	run.88.cwd	./.build/runs/phase-03/mutants/33
+observation	Observer	run.88.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.88.exit	ExitSuccess
+observation	Observer	run.88.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.88.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.88.stdout-bytes	0
+observation	Observer	run.88.digest	f370efe8c311db2069c9e54b325a7e16589597cf825ae71ae605cc164d6d905d
+observation	Observer	run.89.executable	cabal
+observation	Observer	run.89.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/33/suite
+observation	Observer	run.89.cwd	./.build/runs/phase-03/mutants/33
+observation	Observer	run.89.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.89.exit	ExitFailure 1
+observation	Observer	run.89.stdout-sha256	98743182c57ed0aff5bfc5a1126b39b4052365aa352867c3c23f216105fb06da
+observation	Observer	run.89.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.89.stdout-bytes	20989
+observation	Observer	run.89.digest	6fc582e6e036327cea436ad4b9456ddf8799cf0da9aac316e66606df7a84943b
+observation	Observer	run.90.executable	cabal
+observation	Observer	run.90.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.90.cwd	./.build/runs/phase-03/mutants/34
+observation	Observer	run.90.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.90.exit	ExitFailure 1
+observation	Observer	run.90.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.90.stderr-sha256	ef6db9c1037dad8613542ce9371a6736e443c4056c225e0f85894d8cd329dad6
+observation	Observer	run.90.stdout-bytes	0
+observation	Observer	run.90.digest	f84bf70c07dc26dfb4aa8a7d51e326a830b2d8e6d98a5c615f031e4dff9d9d95
+observation	Observer	run.91.executable	cabal
+observation	Observer	run.91.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.91.cwd	./.build/runs/phase-03/mutants/35
+observation	Observer	run.91.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.91.exit	ExitSuccess
+observation	Observer	run.91.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.91.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.91.stdout-bytes	0
+observation	Observer	run.91.digest	71e5d3e3e196ab888f7d6478b57f1cf1fc1e17d984b6c9e61355f45cfe340c36
+observation	Observer	run.92.executable	cabal
+observation	Observer	run.92.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/35/suite
+observation	Observer	run.92.cwd	./.build/runs/phase-03/mutants/35
+observation	Observer	run.92.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.92.exit	ExitSuccess
+observation	Observer	run.92.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.92.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.92.stdout-bytes	0
+observation	Observer	run.92.digest	182cad9555ecf467ce03592c929ad90e7640d9ade8be75b3c6c4092debb26533
+observation	Observer	run.93.executable	cabal
+observation	Observer	run.93.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/35/suite
+observation	Observer	run.93.cwd	./.build/runs/phase-03/mutants/35
+observation	Observer	run.93.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.93.exit	ExitFailure 1
+observation	Observer	run.93.stdout-sha256	7a8b1a4493bdce7a69a5e10f9c69ccfc195f765bd155a83785de9b905a0e725f
+observation	Observer	run.93.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.93.stdout-bytes	32507
+observation	Observer	run.93.digest	0fc674c08395720c2357a051728e1efb28f33958819cbf20f747822c41f59a4b
+observation	Observer	run.94.executable	cabal
+observation	Observer	run.94.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.94.cwd	./.build/runs/phase-03/mutants/36
+observation	Observer	run.94.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.94.exit	ExitSuccess
+observation	Observer	run.94.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.94.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.94.stdout-bytes	0
+observation	Observer	run.94.digest	bee2b45a083488f27ca38f83fcd0d0040e57e382239b1c97444306195d653bef
+observation	Observer	run.95.executable	cabal
+observation	Observer	run.95.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/36/suite
+observation	Observer	run.95.cwd	./.build/runs/phase-03/mutants/36
+observation	Observer	run.95.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.95.exit	ExitSuccess
+observation	Observer	run.95.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.95.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.95.stdout-bytes	0
+observation	Observer	run.95.digest	97a8f0452010b137e385c1d1c99e454949f11e97952c41a44ce197437140bdb9
+observation	Observer	run.96.executable	cabal
+observation	Observer	run.96.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/36/suite
+observation	Observer	run.96.cwd	./.build/runs/phase-03/mutants/36
+observation	Observer	run.96.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.96.exit	ExitFailure 1
+observation	Observer	run.96.stdout-sha256	4983a6ebe856b5e6767f94a1cdda291b3dc483430518bc591ac4c2f45c1f0dda
+observation	Observer	run.96.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.96.stdout-bytes	32550
+observation	Observer	run.96.digest	cb567d613db6564b18d3dade85d2e92f873c711c49e0bf36283358562bfabe2c
+observation	Observer	run.97.executable	cabal
+observation	Observer	run.97.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.97.cwd	./.build/runs/phase-03/mutants/37
+observation	Observer	run.97.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.97.exit	ExitFailure 1
+observation	Observer	run.97.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.97.stderr-sha256	b9fa3c06c0fb4565b409c75858e2c6cd61553594a2e39fbdaa70c45ffef6e904
+observation	Observer	run.97.stdout-bytes	0
+observation	Observer	run.97.digest	ba09a769186d6a82bae75399ea17da70638e9ae3df9d43b5c6bfc2338c0bb220
+observation	Observer	run.98.executable	cabal
+observation	Observer	run.98.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.98.cwd	./.build/runs/phase-03/mutants/38
+observation	Observer	run.98.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.98.exit	ExitSuccess
+observation	Observer	run.98.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.98.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.98.stdout-bytes	0
+observation	Observer	run.98.digest	020a6cb571bd413d31a6996cc674c85ff045a95d4bc946d9c7f90a5fa43f3de7
+observation	Observer	run.99.executable	cabal
+observation	Observer	run.99.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/38/suite
+observation	Observer	run.99.cwd	./.build/runs/phase-03/mutants/38
+observation	Observer	run.99.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.99.exit	ExitSuccess
+observation	Observer	run.99.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.99.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.99.stdout-bytes	0
+observation	Observer	run.99.digest	cb3a330fe73b2f54741792378089170f5e22589fa9d6c90fefcf518578164180
+observation	Observer	run.100.executable	cabal
+observation	Observer	run.100.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/38/suite
+observation	Observer	run.100.cwd	./.build/runs/phase-03/mutants/38
+observation	Observer	run.100.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.100.exit	ExitFailure 1
+observation	Observer	run.100.stdout-sha256	a435809f23a4e76f95e8a1005f146884c4e391a2ef607857304536300133d4a5
+observation	Observer	run.100.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.100.stdout-bytes	38496
+observation	Observer	run.100.digest	d14e1d59af3c7b758a37ed659734c0524f48853406131c431570fb4c8526d66f
+observation	Observer	run.101.executable	cabal
+observation	Observer	run.101.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.101.cwd	./.build/runs/phase-03/mutants/39
+observation	Observer	run.101.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.101.exit	ExitSuccess
+observation	Observer	run.101.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.101.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.101.stdout-bytes	0
+observation	Observer	run.101.digest	07539e79715a285ab725ec52edbaf6c101115b776a3bd87fdbfc475daac696a2
+observation	Observer	run.102.executable	cabal
+observation	Observer	run.102.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/39/suite
+observation	Observer	run.102.cwd	./.build/runs/phase-03/mutants/39
+observation	Observer	run.102.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.102.exit	ExitSuccess
+observation	Observer	run.102.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.102.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.102.stdout-bytes	0
+observation	Observer	run.102.digest	192c1ca55a683fe247e5d3a8df5da29f5651f280cfd45345bbad4cfe1f1076b8
+observation	Observer	run.103.executable	cabal
+observation	Observer	run.103.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/39/suite
+observation	Observer	run.103.cwd	./.build/runs/phase-03/mutants/39
+observation	Observer	run.103.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.103.exit	ExitFailure 1
+observation	Observer	run.103.stdout-sha256	e6ce366f9a6197b788b3af15a2f936a52d8cf18d5f1d9f9ffa2f4d0b808e6390
+observation	Observer	run.103.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.103.stdout-bytes	37691
+observation	Observer	run.103.digest	0b1a16529ffe68e33233be884ce0c2074cafa270d9e07a6feda72964dbab6a47
+observation	Observer	run.104.executable	cabal
+observation	Observer	run.104.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.104.cwd	./.build/runs/phase-03/mutants/40
+observation	Observer	run.104.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.104.exit	ExitSuccess
+observation	Observer	run.104.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.104.stderr-sha256	67890ce8ce5f5274e080203131761f653b84e82ce32f9f89225044f66ed7ce3f
+observation	Observer	run.104.stdout-bytes	0
+observation	Observer	run.104.digest	da212863794a0d9f46a2d7f5969136ace1f75def20dda2dbe3a169deb6f754f7
+observation	Observer	run.105.executable	cabal
+observation	Observer	run.105.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/40/suite
+observation	Observer	run.105.cwd	./.build/runs/phase-03/mutants/40
+observation	Observer	run.105.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.105.exit	ExitSuccess
+observation	Observer	run.105.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.105.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.105.stdout-bytes	0
+observation	Observer	run.105.digest	c8693580361d3d5accae2b05b218bf9970d26f5f56e0e02c80dd01f5cc2462b5
+observation	Observer	run.106.executable	cabal
+observation	Observer	run.106.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/40/suite
+observation	Observer	run.106.cwd	./.build/runs/phase-03/mutants/40
+observation	Observer	run.106.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.106.exit	ExitFailure 1
+observation	Observer	run.106.stdout-sha256	86ac15ccda567cfa6183d6fc93f3366ffac70a25f7006da2817efe975eced492
+observation	Observer	run.106.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.106.stdout-bytes	24275
+observation	Observer	run.106.digest	b30f85fe34eec5eb83bb88168a0eb8291ddbe1a51feff64a6727f609ae718a3d
+observation	Observer	run.107.executable	cabal
+observation	Observer	run.107.argv	build -v0 --jobs=1 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.107.cwd	.
+observation	Observer	run.107.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.107.exit	ExitSuccess
+observation	Observer	run.107.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.107.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.107.stdout-bytes	0
+observation	Observer	run.107.digest	736d829c4d860c55ee52fb67672f43828e16576a69e751d6170c99b5328f68ce
+observation	Observer	run.108.executable	cabal
+observation	Observer	run.108.argv	run -v0 --jobs=1 amoebius:test:spine-suite -- ./.build/runs/phase-03/clean/suite
+observation	Observer	run.108.cwd	.
+observation	Observer	run.108.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.108.exit	ExitSuccess
+observation	Observer	run.108.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.108.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.108.stdout-bytes	0
+observation	Observer	run.108.digest	1be7fd89ab1dd564713f2ed962ee96bc3ab3343859c307f555cd8d20625de332
+observation	Observer	run.109.executable	cabal
+observation	Observer	run.109.argv	run -v0 --jobs=1 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/clean/suite
+observation	Observer	run.109.cwd	.
+observation	Observer	run.109.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.109.exit	ExitSuccess
+observation	Observer	run.109.stdout-sha256	68d0a19ad47973e2dc192b96f9864cfb26c1581ce3fe92dafd787dd01bfb94a4
+observation	Observer	run.109.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.109.stdout-bytes	21683
+observation	Observer	run.109.digest	00d5dd9de80b1e4f30ff005894e5f98c9e1561c135641e14f9072a114e83322f
+observation	Observer	run.110.executable	/home/matt/amoebius/dist-newstyle/build/x86_64-linux/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+observation	Observer	run.110.argv	render-examples --example kind-single-objectstore --output ./.build/runs/phase-03/clean/suite/binary/input/root.dhall
+observation	Observer	run.110.cwd	.
+observation	Observer	run.110.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.110.exit	ExitSuccess
+observation	Observer	run.110.stdout-sha256	79113e042131f468751ca5188a16e1a50451038ef873ffbde3ec6a7e3ce4a79e
+observation	Observer	run.110.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.110.stdout-bytes	125
+observation	Observer	run.110.digest	4c423fe03d59537d778cf37656c9ad97ab248046544c31d0b5edb45ec94eb099
+observation	Observer	run.111.executable	/home/matt/amoebius/dist-newstyle/build/x86_64-linux/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+observation	Observer	run.111.argv	compile --input ./.build/runs/phase-03/clean/suite/binary/input/root.dhall --out ./.build/runs/phase-03/clean/suite/binary/compiled
+observation	Observer	run.111.cwd	.
+observation	Observer	run.111.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.111.exit	ExitSuccess
+observation	Observer	run.111.stdout-sha256	3f3e4f1debb953ed643d5207b7beaf18d4be56eef07160ae941047e9c4de45ab
+observation	Observer	run.111.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.111.stdout-bytes	12
+observation	Observer	run.111.digest	a31500a3c73ed6b97463d2d87d89256396ad5031d654417cf06739714a10ec12
+observation	Observer	run.112.executable	/home/matt/amoebius/dist-newstyle/build/x86_64-linux/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+observation	Observer	run.112.argv	apply --executor fake --input ./.build/runs/phase-03/clean/suite/binary/input/root.dhall --out ./.build/runs/phase-03/clean/suite/binary/applied
+observation	Observer	run.112.cwd	.
+observation	Observer	run.112.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.112.exit	ExitSuccess
+observation	Observer	run.112.stdout-sha256	e0530169153da54b52c56a76cc350abceb950327f3068ea09828067f166bd369
+observation	Observer	run.112.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.112.stdout-bytes	11
+observation	Observer	run.112.digest	1b36ce3698a596aca6c3c8b3c23094039054efb7fd4b61060f0d65ebbfc67b4e
+row	Authority/bypass	green
+observation	Authority/bypass	closure.validator-free	True
+observation	Authority/bypass	closure.product	capability-bind,capacity-topology,dsl-core,dsl-spine,execution-accelerator-folds,formal-model,kernel-steps,layout,manifest-render,offline-language-types,provider-pulumi,provision-seal,storage-geometry-folds,toolchain,vocabulary
+observation	Authority/bypass	subjects.validator	0
+row	Freshness	green
+observation	Freshness	source.opening	d1e6cac8338e5d6037ab0b302c20ad0e52471cdcc3d9daa82f3d867c88c5634a
+observation	Freshness	source.closing	d1e6cac8338e5d6037ab0b302c20ad0e52471cdcc3d9daa82f3d867c88c5634a
+observation	Freshness	run-root	./.build/runs/phase-03
+row	Qualification	green
+observation	Qualification	qualification	generated-mutant-matrix
+observation	Qualification	matrix.precedes-clean	true
+row	Cleanroom	green
+observation	Cleanroom	cleanroom.run-root	./.build/runs/phase-03
+observation	Cleanroom	cleanroom.tracked-unchanged	True
+row	Legacy closure	green
+observation	Legacy closure	hygiene.kernel-lines	3421
+observation	Legacy closure	hygiene.kernel-cap	14000
+observation	Legacy closure	hygiene.doc-check-lines	6046
+observation	Legacy closure	hygiene.doc-check-cap	7000
+observation	Legacy closure	hygiene.conditional-compilation-lines	0
+observation	Legacy closure	hygiene.run-modules	0
+observation	Legacy closure	hygiene.phase-literals	0
+observation	Legacy closure	hygiene.phase-tables	0
+observation	Legacy closure	hygiene.duplicate-vocabulary	0
+observation	Legacy closure	hygiene.product-duplicate-vocabulary	
+observation	Legacy closure	hygiene.verdict	green
+observation	Legacy closure	legacy.due	LTD-SRC-002,LTD-SRC-003,LTD-VAL-005,LTD-DOC-001,LTD-DSL-001,LTD-DSL-002,LTD-DSL-004,LTD-DSL-009
+row	Predecessor	green
+observation	Predecessor	predecessor	c7d71980eda0fc703c3520e9b930395508a7889629751083b1578c38eddd4f6d
+row	Residue	green
+observation	Residue	residue.tracked-unchanged	True
+observation	Residue	residue.unverified	later-owned capabilities remain UNVERIFIED by construction
+row	Pass criterion	green
+observation	Pass criterion	pass-criterion	qualified-gate-pass

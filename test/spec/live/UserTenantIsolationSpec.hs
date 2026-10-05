@@ -8,6 +8,7 @@ import Amoebius.Pulsar.Consumer qualified as Consumer
 import Amoebius.Pulsar.Producer qualified as Producer
 import Amoebius.Pulsar.Subscription
 import Amoebius.Pulsar.Topology
+import Amoebius.Vocabulary (Substrate (..))
 import Amoebius.Ui.Server.RequestContext
 import Amoebius.Ui.Server.ScopedAuthority
 import Codec.Serialise (Serialise)

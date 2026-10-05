@@ -7,6 +7,7 @@ import Amoebius.Pulsar.Consumer qualified as Consumer
 import Amoebius.Pulsar.Producer qualified as Producer
 import Amoebius.Pulsar.Subscription (SubscriptionType (Exclusive))
 import Amoebius.Pulsar.Topology
+import Amoebius.Vocabulary (Substrate (..))
 import Control.Monad (unless)
 import Data.Set qualified as Set
 import Data.Text (Text)

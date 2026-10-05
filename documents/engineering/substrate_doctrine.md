@@ -621,9 +621,13 @@ gate input. Current third-party dependencies and packaging machinery remain `LTD
 target installation contract. A running invocation cannot update itself: doing so would make the run's own
 provenance unanswerable.
 
-The tracked `pb/**` footprint is specified to be admitted by the SHA-256 pin of `pb/__main__.py`, owed by
-[Phase 2](../../DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md). That source admission does not
-establish runtime handoff behavior. Every phase through the DSL barrier (Phase 9) invokes the source-bound
+**Observed implementation** ([GateSpec:repository_layout_conformance]). The tracked `pb/**` footprint is admitted
+by the SHA-256 pin of `pb/__main__.py`, implemented by
+[Phase 2](../../DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md)
+([DL-0022](../decision_log.md#dl-0022--phase-2-accepted-its-owed-by-paragraphs-become-observed-implementations)).
+That source admission does not establish runtime handoff behavior.
+
+Every phase through the DSL barrier (Phase 9) invokes the source-bound
 verifier directly and cannot use `pb` as evidence. [Phase 50](../../DEVELOPMENT_PLAN/phase_50_host_assert_cli.md) alone
 owns runtime adapter effects, executable identity, unchanged argv, exec replacement, and exit propagation for
 the already-bounded handoff. The [tracker](../../DEVELOPMENT_PLAN/README.md) is the sole status authority for

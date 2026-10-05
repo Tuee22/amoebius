@@ -23,7 +23,7 @@ import Amoebius.Plan.ValidationRecordPath (validationRecordRoot)
 import Amoebius.Validation.Runner.Observer (observe, runStdout)
 import Control.Monad (filterM, forM, forM_, unless)
 import Data.Char (isDigit)
-import Data.List (isPrefixOf, isSuffixOf, sort)
+import Data.List (isSuffixOf, sort)
 import Data.Map.Strict qualified as Map
 import Data.Text (Text)
 import Data.Text qualified as Text
@@ -54,11 +54,9 @@ copyTree from to files = forM_ files $ \file -> do
     createDirectoryIfMissing True (takeDirectory (to </> file))
     copyFile (from </> file) (to </> file)
 
--- | The vocabulary axes that must have exactly one definition inside the validator
--- roots; duplicates elsewhere under src/ are observed on the row and owed to the
--- phase that owns the vocabulary library (DL-0012).
+-- | The vocabulary axes that must have exactly one definition anywhere under src/.
 vocabularyTypes :: [Text]
-vocabularyTypes = ["Substrate", "Lane", "Architecture", "ComputeEngine", "EngineRuntime", "ExtensionId", "ResourceVector", "Register"]
+vocabularyTypes = ["Substrate", "Architecture", "Detected", "Lane", "ComputeEngine", "EngineRuntime", "CapabilityArm", "ExtensionId", "Quantity", "ResourceVector", "Register"]
 data HygieneReport = HygieneReport
   { hygieneKernelLines :: Int
   , hygieneKernelCap :: Int
@@ -158,7 +156,7 @@ hygieneProblems report =
     <> ["RunModules: " <> Text.intercalate "," (map Text.pack (take 5 (hygieneRunModules report))) | not (null (hygieneRunModules report))]
     <> ["PhaseLiterals: " <> showText (length (hygienePhaseLiterals report)) | not (null (hygienePhaseLiterals report))]
     <> ["PhaseTables: " <> Text.intercalate "," (map Text.pack (hygienePhaseTables report)) | length (hygienePhaseTables report) > 1]
-    <> ["DuplicateVocabulary: " <> Text.intercalate "," (map fst (hygieneDuplicateVocabulary report)) | not (null (hygieneDuplicateVocabulary report))]
+    <> ["DuplicateVocabulary: " <> Text.intercalate "," (map fst (hygieneProductDuplicateVocabulary report)) | not (null (hygieneProductDuplicateVocabulary report))]
 hygieneGreen :: HygieneReport -> Bool
 hygieneGreen = null . hygieneProblems
 renderHygiene :: HygieneReport -> [(Text, Text)]
@@ -187,5 +185,3 @@ haskellFilesUnder root relative = do
     pure ([directory </> name | name <- names, ".hs" `isSuffixOf` name, name `notElem` directories] <> nested)
 showText :: Int -> Text
 showText = Text.pack . show
-_unusedPrefix :: String -> String -> Bool
-_unusedPrefix = isPrefixOf

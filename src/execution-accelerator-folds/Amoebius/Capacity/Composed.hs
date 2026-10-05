@@ -13,20 +13,14 @@ module Amoebius.Capacity.Composed
 
 import Amoebius.Capacity.Accelerator (ProvisionedAccelerator)
 import Amoebius.Capacity.Execution (ProvisionedExecutionEpochs (..))
-import Amoebius.Capacity.Fold (effectiveReserved, place)
+import Amoebius.Capacity.Fits (effectiveReserved)
 import Amoebius.Capacity.ProviderRoot (ProvisionedPerInstanceDiskTemplate)
 import Amoebius.Capacity.RuntimeStorage (ProvisionedNodeRuntimeStorageAccounting)
 import Amoebius.Capacity.Storage (StorageWitness)
-import Amoebius.Capacity.Types
-  ( Axis (..)
-  , Placement
-  , PlacementError
-  , ResourceVector (..)
-  , Workload (..)
-  , addResources
-  , zeroResources
-  )
+import Amoebius.Capacity.Types (Axis, Overcommit (..), PlacementError, Workload (..), firstExceeded)
+import Amoebius.Capacity.Vector (ResourceVector (..), addResources, zeroResources)
 import Amoebius.Dsl.Topology (Topology)
+import Amoebius.Placement.Witness (Placed, place)
 import Control.DeepSeq (NFData)
 import GHC.Generics (Generic)
 import Numeric.Natural (Natural)
@@ -44,7 +38,7 @@ data ComposedPlacementInput = ComposedPlacementInput
   deriving anyclass (NFData)
 
 data ComposedPlacementWitness = ComposedPlacementWitness
-  { composedBasePlacement :: Placement
+  { composedBasePlacement :: Placed
   , composedRequiredResources :: ResourceVector
   , composedExecutionPeakResources :: ResourceVector
   , composedRuntimeStorageWitnesses :: [ProvisionedNodeRuntimeStorageAccounting]
@@ -79,14 +73,9 @@ placeFullResourceVector input = do
       }
 
 ensurePeak :: ResourceVector -> ResourceVector -> Either ComposedPlacementError ()
-ensurePeak required available
-  | resourceCpu required > resourceCpu available = exceeded CpuAxis resourceCpu
-  | resourceMemory required > resourceMemory available = exceeded MemoryAxis resourceMemory
-  | resourceEphemeralStorage required > resourceEphemeralStorage available = exceeded EphemeralStorageAxis resourceEphemeralStorage
-  | resourcePodSlots required > resourcePodSlots available = exceeded PodSlotsAxis resourcePodSlots
-  | otherwise = Right ()
- where
-  exceeded axis project = Left (ComposedExecutionMismatch axis (project required) (project available))
+ensurePeak required available = case firstExceeded required available of
+  Just excess -> Left (ComposedExecutionMismatch (overcommitAxis excess) (overcommitRequired excess) (overcommitAvailable excess))
+  Nothing -> Right ()
 
 mapPlacement :: Either PlacementError value -> Either ComposedPlacementError value
 mapPlacement outcome = case outcome of
