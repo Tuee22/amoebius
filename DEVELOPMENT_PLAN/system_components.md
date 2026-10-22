@@ -4,12 +4,12 @@
 > numerical delivery phase without maintaining a second implementation or status ledger.
 > **Read this if**: a component must be traced to the Haskell source shape, doctrine, or phase that owns it.
 
-**Observed implementation** ([GateSpec:documentation_suite]). This is a target-only inventory. It owns no
-architectural rule and makes no implementation or validation claim. Architecture belongs to the linked
+**Target inventory** ([DL-0034](../documents/decision_log.md#dl-0034--phase-0-acceptance-qualifies-the-finite-seed-boundary)). This inventory owns no
+architectural rule and makes no product implementation or validation claim. Architecture belongs to the linked
 doctrine, phase status belongs only to [the tracker](README.md), and executable source/layout-divergence
-accounting belongs to typed Haskell bindings in `Amoebius.Plan.Legacy`. The single
+accounting belongs to the closed compiled legacy inventory. The single
 [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) file explains those bindings to readers;
-the documentation gate owns the correspondence.
+the bounded governance observation below supplies no result for the target component rows.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -44,13 +44,13 @@ the documentation gate owns the correspondence.
 
 ## How to read this inventory
 
-Every row is a target obligation and every phase is **NOT VALIDATED**. A path describes the intended Haskell
+Every component row is a target obligation; validation status belongs solely to the tracker. A path describes the intended Haskell
 ownership boundary; it does not assert that the path exists or works. The closed repository-source rule is:
 
 - behavioral production, generator, gate, fixture, oracle, mutant, and test source is version-controlled only
   as `.hs`;
 - `pb/**` is the sole non-Haskell source exception and may only make the minimal platform distinction needed
-  to establish the pinned toolchain, build the source-bound Haskell binary, and `exec` it with every user
+  to establish the version-compatible native toolchain, build the source-bound Haskell binary, and `exec` it with every user
   argument unchanged; Haskell owns host-floor policy and every public command;
 - external/operator input is untracked;
 - Dhall, Proto, PureScript, JavaScript, HTML, CSS, Pulumi programs, image recipes, manifests, serialized cases,
@@ -63,13 +63,20 @@ that rule.
 
 ## Reconciliation state
 
-**Observed implementation** ([GateSpec:documentation_suite]). This document deliberately contains no
-present-tree audit, historical result, stale receipt, or deletion checklist. The closed typed Haskell
-inventory in `Amoebius.Plan.Legacy` is the only executable source
-of active divergence IDs, owners, observations, and closure predicates. The single
+**Target boundary** ([DL-0034](../documents/decision_log.md#dl-0034--phase-0-acceptance-qualifies-the-finite-seed-boundary)).
+
+Observed implementation: `Amoebius.Plan.Legacy` supplies the canonical identity, owner, scope and case
+bindings that the accepted seed joins to its forty-five source-bound reports and nine qualifications.
+Later-owned rows remain explicit forward deferrals, and the scoped bootstrap observation supplies no
+whole-snapshot retirement [GateSpec:documentation_suite].
+
+The component rows contain no present-tree audit, historical result, stale receipt or deletion checklist.
+The closed typed inventory must own divergence identities and obligations; the owning Haskell
+analyzers must supply observations, closure predicates and qualified reintroduction evidence. The single
 [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) register explains that inventory to
 readers and supplies no machine input. A current finding not bijectively matched to one typed Haskell ID is
-itself a Phase-0 failure. Editing either Markdown file cannot conceal debt or validate it.
+itself a gate failure.
+Editing either Markdown file cannot conceal debt or validate it.
 
 ## 1. The single binary — three contexts, several typed roles
 
@@ -78,7 +85,7 @@ closed Haskell sum; they are not separate products or foreign-language entry poi
 
 | Target surface | Haskell ownership shape | Doctrine | Phase owner |
 |---|---|---|---|
-| Executable and total role dispatch | `app/**/Main.hs`; `src/**/Command.hs`; `src/**/Role.hs` | [Daemon Topology §1](../documents/engineering/daemon_topology_doctrine.md#1-one-runtime-binary-three-contexts) | [34](phase_03_typed_spine.md), [43](phase_70_ui_projection_runtime.md), [55](phase_55_bootstrap_coordinator_kind.md) |
+| Executable and total role dispatch | `app/**/Main.hs`; `src/**/Command.hs`; `src/**/Role.hs` | [Daemon Topology §1](../documents/engineering/daemon_topology_doctrine.md#1-one-runtime-binary-three-contexts) | [3](phase_03_typed_spine.md), [70](phase_70_ui_projection_runtime.md), [55](phase_55_bootstrap_coordinator_kind.md) |
 | Haskell command-mode administration | `src/**/AdminClient.hs` | [Bootstrap Sequence §5](../documents/engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api) | [65](phase_65_live_dsl_deploy.md) |
 | Sudo host daemon and host-worker supervision | `src/**/Host/*.hs`; `src/**/HostWorker/*.hs` | [Daemon Topology §1](../documents/engineering/daemon_topology_doctrine.md#1-one-runtime-binary-three-contexts) | [55](phase_55_bootstrap_coordinator_kind.md), [89](phase_89_apple_metal_host_daemon.md) |
 | Control-plane daemon, capacity scheduler, and unelected workers | `src/**/ControlPlane/*.hs`; `src/**/Scheduler/*.hs`; `src/**/Workflow/*.hs` | [Daemon Topology §§3–4](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon) | [59](phase_59_capacity_scheduler.md), [65](phase_65_live_dsl_deploy.md), [69](phase_69_content_store_workflow.md) |
@@ -91,10 +98,10 @@ Their tests, independent semantic expectations, and mutants are also `.hs`.
 | Target surface | Haskell ownership shape | Doctrine | Phase owner |
 |---|---|---|---|
 | Five calculi and their indexed base composition | `src/Amoebius/Calculus/{Artifact,Budget,Evidence,Lift,Workflow}/**/*.hs`; `src/calculus-composition/Amoebius/Calculus/Composition.hs`; `test/spec/calculus/*.hs` | [Lift and Compose Doctrine](../documents/engineering/lift_and_compose_doctrine.md) | [3–7](legacy_tracking_for_deletion.md#5-dsl-divergence), [10](legacy_tracking_for_deletion.md#5-dsl-divergence) |
-| Scope and resource indices | `src/Amoebius/Scope/{Index,Flow}.hs`; `src/capacity-topology/Amoebius/Capacity/{Types,Vector,Fits}.hs`; `src/capacity-topology/Amoebius/Placement/{Witness,Ledger,Elastic}.hs`; `src/capacity-topology/Amoebius/Dsl/Topology.hs` | [Extension Security](../documents/engineering/extension_conformance_security.md), [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) | [8](phase_06_extension_admission_attested_scope.md), [9](phase_04_witness_manifests_capacity_storage.md), [28–32](phase_04_witness_manifests_capacity_storage.md) |
+| Scope and resource indices | `src/scope-index/Amoebius/Scope/{Attested,Index,Flow}.hs`; `src/capacity-topology/Amoebius/Capacity/{Types,Vector,Fits}.hs`; `src/capacity-topology/Amoebius/Placement/{Witness,Ledger,Elastic}.hs`; `src/capacity-topology/Amoebius/Dsl/Topology.hs` | [Extension Security](../documents/engineering/extension_conformance_security.md), [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) | [6](phase_06_extension_admission_attested_scope.md), [4](phase_04_witness_manifests_capacity_storage.md), [28–32](phase_04_witness_manifests_capacity_storage.md) |
 | Formal/checker models | `src/Amoebius/Formal/{Model,Interpret,Explore,EmitTLA,ToyModel}.hs`; `src/formal-composition-model/**`; checkers `src/{explicit-state-checker,symbolic-checker,refinement-checker,compile-fail-harness}/**`; Haskell semantic oracles and the run-local fake SMT boundary under `test/spec/formal/**` plus `test/spec/compile_fail_harness/**`; package-hidden the proof-assistant track–16 supervisors under `src/validation-kernel/**`; later checker/model modules under their phase roots | [Formal Model Doctrine](../documents/engineering/formal_model_doctrine.md), [Testing Doctrine §9](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) | [11–19](later_phases.md) |
-| Deterministic simulation substrate | `src/Amoebius/Sim/**/*.hs`; `test/spec/sim/{SimSpec,FaultContracts}.hs`; `test/harness/deterministic_simulation/CalculusProjection.hs`; package-hidden Phase 75 supervisor | [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) | [16](phase_75_gateway_migration_drills.md), later adopters [58–59](phase_58_object_reconciler.md) |
-| Extension declaration, laws, conformance gate, and transactions | Phase 6 declaration `src/extension-declaration/Amoebius/Extension/Declaration.hs`; Phase 6 per-extension evaluator; Phase 6 normalized composite/C1–C7 evaluator; Phase 6 typed identity/scope/namespace/policy kernel and S1–S6 evaluator; Phase 6 declaration-derived plan, generated-suite/verdict/admission kernel `src/extension-conformance-gate/Amoebius/Extension/Conformance/Gate.hs`; Phase 8 closed GADT and schema/policy/statement projection `src/transaction-vocabulary/Amoebius/Transaction/Vocabulary.hs`; independent `.hs` oracles, compiler fixtures, production mutants, and package-hidden supervisors; later `src/**/Extension/*.hs` and `test/**/Extension/*.hs` | [Extension Conformance Doctrine](../documents/engineering/extension_conformance_doctrine.md), [Extension Conformance Laws](../documents/engineering/extension_conformance_laws.md), [Extension Security](../documents/engineering/extension_conformance_security.md), [Transaction Laws](../documents/engineering/extension_conformance_transactions.md) | [20–24](phase_06_extension_admission_attested_scope.md), [36](phase_08_ui_program_language_binding.md) |
+| Deterministic simulation substrate | `src/Amoebius/Sim/**/*.hs`; `test/spec/sim/{SimSpec,FaultContracts}.hs`; `test/harness/deterministic_simulation/CalculusProjection.hs`; package-hidden Phase 75 supervisor | [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) | [75](phase_75_gateway_migration_drills.md), later adopters [58–59](phase_58_object_reconciler.md) |
+| Extension declaration, laws, conformance gate, and transactions | Phase 6 declaration `src/extension-declaration/Amoebius/Extension/Declaration.hs`; Phase 6 per-extension evaluator; Phase 6 normalized composite/C1–C7 evaluator; Phase 6 typed identity/scope/namespace/policy kernel and S1–S6 evaluator; Phase 6 declaration-derived plan, generated-suite/verdict/admission kernel `src/extension-conformance-gate/Amoebius/Extension/Conformance/Gate.hs`; Phase 8 closed GADT and schema/policy/statement projection `src/transaction-vocabulary/Amoebius/Transaction/Vocabulary.hs`; independent `.hs` oracles, compiler fixtures, production mutants, and package-hidden supervisors; later `src/**/Extension/*.hs` and `test/**/Extension/*.hs` | [Extension Conformance Doctrine](../documents/engineering/extension_conformance_doctrine.md), [Extension Conformance Laws](../documents/engineering/extension_conformance_laws.md), [Extension Security](../documents/engineering/extension_conformance_security.md), [Transaction Laws](../documents/engineering/extension_conformance_transactions.md) | [20–24](phase_06_extension_admission_attested_scope.md), [8](phase_08_ui_program_language_binding.md) |
 
 ## 2. The DSL — Dhall decoder + chain/Step kernel
 
@@ -127,7 +134,7 @@ manifests and observation records are lazy `.build/**` materializations.
 
 | Target surface | Haskell ownership shape | Doctrine | Phase owner |
 |---|---|---|---|
-| Total typed renderer | `src/**/Manifest/*.hs`; `test/**/Manifest/*.hs` | [Manifest Generation Doctrine §2](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) | [33](phase_03_typed_spine.md) |
+| Total typed renderer | `src/**/Manifest/*.hs`; `test/**/Manifest/*.hs` | [Manifest Generation Doctrine §2](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) | [3](phase_03_typed_spine.md) |
 | Snapshot-bound SSA reconciler | `src/**/Reconcile/*.hs` | [Manifest Generation Doctrine §5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) | [58](phase_58_object_reconciler.md) |
 
 ## 4. Capabilities — the capability→provider→shape binder
@@ -137,12 +144,12 @@ and functions. Application/operator values cannot name provider coordinates or c
 
 | Target surface | Haskell ownership shape | Doctrine | Phase owner |
 |---|---|---|---|
-| Logical-to-physical storage geometry | `src/storage-geometry-folds/Amoebius/Capacity/{Storage,StorageGeometry,ServiceStorage,Growable,StorageScaling}.hs` | [Resource Capacity Doctrine §5–§7](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) | [28](phase_04_witness_manifests_capacity_storage.md) |
-| Execution epochs, scheduler reservations, runtime/node-local storage, accelerator residency, provider-root, and composed placement | `src/execution-accelerator-folds/Amoebius/Capacity/{Execution,Scheduler,HostReservation,RuntimeStorage,NodeLocalStorage,Accelerator,ProviderRoot,Etcd,PulumiExecution,Composed}.hs`; `test/spec/dsl/ExecutionAccelerator{Fixtures,Oracle,Gate,Props,Spec}.hs`; package-hidden Phase 4 supervisor | [Resource Capacity Doctrine §3–§4](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget), [Testing Doctrine §2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) | [29](phase_04_witness_manifests_capacity_storage.md) |
-| Capability/provider catalog and binding | `src/capability-bind/Amoebius/Capability/*.hs` | [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) | [30](phase_03_typed_spine.md) |
-| Whole-deployment provision seal | `src/provision-seal/Amoebius/Capacity/{Provision,RenderSource}.hs`; `src/provision-seal/Amoebius/Capability/{Engine,Provisioned}.hs`; `test/spec/capability/{ProvisionSealGate,ProvisionSealOracle,ProvisionSealSpec,ProvisionFixtures,ProvisionProps,RuntimeStorageBindingProps}.hs`; package-hidden Phase 3 supervisor | [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) | [31](phase_03_typed_spine.md) |
-| Accelerator/engine offering | `src/provision-seal/Amoebius/Capability/Engine.hs`; `test/spec/capability/EngineAccelerator{Fixtures,Oracle,Gate,Props,Spec}.hs`; package-hidden Phase 4 supervisor | [Service Capability Doctrine §4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding) | [32](phase_04_witness_manifests_capacity_storage.md) |
-| Pure manifest renderer and semantic oracle | private `manifest-render` library at `src/manifest-render/Amoebius/Manifest{,/Types,/K8sObject,/Render,/RenderAll}.hs`; `test/spec/manifest/{DepGraphOracle,RenderGoldenOracle,RenderGoldenGate,RenderGoldenProps,RenderGoldenSpec}.hs`; package-hidden Phase 3 supervisor | [Manifest Generation Doctrine §2–§3](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) | [33](phase_03_typed_spine.md) |
+| Logical-to-physical storage geometry | `src/storage-geometry-folds/Amoebius/Capacity/{Storage,StorageGeometry,ServiceStorage,Growable,StorageScaling}.hs` | [Resource Capacity Doctrine §5–§7](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) | [4](phase_04_witness_manifests_capacity_storage.md) |
+| Execution epochs, scheduler reservations, runtime/node-local storage, accelerator residency, provider-root, and composed placement | `src/execution-accelerator-folds/Amoebius/Capacity/{Execution,Scheduler,HostReservation,RuntimeStorage,NodeLocalStorage,Accelerator,ProviderRoot,Etcd,PulumiExecution,Composed}.hs`; `test/spec/dsl/ExecutionAccelerator{Fixtures,Oracle,Gate,Props,Spec}.hs`; package-hidden Phase 4 supervisor | [Resource Capacity Doctrine §3–§4](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget), [Testing Doctrine §2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) | [4](phase_04_witness_manifests_capacity_storage.md) |
+| Capability/provider catalog and binding | `src/capability-bind/Amoebius/Capability/*.hs` | [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) | [3](phase_03_typed_spine.md) |
+| Whole-deployment provision seal | `src/provision-seal/Amoebius/Capacity/{Provision,RenderSource}.hs`; `src/provision-seal/Amoebius/Capability/{Engine,Provisioned}.hs`; `test/spec/capability/{ProvisionSealGate,ProvisionSealOracle,ProvisionSealSpec,ProvisionFixtures,ProvisionProps,RuntimeStorageBindingProps}.hs`; package-hidden Phase 3 supervisor | [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) | [3](phase_03_typed_spine.md) |
+| Accelerator/engine offering | `src/provision-seal/Amoebius/Capability/Engine.hs`; `test/spec/capability/EngineAccelerator{Fixtures,Oracle,Gate,Props,Spec}.hs`; package-hidden Phase 4 supervisor | [Service Capability Doctrine §4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding) | [4](phase_04_witness_manifests_capacity_storage.md) |
+| Pure manifest renderer and semantic oracle | private `manifest-render` library at `src/manifest-render/Amoebius/Manifest{,/Types,/K8sObject,/Render,/RenderAll}.hs`; `test/spec/manifest/{DepGraphOracle,RenderGoldenOracle,RenderGoldenGate,RenderGoldenProps,RenderGoldenSpec}.hs`; package-hidden Phase 3 supervisor | [Manifest Generation Doctrine §2–§3](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) | [3](phase_03_typed_spine.md) |
 
 ## 5. Platform services — baked non-Registry binaries + separately preloaded Distribution `registry:2`
 
@@ -154,7 +161,7 @@ live target.
 
 | Target surface | Haskell ownership shape | Doctrine | Phase owner |
 |---|---|---|---|
-| Base image recipe and Distribution registry | `src/Amoebius/Image/{BakeInventory,CanonicalBakeCatalog,BaseChannel,BuildArgv,RenderDockerfile}.hs`; `src/**/Platform/Registry*.hs` | [Image Build Doctrine](../documents/engineering/image_build_doctrine.md), [Service Capability Doctrine §3](../documents/engineering/service_capability_doctrine.md#3-canonical-providers-extension-is-capability-specific) | [35](phase_05_substrates_lanes_image_recipe.md), [56](phase_56_base_image_registry.md) |
+| Base image recipe and Distribution registry | `src/Amoebius/Image/{Recipe,Bake,BakeInventory,CanonicalBakeCatalog,BaseChannel,BuildArgv,RenderDockerfile}.hs`; `src/**/Platform/Registry*.hs` | [Image Build Doctrine](../documents/engineering/image_build_doctrine.md), [Service Capability Doctrine §3](../documents/engineering/service_capability_doctrine.md#3-canonical-providers-extension-is-capability-specific) | [5](phase_05_substrates_lanes_image_recipe.md), [56](phase_56_base_image_registry.md) |
 | Object store, message bus, retained storage | `src/**/Platform/{ObjectStore,MessageBus,Storage}*.hs` | [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) | [60–62](phase_60_retained_storage.md) |
 | SQL, Redis, observability, readiness | `src/**/Platform/{Sql,Redis,Observability,Readiness}*.hs` | [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) | [63](phase_63_platform_services_2.md) |
 | Identity and single ingress | `src/**/Platform/{Identity,Edge}*.hs` | [Platform Services Doctrine §9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) | [64](phase_64_keycloak_ingress.md) |
@@ -166,7 +173,7 @@ view and any bindings/checksums are generated lazily beneath `.build/proto/**`.
 
 | Target surface | Haskell ownership shape | Doctrine | Phase owner |
 |---|---|---|---|
-| Protocol declaration and generated projection | `Amoebius.Pulsar.Wire.protocolDeclarations`; generated `PulsarApi.proto` is run-local only | [Pulsar Client Doctrine](../documents/engineering/pulsar_client_doctrine.md) | [26](phase_03_typed_spine.md) |
+| Protocol declaration and generated projection | `Amoebius.Pulsar.Wire.protocolDeclarations`; generated `PulsarApi.proto` is run-local only | [Pulsar Client Doctrine](../documents/engineering/pulsar_client_doctrine.md) | [3](phase_03_typed_spine.md) |
 | Native client and bounded live correspondence | `src/**/Pulsar/*.hs`; `test/**/Pulsar/*.hs` | [Pulsar Client Doctrine](../documents/engineering/pulsar_client_doctrine.md) | [67](phase_67_pulsar_client.md) |
 
 ## 7. The content-addressed store + determinism kernel
@@ -242,7 +249,7 @@ Provider/cluster state and drill records are live or `.build/**` products.
 | Target surface | Haskell ownership shape | Doctrine | Phase owner |
 |---|---|---|---|
 | Child spawn and geo-replication | `src/**/Multicluster/{Spawn,Replication}*.hs` | [Cluster Lifecycle Doctrine](../documents/engineering/cluster_lifecycle_doctrine.md) | [74](phase_74_multicluster_spawn_georepl.md) |
-| Gateway migration model and drills | `src/Amoebius/Formal/GatewayMigration.hs`, `src/Amoebius/Multicluster/{StructuralFit,GatewayMigration}.hs` | [Gateway Migration Doctrine](../documents/engineering/gateway_migration_doctrine.md), [Gateway Migration Model Doctrine](../documents/engineering/gateway_migration_model_doctrine.md) | [17](phase_75_gateway_migration_drills.md), [75](phase_75_gateway_migration_drills.md) |
+| Gateway migration model and drills | `src/Amoebius/Formal/GatewayMigration.hs`, `src/Amoebius/Multicluster/{StructuralFit,GatewayMigration}.hs` | [Gateway Migration Doctrine](../documents/engineering/gateway_migration_doctrine.md), [Gateway Migration Model Doctrine](../documents/engineering/gateway_migration_model_doctrine.md) | [75](phase_75_gateway_migration_drills.md), [75](phase_75_gateway_migration_drills.md) |
 
 ## 14. The pre-cluster (Register 1–2) design-first validation surface
 

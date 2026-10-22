@@ -12,7 +12,7 @@ section lettering lives in [`development_plan_standards.md`](development_plan_st
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_90_test_topology_live.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/behavioural_verification_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/gate_runner_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_90_test_topology_live.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/decision_log.md, documents/documentation_standards.md, documents/engineering/behavioural_verification_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/gate_runner_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -131,7 +131,7 @@ evidence cannot populate authored contract fields.
 |---|---|
 | `Claim` | One falsifiable capability statement and its explicit exclusions. |
 | `Subject` | The production `.hs` module and entry point exercised; a wrapper, manifest, or gate runner alone is not a subject. |
-| `Command` | Future public target: `pb validate phase NN`. Before the `BOOTSTRAP_HANDOFF` gate passes, the candidate command is the exact source-bound verifier invoked directly: `amoebius-validate preview phase NN`, which mints nothing, and `amoebius-validate accept --phase NN`, which records the reproducible receipt and applies one phase's patch, both agent-run; invoking `pb` is inadmissible evidence. The runner spawns the shipped `amoebius` binary as a child for every product command. Phase 0 binds the narrow non-numbered `GenesisTrust` local-custody token, which does not authenticate the actual compiler executable bytes, derivation, loader, broader host, or reproducibility. Phase 1 owns pin-verified acquisition, executable-byte identity, and reproducibility claims for subsequent builds while publisher identity remains unverified ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)); neither claim lets a binary prove its own compiler. Phase 50 starts the verifier directly and has it invoke `pb` as the externally observed child subject; the public spelling cannot supervise its own handoff. Phase 51 onward may use `pb` only while binding the current Phase-50 gate pass. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
+| `Command` | Future public target: `pb validate phase NN`. Before the `BOOTSTRAP_HANDOFF` gate passes, the candidate command is the exact source-bound verifier invoked directly: `amoebius-validate preview phase NN`, which mints nothing, and `amoebius-validate accept --phase NN`, which records the reproducible receipt and applies one phase's patch, both agent-run; invoking `pb` is inadmissible evidence. The runner spawns the shipped `amoebius` binary as a child for every product command. Phase 0 assumes that version-compatible native GHCup and GHC execute correctly. Phase 1 qualifies version admission and retained probes; no toolchain byte pins, signatures, prepared archive set, fixed OS/CPU architecture, or device are required. Neither phase proves compiler semantics. Phase 50 starts the verifier directly and has it invoke `pb` as the externally observed child subject; the public spelling cannot supervise its own handoff. Phase 51 onward may use `pb` only while binding the current Phase-50 gate pass. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
 | `Oracle` | A separately authored `.hs` oracle module, its accepted baseline identity, independence boundary, and provenance. The candidate cannot substitute its own expectations. |
 | `Positive controls` | A closed named corpus and the exact observations expected for each member. |
 | `Paired negatives` | For every foreclosed dimension, a minimally different positive/negative pair and the exact rejection locus and reason. |
@@ -142,7 +142,7 @@ evidence cannot populate authored contract fields.
 | `Authority/bypass` | Paired least-privilege success/foreign-scope denial and alternate-path probes, or tested non-applicability. |
 | `Freshness` | How stale state, cached output, prior evidence, and replayed responses are made unable to pass. |
 | `Qualification` | The generated-mutant matrix precedes the clean candidate in the same run and protects every acceptance mechanism when first used. Phase 0 retains its finite protocol in §M.4. The DSL barrier additionally re-runs the union corpus of Phases 3 through 8; earlier mechanisms cannot postpone their own qualification to that barrier. |
-| `Cleanroom` | Candidate products start absent and outputs are derived lazily. Accepted verifier state, pin-verified toolchain and integrity-checked dependency inputs, and applicable predecessor evidence are explicit read-only inputs. The pin check does not prove publisher identity ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)). Undeclared caches or copied candidate products refuse. Phase 0 retains its finite GenesisTrust and cleanup boundary. |
+| `Cleanroom` | Candidate products start absent and outputs are derived lazily. Accepted verifier state, version-checked native toolchain and integrity-checked dependency inputs, and applicable predecessor evidence are explicit read-only inputs. Version checks do not prove publisher identity ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)). Undeclared caches or copied candidate products refuse. Phase 0 retains its finite GenesisTrust and cleanup boundary. |
 | `Legacy closure` | The hygiene row plus the two-way typed inventory join: reader-facing references to the typed Haskell IDs due in this phase, with the compiled owner map and the owning analyzer's independent oracle supplying the zero-finding decision. Phase 0 closes the validator rows `LTD-VAL-001` through `LTD-VAL-004`, `LTD-VAL-006`, and `LTD-KRN-001` through `LTD-KRN-003`, and proves the due-count for every other identifier is zero; its scoped `SourcePb` zero does not retire Phase-2-owned `LTD-SRC-008`. An unavailable analyzer for a due or retired ID refuses; before its owner an active unavailable analyzer is an explicit forward deferral and cannot claim closure. Cell text supplies no executable value. |
 | `Predecessor` | The immediately preceding phase's authenticated pass from the admitted certification generation, with current compatibility established under §M.6. Phase 0 instead binds the irreducible `GenesisTrust`/`BootstrapRoot`, represented structurally as `genesis`. |
 | `Residue` | Typed evidence distinguishes missing required observations, forbidden resource residue, and explicit limitations outside the accepted claim. Missing required evidence or forbidden residue refuses. Assumptions and excluded later-owned capabilities remain visible as `UNVERIFIED`; an empty list is never a universal pass requirement. |
@@ -260,7 +260,7 @@ candidate whose matrix misses the kill ratio is rejected regardless of its own r
 generation 1 — seventeen labelled cases judged by a report checker — is retired under `LTD-KRN-001`; the
 runner has no report checker to sabotage, because it holds every verdict itself.
 
-Phase 1 separately adds pin-verified reproducible toolchain acquisition and Phase 2 adds the compiler-backed source graph
+Phase 1 separately adds version-checked native toolchain selection and Phase 2 adds the compiler-backed source graph
 ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope));
 neither is pulled into Phase 0. Later-owned cases are typed forward deferrals and cannot block an earlier
 candidate merely because the closed plan already names their owner.
@@ -480,8 +480,8 @@ an active unavailable analyzer is recorded only as explicit later-owned debt and
 the inventory early therefore creates no dependency on later implementation: the owning sprint implements and
 qualifies its analyzer in numerical order.
 
-The current Sprint-0.2 disposition universe is Active-only. Retirement is a future typed transition, not
-deletion of executable memory. Sprint 0.2 retains a required reintroduction-case identity, not an executed
+The disposition universe retains both Active and Retired declarations. Retirement records an accepted owning
+gate and never deletes executable memory. Sprint 0.2 retains a required reintroduction-case identity, not an executed
 guard. An Active zero is admissible only in the owning phase's integrated candidate when opaque evidence binds
 the same row and source snapshot to the exact canonical reintroduction-case set and qualifying transcript, after
 the owner analyzer implements and passes its independently authored negative; it is candidate readiness, not a status or
@@ -492,7 +492,16 @@ constructor, owner, analyzer key, and qualified Haskell reintroduction negative 
 reader-facing Markdown register contributes no identity, owner, lifecycle state, predicate, count, or join
 operand to that decision. It is active-only, so the accepted retired explanation is removed and Git history is
 the only prose archive. This is accounting, not a waiver: the owning phase must reach zero, and no later phase
-may reintroduce the finding.
+may reintroduce the finding. The eight Phase-0-owned identities now record that transition under
+[DL-0035](../documents/decision_log.md#dl-0035--retired-legacy-checks-inherit-an-exact-source-predecessor-pass).
+The runner must issue an opaque predecessor handle only after every gate row passes. Custody must reproduce the
+accepted predecessor at the current verifier, governance and closure before forwarding that handle. It binds
+the immediate predecessor and exact captured source to the retained opaque qualifications; the next gate
+inherits only canonical Retired snapshot bindings. A raw digest, red candidate, component collection, wrong
+source or wrong predecessor cannot replace it. Every retained query and reintroduction guard remains
+required, and the scoped bootstrap qualification cannot retire the whole-snapshot bootstrap binding.
+During numerical replay, a declaration whose owner is later remains later-owned accounting; retirement
+cannot supply early closure or move its implementation or effects ahead of that owner.
 
 The transition exception has a hard stop. A DSL-barrier (Phase 9) candidate must report **zero
 source-boundary debt**: every `LTD-SRC-*` query, including Phase-2-owned `LTD-SRC-008`, is zero. Phase 0
@@ -510,7 +519,7 @@ Every phase inherits the following postconditions. They are part of the gate, no
    contrary finding must satisfy the strictly-later typed-binding transition rule above, which expires before
    the DSL-barrier candidate.
 2. **One bootstrap exception.** Non-Haskell program source is permitted only under `pb/**`, and only to make
-   the minimum platform distinction needed to select the establishment adapter, establish the pinned
+   the minimum platform distinction needed to select the establishment adapter, establish the version-compatible
    Haskell toolchain, build the source-bound
    Haskell binary, and exec it with every user argument unchanged. Haskell owns host-floor decisions, public
    commands, help, version, product policy, tests, gates, evidence, and validation verdicts.
@@ -533,17 +542,20 @@ Every phase inherits the following postconditions. They are part of the gate, no
    decisions that belong in Haskell.
 6. **No source-adjacent output.** Compilation, generation, resolution, caches, temporary files, interpreter
    bytecode, candidate evidence, and test discovery remain beneath `.build/**`. The sole accepted historical
-   bundle is published under `validation-records/**` after a verified gate, never beside source. There is no
+   pass bundle is published under `validation-records/**` after a verified gate, never beside source.
+   A verifier-issued reset event uses that same closed archive shape without a gate verdict or predecessor
+   authority ([DL-0031](../documents/decision_log.md#dl-0031--unqualified-validation-claims-remain-obligations)). There is no
    cache exception beside authored source, including for `pb`
    ([DL-0015](../documents/decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence)).
 7. **Snapshot closure.** Candidate products and undeclared runtime state start absent. Accepted verifier
-   state and pin-verified toolchain and integrity-checked dependency inputs are explicit read-only inputs
-   beneath `.build/**`; the accepted predecessor bundle is exact-read from `validation-records/**`. Their
-   accepted input manifest binds exact contents, custody,
-   permissions, and permitted use; directory names or cache-entry counts cannot authenticate them.
+   state and integrity-checked dependency inputs are explicit read-only inputs beneath `.build/**`;
+   version-checked native tool paths may be declared read-only inputs outside it. The accepted predecessor
+   bundle is exact-read from `validation-records/**`. Input records bind native tool paths and versions,
+   dependency-source contents, custody, permissions, and permitted use; they impose no executable-byte pin.
+   Directory names or cache-entry counts cannot authenticate source or evidence.
    Publisher identity is unverified under
    [DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope).
-   Phase 0 consumes its seven GenesisTrust inputs and proves its unique qualification leaf absent afterward.
+   Phase 0 records compatible native GHCup/GHC versions and selected paths and proves its unique qualification leaf absent afterward.
    It does not claim whole-`.build/**` absence or universal replay detection. Later candidates establish
    compatibility under §M.6. Undeclared caches, detached receipts, and reused candidate products refuse.
 8. **No condemned fallback.** The cleanroom run starts with every legacy path owned by the phase absent and
@@ -596,10 +608,11 @@ Every phase inherits the following postconditions. They are part of the gate, no
     type has exactly one definition under `src/`.
 21. **No authored mutant.** No `_MUTANT` symbol exists under `src/`, `app/`, or `test/`; every mutant is
     runner-generated beneath `.build/runs/**`.
-22. **Observed implementation** ([GateSpec:repository_layout_conformance]). The admitted non-Haskell set: the
-    tracked non-`.hs`, non-`.md` set is exactly the six admitted build, ignore, licence, and packaging files that
-    [Phase 2](phase_02_repository_layout_conformance.md) names, and the pin of `pb/__main__.py` by its SHA-256 is
-    enforced by that gate ([DL-0022](../documents/decision_log.md#dl-0022--phase-2-accepted-its-owed-by-paragraphs-become-observed-implementations)).
+22. **Required source boundary** ([DL-0031](../documents/decision_log.md#dl-0031--unqualified-validation-claims-remain-obligations)).
+    Qualification is owed by [Phase 2](phase_02_repository_layout_conformance.md), which must establish that the admitted tracked non-`.hs`,
+    non-`.md` set contains only its six named build, ignore, licence and packaging inputs and the bounded
+    `pb/__main__.py` source exception. That gate must check the authored bootstrap source's SHA-256; the
+    source pin supplies no compiler admission or runtime handoff claim.
 
 <a id="s-commit-timing"></a>
 
@@ -670,17 +683,32 @@ normative tree and the mechanical file classification. The development plan adds
    product/runtime identities.
 4. Every root is justified by what its contents are and who consumes them, not by the phase or build target
    that first needed it.
-5. **Observed implementation** ([GateSpec:documentation_suite]). The validator's roots are `src/gate-spec`,
-   `src/plan-decisions`, `src/doc-check`, and the retained `src/validation-kernel`; the product gains
-   `src/vocabulary`, `src/ui-core`, and `src/extension-spec` as later phases deliver them; each oracle area
-   has one exclusive directory whose entry module is named exactly, for example `test/oracle/dsl/Main.hs`;
-   and there are two executables, `amoebius` and `amoebius-validate`, with no product-to-validator
-   dependency edge.
+5. **Required root and role split** ([DL-0034](../documents/decision_log.md#dl-0034--phase-0-acceptance-qualifies-the-finite-seed-boundary)).
+
+   Observed implementation: the accepted seed checks its validator root budget, exclusive oracle-area
+   boundary and product-to-validator separation [GateSpec:documentation_suite].
+
+   Complete source-graph enforcement is owed by [Phase 2](phase_02_repository_layout_conformance.md).
+   The validator must use `src/gate-spec`, `src/plan-decisions`, `src/doc-check` and the retained
+   `src/validation-kernel`. Product roots must follow the repository-layout doctrine. Each oracle area must
+   have one exclusive directory and a named entry module, such as `test/oracle/dsl/Main.hs`. The public
+   executable roles must remain `amoebius` and `amoebius-validate`, without a product-to-validator dependency
+   edge. The bounded `extension-source-admission` build transport specified by
+   [DL-0030](../documents/decision_log.md#dl-0030--extension-admission-binds-source-scope-and-dependency-closure)
+   must not become another product runtime.
 
 These rules make repository closure a prerequisite to evidence. A gate cannot certify behaviour while
 silently consuming a condemned source language, a pre-generated artifact, or a legacy fallback.
 
 ---
+
+
+Toolchain version admission and the hardware-free boundary follow
+[DL-0025](../documents/decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier).
+
+
+The version-admission and hardware-free boundary amendment is recorded in
+[DL-0026](../documents/decision_log.md#dl-0026--plan-gates-use-native-version-admission-without-hardware-prerequisites).
 
 ## Related Documents
 

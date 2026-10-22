@@ -14,6 +14,9 @@ module Amoebius.Toolchain.Provenance
   ( AcquiredUpstream (..)
   , ProvenanceRefusal (..)
   , Reference (..)
+  , VendorSourceFault (..)
+  , vendorSourceExamples
+  , vendorSourcePaths
   , UpstreamIdentity (..)
   , acquireUpstream
   , admitReference
@@ -35,7 +38,7 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, listDirectory)
-import System.FilePath (makeRelative, (</>))
+import System.FilePath (makeRelative, takeExtension, (</>))
 
 -- | An immutable upstream identity: a released source tree whose digest is
 -- fixed. The digest is over the sorted @<relative path> <sha256>@ lines of the
@@ -89,6 +92,7 @@ data ProvenanceRefusal
   | TopLevelVendor FilePath
   | PatchProgram FilePath
   | TrackedForeignPackage FilePath
+  | TrackedVendorProto FilePath
   | ForkModuleMissing Text
   | AcquisitionFailed Text
   deriving (Eq, Ord, Show)
@@ -103,6 +107,7 @@ renderProvenanceRefusal refusal = case refusal of
   TopLevelVendor path -> "TopLevelVendor: " <> Text.pack path
   PatchProgram path -> "PatchProgram: " <> Text.pack path
   TrackedForeignPackage path -> "TrackedForeignPackage: " <> Text.pack path
+  TrackedVendorProto path -> "TrackedVendorProto: " <> Text.pack path
   ForkModuleMissing name -> "ForkModuleMissing: " <> name
   AcquisitionFailed detail -> "UpstreamAcquisitionFailed: " <> detail
 
@@ -113,6 +118,26 @@ data Reference
   | GitBranch Text Text
   | LocalPath FilePath
   deriving (Eq, Ord, Show)
+
+data VendorSourceFault = ReintroducedVendorFile FilePath Text | MutableVendorReference Reference
+  deriving (Eq, Show)
+
+vendorSourceExamples :: [(Text, Text, VendorSourceFault)]
+vendorSourceExamples =
+  [("top-level-vendor", "haskell", ReintroducedVendorFile "vendor/supernova/src/Pulsar.hs" "module Pulsar where\n")
+  ,("mutable-reference", "branch", MutableVendorReference (GitBranch "https://github.com/cr-org/supernova" "main"))
+  ,("mutable-reference", "short-commit", MutableVendorReference (GitCommit "https://github.com/cr-org/supernova" "abcdef0"))
+  ,("mutable-reference", "local-path", MutableVendorReference (LocalPath "checkout/supernova"))
+  ,("tracked-vendor-proto", "schema", ReintroducedVendorFile "src/vendor/Probe.proto" "syntax = \"proto3\";\nmessage Probe {}\n")
+  ,("tracked-foreign-package", "cabal", ReintroducedVendorFile "dependency/dependency.cabal" "cabal-version: 3.0\nname: dependency\n")
+  ,("tracked-foreign-package", "npm", ReintroducedVendorFile "src/vendor/package.json" "{\"scripts\":{\"test\":\"true\"}}\n")
+  ,("tracked-foreign-package", "cargo", ReintroducedVendorFile "src/vendor/Cargo.toml" "[package]\nname = \"foreign\"\n")
+  ,("tracked-patch-program", "patch", ReintroducedVendorFile "patches/vendor.patch" "--- a/source\n+++ b/source\n@@ -1 +1 @@\n-old\n+new\n")
+  ,("tracked-patch-program", "diff", ReintroducedVendorFile "patches/vendor.diff" "--- a/source\n+++ b/source\n@@ -1 +1 @@\n-old\n+new\n")]
+
+vendorSourcePaths :: [FilePath] -> [FilePath]
+vendorSourcePaths = filter (\path -> any (`isPrefixOf` path) ["vendor/", "src/vendor/"]
+  || any (`isSuffixOf` path) [".patch", ".diff", ".cabal"])
 
 renderReference :: Reference -> Text
 renderReference reference = case reference of
@@ -197,7 +222,9 @@ refuseLayout paths =
   concat
     [ [TopLevelVendor path | "vendor/" `isPrefixOf` path]
         <> [PatchProgram path | any (`isSuffixOf` path) [".patch", ".diff"]]
-        <> [TrackedForeignPackage path | ".cabal" `isSuffixOf` path, path `notElem` ["amoebius.cabal", "probe/probe.cabal"]]
+        <> [TrackedForeignPackage path | (".cabal" `isSuffixOf` path && path `notElem` ["amoebius.cabal", "probe/probe.cabal"])
+          || ("src/vendor/" `isPrefixOf` path && takeExtension path `notElem` [".hs", ".proto", ".patch", ".diff"])]
+        <> [TrackedVendorProto path | "src/vendor/" `isPrefixOf` path && takeExtension path == ".proto"]
     | path <- paths
     ]
 

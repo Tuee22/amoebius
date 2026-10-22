@@ -62,8 +62,8 @@ expectedNegatives :: [NegativeRow]
 expectedNegatives =
   [ NegativeRow "illegal_unbuilt_provider" "UnbuiltProviderArm" "provider decoder"
   , NegativeRow "illegal_unbound_capability" "UnboundCapability" "binding coverage"
-  , NegativeRow "illegal_cyclic_extension" "CyclicExtension" "extension requirements"
-  , NegativeRow "illegal_shadowing_extension" "ShadowingExtension" "extension providers"
+  , NegativeRow "illegal_cyclic_extension" "CyclicExtension" "canonical linked extension requirements"
+  , NegativeRow "illegal_shadowing_extension" "ShadowingExtension" "canonical linked extension providers"
   ]
 
 mutantSpecs :: [MutantSpec]

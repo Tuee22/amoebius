@@ -6,7 +6,6 @@ module Amoebius.Capability.Binding
   ( bind
   , decodeCapabilityProvider
   , validateBindingCoverage
-  , validateExtensionGraph
   , boundDeploymentIsUnprovisioned
   ) where
 
@@ -66,45 +65,6 @@ validateBindingCoverage declared bindings = case Set.lookupMin (declared Set.\\ 
   Just missing -> Left (UnboundCapability (armName missing))
   Nothing -> Right ()
 
--- | Validate the closed extension provide/require graph.  Duplicate
--- providers are anti-shadowing violations; requirements are total; and a
--- DFS over provider edges rejects cycles, including self-loops.
-validateExtensionGraph :: [ExtensionDescriptor] -> Either DecodeError ()
-validateExtensionGraph extensions = do
-  providerIndex <- buildProviderIndex extensions
-  mapM_ (ensureRequirements providerIndex) extensions
-  mapM_ (visit providerIndex Set.empty Set.empty) (fmap extensionName extensions)
- where
-  buildProviderIndex :: [ExtensionDescriptor] -> Either DecodeError (Map CapabilityArm ExtensionName)
-  buildProviderIndex = foldl insertExtension (Right Map.empty)
-
-  insertExtension outcome extension = do
-    index <- outcome
-    foldl (insertCapability (extensionName extension)) (Right index) (Set.toList (extensionProvides extension))
-
-  insertCapability owner outcome capability = do
-    index <- outcome
-    case Map.lookup capability index of
-      Just existing -> Left (ShadowingExtension (extensionText owner <> " shadows " <> extensionText existing <> " for " <> armName capability))
-      Nothing -> Right (Map.insert capability owner index)
-
-  ensureRequirements index extension = case Set.lookupMin (extensionRequires extension Set.\\ Map.keysSet index) of
-    Just missing -> Left (UnboundCapability (armName missing))
-    Nothing -> Right ()
-
-  visit index visiting visited name
-    | name `Set.member` visiting = Left (CyclicExtension (extensionText name))
-    | name `Set.member` visited = Right ()
-    | otherwise = case findExtension name extensions of
-        Nothing -> Right ()
-        Just extension ->
-          mapM_
-            (visit index (Set.insert name visiting) (Set.insert name visited))
-            [ provider
-            | requirement <- Set.toList (extensionRequires extension)
-            , Just provider <- [Map.lookup requirement index]
-            ]
-
 canonicalProduct :: CapabilityArm -> Text
 canonicalProduct arm = case arm of
   ObjectStore -> "MinIO"
@@ -157,9 +117,9 @@ controllerFor need object
   | otherwise = case need of
       EdgeNeed _ -> DeploymentBody 1 recreateRollout
       InferenceEngineCapabilityNeed inference -> case inferenceRuntime inference of
-        AppleMetal _ -> HostProcessBody ["eligible-metal-host"] "release-drain-replace"
-        Cuda _ -> DaemonSetBody ["eligible-cuda-node"] DaemonSetOnDelete
-        CpuRuntime _ -> DeploymentBody 1 recreateRollout
+        AppleMetal -> HostProcessBody ["eligible-metal-host"] "release-drain-replace"
+        Cuda -> DaemonSetBody ["eligible-cuda-node"] DaemonSetOnDelete
+        CpuRuntime -> DeploymentBody 1 recreateRollout
       ObjectStoreNeed _ -> StatefulSetBody 1 StatefulSetNativeSerial
       SecretStoreNeed _ -> StatefulSetBody 1 StatefulSetNativeSerial
       MessageBusNeed _ -> StatefulSetBody 1 StatefulSetNativeSerial
@@ -216,18 +176,6 @@ armName arm = Text.pack (show arm)
 
 armSlug :: CapabilityArm -> Text
 armSlug = Text.toLower . armName
-
-extensionText :: ExtensionName -> Text
-extensionText extension = case extension of
-  InfernixExtension -> "infernix"
-  JitMLExtension -> "jitML"
-
-findExtension :: ExtensionName -> [ExtensionDescriptor] -> Maybe ExtensionDescriptor
-findExtension name extensions = case extensions of
-  [] -> Nothing
-  extension : rest
-    | extensionName extension == name -> Just extension
-    | otherwise -> findExtension name rest
 
 naturalText :: Natural -> Text
 naturalText = Text.pack . show

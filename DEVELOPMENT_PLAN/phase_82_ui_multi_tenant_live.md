@@ -56,7 +56,7 @@ retain or reveal a raw tenant identity supplied by the browser.
 `ui-multi-tenant-live` Haskell component suite can supply supporting observations only; the sole acceptance command is `pb validate
 phase 82`. Split on workflow/artifact UX, replica failure/HA, a second substrate, or a second independently
 releasable runtime feature.
-**Substrate:** `linux-cpu` — future live browser/cluster observation only after the DSL barrier (Phase 4) and every predecessor gate pass.
+**Substrate:** `linux-cpu` — future live browser/cluster observation only after the [DSL barrier](phase_09_dsl_barrier.md) (`DSL_BARRIER`) and every predecessor gate pass.
 **Lane:** `linux-cpu/amd64`.
 **Register:** 3 — live authenticated multi-tenant browser isolation; NOT VALIDATED.
 **Depends on:** [Phase 81](phase_81_ui_single_tenant_live.md)

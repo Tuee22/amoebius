@@ -22,6 +22,7 @@ module Amoebius.Capacity.Types
   , HostEnvironment (..)
   , NodeCapacity (..)
   , Node (..)
+  , NodeRole (..)
   , CandidateNodeClass (..)
   , GrowthQuota (..)
   , PlacementError (..)
@@ -38,7 +39,7 @@ module Amoebius.Capacity.Types
   ) where
 
 import Amoebius.Capacity.Vector (ResourceVector (..), addResources, zeroResources)
-import Amoebius.Vocabulary (Quantity (..), Unit (..), quantityValue)
+import Amoebius.Vocabulary (Detected, Quantity (..), Unit (..), quantityValue)
 import Control.DeepSeq (NFData)
 import Data.Map.Strict (Map)
 import Data.Set (Set)
@@ -147,12 +148,18 @@ data NodeCapacity = NodeCapacity
   deriving stock (Eq, Generic, Show)
   deriving anyclass (NFData)
 
+data NodeRole = KindWorker | Rke2Server | Rke2Agent | ManagedWorker
+  deriving stock (Eq, Generic, Ord, Show)
+  deriving anyclass (NFData)
+
 data Node = Node
   { nodeId :: Text
   , nodeHostId :: Text
   , nodeEnvironment :: HostEnvironment
   , nodeCapacity :: NodeCapacity
   , nodeTaints :: Set Text
+  , nodeDetected :: Detected
+  , nodeRole :: NodeRole
   }
   deriving stock (Eq, Generic, Show)
   deriving anyclass (NFData)
@@ -160,6 +167,7 @@ data Node = Node
 data CandidateNodeClass = CandidateNodeClass
   { candidateName :: Text
   , candidateEnvironment :: HostEnvironment
+  , candidateDetected :: Detected
   , candidateCapacity :: NodeCapacity
   , candidatePerNodeDemand :: ResourceVector
   , candidateTaints :: Set Text
@@ -178,7 +186,8 @@ data GrowthQuota = GrowthQuota
   deriving anyclass (NFData)
 
 data PlacementError
-  = CapacityOvercommit Overcommit
+  = TaintedOnlyHost Text
+  | CapacityOvercommit Overcommit
   | Unschedulable Text
   | CpuLimitPolicyExceeded Text Natural Natural
   | InvalidResourceEnvelope Overcommit

@@ -64,7 +64,7 @@ import System.FilePath.Posix
   , takeExtension
   , takeFileName
   )
-import System.Posix.Directory (closeDirStream, openDirStream, readDirStream)
+import Data.Streaming.Filesystem (closeDirStream, openDirStream, readDirStream)
 
 data Document = Document
   { documentPath :: FilePath
@@ -1250,13 +1250,11 @@ boundedDirectoryEntries budget relative absolute = do
  where
   readBounded = bracket (openDirStream absolute) closeDirStream (consume 0 [])
   consume localCount accepted stream = do
-    name <- readDirStream stream
-    if null name
-      then pure (Right (sort (reverse accepted)))
-      else
-        if name `elem` [".", ".."]
-          then consume localCount accepted stream
-          else admitDirectoryEntry localCount accepted name (consume (localCount + 1) (name : accepted) stream)
+    entry <- readDirStream stream
+    case entry of
+      Nothing -> pure (Right (sort (reverse accepted)))
+      Just name | name `elem` [".", ".."] -> consume localCount accepted stream
+                | otherwise -> admitDirectoryEntry localCount accepted name (consume (localCount + 1) (name : accepted) stream)
   admitDirectoryEntry localCount _ _ _
     | discoveryDirectoryEntriesExceeded localCount =
         pure

@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RoleAnnotations #-}
 
 -- | Declaration-derived suite inventory, passing-run seal, and verdict-gated link set.
 --
@@ -126,6 +127,7 @@ data CoverageCell = CoverageCell
   }
   deriving stock (Eq, Ord, Show)
 
+type role GatePlan nominal
 data GatePlan scope = GatePlan
   { internalDeclarationDigest :: Text
   , internalCoreVersion :: CoreVersion
@@ -269,6 +271,7 @@ data ObservedCase = ObservedCase
 data VerdictResult = VerdictPassed
   deriving stock (Eq, Ord, Show)
 
+type role ConformanceVerdict nominal
 data ConformanceVerdict scope = ConformanceVerdict
   { internalVerdictDeclarationDigest :: Text
   , internalVerdictCoreVersion :: CoreVersion
@@ -342,6 +345,7 @@ verdictAddress declaration version suite result =
 resultTag :: VerdictResult -> Text
 resultTag VerdictPassed = "passed"
 
+type role LinkSet nominal
 newtype LinkSet scope = LinkSet [(Text, Text, Text)]
   deriving stock (Eq, Show)
 

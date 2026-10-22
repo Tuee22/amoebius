@@ -1,0 +1,835 @@
+candidate	phase=4	capability=witness_manifests_capacity_storage
+spec-digest	082bc4faabac14fc677811b16337989da1f8a718137c4d1ee4c039802e75e9a9
+challenge	fe1ccc26a22cf5e08fe71be9a3811677
+chain	6f1938a0713fb127eedbd3981cb386a3d0fccb2ace80d6f27ea479293090a8bf
+reproducible-core	5ca30e9d2742e9967b0655294df7d01a9a764d20909c2cf07701e48729bfb17d
+row	Claim	green
+observation	Claim	claim	The two-node corpus example reaches fake-applied bytes whose node names, replica counts, resource requests, and claim bytes equal the placement, envelope, and storage witnesses, and every capacity is a unit-tagged quantity. The runner rewrites the rendered example after the run starts, planting a nonce and raising one host capacity by one unit so the application's placement flips, and the oracle judges every stage artefact from literals. The total fit over every pair of three-valued vectors, the volume identities, and the render of a claim without a StatefulSet are judged from the suite's bytes, and the over-capacity twins are refused at provision with the exact-fit twin accepted. Substrates, taints, extensions, children, and the UI language are excluded.
+observation	Claim	spec-digest	082bc4faabac14fc677811b16337989da1f8a718137c4d1ee4c039802e75e9a9
+observation	Claim	role	OrdinaryGate
+row	Subject	green
+observation	Subject	subject.Amoebius.Capacity.Fits	capacity-topology
+observation	Subject	subject.Amoebius.Capacity.Vector	capacity-topology
+observation	Subject	subject.Amoebius.Manifest.Render	manifest-render
+observation	Subject	subject.Amoebius.Manifest.StatefulSet	manifest-render
+observation	Subject	subject.Amoebius.Placement.Witness	capacity-topology
+observation	Subject	subject.Amoebius.Storage.Witness	storage-geometry-folds
+row	Command	green
+observation	Command	command	amoebius-validate preview phase 4
+observation	Command	suite	spine-suite
+observation	Command	oracle	oracle-dsl
+row	Oracle	green
+observation	Oracle	oracle.directories	test/oracle/dsl
+observation	Oracle	oracle.ledger-sha256	f072aab9e576689a3651c352abc088a5e7f7eda185709967de4eca15830e6b62
+observation	Oracle	oracle.rows	920
+row	Positive controls	green
+observation	Positive controls	positive.count	20
+observation	Positive controls	ledger.red-rows	
+row	Paired negatives	green
+observation	Paired negatives	negative.count	33
+observation	Paired negatives	ledger.red-rows	
+row	Mutants	green
+observation	Mutants	mutants.killed	25
+observation	Mutants	mutants.viable	25
+observation	Mutants	mutants.stillborn	0
+observation	Mutants	mutants.ratio	1 % 1
+observation	Mutants	mutants.rows	25
+observation	Mutants	mutant.1	Amoebius.Capacity.Vector	src/capacity-topology/Amoebius/Capacity/Vector.hs:30	constant-flip	620491f69d2a->5042848abea1	killed@lower.kind-single-objectstore.dump,plan.kind-single-objectstore.dump,lower.shape-swap-sibling.dump
+observation	Mutants	mutant.2	Amoebius.Capacity.Fits	src/capacity-topology/Amoebius/Capacity/Fits.hs:43	field-drop	ede676af40a8->c4b39255f6e4	killed@consume.section,chain.section,fake-apply.section
+observation	Mutants	mutant.3	Amoebius.Placement.Witness	src/capacity-topology/Amoebius/Placement/Witness.hs:70	branch-swap	68ef4c46f5ee->b317004dbc5b	killed@place.kind-two-nodes.nodes,render.kind-two-nodes.app-deployment,place.exact-fit-sibling.nodes
+observation	Mutants	mutant.4	Amoebius.Storage.Witness	src/storage-geometry-folds/Amoebius/Storage/Witness.hs:67	constant-flip	7d8fe4e36033->084a921634dc	killed@volume.table,volume.injective,volume.size-explicit
+observation	Mutants	mutant.5	Amoebius.Manifest.StatefulSet	src/manifest-render/Amoebius/Manifest/StatefulSet.hs:32	constant-flip	2655408e81c9->22a8296bd784	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.shape-swap-sibling.objects
+observation	Mutants	mutant.6	Amoebius.Manifest.Render	src/manifest-render/Amoebius/Manifest/Render.hs:53	branch-swap	9082526ecc8d->f2fa8a8fdda3	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.kind-single-objectstore.app-deployment
+observation	Mutants	mutant.7	Amoebius.Capacity.Vector	src/capacity-topology/Amoebius/Capacity/Vector.hs:36	field-drop	620491f69d2a->11b13ac7e03c	killed@decode.section,consume.section,chain.section
+observation	Mutants	mutant.8	Amoebius.Capacity.Fits	src/capacity-topology/Amoebius/Capacity/Fits.hs:44	field-drop	ede676af40a8->f9f90ff80ba3	killed@consume.section,chain.section,fake-apply.section
+observation	Mutants	mutant.9	Amoebius.Placement.Witness	src/capacity-topology/Amoebius/Placement/Witness.hs:70	list-truncation	68ef4c46f5ee->5e2a170df7dd	killed@place.kind-two-nodes.nodes,render.kind-two-nodes.app-deployment,place.exact-fit-sibling.nodes
+observation	Mutants	mutant.10	Amoebius.Storage.Witness	src/storage-geometry-folds/Amoebius/Storage/Witness.hs:67	branch-swap	7d8fe4e36033->4a3fdbbb5695	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.kind-single-objectstore.app-deployment
+observation	Mutants	mutant.11	Amoebius.Manifest.StatefulSet	src/manifest-render/Amoebius/Manifest/StatefulSet.hs:33	list-truncation	2655408e81c9->8687a3c53604	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,chain.kind-single-objectstore.dump
+observation	Mutants	mutant.12	Amoebius.Manifest.Render	src/manifest-render/Amoebius/Manifest/Render.hs:58	list-truncation	9082526ecc8d->477ba29d8d91	killed@render.kind-single-objectstore.objects,render.shape-swap-sibling.objects,render.replicas-3-sibling.objects
+observation	Mutants	mutant.13	Amoebius.Capacity.Vector	src/capacity-topology/Amoebius/Capacity/Vector.hs:37	field-drop	620491f69d2a->09b5e4572541	killed@decode.section,consume.section,chain.section
+observation	Mutants	mutant.14	Amoebius.Capacity.Fits	src/capacity-topology/Amoebius/Capacity/Fits.hs:45	field-drop	ede676af40a8->605b097d94f0	killed@consume.section,chain.section,fake-apply.section
+observation	Mutants	mutant.15	Amoebius.Placement.Witness	src/capacity-topology/Amoebius/Placement/Witness.hs:96	list-truncation	68ef4c46f5ee->760a3b37b459	killed@provision.kind-single-objectstore.dump,render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes
+observation	Mutants	mutant.16	Amoebius.Storage.Witness	src/storage-geometry-folds/Amoebius/Storage/Witness.hs:72	list-truncation	7d8fe4e36033->26adfe79bfc7	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.shape-swap-sibling.objects
+observation	Mutants	mutant.17	Amoebius.Manifest.StatefulSet	src/manifest-render/Amoebius/Manifest/StatefulSet.hs:39	field-drop	2655408e81c9->e5aaf72927f6	killed@render.kind-single-objectstore.objects,render.shape-swap-sibling.objects,render.replicas-3-sibling.objects
+observation	Mutants	mutant.18	Amoebius.Capacity.Vector	src/capacity-topology/Amoebius/Capacity/Vector.hs:38	field-drop	620491f69d2a->eef500d1dfc2	killed@decode.section,consume.section,chain.section
+observation	Mutants	mutant.19	Amoebius.Placement.Witness	src/capacity-topology/Amoebius/Placement/Witness.hs:103	field-drop	68ef4c46f5ee->f1c9f63a5fe1	killed@consume.section,fake-apply.section,provision.kind-single-objectstore.dump
+observation	Mutants	mutant.20	Amoebius.Manifest.StatefulSet	src/manifest-render/Amoebius/Manifest/StatefulSet.hs:40	field-drop	2655408e81c9->babd473cb3ef	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.shape-swap-sibling.objects
+observation	Mutants	mutant.21	Amoebius.Placement.Witness	src/capacity-topology/Amoebius/Placement/Witness.hs:104	field-drop	68ef4c46f5ee->8deadd2c2a29	killed@consume.section,chain.section,fake-apply.section
+observation	Mutants	mutant.22	Amoebius.Manifest.StatefulSet	src/manifest-render/Amoebius/Manifest/StatefulSet.hs:41	field-drop	2655408e81c9->cf454866e2c7	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.shape-swap-sibling.objects
+observation	Mutants	mutant.23	Amoebius.Placement.Witness	src/capacity-topology/Amoebius/Placement/Witness.hs:105	field-drop	68ef4c46f5ee->5ae6c3855bff	killed@consume.section,fake-apply.section,provision.kind-single-objectstore.dump
+observation	Mutants	mutant.24	Amoebius.Manifest.StatefulSet	src/manifest-render/Amoebius/Manifest/StatefulSet.hs:42	field-drop	2655408e81c9->11eebbbcca0e	killed@place.kind-single-objectstore.nodes,claims.kind-single-objectstore.volumes,place.shape-swap-sibling.nodes
+observation	Mutants	mutant.25	Amoebius.Placement.Witness	src/capacity-topology/Amoebius/Placement/Witness.hs:106	field-drop	68ef4c46f5ee->1b5e4c81e6f6	killed@consume.section,fake-apply.section,provision.kind-single-objectstore.dump
+observation	Mutants	mutant.26	summary	killed=25	viable=25	stillborn=0
+row	Discovery	green
+observation	Discovery	closure.stanzas	capability-bind,capacity-topology,dsl-core,dsl-spine,execution-accelerator-folds,formal-model,kernel-steps,layout,manifest-render,offline-language-types,provider-pulumi,provision-seal,storage-geometry-folds,toolchain,vocabulary
+observation	Discovery	subjects.mapped	6
+observation	Discovery	subjects.declared	6
+row	Challenge	green
+observation	Challenge	challenge.nonce	fe1ccc26a22cf5e08fe71be9a3811677
+observation	Challenge	challenge.kind	runner-perturbed input
+observation	Challenge	challenge.binary	[("./.build/runs/phase-04/clean/suite/binary/compiled/frozen.dhall",True),("./.build/runs/phase-04/clean/suite/binary/compiled/decoded.dump",True),("./.build/runs/phase-04/clean/suite/binary/compiled/lowered.dump",True),("./.build/runs/phase-04/clean/suite/binary/compiled/plan.dump",True),("./.build/runs/phase-04/clean/suite/binary/compiled/provisioned.dump",True),("./.build/runs/phase-04/clean/suite/binary/compiled/manifest.json",True),("./.build/runs/phase-04/clean/suite/binary/compiled/chain.dump",True),("./.build/runs/phase-04/clean/suite/binary/compiled/dry-run.dump",True),("./.build/runs/phase-04/clean/suite/binary/applied/fake/stdin.combined",True)]
+observation	Challenge	challenge.spine	True
+row	Observer	green
+observation	Observer	run.1.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.1.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.1.cwd	./.build/runs/phase-04/mutants/1
+observation	Observer	run.1.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.1.exit	ExitSuccess
+observation	Observer	run.1.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.1.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+observation	Observer	run.1.stdout-bytes	0
+observation	Observer	run.1.digest	fac5033b622792bda97f534b8665bb2826751ea7e739b41afce2bf3ff58aef97
+observation	Observer	run.2.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.2.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/1/suite
+observation	Observer	run.2.cwd	./.build/runs/phase-04/mutants/1
+observation	Observer	run.2.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.2.exit	ExitSuccess
+observation	Observer	run.2.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.2.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.2.stdout-bytes	0
+observation	Observer	run.2.digest	3f1974e463d6286bff82b456dc5c48975251c699b0882d0ea0c390f1ebf699d0
+observation	Observer	run.3.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.3.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/1/suite
+observation	Observer	run.3.cwd	./.build/runs/phase-04/mutants/1
+observation	Observer	run.3.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.3.exit	ExitFailure 1
+observation	Observer	run.3.stdout-sha256	0af99ec3ca90f1bcd3f933b486c877c7a1ca6ed6a9e5e7511d49bf536e104db4
+observation	Observer	run.3.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.3.stdout-bytes	57750
+observation	Observer	run.3.digest	b6c4e1ca60c508db79437b3fbd9914886693dfe5bd6ff891ef87840e702bd390
+observation	Observer	run.4.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.4.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.4.cwd	./.build/runs/phase-04/mutants/2
+observation	Observer	run.4.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.4.exit	ExitSuccess
+observation	Observer	run.4.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.4.stderr-sha256	ef194b04a0a280ab0d66583b434b19bf97da311c5aaf5d82eb21d0f7a5ac9a0b
+observation	Observer	run.4.stdout-bytes	0
+observation	Observer	run.4.digest	f851f02e81c31e418ca62dd6c94a6d8f2fc664fef5812e26244f101a9c309dd5
+observation	Observer	run.5.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.5.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/2/suite
+observation	Observer	run.5.cwd	./.build/runs/phase-04/mutants/2
+observation	Observer	run.5.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.5.exit	ExitSuccess
+observation	Observer	run.5.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.5.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.5.stdout-bytes	0
+observation	Observer	run.5.digest	138ec8916f427ddcb704eb6645598d3288a43d2c9322c5a5e93a5b426e8882b6
+observation	Observer	run.6.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.6.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/2/suite
+observation	Observer	run.6.cwd	./.build/runs/phase-04/mutants/2
+observation	Observer	run.6.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.6.exit	ExitFailure 1
+observation	Observer	run.6.stdout-sha256	6fb087290c0403531bda5cbc3cb467751a8def08e3f80e371d2aa0a1fdf2546e
+observation	Observer	run.6.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.6.stdout-bytes	59292
+observation	Observer	run.6.digest	be743be40ed6bf6992aeeb1f02582d14f8018c56c1bdc356f63ccc836d6a8fc8
+observation	Observer	run.7.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.7.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.7.cwd	./.build/runs/phase-04/mutants/3
+observation	Observer	run.7.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.7.exit	ExitSuccess
+observation	Observer	run.7.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.7.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+observation	Observer	run.7.stdout-bytes	0
+observation	Observer	run.7.digest	b01ef110cba6d4b50450e11919247946f200ae5bb7d237702e48a4535d1672c4
+observation	Observer	run.8.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.8.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/3/suite
+observation	Observer	run.8.cwd	./.build/runs/phase-04/mutants/3
+observation	Observer	run.8.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.8.exit	ExitSuccess
+observation	Observer	run.8.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.8.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.8.stdout-bytes	0
+observation	Observer	run.8.digest	fefab03a0caff449e65cc4a356e22b9a96133f222c44dfa511b8f51c688a9558
+observation	Observer	run.9.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.9.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/3/suite
+observation	Observer	run.9.cwd	./.build/runs/phase-04/mutants/3
+observation	Observer	run.9.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.9.exit	ExitFailure 1
+observation	Observer	run.9.stdout-sha256	a70b338d92058ca5539b817bc33d79fde989638c5660936bf04251b3fbb997cb
+observation	Observer	run.9.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.9.stdout-bytes	42481
+observation	Observer	run.9.digest	94d99221e30d8ddcc9ec3f8a1fced5010f9af00f7e47e252f343e02d41ad5bd3
+observation	Observer	run.10.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.10.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.10.cwd	./.build/runs/phase-04/mutants/4
+observation	Observer	run.10.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.10.exit	ExitSuccess
+observation	Observer	run.10.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.10.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+observation	Observer	run.10.stdout-bytes	0
+observation	Observer	run.10.digest	421820694a665e4dd7d2e1c4dadc8bd6395866b670f41543d55225794af863d7
+observation	Observer	run.11.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.11.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/4/suite
+observation	Observer	run.11.cwd	./.build/runs/phase-04/mutants/4
+observation	Observer	run.11.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.11.exit	ExitSuccess
+observation	Observer	run.11.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.11.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.11.stdout-bytes	0
+observation	Observer	run.11.digest	3c9ff6018be64541019528cbe5399101d945114c28844c1b0a026ae8bdd1a338
+observation	Observer	run.12.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.12.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/4/suite
+observation	Observer	run.12.cwd	./.build/runs/phase-04/mutants/4
+observation	Observer	run.12.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.12.exit	ExitFailure 1
+observation	Observer	run.12.stdout-sha256	a119f8ce11f08ee1d8dc528409aa86db14d245c8c1846136b3c75aea37634eb2
+observation	Observer	run.12.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.12.stdout-bytes	40828
+observation	Observer	run.12.digest	a9404307c374702eb4ca8f292fa6ef3ba72a6a06b515d57359e440da1ec73474
+observation	Observer	run.13.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.13.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.13.cwd	./.build/runs/phase-04/mutants/5
+observation	Observer	run.13.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.13.exit	ExitSuccess
+observation	Observer	run.13.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.13.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+observation	Observer	run.13.stdout-bytes	0
+observation	Observer	run.13.digest	9f8fb507fcadfd0b2cb24642cb00be69f2c5147aea9bb27233fb926c9d073e35
+observation	Observer	run.14.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.14.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/5/suite
+observation	Observer	run.14.cwd	./.build/runs/phase-04/mutants/5
+observation	Observer	run.14.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.14.exit	ExitSuccess
+observation	Observer	run.14.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.14.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.14.stdout-bytes	0
+observation	Observer	run.14.digest	f5d0c6a1513ab355ec8d29984a921524fcd3c3572060b5b69fba231b4ac957b6
+observation	Observer	run.15.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.15.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/5/suite
+observation	Observer	run.15.cwd	./.build/runs/phase-04/mutants/5
+observation	Observer	run.15.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.15.exit	ExitFailure 1
+observation	Observer	run.15.stdout-sha256	af3dd97cf5a9b43eff5ee2b764ce06de04af36ebe2a2e3d485bbe74c039114c0
+observation	Observer	run.15.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.15.stdout-bytes	46732
+observation	Observer	run.15.digest	1885330f7e1aeb56e7c8653e1631f3e26df328e991dd234a50b7cbe70cda0e53
+observation	Observer	run.16.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.16.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.16.cwd	./.build/runs/phase-04/mutants/6
+observation	Observer	run.16.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.16.exit	ExitSuccess
+observation	Observer	run.16.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.16.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+observation	Observer	run.16.stdout-bytes	0
+observation	Observer	run.16.digest	dc7eda9f5527b9352876729f91ee959ba767285b10c10d1ff6b18bb54820526b
+observation	Observer	run.17.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.17.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/6/suite
+observation	Observer	run.17.cwd	./.build/runs/phase-04/mutants/6
+observation	Observer	run.17.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.17.exit	ExitSuccess
+observation	Observer	run.17.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.17.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.17.stdout-bytes	0
+observation	Observer	run.17.digest	17bc1e9e80527765b4ee8f990d331ecd363ef8d978f4e3fccd3f7df4cb089700
+observation	Observer	run.18.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.18.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/6/suite
+observation	Observer	run.18.cwd	./.build/runs/phase-04/mutants/6
+observation	Observer	run.18.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.18.exit	ExitFailure 1
+observation	Observer	run.18.stdout-sha256	d679c175d5433327e70c5ea9b474c3293987db191ef872542772a0a880be47c9
+observation	Observer	run.18.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.18.stdout-bytes	60031
+observation	Observer	run.18.digest	4920d9d69842ac1b8d4ba08376bb203ba8ea25dbfc8c572fec547275922e88d5
+observation	Observer	run.19.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.19.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.19.cwd	./.build/runs/phase-04/mutants/7
+observation	Observer	run.19.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.19.exit	ExitSuccess
+observation	Observer	run.19.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.19.stderr-sha256	6d04ed716c5cd8c9762f220b9631f75046529d5d9dfc4f4264be894f0ed28afb
+observation	Observer	run.19.stdout-bytes	0
+observation	Observer	run.19.digest	3b4d5211580cbc724218c6b96e6b82d0accf57ae247fb413865af3e0b573b002
+observation	Observer	run.20.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.20.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/7/suite
+observation	Observer	run.20.cwd	./.build/runs/phase-04/mutants/7
+observation	Observer	run.20.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.20.exit	ExitSuccess
+observation	Observer	run.20.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.20.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.20.stdout-bytes	0
+observation	Observer	run.20.digest	b0c4cc4a0e588c78deb2269d4f0bf0c4c69a56d43fe4f0e2e4cf5d6befc3a3d0
+observation	Observer	run.21.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.21.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/7/suite
+observation	Observer	run.21.cwd	./.build/runs/phase-04/mutants/7
+observation	Observer	run.21.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.21.exit	ExitFailure 1
+observation	Observer	run.21.stdout-sha256	c5a660cec81924b338ed3da1cce14de5ebdd646563a27ca94b3ebb4701ecf7be
+observation	Observer	run.21.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.21.stdout-bytes	61842
+observation	Observer	run.21.digest	f6b7f8af2af40840747291546895853ba0dc8bfbe2759477139bd091e55141ef
+observation	Observer	run.22.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.22.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.22.cwd	./.build/runs/phase-04/mutants/8
+observation	Observer	run.22.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.22.exit	ExitSuccess
+observation	Observer	run.22.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.22.stderr-sha256	bc6579aed1f91808b720e550e580444ae028ade0509c234525379f75dce3ced4
+observation	Observer	run.22.stdout-bytes	0
+observation	Observer	run.22.digest	052c9f821f7383afd4572a14215f2ce25e48c7504c17c6b812250971af9050c5
+observation	Observer	run.23.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.23.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/8/suite
+observation	Observer	run.23.cwd	./.build/runs/phase-04/mutants/8
+observation	Observer	run.23.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.23.exit	ExitSuccess
+observation	Observer	run.23.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.23.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.23.stdout-bytes	0
+observation	Observer	run.23.digest	8af093143702234fb6dfd46463ad94d7cf022441c1aa4876f2d82d73354aac48
+observation	Observer	run.24.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.24.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/8/suite
+observation	Observer	run.24.cwd	./.build/runs/phase-04/mutants/8
+observation	Observer	run.24.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.24.exit	ExitFailure 1
+observation	Observer	run.24.stdout-sha256	6fb087290c0403531bda5cbc3cb467751a8def08e3f80e371d2aa0a1fdf2546e
+observation	Observer	run.24.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.24.stdout-bytes	59292
+observation	Observer	run.24.digest	fc1c0fa629a2893b4bc951fddb1e9aa55aa4c96d9e8f35361394afc52a2cb80e
+observation	Observer	run.25.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.25.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.25.cwd	./.build/runs/phase-04/mutants/9
+observation	Observer	run.25.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.25.exit	ExitSuccess
+observation	Observer	run.25.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.25.stderr-sha256	f6950777827501ef110774f6167f526e068aa4c383cf835c904fec2285c3ab7d
+observation	Observer	run.25.stdout-bytes	0
+observation	Observer	run.25.digest	f811dc79c3bcaa3dd6e954f5439b3c91366efe5b7323bae034d4aa66b635e1c3
+observation	Observer	run.26.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.26.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/9/suite
+observation	Observer	run.26.cwd	./.build/runs/phase-04/mutants/9
+observation	Observer	run.26.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.26.exit	ExitSuccess
+observation	Observer	run.26.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.26.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.26.stdout-bytes	0
+observation	Observer	run.26.digest	c4b13caab528149c2e3a3b14c31e700f031ee6dbdcb6115cd2380145fa15fd2c
+observation	Observer	run.27.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.27.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/9/suite
+observation	Observer	run.27.cwd	./.build/runs/phase-04/mutants/9
+observation	Observer	run.27.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.27.exit	ExitFailure 1
+observation	Observer	run.27.stdout-sha256	7fdc3115d8802dc43fa76715ddc99eff0a1ba50f3460f650bcb6da5b847cc84c
+observation	Observer	run.27.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.27.stdout-bytes	41442
+observation	Observer	run.27.digest	dcfbde3b1959d5e3a7b16f4718d1b0cfe0835314bac2f8df53fb6f99ecaa82a8
+observation	Observer	run.28.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.28.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.28.cwd	./.build/runs/phase-04/mutants/10
+observation	Observer	run.28.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.28.exit	ExitSuccess
+observation	Observer	run.28.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.28.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+observation	Observer	run.28.stdout-bytes	0
+observation	Observer	run.28.digest	ce8d1f7f64c258b5d502c8bb9265a0ece597afe4e495098ac2a48fe557c38770
+observation	Observer	run.29.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.29.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/10/suite
+observation	Observer	run.29.cwd	./.build/runs/phase-04/mutants/10
+observation	Observer	run.29.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.29.exit	ExitSuccess
+observation	Observer	run.29.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.29.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.29.stdout-bytes	0
+observation	Observer	run.29.digest	277854064bfa7d194decbde20425add718e59ac0806bfcd05d8eb07f802c6f66
+observation	Observer	run.30.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.30.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/10/suite
+observation	Observer	run.30.cwd	./.build/runs/phase-04/mutants/10
+observation	Observer	run.30.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.30.exit	ExitFailure 1
+observation	Observer	run.30.stdout-sha256	547aac46149934274bfd3a1204a63a29fe7196209d62366257586016fcc7d194
+observation	Observer	run.30.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.30.stdout-bytes	59796
+observation	Observer	run.30.digest	b169fb72cb8459d3f6875edbdc8275a386308c4fbeab0b622b6c1b645864705f
+observation	Observer	run.31.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.31.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.31.cwd	./.build/runs/phase-04/mutants/11
+observation	Observer	run.31.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.31.exit	ExitSuccess
+observation	Observer	run.31.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.31.stderr-sha256	0b47899b67d6abab31483e85dbf0197fdd7c9d3d5d27e1b2102b205d8545ea41
+observation	Observer	run.31.stdout-bytes	0
+observation	Observer	run.31.digest	2fd91da392fe6cdeb995395e04f022cae333daf525d8e5701960adbd7bf7e9fd
+observation	Observer	run.32.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.32.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/11/suite
+observation	Observer	run.32.cwd	./.build/runs/phase-04/mutants/11
+observation	Observer	run.32.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.32.exit	ExitSuccess
+observation	Observer	run.32.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.32.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.32.stdout-bytes	0
+observation	Observer	run.32.digest	2b4f30abfc9ed87b1bb779f0ee01b73ccc3f220dceedf037d37c34d5f6b9507b
+observation	Observer	run.33.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.33.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/11/suite
+observation	Observer	run.33.cwd	./.build/runs/phase-04/mutants/11
+observation	Observer	run.33.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.33.exit	ExitFailure 1
+observation	Observer	run.33.stdout-sha256	b792a8dcad38cfe30aec16b19863be1a778dcc43b496ce2e696ff3e17fd8bebd
+observation	Observer	run.33.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.33.stdout-bytes	58640
+observation	Observer	run.33.digest	6e78cbe3cddab26dc37d48ad82450facd6d26f5a4128ae53828f3b5c839af44a
+observation	Observer	run.34.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.34.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.34.cwd	./.build/runs/phase-04/mutants/12
+observation	Observer	run.34.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.34.exit	ExitSuccess
+observation	Observer	run.34.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.34.stderr-sha256	e3cba210cc64bf371e9ffbbb0ef18a8a9aadf3db6c0e9ba886cdc45d21b16c75
+observation	Observer	run.34.stdout-bytes	0
+observation	Observer	run.34.digest	bd6ec97b54f29f23817e8eb126c7b64cf4320875b6139514dd59107b157c2fc1
+observation	Observer	run.35.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.35.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/12/suite
+observation	Observer	run.35.cwd	./.build/runs/phase-04/mutants/12
+observation	Observer	run.35.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.35.exit	ExitSuccess
+observation	Observer	run.35.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.35.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.35.stdout-bytes	0
+observation	Observer	run.35.digest	1630b1256e7b07f64300ec032847e63c6e14ff267afc669fb2d43ba89d171ca5
+observation	Observer	run.36.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.36.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/12/suite
+observation	Observer	run.36.cwd	./.build/runs/phase-04/mutants/12
+observation	Observer	run.36.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.36.exit	ExitFailure 1
+observation	Observer	run.36.stdout-sha256	783d77aac4438d48659ea6adc30a6df260d80fb7324cb7f47c0736bbed6fb7e9
+observation	Observer	run.36.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.36.stdout-bytes	43299
+observation	Observer	run.36.digest	013a1243493cdb33f50481f09583f65852e990da6054bf9a29b356dfd19cb35e
+observation	Observer	run.37.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.37.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.37.cwd	./.build/runs/phase-04/mutants/13
+observation	Observer	run.37.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.37.exit	ExitSuccess
+observation	Observer	run.37.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.37.stderr-sha256	98e23ce5a5a66c371dd4c9dd01a9e46de6c40388e026bf701b407dc3a00022c6
+observation	Observer	run.37.stdout-bytes	0
+observation	Observer	run.37.digest	7c5ce42d7129b3f1c41c8b3478fc8a0f62bbdccf12bd1a80c051cb118ecb84c1
+observation	Observer	run.38.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.38.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/13/suite
+observation	Observer	run.38.cwd	./.build/runs/phase-04/mutants/13
+observation	Observer	run.38.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.38.exit	ExitSuccess
+observation	Observer	run.38.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.38.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.38.stdout-bytes	0
+observation	Observer	run.38.digest	1e63ec9aaf71363b93c754a4ae563f0fba1a26ca3a57ac811ba27bd9a8391910
+observation	Observer	run.39.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.39.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/13/suite
+observation	Observer	run.39.cwd	./.build/runs/phase-04/mutants/13
+observation	Observer	run.39.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.39.exit	ExitFailure 1
+observation	Observer	run.39.stdout-sha256	c5a660cec81924b338ed3da1cce14de5ebdd646563a27ca94b3ebb4701ecf7be
+observation	Observer	run.39.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.39.stdout-bytes	61842
+observation	Observer	run.39.digest	f349384e724dae42310f2c46f9d5bfca00258ab16559ebc75a0be2246d90b62b
+observation	Observer	run.40.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.40.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.40.cwd	./.build/runs/phase-04/mutants/14
+observation	Observer	run.40.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.40.exit	ExitSuccess
+observation	Observer	run.40.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.40.stderr-sha256	6690a11cbd2a43ce6cb94588bee5afdecb20e4e189dbad2994fa95b76a01b8e2
+observation	Observer	run.40.stdout-bytes	0
+observation	Observer	run.40.digest	7ddb77e629f284a0f8383991bde7258c2162802e0932a5e61224a32c55e05027
+observation	Observer	run.41.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.41.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/14/suite
+observation	Observer	run.41.cwd	./.build/runs/phase-04/mutants/14
+observation	Observer	run.41.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.41.exit	ExitSuccess
+observation	Observer	run.41.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.41.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.41.stdout-bytes	0
+observation	Observer	run.41.digest	3d26a13a78ef2dd0c027a0be1ce45e762b30ad1cfc5e9116a67caf2a5edde153
+observation	Observer	run.42.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.42.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/14/suite
+observation	Observer	run.42.cwd	./.build/runs/phase-04/mutants/14
+observation	Observer	run.42.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.42.exit	ExitFailure 1
+observation	Observer	run.42.stdout-sha256	9b2b10c8f8524c4027bf6d3b176b546c1626817cc71c029cc19623b7fbc7c9d1
+observation	Observer	run.42.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.42.stdout-bytes	58262
+observation	Observer	run.42.digest	651327eb3f929342e8b576f4a04bb39c62c1da9f5b25b973e725691751dcee80
+observation	Observer	run.43.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.43.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.43.cwd	./.build/runs/phase-04/mutants/15
+observation	Observer	run.43.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.43.exit	ExitSuccess
+observation	Observer	run.43.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.43.stderr-sha256	667fe539425a19d99e10dfaac642223bc8c2d7c18c1745b2fac445047895aad6
+observation	Observer	run.43.stdout-bytes	0
+observation	Observer	run.43.digest	01ec58866940a326a8b00f4a7fc581493bb8fa4a5d208b475c5390388bd97142
+observation	Observer	run.44.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.44.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/15/suite
+observation	Observer	run.44.cwd	./.build/runs/phase-04/mutants/15
+observation	Observer	run.44.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.44.exit	ExitSuccess
+observation	Observer	run.44.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.44.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.44.stdout-bytes	0
+observation	Observer	run.44.digest	ec271020ad5718bcca04d31fa95d741f91dcebc10473948208b2e992288a6b3a
+observation	Observer	run.45.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.45.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/15/suite
+observation	Observer	run.45.cwd	./.build/runs/phase-04/mutants/15
+observation	Observer	run.45.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.45.exit	ExitFailure 1
+observation	Observer	run.45.stdout-sha256	45b18ebecb8652b8cf90bafe3c2881dba88602929d5dc08ba3be80f9f4012079
+observation	Observer	run.45.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.45.stdout-bytes	61079
+observation	Observer	run.45.digest	465ab6dcf14d2808f4dd89b04e34f55432d7ea45305cd51f2ddf2a90f10c05ce
+observation	Observer	run.46.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.46.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.46.cwd	./.build/runs/phase-04/mutants/16
+observation	Observer	run.46.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.46.exit	ExitSuccess
+observation	Observer	run.46.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.46.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+observation	Observer	run.46.stdout-bytes	0
+observation	Observer	run.46.digest	46881af985f49987980799942980ab78fb6b3845d3525c4321d223a2cd3464c3
+observation	Observer	run.47.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.47.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/16/suite
+observation	Observer	run.47.cwd	./.build/runs/phase-04/mutants/16
+observation	Observer	run.47.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.47.exit	ExitSuccess
+observation	Observer	run.47.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.47.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.47.stdout-bytes	0
+observation	Observer	run.47.digest	8c43c9a7cd1c6a1389b23671e3686d1234b6435e3c24e22432e6221163d15a41
+observation	Observer	run.48.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.48.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/16/suite
+observation	Observer	run.48.cwd	./.build/runs/phase-04/mutants/16
+observation	Observer	run.48.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.48.exit	ExitFailure 1
+observation	Observer	run.48.stdout-sha256	94470fc4cec820484b7836fe035f93f8b30ba5b5d1546c882de3e01a03ba0254
+observation	Observer	run.48.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.48.stdout-bytes	47053
+observation	Observer	run.48.digest	7920ddbd888f6af86f8d6709eb8008ab191302c4111991da11a774671cad83f9
+observation	Observer	run.49.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.49.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.49.cwd	./.build/runs/phase-04/mutants/17
+observation	Observer	run.49.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.49.exit	ExitSuccess
+observation	Observer	run.49.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.49.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+observation	Observer	run.49.stdout-bytes	0
+observation	Observer	run.49.digest	e62b11b2f70e432a37cd54c0e7621c6cccb07d3c3f72fd1cb026ba968b8a41fd
+observation	Observer	run.50.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.50.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/17/suite
+observation	Observer	run.50.cwd	./.build/runs/phase-04/mutants/17
+observation	Observer	run.50.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.50.exit	ExitSuccess
+observation	Observer	run.50.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.50.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.50.stdout-bytes	0
+observation	Observer	run.50.digest	5a400bd93c43e932d9636b1bf1a5f8eecdeebefa9b45f6274fe14106cfca43db
+observation	Observer	run.51.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.51.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/17/suite
+observation	Observer	run.51.cwd	./.build/runs/phase-04/mutants/17
+observation	Observer	run.51.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.51.exit	ExitFailure 1
+observation	Observer	run.51.stdout-sha256	abfdf71580ef92e23df56a2324d914efbaf10466b401715c19dcc2dcc548cf34
+observation	Observer	run.51.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.51.stdout-bytes	42708
+observation	Observer	run.51.digest	cff50df1025e16d3426e936dd56a637f113486e0577b1669a78d8bff2c7cbae6
+observation	Observer	run.52.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.52.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.52.cwd	./.build/runs/phase-04/mutants/18
+observation	Observer	run.52.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.52.exit	ExitSuccess
+observation	Observer	run.52.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.52.stderr-sha256	b08a0cd836d0faee523a91f4d388d4377ab5e365098ad95f7febd147de09a402
+observation	Observer	run.52.stdout-bytes	0
+observation	Observer	run.52.digest	5c14f2fa305fbeedf737c1170682f11861e8225f9f260260ac5b75ef87994ab0
+observation	Observer	run.53.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.53.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/18/suite
+observation	Observer	run.53.cwd	./.build/runs/phase-04/mutants/18
+observation	Observer	run.53.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.53.exit	ExitSuccess
+observation	Observer	run.53.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.53.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.53.stdout-bytes	0
+observation	Observer	run.53.digest	67d8955336666d6cdcb2c8e0f930a1d9da410c39801245c16f4944eb6c40676d
+observation	Observer	run.54.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.54.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/18/suite
+observation	Observer	run.54.cwd	./.build/runs/phase-04/mutants/18
+observation	Observer	run.54.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.54.exit	ExitFailure 1
+observation	Observer	run.54.stdout-sha256	ef28a63d2390552a7c4b40cccd52be9f0041957b0c25f0287d0a66622e984245
+observation	Observer	run.54.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.54.stdout-bytes	59985
+observation	Observer	run.54.digest	339b62ea5274a20ae96de17cd9719f51904b8494d6e00708647ef817553cb869
+observation	Observer	run.55.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.55.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.55.cwd	./.build/runs/phase-04/mutants/19
+observation	Observer	run.55.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.55.exit	ExitSuccess
+observation	Observer	run.55.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.55.stderr-sha256	060cc4be74b13cf9a20156c95c02f6872e888fdbd4e451981ed07cda9cfe99f1
+observation	Observer	run.55.stdout-bytes	0
+observation	Observer	run.55.digest	efe95656038eced4dff8f60d748fbe332a6c7c8a8f58e17efe953510277b4808
+observation	Observer	run.56.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.56.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/19/suite
+observation	Observer	run.56.cwd	./.build/runs/phase-04/mutants/19
+observation	Observer	run.56.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.56.exit	ExitSuccess
+observation	Observer	run.56.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.56.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.56.stdout-bytes	0
+observation	Observer	run.56.digest	6792dbff86e4df86077fc2d2b43727f3b555cb1d6c994a7eeb98ae9b4c42e0af
+observation	Observer	run.57.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.57.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/19/suite
+observation	Observer	run.57.cwd	./.build/runs/phase-04/mutants/19
+observation	Observer	run.57.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.57.exit	ExitFailure 1
+observation	Observer	run.57.stdout-sha256	bbbb9a1c6706cb22a7703899126f96e725fd82f21e6dee4a24872573308ce173
+observation	Observer	run.57.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.57.stdout-bytes	58796
+observation	Observer	run.57.digest	d8170a89144c0b2d94fc525cccecca4366adf0e4905cf33a2b2e0dd59f994594
+observation	Observer	run.58.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.58.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.58.cwd	./.build/runs/phase-04/mutants/20
+observation	Observer	run.58.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.58.exit	ExitSuccess
+observation	Observer	run.58.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.58.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+observation	Observer	run.58.stdout-bytes	0
+observation	Observer	run.58.digest	262ae0eab435b2e653f8cbcd3881c853d30e2fc66a722d564a9efe4279e279d4
+observation	Observer	run.59.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.59.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/20/suite
+observation	Observer	run.59.cwd	./.build/runs/phase-04/mutants/20
+observation	Observer	run.59.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.59.exit	ExitSuccess
+observation	Observer	run.59.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.59.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.59.stdout-bytes	0
+observation	Observer	run.59.digest	b6dcd2e46e98189e5da18fc4a57b2287321a1fc7940d6eaf55b221b7b27aa051
+observation	Observer	run.60.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.60.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/20/suite
+observation	Observer	run.60.cwd	./.build/runs/phase-04/mutants/20
+observation	Observer	run.60.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.60.exit	ExitFailure 1
+observation	Observer	run.60.stdout-sha256	449c213ddc9bc83f544378f241148752e3da36e8b37ae545fdcba1b45ae19339
+observation	Observer	run.60.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.60.stdout-bytes	46078
+observation	Observer	run.60.digest	7d2b372ac22f771645a32c512226233ac564ee5b816af0d3cd2d1bb312a75564
+observation	Observer	run.61.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.61.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.61.cwd	./.build/runs/phase-04/mutants/21
+observation	Observer	run.61.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.61.exit	ExitSuccess
+observation	Observer	run.61.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.61.stderr-sha256	1fe160f158327c14216fec1e26fd3cde3e7e3a20c141cbc1a0c9011cce49ec24
+observation	Observer	run.61.stdout-bytes	0
+observation	Observer	run.61.digest	333931c7b8c13a88f6b4205e75f6951fa8e57a37e4d8487800d687134a611c34
+observation	Observer	run.62.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.62.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/21/suite
+observation	Observer	run.62.cwd	./.build/runs/phase-04/mutants/21
+observation	Observer	run.62.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.62.exit	ExitSuccess
+observation	Observer	run.62.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.62.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.62.stdout-bytes	0
+observation	Observer	run.62.digest	570f71dc9cf5199948d4b9dc2f8475b200e74bf7b0ba521c9b110a60c2e8e6ec
+observation	Observer	run.63.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.63.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/21/suite
+observation	Observer	run.63.cwd	./.build/runs/phase-04/mutants/21
+observation	Observer	run.63.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.63.exit	ExitFailure 1
+observation	Observer	run.63.stdout-sha256	3153ab0a2b0f3898dc02c57b2fada4ce1328116d76ac7d3525994446a1e59f62
+observation	Observer	run.63.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.63.stdout-bytes	60549
+observation	Observer	run.63.digest	b9d29960c97fa53f7496535f8bc0d50b6b2f510c5975ee6b35372dab04a039c7
+observation	Observer	run.64.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.64.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.64.cwd	./.build/runs/phase-04/mutants/22
+observation	Observer	run.64.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.64.exit	ExitSuccess
+observation	Observer	run.64.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.64.stderr-sha256	3d6c194ffa11dd8985cc9970808cc9a08d54c9b45896b405a951167a0fafabca
+observation	Observer	run.64.stdout-bytes	0
+observation	Observer	run.64.digest	27ae63807cfb944202aad7b14fe8577d9441ce437eaf3e904d4c417d79ab79aa
+observation	Observer	run.65.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.65.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/22/suite
+observation	Observer	run.65.cwd	./.build/runs/phase-04/mutants/22
+observation	Observer	run.65.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.65.exit	ExitSuccess
+observation	Observer	run.65.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.65.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.65.stdout-bytes	0
+observation	Observer	run.65.digest	a65bf128c3a248c0b0308e27f3e026d38ce0b3787f2d1e7a0c978637beb2ecbb
+observation	Observer	run.66.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.66.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/22/suite
+observation	Observer	run.66.cwd	./.build/runs/phase-04/mutants/22
+observation	Observer	run.66.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.66.exit	ExitFailure 1
+observation	Observer	run.66.stdout-sha256	96aa9af5266c834ddd45b8825e43bb53cc351ea6273373dcbdb50a5ae4faf179
+observation	Observer	run.66.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.66.stdout-bytes	46576
+observation	Observer	run.66.digest	1946ed388defc84e248b03279a2cacb04a2a2106a4d6dbc19004d2af4bf8d659
+observation	Observer	run.67.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.67.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.67.cwd	./.build/runs/phase-04/mutants/23
+observation	Observer	run.67.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.67.exit	ExitSuccess
+observation	Observer	run.67.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.67.stderr-sha256	4f9ab990439aa91fd7d959dd0e97dda790d90b409e271efa4c61268febe941d5
+observation	Observer	run.67.stdout-bytes	0
+observation	Observer	run.67.digest	ab4c6e683bc982553db93c732fc841b109287b7d8852ca2b92672db248191af6
+observation	Observer	run.68.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.68.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/23/suite
+observation	Observer	run.68.cwd	./.build/runs/phase-04/mutants/23
+observation	Observer	run.68.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.68.exit	ExitSuccess
+observation	Observer	run.68.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.68.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.68.stdout-bytes	0
+observation	Observer	run.68.digest	abd971f330c04936eb26079c51345dfdc79c2f24c733a250c17964eb7232ca40
+observation	Observer	run.69.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.69.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/23/suite
+observation	Observer	run.69.cwd	./.build/runs/phase-04/mutants/23
+observation	Observer	run.69.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.69.exit	ExitFailure 1
+observation	Observer	run.69.stdout-sha256	bbbb9a1c6706cb22a7703899126f96e725fd82f21e6dee4a24872573308ce173
+observation	Observer	run.69.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.69.stdout-bytes	58796
+observation	Observer	run.69.digest	954649fb67b75051211fc69dd3768eea9eb1a634494d8cb9368104ca3f87dac8
+observation	Observer	run.70.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.70.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.70.cwd	./.build/runs/phase-04/mutants/24
+observation	Observer	run.70.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.70.exit	ExitSuccess
+observation	Observer	run.70.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.70.stderr-sha256	f2e2bd877f6ccc9eb9efac5d1c22e6322f9bf7f68f1313db2bc11aac4fc5a1fd
+observation	Observer	run.70.stdout-bytes	0
+observation	Observer	run.70.digest	935c789c147b76f83b8934fd8f3302064b81b088b8fa7d90283c23f2b4dafe58
+observation	Observer	run.71.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.71.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/24/suite
+observation	Observer	run.71.cwd	./.build/runs/phase-04/mutants/24
+observation	Observer	run.71.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.71.exit	ExitSuccess
+observation	Observer	run.71.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.71.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.71.stdout-bytes	0
+observation	Observer	run.71.digest	9954f60bfb604b5db4497e791ab4a64ae00ec163e1965699b2f2f1f3c826d639
+observation	Observer	run.72.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.72.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/24/suite
+observation	Observer	run.72.cwd	./.build/runs/phase-04/mutants/24
+observation	Observer	run.72.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.72.exit	ExitFailure 1
+observation	Observer	run.72.stdout-sha256	a46817716091af94c21b6eb500e7a58c5e7d33f6b45f1d9d21942f7faa156e6a
+observation	Observer	run.72.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.72.stdout-bytes	45942
+observation	Observer	run.72.digest	857be18a81b3adb66bdd78eb0ce825e51af58c67509542f3a7ab1fe82f4e657c
+observation	Observer	run.73.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.73.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.73.cwd	./.build/runs/phase-04/mutants/25
+observation	Observer	run.73.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.73.exit	ExitSuccess
+observation	Observer	run.73.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.73.stderr-sha256	c3b69060c9d387be06563de4afe5ea9e451dd383f0bb6d56edb94a9527588910
+observation	Observer	run.73.stdout-bytes	0
+observation	Observer	run.73.digest	cfda65dff98d5133cc6a94884396dbd1c8486d7105f261e37e2bee6ba896e69c
+observation	Observer	run.74.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.74.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/mutants/25/suite
+observation	Observer	run.74.cwd	./.build/runs/phase-04/mutants/25
+observation	Observer	run.74.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.74.exit	ExitSuccess
+observation	Observer	run.74.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.74.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.74.stdout-bytes	0
+observation	Observer	run.74.digest	c5bc9786c01f801089fb9c3bdc342fc2c57247d567a367106cb2a6c75276df43
+observation	Observer	run.75.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.75.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/mutants/25/suite
+observation	Observer	run.75.cwd	./.build/runs/phase-04/mutants/25
+observation	Observer	run.75.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.75.exit	ExitFailure 1
+observation	Observer	run.75.stdout-sha256	bbbb9a1c6706cb22a7703899126f96e725fd82f21e6dee4a24872573308ce173
+observation	Observer	run.75.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.75.stdout-bytes	58796
+observation	Observer	run.75.digest	2d92abc01bc36bdbc51517e3a8f397a6a062a5ae7c16b6cc7f6ce16296b0041d
+observation	Observer	run.76.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.76.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+observation	Observer	run.76.cwd	.
+observation	Observer	run.76.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.76.exit	ExitSuccess
+observation	Observer	run.76.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.76.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.76.stdout-bytes	0
+observation	Observer	run.76.digest	ab52accf9a0483a22089903298fd4621860773ecd96dd5a30619e087a321dad0
+observation	Observer	run.77.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.77.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-04/clean/suite
+observation	Observer	run.77.cwd	.
+observation	Observer	run.77.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.77.exit	ExitSuccess
+observation	Observer	run.77.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.77.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+observation	Observer	run.77.stdout-bytes	0
+observation	Observer	run.77.digest	658ae2779e979b683f47eed2b6b2cdeb4bc48e3dd5490aa491e68df622b29603
+observation	Observer	run.78.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.78.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-04/clean/suite
+observation	Observer	run.78.cwd	.
+observation	Observer	run.78.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.78.exit	ExitSuccess
+observation	Observer	run.78.stdout-sha256	f072aab9e576689a3651c352abc088a5e7f7eda185709967de4eca15830e6b62
+observation	Observer	run.78.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.78.stdout-bytes	41756
+observation	Observer	run.78.digest	8faa00299556eb8bb362e7e87f2b53b4981590890939933adb47f99f993587b5
+observation	Observer	run.79.executable	/Users/matthewnowak/amoebius/.build/dist-native/build/aarch64-osx/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+observation	Observer	run.79.argv	render-examples --example kind-two-nodes --output ./.build/runs/phase-04/clean/suite/binary/input/root.dhall
+observation	Observer	run.79.cwd	.
+observation	Observer	run.79.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.79.exit	ExitSuccess
+observation	Observer	run.79.stdout-sha256	3dfe50313800a4f32cf08b0d74e07f50d2d4e58d4785783aee53d52c01621b6e
+observation	Observer	run.79.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.79.stdout-bytes	125
+observation	Observer	run.79.digest	6f2727066cf6f696c19689797b1fc2761a8565ca6b1baf0d1ebe6d3175e2b952
+observation	Observer	run.80.executable	/Users/matthewnowak/amoebius/.build/dist-native/build/aarch64-osx/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+observation	Observer	run.80.argv	compile --input ./.build/runs/phase-04/clean/suite/binary/input/root.dhall --out ./.build/runs/phase-04/clean/suite/binary/compiled
+observation	Observer	run.80.cwd	.
+observation	Observer	run.80.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.80.exit	ExitSuccess
+observation	Observer	run.80.stdout-sha256	3f3e4f1debb953ed643d5207b7beaf18d4be56eef07160ae941047e9c4de45ab
+observation	Observer	run.80.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.80.stdout-bytes	12
+observation	Observer	run.80.digest	d7108367fab72b83d2b1eadc3f60d5cf10e15b591071102b4241c5e2e3a65ad0
+observation	Observer	run.81.executable	/Users/matthewnowak/amoebius/.build/dist-native/build/aarch64-osx/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+observation	Observer	run.81.argv	apply --executor fake --input ./.build/runs/phase-04/clean/suite/binary/input/root.dhall --out ./.build/runs/phase-04/clean/suite/binary/applied
+observation	Observer	run.81.cwd	.
+observation	Observer	run.81.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.81.exit	ExitSuccess
+observation	Observer	run.81.stdout-sha256	e0530169153da54b52c56a76cc350abceb950327f3068ea09828067f166bd369
+observation	Observer	run.81.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.81.stdout-bytes	11
+observation	Observer	run.81.digest	e87e3d45500b6a14f11b31bbfd6bfa05fa002c6601984fee5b14fcea1d2f0212
+row	Authority/bypass	green
+observation	Authority/bypass	closure.validator-free	True
+observation	Authority/bypass	closure.product	capability-bind,capacity-topology,dsl-core,dsl-spine,execution-accelerator-folds,formal-model,kernel-steps,layout,manifest-render,offline-language-types,provider-pulumi,provision-seal,storage-geometry-folds,toolchain,vocabulary
+observation	Authority/bypass	subjects.validator	0
+row	Freshness	green
+observation	Freshness	source.opening	03792e64466890de2073ae94332b55f890804f81418946e201892605a656c30c
+observation	Freshness	source.closing	03792e64466890de2073ae94332b55f890804f81418946e201892605a656c30c
+observation	Freshness	run-root	./.build/runs/phase-04
+row	Qualification	green
+observation	Qualification	qualification	generated-mutant-matrix
+observation	Qualification	matrix.precedes-clean	true
+row	Cleanroom	green
+observation	Cleanroom	cleanroom.run-root	./.build/runs/phase-04
+observation	Cleanroom	cleanroom.tracked-unchanged	True
+row	Legacy closure	green
+observation	Legacy closure	hygiene.kernel-lines	3384
+observation	Legacy closure	hygiene.kernel-cap	3384
+observation	Legacy closure	hygiene.doc-check-lines	6046
+observation	Legacy closure	hygiene.doc-check-cap	7000
+observation	Legacy closure	hygiene.conditional-compilation-lines	0
+observation	Legacy closure	hygiene.run-modules	0
+observation	Legacy closure	hygiene.phase-literals	0
+observation	Legacy closure	hygiene.phase-tables	0
+observation	Legacy closure	hygiene.duplicate-vocabulary	0
+observation	Legacy closure	hygiene.product-duplicate-vocabulary	
+observation	Legacy closure	hygiene.verdict	green
+observation	Legacy closure	legacy.due	LTD-DSL-003
+row	Predecessor	green
+observation	Predecessor	predecessor	db3b4493c96a375ff158ae341615a9a14af66a5db2199777593ff02874bace38
+row	Residue	green
+observation	Residue	residue.tracked-unchanged	True
+observation	Residue	residue.unverified	later-owned capabilities remain UNVERIFIED by construction
+row	Pass criterion	green
+observation	Pass criterion	pass-criterion	qualified-gate-pass

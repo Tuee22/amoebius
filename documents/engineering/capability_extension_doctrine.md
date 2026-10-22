@@ -134,8 +134,9 @@ wired by the same graph every other extension is wired by.
 
 ## 3. The PROVIDE and REQUIRE contract
 
-[Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) owns the target two-member
-link set of `{infernix, jitML}` and its provide/require refinement: requirements must resolve, duplicate
+[Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) owns the two workload members
+`{infernix, jitML}` and their required capability peers `{jit-build, coordination}`: four `ExtensionSpec`
+values in the complete initial closure. Its provide/require refinement requires that requirements resolve, duplicate
 providers are rejected as anti-shadow violations, and provider edges must be acyclic. Its paired
 legal/cyclic/shadowing twins and the missing-requirement pair are owed by that phase; linked runtime behavior
 is owned by the live phases.
@@ -218,7 +219,11 @@ amoebius-built consensus plane.
 
 ## 5. The requirement edges
 
-The graph is the union of every extension's `extRequires`. The edge set of the two-member link set the plan first delivers:
+The graph is the union of every extension's `extRequires`. The initial closure has two workload members
+and two required horizontal capability peers, as clarified by [DL-0030](../decision_log.md#dl-0030--extension-admission-binds-source-scope-and-dependency-closure):
+
+The project displayed as `jitML` has the canonical DNS-1123 `ExtensionId` `jitml`; display spelling does
+not relax identifier validation. The two peer capabilities do not add app-authored service arms.
 
 Both columns are `List Capability` ([§3](#3-the-provide-and-require-contract)), so a cell names capabilities
 only — never a workload. A workload extension that stands up no capability provides the empty list.
@@ -295,9 +300,8 @@ flowchart TD
 %% register: orientation
   jitml[jitML workload extension] -->|extRequires JitBuild| jb[jit-build capability extension]
   jitml -->|extRequires Coordination| coord[coordination capability extension]
-  jitml -->|extRequires InferenceEngine| ie[InferenceEngine core capability]
-  infernix[infernix workload extension] -->|extRequires JitBuild| jb
-  infernix -->|extRequires InferenceEngine| ie
+  jitml -->|extRequires InferenceEngine| infernix[infernix workload extension]
+  infernix -->|extRequires JitBuild| jb
   jb -->|extRequires ObjectStore| os[ObjectStore core capability]
   jb -->|extRequires Registry| reg[Registry core capability]
   coord -->|extRequires MessageBus| mb[MessageBus core capability]

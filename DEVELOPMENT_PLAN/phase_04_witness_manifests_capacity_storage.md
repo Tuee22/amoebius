@@ -34,17 +34,18 @@ extensions, child clusters, or the UI language, which the later slice phases own
 
 ## Phase Status
 
-✅ Done.
-**Receipt**: 829c1389d2c8612f2462d67a0e8b2126c035e4b17a481c188ba4025fe9e91a9b
+⏸️ Blocked — NOT VALIDATED.
 
-The four sprints are implemented in the working tree and judged by the shared spine suite and the independent
-`oracle-dsl`; no complete gate result for the exact current source has been recorded, so none of it is validated.
-Registering this gate changed the verifier (the specification registry, the `Rewrite` perturbation, the vocabulary
-check's list of closed axes, and the oracle's binary rows), so `replay` must re-derive the receipts of Phases 0
-through 3 under the resulting generation before `accept`. Hardware-free implementation ahead of the frontier
-yields component diagnostics only, under
-[§O](development_plan_phase_model.md#o-sprint-sized-seams-and-bounded-phase-gates); it mints no evidence. The
-gate's `Residue` row lists what a pass will not establish.
+The verifier revoked the selected receipt and reopened the documentation gate after finding the missing
+inherited legacy analyzer/evidence join. Historical capacity, placement, storage and rendering runs remain
+immutable observations beneath `validation-records/`; they do not establish a current complete gate pass.
+This phase requires fresh numerical qualification after the earlier boundary is repaired.
+
+The runner's binary challenge plants a nonce and raises one host's capacity by one unit. The independent
+oracle checks the resulting placement change, witness-driven manifest and claim bytes, and the fake's
+exact stdin. This phase's scope covers the declared capacity, placement, storage, and rendering claim;
+substrates, extensions, children, UI, and live enforcement retain their later owners. Later closure changes
+require fresh replay under [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase).
 
 ## Phase Summary
 
@@ -194,9 +195,9 @@ documentation checker refuses a block that differs from it. Execution evidence r
 
 ## Sprints
 
-## Sprint 4.1: renderCandidates after placement and epochs ✅
+## Sprint 4.1: renderCandidates after placement and epochs ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/manifest-render/Amoebius/Manifest/Render.hs` and `src/capacity-topology/Amoebius/Placement/Witness.hs`
 **Blocked by**: [Phase 3](phase_03_typed_spine.md) gate pass
 **Independent Validation**: `renderCandidates` accepts only a `Placed` witness and an `Epoch`; every workload on the wire carries the `podNodeName` the witness assigns and every object the epoch label `amoebius.io/epoch`; `kind-two-nodes` renders the baseline's eleven identities with the application Deployment's node the one differing path. A render without a placement witness and a `Placed` built outside the fold are compile-negative twins the oracle writes and compiles. A mutant that ignores the witness or drops the epoch is killed by the oracle's render and placement rows.
@@ -221,12 +222,12 @@ witness-free render and the `Placed` built outside the fold to fail at the type.
 
 ### Remaining Work
 
-The two modules are implemented and the render path that read the bound deployment alone is deleted. The complete
-gate is the remaining work.
+None within this sprint. The complete qualified gate checks the placement/envelope witnesses and the
+rendering path that consumes them; the receipt is recorded above.
 
-## Sprint 4.2: StatefulSet and the storage witness to PVC ✅
+## Sprint 4.2: StatefulSet and the storage witness to PVC ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/manifest-render/Amoebius/Manifest/StatefulSet.hs` and `src/storage-geometry-folds/Amoebius/Storage/Witness.hs`
 **Blocked by**: Sprint 4.1
 **Independent Validation**: `kind-sql-distributed3` renders three StatefulSet members, each with one claim whose bytes equal the volume witness's size, storage class, owner, and deterministic names; `kind-single-objectstore` renders its one. The volume witness names each volume from its identity and refuses a volume of zero bytes and an identity whose parts could make two witnesses name one volume. A claim on any source that is not a StatefulSet is refused as `PvcWithoutStatefulSet`, and a `VolumeWitness` built outside its constructor is a compile-negative twin. A mutant that drops a claim, its size, or its owner is killed at the claim rows.
@@ -251,11 +252,12 @@ at its tag and the volume built outside its constructor to fail at the type.
 
 ### Remaining Work
 
-The modules and the corpus additions are implemented. The complete gate is the remaining work.
+None within this sprint. The complete qualified gate checks the storage-witness and StatefulSet/PVC
+observations, including their paired refusals.
 
-## Sprint 4.3: Unit-tagged ResourceVector and the fits differential ✅
+## Sprint 4.3: Unit-tagged ResourceVector and the fits differential ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/capacity-topology/Amoebius/Capacity/Vector.hs` and `src/capacity-topology/Amoebius/Capacity/Fits.hs`
 **Blocked by**: Sprint 4.2
 **Independent Validation**: `ResourceVector` carries a `Quantity (u :: Unit)` per axis, so a sum of two units is a compile-negative twin. `fits` is total and agrees with the oracle's authored predicate over every pair of three-valued four-axis vectors, 6,561 pairs written by the suite; the oracle judges the verdict, the first exceeded axis in a fixed order, the headroom, the exact fit, the componentwise sum, and the zero identity. `OverCapacity` and `OneShort` are refused at provision with the exact-fit sibling accepted.
@@ -279,12 +281,12 @@ Run the enumeration and require every case to agree; require the sum of two unit
 
 ### Remaining Work
 
-The modules are implemented and every unitless quantity path is gone from the product. The complete gate is the
-remaining work.
+None within this sprint. The complete qualified gate checks the unit boundary, all 6,561 fit pairs,
+componentwise sums, zero identity, and capacity refusals.
 
-## Sprint 4.4: The Phase-4 gate specification ✅
+## Sprint 4.4: The Phase-4 gate specification ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs` and `amoebius.cabal`
 **Blocked by**: Sprint 4.3
 **Independent Validation**: The compiled specification equals the fenced block above; `verifySpec` accepts it; the corpus module contains the Phase-3 corpus. A specification whose negatives omit `OverCapacity` is refused as `SPEC-WEAKENED`.
@@ -308,7 +310,8 @@ phase's patch.
 
 ### Remaining Work
 
-The specification is registered. The complete gate is the remaining work; the `accept` ends this phase.
+None within this sprint. The registered specification passed its complete gate, and numerical replay
+refreshed the recorded receipt under the current verifier and governance digests.
 
 ## Documentation Requirements
 

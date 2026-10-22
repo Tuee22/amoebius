@@ -32,8 +32,6 @@ module Amoebius.Capability.Types
       , boundPriorRegistryRef
       , boundDeploymentApps
       )
-  , ExtensionName (..)
-  , ExtensionDescriptor (..)
   ) where
 
 import Amoebius.Capability.Types.Internal

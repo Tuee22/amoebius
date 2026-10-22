@@ -46,6 +46,13 @@ family/profile ownership, peer-graph requirements, and raw/reserved/allocatable 
 Former reseals and external-run references are permanently invalid evidence. Detection, materialization,
 attachment, and observed readback are later claims.
 
+Before `DSL_BARRIER`, the substrate catalog, natural architectures, lanes, GPU observations, and capacities
+are modelled and tested through supplied Haskell values and fake boundaries. A fixture naming ARM64, AMD64,
+CUDA, Apple, Windows, or Linux never requires that physical host or device. Native GHCup/GHC version checks
+admit the compiler execution environment. Real host discovery and native per-lane build/run proof remain
+later hardware claims
+([DL-0025](../decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier)).
+
 ## 1. The substrate is a fact about the host, not a knob
 
 Current certification and evidence are recorded in the [development plan](../../DEVELOPMENT_PLAN/README.md).
@@ -292,11 +299,15 @@ well formed for windows fails on an apple host that will never execute it.
 **How an ensured tool is acquired, and why the package manager is not the default.** A
 package-manager install cannot be verified against a publisher digest, because the package manager
 is its own trust root. So the package manager is used for the floor's root and for what only it
-can supply; every other tool is taken from its publisher's own release, verified against that
+can supply; other tools are taken from their publisher's own release, verified against that
 publisher's own checksum fetched in the same run, and installed beneath the repository's ignored
 build root rather than into a shared host location
 ([`repository_layout_doctrine.md` §4](./repository_layout_doctrine.md#4-dependency-and-toolchain-resolution)).
 That keeps acquisition auditable and leaves no amoebius-owned state outside the checkout.
+GHCup/GHC toolchain admission is the explicit version-only exception under DL-0025: their reported versions
+are sufficient, with available Cabal and no required executable digest, checksum manifest, or signature.
+Native installed tool paths may be declared read-only inputs. Before the DSL barrier, no live host-floor or
+tool-acquisition adapter is exercised; platform and dependency plans use supplied values and fake boundaries.
 
 ### Why this is structurally enforced, not merely a guideline
 
@@ -416,14 +427,19 @@ maps each member to its natural architecture, its lanes, and its host frame, and
 the lane it requires through `extRequiresLane`
 ([`extension_conformance_doctrine.md` §8](./extension_conformance_doctrine.md#8-a-hardware-substrate-is-a-catalog-member-with-a-profile),
 [DL-0001](../decision_log.md#dl-0001--substrates-are-a-closed-catalog-with-one-profile-site)). Adding a family
-is a catalog edit plus a decision-log entry, owed by
-[Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md) for the profile site.
+is a catalog edit plus a decision-log entry.
 
-**Target frame boundary — NOT VALIDATED.** The plan must establish the three-constructor frame set, total
-wildcard-free substrate/frame/engine relations, and observation-only transition witnesses through the
-numerically owned Haskell contracts. No former implementation or suite result is retained here, and none of
-the Apple or Windows provider rows is current validation evidence. Phase 52 owns only the scoped Incus/Linux
-row and its live observations; its status, like every other phase's, lives only in the
+**Specification** ([DL-0033](../decision_log.md#dl-0033--image-and-bootstrap-source-claims-require-current-qualification)).
+Qualification is owed by [Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md) for the one private
+`SubstrateProfile` catalog for natural architecture, lanes and the three-constructor `Frame` set.
+Lowering and host policy must project that catalog; an independent oracle must judge the complete
+substrate/architecture product and opaque factory negatives using supplied values. These obligations
+require pure catalog observations and no hardware discovery.
+
+**Target provider transitions — NOT VALIDATED.** Total wildcard-free substrate/frame/engine transition
+relations and observation-only transition witnesses remain owed to their numerically owned Haskell
+contracts. Apple and Windows provider realization remains **UNVERIFIED**. Phase 52 owns only the scoped
+Incus/Linux row and its live observations; its status, like every other phase's, lives only in the
 [tracker](../../DEVELOPMENT_PLAN/README.md). The cross-substrate frame boundary remains UNVERIFIED until its
 later owners close the other rows.
 
@@ -607,7 +623,7 @@ because the no-`PATH` / no-env, lazy-tool-ensure discipline ([§3](#3-the-no-env
 cannot start until there is a Haskell binary to enforce it. It is Python only because it must run on a
 **bare host before any Haskell toolchain exists**. It has no Python-owned public command surface: after the
 minimum platform distinction required to select its toolchain adapter, every user argv—including empty,
-help, version, bootstrap, validation, unknown, and future commands—is opaque. `pb` establishes the pinned
+help, version, bootstrap, validation, unknown, and future commands—is opaque. `pb` establishes a version-compatible
 toolchain beneath `.build/**`, builds the one source-bound binary, and `exec`s it with argv unchanged. Haskell
 owns host-floor decisions and the entire post-handoff command mode
 ([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)).
@@ -621,11 +637,11 @@ gate input. Current third-party dependencies and packaging machinery remain `LTD
 target installation contract. A running invocation cannot update itself: doing so would make the run's own
 provenance unanswerable.
 
-**Observed implementation** ([GateSpec:repository_layout_conformance]). The tracked `pb/**` footprint is admitted
-by the SHA-256 pin of `pb/__main__.py`, implemented by
-[Phase 2](../../DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md)
-([DL-0022](../decision_log.md#dl-0022--phase-2-accepted-its-owed-by-paragraphs-become-observed-implementations)).
-That source admission does not establish runtime handoff behavior.
+**Specification** ([DL-0033](../decision_log.md#dl-0033--image-and-bootstrap-source-claims-require-current-qualification)).
+Qualification is owed by [Phase 2](../../DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md) for the tracked
+`pb/**` source boundary, including the SHA-256 identity of `pb/__main__.py`. This source admission must
+not establish runtime handoff behavior or become a compiler admission pin. Runtime identity, unchanged
+argv and exec replacement remain owed by the bootstrap handoff.
 
 Every phase through the DSL barrier (Phase 9) invokes the source-bound
 verifier directly and cannot use `pb` as evidence. [Phase 50](../../DEVELOPMENT_PLAN/phase_50_host_assert_cli.md) alone
@@ -650,15 +666,17 @@ For a user invocation whose unchanged argv will later be interpreted by Haskell 
 Apple establishment path is:
 
 1. **Select the direct establishment adapter.** Python may inspect only the minimum OS/architecture facts
-   needed to select the pinned publisher artifact, verification material, and contained path convention. It
+   needed to select a compatible native artifact and contained path convention. It
    does not probe, require, install, or prescribe Homebrew, `apt`, `winget`, or any other host-floor tool; it
    does not turn absence into user guidance or a command verdict.
-2. **Materialize a verified `ghcup` beneath the repository toolchain root.** The selected direct adapter
-   acquires the pinned publisher artifact directly into `.build/toolchain/<os>-<arch>/bootstrap/**`; it does
+2. **Materialize a version-checked `ghcup` beneath the repository toolchain root.** The selected direct adapter
+   acquires the selected release directly into `.build/toolchain/<os>-<arch>/bootstrap/**` and checks its reported
+   version; no executable digest, signature, or publisher-authentication pin is required. It does
    not invoke a package manager, use a global package prefix, or place an executable in ambient `PATH`.
 3. **Resolve and install the current compatible GHC and Cabal** via that absolute `ghcup` path into
    `.build/toolchain/<os>-<arch>/**` with an explicit isolated home/cache. Authored requirements select a
-   compatible release channel/range; resolved versions and executable paths are written only to the
+   compatible release channel/range, with an exact GHC version where the compiler API requires it. GHC's
+   reported version is checked; Cabal is an available build tool. Resolved versions and executable paths are written only to the
    run-local toolchain record described by
    [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 4. **Build the project Haskell binary** into the contained `.build/**` build root using only those absolute
@@ -673,8 +691,8 @@ Apple establishment path is:
    bring-up.
 
 The pre-binary handoff is **substrate-specific only at its minimal adapter-selection seam**: publisher
-artifact identity, verification material, executable form, and contained path convention may differ by
-OS/architecture. Steps 2–5 retain one closed role across substrates — direct verified acquisition, the same
+artifact URL, executable form, and contained path convention may differ by
+OS/architecture. Steps 2–5 retain one closed role across substrates — direct version-checked acquisition, the same
 authored compatibility policy, the same contained resolver/build, and the same unchanged-argv handoff. The
 pre-binary handoff is a **thin driver**: it makes no package-manager or broader host-floor decision, installs
 no packages beyond the contained Haskell toolchain root, holds no cluster logic, and never runs after the
@@ -683,7 +701,7 @@ no packages beyond the contained Haskell toolchain root, holds no cluster logic,
 ```mermaid
 flowchart TD
 %% register: orientation
-  pb[pb pre-binary handoff, bounded Python] -->|select direct OS/architecture adapter| ghcup[Verified contained ghcup]
+  pb[pb pre-binary handoff, bounded Python] -->|select direct OS/architecture adapter| ghcup[Version-checked contained ghcup]
   ghcup -->|resolve and install beneath .build| tc[Run-local contained GHC and Cabal]
   tc -->|cabal build| bin[amoebius Haskell binary on the host]
   bin -->|exec with original argv; Haskell interprets bootstrap flags| handoff[Binary owns the rest: lazy tool-ensure, VM providers, cluster bring-up]

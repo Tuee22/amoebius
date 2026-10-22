@@ -127,7 +127,7 @@ later phase. Phase 70's status is owned by the plan's mechanical status projecti
 and Haskell-owned fakes. Its eventual contract must admit the exact signed-credential/current-scope case and
 refuse minimally different twins without starting a browser, network service, or OS observer. Live server
 admission, Redis routing, resume, durable receipts, cross-pod dispatch, replica drain, and failover belong
-after the DSL barrier (Phase 4). Phase 70's status is owned by the plan's mechanical status projection
+after the [DSL barrier](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md) (`DSL_BARRIER`; [DL-0028](../decision_log.md#dl-0028--hardware-boundaries-follow-the-dsl-barrier-role)). Phase 70's status is owned by the plan's mechanical status projection
 ([`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md)).
 
 Every routed frame carries an envelope equivalent to:

@@ -2,6 +2,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition (
@@ -24,7 +25,7 @@ import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
 import Amoebius.Capacity.Vector (ResourceVector (ResourceVector))
 import Amoebius.Vocabulary (quantityText)
-import Amoebius.Scope.Index (activeMembership, trustedSubject, trustedTenant, withRequestScope)
+import Amoebius.Scope.Index (activeMembership, trustedSubject, trustedTenant)
 import Amoebius.Ui.Check
 import Amoebius.Ui.Source
 import Control.Monad (forM_, unless)
@@ -222,7 +223,7 @@ checkCalculus = do
     tenant <- either (fail . show) pure (trustedTenant "ui-program-schema-calculus-tenant")
     subject <- either (fail . show) pure (trustedSubject tenant "ui-program-schema-calculus-subject")
     membership <- either (fail . show) pure (activeMembership tenant subject)
-    action <- either (fail . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+    action <- either (fail . show) pure $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
         let resources :: Int -> ResourceVector
             resources count = ResourceVector 1 (fromIntegral count) 0 0
             counts = [3, 10, 8, 3, 6] :: [Int]

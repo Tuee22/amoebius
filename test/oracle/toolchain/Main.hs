@@ -1,183 +1,108 @@
 {-# LANGUAGE OverloadedStrings #-}
-
--- | The toolchain-area oracle executable.
---
--- It depends on no @amoebius@ library. It reads the projection the toolchain
--- suite wrote and prints a ledger derived from the literals below: one row per
--- expectation, @green@ or @red@ with the observed value. The seven pins, the
--- compiler and package-tool identities, the probe outcomes, the planner's step
--- list, the upstream identity, and every refusal tag are restated here, never
--- regenerated from the subject.
+-- | Independent version and probe expectations. No product dependency.
 module Main (main) where
-
 import Control.Monad (unless)
-import Data.Map.Strict (Map)
+import Control.Exception (IOException, try)
 import Data.Map.Strict qualified as Map
+import Data.List (sort)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as TextIO
-import System.Directory (doesDirectoryExist)
+import System.Directory (doesDirectoryExist, doesFileExist)
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
+import VersionExpectations (versionCases)
+import Admission (admissionChecks)
+import ProbeSource (probeSourceChecks)
+import VendorSource (vendorSourceChecks)
 
 main :: IO ()
 main = do
   arguments <- getArgs
-  input <- case arguments of
-    [path] -> do
-      directory <- doesDirectoryExist path
-      pure (if directory then path <> "/toolchain.tsv" else path)
-    _ -> pure ".build/runs/toolchain-suite/toolchain.tsv"
-  contents <- TextIO.readFile input
-  let rows = Map.fromList [(key, Text.intercalate "\t" rest) | line <- Text.lines contents, (key : rest) <- [Text.splitOn "\t" line]]
-      ledger = judge rows
-  mapM_ (TextIO.putStrLn . renderRow) ledger
-  unless (all rowGreen ledger) exitFailure
+  case arguments of
+    ["--native-tool-versions", directory] -> admissionChecks directory >>= emit
+    ["--probe-source", directory] -> probeSourceChecks directory >>= emit
+    ["--vendor-source", directory] -> vendorSourceChecks directory >>= emit
+    [input] -> toolchainChecks input
+    _ -> exitFailure
 
-data LedgerRow = LedgerRow
-  { rowName :: Text
-  , rowGreen :: Bool
-  , rowObserved :: Text
-  }
+emit :: [(Text, Bool, Text)] -> IO ()
+emit rows = do
+  mapM_ (\(name, green, observed) -> TextIO.putStrLn (Text.intercalate "\t" [name, if green then "green" else "red", observed])) rows
+  unless (all (\(_, green, _) -> green) rows) exitFailure
 
-renderRow :: LedgerRow -> Text
-renderRow row = Text.intercalate "\t" [rowName row, if rowGreen row then "green" else "red", rowObserved row]
+toolchainChecks :: FilePath -> IO ()
+toolchainChecks input = do
+  directory <- doesDirectoryExist input
+  observed <- try (TextIO.readFile (if directory then input <> "/toolchain.tsv" else input)) :: IO (Either IOException Text)
+  contents <- case observed of
+    Left _ -> TextIO.putStrLn "observation.toolchain\tred\trequired toolchain.tsv is unreadable" >> exitFailure
+    Right bytes -> pure bytes
+  let rows = Map.fromList [(key, Text.intercalate "\t" rest) | line <- Text.lines contents, key : rest <- [Text.splitOn "\t" line]]
+      value key = Map.findWithDefault "<absent>" key rows
+      exact key expected = (key, value key == expected, value key)
+      prefix key expected = (key, expected `Text.isPrefixOf` value key, value key)
+      ledger = [exact ("version.case." <> Text.pack (show index)) (Text.intercalate "|" [tool, raw, verdict]) | (index, (tool, raw, verdict)) <- zip [1 :: Int ..] versionCases]
+        <> [("version.discovery", length [key | key <- Map.keys rows, "version.case." `Text.isPrefixOf` key] == length versionCases, "version case inventory")]
+        <> [exact "versions.verdict" "accepted", exact "second.verdict" "none", exact "report.versions.verdict" "accepted", exact "report.request.positive" "accepted", exact "report.request.negative" "ToolVersionMismatch: ghc", exact "negative.ReportUnknownArgument" "toolchain-report: unknown argument --bogus",
+           exact "report.probe.decode.positive" "decoded amoebius/3/True", exact "report.probe.decode.mistyped" "refused type-error", exact "report.probe.sim.clean" "b:2", exact "report.probe.sim.perturbed" "a:1", exact "report.probe.codegen.link-token" "0a08616d6f65626975731003", exact "report.probe.bridge.files" "Amoebius/Toolchain/Probe.purs", exact "report.provenance.fork-modules" "17", exact "probe.decode.positive" "decoded amoebius/3/True", prefix "probe.decode.mistyped" "refused type-error", exact "probe.sim.clean" "b:2", exact "probe.sim.perturbed" "a:1", exact "fork.modules" "17", exact "fork.problems" "none", exact "layout.problems" "none", exact "upstream.verdict" "acquired", exact "probe.codegen.files" "Proto/Probe.hs,Proto/Probe_Fields.hs"
+           , ("plan.packages", all (`elem` Text.splitOn "," (value "plan.packages")) ["dhall", "io-classes", "io-sim", "proto-lens", "proto-lens-runtime", "purescript-bridge", "tar", "zlib"], value "plan.packages")
+           , exact "report.provenance.upstream" "supernova-0.0.3 2e2f01be19b08128cd8549befcc1da3fea172b1f5b3471845d05ef8dc06dda33"]
+        <> [prefix ("negative." <> key) expected | (key, expected) <- [("MissingTool", "ToolMissing"), ("MalformedVersion", "ToolVersionMalformed"), ("UnsupportedVersion", "ToolVersionMismatch"), ("UnsupportedGhcupVersion", "ToolVersionMismatch"), ("FailedVersionCommand", "ToolCommandFailed"), ("TrackedResolutionOutput", "TrackedResolutionOutput"), ("TrackedProbeInput", "TrackedProbeInput"), ("MutableIdentity", "MutableIdentity"), ("TopLevelVendor", "TopLevelVendor"), ("AbsentTool", "AbsentTool"), ("OutOfRangeVersion", "OutOfRangeVersion"), ("NoPlatformAsset", "NoPlatformAsset"), ("UpstreamDigestMismatch", "DigestMismatch")]]
+        <> [exact "negative.MissingDependency" "MissingDependency: amoebius-absent-probe", exact "report.probe.source.findings" "", exact "report.provenance.layout" ""]
+        <> [("report.probe.discovery", sort [key | line <- Text.lines contents, key : _ <- [Text.splitOn "\t" line], "report.probe." `Text.isPrefixOf` key]
+             == sort ["report.probe." <> key | key <- ["decode.positive", "decode.mistyped", "sim.clean", "sim.perturbed", "codegen.link-token", "bridge.files", "source.findings"]], "exact shipped-report probe inventory")]
+        <> [exact "report.plan.steps" "ensure ghc 9.12.4 versioned via ghcup; ensure cabal-install 3.16.1.0 managed via ghcup; ensure proto-lens-protoc 0.9.0.1 managed via cabal-install; ensure protoc 3.21.12 managed via package-manager"]
+        <> [exact "plan.steps" "ensure ghc 9.12.4 versioned via ghcup; ensure cabal-install 3.16.1.0 managed via ghcup; ensure proto-lens-protoc 0.9.0.1 managed via cabal-install; ensure protoc 3.21.12 managed via package-manager"]
+        <> [exact "child.absent.exit" "127", exact "child.absent.stdout" "", prefix "child.absent.stderr" "executable not found:", exact "child.failed-cwd.exit" "127", exact "child.failed-cwd.stdout" "", ("child.failed-cwd.stderr", not (Text.null (value "child.failed-cwd.stderr")), "spawn error observed")]
+        <> [exact "second.mismatch.ghcup" "AcquisitionsDisagree: ghcup.version 0.1.50.2 /= 0.2.6.2", exact "second.mismatch.compiler" "AcquisitionsDisagree: compiler.version 9.12.4 /= 9.10.1", exact "second.cabal-version" "none", exact "versions.cabal-report-unavailable" "accepted"]
+        <> [exact "report.cli.unknown.exit" "2", prefix "report.cli.unknown.stderr" "toolchain-report: unknown argument --bogus", exact "report.cli.emit.exit" "0", exact "report.cli.run.exit" "0", exact "report.cli.run.stdout" ""]
+  binary <- if directory then binaryRows input else pure []
+  cli <- if directory then cliRows input else pure []
+  admission <- if directory then admissionChecks input else pure []
+  source <- if directory then probeSourceChecks input else pure []
+  vendor <- if directory then vendorSourceChecks input else pure []
+  let complete = ledger <> binary <> cli <> admission <> source <> vendor
+  emit complete
 
--- | The seven pins: name, byte count, SHA-256.
-expectedPins :: [(Text, Text, Text)]
-expectedPins =
-  [ ("ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz", "302637420", "4da657809c06c1658ae5713911fcb168a32093e239f61fe77be78aba74132cfa")
-  , ("ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz.sig", "438", "a5c8828b3c1c53cfc8d5e4459de0790efa5a8dea96cc16dd564382f005280cc5")
-  , ("ghc-SHA256SUMS", "6585", "67869bc776c7f0ffe76226a689c234b367b2194aececbb53da2275892040053b")
-  , ("ghc-SHA256SUMS.sig", "438", "9db94ced16b87713e89a41c408bf5efcb29462971c2494fbfec7e05a33de6bad")
-  , ("cabal-install-3.16.1.0-x86_64-linux-ubuntu22_04.tar.xz", "5288744", "9d68bd17d4aa87e93eea3f667d3edf41ab1cb2b5194bf1745da9dee678426c17")
-  , ("cabal-SHA256SUMS", "2799", "19ef5e11a70d6d06ae23a2b4cae6b52bcf19575be7343fc9dfcce4104bce8bb3")
-  , ("cabal-SHA256SUMS.sig", "95", "59fa7dbebd873bd1714f440111fe1607148d25afd23450e4c5ee9afdc38c4eb3")
-  ]
+cliRows :: FilePath -> IO [(Text, Bool, Text)]
+cliRows directory = do
+  let request = directory <> "/cli/request/deep/request.tsv"
+      report = directory <> "/cli/output/deep/report.tsv"
+  requestPresent <- doesFileExist request
+  reportPresent <- doesFileExist report
+  if not (requestPresent && reportPresent) then pure [("report.cli.files", False, "request or report missing")] else do
+    requestBytes <- TextIO.readFile request
+    reportBytes <- TextIO.readFile report
+    let values = Map.fromList [(key, value) | line <- Text.lines reportBytes, [key, value] <- [Text.splitOn "\t" line]]
+        check name condition = (name, condition, if condition then "ok" else "report contract differs")
+    pure [check "report.cli.request" (requestBytes == "label\t0b5e17e11a0c0ffee0de1e9a7e5ba5ed\nghc.requested-version\t9.12.4\n")
+         , check "report.cli.label" (Map.lookup "request.label" values == Just "cli-fixture")
+         , check "report.cli.refusal" (Map.lookup "request.verdict" values == Just "ToolVersionMismatch: ghc")
+         , check "report.cli.acquisition" (Map.lookup "acquisition.verdict" values == Just "agree")
+         , check "report.cli.native" (Map.lookup "versions.verdict" values == Just "accepted" && Map.lookup "compiler.version" values == Just "9.12.4")]
 
--- | The role of each pin, in the order of 'expectedPins'.
-pinRoles :: [Text]
-pinRoles = ["compiler-archive", "compiler-archive-signature", "compiler-manifest", "compiler-manifest-signature", "package-tool-archive", "package-tool-manifest", "package-tool-manifest-signature"]
-
-compilerSha256 :: Text
-compilerSha256 = "29b0a853efd81eeed37f5d5ffe8add38f3bd0daa87a8838deaf088ec458e99fc"
-
-packageToolSha256 :: Text
-packageToolSha256 = "27a896cd2389c336d8c492dbb4d49dd22148a278150f9e4619a84c0ea6a307fb"
-
-upstreamTreeSha256 :: Text
-upstreamTreeSha256 = "2e2f01be19b08128cd8549befcc1da3fea172b1f5b3471845d05ef8dc06dda33"
-
-expectedSteps :: Text
-expectedSteps = "ensure ghc 9.12.4 pinned via compiler-archive; ensure cabal-install 3.16.1.0 pinned via package-tool-archive; ensure proto-lens-protoc 0.9.0.1 managed via cabal-install; ensure protoc 3.21.12 managed via package-manager"
-
-expectedPackages :: [Text]
-expectedPackages = ["dhall", "io-classes", "io-sim", "proto-lens", "proto-lens-runtime", "purescript-bridge", "tar", "zlib"]
-
--- | Every negative and the tag its refusal must carry at its locus.
-expectedNegatives :: [(Text, Text)]
-expectedNegatives =
-  [ ("AmbientNetworkRead", "AmbientNetworkRefused: ")
-  , ("MissingPin", "PinMissing: ghc-SHA256SUMS")
-  , ("MissingArchivePin", "PinMissing: ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz")
-  , ("MissingSignaturePin", "PinMissing: cabal-SHA256SUMS.sig")
-  , ("DigestMismatch", "PinDigestMismatch: cabal-SHA256SUMS")
-  , ("ManifestDisagrees", "ManifestDisagrees: cabal-install-3.16.1.0-x86_64-linux-ubuntu22_04.tar.xz")
-  , ("PinnedSignatureDigestMismatch", "PinDigestMismatch: cabal-SHA256SUMS.sig")
-  , ("RootNotAbsent", "RootNotAbsent: ")
-  , ("DisagreeingAcquisition", "AcquisitionsDisagree: compiler.sha256")
-  , ("MissingDependency", "MissingDependency: amoebius-absent-probe")
-  , ("TrackedResolutionOutput", "TrackedResolutionOutput: cabal.project.freeze")
-  , ("DeveloperHomePath", "DeveloperHomePath: /home/developer/amoebius/probe.cabal")
-  , ("TrackedProbeInput", "TrackedProbeInput: test/fixture/probe.dhall")
-  , ("MutableIdentity", "MutableIdentity: git:https://github.com/cr-org/supernova#main")
-  , ("AbsentIdentity", "AbsentIdentity: hackage:-")
-  , ("ProvenanceDeveloperHome", "DeveloperHomePath: /home/developer/supernova")
-  , ("UpstreamDigestMismatch", "DigestMismatch: expected=0000000000000000000000000000000000000000000000000000000000000000")
-  , ("TopLevelVendor", "TopLevelVendor: vendor/supernova/src/Pulsar.hs")
-  , ("PatchProgram", "PatchProgram: patches/supernova.patch")
-  , ("TrackedForeignPackage", "TrackedForeignPackage: vendor/supernova/supernova.cabal")
-  , ("AbsentTool", "AbsentTool: absent-tool")
-  , ("OutOfRangeVersion", "OutOfRangeVersion: ghc 9.10.1")
-  , ("NoPlatformAsset", "NoPlatformAsset: ghc windows-x86_64")
-  ]
-
-judge :: Map Text Text -> [LedgerRow]
-judge rows =
-  [ expect "pins.verdict" "ok"
-  , expect "identity.pins" "7"
-  , expect "identity.platform" "linux-x86_64"
-  ]
-    <> [expect ("pin." <> name) ("ok bytes=" <> bytes <> " sha256=" <> digest) | (name, bytes, digest) <- expectedPins]
-    <> [ expect "manifest.compiler-archive" "agrees claimed=4da657809c06c1658ae5713911fcb168a32093e239f61fe77be78aba74132cfa"
-       , expect "manifest.package-tool-archive" "agrees claimed=9d68bd17d4aa87e93eea3f667d3edf41ab1cb2b5194bf1745da9dee678426c17"
-       , expect "acquisition.verdict" "agree"
-       ]
-    <> concat
-      [ [ expect ("acquisition." <> arm <> ".compiler.sha256") compilerSha256
-        , expect ("acquisition." <> arm <> ".package-tool.sha256") packageToolSha256
-        , expect ("acquisition." <> arm <> ".compiler.version") "9.12.4"
-        , expect ("acquisition." <> arm <> ".package-tool.version") "3.16.1.0"
-        , expect ("acquisition." <> arm <> ".compiler.target") "x86_64-unknown-linux"
-        ]
-      | arm <- ["a", "b"]
-      ]
-    <> [ hex64 "plan.a.digest"
-       , hex64 "plan.b.digest"
-       , equalRows "plan.digests-agree" "plan.a.digest" "plan.b.digest"
-       , expect "plan.agree" "True"
-       , contains "plan.a.packages" expectedPackages
-       , expect "probe.decode.positive" "decoded amoebius/3/True"
-       , expect "probe.decode.mistyped" "refused type-error"
-       , expect "probe.sim.clean" "b:2"
-       , expect "probe.sim.perturbed" "a:1"
-       , expect "probe.codegen.link-token" "0a08616d6f65626975731003"
-       , expect "probe.codegen.files" "Proto/Probe.hs,Proto/Probe_Fields.hs"
-       , expect "probe.bridge.files" "Amoebius/Toolchain/Probe.purs"
-       , expect "plan.steps" expectedSteps
-       , expect "plan.present" "present ghc 9.12.4; present cabal-install 3.16.1.0"
-       , expect "upstream.verdict" "acquired"
-       , expect "upstream.identity" "supernova-0.0.3"
-       , expect "upstream.tree-sha256" upstreamTreeSha256
-       , expect "upstream.files" "22"
-       , expect "fork.missing" "none"
-       , expect "fork.modules" "17"
-       , expect "layout.resolve-refusals" "none"
-       , expect "layout.provenance-refusals" "none"
-       ]
-    <> [prefixWithin ("negative." <> name) tag | (name, tag) <- expectedNegatives]
-    <> [ expect "report.pins.verdict" "ok"
-       , expect "report.identity.compiler" ("ghc 9.12.4 " <> compilerSha256)
-       , expect "report.identity.package-tool" ("cabal-install 3.16.1.0 " <> packageToolSha256)
-       , expect "report.identity.platform" "linux-x86_64"
-       , expect "report.identity.pins" "7"
-       , expect "report.probe.decode.positive" "decoded amoebius/3/True"
-       , expect "report.probe.decode.mistyped" "refused type-error"
-       , expect "report.probe.sim.clean" "b:2"
-       , expect "report.probe.sim.perturbed" "a:1"
-       , expect "report.probe.sim.schedule.clean" "a@10=1,b@20=2"
-       , expect "report.probe.codegen.link-token" "0a08616d6f65626975731003"
-       , expect "report.probe.bridge.files" "Amoebius/Toolchain/Probe.purs"
-       , expect "report.plan.steps" expectedSteps
-       , expect "report.provenance.upstream" ("supernova-0.0.3 " <> upstreamTreeSha256)
-       , expect "report.provenance.fork-modules" "17"
-       , expect "report.provenance.requirements" "dhall >=1.42 && <1.43; io-sim >=1.10 && <1.11; io-classes >=1.10 && <1.11; proto-lens >=0.7 && <0.8; proto-lens-runtime >=0.7 && <0.8; purescript-bridge >=0.15 && <0.16; tar >=0.6 && <0.8; zlib >=0.7 && <0.8"
-       , expect "report.rows" "26"
-       , expect "report.refused.verdict" "refused"
-       , expect "report.refused.keys" "pins.refusal.1,pins.refusal.2"
-       , expect "report.refused.manifest" "ManifestDisagrees: ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz claimed=0000000000000000000000000000000000000000000000000000000000000000 observed=4da657809c06c1658ae5713911fcb168a32093e239f61fe77be78aba74132cfa"
-       , expect "negative.ReportUnknownArgument" "toolchain-report: unknown argument --bogus"
-       , expect "report.options" "Just (Just \"root\")"
-       , expect "report.keys" "pins.verdict,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz,pin.ghc-9.12.4-x86_64-ubuntu22_04-linux.tar.xz.sig,pin.ghc-SHA256SUMS,pin.ghc-SHA256SUMS.sig,pin.cabal-install-3.16.1.0-x86_64-linux-ubuntu22_04.tar.xz,pin.cabal-SHA256SUMS,pin.cabal-SHA256SUMS.sig,manifest.compiler-archive,manifest.package-tool-archive,identity.compiler,identity.package-tool,identity.platform,identity.pins,probe.decode.positive,probe.decode.mistyped,probe.sim.clean,probe.sim.perturbed,probe.sim.schedule.clean,probe.sim.schedule.perturbed,probe.codegen.link-token,probe.bridge.files,plan.steps,provenance.upstream,provenance.fork-modules,provenance.requirements"
-       , expect "pins.rendered" (Text.intercalate "; " [role <> " " <> name <> " " <> bytes <> " " <> digest | ((name, bytes, digest), role) <- zip expectedPins pinRoles])
-       , expect "probe.codegen.schema-sha256" "56c70c7e2ec078925245048b18ecaaafb41c4da01524095c6b9d54b1fd68b4bd"
-       , expect "positive.GitCommit" "git:https://github.com/cr-org/supernova@0123456789abcdef0123456789abcdef01234567"
-       , expect "negative.ShortCommit" "MutableIdentity: git:https://github.com/cr-org/supernova@0123456789abcdef0123456789abcdef0123456"
-       ]
+-- | Judge the runner's rewritten request independently, including its semantic
+-- refusal. Echoing a nonce alone cannot satisfy this binary challenge.
+binaryRows :: FilePath -> IO [(Text, Bool, Text)]
+binaryRows directory = do
+  let root = directory <> "/binary"
+  present <- doesDirectoryExist root
+  if not present then pure [] else do
+    let input = root <> "/input/toolchain-request.tsv"
+        output = root <> "/toolchain-report.tsv"
+    hasInput <- doesFileExist input
+    hasOutput <- doesFileExist output
+    if not (hasInput && hasOutput) then pure [("binary.outputs-present", False, "input or report absent")] else do
+      request <- rowsOf <$> TextIO.readFile input
+      report <- rowsOf <$> TextIO.readFile output
+      let values key rows = [value | (name, value) <- rows, name == key]
+          label = values "label" request
+          validNonce value = Text.length value == 32 && Text.all (\c -> c `elem` ['0'..'9'] || c `elem` ['a'..'f']) value
+          exact name condition = (name, condition, if condition then "ok" else "input/report contract differs")
+      pure [exact "binary.input-contract" (length request == 2 && values "ghc.requested-version" request == ["9.10.1"] && length label == 1 && all validNonce label)
+           , exact "binary.nonce-recovered" (values "request.label" report == label && not (null label))
+           , exact "binary.version-request-refused" (values "request.verdict" report == ["ToolVersionMismatch: ghc"])
+           , exact "binary.native-versions-admitted" (values "versions.verdict" report == ["accepted"] && values "compiler.version" report == ["9.12.4"])]
  where
-  observed key = Map.findWithDefault "<absent>" key rows
-  expect key value = LedgerRow key (observed key == value) (observed key)
-  prefixWithin key value = LedgerRow key (value `Text.isInfixOf` observed key) (observed key)
-  hex64 key = LedgerRow key (Text.length (observed key) == 64 && Text.all (`elem` ("0123456789abcdef" :: String)) (observed key)) (observed key)
-  equalRows name first second = LedgerRow name (observed first == observed second && observed first /= "<absent>") (observed first <> " vs " <> observed second)
-  contains key members = LedgerRow key (all (`elem` Text.splitOn "," (observed key)) members) (observed key)
+  rowsOf text = [(key, value) | line <- Text.lines text, [key, value] <- [Text.splitOn "\t" line]]

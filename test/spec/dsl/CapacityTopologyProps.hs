@@ -10,9 +10,9 @@ module CapacityTopologyProps
 
 import Amoebius.Capacity.Fits (carve, fits)
 import Amoebius.Placement.Witness (placedPlacement, place)
-import Amoebius.Capacity.Types (Assignment (..), AvailableCapacity (..), CandidateNodeClass (..), CpuOvercommitPolicy (..), Demand (..), GrowthQuota (..), HostEnvironment (..), MaterializedNode (..), Node (..), NodeCapacity (..), Placement (..), StorageDemand (..), VolumeAttachment (..), Workload (..), envelopeHeadroom, envelopeLimits, envelopeRequests, headroomResources, availableResources)
+import Amoebius.Capacity.Types (Assignment (..), AvailableCapacity (..), CandidateNodeClass (..), CpuOvercommitPolicy (..), Demand (..), GrowthQuota (..), HostEnvironment (..), MaterializedNode (..), NodeRole (..), Node (..), NodeRole (..), NodeCapacity (..), Placement (..), StorageDemand (..), VolumeAttachment (..), Workload (..), envelopeHeadroom, envelopeLimits, envelopeRequests, headroomResources, availableResources)
 import Amoebius.Capacity.Vector (ResourceVector (..), addResources)
-import Amoebius.Vocabulary (Quantity (..), Unit (..), quantityValue)
+import Amoebius.Vocabulary (Architecture (Amd64), linuxCpuDetected, Quantity (..), Unit (..), quantityValue)
 import Amoebius.Dsl.Topology
   ( ComputeEngine (..)
   , NodeSupply (..)
@@ -128,6 +128,8 @@ propPlaceSound (PlacementCase required available) = checkCoverage
       NativeLinux
       (NodeCapacity (resources available 4 4 1) NoCpuOvercommit Map.empty)
       Set.empty
+      (linuxCpuDetected Amd64)
+      KindWorker
 
 propCompatibilityEquivalence :: CompatibilityCase -> Property
 propCompatibilityEquivalence (CompatibilityCase engine environment) = checkCoverage

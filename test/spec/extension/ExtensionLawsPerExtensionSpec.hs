@@ -4,6 +4,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Budget.Admission
   ( Demand (Demand)
   , admit
@@ -42,7 +43,6 @@ import Amoebius.Scope.Index
   , activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import Control.Exception (SomeException, evaluate, try)
 import Control.Monad (forM, unless)
@@ -300,7 +300,7 @@ withDeclaration (FixtureConfig extension _artifact _budget _workflow _evidence b
   tenant <- either (die . show) pure (trustedTenant (extension <> "-law-tenant"))
   subject <- either (die . show) pure (trustedSubject tenant (extension <> "-law-subject"))
   membership <- either (die . show) pure (activeMembership tenant subject)
-  nested <- either (die . show) pure $ withRequestScope tenant subject membership $ \scope ->
+  nested <- either (die . show) pure $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope ->
     continuation <$> build scope
   either (die . show) pure nested
 

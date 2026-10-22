@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main (main) where
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition
@@ -67,7 +68,7 @@ checkCalculus = do
   tenant <- requireRight "calculus tenant" (CalculusScope.trustedTenant "ui-server-calculus-tenant")
   subject <- requireRight "calculus subject" (CalculusScope.trustedSubject tenant "ui-server-calculus-subject")
   membership <- requireRight "calculus membership" (CalculusScope.activeMembership tenant subject)
-  action <- requireRight "calculus request scope" $ CalculusScope.withRequestScope tenant subject membership $ \scope -> do
+  action <- requireRight "calculus request scope" $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
     let resources count = ResourceVector 1 (fromIntegral (count :: Int)) 0 0; counts=[5,5,55,6,9]::[Int]
         artifact=artifactComponent scope "public-boundary-artifacts" (resources 5) (RecipeId "ui-server-boundary" 5)
         budget=budgetComponent scope "closed-authority-budget" (resources 5) (allowance (Bytes 5) (Slots 1) (Bytes 5)); lift=liftComponent scope "server-boundary-corpus" (resources 55) OnHost

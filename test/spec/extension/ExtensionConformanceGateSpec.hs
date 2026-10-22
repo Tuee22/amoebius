@@ -2,13 +2,13 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Extension.Conformance.Gate
 import Amoebius.Scope.Index
   ( RequestScope
   , activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import Control.Monad (unless)
 import Data.ByteString qualified as ByteString
@@ -37,7 +37,7 @@ main = do
   tenant <- either (die . show) pure (trustedTenant "conformance-tenant")
   subject <- either (die . show) pure (trustedSubject tenant "conformance-subject")
   membership <- either (die . show) pure (activeMembership tenant subject)
-  action <- either (die . show) pure $ withRequestScope tenant subject membership $ \scope ->
+  action <- either (die . show) pure $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope ->
     runFixture expectedInventory expectedCoverage scope
   action
 

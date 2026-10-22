@@ -3,6 +3,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Capacity.Vector (ResourceVector (ResourceVector), zeroResources)
 import Amoebius.Vocabulary (Quantity (..))
 import Amoebius.Extension.Declaration (declarationDigest)
@@ -31,7 +32,6 @@ import Amoebius.Scope.Index
   ( activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import Control.Monad (forM, forM_, unless)
 import Data.ByteString.Char8 qualified as ByteString
@@ -256,7 +256,7 @@ withFixtureSet continuation = do
   subject <- either (die . show) pure (trustedSubject tenant "composition-law-subject")
   membership <- either (die . show) pure (activeMembership tenant subject)
   nested <- either (die . show) pure $
-    withRequestScope tenant subject membership $ \scope -> continuation <$> fixtureSet scope
+    FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> continuation <$> fixtureSet scope
   either (die . show) id nested
 
 tupleResource :: (Natural, Natural, Natural, Natural) -> ResourceVector

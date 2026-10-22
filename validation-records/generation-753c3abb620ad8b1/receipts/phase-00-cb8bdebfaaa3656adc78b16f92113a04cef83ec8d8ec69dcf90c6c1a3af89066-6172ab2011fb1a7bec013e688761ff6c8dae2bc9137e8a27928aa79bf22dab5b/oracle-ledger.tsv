@@ -1,0 +1,172 @@
+phase.cardinality	green	56
+phase.table	green	0=documentation_suite,1=toolchain_spike,2=repository_layout_conformance,3=typed_spine,4=witness_manifests_capacity_storage,5=substrates_lanes_image_recipe,6=extension_admission_attested_scope,7=child_clusters_obligation_teardown,8=ui_program_language_binding,9=dsl_barrier,50=host_assert_cli,51=host_ensure_kernel,52=linux_engine_bringup,53=apple_engine_bringup,54=windows_engine_bringup,55=bootstrap_coordinator_kind,56=base_image_registry,57=complementary_arch_child,58=object_reconciler,59=capacity_scheduler,60=retained_storage,61=vault_pki,62=platform_backbone,63=platform_services_2,64=keycloak_ingress,65=live_dsl_deploy,66=app_tenancy,67=pulsar_client,68=user_tenant_isolation_live,69=content_store_workflow,70=ui_projection_runtime,71=release_lifecycle,72=ui_program_release,73=network_fabric_wireguard,74=multicluster_spawn_georepl,75=gateway_migration_drills,76=provider_deploy_checkpoint,77=provider_child_bringup,78=provider_ebs_credential,79=provider_dynamic_nodes,80=determinism_jitcache,81=ui_single_tenant_live,82=ui_multi_tenant_live,83=ui_rollout_reconnect,84=ui_ha_multizone,85=offline_replay_receipts,86=offline_blobs_isolation,87=offline_release_evolution,88=offline_multizone_continuity,89=apple_metal_host_daemon,90=test_topology_live,91=infernix_rederivation,92=infernix_ui_rederivation,93=jitml_rederivation,94=jitml_ui_rederivation,95=webapp_rederivation
+phase.resource-required	green	1,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95
+phase.paths	green	exact
+predecessor.50	green	9
+predecessor.0	green	none
+predecessor.1	green	0
+successor.9	green	50
+successor.95	green	none
+role.DSL_BARRIER	green	9
+role.BOOTSTRAP_HANDOFF	green	50
+role.HOST_ENSURE	green	51
+role.FIRST_HARDWARE	green	52
+role.REGISTRY_BOUNDARY	green	56
+gap	green	10..49
+integrity.problems	green	0
+legacy.cardinality	green	44
+legacy.owners	green	LTD-BOOT-001=toolchain_spike,LTD-DOC-001=typed_spine,LTD-DSL-001=typed_spine,LTD-DSL-002=typed_spine,LTD-DSL-003=witness_manifests_capacity_storage,LTD-DSL-004=typed_spine,LTD-DSL-005=extension_admission_attested_scope,LTD-DSL-006=ui_program_language_binding,LTD-DSL-007=extension_admission_attested_scope,LTD-DSL-008=extension_admission_attested_scope,LTD-DSL-009=typed_spine,LTD-HELPER-001=host_assert_cli,LTD-HOST-001=host_ensure_kernel,LTD-HOST-002=host_ensure_kernel,LTD-IMG-001=base_image_registry,LTD-KRN-001=documentation_suite,LTD-KRN-002=documentation_suite,LTD-KRN-003=documentation_suite,LTD-LIB-001=dsl_barrier,LTD-LIB-002=later-phases-track,LTD-META-001=repository_layout_conformance,LTD-NAME-001=repository_layout_conformance,LTD-RUN-001=bootstrap_coordinator_kind,LTD-SEED-001=infernix_rederivation,LTD-SEED-002=jitml_rederivation,LTD-SRC-000=repository_layout_conformance,LTD-SRC-001=repository_layout_conformance,LTD-SRC-002=typed_spine,LTD-SRC-003=typed_spine,LTD-SRC-004=ui_program_language_binding,LTD-SRC-005=repository_layout_conformance,LTD-SRC-006=repository_layout_conformance,LTD-SRC-007=toolchain_spike,LTD-SRC-008=repository_layout_conformance,LTD-SRC-009=toolchain_spike,LTD-UI-001=ui_program_release,LTD-VAL-001=documentation_suite,LTD-VAL-002=documentation_suite,LTD-VAL-003=documentation_suite,LTD-VAL-004=documentation_suite,LTD-VAL-005=typed_spine,LTD-VAL-006=documentation_suite,LTD-VAL-007=host_assert_cli,LTD-VAL-008=host_assert_cli
+decision.ids	green	DL-0001,DL-0002,DL-0003,DL-0004,DL-0005,DL-0006,DL-0007,DL-0008,DL-0009,DL-0010,DL-0011,DL-0012,DL-0013,DL-0014,DL-0015,DL-0016,DL-0017,DL-0018,DL-0019,DL-0020,DL-0021,DL-0022,DL-0023,DL-0024,DL-0025,DL-0026,DL-0027
+frozen.paths	green	AGENTS.md,DEVELOPMENT_PLAN/development_plan_gate_integrity.md,DEVELOPMENT_PLAN/development_plan_phase_model.md,DEVELOPMENT_PLAN/development_plan_standards.md,DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md,documents/README.md,documents/documentation_standards.md,documents/engineering/README.md,documents/engineering/app_vs_deployment_doctrine.md,documents/engineering/apple_metal_headless_builds.md,documents/engineering/backup_recovery_doctrine.md,documents/engineering/behavioural_verification_doctrine.md,documents/engineering/bootstrap_sequence_doctrine.md,documents/engineering/browser_offline_runtime_doctrine.md,documents/engineering/capability_extension_doctrine.md,documents/engineering/chaos_failover_doctrine.md,documents/engineering/chaos_failover_second_axis.md,documents/engineering/chaos_failover_worked_examples.md,documents/engineering/cluster_lifecycle_doctrine.md,documents/engineering/cluster_topology_doctrine.md,documents/engineering/conformance_harness_doctrine.md,documents/engineering/consistency_pacelc_doctrine.md,documents/engineering/content_addressing_determinism.md,documents/engineering/content_addressing_doctrine.md,documents/engineering/daemon_topology_doctrine.md,documents/engineering/deterministic_simulation_doctrine.md,documents/engineering/diagram_conventions.md,documents/engineering/dsl_doctrine.md,documents/engineering/evidence_calculus_doctrine.md,documents/engineering/extension_conformance_doctrine.md,documents/engineering/extension_conformance_laws.md,documents/engineering/extension_conformance_security.md,documents/engineering/extension_conformance_transactions.md,documents/engineering/formal_model_doctrine.md,documents/engineering/gate_runner_doctrine.md,documents/engineering/gateway_migration_doctrine.md,documents/engineering/gateway_migration_model_doctrine.md,documents/engineering/generated_artifacts_doctrine.md,documents/engineering/host_cluster_comms_doctrine.md,documents/engineering/image_build_doctrine.md,documents/engineering/inforcespec_migration_doctrine.md,documents/engineering/jit_artifact_doctrine.md,documents/engineering/jit_budget_doctrine.md,documents/engineering/lift_and_compose_doctrine.md,documents/engineering/low_code_ui_runtime_doctrine.md,documents/engineering/low_code_ui_workflow_lifting.md,documents/engineering/manifest_generation_doctrine.md,documents/engineering/migration_doctrine.md,documents/engineering/monitoring_doctrine.md,documents/engineering/namespace_layout_doctrine.md,documents/engineering/network_fabric_doctrine.md,documents/engineering/platform_services_doctrine.md,documents/engineering/preflight_validation_doctrine.md,documents/engineering/pulsar_client_doctrine.md,documents/engineering/pulumi_ebs_credential_model.md,documents/engineering/pulumi_iac_doctrine.md,documents/engineering/readiness_ordering_doctrine.md,documents/engineering/release_lifecycle_doctrine.md,documents/engineering/repository_layout_doctrine.md,documents/engineering/resource_capacity_construction.md,documents/engineering/resource_capacity_doctrine.md,documents/engineering/resource_capacity_folds.md,documents/engineering/resource_capacity_schema.md,documents/engineering/resource_capacity_sources.md,documents/engineering/resource_capacity_storage.md,documents/engineering/resource_capacity_types.md,documents/engineering/service_capability_doctrine.md,documents/engineering/single_logical_data_plane_doctrine.md,documents/engineering/storage_lifecycle_doctrine.md,documents/engineering/substrate_doctrine.md,documents/engineering/substrate_node_inventory.md,documents/engineering/tenancy_doctrine.md,documents/engineering/test_derivation_analysis.md,documents/engineering/testing_doctrine.md,documents/engineering/testing_spoof_resistance.md,documents/engineering/ui_realtime_coordination_doctrine.md,documents/engineering/validation_frame_doctrine.md,documents/engineering/vault_pki_doctrine.md,documents/engineering/workflow_calculus_doctrine.md,documents/glossary.md,documents/illegal_state/README.md,documents/illegal_state/illegal_state_capability_messaging.md,documents/illegal_state/illegal_state_capacity.md,documents/illegal_state/illegal_state_catalog.md,documents/illegal_state/illegal_state_lifecycle.md,documents/illegal_state/illegal_state_ml_asset.md,documents/illegal_state/illegal_state_multicluster.md,documents/illegal_state/illegal_state_security.md,documents/illegal_state/illegal_state_storage.md,documents/illegal_state/illegal_state_techniques.md,documents/illegal_state/illegal_state_tenancy.md,documents/illegal_state/illegal_state_topology.md,documents/reading_order.md
+frozen.digests	green	sha256-hex
+frozen.decisions	green	known
+frozen.amendments	green	AGENTS.md=DL-0025,DEVELOPMENT_PLAN/development_plan_gate_integrity.md=DL-0026,DEVELOPMENT_PLAN/development_plan_phase_model.md=DL-0026,DEVELOPMENT_PLAN/development_plan_standards.md=DL-0026,DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md=DL-0026,documents/documentation_standards.md=DL-0025,documents/engineering/cluster_topology_doctrine.md=DL-0024,documents/engineering/gate_runner_doctrine.md=DL-0019,documents/engineering/gateway_migration_model_doctrine.md=DL-0027,documents/engineering/generated_artifacts_doctrine.md=DL-0020,documents/engineering/image_build_doctrine.md=DL-0025,documents/engineering/pulumi_iac_doctrine.md=DL-0024,documents/engineering/repository_layout_doctrine.md=DL-0027,documents/engineering/resource_capacity_doctrine.md=DL-0024,documents/engineering/resource_capacity_folds.md=DL-0024,documents/engineering/service_capability_doctrine.md=DL-0023,documents/engineering/substrate_doctrine.md=DL-0025,documents/engineering/testing_doctrine.md=DL-0023,documents/engineering/testing_spoof_resistance.md=DL-0027,documents/engineering/validation_frame_doctrine.md=DL-0025
+frozen.amendment-digests	green	AGENTS.md=7be90c67243b16190ea0e617001abffcbc1bfc2b4e964a009237a8a9ea497e4a,DEVELOPMENT_PLAN/development_plan_gate_integrity.md=0337be9912dcea2949b137f3b0d202cc136bf2383250e503ea1c2226b96b1470,DEVELOPMENT_PLAN/development_plan_phase_model.md=1136bf4ed4c58706bbf1b6b56be94fc53ac3f92c9ccdc0d23541818cb6029da4,DEVELOPMENT_PLAN/development_plan_standards.md=4c9e6cd0a1807fd567d016c957b4e1ab89a007a2dcd8e5fa8b9a25274da9d540,DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md=3da6a19267eeb9e1733c7d449862e2accd3b1748525f73264348b12ef83cdff8,documents/documentation_standards.md=a4106423d4b91b09e0c7d06ccd77e11ac3d803df225ef5f975d7aa34b77581f6,documents/engineering/cluster_topology_doctrine.md=6afb9a76b91dbcb7d8bcec961183b541f2d0ec7f44b841803861514b4fc6d0b2,documents/engineering/gate_runner_doctrine.md=2e860dc817200dcf5ef9d56fc54482028e3709b89c44caeaca492cc32a4b6f30,documents/engineering/gateway_migration_model_doctrine.md=e631499a6a16cbf4e410ba0aa766163356fbc5fc922dca5a8d37f896e74489a6,documents/engineering/generated_artifacts_doctrine.md=5dfae009252ba074136652107c465097eb9ef06dbbaaf7b768f4fdd2109ee763,documents/engineering/image_build_doctrine.md=f85c2389a2ae0a4ed9bf6c2967688530fece528e4b7f810a72e71469efe7b788,documents/engineering/pulumi_iac_doctrine.md=e678d7449e351cb906dfca30a1358624adf1882171a5820f1f2a8ca60ca7f8f1,documents/engineering/repository_layout_doctrine.md=aa6c17687099026a1da231ebabbd0352cff432ecd881ef7b83eac296c40f97f2,documents/engineering/resource_capacity_doctrine.md=552624e8494d0016868d0c7fd36bc10712f2a518d4e33971ceef86ee9e7e56ee,documents/engineering/resource_capacity_folds.md=17d919d89a7fc704a263203ee37fc1fecbf1f0cc2192921973e583310efd2ed2,documents/engineering/service_capability_doctrine.md=e728bf72bf98f534ddfb8fa25b5c6ebbe9cb48aa0745ae9b1e859b9ded45b5d5,documents/engineering/substrate_doctrine.md=52d824b3fc7189f4399a23bbad05be32a7c9697653478554d24b47ad67a0b4ab,documents/engineering/testing_doctrine.md=9c0303f08df8dd1c76e15020f2713a81e93eaf3b10b04793f898ccf1960d0050,documents/engineering/testing_spoof_resistance.md=c163e53389da71a20c30b5fd44a4641968b598381fe00625e24ae7c6cffe8f14,documents/engineering/validation_frame_doctrine.md=7d8db0a1730a300d5a6b57fdd8c0d9c3b17d9e7323fd8edbc6f108dac691ca91
+evidence-path.cardinality	green	43
+evidence-path.results	green	absolute=refused,backslash=refused,candidate=admitted,extra-child=refused,foreign-source=refused,kill-table=admitted,last-phase=admitted,markdown=refused,missing-bundle-digest=refused,observer=admitted,oracle-ledger=admitted,outcome=admitted,receipt=admitted,receipt-hash=admitted,shell=refused,short-bundle-digest=refused,short-digest=refused,short-generation=refused,sibling-tsv=refused,traversal=refused,unknown-file=refused,unpadded-phase=refused,unregistered-phase=refused,uppercase-bundle-digest=refused,uppercase-digest=refused,uppercase-generation=refused,void=admitted,void-absolute=refused,void-backslash=refused,void-extra-child=refused,void-last-phase=admitted,void-markdown=refused,void-missing-suffix=refused,void-short-digest=refused,void-short-generation=refused,void-short-target=refused,void-sidecar=refused,void-traversal=refused,void-unpadded-phase=refused,void-unregistered-phase=refused,void-uppercase-digest=refused,void-uppercase-generation=refused,void-uppercase-target=refused
+evidence-parser.bundle-only	green	True,False
+evidence-parser.void-only	green	False,True
+evidence-parser.void-fields	green	aaaaaaaaaaaaaaaa,0,cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc,dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+doc.findings	green	0
+doc.governed-count-observed	green	present
+negative.discovery	green	broken-link,decision-log-out-of-order,gate-spec-block-mismatch,missing-status-line,non-frontier-status-vector,receipt-line-unexpected,stale-backlink,unauthorised-frozen-edit,uncited-module-claim
+negative.broken-link	green	DOC-LINK-TARGET
+negative.stale-backlink	green	DOC-BACKLINK-STALE
+negative.missing-status-line	green	PLAN-PHASE-STATUS
+negative.non-frontier-status-vector	green	PLAN-STATUS-FRONTIER-RECORDED
+negative.unauthorised-frozen-edit	green	DOC-FROZEN-BODY-CHANGED
+negative.uncited-module-claim	green	DOC-HONESTY-MOOD
+negative.gate-spec-block-mismatch	green	DOC-GATE-SPEC-MISMATCH
+negative.decision-log-out-of-order	green	DOC-DECISION-LOG-ORDER
+negative.receipt-line-unexpected	green	PLAN-STATUS-RECEIPT-UNEXPECTED
+refusal.legal-ordinary	green	ok
+refusal.kernel-subject	green	SUBJECT-NOT-SHIPPED: Amoebius.Validation.Runner
+refusal.missing-binary-fact	green	BINARY-FACT-MISSING
+refusal.barrier-without-spine	green	SPINE-FACT-MISSING
+refusal.seed-with-binary-fact	green	SEED-CARRIES-BINARY-FACT
+refusal.hardware-substrate-ordinary	green	HARDWARE-BEFORE-BARRIER: linux-cpu
+refusal.hardware-role-without-substrate	green	SUBSTRATE-ABSENT
+refusal.stage-not-subject	green	STAGE-MODULE-NOT-SUBJECT: Amoebius.Dsl.Other
+refusal.duplicate-case	green	CASE-DUPLICATE: a
+refusal.legal-seed	green	ok
+refusal.ordinary-with-spine	green	ok
+render.lines	green	11
+render.staged	green	binary-fact: command=compile {input} | input=examples/root.dhall | perturbation=staged(pre=render x --output {input} post=apply y then=sentinel-to-nonce(S),replica-count(1->3)) | outputs={run}/out/m
+perturb.staged-direct	green	refused
+verify.closure	green	dsl-core,vocabulary
+verify.legal	green	ok
+verify.outside-closure	green	SUBJECT-NOT-SHIPPED: Amoebius.Parked.Thing (parked)
+verify.not-in-package	green	SUBJECT-NOT-IN-PACKAGE: Amoebius.Nowhere
+verify.oracle-depends-on-product	green	ORACLE-DEPENDS-ON-PRODUCT: oracle-leaky
+verify.oracle-cpp	green	ORACLE-CPP: ./.build/runs/phase-00/custody/suite/fixture-package/test/oracle/cpp/Main.hs
+verify.oracle-missing	green	ORACLE-MISSING: oracle-absent
+verify.suite-missing	green	SUITE-MISSING: no-suite
+loci.constant-flip	green	6,12,17,18,22
+loci.boundary-shift	green	9
+loci.branch-swap	green	12
+loci.field-drop	green	18
+loci.list-truncation	green	22
+sample.deterministic	green	equal
+sample.seed-sensitive	green	differs
+sample.size	green	4
+sample.cap	green	9
+apply.witness	green	changed
+apply.line-6	green	limit = 4
+apply.stale-locus	green	refused
+kill.killed	green	3
+kill.viable	green	4
+kill.stillborn	green	2
+kill.ratio	green	3 % 4
+kill.rows	green	8
+attribution.owned-red	green	True
+attribution.unowned-red	green	False
+attribution.no-policy	green	True
+attribution.empty-ledger	green	False
+hygiene.fixture.kernel-lines	green	13
+hygiene.fixture.cap	green	5
+hygiene.fixture.cpp	green	2
+hygiene.fixture.run-modules	green	["src/validation-kernel/Amoebius/Validation/FooRun/Internal.hs"]
+hygiene.fixture.phase-literals	green	1
+hygiene.fixture.phase-tables	green	1
+hygiene.fixture.duplicates	green	Substrate
+hygiene.fixture.product-duplicates	green	Substrate
+hygiene.fixture.problems	green	5
+hygiene.clean.green	green	True
+hygiene.clean.cap	green	14000
+hygiene.vocabulary	green	Architecture,CapabilityArm,ComputeEngine,Detected,EngineRuntime,ExtensionId,Lane,Quantity,Register,ResourceVector,Substrate
+capture.all-green	green	True
+capture.one-red	green	False
+capture.empty-observation	green	False
+capture.reordered	green	False
+capture.rows	green	41
+capture.categories	green	18
+preflight.clean	green	
+preflight-status-surface-dirty	green	StatusSurfaceDirty
+preflight.predecessor-not-committed	green	PredecessorNotCommitted
+preflight.status-without-receipt	green	STATUS-WITHOUT-RECEIPT
+preflight-predecessor-not-reproduced	green	PredecessorNotReproduced
+preflight.frozen-finding	green	GOVERNANCE-UNACCEPTED
+preflight.hardware-before-barrier	green	HARDWARE-BEFORE-BARRIER
+preflight.hardware-after-barrier	green	
+preflight.substrate-absent	green	SUBSTRATE-ABSENT
+preflight.kernel-over-budget	green	KernelOverBudget
+preflight.spec-weakened	green	SPEC-WEAKENED
+preflight.spec-unchanged	green	
+preflight.first-run	green	
+preflight.weakened-detail	green	case unbound-need
+store.write-seed	green	ok
+store.write-receipt	green	ok
+store-seed-roundtrip	green	equal
+store-receipt-roundtrip	green	equal
+store.reset-receipt	green	kept-beside-pass
+store.latest-generation	green	accept phase 0
+store.other-generation	green	absent
+store-tampered-receipt	green	1
+store.corrupted-record	green	record digest or UTF-8 is invalid
+store.restored-receipt	green	2
+store.generation-directory	green	/s/generation-abcdef0123456789
+archive.write	green	accepted
+archive.roundtrip	green	exact
+archive.repeat	green	same
+archive.tampered-evidence	green	archive receipt identity or canonical form is invalid
+archive.missing-file	green	archive bundle has missing or extra records
+archive.symlink	green	archive bundle contains a symbolic link
+archive.restored	green	exact
+archive.distinct-run-bundle	green	distinct
+void.setup	green	ready
+void.latest-before-red	green	newer
+void.tied-publication	green	archive receipt issued-at is not newer than the existing phase bundle
+void.backdated-publication	green	archive receipt issued-at is not newer than the existing phase bundle
+void.wrong-target	green	void target or failure identity is invalid
+void.invalid-failure	green	void target or failure identity is invalid
+void.write	green	accepted
+void.repeat	green	same
+void.no-fallback	green	blocked
+void.history-retained	green	two-bundles
+void.tampered	green	void record identity or target is invalid
+void.green-recovery	green	later-green
+crossvoid.targets	green	3
+crossvoid.unrecorded-green	green	unrecorded-green
+crossvoid.downstream	green	0
+crossvoid.unrelated	green	unrelated
+crossvoid.history	green	5
+crossvoid.missing	green	recorded receipt is absent from the archive
+status.recorded-frontier	green	one-frontier
+status.surface-digest-stable	green	changed
+status.patched-files	green	3
+status.bare-receipt-missing	green	True
+status.receipted-receipt-missing	green	False
+status.receipted-structural-findings	green	
+status.after-active	green	✅ Done
+status.after-successor	green	🔄 Active — NOT VALIDATED
+status.after-active-sprints	green	done
+status.receipt-recorded	green	bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+status.receipt-line	green	✅ Done.
+receipt-reproducible-digest-stable	green	same
+reproducible.verdict-sensitive	green	differs
+reproducible.ledger-sensitive	green	differs
+reproducible.spec-sensitive	green	differs
+package.product-closure-validator-free	green	True
+package.verifier-links-runner	green	True
+package.flags	green	0
+package.executables	green	amoebius,amoebius-validate

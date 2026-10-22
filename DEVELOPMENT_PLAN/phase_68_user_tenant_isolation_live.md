@@ -53,7 +53,7 @@ multi-tenant UI scope switching.
 `user-tenant-isolation-live` Haskell component suite can supply supporting observations only; the sole acceptance command is `pb
 validate phase 68`. Split if a browser interaction, UI-plan rollout, HA failure, second substrate, or
 independently useful provider feature is required.
-**Substrate:** `linux-cpu` — future live cluster observation only after the DSL barrier (Phase 4) and every predecessor gate pass.
+**Substrate:** `linux-cpu` — future live cluster observation only after the [DSL barrier](phase_09_dsl_barrier.md) (`DSL_BARRIER`) and every predecessor gate pass.
 **Lane:** `linux-cpu/amd64`.
 **Register:** 3 — live real-authority isolation; NOT VALIDATED.
 **Depends on:** [Phase 67](phase_67_pulsar_client.md)

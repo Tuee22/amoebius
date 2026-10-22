@@ -1,0 +1,43 @@
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:43	constant-flip	e944ff2e6c88->373082ef2c98	killed@path:.dockerignore,path:.gitignore,path:LICENSE
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:122	constant-flip	3b50c018654c->70238808708a	killed@challenge-finding:ordinal,challenge-finding:unmapped,challenge-finding:vendor
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:104	constant-flip	fbd3e087c9dc->9769ea862fb5	survived
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:36	constant-flip	3287f6c3c1ad->ac459001589c	killed@case:report.bad-options
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:464	field-drop	1d2d981e3e79->71f4b2ab4cd8	stillborn:src/Amoebius/Layout/SourceGraph.hs:465:46: error: [GHC-88464]
+    Variable not i
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:68	constant-flip	e944ff2e6c88->0c8c288c74bc	survived
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:168	constant-flip	3b50c018654c->6b997dc9a38d	killed@finding-set,compiler-instance-external-contract-control,compiler-derived-class-member-control
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:132	branch-swap	fbd3e087c9dc->192d826a4e3b	killed@finding-set,bootstrap-call-sites,bootstrap-effect-sites
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:40	constant-flip	3287f6c3c1ad->f11f7c0451da	killed@case:report.paths-file-missing,case:report.inventory-failure
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:1372	constant-flip	1d2d981e3e79->edaece1d7d98	killed@sink-catalogue-recomputed,sink-use-anchors,consumer-rows
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:75	branch-swap	e944ff2e6c88->56e429875943	killed@path-set,finding-set,path:test/fixture/accept/release_lifecycle/environment.hs
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:197	constant-flip	3b50c018654c->80e1d828f586	killed@case:graph-qualified
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:225	constant-flip	fbd3e087c9dc->9f711f5285b3	killed@finding-set,bootstrap-call-sites,bootstrap-effect-sites
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:47	constant-flip	3287f6c3c1ad->f4fb9826b889	killed@finding-set,compiler-class-effect-type-seed-control,compiler-instance-external-contract-control
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:1439	constant-flip	1d2d981e3e79->cabf4c8af31c	killed@compiler-call-site-coverage-control,compiler-prelude-interface-control,case:graph.implicit-prelude-export
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:79	constant-flip	e944ff2e6c88->d089d26b31c6	killed@case:negative.tool
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:653	constant-flip	3b50c018654c->6a893df731a8	killed@finding-set,compiler-instance-external-contract-control,compiler-derived-class-member-control
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:230	constant-flip	fbd3e087c9dc->c1b91be464e7	killed@finding-set,bootstrap-call-sites,bootstrap-effect-sites
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:126	constant-flip	3287f6c3c1ad->56700e3075a4	survived
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:1745	constant-flip	1d2d981e3e79->7934cb5da4f3	killed@compiler-rejected-source-call-control,case:graph-qualified
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:125	constant-flip	e944ff2e6c88->c0693e2016c4	killed@finding-set,case:negative.ignore-source,case:report.nested-output
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:699	list-truncation	3b50c018654c->785de1937c0f	stillborn:src/Amoebius/Layout/PackageMap.hs:699:71: error: [GHC-58481]
+    parse error on 
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:249	constant-flip	fbd3e087c9dc->a92588663991	killed@finding-set,bootstrap-call-sites,bootstrap-effect-sites
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:139	constant-flip	3287f6c3c1ad->b825ec0e46fa	killed@finding-set,case:report.nested-output,case:report.default-exit
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:1817	constant-flip	1d2d981e3e79->db43489ea674	killed@sink-catalogue-recomputed,fixture-sinks
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:127	constant-flip	e944ff2e6c88->87711baab3e5	killed@finding-set,case:report.nested-output,case:report.default-exit
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:709	constant-flip	3b50c018654c->943ebdf55d16	survived
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:255	constant-flip	fbd3e087c9dc->a2863911df02	killed@finding-set,bootstrap-call-sites,bootstrap-effect-sites
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:141	constant-flip	3287f6c3c1ad->3d0c1c007a00	survived
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:1818	constant-flip	1d2d981e3e79->b145956264bc	killed@consumer-rows
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:167	constant-flip	e944ff2e6c88->0d695dbaeaf1	killed@case:negative.ordinal
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:716	list-truncation	3b50c018654c->5bab0769d76f	killed@finding-set,compiler-instance-external-contract-control,compiler-derived-class-member-control
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:328	constant-flip	fbd3e087c9dc->9b677258f85c	survived
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:141	branch-swap	3287f6c3c1ad->60087f2f113d	killed@finding-set,case:report.nested-output,case:report.default-exit
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:1945	constant-flip	1d2d981e3e79->6f29d5a8d60c	survived
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:200	constant-flip	e944ff2e6c88->3455f357349a	survived
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:747	branch-swap	3b50c018654c->30c18d2a20ef	survived
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:339	constant-flip	fbd3e087c9dc->97b1903abcc5	survived
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:142	constant-flip	3287f6c3c1ad->694021e29108	survived
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:2398	branch-swap	1d2d981e3e79->f2954269d68d	killed@compiler-deferred-seed-call-control,case:graph-qualified,case:graph.deferred-seed-call
+summary	killed=27	viable=38	stillborn=2

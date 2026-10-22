@@ -3,6 +3,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (..))
 import Amoebius.Calculus.Budget.Grant (Bytes (..), Slots (..), allowance)
 import Amoebius.Calculus.Composition
@@ -21,7 +22,7 @@ import Amoebius.Formal.Interpret (evalExpr, interpret, valueAsBool)
 import Amoebius.Formal.Model
 import Amoebius.Formal.ToyModel (toyModel)
 import Amoebius.Scope.Index
-  ( RequestScope, activeMembership, trustedSubject, trustedTenant, withRequestScope )
+  ( RequestScope, activeMembership, trustedSubject, trustedTenant )
 import Amoebius.Vocabulary (quantityValue)
 import Control.Monad (forM_, unless)
 import Data.List (find, intercalate, isInfixOf, isPrefixOf, isSuffixOf, tails)
@@ -320,7 +321,7 @@ withReferenceComposition continuation = case trustedTenant "phase-11-tenant" of
     Left problem -> pure (Left (show problem))
     Right subject -> case activeMembership tenant subject of
       Left problem -> pure (Left (show problem))
-      Right membership -> case withRequestScope tenant subject membership (continuation . referenceComposition) of
+      Right membership -> case FixtureAuthority.withFixtureScope tenant subject membership (continuation . referenceComposition) of
         Left problem -> pure (Left (show problem))
         Right action -> Right <$> action
 

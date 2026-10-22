@@ -1,0 +1,1062 @@
+run.1.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.1.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.1.cwd	./.build/runs/phase-03/mutants/1
+run.1.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.1.exit	ExitSuccess
+run.1.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.1.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.1.stdout-bytes	0
+run.1.digest	1f100e9833eda871d03dc541d1ead4acaf97c60cd42f92760eeb4776ff499d9c
+run.2.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.2.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/1/suite
+run.2.cwd	./.build/runs/phase-03/mutants/1
+run.2.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.2.exit	ExitSuccess
+run.2.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.2.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.2.stdout-bytes	0
+run.2.digest	2dd5ad6c4b154c9834a3a9e531972e9ab210e52c32311ae237de3041b0f3f03c
+run.3.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.3.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/1/suite
+run.3.cwd	./.build/runs/phase-03/mutants/1
+run.3.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.3.exit	ExitFailure 1
+run.3.stdout-sha256	d87199d079f4c029b483f5726f3671b558206ae5281939b400ad6fc50c44df50
+run.3.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.3.stdout-bytes	42618
+run.3.digest	0b616de02a20e7966a3a78cb0d2196decea96e562bbb6448dbe2e17915a2c420
+run.4.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.4.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.4.cwd	./.build/runs/phase-03/mutants/2
+run.4.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.4.exit	ExitSuccess
+run.4.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.4.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.4.stdout-bytes	0
+run.4.digest	ab007bfebc4757fd5bbf261e62461d12e82debc42d3b48a9c4649cdde2b30234
+run.5.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.5.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/2/suite
+run.5.cwd	./.build/runs/phase-03/mutants/2
+run.5.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.5.exit	ExitSuccess
+run.5.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.5.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.5.stdout-bytes	0
+run.5.digest	0d44ac0583e675a3cfc9154a9c590ebe0c0eebe2981fd5e188ce9b89021855cf
+run.6.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.6.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/2/suite
+run.6.cwd	./.build/runs/phase-03/mutants/2
+run.6.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.6.exit	ExitFailure 1
+run.6.stdout-sha256	8633094b6af6d8139db16ef90caad295528de0e4ee2c11e7eb16530924e68a78
+run.6.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.6.stdout-bytes	63644
+run.6.digest	7d1f10b32d9a6624f105616db636be78915c7734d5634c4ec8228caea388e6ac
+run.7.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.7.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.7.cwd	./.build/runs/phase-03/mutants/3
+run.7.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.7.exit	ExitSuccess
+run.7.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.7.stderr-sha256	0253b0cc32b8888c72efdb06853dba3b4ef601ab8d579c833b8a813648124058
+run.7.stdout-bytes	0
+run.7.digest	f6b62d40e8ce841f764514476057f23a583c61c6a0d8ba0f79ce253661c1a40e
+run.8.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.8.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/3/suite
+run.8.cwd	./.build/runs/phase-03/mutants/3
+run.8.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.8.exit	ExitSuccess
+run.8.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.8.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.8.stdout-bytes	0
+run.8.digest	e85f991bc41b5e66d2f930a017631bdb9d626c4f44cd4fafe6a1b85cec771d92
+run.9.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.9.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/3/suite
+run.9.cwd	./.build/runs/phase-03/mutants/3
+run.9.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.9.exit	ExitFailure 1
+run.9.stdout-sha256	1ff0c84595758bec02d6a4f0a2b962b88325e3508cafbc0f45b9cb6e139549d0
+run.9.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.9.stdout-bytes	58415
+run.9.digest	0ce4c7dbc369331c76730def37518a960bb7349e774ad7d5aaf4b132c394fadb
+run.10.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.10.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.10.cwd	./.build/runs/phase-03/mutants/4
+run.10.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.10.exit	ExitSuccess
+run.10.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.10.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.10.stdout-bytes	0
+run.10.digest	eba948956823e6e36929fad6c5b40195d0bb9e8dcf7d372226b13948098baffb
+run.11.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.11.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/4/suite
+run.11.cwd	./.build/runs/phase-03/mutants/4
+run.11.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.11.exit	ExitSuccess
+run.11.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.11.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.11.stdout-bytes	0
+run.11.digest	613f08f0b84a38394f0bb844a4d1f12bdb8c03f63b020a8b570e0ee17e2b7e0f
+run.12.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.12.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/4/suite
+run.12.cwd	./.build/runs/phase-03/mutants/4
+run.12.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.12.exit	ExitFailure 1
+run.12.stdout-sha256	9c2a3242d5ed86f6e1c38a84f8da1ef881877c8f6bc79f1144c51b340b19b2e4
+run.12.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.12.stdout-bytes	44799
+run.12.digest	9007a06c271bb42a8c2a24c11e977082db3848e5001ed94a520672f00f741370
+run.13.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.13.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.13.cwd	./.build/runs/phase-03/mutants/5
+run.13.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.13.exit	ExitSuccess
+run.13.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.13.stderr-sha256	45dd466bea714447d073db17cc015f325d4ac05276d6e85e1b3a730e2220f648
+run.13.stdout-bytes	0
+run.13.digest	8364e2501efb33e197b537c2f6fa3cff2da8050c8f81d183e5ca8832ce038f6e
+run.14.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.14.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/5/suite
+run.14.cwd	./.build/runs/phase-03/mutants/5
+run.14.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.14.exit	ExitSuccess
+run.14.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.14.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.14.stdout-bytes	0
+run.14.digest	1c2bd6c6c22c6fb89c179b1a4caae4a2001d5be86da663e153f4f2b7bd3bd75d
+run.15.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.15.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/5/suite
+run.15.cwd	./.build/runs/phase-03/mutants/5
+run.15.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.15.exit	ExitFailure 1
+run.15.stdout-sha256	04e8f48144717b9ade4766a5b64580780c722009cbd0e7b44ae6d57d5e761278
+run.15.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.15.stdout-bytes	56403
+run.15.digest	b8f33fc35d558790158bba48600aacd47c74e7f9fcfe2ce2ff9deef72ed6ee9e
+run.16.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.16.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.16.cwd	./.build/runs/phase-03/mutants/6
+run.16.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.16.exit	ExitSuccess
+run.16.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.16.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.16.stdout-bytes	0
+run.16.digest	41d4ecd5ca096b0c3121471356482d5276fdaf32c3a4433f03be5a6a8ef5b1be
+run.17.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.17.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/6/suite
+run.17.cwd	./.build/runs/phase-03/mutants/6
+run.17.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.17.exit	ExitSuccess
+run.17.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.17.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.17.stdout-bytes	0
+run.17.digest	ec127e94200e274b70008846f10dd10a7e0588d77c239e8ff9df5fdf49ef7cf7
+run.18.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.18.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/6/suite
+run.18.cwd	./.build/runs/phase-03/mutants/6
+run.18.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.18.exit	ExitFailure 1
+run.18.stdout-sha256	cd1528c9b82a8228a08524b3e51d7a15e37ea74b0a171af973acd9263ed21678
+run.18.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.18.stdout-bytes	56158
+run.18.digest	283ec798486ff1aceaaa57797b4337d98e00861cefe93530adb045bec2a5b24a
+run.19.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.19.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.19.cwd	./.build/runs/phase-03/mutants/7
+run.19.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.19.exit	ExitSuccess
+run.19.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.19.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.19.stdout-bytes	0
+run.19.digest	a931b1d1cd082c1c132e43b9d438b1010a439391f6f9c77f3876bf77c3227e0d
+run.20.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.20.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/7/suite
+run.20.cwd	./.build/runs/phase-03/mutants/7
+run.20.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.20.exit	ExitSuccess
+run.20.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.20.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.20.stdout-bytes	0
+run.20.digest	d06769788b25de3897d83f316276d4af7aa80ff84883c638b51377652d2cfe4f
+run.21.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.21.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/7/suite
+run.21.cwd	./.build/runs/phase-03/mutants/7
+run.21.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.21.exit	ExitFailure 1
+run.21.stdout-sha256	699930145d080a231013de1f9888f733a4f21ec317db2b0ccb98d6711a463c31
+run.21.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.21.stdout-bytes	44222
+run.21.digest	aa21b562a4c02d97c8a8b933cc724f9ae9a7f2a432d3febe06bc8e8581aba64a
+run.22.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.22.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.22.cwd	./.build/runs/phase-03/mutants/8
+run.22.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.22.exit	ExitSuccess
+run.22.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.22.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.22.stdout-bytes	0
+run.22.digest	7d738fb1790d3367078783ec45095573bee2045d8b9f83639477d3462dd7ff68
+run.23.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.23.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/8/suite
+run.23.cwd	./.build/runs/phase-03/mutants/8
+run.23.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.23.exit	ExitSuccess
+run.23.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.23.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.23.stdout-bytes	0
+run.23.digest	34f56dd632c53f60d3cff0b8f53647743a3ebd4e2c756227f10489f41beebb32
+run.24.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.24.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/8/suite
+run.24.cwd	./.build/runs/phase-03/mutants/8
+run.24.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.24.exit	ExitFailure 1
+run.24.stdout-sha256	d28a42aedc6fd9e828d30f8b22a0e94c5fe57a14393cc3bc4a453cf3a5414e0e
+run.24.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.24.stdout-bytes	54472
+run.24.digest	0a8c45b5aa66e4f08f56f0a8ad4308ee6f5010e832d28eeab2dac6deaa3c746e
+run.25.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.25.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.25.cwd	./.build/runs/phase-03/mutants/9
+run.25.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.25.exit	ExitSuccess
+run.25.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.25.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.25.stdout-bytes	0
+run.25.digest	3284721692a2403c33f622524f032586a457e8d3a63d671b2e573682003620c6
+run.26.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.26.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/9/suite
+run.26.cwd	./.build/runs/phase-03/mutants/9
+run.26.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.26.exit	ExitSuccess
+run.26.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.26.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.26.stdout-bytes	0
+run.26.digest	dcdd1d23d4a86435d4d754b37e4f6fac84b776ba89ea1964f7b6a25b970d888b
+run.27.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.27.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/9/suite
+run.27.cwd	./.build/runs/phase-03/mutants/9
+run.27.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.27.exit	ExitFailure 1
+run.27.stdout-sha256	7951544103f585fef2afa573ac51997386c698b853ffdf6292d92120268b9d70
+run.27.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.27.stdout-bytes	39624
+run.27.digest	c6f916a9467089fc501d7157f5cfbbcf6b404990ecc23973d2540ed9c786e199
+run.28.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.28.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.28.cwd	./.build/runs/phase-03/mutants/10
+run.28.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.28.exit	ExitSuccess
+run.28.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.28.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.28.stdout-bytes	0
+run.28.digest	c640b9131000996599e42f997fc2a2d42e8fde7dbeff9fa4f6ede1b7b4384581
+run.29.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.29.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/10/suite
+run.29.cwd	./.build/runs/phase-03/mutants/10
+run.29.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.29.exit	ExitSuccess
+run.29.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.29.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.29.stdout-bytes	0
+run.29.digest	4c9d4f2c7ce461eb27b179cb5d24c2c2c09d62a125c38a26f7a792d006fd076d
+run.30.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.30.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/10/suite
+run.30.cwd	./.build/runs/phase-03/mutants/10
+run.30.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.30.exit	ExitFailure 1
+run.30.stdout-sha256	b8db36566aa49a38672ec1a4d4fdd348014d2539b8ad2ac14bd443ba86e9d05c
+run.30.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.30.stdout-bytes	63389
+run.30.digest	ea72c8fe3ced21eae49f6be60f85c9ac3f0ad18b6f5187845937884e06070b36
+run.31.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.31.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.31.cwd	./.build/runs/phase-03/mutants/11
+run.31.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.31.exit	ExitSuccess
+run.31.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.31.stderr-sha256	3d79c270943d485c5acb342013209913c6e22b06b5a9192062310ab568a5dcf6
+run.31.stdout-bytes	0
+run.31.digest	ab69ec0db788908ed42fa6c4484905f88ff39eaa5c3c079ef4dd707fb0644418
+run.32.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.32.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/11/suite
+run.32.cwd	./.build/runs/phase-03/mutants/11
+run.32.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.32.exit	ExitSuccess
+run.32.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.32.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.32.stdout-bytes	0
+run.32.digest	7e9e22e58ce675f3d58c5de5227ad39e858c8948824727cd74c74ea76a353607
+run.33.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.33.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/11/suite
+run.33.cwd	./.build/runs/phase-03/mutants/11
+run.33.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.33.exit	ExitFailure 1
+run.33.stdout-sha256	fc99decb443ef437a6fa2b7cdb595f6a3627148e4df79da83895eae640cda8e2
+run.33.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.33.stdout-bytes	39592
+run.33.digest	09fb09ec8f4b0c9c9c4c4359ac2c59b0f781d0d8ab100e64fb27a38c1f08ce1b
+run.34.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.34.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.34.cwd	./.build/runs/phase-03/mutants/12
+run.34.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.34.exit	ExitSuccess
+run.34.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.34.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.34.stdout-bytes	0
+run.34.digest	0c9b588381ffaaf12731e1870defe522bee4078fa330373a4dedaddb168175c4
+run.35.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.35.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/12/suite
+run.35.cwd	./.build/runs/phase-03/mutants/12
+run.35.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.35.exit	ExitSuccess
+run.35.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.35.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.35.stdout-bytes	0
+run.35.digest	d5abe713744a6fa3ad838149d2774965a2c61b6239ed6d65075108fa9553c9e6
+run.36.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.36.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/12/suite
+run.36.cwd	./.build/runs/phase-03/mutants/12
+run.36.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.36.exit	ExitFailure 1
+run.36.stdout-sha256	9c2a3242d5ed86f6e1c38a84f8da1ef881877c8f6bc79f1144c51b340b19b2e4
+run.36.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.36.stdout-bytes	44799
+run.36.digest	f268c88e17d192163b4b54d9fad754ff0b03291c56d6f638cf1cd4a83b6bcdfa
+run.37.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.37.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.37.cwd	./.build/runs/phase-03/mutants/13
+run.37.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.37.exit	ExitSuccess
+run.37.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.37.stderr-sha256	038bc140e9741ee1fa18b43f7bd2ba11ad3478025a987581a974b577d3bf09b8
+run.37.stdout-bytes	0
+run.37.digest	5de7be4cfa6e988ddd7ca42ed4a23435ccfc70f8a55e3b3f4b6493386f1f71c1
+run.38.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.38.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/13/suite
+run.38.cwd	./.build/runs/phase-03/mutants/13
+run.38.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.38.exit	ExitSuccess
+run.38.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.38.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.38.stdout-bytes	0
+run.38.digest	12d4a07857e951f0b6332aebca6e82da6c0b38d2ef35a4166418a5469ee0f8a7
+run.39.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.39.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/13/suite
+run.39.cwd	./.build/runs/phase-03/mutants/13
+run.39.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.39.exit	ExitFailure 1
+run.39.stdout-sha256	ebb58a9f23e73d29ea62bd2b1dbe4568e1c3be053bfb9929bd615db4778c9d38
+run.39.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.39.stdout-bytes	56886
+run.39.digest	54e3755625ae4ee7ca76cc2b9a14270ab1dae49c6436cf8ff07f7cf376d46427
+run.40.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.40.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.40.cwd	./.build/runs/phase-03/mutants/14
+run.40.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.40.exit	ExitSuccess
+run.40.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.40.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.40.stdout-bytes	0
+run.40.digest	5c3fc0a35710b0cccb0b814885aa3cd94422563a7dc6fcbc7e9d3ac0a5fc5856
+run.41.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.41.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/14/suite
+run.41.cwd	./.build/runs/phase-03/mutants/14
+run.41.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.41.exit	ExitSuccess
+run.41.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.41.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.41.stdout-bytes	0
+run.41.digest	5c2335390d68365ae78a017eb7db3d2cb4670f11dde361860beb3566f522e47d
+run.42.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.42.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/14/suite
+run.42.cwd	./.build/runs/phase-03/mutants/14
+run.42.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.42.exit	ExitFailure 1
+run.42.stdout-sha256	7a4da1646735b52c152716149dbb6f07c2b088aa7965d1e81e55af62ddfe04d9
+run.42.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.42.stdout-bytes	56158
+run.42.digest	e0b32ffc4b256cb493916369248096557110679850d543a7ba907db817a5ea8e
+run.43.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.43.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.43.cwd	./.build/runs/phase-03/mutants/15
+run.43.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.43.exit	ExitSuccess
+run.43.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.43.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.43.stdout-bytes	0
+run.43.digest	4a2204bbf581124288e53fe6814f8f0e8cff8960201f303d900f828c8741bc87
+run.44.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.44.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/15/suite
+run.44.cwd	./.build/runs/phase-03/mutants/15
+run.44.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.44.exit	ExitSuccess
+run.44.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.44.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.44.stdout-bytes	0
+run.44.digest	97b6a9ba1fd942f65464bfe54a5e704972f79285cfe981ab2103e79d0de29a6e
+run.45.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.45.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/15/suite
+run.45.cwd	./.build/runs/phase-03/mutants/15
+run.45.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.45.exit	ExitFailure 1
+run.45.stdout-sha256	b19175db625bddda41ee3261f3588919d39fc56571481515527cff5e7c00cec9
+run.45.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.45.stdout-bytes	46494
+run.45.digest	1acc11e1b614e02e9814b2c77d3fd2f40895d560c7c5dfd63ddd77ce6eeec273
+run.46.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.46.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.46.cwd	./.build/runs/phase-03/mutants/16
+run.46.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.46.exit	ExitSuccess
+run.46.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.46.stderr-sha256	2fb7ca5f7ead581c5187ae37f2298375ce1e38f6662cf77f2afc12540528b351
+run.46.stdout-bytes	0
+run.46.digest	c5a348166195c52d01761ac7f3fa2115ab6de21088b55bb8bf9e8dae36886215
+run.47.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.47.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/16/suite
+run.47.cwd	./.build/runs/phase-03/mutants/16
+run.47.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.47.exit	ExitSuccess
+run.47.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.47.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.47.stdout-bytes	0
+run.47.digest	516f010927c68eeec686c3cd6c51e3d01c78fc0999b406f2c92b49f85e2cc931
+run.48.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.48.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/16/suite
+run.48.cwd	./.build/runs/phase-03/mutants/16
+run.48.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.48.exit	ExitFailure 1
+run.48.stdout-sha256	9597449262d43fdb67736649a7f81649968d26e08462527950d0bdb8a1066583
+run.48.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.48.stdout-bytes	44391
+run.48.digest	6a6e1e87ad9824c2039fd6378f86fa95e3b6acd571dde9a8c06ca3265501b898
+run.49.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.49.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.49.cwd	./.build/runs/phase-03/mutants/17
+run.49.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.49.exit	ExitSuccess
+run.49.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.49.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.49.stdout-bytes	0
+run.49.digest	c0c79944bfd5c56ed82e8d3e84bf546b8d65cdf890bfda8f110f7c363c0b0c21
+run.50.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.50.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/17/suite
+run.50.cwd	./.build/runs/phase-03/mutants/17
+run.50.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.50.exit	ExitSuccess
+run.50.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.50.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.50.stdout-bytes	0
+run.50.digest	b3f4cf9f14ca34df1c6a3fa38bbc1eba74f52da05b75d122ff6f2f02da01c733
+run.51.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.51.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/17/suite
+run.51.cwd	./.build/runs/phase-03/mutants/17
+run.51.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.51.exit	ExitFailure 1
+run.51.stdout-sha256	77758728ce4b99fb00cb83f9da912457fae0e92d9f1fd7d8f6345653fcebe432
+run.51.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.51.stdout-bytes	38427
+run.51.digest	31681e535d4d4328b775be50bddd36e35a304b0cd542fc75305fada8afb4a8a0
+run.52.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.52.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.52.cwd	./.build/runs/phase-03/mutants/18
+run.52.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.52.exit	ExitSuccess
+run.52.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.52.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.52.stdout-bytes	0
+run.52.digest	44f8b2fae68315008d074b1b8e28a7d786beb00e1945f61a3868b550730a88e3
+run.53.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.53.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/18/suite
+run.53.cwd	./.build/runs/phase-03/mutants/18
+run.53.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.53.exit	ExitSuccess
+run.53.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.53.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.53.stdout-bytes	0
+run.53.digest	48b5010e007d25ee79ced9e6771beda76155dc08608bc56c7c706060498a49bb
+run.54.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.54.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/18/suite
+run.54.cwd	./.build/runs/phase-03/mutants/18
+run.54.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.54.exit	ExitFailure 1
+run.54.stdout-sha256	59781f99becad871cd47629c50e35d12bf9e18354b2fbc2f3199e40bfa942406
+run.54.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.54.stdout-bytes	38965
+run.54.digest	903e1757179b4bfb1149d8b03c1d93b00b78787958ba1e8343ee546736a07b58
+run.55.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.55.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.55.cwd	./.build/runs/phase-03/mutants/19
+run.55.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.55.exit	ExitSuccess
+run.55.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.55.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.55.stdout-bytes	0
+run.55.digest	ce49c36c2de5d9ce4321a4ebca7eb5caddb861bed50c59ac616c3e9a572a1ede
+run.56.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.56.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/19/suite
+run.56.cwd	./.build/runs/phase-03/mutants/19
+run.56.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.56.exit	ExitSuccess
+run.56.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.56.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.56.stdout-bytes	0
+run.56.digest	08225e26bfdf9b0f934ca32d409f74df03548febac671f246e448dd82dac5447
+run.57.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.57.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/19/suite
+run.57.cwd	./.build/runs/phase-03/mutants/19
+run.57.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.57.exit	ExitFailure 1
+run.57.stdout-sha256	06758366b8abd2925b9e82802cc28464cf870d14b917f14e5eba2bd334d63a64
+run.57.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.57.stdout-bytes	41683
+run.57.digest	688bdb3c564998d6b4651eef8a18b09afc8a9893b69c107ab76152cc0709c591
+run.58.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.58.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.58.cwd	./.build/runs/phase-03/mutants/20
+run.58.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.58.exit	ExitFailure 1
+run.58.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.58.stderr-sha256	8bc082109625a87e3b4eb388af71ca82eb77bd8b465d8c68ce53389fdf340f67
+run.58.stdout-bytes	0
+run.58.digest	d90c5326a80227f38b875a7d15956f72b9a39e818c699c1d573b1f10d91a82f1
+run.59.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.59.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.59.cwd	./.build/runs/phase-03/mutants/21
+run.59.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.59.exit	ExitSuccess
+run.59.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.59.stderr-sha256	45b35dc762aa8dceecbfda95743e250cf9fa34c32037707a7bb7eadf8caf5d8b
+run.59.stdout-bytes	0
+run.59.digest	394393a0512ac07d2fcddbad9ec6471e12e52e580606cccc41cf860a1ac776ac
+run.60.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.60.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/21/suite
+run.60.cwd	./.build/runs/phase-03/mutants/21
+run.60.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.60.exit	ExitSuccess
+run.60.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.60.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.60.stdout-bytes	0
+run.60.digest	60ce00020dd3d0385144a0cc0f9a94a21eaee120502d55f7bf2bd0340fe5f376
+run.61.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.61.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/21/suite
+run.61.cwd	./.build/runs/phase-03/mutants/21
+run.61.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.61.exit	ExitFailure 1
+run.61.stdout-sha256	04e8f48144717b9ade4766a5b64580780c722009cbd0e7b44ae6d57d5e761278
+run.61.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.61.stdout-bytes	56403
+run.61.digest	734c98d4526bb5d6b83d8a1199f6c2fca76fcd5e68e0c8205e446bea7c187893
+run.62.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.62.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.62.cwd	./.build/runs/phase-03/mutants/22
+run.62.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.62.exit	ExitSuccess
+run.62.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.62.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.62.stdout-bytes	0
+run.62.digest	3dbb5a3aa831d74c477bcfc50ef5ef632e38ef51725b3682abd6a9921b1d33a6
+run.63.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.63.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/22/suite
+run.63.cwd	./.build/runs/phase-03/mutants/22
+run.63.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.63.exit	ExitSuccess
+run.63.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.63.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.63.stdout-bytes	0
+run.63.digest	4a8d67620f1a2b5dac3f70bde46e646ab810ffe5e2596cd89ccdf84265eee66a
+run.64.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.64.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/22/suite
+run.64.cwd	./.build/runs/phase-03/mutants/22
+run.64.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.64.exit	ExitFailure 1
+run.64.stdout-sha256	c894784b7d7abdeee6db475a59d67c178b451c723268b3a6830477ff22058d0c
+run.64.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.64.stdout-bytes	38386
+run.64.digest	3811512e1afec5d5063cdcb444b82fd2dfebaae7e13335046de72ac2a41f8b89
+run.65.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.65.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.65.cwd	./.build/runs/phase-03/mutants/23
+run.65.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.65.exit	ExitSuccess
+run.65.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.65.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.65.stdout-bytes	0
+run.65.digest	a086af17e672a0cd7c9eb7c0d31b3d47aabf19fe5d0387341468353e5cc4825f
+run.66.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.66.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/23/suite
+run.66.cwd	./.build/runs/phase-03/mutants/23
+run.66.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.66.exit	ExitSuccess
+run.66.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.66.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.66.stdout-bytes	0
+run.66.digest	0daa852aa41d0dbe549bbc9fc66866a8f4c0c0ddf48ffc969996142bccb296fe
+run.67.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.67.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/23/suite
+run.67.cwd	./.build/runs/phase-03/mutants/23
+run.67.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.67.exit	ExitFailure 1
+run.67.stdout-sha256	30f07a223b2c52e51adc213c7474fb71046a3068f0634513e6a6a1a058f321c1
+run.67.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.67.stdout-bytes	46238
+run.67.digest	36382dbe96ac97e7fdadae940d4480769713147040cae0cd731a316e910668ec
+run.68.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.68.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.68.cwd	./.build/runs/phase-03/mutants/24
+run.68.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.68.exit	ExitSuccess
+run.68.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.68.stderr-sha256	bd678af2ca1202be6a268859b19fa4ae94ece2afd79a5f0c0066c0aff6545303
+run.68.stdout-bytes	0
+run.68.digest	a0f6ceb92f3e479182f5486e5c68face7f005937645a72b82b9954146ed1f530
+run.69.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.69.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/24/suite
+run.69.cwd	./.build/runs/phase-03/mutants/24
+run.69.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.69.exit	ExitSuccess
+run.69.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.69.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.69.stdout-bytes	0
+run.69.digest	e2bc6646e4eb9f32980ffab07ccfdcbb9312609f748e84312b2b510fa7920558
+run.70.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.70.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/24/suite
+run.70.cwd	./.build/runs/phase-03/mutants/24
+run.70.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.70.exit	ExitFailure 1
+run.70.stdout-sha256	9597449262d43fdb67736649a7f81649968d26e08462527950d0bdb8a1066583
+run.70.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.70.stdout-bytes	44391
+run.70.digest	03442a7e0ef3aae960bd1114c36cb228132f15045322fdc8d7d7d7512ed7aa87
+run.71.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.71.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.71.cwd	./.build/runs/phase-03/mutants/25
+run.71.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.71.exit	ExitSuccess
+run.71.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.71.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.71.stdout-bytes	0
+run.71.digest	71d936e7afc3db73f81e23b36a5176c14b6abdfd876137a85d346d947df21993
+run.72.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.72.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/25/suite
+run.72.cwd	./.build/runs/phase-03/mutants/25
+run.72.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.72.exit	ExitSuccess
+run.72.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.72.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.72.stdout-bytes	0
+run.72.digest	6df428dd59e75ff55be7441889309f6af7b3e6d8c37f4d356705b4f22d8741e2
+run.73.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.73.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/25/suite
+run.73.cwd	./.build/runs/phase-03/mutants/25
+run.73.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.73.exit	ExitFailure 1
+run.73.stdout-sha256	0ea89478eca89ccaeaa90a5e2ecf3127028e1ec77a372166bb8e3f9270985c83
+run.73.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.73.stdout-bytes	38383
+run.73.digest	9e435284c1dc1cde6f2141d767df4391d5a331f7ec511930275478b113a421a5
+run.74.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.74.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.74.cwd	./.build/runs/phase-03/mutants/26
+run.74.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.74.exit	ExitSuccess
+run.74.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.74.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.74.stdout-bytes	0
+run.74.digest	04f9408bdfe3b5217a93f932293a2a9dd8aa17e426cfe8267ab8ebbceb48a468
+run.75.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.75.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/26/suite
+run.75.cwd	./.build/runs/phase-03/mutants/26
+run.75.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.75.exit	ExitSuccess
+run.75.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.75.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.75.stdout-bytes	0
+run.75.digest	799ffa1e682c60803f73be3927215c1edb77af71663888db1bfec15a45639671
+run.76.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.76.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/26/suite
+run.76.cwd	./.build/runs/phase-03/mutants/26
+run.76.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.76.exit	ExitFailure 1
+run.76.stdout-sha256	286d407039edd0bde262f9b1d5dc3cc5937bea5fc4573c35ee4fdc895d559c6f
+run.76.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.76.stdout-bytes	39008
+run.76.digest	d1fadf03f29ea917a4705fedd9dff5a653aa3ede9c76424d3d753ba05bfbb4fb
+run.77.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.77.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.77.cwd	./.build/runs/phase-03/mutants/27
+run.77.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.77.exit	ExitFailure 1
+run.77.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.77.stderr-sha256	75f81b37714fadd0877ce09260cb7b40ef84eab7ba7afa3dc9646a8dddd286d5
+run.77.stdout-bytes	0
+run.77.digest	396c1d05706d3b3de74be9efbe6ef92f3f8203698cc84726d80a18a8283b153f
+run.78.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.78.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.78.cwd	./.build/runs/phase-03/mutants/28
+run.78.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.78.exit	ExitSuccess
+run.78.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.78.stderr-sha256	dae19c50c566e3988c7f5ba40e8b0d0b80800c6d3d101d79caf9097eb00f4d5a
+run.78.stdout-bytes	0
+run.78.digest	1f4b0f255df1d997bca48a5a2dc22ab9b08c7e4f0f45b1e4b29cf80358f122ad
+run.79.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.79.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/28/suite
+run.79.cwd	./.build/runs/phase-03/mutants/28
+run.79.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.79.exit	ExitSuccess
+run.79.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.79.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.79.stdout-bytes	0
+run.79.digest	78257ec9b55d6db86b792ba6a2050ef4c27c5b0f75fe0e695911de67ccd5229a
+run.80.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.80.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/28/suite
+run.80.cwd	./.build/runs/phase-03/mutants/28
+run.80.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.80.exit	ExitFailure 1
+run.80.stdout-sha256	04e8f48144717b9ade4766a5b64580780c722009cbd0e7b44ae6d57d5e761278
+run.80.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.80.stdout-bytes	56403
+run.80.digest	8fd0ec2cd8dbd55ca78549a3e8454bc27e362b56cf7ce62bf78998c2172246f0
+run.81.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.81.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.81.cwd	./.build/runs/phase-03/mutants/29
+run.81.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.81.exit	ExitSuccess
+run.81.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.81.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.81.stdout-bytes	0
+run.81.digest	150d35f22bc25ab7aa1bfb1c437a0524f9c1e666f9c97b160d5d616ebeee88d7
+run.82.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.82.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/29/suite
+run.82.cwd	./.build/runs/phase-03/mutants/29
+run.82.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.82.exit	ExitSuccess
+run.82.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.82.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.82.stdout-bytes	0
+run.82.digest	32dc70abd4e508c2c0833ffbb5e4e7014ac547b3e2aa616ff17645eb062713fe
+run.83.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.83.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/29/suite
+run.83.cwd	./.build/runs/phase-03/mutants/29
+run.83.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.83.exit	ExitFailure 1
+run.83.stdout-sha256	33ba3dcb0daea6c5c5dd860689bbe750121612aae6e80be8c7192aacb9ba548c
+run.83.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.83.stdout-bytes	56188
+run.83.digest	08defc9edc6deb24c4c1a210c126c62423d501ae7072df65e891988336a52334
+run.84.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.84.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.84.cwd	./.build/runs/phase-03/mutants/30
+run.84.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.84.exit	ExitSuccess
+run.84.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.84.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.84.stdout-bytes	0
+run.84.digest	14ea6377390d0041bd697d986d80cd548b41e6f148da0496d0101b7d8f569849
+run.85.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.85.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/30/suite
+run.85.cwd	./.build/runs/phase-03/mutants/30
+run.85.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.85.exit	ExitSuccess
+run.85.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.85.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.85.stdout-bytes	0
+run.85.digest	8723e55264016f32de2dfd96947b0a8967f5cbe8219780aad2258511cf2c9163
+run.86.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.86.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/30/suite
+run.86.cwd	./.build/runs/phase-03/mutants/30
+run.86.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.86.exit	ExitFailure 1
+run.86.stdout-sha256	c818a6b3187cab7cc9db65382590c251f31d542e041ec04bfa7750021c889af4
+run.86.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.86.stdout-bytes	45276
+run.86.digest	c893cae208b0bbfd852c6bc2af594e9630ec7998fdec41fa6bed4f7298d5e521
+run.87.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.87.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.87.cwd	./.build/runs/phase-03/mutants/31
+run.87.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.87.exit	ExitSuccess
+run.87.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.87.stderr-sha256	2e86c0db978ad4cdd6fd4b9395e77c072d09b23052cf6c1d9dc218e6d1b46b6c
+run.87.stdout-bytes	0
+run.87.digest	3be9cafd3441a98ab0ab2446839ef77e46d682231c6afd8137706ac2f719c4ad
+run.88.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.88.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/31/suite
+run.88.cwd	./.build/runs/phase-03/mutants/31
+run.88.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.88.exit	ExitSuccess
+run.88.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.88.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.88.stdout-bytes	0
+run.88.digest	960b1966e1d50d2e976e7de9a1526d4dcd0451bb15c25c0aa60ca1f4fd8ed6b6
+run.89.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.89.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/31/suite
+run.89.cwd	./.build/runs/phase-03/mutants/31
+run.89.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.89.exit	ExitFailure 1
+run.89.stdout-sha256	cac18e7ce25c5c3f215689191efd4c7f8bb53f25e3b6c2ed642e2cd84a41bb07
+run.89.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.89.stdout-bytes	44599
+run.89.digest	1b4791638604ada77621f3a2c1850c5776547dd2e320506d4eda7dcc2a997da5
+run.90.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.90.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.90.cwd	./.build/runs/phase-03/mutants/32
+run.90.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.90.exit	ExitSuccess
+run.90.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.90.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.90.stdout-bytes	0
+run.90.digest	54f033a84946c8d8d9b0ee7d0b323c7b80d3fc25e8314096e5b5fb06f2b27c8f
+run.91.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.91.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/32/suite
+run.91.cwd	./.build/runs/phase-03/mutants/32
+run.91.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.91.exit	ExitSuccess
+run.91.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.91.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.91.stdout-bytes	0
+run.91.digest	fb06b2a5032417cd2fb2f654e0688123d117cf4098bb93c8f34b2949c16a5646
+run.92.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.92.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/32/suite
+run.92.cwd	./.build/runs/phase-03/mutants/32
+run.92.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.92.exit	ExitFailure 1
+run.92.stdout-sha256	5faed860f79d16f3ce2a9c31fe6ae3c83a3c5ac7ea318697599ba3b5bde34432
+run.92.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.92.stdout-bytes	65005
+run.92.digest	319484ae508bf1203f4b73b6c281f9bd550208977a5dc5d94dee65c5488b4f62
+run.93.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.93.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.93.cwd	./.build/runs/phase-03/mutants/33
+run.93.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.93.exit	ExitSuccess
+run.93.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.93.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.93.stdout-bytes	0
+run.93.digest	11940136e1236b5c413960284f8afb7c83f6af73e17de4939965828de412f34a
+run.94.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.94.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/33/suite
+run.94.cwd	./.build/runs/phase-03/mutants/33
+run.94.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.94.exit	ExitSuccess
+run.94.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.94.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.94.stdout-bytes	0
+run.94.digest	30789e405810ab8d0f79bbac10aafbd6ea28879f17cdbd0e0f2eaaf558fd7e5a
+run.95.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.95.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/33/suite
+run.95.cwd	./.build/runs/phase-03/mutants/33
+run.95.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.95.exit	ExitFailure 1
+run.95.stdout-sha256	51677d241fea461e8e6780641cca1bbbb7b176d3936fa169b776ab43090c495e
+run.95.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.95.stdout-bytes	38603
+run.95.digest	f5e6171203f1080fc67f006eff3dd31f6ebce07a7ae087c3d28100da765f9934
+run.96.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.96.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.96.cwd	./.build/runs/phase-03/mutants/34
+run.96.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.96.exit	ExitFailure 1
+run.96.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.96.stderr-sha256	233007c98d13c5c4b2b9f29ba5c7361b5ce7113d14aa77139032ce7d98067d12
+run.96.stdout-bytes	0
+run.96.digest	5c44b9f154357371d73d50a573f8d861ac8ec642e0b4b757670177d7593debb7
+run.97.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.97.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.97.cwd	./.build/runs/phase-03/mutants/35
+run.97.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.97.exit	ExitSuccess
+run.97.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.97.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.97.stdout-bytes	0
+run.97.digest	846d159fce1011a809c3bbea572b456d76dc4c5b294729df4bd82af960112ddf
+run.98.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.98.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/35/suite
+run.98.cwd	./.build/runs/phase-03/mutants/35
+run.98.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.98.exit	ExitSuccess
+run.98.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.98.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.98.stdout-bytes	0
+run.98.digest	478a21d10fdad12ab402294c752fcdea1a2b14a9b1ca1ff3ff263cbbf78b3d42
+run.99.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.99.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/35/suite
+run.99.cwd	./.build/runs/phase-03/mutants/35
+run.99.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.99.exit	ExitFailure 1
+run.99.stdout-sha256	b141e6b0542ff1459d7b82de72ee35b3b8e02dd46d2bce12a119b6d6972994db
+run.99.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.99.stdout-bytes	59576
+run.99.digest	49b45a8860bf6cda697e5cd936e9334d3b5b96204c878aa21f8ec5df931b1c3f
+run.100.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.100.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.100.cwd	./.build/runs/phase-03/mutants/36
+run.100.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.100.exit	ExitSuccess
+run.100.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.100.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.100.stdout-bytes	0
+run.100.digest	9a375fc607dca3cae9e4af00619b434aeabf767259ae00411118a4f11fa1cebf
+run.101.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.101.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/36/suite
+run.101.cwd	./.build/runs/phase-03/mutants/36
+run.101.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.101.exit	ExitSuccess
+run.101.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.101.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.101.stdout-bytes	0
+run.101.digest	99e63ba377ca5049c71aae49f916aea0949b71dc55f8f32630b2983fa8dab787
+run.102.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.102.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/36/suite
+run.102.cwd	./.build/runs/phase-03/mutants/36
+run.102.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.102.exit	ExitFailure 1
+run.102.stdout-sha256	33ba3dcb0daea6c5c5dd860689bbe750121612aae6e80be8c7192aacb9ba548c
+run.102.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.102.stdout-bytes	56188
+run.102.digest	8059ccf9bc33f175947f18a6ef29e2ba595c3eed224feba569436a1643683390
+run.103.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.103.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.103.cwd	./.build/runs/phase-03/mutants/37
+run.103.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.103.exit	ExitFailure 1
+run.103.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.103.stderr-sha256	3e32bb216e7f758b5beee76f76282a7e29d1432eecc6c2ec2bd28ef0693be395
+run.103.stdout-bytes	0
+run.103.digest	acdf9060c1b080a444f37c05e953377c7b70d960797b21cfea100a839d1c33e8
+run.104.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.104.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.104.cwd	./.build/runs/phase-03/mutants/38
+run.104.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.104.exit	ExitSuccess
+run.104.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.104.stderr-sha256	d0d92bee42b0f1f362865712a60af6799eb7de5fc312d9629bddb60f0d0716a0
+run.104.stdout-bytes	0
+run.104.digest	e5926047cf03805d9a0c97b8f9bb335c6c7ee55aabf7e7f2ef8ac11b0713f199
+run.105.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.105.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/38/suite
+run.105.cwd	./.build/runs/phase-03/mutants/38
+run.105.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.105.exit	ExitSuccess
+run.105.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.105.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.105.stdout-bytes	0
+run.105.digest	2db7d4c41d92adfe61ff1be90859c68abc4eac4bec1ac8626b938afb1a3d0d9c
+run.106.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.106.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/38/suite
+run.106.cwd	./.build/runs/phase-03/mutants/38
+run.106.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.106.exit	ExitFailure 1
+run.106.stdout-sha256	9597449262d43fdb67736649a7f81649968d26e08462527950d0bdb8a1066583
+run.106.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.106.stdout-bytes	44391
+run.106.digest	dbe98a1ff20ca4c7026cc3def0ae287e0c2d7ee7e2caf18b5fe705c66ee34278
+run.107.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.107.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.107.cwd	./.build/runs/phase-03/mutants/39
+run.107.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.107.exit	ExitSuccess
+run.107.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.107.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.107.stdout-bytes	0
+run.107.digest	5c84b65044420b20ab9d20be22fe17676f233cf7bd50d2ef4fab584c8288b6bb
+run.108.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.108.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/39/suite
+run.108.cwd	./.build/runs/phase-03/mutants/39
+run.108.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.108.exit	ExitSuccess
+run.108.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.108.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.108.stdout-bytes	0
+run.108.digest	75a185cad805178caec2ad510db943cd5291ab7f395df5b1f95a84b7b2182911
+run.109.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.109.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/39/suite
+run.109.cwd	./.build/runs/phase-03/mutants/39
+run.109.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.109.exit	ExitFailure 1
+run.109.stdout-sha256	0c7924f7fea9584579d43ccd866eda37eb2420505d498436fcdf2e0572160bff
+run.109.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.109.stdout-bytes	38866
+run.109.digest	4d139d808023f2e34f2ae0f65e2e7cb198be5c23079311f2b026b8b5ea7a1889
+run.110.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.110.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.110.cwd	./.build/runs/phase-03/mutants/40
+run.110.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.110.exit	ExitSuccess
+run.110.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.110.stderr-sha256	3b31a33d1cd17d113c386a9c43986aea261f3eff355603f39aceb5da93b5b06c
+run.110.stdout-bytes	0
+run.110.digest	2b0541d1f8cdcdda8028514e54a0b07f56e7a66b0a86501b1b67ed42b635203b
+run.111.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.111.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/mutants/40/suite
+run.111.cwd	./.build/runs/phase-03/mutants/40
+run.111.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.111.exit	ExitSuccess
+run.111.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.111.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.111.stdout-bytes	0
+run.111.digest	ae4ccd1690b2df840d729d493a7937ac9810c3b1453be2f8cb2c10b1e4d44569
+run.112.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.112.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/mutants/40/suite
+run.112.cwd	./.build/runs/phase-03/mutants/40
+run.112.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.112.exit	ExitFailure 1
+run.112.stdout-sha256	ce7c5a61e394e7109b3caadb3c84501c291dd1c25e8e667166d41f36da3642f7
+run.112.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.112.stdout-bytes	63348
+run.112.digest	dd8eb8d7b06da1cbae53cdc9d17a110ac96c6da41c825b128efb4e050a091e92
+run.113.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.113.argv	build -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite amoebius:test:oracle-dsl
+run.113.cwd	.
+run.113.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.113.exit	ExitSuccess
+run.113.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.113.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.113.stdout-bytes	0
+run.113.digest	ab52accf9a0483a22089903298fd4621860773ecd96dd5a30619e087a321dad0
+run.114.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.114.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:spine-suite -- ./.build/runs/phase-03/clean/suite
+run.114.cwd	.
+run.114.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.114.exit	ExitSuccess
+run.114.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.114.stderr-sha256	77e7ab5536aa9f4bfd755efd74455f039a0243e59a536a0be3f99a31775d93fe
+run.114.stdout-bytes	0
+run.114.digest	5d3be68ec524de3fb325fdf5456eec4ce6ecc77a5c765e32dbe314d5e443a82d
+run.115.executable	/Users/matthewnowak/.ghcup/bin/cabal
+run.115.argv	run -v0 --jobs=1 --builddir=.build/dist-native --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 amoebius:test:oracle-dsl -- ./.build/runs/phase-03/clean/suite
+run.115.cwd	.
+run.115.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.115.exit	ExitSuccess
+run.115.stdout-sha256	23bc672626e0a7c9f3fd9e570a44eaed27771a843641a7b10314c6ecf1e682f6
+run.115.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.115.stdout-bytes	39729
+run.115.digest	714e0c8174f9d7b4182fb9dbe84a9b6c584e66da7caa32e4f571a2617e4c6dcd
+run.116.executable	/Users/matthewnowak/amoebius/.build/dist-native/build/aarch64-osx/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+run.116.argv	render-examples --example kind-single-objectstore --output ./.build/runs/phase-03/clean/suite/binary/input/root.dhall
+run.116.cwd	.
+run.116.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.116.exit	ExitSuccess
+run.116.stdout-sha256	48dae4d66237e7af9f41d43fa0f68cc3b9825fb8a49af60bb4fb5af6456d4bf6
+run.116.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.116.stdout-bytes	125
+run.116.digest	0316612962bc62fd21e780e78bf8d65652dc19f1f0aab7651a84169438c63ee8
+run.117.executable	/Users/matthewnowak/amoebius/.build/dist-native/build/aarch64-osx/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+run.117.argv	compile --input ./.build/runs/phase-03/clean/suite/binary/input/root.dhall --out ./.build/runs/phase-03/clean/suite/binary/compiled
+run.117.cwd	.
+run.117.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.117.exit	ExitSuccess
+run.117.stdout-sha256	3f3e4f1debb953ed643d5207b7beaf18d4be56eef07160ae941047e9c4de45ab
+run.117.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.117.stdout-bytes	12
+run.117.digest	701b8771d48aea0b2f738fe4822bf96d5521369197e995c30b4f368f51c9f4ff
+run.118.executable	/Users/matthewnowak/amoebius/.build/dist-native/build/aarch64-osx/ghc-9.12.4/amoebius-0.1.0.0/x/amoebius/noopt/build/amoebius/amoebius
+run.118.argv	apply --executor fake --input ./.build/runs/phase-03/clean/suite/binary/input/root.dhall --out ./.build/runs/phase-03/clean/suite/binary/applied
+run.118.cwd	.
+run.118.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+run.118.exit	ExitSuccess
+run.118.stdout-sha256	e0530169153da54b52c56a76cc350abceb950327f3068ea09828067f166bd369
+run.118.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+run.118.stdout-bytes	11
+run.118.digest	a2af9e087cb9afd483158a28f1f92b12283b267285b24619311cebfb4e88e407

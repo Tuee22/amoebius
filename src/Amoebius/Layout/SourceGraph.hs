@@ -20,7 +20,8 @@ import Amoebius.Layout.PackageMap
   , packageCatalogMemberNames
   , lookupExternalMemberExport, lookupAvailableExternalMemberExport
   , lookupDeferredSeedModule, maintainedForkOwedModules
-  , loadExternalInterfaces, packageCatalogHasComponent, packageCatalogHasModuleInterface)
+  , loadExternalInterfaces, packageCatalogHasComponent, packageCatalogHasModuleInterface
+  , packageCatalogSourceUnit, packageCatalogSourceDependency)
 import Control.Applicative ((<|>))
 import Control.Exception (IOException, SomeException, try)
 import Crypto.Hash.SHA256 qualified as SHA256
@@ -51,7 +52,7 @@ import GHC.Hs
   , HsBindLR (..), HsConDeclGADTDetails (..), HsConDetails (..), HsLit (..)
   , FamilyDecl (..), HsDataDefn (..), HsDecl (..), HsDerivingClause (..), HsSigType (..), HsType (..)
   , HsUntypedSplice (..), InstDecl (..), LHsDecl
-  , HsExpr (..), HsLocalBindsLR (..), HsRecFields (..), HsTupArg (..)
+  , HsExpr (..), HsQuote (..), HsLocalBindsLR (..), HsRecFields (..), HsTupArg (..)
   , HsValBindsLR (..), IE (..), IEWrappedName (..), IEWildcard (..), LPat
   , ImportDeclQualifiedStyle (..), ImportListInterpretation (..)
   , LHsRecUpdFields (..), LHsType, LIE, LIEWrappedName, LHsExpr, Match (..), MatchGroup (..), Pat (..)
@@ -69,6 +70,7 @@ import GHC.Types.SrcLoc
   (GenLocated, SrcSpan (..), mkRealSrcLoc, srcSpanEndCol, srcSpanEndLine,
    srcSpanStartCol, srcSpanStartLine, unLoc)
 import GHC.Types.PkgQual (RawPkgQual (..))
+import GHC.Types.SourceText (StringLiteral (..))
 import GHC.Types.ForeignCall (CCallTarget (..), CExportSpec (..))
 import GHC.Types.Name (nameModule, nameOccName)
 import GHC.Types.Name.Occurrence (occNameString)
@@ -97,7 +99,7 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         | entry <- modules
         , component <- Map.findWithDefault [] (entryPath entry) componentMap
         , importRef <- entryImports entry
-        , importPackageFree importRef
+        , importUnqualified importRef
         , (_, unit) <- lookupExternalModule initialCatalog component (importName importRef)
             <> if packageCatalogHasComponent initialCatalog component then []
                  else lookupUnselectedModule initialCatalog component (importName importRef)]
@@ -105,14 +107,14 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
            | entry <- modules
            , Map.notMember (entryPath entry) componentMap
            , importRef <- entryImports entry
-           , importPackageFree importRef
+           , importUnqualified importRef
            , importName importRef `Set.notMember` moduleNames
            , (_, unit) <- lookupStandaloneExternalModule initialCatalog (importName importRef)]
         <> [(unit, importName importRef)
            | entry <- modules
            , Map.notMember (entryPath entry) componentMap
            , importRef <- entryImports entry
-           , importPackageFree importRef
+           , importUnqualified importRef
            , importName importRef `Set.notMember` moduleNames
            , null (lookupStandaloneExternalModule initialCatalog (importName importRef))
            , (_, unit) <- lookupStandaloneRegisteredOnlyModule initialCatalog (importName importRef)]
@@ -129,6 +131,14 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
       byName = Map.fromListWith (<>)
         [(entryName entry, [(component, entryPath entry)])
         | entry <- modules, component <- Map.findWithDefault [] (entryPath entry) componentMap]
+      sourcePaths ref =
+        [path | path <- Map.findWithDefault [] (importName ref) byModuleName
+        , maybe True (\package -> any (matchesPackage package)
+            (Map.findWithDefault [] path componentMap)) (importPackageName ref)]
+      matchesPackage package component =
+        (component == "library" || "library:" `Text.isPrefixOf` component)
+          && maybe False ((== package) . fst) (packageCatalogSourceUnit catalog component)
+      importSourceAllowed ref = importUnqualified ref || not (null (sourcePaths ref))
       instanceSourceContracts = Set.toAscList . Set.fromList $
         [(entryPath entry, instanceHead instance_, instanceClass instance_, method,
           providerPath, imported)
@@ -140,17 +150,17 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
             | (instanceClass instance_, method) `elem` entryClassMethods entry]
             <> [(providerPath, importName importRef)
                | importRef <- entryImports entry
-               , importPackageFree importRef
+               , importSourceAllowed importRef
                , Just className <- [importedCallName importRef (instanceClass instance_)]
                , classImportPermits importRef className method
-               , [providerPath] <- [Map.findWithDefault [] (importName importRef) byModuleName]
+               , [providerPath] <- [sourcePaths importRef]
                , providerPath /= entryPath entry
                , Just provider <- [Map.lookup providerPath byPath]
                , (className, method) `elem` entryClassMethods provider
                , maybe True (method `elem`) (entryExports provider)
                , let owners = Map.findWithDefault [] (entryPath entry) componentMap
                , null owners || any (\component ->
-                   any ((== providerPath) . snd) (candidates component (importName importRef))) owners]]
+                   any ((== providerPath) . snd) (importCandidates component importRef)) owners]]
       instanceExternalContracts = Set.toAscList . Set.fromList $
         [(entryPath entry, instanceHead instance_, instanceClass instance_, method,
           importName importRef, package, unit, "explicit")
@@ -158,8 +168,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , instance_ <- entryClassInstances entry
         , method <- instanceMethods instance_
         , importRef <- entryImports entry
-        , importPackageFree importRef
-        , null (Map.findWithDefault [] (importName importRef) byModuleName)
+        , importUnqualified importRef
+        , null (sourcePaths importRef)
         , Just className <- [importedCallName importRef (instanceClass instance_)]
         , classImportPermits importRef className method
         , [(package, unit)] <- [selectedExternalProviders entry (importName importRef)]
@@ -184,8 +194,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , symbols <- entryData entry
         , (classText, classHead, strategy) <- symbolDerivedTypes symbols
         , importRef <- entryImports entry
-        , importPackageFree importRef
-        , null (Map.findWithDefault [] (importName importRef) byModuleName)
+        , importUnqualified importRef
+        , null (sourcePaths importRef)
         , Just importedClass <- [importedCallName importRef classHead]
         , classTypeImportPermits importRef importedClass
         , (package, unit) <- externalProviders entry (importName importRef)
@@ -208,8 +218,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         | entry <- modules
         , (instanceType, classHead, strategy) <- entryStandaloneDeriving entry
         , importRef <- entryImports entry
-        , importPackageFree importRef
-        , null (Map.findWithDefault [] (importName importRef) byModuleName)
+        , importUnqualified importRef
+        , null (sourcePaths importRef)
         , Just importedClass <- [importedCallName importRef classHead]
         , classTypeImportPermits importRef importedClass
         , (package, unit) <- externalProviders entry (importName importRef)
@@ -250,7 +260,7 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         [ ["local" | className `elem` entryClassNames entry]
         , [ "source:" <> Text.pack providerPath
           | importRef <- entryImports entry
-          , importPackageFree importRef
+          , importSourceAllowed importRef
           , Just name <- [importedCallName importRef className]
           , classTypeImportPermits importRef name
           , providerPath <- Set.toAscList (sourceProviders importRef)
@@ -259,8 +269,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
           , name `elem` entryClassNames provider ]
         , [ "external:" <> importName importRef <> ":" <> package <> ":" <> unit
           | importRef <- entryImports entry
-          , importPackageFree importRef
-          , null (Map.findWithDefault [] (importName importRef) byModuleName)
+          , importUnqualified importRef
+          , null (sourcePaths importRef)
           , Just name <- [importedCallName importRef className]
           , classTypeImportPermits importRef name
           , (package, unit) <- externalClassProviders entry (importName importRef) name ]
@@ -270,7 +280,7 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
           , (package, unit) <- implicitClassProviders entry className ] ]
       -- The source modules an import can supply names from: the named module and
       -- every source module it re-exports, transitively.
-      sourceProviders importRef = reexportClosure Set.empty (Map.findWithDefault [] (importName importRef) byModuleName)
+      sourceProviders importRef = reexportClosure Set.empty (sourcePaths importRef)
       reexportClosure seen [] = seen
       reexportClosure seen (path : rest)
         | path `Set.member` seen = reexportClosure seen rest
@@ -282,7 +292,7 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
           | moduleName <- entryReexports provider
           , importRef <- entryImports provider
           , importQualifier importRef == moduleName || importName importRef == moduleName
-          , target <- Map.findWithDefault [] (importName importRef) byModuleName]
+          , target <- sourcePaths importRef]
       derivedDeclarations = Set.fromList
         [(entryPath entry, symbolType symbols, unqualifiedName classHead)
         | entry <- modules, symbols <- entryData entry, (_, classHead, _) <- symbolDerivedTypes symbols]
@@ -297,7 +307,7 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
                 | component <- Map.findWithDefault [] (entryPath entry) componentMap
                 , instanceComponent <- Map.findWithDefault [] instancePath componentMap]
           || or [instancePath `Set.member` sourceProviders importRef
-                | importRef <- entryImports entry, importPackageFree importRef]
+                | importRef <- entryImports entry, importSourceAllowed importRef]
       -- The default strategy of a clause with none written follows GHC: a data type
       -- derives a stock class by the stock strategy and anything else by anyclass; a
       -- newtype derives Show, Read, Data, Generic, Generic1, Lift and Traversable by
@@ -404,8 +414,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         | row <- concat
             [ Map.findWithDefault [] (importName importRef, name) sinkIndex
             | importRef <- entryImports entry
-            , importPackageFree importRef
-            , null (Map.findWithDefault [] (importName importRef) byModuleName)
+            , importUnqualified importRef
+            , null (sourcePaths importRef)
             , Just name <- [externalCallName importRef target <|> externalOpenCallName importRef target]]
             <> [row
                | entryImplicitPrelude entry
@@ -494,7 +504,17 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
                | dependency <- Map.findWithDefault [] component dependencyMap
                , path <- Map.findWithDefault [] (dependency, imported) byComponentName]
           else local
-      exportedTargets component provider name visited
+      importCandidates component ref = case importPackageName ref of
+        Nothing -> candidates component (importName ref)
+        Just package -> [(provider, path)
+          | provider <- component : Map.findWithDefault [] component dependencyMap
+          , matchesPackage package provider
+          , packageCatalogSourceDependency catalog component provider
+          , path <- Map.findWithDefault [] (provider, importName ref) byComponentName]
+      exportedTargets = exportedSourceTargets importCandidates
+      standaloneExportedTargets = exportedSourceTargets
+        (\_ ref -> [("-", path) | [path] <- [sourcePaths ref]]) "-"
+      exportedSourceTargets resolve component provider name visited
         | (component, provider) `Set.member` visited = []
         | otherwise = case Map.lookup provider byPath of
             Nothing -> []
@@ -507,38 +527,74 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
                   imported =
                     [target
                     | importRef <- entryImports entry
-                    , importPackageFree importRef
+                    , importSourceAllowed importRef
                     , let reexported = not (importQualifiedOnly importRef)
                             && (importQualifier importRef `elem` entryReexports entry
                                   || importName importRef `elem` entryReexports entry)
-                    , (targetComponent, targetPath) <- candidates component (importName importRef)
+                    , (targetComponent, targetPath) <- resolve component importRef
                     , Just targetEntry <- [Map.lookup targetPath byPath]
                     , let explicitFromProvider = maybe False (name `elem`)
                             (exportedValueNames (entryData targetEntry)
                               (entryClassMethods targetEntry) <$> entryExportItems entry)
                     , reexported || explicit || explicitFromProvider
                     , reexported || importedCallName importRef name == Just name
-                    , target@(_, physicalPath, _) <- exportedTargets targetComponent targetPath name seen
+                    , target@(_, physicalPath, _) <- exportedSourceTargets resolve targetComponent targetPath name seen
                     , Just physicalEntry <- [Map.lookup physicalPath byPath]
                     , importPermits importRef targetEntry name || importPermits importRef physicalEntry name]
               in Set.toAscList (Set.fromList (local <> imported))
+      -- A source facade can export a constructor owned by a selected external
+      -- unit. Keep that route distinct from a source body and from a direct
+      -- external call. Every facade and import boundary must grant the member.
+      constructorReexportTargets component provider name visited
+        | (component, provider) `Set.member` visited = []
+        | otherwise = case Map.lookup provider byPath of
+            Nothing -> []
+            Just entry | name `elem` entryValueNames entry -> []
+            Just entry ->
+              let seen = Set.insert (component, provider) visited
+                  imports = [ref | ref <- entryImports entry, importSourceAllowed ref,
+                    not (importQualifiedOnly ref)]
+                  direct =
+                    [(component, provider, importName ref, package, unit, parent)
+                    | ref <- imports, importUnqualified ref, null (importCandidates component ref)
+                    , [(package, unit)] <- [lookupExternalModule catalog component (importName ref)]
+                    , parent <- Set.toList . Set.fromList $ constructorParents
+                        (maybe [] id (entryExportItems entry)
+                          <> maybe [] snd (importSelection ref))
+                    , constructorImportPermits ref parent name
+                    , constructorExportPermits entry ref parent name
+                    , (package, unit) `elem` lookupExternalMemberExport catalog component (importName ref) parent name]
+                  indirect =
+                    [result | ref <- imports
+                    , (nextComponent, nextPath) <- importCandidates component ref
+                    , result@(_, _, _, _, _, parent) <- constructorReexportTargets nextComponent nextPath name seen
+                    , constructorImportPermits ref parent name
+                    , constructorExportPermits entry ref parent name]
+              in Set.toAscList (Set.fromList (direct <> indirect))
       links = Set.toAscList . Set.fromList $
         [ (component, entryPath entry, imported, Set.toAscList (Set.fromList providers))
         | entry <- modules
         , component <- Map.findWithDefault [] (entryPath entry) componentMap
         , importRef <- entryImports entry
         , let imported = importName importRef
-        , importPackageFree importRef
-        , let providers = candidates component imported
+        , importSourceAllowed importRef
+        , let providers = importCandidates component importRef
         , not (null providers)
         ]
+      packageSourceLinks = Set.toAscList . Set.fromList $
+        [(component, entryPath entry, requested, importName ref, provider, path, package, unit)
+        | entry <- modules
+        , component <- Map.findWithDefault [] (entryPath entry) componentMap
+        , ref <- entryImports entry, Just requested <- [importPackageName ref]
+        , (provider, path) <- importCandidates component ref
+        , Just (package, unit) <- [packageCatalogSourceUnit catalog provider]]
       externalLinks = Set.toAscList . Set.fromList $
         [(component, entryPath entry, imported, package, unit)
         | entry <- modules
         , component <- Map.findWithDefault [] (entryPath entry) componentMap
         , importRef <- entryImports entry
         , let imported = importName importRef
-        , importPackageFree importRef
+        , importUnqualified importRef
         , null (candidates component imported)
         , [(package, unit)] <- [lookupExternalModule catalog component imported]]
       unselectedLinks = Set.toAscList . Set.fromList $
@@ -548,7 +604,7 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , not (packageCatalogHasComponent catalog component)
         , importRef <- entryImports entry
         , let imported = importName importRef
-        , importPackageFree importRef
+        , importUnqualified importRef
         , null (candidates component imported)
         , (package, unit) <- lookupUnselectedModule catalog component imported]
       resolvedUnselected component imported =
@@ -566,8 +622,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         | entry <- modules
         , Map.notMember (entryPath entry) componentMap
         , importRef <- entryImports entry
-        , importPackageFree importRef
-        , null (Map.findWithDefault [] (importName importRef) byModuleName)
+        , importUnqualified importRef
+        , null (sourcePaths importRef)
         , (package, unit) <- lookupStandaloneExternalModule catalog (importName importRef)
         , packageCatalogHasModuleInterface catalog unit (importName importRef)]
       standaloneRegisteredOnlyLinks = Set.toAscList . Set.fromList $
@@ -575,8 +631,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         | entry <- modules
         , Map.notMember (entryPath entry) componentMap
         , importRef <- entryImports entry
-        , importPackageFree importRef
-        , null (Map.findWithDefault [] (importName importRef) byModuleName)
+        , importUnqualified importRef
+        , null (sourcePaths importRef)
         , null (lookupStandaloneExternalModule catalog (importName importRef))
         , (package, unit) <- lookupStandaloneRegisteredOnlyModule catalog (importName importRef)
         , packageCatalogHasModuleInterface catalog unit (importName importRef)]
@@ -586,20 +642,20 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         | entry <- modules
         , Map.notMember (entryPath entry) componentMap
         , importRef <- entryImports entry
-        , importPackageFree importRef
-        , null (Map.findWithDefault [] (importName importRef) byModuleName)
+        , importUnqualified importRef
+        , null (sourcePaths importRef)
         , (entryPath entry, importName importRef) `Set.notMember` standaloneAvailableKeys
         , Just (owedPath, role) <- [lookup (importName importRef) maintainedForkOwedModules]]
       -- A standalone source has no component, so its imports have their own closed
       -- partition: a source provider, an available unit, or a recorded owed module.
       standaloneUnresolved = Set.toAscList . Set.fromList $
-        [(entryPath entry, imported, if importPackageFree importRef then "standalone-unresolved" else "package-qualified")
+        [(entryPath entry, imported, if importSourceAllowed importRef then "standalone-unresolved" else "package-qualified")
         | entry <- modules
         , Map.notMember (entryPath entry) componentMap
         , importRef <- entryImports entry
         , let imported = importName importRef
-        , not (importPackageFree importRef)
-            || not (not (null (Map.findWithDefault [] imported byModuleName))
+        , not (importSourceAllowed importRef)
+            || not (not (null (sourcePaths importRef))
                 || (entryPath entry, imported) `Set.member` standaloneAvailableKeys
                 || isJust (lookup imported maintainedForkOwedModules))]
       forwardLinks = Set.toAscList . Set.fromList $
@@ -608,7 +664,7 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , component <- Map.findWithDefault [] (entryPath entry) componentMap
         , importRef <- entryImports entry
         , let imported = importName importRef
-        , importPackageFree importRef
+        , importUnqualified importRef
         , null (candidates component imported)
         , null (lookupExternalModule catalog component imported)
         , Just (expectedPath, role) <- [Map.lookup (component, imported) forwardOwned]]
@@ -618,12 +674,12 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , component <- Map.findWithDefault [] (entryPath entry) componentMap
         , importRef <- entryImports entry
         , let imported = importName importRef
-        , importPackageFree importRef
+        , importUnqualified importRef
         , null (candidates component imported)
         , Just (package, owner) <- [lookupDeferredSeedModule dependencyMap catalog component imported]]
       unresolved = Set.toAscList . Set.fromList $
         [ (component, entryPath entry, imported,
-            if not (importPackageFree importRef) then "package-qualified"
+            if not (importSourceAllowed importRef) then "package-qualified"
             else if Map.member imported byName then "internal-not-declared"
             else if length (lookupExternalModule catalog component imported) > 1 then "external-ambiguous"
             else if not (packageCatalogHasComponent catalog component) then "component-not-in-plan"
@@ -632,13 +688,14 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , component <- Map.findWithDefault [] (entryPath entry) componentMap
         , importRef <- entryImports entry
         , let imported = importName importRef
-        , not (importPackageFree importRef)
-            || (null (candidates component imported)
-                && length (lookupExternalModule catalog component imported) /= 1
+        , not (importSourceAllowed importRef)
+            || (null (importCandidates component importRef)
+                && (not (importUnqualified importRef) ||
+                    (length (lookupExternalModule catalog component imported) /= 1
                 && resolvedUnselected component imported == Nothing
                 && lookupDeferredSeedModule dependencyMap catalog component imported == Nothing
                 && (not (null (lookupExternalModule catalog component imported))
-                    || Map.notMember (component, imported) forwardOwned))
+                    || Map.notMember (component, imported) forwardOwned))))
         ]
       localCallSiteCandidates = Set.toAscList . Set.fromList $
         [(component, entryPath entry, owner, site, target)
@@ -667,14 +724,14 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , not lexical
         , target `notElem` entryValueNames entry
         , importRef <- entryImports entry
-        , importPackageFree importRef
+        , importSourceAllowed importRef
         , Just callee <- [importedCallName importRef target]
-        , [providerPath] <- [Map.findWithDefault [] (importName importRef) byModuleName]
-        , providerPath /= entryPath entry
-        , Just provider <- [Map.lookup providerPath byPath]
-        , callee `elem` entryValueNames provider
-        , maybe True (callee `elem`) (entryExports provider)
-        , importPermits importRef provider callee]
+        , [importedPath] <- [sourcePaths importRef]
+        , importedPath /= entryPath entry
+        , Just provider <- [Map.lookup importedPath byPath]
+        , (_, providerPath, _) <- standaloneExportedTargets importedPath callee Set.empty
+        , Just physicalEntry <- [Map.lookup providerPath byPath]
+        , importPermits importRef provider callee || importPermits importRef physicalEntry callee]
       standaloneDeniedSourceCallSites = Set.toAscList . Set.fromList $
         [(entryPath entry, owner, site, target, importName importRef,
           providerPath, callee, reason)
@@ -684,9 +741,9 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , not lexical
         , target `notElem` entryValueNames entry
         , importRef <- entryImports entry
-        , importPackageFree importRef
+        , importSourceAllowed importRef
         , Just callee <- [importedCallName importRef target]
-        , [providerPath] <- [Map.findWithDefault [] (importName importRef) byModuleName]
+        , [providerPath] <- [sourcePaths importRef]
         , providerPath /= entryPath entry
         , Just provider <- [Map.lookup providerPath byPath]
         , callee `elem` entryValueNames provider
@@ -702,9 +759,9 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , not lexical
         , target `notElem` entryValueNames entry
         , importRef <- entryImports entry
-        , importPackageFree importRef
+        , importSourceAllowed importRef
         , Just callee <- [importedCallName importRef target]
-        , [providerPath] <- [Map.findWithDefault [] (importName importRef) byModuleName]
+        , [providerPath] <- [sourcePaths importRef]
         , providerPath /= entryPath entry
         , Just provider <- [Map.lookup providerPath byPath]
         , callee `notElem` entryValueNames provider
@@ -719,8 +776,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , not lexical
         , target `notElem` entryValueNames entry
         , importRef <- entryImports entry
-        , importPackageFree importRef
-        , null (Map.findWithDefault [] (importName importRef) byModuleName)
+        , importUnqualified importRef
+        , null (sourcePaths importRef)
         , [(package, unit)] <- [lookupStandaloneExternalModule catalog (importName importRef)]
         , packageCatalogHasModuleInterface catalog unit (importName importRef)
         , Just callee <- [externalCallName importRef target <|> externalOpenCallName importRef target]
@@ -733,8 +790,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , not lexical
         , target `notElem` entryValueNames entry
         , importRef <- entryImports entry
-        , importPackageFree importRef
-        , null (Map.findWithDefault [] (importName importRef) byModuleName)
+        , importUnqualified importRef
+        , null (sourcePaths importRef)
         , null (lookupStandaloneExternalModule catalog (importName importRef))
         , [(package, unit)] <- [lookupStandaloneRegisteredOnlyModule catalog (importName importRef)]
         , packageCatalogHasModuleInterface catalog unit (importName importRef)
@@ -749,8 +806,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , not lexical
         , target `notElem` entryValueNames entry
         , importRef <- entryImports entry
-        , importPackageFree importRef
-        , null (Map.findWithDefault [] (importName importRef) byModuleName)
+        , importUnqualified importRef
+        , null (sourcePaths importRef)
         , [(package, unit)] <- [lookupStandaloneExternalModule catalog (importName importRef)]
         , packageCatalogHasModuleInterface catalog unit (importName importRef)
         , (parent, callee) <- externalMemberCallNames importRef target
@@ -775,9 +832,9 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , (owner, target, site, lexical) <- entryCalls entry
         , not lexical
         , importRef <- entryImports entry
-        , importPackageFree importRef
+        , importSourceAllowed importRef
         , Just callee <- [importedCallName importRef target]
-        , (importComponent, importedPath) <- candidates component (importName importRef)
+        , (importComponent, importedPath) <- importCandidates component importRef
         , Just providerEntry <- [Map.lookup importedPath byPath]
         , (targetComponent, provider, _) <- exportedTargets importComponent importedPath callee Set.empty
         , Just physicalEntry <- [Map.lookup provider byPath]
@@ -799,8 +856,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , not lexical
         , null (Map.findWithDefault [] (component, entryPath entry, owner, site, target) localCallIndex)
         , importRef <- entryImports entry
-        , importPackageFree importRef
-        , null (candidates component (importName importRef))
+        , importUnqualified importRef
+        , null (importCandidates component importRef)
         , [(package, unit)] <- [lookupExternalModule catalog component (importName importRef)]
         , let syntactic = externalCallName importRef target
         , Just callee <- [syntactic <|> externalOpenCallName importRef target]
@@ -808,6 +865,21 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
                 lookupExternalExport catalog component (importName importRef) callee
         , exported || (syntactic /= Nothing
             && not (packageCatalogHasModuleInterface catalog unit (importName importRef)))]
+      constructorReexportCallSiteCandidates = Set.toAscList . Set.fromList $
+        [(component, entryPath entry, owner, site, target, facadeComponent, facadePath,
+          imported, package, unit, parent, callee)
+        | entry <- modules
+        , component <- Map.findWithDefault [] (entryPath entry) componentMap
+        , (owner, target, site, lexical) <- entryCalls entry, not lexical
+        , null (Map.findWithDefault [] (component, entryPath entry, owner, site, target) localCallIndex)
+        , null (Map.findWithDefault [] (component, entryPath entry, owner, site, target) importedCallIndex)
+        , ref <- entryImports entry, importSourceAllowed ref
+        , Just callee <- [importedCallName ref target]
+        , Just (initial, _) <- [Text.uncons callee], isUpper initial || initial == ':'
+        , (providerComponent, providerPath) <- importCandidates component ref
+        , (facadeComponent, facadePath, imported, package, unit, parent) <-
+            constructorReexportTargets providerComponent providerPath callee Set.empty
+        , constructorImportPermits ref parent callee]
       externalMemberCallSiteCandidates = Set.toAscList . Set.fromList $
         [(component, entryPath entry, owner, site, target, importName importRef,
           package, unit, parent, callee)
@@ -817,8 +889,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , not lexical
         , null (Map.findWithDefault [] (component, entryPath entry, owner, site, target) localCallIndex)
         , importRef <- entryImports entry
-        , importPackageFree importRef
-        , null (candidates component (importName importRef))
+        , importUnqualified importRef
+        , null (importCandidates component importRef)
         , (parent, callee) <- externalMemberCallNames importRef target
         , (package, unit) <- lookupExternalMemberExport catalog component (importName importRef) parent callee]
       availableCallSiteCandidates = Set.toAscList . Set.fromList $
@@ -829,8 +901,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , not lexical
         , null (Map.findWithDefault [] (component, entryPath entry, owner, site, target) localCallIndex)
         , importRef <- entryImports entry
-        , importPackageFree importRef
-        , null (candidates component (importName importRef))
+        , importUnqualified importRef
+        , null (importCandidates component importRef)
         , Just callee <- [externalCallName importRef target <|> externalOpenCallName importRef target]
         , (package, unit) <- lookupAvailableExternalExport catalog component (importName importRef) callee]
       availableMemberCallSiteCandidates = Set.toAscList . Set.fromList $
@@ -842,8 +914,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , not lexical
         , null (Map.findWithDefault [] (component, entryPath entry, owner, site, target) localCallIndex)
         , importRef <- entryImports entry
-        , importPackageFree importRef
-        , null (candidates component (importName importRef))
+        , importUnqualified importRef
+        , null (importCandidates component importRef)
         , (parent, callee) <- externalMemberCallNames importRef target
         , (package, unit) <- lookupAvailableExternalMemberExport catalog component (importName importRef) parent callee]
       deferredSeedCallSiteCandidates = Set.toAscList . Set.fromList $
@@ -853,8 +925,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , component <- Map.findWithDefault [] (entryPath entry) componentMap
         , (owner, target, site, lexical) <- entryCalls entry
         , not lexical
-        , importRef <- entryImports entry, importPackageFree importRef
-        , null (candidates component (importName importRef))
+        , importRef <- entryImports entry, importUnqualified importRef
+        , null (importCandidates component importRef)
         , Just (package, role) <- [lookupDeferredSeedModule dependencyMap catalog component (importName importRef)]
         , Just callee <- [deferredSeedCallName importRef target]]
       implicitPreludeImports = Set.toAscList . Set.fromList $
@@ -1028,9 +1100,9 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , Just entry <- [Map.lookup path byPath]
         , targetKind /= "unqualified" || target `notElem` entryValueNames entry
         , importRef <- entryImports entry
-        , importPackageFree importRef
+        , importUnqualified importRef
         , Just callee <- [importedCallName importRef target]
-        , (importComponent, importedPath) <- candidates component (importName importRef)
+        , (importComponent, importedPath) <- importCandidates component importRef
         , Just providerEntry <- [Map.lookup importedPath byPath]
         , (targetComponent, provider, _) <- exportedTargets importComponent importedPath callee Set.empty
         , Just physicalEntry <- [Map.lookup provider byPath]
@@ -1052,8 +1124,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , Just entry <- [Map.lookup path byPath]
         , targetKind /= "unqualified" || target `notElem` entryValueNames entry
         , importRef <- entryImports entry
-        , importPackageFree importRef
-        , null (candidates component (importName importRef))
+        , importUnqualified importRef
+        , null (importCandidates component importRef)
         , [(package, unit)] <- [lookupExternalModule catalog component (importName importRef)]
         , Just callee <- [externalCallName importRef target <|> externalOpenCallName importRef target]
         , (package, unit) `elem` lookupExternalExport catalog component (importName importRef) callee]
@@ -1082,6 +1154,9 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         `Set.union` Set.fromList
         [(component, path, owner, site, target)
         | (component, path, owner, site, target, _, _, _, _, _) <- externalMemberCallSiteCandidates]
+        `Set.union` Set.fromList
+        [(component, path, owner, site, target)
+        | (component, path, owner, site, target, _, _, _, _, _, _, _) <- constructorReexportCallSiteCandidates]
         `Set.union` Set.fromList
         [(component, path, owner, site, target)
         | (component, path, owner, site, target, _, _, _, _) <- availableCallSiteCandidates]
@@ -1143,9 +1218,9 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         , (owner, target, site, lexical) <- entryReferences entry
         , not lexical
         , importRef <- entryImports entry
-        , importPackageFree importRef
+        , importSourceAllowed importRef
         , Just referent <- [importedCallName importRef target]
-        , (importComponent, importedPath) <- candidates component (importName importRef)
+        , (importComponent, importedPath) <- importCandidates component importRef
         , Just providerEntry <- [Map.lookup importedPath byPath]
         , (targetComponent, provider, _) <- exportedTargets importComponent importedPath referent Set.empty
         , Just physicalEntry <- [Map.lookup provider byPath]
@@ -1168,8 +1243,8 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
              targetComponent, provider, symbolType symbols, importName importRef)
            | (entry, owner, site, field, kind) <- recordUseSites
            , component <- Map.findWithDefault [] (entryPath entry) componentMap
-           , importRef <- entryImports entry, importPackageFree importRef
-           , (importComponent, importedPath) <- candidates component (importName importRef)
+           , importRef <- entryImports entry, importSourceAllowed importRef
+           , (importComponent, importedPath) <- importCandidates component importRef
            , (targetComponent, provider, _) <- exportedTargets importComponent importedPath field Set.empty
            , Just targetEntry <- [Map.lookup provider byPath]
            , symbols <- entryData targetEntry, field `elem` symbolSelectors symbols]
@@ -1192,6 +1267,7 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
       graphStage :: Text
       graphStage
         | null unresolved && null standaloneUnresolved && null routeGaps && null reportedOpaqueSites
+            && null [() | Left _ <- parsed]
             && all (null . entryGaps) modules && all (null . entryDeclarationGaps) modules = "resolved"
         | otherwise = "partial-calls"
   pure
@@ -1219,6 +1295,9 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
            | entry <- modules, Map.notMember (entryPath entry) componentMap]
         <> [Text.intercalate "\t" ["graph-link", component, Text.pack consumer, targetComponent, Text.pack provider, imported]
            | (component, consumer, imported, [(targetComponent, provider)]) <- links]
+        <> [Text.intercalate "\t" ["graph-import-source-package", component,
+             Text.pack consumer, requested, imported, provider, Text.pack path, package, unit]
+           | (component, consumer, requested, imported, provider, path, package, unit) <- packageSourceLinks]
         <> [Text.intercalate "\t" ["graph-import-external", component,
              Text.pack consumer, imported, package, unit]
            | (component, consumer, imported, package, unit) <- externalLinks]
@@ -1372,6 +1451,11 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         <> [Text.intercalate "\t" ["graph-call-external-member-candidate", component,
              Text.pack path, owner, site, target, imported, package, unit, parent, callee]
            | (component, path, owner, site, target, imported, package, unit, parent, callee) <- externalMemberCallSiteCandidates]
+        <> [Text.intercalate "\t" ["graph-call-constructor-reexport-candidate", component,
+             Text.pack path, owner, site, target, facadeComponent, Text.pack facadePath,
+             imported, package, unit, parent, callee]
+           | (component, path, owner, site, target, facadeComponent, facadePath,
+              imported, package, unit, parent, callee) <- constructorReexportCallSiteCandidates]
         <> [Text.intercalate "\t" ["graph-call-available-unit-candidate", component, Text.pack path, owner, site,
              target, imported, package, unit, callee]
            | (component, path, owner, site, target, imported, package, unit, callee) <- availableCallSiteCandidates]
@@ -1480,7 +1564,7 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
                   [let imported = Text.pack (moduleNameString (unLoc (ideclName declaration)))
                    in ImportRef
                      { importName = imported
-                     , importPackageFree = case ideclPkgQual declaration of NoRawPkgQual -> True; RawPkgQual _ -> False
+                     , importPackageName = case ideclPkgQual declaration of NoRawPkgQual -> Nothing; RawPkgQual qualifier -> Just (Text.pack (unpackFS (sl_fs qualifier)))
                      , importQualifier = maybe imported (Text.pack . moduleNameString . unLoc) (ideclAs declaration)
                      , importQualifiedOnly = ideclQualified declaration /= NotQualified
                      , importSelection = case ideclImportList declaration of
@@ -1564,11 +1648,14 @@ reachableComponents dependencies start = visit Set.empty [start]
 
 data ImportRef = ImportRef
   { importName :: Text
-  , importPackageFree :: Bool
+  , importPackageName :: Maybe Text
   , importQualifier :: Text
   , importQualifiedOnly :: Bool
   , importSelection :: Maybe (ImportListInterpretation, [LIE GhcPs])
   }
+
+importUnqualified :: ImportRef -> Bool
+importUnqualified ref = importPackageName ref == Nothing
 
 data SourceEntry = SourceEntry
   { entryPath :: FilePath
@@ -1634,15 +1721,16 @@ observeRejectedNegativeCalls :: FilePath -> [SourceEntry] -> Map.Map Text [FileP
   -> IO [(FilePath, Text, Text, Text, Int, Text, Text)]
 observeRejectedNegativeCalls root modules byModuleName calls = do
   absoluteRoot <- makeAbsolute root
-  built <- doesDirectoryExist (absoluteRoot </> "dist-newstyle" </> "packagedb")
+  built <- doesDirectoryExist (absoluteRoot </> ".build/dist-native" </> "packagedb")
   if not built then pure [] else
     concat <$> mapM (observeFile absoluteRoot) (zip [1 :: Int ..] (Map.toAscList grouped))
  where
   grouped = Map.fromListWith (<>)
     [(path, [(owner, site, target)])
     | (path, owner, site, target) <- calls
-    , "test/negative/" `isPrefixOf` path
-        || "test/fixture/chain_boundary/compilefail/" `isPrefixOf` path]
+    , any (`isPrefixOf` path)
+        ["test/negative/", "test/fixture/chain_boundary/compilefail/",
+         "test/spec/dsl/compilefail/", "test/spec/dsl/capacity_topology_compile_fail/"]]
   entries = Map.fromList [(entryPath entry, entry) | entry <- modules]
   sourceRoot entry = iterate takeDirectory (entryPath entry)
     !! length (Text.splitOn "." (entryName entry))
@@ -1655,7 +1743,7 @@ observeRejectedNegativeCalls root modules byModuleName calls = do
           let providers =
                 [provider
                 | importRef <- entryImports entry
-                , importPackageFree importRef
+                , importUnqualified importRef
                 , [provider] <- [Map.findWithDefault [] (importName importRef) byModuleName]]
           in reachable (Set.insert path seen) (rest <> providers)
   observeFile absoluteRoot (index, (path, fileCalls)) = do
@@ -1665,7 +1753,7 @@ observeRejectedNegativeCalls root modules byModuleName calls = do
           [absoluteRoot </> sourceRoot entry
           | reached <- Set.toList (reachable Set.empty [path])
           , Just entry <- [Map.lookup reached entries]])
-        arguments = ["exec", "--jobs=1", "--", "ghc", "-j1",
+        arguments = ["exec", "--jobs=1", "--builddir=.build/dist-native", "--", "ghc", "-j1",
           "-fdiagnostics-as-json", "-fno-code", "-fforce-recomp", "-XGHC2024"]
           <> ["-i" <> directory | directory <- sourceRoots]
           <> ["-outputdir", outputDir, path]
@@ -1810,6 +1898,9 @@ sinkCatalogue = concat
   , pathsAt "file-write" [0, 1] "System.Posix.Files" ["createSymbolicLink", "rename", "createLink"]
   , pathsAt "file-query" [0] "System.Posix.Files"
       ["getFileStatus", "getSymbolicLinkStatus", "fileExist", "readSymbolicLink"]
+  , pathsAt "file-query" [0] "System.PosixCompat.Files" ["getSymbolicLinkStatus"]
+  , pathsAt "file-query" [0] "Data.Streaming.Filesystem" ["openDirStream"]
+  , pathsAt "file-query" [] "Data.Streaming.Filesystem" ["readDirStream", "closeDirStream"]
   , pathsAt "file-write" [0] "System.Posix.Directory" ["createDirectory", "removeDirectory", "changeWorkingDirectory"]
   , pathsAt "file-query" [0] "System.Posix.Directory" ["openDirStream"]
   , pathsAt "file-query" [] "System.Posix.Directory" ["readDirStream"]
@@ -2404,6 +2495,43 @@ importPermits importRef provider name = case importSelection importRef of
   unknownType wrapped =
     not (any ((== wrappedNameText wrapped) . symbolType) (entryData provider))
 
+constructorParents :: [LIE GhcPs] -> [Text]
+constructorParents = concatMap (parent . unLoc)
+ where
+  parent item = case item of
+    IEThingAbs _ wrapped _ -> [wrappedNameText wrapped]
+    IEThingAll _ wrapped _ -> [wrappedNameText wrapped]
+    IEThingWith _ wrapped _ _ _ -> [wrappedNameText wrapped]
+    _ -> []
+
+constructorMemberSelected :: Text -> Text -> IE GhcPs -> Bool
+constructorMemberSelected parent name item = case item of
+  IEVar _ wrapped _ -> wrappedNameText wrapped == name
+  IEThingAll _ wrapped _ -> wrappedNameText wrapped == parent
+  IEThingWith _ wrapped wildcard children _ -> wrappedNameText wrapped == parent
+    && (wildcard /= NoIEWildcard || name `elem` map wrappedNameText children)
+  _ -> False
+
+constructorImportPermits :: ImportRef -> Text -> Text -> Bool
+constructorImportPermits ref parent name = case importSelection ref of
+  Nothing -> True
+  Just (Exactly, selected) -> any (constructorMemberSelected parent name . unLoc) selected
+  Just (EverythingBut, selected) -> not (any hidden selected)
+ where
+  hidden located = constructorMemberSelected parent name (unLoc located)
+    || case unLoc located of
+      IEThingAbs _ wrapped _ -> wrappedNameText wrapped == parent
+      _ -> False
+
+constructorExportPermits :: SourceEntry -> ImportRef -> Text -> Text -> Bool
+constructorExportPermits entry ref parent name = maybe False (any permits) (entryExportItems entry)
+ where
+  permits located = constructorMemberSelected parent name (unLoc located)
+    || case unLoc located of
+      IEModuleContents _ module_ -> Text.pack (moduleNameString (unLoc module_))
+        `elem` [importName ref, importQualifier ref]
+      _ -> False
+
 exportedValueNames :: [DataSymbols] -> [(Text, Text)] -> [LIE GhcPs] -> [Text]
 exportedValueNames dataDeclarations classMethods declarations = concatMap (namesFromIE . unLoc) declarations
  where
@@ -2622,7 +2750,10 @@ scanExpr scope located = case unLoc located of
   ExprWithTySig _ inner _ -> scanExpr scope inner
   ArithSeq _ _ sequenceInfo -> observeCall scope (sourceSpanText located) (arithSeqCall sequenceInfo) : scanArithSeq scope sequenceInfo
   HsTypedBracket _ inner -> scanExpr scope inner
-  HsUntypedBracket {} -> [Unscanned "UntypedBracket"]
+  HsUntypedBracket _ quotation -> case quotation of
+    ExpBr _ inner -> scanExpr scope inner
+    VarBr _ _ name -> [observeReference scope (sourceSpanText located) (renderRdr (unLoc name))]
+    _ -> [Unscanned "UntypedBracket"]
   HsTypedSplice _ inner -> scanExpr scope inner
   HsUntypedSplice _ splice -> scanSplice scope (sourceSpanText located) splice
   HsProc {} -> [Unscanned "Proc"]

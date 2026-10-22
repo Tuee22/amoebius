@@ -6,6 +6,7 @@
 -- source side of the comparison.
 module Amoebius.Layout.PackageMap
   ( packageMapReport
+  , runtimeComponentFindings
   , SourceComponentMap
   , ComponentDependencyMap
   , ComponentPackageMap
@@ -34,6 +35,8 @@ module Amoebius.Layout.PackageMap
   , packageCatalogHasModuleInterface
   , implicitPreludeUnit
   , packageCatalogHasComponent
+  , packageCatalogSourceUnit
+  , packageCatalogSourceDependency
   , packageCatalogFromInputs
   , packageCatalogWithForks
   , packageCatalogWithPrelude
@@ -45,7 +48,7 @@ module Amoebius.Layout.PackageMap
   , maintainedForkOwedModules
   ) where
 
-import Amoebius.Layout.Classify (LayoutFinding (..))
+import Amoebius.Layout.Classify (LayoutFinding (..), checkRuntimeComponent)
 import Control.Exception (IOException, SomeException, displayException, try)
 import Control.Monad (filterM)
 import Control.Monad.IO.Class (liftIO)
@@ -66,6 +69,7 @@ import Distribution.PackageDescription
   ( Benchmark (..)
   , BuildInfo (..)
   , Executable (..)
+  , ForeignLib (..)
   , GenericPackageDescription (..)
   , Library (..)
   , TestSuite (..)
@@ -117,7 +121,8 @@ packageMapReport mainBytes probeBytes present = case (parse "amoebius.cabal" mai
   (Left problem, _) -> ([problem], [], Map.empty, Map.empty, Map.empty, Map.empty)
   (_, Left problem) -> ([problem], [], Map.empty, Map.empty, Map.empty, Map.empty)
   (Right mainPackage, Right probePackage) ->
-    ([ LayoutFinding "DeclaredModuleMissing" (Text.unpack (claimComponent claim) <> ":" <> claimFile claim)
+    (runtimeComponentFindings "amoebius.cabal" mainBytes <> runtimeComponentFindings "probe/probe.cabal" probeBytes
+      <> [ LayoutFinding "DeclaredModuleMissing" (Text.unpack (claimComponent claim) <> ":" <> claimFile claim)
     | claim <- claims, null (matchingPaths claim), not (forwardOwned claim)]
       <> [LayoutFinding "UnmappedHaskellSource" path
          | path <- haskellPaths, path `Set.notMember` mapped, standaloneSourceRole path == Nothing]
@@ -173,6 +178,23 @@ packageMapReport mainBytes probeBytes present = case (parse "amoebius.cabal" mai
   parse path bytes = case runParseResult (parseGenericPackageDescription bytes) of
     (_, Left _) -> Left (LayoutFinding "PackageDescriptionUnparsable" path)
     (_, Right description) -> Right description
+
+-- | Parse component identities independently of module claims: a disabled or
+-- empty component still has an authored name, and all conditional roots count.
+runtimeComponentFindings :: FilePath -> ByteString.ByteString -> [LayoutFinding]
+runtimeComponentFindings path bytes = case runParseResult (parseGenericPackageDescription bytes) of
+  (_, Left _) -> [LayoutFinding "PackageDescriptionUnparsable" path]
+  (_, Right description) -> concat
+    [checkRuntimeComponent path component (map getSymbolicPath (hsSourceDirs info))
+      | (component, info) <- components description]
+ where
+  components description =
+    [("library", libBuildInfo (flatten tree)) | tree <- maybe [] pure (condLibrary description)]
+    <> [("library:" <> Text.pack (prettyShow name), libBuildInfo (flatten tree)) | (name, tree) <- condSubLibraries description]
+    <> [("executable:" <> Text.pack (prettyShow name), buildInfo (flatten tree)) | (name, tree) <- condExecutables description]
+    <> [("test:" <> Text.pack (prettyShow name), testBuildInfo (flatten tree)) | (name, tree) <- condTestSuites description]
+    <> [("benchmark:" <> Text.pack (prettyShow name), benchmarkBuildInfo (flatten tree)) | (name, tree) <- condBenchmarks description]
+    <> [("foreign-library:" <> Text.pack (prettyShow name), foreignLibBuildInfo (flatten tree)) | (name, tree) <- condForeignLibs description]
 
 -- | External packages, each at the version the maintained fork tracks, that the
 -- fork imports beyond the planned dependency universe. The fork has no Cabal
@@ -279,10 +301,11 @@ data PackageCatalog = PackageCatalog
   , catalogModuleMembers :: Map (Text, Text, Text) (Set.Set Text)
   , catalogRegistered :: Map Text RegisteredUnit
   , catalogLibdir :: Maybe FilePath
+  , catalogSourceUnits :: Map Text [(Text, Text, [Text])]
   }
 
 emptyPackageCatalog :: PackageCatalog
-emptyPackageCatalog = PackageCatalog Map.empty Map.empty [] Map.empty Map.empty Map.empty Map.empty Nothing
+emptyPackageCatalog = PackageCatalog Map.empty Map.empty [] Map.empty Map.empty Map.empty Map.empty Nothing Map.empty
 
 lookupExternalModule :: PackageCatalog -> Text -> Text -> [(Text, Text)]
 lookupExternalModule catalog component moduleName =
@@ -435,10 +458,23 @@ packageCatalogWithModuleMembers members catalog = catalog {catalogModuleMembers 
 packageCatalogHasComponent :: PackageCatalog -> Text -> Bool
 packageCatalogHasComponent catalog component = Map.member component (catalogSelected catalog)
 
+-- A component label shared by multiple plan units supplies no unique source identity.
+packageCatalogSourceUnit :: PackageCatalog -> Text -> Maybe (Text, Text)
+packageCatalogSourceUnit catalog component = case Map.lookup component (catalogSourceUnits catalog) of
+  Just [(package, unit, _)] -> Just (package, unit)
+  _ -> Nothing
+
+packageCatalogSourceDependency :: PackageCatalog -> Text -> Text -> Bool
+packageCatalogSourceDependency catalog consumer provider =
+  case (Map.lookup consumer (catalogSourceUnits catalog), packageCatalogSourceUnit catalog provider) of
+    (Just [(_, _, dependencies)], Just (_, unit)) -> consumer == provider || elem unit dependencies
+    _ -> False
+
 data BuildPlan = BuildPlan Text Text [PlanEntry]
 
 data RegisteredUnit = RegisteredUnit
   { registeredPackage :: Text
+  , registeredVersion :: Text
   , registeredModules :: Set.Set Text
   , registeredDirs :: [FilePath]
   , registeredReexports :: Map Text (Text, Text)
@@ -473,7 +509,7 @@ loadPackageCatalog declared = do
         Right planBytes -> case eitherDecodeStrict' planBytes of
           Left _ -> pure (Left (LayoutFinding "PackagePlanUnparsable" path))
           Right plan@(BuildPlan compiler abi _) -> do
-            pathResult <- runTool "cabal" ["path"]
+            pathResult <- runTool "cabal" ["path", "--jobs=1", "--builddir=.build/dist-native"]
             case pathResult >>= storeDirectory of
               Nothing -> pure (Left (LayoutFinding "CabalStoreUnavailable" path))
               Just storeRoot -> do
@@ -542,7 +578,7 @@ forkUnits :: (Text, Text) -> Map Text RegisteredUnit -> [(Text, RegisteredUnit)]
 forkUnits (package, version) registered =
   [(unit, record) | (unit, record) <- Map.toAscList registered
   , registeredPackage record == package
-  , (Text.takeWhile (/= '-') <$> Text.stripPrefix (package <> "-") unit) == Just version]
+  , registeredVersion record == version]
 
 -- | Each declared fork package must have exactly one registered unit at its pinned
 -- version; a unit of another version is not a candidate and is ignored.
@@ -573,7 +609,8 @@ catalogue forkPackages declared (BuildPlan _ _ entries) registered = do
             , (unit, record) <- forkUnits fork registered
             , unit `Map.notMember` units]
           available = planned <> declaredFork
-      pure (PackageCatalog (Map.fromList selected) declared available Map.empty Map.empty Map.empty registered Nothing)
+      pure (PackageCatalog (Map.fromList selected) declared available Map.empty Map.empty Map.empty registered Nothing
+        (Map.fromListWith (<>) [(component, [(planPackage entry, planUnit entry, planDepends entry)]) | (component, entry) <- components]))
  where
   selectComponent units (component, entry) = do
     packages <- mapM (\unit -> maybe (Left (LayoutFinding "PackagePlanDependencyMissing" (Text.unpack unit)))
@@ -598,13 +635,14 @@ catalogue forkPackages declared (BuildPlan _ _ entries) registered = do
 
 parsePackageDump :: Text -> Map Text RegisteredUnit
 parsePackageDump dumped = Map.fromList
-  [(unit, RegisteredUnit package (Set.fromList modules) dirs reexports)
+  [(unit, RegisteredUnit package version (Set.fromList modules) dirs reexports)
   | record <- Text.splitOn "\n---\n" dumped
   , [unit] <- [take 1 (Text.words (Text.unwords (field "id" record)))]
   , let packageField = case field "package-name" record of
           [] -> field "name" record
           named -> named
   , [package] <- [take 1 (Text.words (Text.unwords packageField))]
+  , let version = Text.strip (Text.unwords (field "version" record))
   , let modules = [token
           | raw <- Text.words (Text.unwords (field "exposed-modules" record))
           , let token = Text.dropWhileEnd (== ',') raw

@@ -331,19 +331,26 @@ flowchart TD
 
 One decoded `RootInForceSpec` is the value every later stage consumes. Its records are spelled here once and
 linked from every other document
-([DL-0004](../decision_log.md#dl-0004--the-typed-spec-records-are-spelled-once)). The spelling below is
-specification: `RootInForceSpec`, `ClusterSpec`, `TopologySpec`, and `AppSpec` are owed by
-[Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md); the witness-bearing `DeploymentRules` dials by
-[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md); the `Rke2Quorum` arms and
-the substrate profile a `HostSpec` names by
-[Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md).
+([DL-0004](../decision_log.md#dl-0004--the-typed-spec-records-are-spelled-once)). The spelling below is the
+complete target specification; accepted slices establish only their explicitly observed portions.
+
+**Specification** ([DL-0033](../decision_log.md#dl-0033--image-and-bootstrap-source-claims-require-current-qualification)).
+[Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md) must qualify the decoded root, cluster,
+application and deployment spine; [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md)
+must qualify its witness-bearing placement, quantity and storage paths; and
+[Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md) must qualify the payload-bearing
+`Rke2Quorum` and the substrate profile consumed by each `HostSpec`. Extension and child fields remain owed
+by [Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) and
+[Phase 7](../../DEVELOPMENT_PLAN/phase_07_child_clusters_obligation_teardown.md). Remaining topology arms
+and deployment dials retain their later phase contracts; the target spelling alone supplies no evidence
+that those paths execute.
 
 ```haskell
 data RootInForceSpec = RootInForceSpec
   { rootClusters    :: NonEmpty ClusterSpec
   , rootApps        :: [AppSpec]
   , rootDeployments :: [DeploymentRules]
-  , rootExtensions  :: [ExtensionSpec]
+  , rootExtensions  :: [ExtensionRequest]
   , rootChildren    :: [ChildInForceSpec]
   }
 
@@ -404,7 +411,7 @@ data ExtensionSpec = ExtensionSpec
   , extConfig       :: ExtensionConfig             -- the typed sub-catalog nested inside the InForceSpec
   , extProvides     :: [Capability]                -- PROVIDES into the capability surface
   , extRequires     :: [Capability]                -- REQUIRES from a peer extension or the core
-  , extRequiresLane :: Lane                        -- the catalog lane the extension needs
+  , extRequiresLane :: cfg -> Architecture -> Lane  -- supplied target, never validation host
   , extChain        :: cfg -> [Step]               -- its slice of the chain/Step algebra
   , extUiHandlers   :: [TrustedUiHandler]          -- the trusted server catalog UI ports bind against
   , extMonitoring   :: NonEmpty MonitoringSurface  -- mandatory, non-optional
@@ -412,6 +419,17 @@ data ExtensionSpec = ExtensionSpec
   , extSourceSeal   :: CheckedExtensionSource      -- extension-astcheck's opaque verdict
   }
 ```
+
+The ten names are logical fields, exposed by function projections rather than record-update labels.
+Static monitoring and declaration entries are pure builders: refined configuration and an attested scope
+instantiate their closed `MonitoringSurface` and five-component `ExtensionDeclaration` values at binding.
+A builder carries no scope or authority before that application.
+The base-only foundation is parameterised; the product fixes its source parameter to the checker-issued
+opaque seal. An authored `ExtensionRequest` contains an identity and typed configuration data, never
+`extChain` or another compiled function. The lane function consumes refined configuration and a supplied
+target architecture, and the binder checks its result against the target node's supplied lanes before any
+provider effect. It must not inspect or constrain the validation host. This representation contract and
+its source-admission boundary are authorised by [DL-0030](../decision_log.md#dl-0030--extension-admission-binds-source-scope-and-dependency-closure); validation status belongs to [Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md).
 
 Each field is owned where it is load-bearing:
 
@@ -625,12 +643,11 @@ live effect are deferred to those owners and never promoted by the decode gate.
 
 ### extension-astcheck — the extension AST checker
 
-Gates 1 and 2 prove things about a *value*. Neither says anything about the Haskell linked beside it: an
-`ExtensionSpec`'s `extChain` carries a `stepRun :: cfg -> IO ()`, and `IO ()` is a type, not a bound. A
-closed list of reviewed libraries is not a mechanism; extension-astcheck is specified to replace review with
-a check, and it is owed by
-[Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) (`LTD-DSL-007`,
-[DL-0006](../decision_log.md#dl-0006--the-honesty-backlog-is-struck-or-re-mooded)).
+Gates 1 and 2 prove things about a *value*. A `Step` is closed data and carries no `IO` function.
+That alone does not constrain the Haskell used to construct it. Source admission must therefore judge
+that Haskell against the sanctioned constructors and effects, before contributed code can execute during
+compilation or join the linked binary. This is the contract owned by [Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md) under [DL-0030](../decision_log.md#dl-0030--extension-admission-binds-source-scope-and-dependency-closure); it does not assert a recorded pass.
+
 
 **Extension source is admitted by a custom AST checker against a closed sanctioned API.** The checker is
 specified to run at build time, before link, over the module set an `ExtensionSpec` contributes:
@@ -639,6 +656,7 @@ specified to run at build time, before link, over the module set an `ExtensionSp
 SanctionedApi = -- the closed set of amoebius library entry points extension source may reference
   { modules   : NonEmptySet ModuleName
   , effects   : NonEmptySet SanctionedEffect   -- no unrestricted IO constructor
+  , symbols   : NonEmptyMap ModuleName (NonEmptySet ExportName)
   }
 
 AstViolationReason =
@@ -650,7 +668,7 @@ AstViolationReason =
   | OrphanInstance    : Text
   >
 
-AstViolation = { modulePath : AbsPath, srcSpan : SrcSpan, reason : AstViolationReason }
+AstViolation = { modulePath : AbsPath, srcSpan : SrcSpan, node : AstNodeKind, reason : AstViolationReason }
 
 ExtensionSourceVerdict =
   < Rejected : NonEmpty AstViolation
@@ -664,7 +682,37 @@ nothing else — so "link unchecked source" has no more syntax than "render an u
 ([§5](#5-the-illegal-state-unrepresentable-contract)'s post-gate seal, below). The symmetry is the argument
 for putting this here rather than in a build script: a lint that a build can skip is not a gate.
 
-A rejection names its module, source span, and reason, so a diagnostic is a located fact rather than a
+Implementation and qualification of this surface are owed by [Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md).
+The one executable `SanctionedApi` declaration owns module, symbol and effect membership. Its bounded
+extension-construction surface includes `Amoebius.Extension.Spec`, `Amoebius.Extension.Surface`, the closed
+Step API and the abstract manifest-object API, together with a pure Prelude subset. It supplies no private
+scope constructor, checker constructor, unrestricted host process, compiler plugin, or reflective reader.
+Export names retain their type/value namespace: admitting an abstract type does not admit its data
+constructor or record fields. Unrestricted record update, overloaded record projection and overloaded-label
+construction are outside the admitted surface; pure local code can use explicit constructors and functions.
+Type and data family instance declarations are outside the admitted surface; local closed type families
+remain available.
+
+Qualified foreign references are checked against that symbol table; an unqualified foreign import
+other than Prelude names an exact explicit list of admitted symbols. Helper modules belong to the
+checked closure. IO, unsafe and reflective-construction names are reserved even when locally shadowed;
+words inside comments and string data do not count as references. Imports, exports, expressions, types, patterns and
+compiler-header nodes must all be checked. CPP, compiler options and position pragmas cannot hide a source
+region or redirect the compiler before the check.
+
+The bounded Haskell build wire runs this same checker before contributed modules are compiled. The trusted
+link boundary binds its opaque seal to the complete actual contributed closure and registers those files
+as compiler dependencies. A verdict for a harmless replacement module cannot authorise another factory.
+Diagnostics retain physical source locations; canonical source identity uses module-relative names and
+exact bytes, not an absolute checkout path. Native GHCup/GHC version admission remains sufficient.
+
+Scope introduction likewise consumes evidence: `attest` accepts a verified principal or an actual binding
+proof, and its constructor is private. Scope and obligation indices have nominal roles. `reenter` consumes
+an existing attested scope and a tenant-matching persisted key; it does not mint from tenant text. The render
+entry requires the attestation for every object and refuses an absent one as `UnattestedScope`. Compiler
+constructor, record-update, generic-conversion and coercion controls belong to the same contract.
+
+A rejection names its module, source span, node kind, and reason, so a diagnostic is a located fact rather than a
 refusal. And because the sanctioned surface is *closed*, widening it is a deliberate amendment to this
 document — the same discipline that keeps `EngineRuntime` and `ImageIdentity` closed
 ([service_capability_doctrine.md](./service_capability_doctrine.md), [image_build_doctrine.md](./image_build_doctrine.md)) rather than something an extension author can grant

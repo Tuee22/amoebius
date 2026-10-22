@@ -55,7 +55,7 @@ retiredModules = ["Amoebius.Dsl.Types", "Amoebius.Dsl.SmartConstructors", "Amoeb
 
 -- | Each closed axis and the one file that defines it.
 closedAxes :: [(Text, FilePath)]
-closedAxes = [(name, "src/vocabulary/Amoebius/Vocabulary.hs") | name <- ["Substrate", "Architecture", "Detected", "Lane", "ComputeEngine", "EngineRuntime", "CapabilityArm", "ExtensionId", "Quantity"]] <> [("ResourceVector", "src/capacity-topology/Amoebius/Capacity/Vector.hs")]
+closedAxes = [(name, "src/vocabulary/Amoebius/Vocabulary.hs") | name <- ["Substrate", "Architecture", "Detected", "Lane", "ComputeEngine", "EngineRuntime", "InferenceFamily", "CapabilityArm", "ExtensionId", "Quantity"]] <> [("ResourceVector", "src/capacity-topology/Amoebius/Capacity/Vector.hs")]
 
 isImportOf :: Text -> Text -> Bool
 isImportOf moduleName line = case Text.words line of

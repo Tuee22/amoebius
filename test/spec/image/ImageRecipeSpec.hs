@@ -3,6 +3,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition (
@@ -35,7 +36,7 @@ import Amoebius.Scope.Index (
     activeMembership,
     trustedSubject,
     trustedTenant,
-    withRequestScope,
+    FixtureAuthority.withFixtureScope,
  )
 import Control.Monad (forM_, unless)
 import Data.List (sortOn)
@@ -71,8 +72,8 @@ runGreen catalog rendered cases argvOracle = do
     checkRecipeProjection catalog rendered
     argvTokenCount <- checkBuildInvocations catalog cases argvOracle
     checkCalculusProjection argvTokenCount
-    putStrLn "image-recipe-calculus: PASS (5 kinds, 77 projected units)"
-    putStrLn "image-recipe-invariants: PASS (3 stages, 22 semantic step projections, 1 dynamic base, 0 authored base digests, 2 deterministic renders)"
+    putStrLn "image-recipe-calculus: PASS (5 kinds, 76 projected units)"
+    putStrLn "image-recipe-invariants: PASS (3 stages, 21 semantic step projections, 1 dynamic base, 0 authored base digests, 2 deterministic renders)"
     putStrLn "image-recipe-spec: PASS (4 exact build invocations, 44 argv tokens, 2 architecture refusals, 3 mutants)"
 
 checkRecipeProjection :: Catalog.BakeCatalog -> Text -> IO ()
@@ -88,7 +89,7 @@ checkRecipeProjection catalog rendered = do
         linesOfRecipe = Text.lines rendered
     assert (map rowTuple actual == Oracle.recipeRows) "semantic recipe-step projection drifted"
     assert (length catalog.stages == 3) "catalog stage count changed"
-    assert ([length apt, length artifacts, length built, length copied] == [7, 9, 6, 0]) "bake-step arm vector changed"
+    assert ([length apt, length artifacts, length built, length copied] == [6, 9, 6, 0]) "bake-step arm vector changed"
     assert (length payloads == 1) "published companion payload count changed"
     assert (length catalog.runtimeEnvironment == 3) "runtime environment projection changed"
     assert (rendered == second.dockerfileText) "repeated Dockerfile render changed bytes"
@@ -170,11 +171,11 @@ checkCalculusProjection argvTokens = do
     tenant <- either (fail . show) pure (trustedTenant "image-recipe-tenant")
     subject <- either (fail . show) pure (trustedSubject tenant "image-recipe-subject")
     membership <- either (fail . show) pure (activeMembership tenant subject)
-    action <- either (fail . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+    action <- either (fail . show) pure $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
         let resources :: Int -> ResourceVector
             resources count = ResourceVector 1 (fromIntegral count) 0 0
-            components = [22, argvTokens, 4, 4, 3]
-            artifact = artifactComponent scope "recipe-step-semantics" (resources 22) (RecipeId "amoebius-image-recipe" 1)
+            components = [21, argvTokens, 4, 4, 3]
+            artifact = artifactComponent scope "recipe-step-semantics" (resources 21) (RecipeId "amoebius-image-recipe" 1)
             budget = budgetComponent scope "build-argv-tokens" (resources argvTokens) (allowance (Bytes (fromIntegral argvTokens)) (Slots 1) (Bytes (fromIntegral argvTokens)))
             lift = liftComponent scope "renderer-laws" (resources 4) OnHost
             workflow = workflowComponent scope "build-cases" (resources 4) emptyLedger

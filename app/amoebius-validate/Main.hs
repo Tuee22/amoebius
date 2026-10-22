@@ -10,12 +10,16 @@ module Main (main) where
 import Amoebius.Doc.Check (checkTree, discoverDocuments)
 import Amoebius.Doc.Render (Negative (..), negativeCatalogue, renderNegative, writeCorpus)
 import Amoebius.Doc.Types (CheckResult (..), Finding (..), Observation (..))
-import Amoebius.Plan.PhaseIdentity qualified as PhaseIdentity
+import Amoebius.Plan.Legacy qualified as Legacy
+import Amoebius.Plan.PhaseIdentity (phaseDomainLowerOrdinal)
 import Amoebius.Validation.Custody
 import Amoebius.Validation.Runner qualified as Runner
-import Amoebius.Validation.Custody.Store (Store (..))
-import Amoebius.Validation.GateSpec (GateRole (..), mkGateSpec, renderGateSpec, renderSpecRefusal)
-import Amoebius.Validation.GateSpec.Registry (specInputFor)
+import Amoebius.Validation.Runner.Hygiene (captureSource)
+import Amoebius.Validation.Runner.Legacy (observeLegacy, auditLegacyReports, renderLegacyReports, runLegacyProbe, qualifyLegacy, qualifiedLegacyReports, auditQualifiedLegacyReports)
+import Amoebius.Validation.Custody.Store (Store (..), archivedKernelCap)
+import Amoebius.Validation.GateSpec (renderGateSpec)
+import Amoebius.Validation.GateSpec.Registry (registeredSpecInputs)
+import Amoebius.Validation.Runner.Spec (resolveSpec)
 import Control.Monad (forM, unless)
 import Data.List (nub, sort)
 import Data.Text (Text)
@@ -23,7 +27,7 @@ import Data.Text qualified as Text
 import Data.Text.IO qualified as TextIO
 import System.Directory (createDirectoryIfMissing, removePathForcibly)
 import System.Environment (getArgs)
-import System.Exit (ExitCode (..), exitFailure, exitWith)
+import System.Exit (exitFailure, exitWith)
 import System.FilePath ((</>))
 import Text.Read (readMaybe)
 
@@ -41,6 +45,12 @@ main = do
   case positional of
     ["doc-check"] -> docCheck (option "root" "." options) (option "out" ".build/docs" options)
     ["doc-negatives"] -> docNegatives (option "root" "." options) (option "out" ".build/docs" options)
+    ["legacy-audit"] | Just phase <- readMaybe =<< lookup "phase" options -> legacyAuditDiagnostic (custodyRoot config) phase
+    ["kernel-observe"] | Just input <- lookup "input" options -> runLegacyProbe Legacy.LtdKrn001 input >>= TextIO.putStrLn
+    ["mutation-observe"] | Just input <- lookup "input" options -> runLegacyProbe Legacy.LtdKrn002 input >>= TextIO.putStrLn
+    ["solver-observe"] | Just input <- lookup "input" options -> runLegacyProbe Legacy.LtdKrn003 input >>= TextIO.putStrLn
+    ["bootstrap-observe"] | Just input <- lookup "input" options -> runLegacyProbe Legacy.LtdSrc008 input >>= TextIO.putStrLn
+    ["legacy-qualify"] | Just phase <- readMaybe =<< lookup "phase" options -> legacyQualifyDiagnostic config phase (option "analyzer" "kernel" options) (option "out" ".build/legacy-qualification" options)
     ["preview", "phase", ordinal] | Just phase <- readMaybe ordinal -> previewPhase config phase >>= finish
     ["phase", ordinal] | Just phase <- readMaybe ordinal -> previewPhase config phase >>= finish
     ["spec", "phase", ordinal] | Just phase <- readMaybe ordinal -> renderSpec phase
@@ -63,24 +73,62 @@ usage =
   , "  reset --decision DL-NNNN --product-gap LTD-XXX-NNN [--validator-gap TEXT]"
   , "  demo --file PATH                      record the digest of an operator-authored input"
   , "  doc-check | doc-negatives [--out DIR] the documentation checker and its rendered negatives"
+  , "  legacy-audit --phase NN              print untrusted reports and prequalification refusals; mint nothing"
+  , "  legacy-qualify --phase NN [--analyzer kernel|mutation|solver|bootstrap|correspondence|custody|status|authority|fresh|admission|probe-source|vendor-source|test-source|tool-source|pulumi-source|runtime-identity|ignore-context|source-graph|bootstrap-source] [--out DIR] mint no phase evidence"
   , "  spec phase NN                         print the registered specification's rendering (the gate-spec block)"
   ]
 
+legacyAuditDiagnostic :: FilePath -> Int -> IO ()
+legacyAuditDiagnostic root phase = do
+  captured <- captureSource root >>= either (\problem -> TextIO.putStrLn problem >> exitFailure) pure
+  cap <- archivedKernelCap root >>= either (\problem -> TextIO.putStrLn problem >> exitFailure) pure
+  let reports = observeLegacy phase captured cap
+      refusals = auditLegacyReports phase captured reports
+  TextIO.putStrLn "component-diagnostic\tno-phase-evidence"
+  TextIO.putStr (renderLegacyReports reports)
+  mapM_ (TextIO.putStrLn . ("legacy-refusal\t" <>)) refusals
+  unless (null refusals) exitFailure
+
+legacyQualifyDiagnostic :: CustodyConfig -> Int -> String -> FilePath -> IO ()
+legacyQualifyDiagnostic config phase analyzer output = do
+  source <- captureSource (custodyRoot config) >>= either (\problem -> TextIO.putStrLn problem >> exitFailure) pure
+  qualify <- case analyzer of
+    "kernel" -> pure (qualifyLegacy Legacy.LtdKrn001)
+    "mutation" -> pure (qualifyLegacy Legacy.LtdKrn002)
+    "solver" -> pure (qualifyLegacy Legacy.LtdKrn003)
+    "bootstrap" | phase == phaseDomainLowerOrdinal -> pure (qualifyLegacy Legacy.LtdSrc008)
+    "bootstrap" -> TextIO.putStrLn "LegacyQualificationWrongOwner" >> exitFailure
+    "bootstrap-source" | Legacy.legacyOwnerOrdinal Legacy.LtdSrc008 == Just phase -> pure (qualifyLegacy Legacy.LtdSrc008)
+    "bootstrap-source" -> TextIO.putStrLn "LegacyQualificationWrongOwner" >> exitFailure
+    "correspondence" -> pure (qualifyLegacy Legacy.LtdVal002)
+    "custody" -> pure (qualifyLegacy Legacy.LtdVal003)
+    "status" -> pure (qualifyLegacy Legacy.LtdVal004)
+    "authority" -> pure (qualifyLegacy Legacy.LtdVal001)
+    "fresh" -> pure (qualifyLegacy Legacy.LtdVal006)
+    "admission" -> pure (qualifyLegacy Legacy.LtdBoot001)
+    "probe-source" -> pure (qualifyLegacy Legacy.LtdSrc007)
+    "source-graph" -> pure (qualifyLegacy Legacy.LtdSrc000)
+    "ignore-context" -> pure (qualifyLegacy Legacy.LtdMeta001)
+    "runtime-identity" -> pure (qualifyLegacy Legacy.LtdName001)
+    "pulumi-source" -> pure (qualifyLegacy Legacy.LtdSrc005)
+    "tool-source" -> pure (qualifyLegacy Legacy.LtdSrc001)
+    "test-source" -> pure (qualifyLegacy Legacy.LtdSrc006)
+    "vendor-source" -> pure (qualifyLegacy Legacy.LtdSrc009)
+    _ -> TextIO.putStrLn "LegacyQualificationAnalyzerUnknown" >> exitFailure
+  result <- qualify (custodyRoot config) output phase (custodyCabal config) (custodyCompiler config) source
+  case result of
+    Left problem -> TextIO.putStrLn problem >> exitFailure
+    Right qualification -> do
+      TextIO.putStrLn ("component-diagnostic\tqualified-" <> Text.pack analyzer <> "-query\tno-phase-evidence")
+      let refusals = auditQualifiedLegacyReports phase source [qualification] (qualifiedLegacyReports phase source [qualification])
+      mapM_ (TextIO.putStrLn . ("legacy-refusal\t" <>)) refusals
+      unless (null refusals) exitFailure
+
 -- | Print the rendering a phase document must carry in its fenced gate-spec block.
 renderSpec :: Int -> IO ()
-renderSpec phase = case PhaseIdentity.lookupPhaseIdentity phase of
-  Nothing -> putStrLn "PHASE-ABSENT" >> exitFailure
-  Just row -> case specInputFor (PhaseIdentity.phaseIdentityCapability row) of
-    Nothing -> putStrLn "SPEC-ABSENT" >> exitFailure
-    Just input -> case mkGateSpec (roleOf phase) input of
-      Left refusals -> mapM_ (TextIO.putStrLn . renderSpecRefusal) refusals >> exitFailure
-      Right spec -> TextIO.putStr (renderGateSpec spec)
- where
-  roleOf ordinal
-    | ordinal == PhaseIdentity.phaseDomainLowerOrdinal = SeedGate
-    | Just ordinal == PhaseIdentity.roleOrdinal PhaseIdentity.DslBarrier = BarrierGate
-    | maybe False (ordinal >=) (PhaseIdentity.roleOrdinal PhaseIdentity.FirstHardware) = HardwareGate
-    | otherwise = OrdinaryGate
+renderSpec phase = case resolveSpec registeredSpecInputs phase of
+  Left refusals -> mapM_ TextIO.putStrLn refusals >> exitFailure
+  Right (_, spec) -> TextIO.putStr (renderGateSpec spec)
 
 -- | @--name value@ pairs and the remaining positional words.
 splitOptions :: [String] -> ([(String, String)], [String])
@@ -134,7 +182,7 @@ docNegatives root out = do
 -- | The compiled gate-specification blocks: every registered specification's
 -- rendering. A phase document's fenced block must equal it.
 compiledBlocks :: FilePath -> IO [(Int, Text)]
-compiledBlocks _ = pure Runner.compiledBlocks
+compiledBlocks _ = either (fail . Text.unpack . Text.unlines) pure (Runner.compiledBlocks registeredSpecInputs)
 
 renderLedger :: CheckResult -> Text
 renderLedger result =

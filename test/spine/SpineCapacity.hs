@@ -26,6 +26,7 @@ import Amoebius.Capacity.Types
   , Headroom (..)
   , HostEnvironment (NativeLinux)
   , Node (..)
+  , NodeRole (..)
   , NodeCapacity (..)
   , Overcommit (..)
   , Workload (..)
@@ -36,6 +37,8 @@ import Amoebius.Capacity.Vector (ResourceVector (..), addResources, zeroResource
 import Amoebius.Dsl.Topology (ComputeEngine (KindEngine), NodeSupply (FixedSupply), mkTopology)
 import Amoebius.Manifest.K8sObject (K8sObject (..), ObjectMetadata (..), ObjectSpec (..), PodTemplate (..))
 import Amoebius.Manifest.Render (RenderRefusal (..), renderCandidates, renderRefusalTag)
+import Amoebius.Scope.Attested (attest, principalAttestation, scopeStamp)
+import Amoebius.Test.ScopeFixture (fixtureIdentityText)
 import Amoebius.Manifest.Types (K8sObjectKind (..))
 import Amoebius.Placement.Witness (epochNamed, place)
 import Amoebius.Storage.Witness
@@ -45,7 +48,7 @@ import Amoebius.Storage.Witness
   , volumePvName
   , volumeRefusalTag
   )
-import Amoebius.Vocabulary (Quantity (..), quantityValue)
+import Amoebius.Vocabulary (Architecture (Amd64), linuxCpuDetected, Quantity (..), quantityValue)
 import Data.Aeson (encode)
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Lazy qualified as Lazy
@@ -140,6 +143,8 @@ claimRows = concat [scenario name candidates | (name, candidates) <- scenarios]
   refusedIdentity problem = case problem of
     PvcWithoutStatefulSet source -> source
     VolumeRefused source _ -> source
+    InvalidEngineRuntime source -> source
+    UnattestedScope source -> source
   identityText (K8sObjectIdentity text) = text
   kindText kind = Text.pack (show kind)
   nodeOf object = case objectSpec object of
@@ -152,7 +157,11 @@ claimRows = concat [scenario name candidates | (name, candidates) <- scenarios]
 -- | Render a source set through the placement of its one workload on one node.
 outcomeOf :: [RenderSourceCandidate] -> Either RenderRefusal [K8sObject]
 outcomeOf candidates = case (placed, sources) of
-  (Right witness, Right set) -> renderCandidates witness (epochNamed "generation-1") set
+  (Right witness, Right set) -> do
+    identity <- either (const (Left (UnattestedScope "fixture identity"))) Right (fixtureIdentityText "fixture" "renderer")
+    nested <- either (const (Left (UnattestedScope "fixture scope"))) Right $ attest (principalAttestation identity) $ \scope ->
+      renderCandidates (Map.fromList [(owner, scopeStamp scope) | owner <- [DeploymentGlobalOwner, CapabilityServiceOwner "assets"]]) witness (epochNamed "generation-1") set
+    nested
   _ -> Left (PvcWithoutStatefulSet "the fixture did not build")
  where
   node =
@@ -162,6 +171,8 @@ outcomeOf candidates = case (placed, sources) of
       , nodeEnvironment = NativeLinux
       , nodeCapacity = NodeCapacity (ResourceVector 16 64 500 110) NoCpuOvercommit Map.empty
       , nodeTaints = Set.empty
+      , nodeDetected = linuxCpuDetected Amd64
+      , nodeRole = KindWorker
       }
   workload =
     Workload

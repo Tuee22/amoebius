@@ -4,7 +4,9 @@
 --
 -- The caller supplies source bytes and an absolute solver path.  This module
 -- owns the annotation grammar, expression grammar, sort checking, SMT query,
--- refinement classification, and implementation-to-model correspondence.
+-- and diagnostic classification. An executable path supplies no decision
+-- authority: parsed responses remain inconclusive and this parked API has no
+-- positive proof constructor. Implementation correspondence remains unverified.
 module Amoebius.Checker.Refinement
   ( RefinementSolver
   , mkRefinementSolver
@@ -67,7 +69,7 @@ data RefinementSource = RefinementSource
   deriving stock (Eq, Ord, Show)
 
 data RefinementStatus
-  = Proved
+  = Inconclusive
   | PostconditionCounterexample
   | CorrespondenceMismatch
   | UnknownInvariant
@@ -327,14 +329,14 @@ checkRefinement solver invariants source = case Map.lookup key invariants of
       case correspondenceResult of
         Left problem -> pure (Left problem)
         Right (SolverSat, solverModel) ->
-          pure (Right (makeResult CorrespondenceMismatch "postcondition does not imply the registered model invariant" solverModel))
+          pure (Right (makeResult Inconclusive "UNADMITTED-SOLVER: sat response is an unverified correspondence counterexample" solverModel))
         Right (SolverUnsat, _) -> do
           let proofPost = post
           preservation <- solve solver (renderQuery arguments [precondition, "(= result " <> body <> ")", "(not " <> proofPost <> ")"])
           pure $ case preservation of
             Left problem -> Left problem
-            Right (SolverSat, solverModel) -> Right (makeResult PostconditionCounterexample "function body does not establish its postcondition" solverModel)
-            Right (SolverUnsat, _) -> Right (makeResult Proved "postcondition preserved and correspondence established" "")
+            Right (SolverSat, solverModel) -> Right (makeResult Inconclusive "UNADMITTED-SOLVER: sat response is an unverified postcondition counterexample" solverModel)
+            Right (SolverUnsat, _) -> Right (makeResult Inconclusive "UNADMITTED-SOLVER: unsat responses do not establish preservation or correspondence" "")
  where
   key = (refinementModel source, refinementInvariant source)
   arguments = refinementArguments source

@@ -19,6 +19,7 @@ module Amoebius.Dsl.Pipeline
   , dumpPlan
   , dumpProvisioned
   , compileToDirectory
+  , lowerToDirectory
   , ApplyOutcome (..)
   , applyToDirectory
   , EndpointOutcome (..)
@@ -40,20 +41,26 @@ import Amoebius.Capacity.Provision
   , observedMaterializedCapacity
   , observedMaterializedIdentities
   , planInfrastructure
-  , provision
+  , provisionWithEngineOfferings
   , provisionErrorTag
   , provisionedPlacement
   , provisionedRenderSources
   , provisionedSchedulerSystem
   , provisionedServiceParts
   )
-import Amoebius.Capacity.RenderSource (K8sObjectIdentity (K8sObjectIdentity), provisionedRenderSourceMap, renderSourceActivation)
+import Amoebius.Capacity.RenderSource (K8sObjectIdentity (K8sObjectIdentity), RenderActivation (Immediate), ReconcileMode (ServerSideApply), provisionedRenderSourceMap, renderSourceActivation)
 import Amoebius.Capacity.Types (Assignment (..), MaterializedNode (..), Node (..), Placement (..))
+import Amoebius.Capability.Types (BoundApp (boundAppName))
 import Amoebius.Dsl.Decode (DecodeRefusal, decodeRefusalTag, decodeRoot, dumpRoot)
 import Amoebius.Dsl.Dump (commas, natural, row, rows, vector)
 import Amoebius.Dsl.Import (Frozen, ImportRefusal, freezeText, frozenText, importRefusalTag)
-import Amoebius.Dsl.Lower (LowerRefusal, Lowered, dumpLowered, loweredDeployment, loweredSupply, loweredTopology, lowerDeployment, lowerRefusalTag)
+import Amoebius.Dsl.Lower (LowerRefusal, Lowered, dumpLowered, loweredApp, loweredDeployment, loweredSupply, loweredTopology, lowerDeployment, lowerRefusalTag)
+import Amoebius.Dsl.Extensions
+import Amoebius.Dsl.TargetModel (fakeEngineOfferings, targetModelDump)
 import Amoebius.Dsl.Policy (deploymentLabel, provisionGeneration, provisionPolicy)
+import Amoebius.Dsl.Topology (Topology, ComputeEngine (Rke2Engine), NodeSupply (..), topologyEngine, topologySupply)
+import Amoebius.Topology.Lanes (laneLabels)
+import Amoebius.Vocabulary (detectedArchitecture, detectedSubstrate, architectureName, substrateName)
 import Amoebius.Placement.Witness (placedPlacement)
 import Amoebius.Kernel.Interpret
   ( InterpretRefusal
@@ -69,7 +76,6 @@ import Amoebius.Kernel.Step
   ( Frame (ImmediateFrame)
   , Step
   , StepRefusal
-  , chain
   , manifestBytes
   , planOf
   , renderPlan
@@ -77,7 +83,11 @@ import Amoebius.Kernel.Step
   , validateChain
   )
 import Amoebius.Manifest (renderAll)
-import Amoebius.Manifest.Render (RenderRefusal, renderRefusalTag)
+import Amoebius.Manifest.Render (RenderRefusal, renderRefusalTag, stampScope)
+import Amoebius.Scope.Attested (ScopeStamp)
+import Amoebius.Manifest.K8sObject (K8sObject (..), K8sObjectKind (NodeKind), ObjectMetadata (..), ObjectSpec (GlobalControlSpec))
+import Amoebius.Image.Recipe (RecipeRefusal (NoImageLanes), imageRecipe, recipeRefusalTag)
+import Amoebius.Image.Bake (imageRecipeArtifacts)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Except (ExceptT, runExceptT, throwE)
 import Control.Monad.Trans.Writer.Strict (Writer, runWriter, tell)
@@ -85,6 +95,7 @@ import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Lazy qualified as Lazy
 import Data.Map.Strict qualified as Map
+import Data.List.NonEmpty qualified as NonEmpty
 import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
@@ -101,6 +112,9 @@ data PipelineError
   | RenderFailed RenderRefusal
   | ChainFailed StepRefusal
   | DryRunFailed InterpretRefusal
+  | RecipeFailed RecipeRefusal
+  | ExtensionFailed ExtensionRefusal
+  | ExtensionChainFailed ExtensionRefusal
   deriving stock (Eq, Show)
 
 -- | The stable tag of a refusal: the tag its own stage gives it.
@@ -114,6 +128,9 @@ pipelineErrorTag problem = case problem of
   RenderFailed refusal -> renderRefusalTag refusal
   ChainFailed refusal -> stepRefusalTag refusal
   DryRunFailed refusal -> interpretRefusalTag refusal
+  RecipeFailed refusal -> recipeRefusalTag refusal
+  ExtensionFailed refusal -> extensionRefusalTag refusal
+  ExtensionChainFailed refusal -> extensionRefusalTag refusal
 
 -- | The stage that refused.
 pipelineErrorStage :: PipelineError -> Text
@@ -126,6 +143,9 @@ pipelineErrorStage problem = case problem of
   RenderFailed _ -> "render"
   ChainFailed _ -> "chain"
   DryRunFailed _ -> "dry-run"
+  RecipeFailed _ -> "recipe"
+  ExtensionFailed _ -> "attest"
+  ExtensionChainFailed _ -> "extension-chain"
 
 -- | The refusal record: tag, stage, and detail, tab-separated on one line.
 renderPipelineError :: PipelineError -> Text
@@ -171,25 +191,86 @@ compileDeployment frozen = case runWriter (runExceptT (stages frozen)) of
 
 stages :: Frozen -> Pipe [Step]
 stages frozen = do
-  emitText "frozen.dhall" (frozenText frozen)
-  root <- refuse DecodeFailed (decodeRoot frozen)
-  emitText "decoded.dump" (dumpRoot root)
-  lowered <- refuse LowerFailed (lowerDeployment root)
-  emitText "lowered.dump" (dumpLowered lowered)
+  lowered <- frontStages frozen
   planned <- refuse PlanFailed (planInfrastructure (loweredSupply lowered) (loweredDeployment lowered))
   emitText "plan.dump" (dumpPlan lowered planned)
   observation <- refuse PlanFailed (observationFromPlanningResult planned)
   context <- refuse PlanFailed (mkProvisionContext deploymentLabel provisionGeneration provisionPolicy emptyPriorProvisionCatalog observation)
-  provisioned <- refuse ProvisionFailed (provision context (loweredTopology lowered) (loweredDeployment lowered))
+  let offerings = fakeEngineOfferings (loweredTopology lowered) (loweredDeployment lowered)
+  emitText "target-model.tsv" (targetModelDump offerings)
+  provisioned <- refuse ProvisionFailed (provisionWithEngineOfferings offerings context (loweredTopology lowered) (loweredDeployment lowered))
   emitText "provisioned.dump" (dumpProvisioned provisioned)
-  objects <- refuse RenderFailed (renderAll provisioned)
-  steps <- refuse ChainFailed (chain objects)
+  attested <- refuse ExtensionFailed (attestDeployment lowered)
+  emitText "extensions.tsv" (extensionFacts attested)
+  emitText "scope.tsv" (scopeFacts attested)
+  emitText "workflow.tsv" (workflowFacts attested)
+  mapM_ (uncurry emit) (conformanceFiles attested)
+  mapM_ (uncurry emitText) admittedSources
+  objects <- refuse RenderFailed (renderAll (scopeAuthorities attested) provisioned)
+  steps <- refuse ExtensionChainFailed (contributedSteps attested
+    (objects <> nodeObjects (deploymentScope attested) (loweredTopology lowered)))
   refuse ChainFailed (validateChain steps)
   emit "manifest.json" (manifestBytes steps)
   emit "chain.dump" (Lazy.toStrict (renderPlan (planOf steps)))
   planned' <- refuse DryRunFailed (dryRun steps)
   emitText "dry-run.dump" (renderDryRun planned')
   pure steps
+
+-- | The rke2 node envelope carries the observed substrate and all derived
+-- lanes alongside the inventory's taints. Live NodeSpec projection is later.
+nodeObjects :: ScopeStamp -> Topology -> [K8sObject]
+nodeObjects authority topology
+  | topologyEngine topology /= Rke2Engine = []
+  | otherwise = case topologySupply topology of
+      FixedSupply nodes -> map nodeObject (NonEmpty.toList nodes)
+      ElasticSupply {} -> []
+ where
+  nodeObject node = stampScope authority K8sObject
+    { objectIdentity = K8sObjectIdentity ("node/" <> nodeId node)
+    , objectApiVersion = "v1"
+    , objectKind = NodeKind
+    , objectMetadata = ObjectMetadata (nodeId node) Nothing labels Map.empty
+    , objectSpec = GlobalControlSpec (Map.fromList [("role", Text.pack (show (nodeRole node))), ("taints", commas (Set.toAscList (nodeTaints node)))])
+    , objectActivation = Immediate
+    , objectReconcileMode = ServerSideApply
+    }
+   where
+    detected = nodeDetected node
+    labels = Map.fromList
+      ([ ("amoebius.io/owner", "deployment-global"), ("app.kubernetes.io/managed-by", "amoebius"), ("amoebius.io/epoch", "generation-1")
+       , ("amoebius.io/substrate", Text.pack (substrateName (detectedSubstrate detected)))
+       , ("kubernetes.io/arch", Text.pack (architectureName (detectedArchitecture detected)))
+       ] <> [("amoebius.io/lane-" <> Text.replace "/" "-" lane, "true") | lane <- laneLabels detected])
+
+-- | The hardware-free prefix can be observed without claiming provisioning
+-- or an application on a substrate absent from the gate.
+frontStages :: Frozen -> Pipe Lowered
+frontStages frozen = do
+  emitText "frozen.dhall" (frozenText frozen)
+  root <- refuse DecodeFailed (decodeRoot frozen)
+  emitText "decoded.dump" (dumpRoot root)
+  lowered <- refuse LowerFailed (lowerDeployment root)
+  emitText "lowered.dump" (dumpLowered lowered)
+  recipe <- case topologySupply (loweredTopology lowered) of
+    FixedSupply nodes -> refuse RecipeFailed (imageRecipe (boundAppName (loweredApp lowered)) (topologyEngine (loweredTopology lowered)) (fmap nodeDetected nodes))
+    ElasticSupply {} -> throwE (RecipeFailed NoImageLanes)
+  artefacts <- refuse RecipeFailed (imageRecipeArtifacts recipe)
+  mapM_ (uncurry emitText) artefacts
+  pure lowered
+
+lowerToDirectory :: FilePath -> FilePath -> IO (Either PipelineError ())
+lowerToDirectory input output = do
+  source <- Encoding.decodeUtf8 <$> ByteString.readFile input
+  frozen <- freezeText (takeDirectory input) source
+  let (result, files) = case frozen of
+        Left problem -> (Left (ImportFailed problem), [])
+        Right value -> let (outcome, artefacts) = runWriter (runExceptT (frontStages value)) in (fmap (const ()) outcome, artefacts)
+  createDirectoryIfMissing True output
+  writeArtefacts output files
+  case result of
+    Left problem -> ByteString.writeFile (output </> "refusal.tsv") (Encoding.encodeUtf8 (renderPipelineError problem))
+    Right () -> pure ()
+  pure result
 
 -- | The plan dump: what the plan demanded and what the materialised supply offered.
 dumpPlan :: Lowered -> InfrastructurePlanningResult -> Text
@@ -235,12 +316,18 @@ compileToDirectory input output = do
   source <- Encoding.decodeUtf8 <$> ByteString.readFile input
   compiled <- compileText (takeDirectory input) source
   createDirectoryIfMissing True output
-  mapM_ (\(path, bytes) -> ByteString.writeFile (output </> path) bytes) (compiledFiles compiled)
+  writeArtefacts output (compiledFiles compiled)
   case compiledRefusal compiled of
     Nothing -> pure (Right (compiledSteps compiled))
     Just problem -> do
       ByteString.writeFile (output </> "refusal.tsv") (Encoding.encodeUtf8 (renderPipelineError problem))
       pure (Left problem)
+
+writeArtefacts :: FilePath -> [Artefact] -> IO ()
+writeArtefacts output = mapM_ (\(path, bytes) -> do
+  let target = output </> path
+  createDirectoryIfMissing True (takeDirectory target)
+  ByteString.writeFile target bytes)
 
 data ApplyOutcome
   = ApplyRefused PipelineError

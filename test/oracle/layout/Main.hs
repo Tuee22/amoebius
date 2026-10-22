@@ -3,6 +3,14 @@
 -- | Independent expectations for the layout projection. No product package is
 -- imported; the allowed classes and refusal tags are literals here.
 module Main (main) where
+import PackageImportOracle (packageImportChecks, runPackageImportOracle)
+import TestSourceOracle (testSourceChecks, testSourceExampleChecks, runTestSourceOracle)
+import ToolSourceOracle (toolSourceChecks, toolSourceExampleChecks, runToolSourceOracle)
+import PulumiSourceOracle (pulumiSourceChecks, pulumiSourceExampleChecks, runPulumiSourceOracle)
+import RuntimeIdentityOracle (runtimeIdentityChecks, runtimeIdentityExampleChecks, runRuntimeIdentityOracle)
+import IgnoreContextOracle (ignoreContextChecks, ignoreContextExampleChecks, runIgnoreContextOracle)
+import SourceGraphOracle (sourceGraphChecks, sourceGraphExampleChecks, runSourceGraphOracle)
+import BootstrapSourceOracle (bootstrapSourceChecks, bootstrapSourceExampleChecks, runBootstrapSourceOracle, expectedBootstrapCalls, expectedBootstrapEffects)
 
 import Control.Exception (SomeException, try)
 import Control.Monad (unless)
@@ -22,7 +30,7 @@ import Data.Text.Encoding.Error (lenientDecode)
 import Data.Text.IO qualified as TextIO
 import System.Directory (createDirectoryIfMissing)
 import System.Environment (getArgs)
-import System.Exit (ExitCode (..), exitFailure)
+import System.Exit (ExitCode (..), exitFailure, exitSuccess)
 import System.FilePath (normalise, takeExtension, (</>))
 import System.Process (readProcessWithExitCode)
 import SourceScan
@@ -30,10 +38,28 @@ import SourceScan
 main :: IO ()
 main = do
   arguments <- getArgs
+  case arguments of
+    ["--bootstrap-source", target] -> runBootstrapSourceOracle target >> exitSuccess
+    ["--source-graph", target] -> runSourceGraphOracle target >> exitSuccess
+    ["--ignore-context", target] -> runIgnoreContextOracle target >> exitSuccess
+    ["--runtime-identity", target] -> runRuntimeIdentityOracle target >> exitSuccess
+    ["--pulumi-source", target] -> runPulumiSourceOracle target >> exitSuccess
+    ["--tool-source", target] -> runToolSourceOracle target >> exitSuccess
+    ["--test-source", target] -> runTestSourceOracle target >> exitSuccess
+    ["--package-imports", target] -> runPackageImportOracle target >> exitSuccess
+    _ -> pure ()
   let directory = case arguments of
         [path] -> path
         _ -> ".build/runs/layout-suite"
   expectedPaths <- map Text.unpack . Text.lines <$> TextIO.readFile (directory </> "paths.txt")
+  packageChecks <- packageImportChecks directory
+  testChecks <- testSourceChecks directory
+  toolChecks <- toolSourceChecks directory
+  pulumiChecks <- pulumiSourceChecks directory
+  runtimeChecks <- runtimeIdentityChecks directory
+  ignoreChecks <- ignoreContextChecks directory
+  sourceChecks <- sourceGraphChecks directory
+  bootstrapChecks <- bootstrapSourceChecks directory
   report <- Text.lines <$> TextIO.readFile (directory </> "layout.tsv")
   cases <- parsePairs <$> TextIO.readFile (directory </> "cases.tsv")
   (grantCompilerValid, grantCompilerDetail) <- observeGrantTwin directory
@@ -56,7 +82,10 @@ main = do
   fixtureSinks <- Text.lines <$> TextIO.readFile (directory </> "fixture-sinks.tsv")
   fixtureStages <- Text.lines <$> TextIO.readFile (directory </> "fixture-stages.tsv")
   fixtureForks <- Text.lines <$> TextIO.readFile (directory </> "fixture-forks.tsv")
+  standaloneExports <- Text.lines <$> TextIO.readFile (directory </> "fixture-standalone-exports.tsv")
   fixtureFindings <- Text.lines <$> TextIO.readFile (directory </> "fixture-findings.tsv")
+  quoteRows <- Text.lines <$> TextIO.readFile (directory </> "fixture-quotes.tsv")
+  constructorReexportRows <- Text.lines <$> TextIO.readFile (directory </> "fixture-constructor-reexports.tsv")
   challengePaths <- parseChallenges <$> TextIO.readFile (directory </> "challenge-paths.tsv")
   challengeFindings <- mapM (readChallengeFinding directory) challengePaths
   let masked = maskNonce (challengeNonce challengePaths)
@@ -71,6 +100,12 @@ main = do
         ["graph-file", path, name] <- [Text.splitOn "\t" line]]
       graphImports = Set.fromList [(path, name) | line <- report,
         ["graph-import", path, name] <- [Text.splitOn "\t" line]]
+      sourceReach seen [] = seen
+      sourceReach seen (name : rest) = case
+          [path | (path, moduleName) <- Set.toList graphModules, moduleName == name] of
+        [path] | path `Set.notMember` seen -> sourceReach (Set.insert path seen)
+          ([imported | (source, imported) <- Set.toList graphImports, source == path] <> rest)
+        _ -> sourceReach seen rest
       graphModuleReexports = Set.fromList [(path, name) | line <- report,
         ["graph-module-reexport", path, name] <- [Text.splitOn "\t" line]]
       graphTopLevel = Set.fromList [(path, name) | line <- report,
@@ -173,13 +208,14 @@ main = do
       expectedCompilerRejectedCalls = Set.fromList
         [(path, owner, site, target, "1928", rootSite, sourceDigest)
         | (path, owner, rootTarget, rootSite, sourceDigest, True) <- denialObservations
-        , (callPath, callOwner, site, target, _, _, _, _) <-
-            Set.toList graphStandaloneDeniedSourceCalls
+        , (callPath, callOwner, site, target) <- Set.toList graphCallSites
         , callPath == path, callOwner == owner
         , siteContainedBy site rootSite
-        , any (\(source, sourceOwner, rootCallSite, callTarget, _, _, _, _) ->
-            source == path && sourceOwner == owner && rootCallSite == rootSite
-              && callTarget == rootTarget) (Set.toList graphStandaloneDeniedSourceCalls)]
+        -- These fixtures refuse the private head; Grant additionally encloses
+        -- private Allowance heads. Public Location/Bytes/Slots arguments keep
+        -- their ordinary resolved attribution despite the enclosing refusal.
+        , target == rootTarget || (rootTarget == "Grant" && target == "Allowance")
+        , Set.member (path, owner, rootSite, rootTarget) graphCallSites]
       expectedScopeRejectedCalls = Set.fromList
         [(path, owner, site, target, Text.pack (show code), rootSite, sourceDigest)
         | (path, owner, rootTarget, rootSite, code, sourceDigest, True) <- scopeObservations
@@ -205,6 +241,11 @@ main = do
         [(component, path, owner, site, target, imported, package, unit, parent, callee) | line <- report,
          ["graph-call-external-member-candidate", component, path, owner, site, target,
           imported, package, unit, parent, callee] <- [Text.splitOn "\t" line]]
+      graphConstructorReexports = Set.fromList
+        [(component, path, owner, site, target, facadeComponent, facadePath, imported, package, unit, parent, callee)
+        | line <- report,
+          ["graph-call-constructor-reexport-candidate", component, path, owner, site, target,
+           facadeComponent, facadePath, imported, package, unit, parent, callee] <- [Text.splitOn "\t" line]]
       graphAvailableCallCandidates = Set.fromList
         [(component, path, owner, site, target, imported, package, unit, callee) | line <- report,
          ["graph-call-available-unit-candidate", component, path, owner, site, target,
@@ -400,6 +441,9 @@ main = do
       externalMemberCallKeys = Set.fromList
         [(component, path, owner, site, target)
         | (component, path, owner, site, target, _, _, _, _, _) <- Set.toList graphExternalMemberCallCandidates]
+      constructorReexportCallKeys = Set.fromList
+        [(component, path, owner, site, target)
+        | (component, path, owner, site, target, _, _, _, _, _, _, _) <- Set.toList graphConstructorReexports]
       availableCallKeys = Set.fromList
         [(component, path, owner, site, target)
         | (component, path, owner, site, target, _, _, _, _) <- Set.toList graphAvailableCallCandidates]
@@ -435,7 +479,7 @@ main = do
           [graphUniqueCallKeys, graphAmbiguousCallKeys,
            standaloneLocalCallKeys, standaloneLexicalCallKeys, standaloneImportedCallKeys,
            standaloneExternalCallKeys, standaloneExternalMemberCallKeys,
-           externalCallKeys, externalMemberCallKeys,
+           externalCallKeys, externalMemberCallKeys, constructorReexportCallKeys,
            availableCallKeys, availableMemberCallKeys,
            deferredSeedCallKeys,
            preludeCallKeys, availablePreludeCallKeys, standalonePreludeCallKeys,
@@ -661,6 +705,11 @@ main = do
                && baseName className == baseName classHead
                && delegate `elem` Text.words (Text.filter (`notElem` ("()" :: String)) targetHead))
           (Set.toList graphInstanceDeclarations)
+          || any (\(path, typeName, _, targetClass, _, _, _, _, _, _) ->
+               path == targetPath && typeName == delegate
+                 && targetHead == "derived " <> typeName
+                 && baseName targetClass == baseName classHead)
+               (Set.toList graphDerivedRoutes)
       derivedRuleHolds (path, typeName, classText, classHead, strategy, declaredAs, generation, delegate, disposition, provider) =
           let anyClassOn = maybe False (languagePragmaEnabled "DeriveAnyClass") (Map.lookup path sourceTexts)
               targets = Map.findWithDefault [] (path, typeName, classText) derivedTargetMap
@@ -828,9 +877,12 @@ main = do
         , ("compiler-import-control", Set.member ("src/Amoebius/Layout/SourceGraph.hs", "GHC.Parser") graphImports,
            Text.pack (show (Set.size graphImports)))
         , ("compiler-module-reexport-control", graphModuleReexports == Set.fromList
-             [("src/Amoebius/Execution/JobTerminalLive.hs", "Amoebius.Store.ControlPlaneState"),
+               [("src/Amoebius/Dsl/AstCheck.hs", "Admission"),
+              ("src/Amoebius/Dsl/SanctionedApi.hs", "Api"),
+              ("src/Amoebius/Execution/JobTerminalLive.hs", "Amoebius.Store.ControlPlaneState"),
               ("src/Amoebius/Substrate/Apple.hs", "Amoebius.HostWorker.Capacity"),
               ("src/Amoebius/Substrate/Apple.hs", "Amoebius.Substrate.Lima"),
+              ("src/extension-link/Amoebius/Extension/Linked.hs", "Graph"),
               ("src/manifest-render/Amoebius/Manifest/K8sObject.hs", "Amoebius.Manifest.Types"),
               ("src/validation-kernel/Amoebius/Validation/StatusFrontier.hs", "Amoebius.Plan.StatusFrontier"),
               ("src/vendor/Pulsar.hs", "Pulsar.Types")],
@@ -913,7 +965,18 @@ main = do
                   (Set.toList graphInstanceSourceContracts),
            Text.pack (show (Set.size graphInstanceSourceContracts)))
         , ("compiler-instance-external-contract-control",
-             Set.size graphInstanceExternalContracts == 292
+             Set.size graphInstanceExternalContracts == 294
+               && Set.fromList
+                    [(headText, className, method, imported, package, mode)
+                    | (path, headText, className, method, imported, package,
+                       unit, mode) <- Set.toList graphInstanceExternalContracts
+                    , path == "src/vocabulary/Amoebius/Vocabulary.hs"
+                    , not (Text.null unit)]
+                    == Set.fromList
+                      [("NFData Detected", "NFData", "rnf", "Control.DeepSeq",
+                        "deepseq", "explicit")
+                      , ("NFData SubstrateProfile", "NFData", "rnf", "Control.DeepSeq",
+                        "deepseq", "explicit")]
                && Set.null uncontractedInstanceMethods
                && methodImportValid
                && "import Data.Aeson (FromJSON (parseJSON),"
@@ -1033,10 +1096,30 @@ main = do
              && all (\(_, _, sourceSite, _, targetSite) ->
                sourceSite /= "unlocated" && targetSite /= "unlocated") (Set.toList graphControlEdges),
            Text.pack (show (Set.size graphControlEdges)))
-        , ("compiler-dynamic-load-control", graphDynamicLoads == Set.singleton
-             ("test/fixture/chain_boundary/astcheck/negative_template_haskell.hs",
-              "value", "2:9-2:25", "template-haskell-splice", "generateValue"),
+        , ("compiler-dynamic-load-control", graphDynamicLoads == Set.fromList
+             [("test/fixture/chain_boundary/astcheck/negative_template_haskell.hs",
+               "value", "2:9-2:25", "template-haskell-splice", "generateValue"),
+              ("src/extension-link/Amoebius/Extension/Linked.hs", "jitBuild", "27:12-27:55", "template-haskell-splice", "admitContribution"),
+              ("src/extension-link/Amoebius/Extension/Linked.hs", "coordination", "28:16-28:63", "template-haskell-splice", "admitContribution"),
+              ("src/extension-link/Amoebius/Extension/Linked.hs", "infernix", "29:12-29:55", "template-haskell-splice", "admitContribution"),
+              ("src/extension-link/Amoebius/Extension/Linked.hs", "jitml", "30:9-30:49", "template-haskell-splice", "admitContribution"),
+              ("src/extension-admission/Amoebius/Extension/LinkSeal.hs", "admitContribution", "36:76-36:91", "template-haskell-splice", "pure"),
+              ("src/extension-admission/Amoebius/Extension/LinkSeal.hs", "admitContribution", "40:30-40:45", "template-haskell-splice", "varE")],
            Text.pack (show graphDynamicLoads))
+        , ("compiler-quotation-controls", Set.fromList quoteRows == Set.fromList
+             [ "graph-call-site\tQuoteControl.hs\texpression\t4:17-4:26\tcallee"
+             , "graph-reference-site\tQuoteControl.hs\texpression\t4:17-4:23\tcallee"
+             , "graph-reference-site\tQuoteControl.hs\texpression\t4:24-4:26\t()"
+             , "graph-reference-site\tQuoteControl.hs\tname\t5:8-5:15\tcallee"
+             , "graph-call-site\tQuoteControl.hs\tnested\t6:15-6:35\tpure"
+             , "graph-call-site\tQuoteControl.hs\tnested\t6:23-6:32\tcallee"
+             , "graph-reference-site\tQuoteControl.hs\tnested\t6:15-6:19\tpure"
+             , "graph-reference-site\tQuoteControl.hs\tnested\t6:23-6:29\tcallee"
+             , "graph-reference-site\tQuoteControl.hs\tnested\t6:30-6:32\t()"
+             , "graph-dynamic-load\tQuoteControl.hs\tnested\t6:13-6:36\ttemplate-haskell-splice\tpure"
+             , "graph-unscanned\tQuoteControl.hs\tunsupported\tUntypedBracket"
+             ] && length quoteRows == 11,
+           Text.pack (show quoteRows))
         , ("compiler-record-field-control",
              not (Set.null graphRecordFields)
                && all (\(path, owner, site, receiver, field) ->
@@ -1242,7 +1325,7 @@ main = do
                       && Set.member (path, owner, site, target) graphCallSites
                       && Set.notMember (path, owner, site, target) graphLexicalCallSites
                       && Set.member (path, imported) graphImports
-                      && Set.member (provider, imported) graphModules
+                      && provider `Set.member` sourceReach Set.empty [imported]
                       && length [source | (source, name) <- Set.toList graphModules,
                         name == imported] == 1
                       && (Set.member (provider, callee) graphTopLevel
@@ -1256,6 +1339,20 @@ main = do
                           (Set.toList graphForeignSymbols)))
                   (Set.toList graphStandaloneImportedCalls),
            Text.pack (show (Set.size graphStandaloneImportedCalls)))
+        , ("standalone-reexport-boundary",
+             Set.fromList [fields | row <- standaloneExports,
+               let fields = Text.splitOn "\t" row,
+               take 1 fields == ["graph-call-standalone-imported-candidate"]]
+               == Set.fromList
+                 [ ["graph-call-standalone-imported-candidate", "StandaloneReexport.hs", "construct", "3:13-3:20", "Item", "StandaloneFacade", "Duplicate.hs", "Item"]
+                 , ["graph-call-standalone-imported-candidate", "StandaloneReexport.hs", "selector", "4:18-4:33", "itemField", "StandaloneFacade", "Duplicate.hs", "itemField"]
+                 , ["graph-call-standalone-imported-candidate", "StandaloneSelectiveUse.hs", "construct", "3:13-3:20", "Item", "StandaloneSelective", "Duplicate.hs", "Item"] ]
+               && Set.fromList [fields | row <- standaloneExports,
+                    let fields = Text.splitOn "\t" row, take 1 fields == ["graph-call-site-opaque"]]
+                  == Set.fromList
+                    [ ["graph-call-site-opaque", "-", "StandaloneReexport.hs", "hidden", "5:10-5:19", "Hidden", "standalone"]
+                    , ["graph-call-site-opaque", "-", "StandaloneSelectiveUse.hs", "selector", "4:18-4:33", "itemField", "standalone"] ],
+           "re-exported constructors and selectors; hidden members stay opaque")
         , ("compiler-standalone-source-denied-control",
              not (Set.null graphStandaloneDeniedSourceCalls)
                && all (\(path, owner, site, target, imported, provider, callee, reason) ->
@@ -1287,16 +1384,20 @@ main = do
         , ("compiler-rejected-source-call-control",
              all (\(_, _, _, _, _, valid) -> valid) denialObservations
                && all (\(_, _, _, _, _, _, valid) -> valid) scopeObservations
-               && Set.fromList [path | (path, _, _, _, _, _) <- denialObservations]
-                    == Set.fromList [path | (path, _, _, _, _, _, _, _) <-
-                         Set.toList graphStandaloneDeniedSourceCalls]
+               && all (\(path, owner, target, rootSite, _, _) ->
+                    Set.member (path, owner, rootSite, target) graphCallSites) denialObservations
+               && Set.fromList [path | (path, _, _, _, _, _, _, _) <-
+                    Set.toList graphStandaloneDeniedSourceCalls]
+                    `Set.isSubsetOf` Set.fromList [path | (path, _, _, _, _, _) <- denialObservations]
                && graphCompilerRejectedCalls ==
                     (expectedCompilerRejectedCalls `Set.union` expectedScopeRejectedCalls)
-               && Set.size graphCompilerRejectedCalls == 37,
+               && Set.size graphCompilerRejectedCalls == 39,
            Text.pack (show (Set.size graphCompilerRejectedCalls,
              Set.size expectedCompilerRejectedCalls, Set.size expectedScopeRejectedCalls,
              [(path, valid) | (path, _, _, _, _, valid) <- denialObservations],
-             [(path, valid) | (path, _, _, _, _, _, valid) <- scopeObservations])))
+             [(path, valid) | (path, _, _, _, _, _, valid) <- scopeObservations],
+             graphCompilerRejectedCalls `Set.difference` (expectedCompilerRejectedCalls `Set.union` expectedScopeRejectedCalls),
+             (expectedCompilerRejectedCalls `Set.union` expectedScopeRejectedCalls) `Set.difference` graphCompilerRejectedCalls)))
         , ("compiler-standalone-closed-export-refusal-control",
              closedExportSourceProof
                && Set.size expectedClosedExportRefusals == 3
@@ -1398,6 +1499,39 @@ main = do
         , ("compiler-import-partition-control", importPartition,
            Text.pack (show (Set.size componentImportKeys, Set.size internalImportKeys,
              Set.size externalImportKeys, Set.size forwardImportKeys, Set.size unresolvedImportKeys)))
+        , ("compiler-constructor-reexport-control",
+             Set.fromList [(path, site) | (_, path, _, site, _, _, _, _, _, _, _, _) <- Set.toList graphConstructorReexports]
+               == Set.fromList
+                 [("src/extension-contributions/Amoebius/Extension/Contributed/" <> name <> ".hs", site)
+                 | (name, site) <- [("Coordination", "11:6-11:24"), ("Infernix", "11:6-11:24"),
+                     ("JitBuild", "11:6-11:24"), ("JitML", "11:6-11:47")]]
+               && Set.size graphConstructorReexports == 4
+               && all (\(component, path, owner, site, target, facadeComponent, facadePath, imported, package, unit, parent, callee) ->
+                    component == "library:extension-contributions" && owner == "contribution" && target == "S.:|"
+                      && facadeComponent == "library:extension-surface"
+                      && facadePath == "src/extension-surface/Amoebius/Extension/Surface.hs"
+                      && imported == "Data.List.NonEmpty" && package == "base" && parent == "NonEmpty" && callee == ":|"
+                      && Set.member (path, owner, site, target) graphCallSites
+                      && Set.member (facadeComponent, facadePath, imported, package, unit) graphExternalImports
+                      && Set.member (unit, imported, parent, callee) graphModuleInterfaceMembers)
+                 (Set.toList graphConstructorReexports),
+           Text.pack (show graphConstructorReexports))
+        , ("compiler-constructor-reexport-pairs",
+             Set.fromList [fields | row <- constructorReexportRows,
+               "graph-call-constructor-reexport-candidate" : fields <- [Text.splitOn "\t" row]]
+               == Set.fromList
+                 [["test:consumer", "UseExternalFacades.hs", owner, site, target, "test:consumer", facade,
+                    "Example.Provider", "provider", "provider-unit", "Thing", "Thing"]
+                 | (owner, site, target, facade) <-
+                     [("good", "8:8-8:18", "F.Thing", "ExternalFacade.hs"),
+                      ("named", "11:9-11:19", "N.Thing", "ExternalNamed.hs"),
+                      ("relayed", "12:11-12:21", "R.Thing", "ExternalFacade.hs")]]
+               && Set.fromList [(owner, target) | row <- constructorReexportRows,
+                    ["graph-call-site-opaque", "test:consumer", "UseExternalFacades.hs", owner, _, target, "unattributed"]
+                      <- [Text.splitOn "\t" row]]
+                    == Set.fromList [("abstract", "A.Thing"), ("hidden", "H.Thing"), ("cycle", "C.Thing")],
+           Text.pack (show [row | row <- constructorReexportRows,
+             "graph-call-" `Text.isPrefixOf` row && not ("graph-call-site\t" `Text.isPrefixOf` row)]))
         , ("compiler-external-call-candidate-control",
              not (Set.null graphExternalCallCandidates)
                && all (\(component, path, owner, site, target, imported, package, unit, callee) ->
@@ -1708,6 +1842,21 @@ main = do
            Text.pack (show packageOwed))
         ]
           <> routeChecks
+          <> packageChecks
+          <> testChecks
+          <> testSourceExampleChecks report
+          <> toolChecks
+          <> toolSourceExampleChecks report
+          <> pulumiChecks
+          <> pulumiSourceExampleChecks report
+          <> runtimeChecks
+          <> runtimeIdentityExampleChecks report
+          <> ignoreChecks
+          <> ignoreContextExampleChecks report
+          <> sourceChecks
+          <> sourceGraphExampleChecks report
+          <> bootstrapChecks
+          <> bootstrapSourceExampleChecks report
           <> [ ("path:" <> Text.pack path, Map.lookup path observedPaths == Just className, maybe "absent" id (Map.lookup path observedPaths))
              | path <- expectedPaths
              , let className = expectedClass path
@@ -1818,7 +1967,7 @@ observeMethodImportTwin directory = do
   compilerError (CompilerDiagnostic _ severity _ _ _ _ _) = severity == "Error"
   compile outputDir source =
     try (readProcessWithExitCode "cabal"
-      ["exec", "--jobs=1", "--", "ghc", "-j1", "-fdiagnostics-as-json",
+      ["exec", "--jobs=1", "--builddir=.build/dist-native", "--", "ghc", "-j1", "-fdiagnostics-as-json",
        "-fno-code", "-fforce-recomp", "-XGHC2024", "-outputdir", outputDir, source] "")
       :: IO (Either SomeException (ExitCode, String, String))
 
@@ -1826,7 +1975,7 @@ deniedConstructorExpectations :: [(FilePath, Text, Text, Text, Int, Int, FilePat
 deniedConstructorExpectations =
   [ ("test/fixture/chain_boundary/compilefail/checked_ctor_illegal.hs",
       "illegal", "CheckedExtensionSource", "5:11-5:45", 5, 11,
-      "src/Amoebius/Dsl/AstCheck.hs")
+      "src/extension-admission/Amoebius/Extension/AstCheck.hs")
   , ("test/negative/compile_fail/budget_calculus/grant_forged_unbounded.hs",
       "forged", "Grant", "31:3-34:67", 31, 3,
       "src/Amoebius/Calculus/Budget/Grant.hs")
@@ -1850,10 +1999,10 @@ deniedConstructorExpectations =
       "src/Amoebius/Calculus/Lift/Witness.hs")
   , ("test/negative/compile_fail/scope_index/forge_request_scope_illegal.hs",
       "illegal", "RequestScope", "4:37-4:75", 4, 37,
-      "src/Amoebius/Scope/Index.hs")
+      "src/scope-index/Amoebius/Scope/Attested.hs")
   , ("test/negative/compile_fail/scope_index/raw_resource_id_illegal.hs",
       "illegal", "ResourceId", "5:11-5:41", 5, 11,
-      "src/Amoebius/Scope/Index.hs")
+      "src/scope-index/Amoebius/Scope/Attested.hs")
   , ("test/negative/determinism_jitcache/freestring_key.hs",
       "forged", "CacheKey", "6:10-6:51", 6, 10,
       "src/Amoebius/Jit/Cache.hs")
@@ -1865,7 +2014,7 @@ observeDeniedConstructor :: FilePath
 observeDeniedConstructor directory (path, owner, target, rootSite, line, column, provider) = do
   let outputDir = directory </> "compiler-negative" </> "denied"
         </> Text.unpack (sha256Text (TextEncoding.encodeUtf8 (Text.pack path)))
-      arguments = ["exec", "--jobs=1", "--", "ghc", "-j1",
+      arguments = ["exec", "--jobs=1", "--builddir=.build/dist-native", "--", "ghc", "-j1",
         "-fdiagnostics-as-json", "-fno-code", "-fforce-recomp", "-XGHC2024"]
         <> ["-i" <> sourceDir | sourceDir <- sourceDirs]
         <> ["-outputdir", outputDir, path]
@@ -1888,7 +2037,9 @@ observeDeniedConstructor directory (path, owner, target, rootSite, line, column,
   pure (Text.pack path, owner, target, rootSite, digest, valid)
  where
   sourceDirs =
-    ["src", "src/calculus-composition", "src/capacity-topology",
+    ["src", "src/scope-index", "src/binding-subject", "src/extension-admission",
+     "src/extension-graph", "src/extension-spec", "src/extension-capabilities",
+     "src/calculus-composition", "src/capacity-topology", "src/vocabulary",
      "src/extension-conformance-gate", "src/extension-declaration",
      "src/extension-laws-compositional", "src/extension-laws",
      "src/extension-security-laws"]
@@ -1916,6 +2067,9 @@ scopeRejectionExpectations =
   , ("test/negative/determinism_jitcache/url_arm.hs",
       "authored", "Url", "6:12-6:48", 6, 12, 88464,
       "Data constructor not in scope")
+  , ("test/spec/dsl/capacity_topology_compile_fail/quorum_illegal.hs",
+      "quorum", "Two", "4:10-4:17", 4, 10, 88464,
+      "Data constructor not in scope")
   ]
 
 observeScopeRejection :: FilePath
@@ -1924,7 +2078,7 @@ observeScopeRejection :: FilePath
 observeScopeRejection directory (path, owner, target, rootSite, line, column, code, fragment) = do
   let outputDir = directory </> "compiler-negative" </> "scope"
         </> Text.unpack (sha256Text (TextEncoding.encodeUtf8 (Text.pack path)))
-      arguments = ["exec", "--jobs=1", "--", "ghc", "-j1",
+      arguments = ["exec", "--jobs=1", "--builddir=.build/dist-native", "--", "ghc", "-j1",
         "-fdiagnostics-as-json", "-fno-code", "-fforce-recomp", "-XGHC2024"]
         <> ["-i" <> sourceDir | sourceDir <- sourceDirs]
         <> ["-outputdir", outputDir, path]
@@ -1948,8 +2102,10 @@ observeScopeRejection directory (path, owner, target, rootSite, line, column, co
   pure (Text.pack path, owner, target, rootSite, code, digest, valid)
  where
   sourceDirs =
-    ["src", "src/transaction-vocabulary", "src/calculus-composition",
-     "src/capacity-topology", "src/extension-conformance-gate",
+    ["src", "src/scope-index", "src/binding-subject", "src/extension-admission",
+     "src/extension-graph", "src/extension-spec", "src/extension-capabilities",
+     "src/transaction-vocabulary", "src/test-scope-support", "src/calculus-composition",
+     "src/capacity-topology", "src/vocabulary", "src/extension-conformance-gate",
      "src/extension-declaration", "src/extension-laws-compositional",
      "src/extension-laws", "src/extension-security-laws"]
 
@@ -1982,67 +2138,6 @@ parseSite site = case Text.splitOn "-" site of
 
 metadata :: [FilePath]
 metadata = [".gitignore", ".dockerignore", "amoebius.cabal", "cabal.project", "probe/probe.cabal", "LICENSE"]
-
-expectedBootstrapCalls :: [(Text, Text)]
-expectedBootstrapCalls =
-  [ ("BootstrapAdapter.capture", "subprocess.run")
-  , ("BootstrapAdapter.ensure_ghcup", "RuntimeError")
-  , ("BootstrapAdapter.ensure_ghcup", "existing_hash_value.hexdigest")
-  , ("BootstrapAdapter.ensure_ghcup", "hash_value.hexdigest")
-  , ("BootstrapAdapter.ensure_ghcup", "hashlib.sha256")
-  , ("BootstrapAdapter.ensure_ghcup", "response.read")
-  , ("BootstrapAdapter.ensure_ghcup", "target.chmod")
-  , ("BootstrapAdapter.ensure_ghcup", "target.is_file")
-  , ("BootstrapAdapter.ensure_ghcup", "target.parent.mkdir")
-  , ("BootstrapAdapter.ensure_ghcup", "target.read_bytes")
-  , ("BootstrapAdapter.ensure_ghcup", "target.write_bytes")
-  , ("BootstrapAdapter.ensure_ghcup", "urllib.request.urlopen")
-  , ("BootstrapAdapter.environment", "cache.mkdir")
-  , ("BootstrapAdapter.environment", "home.mkdir")
-  , ("BootstrapAdapter.environment", "str")
-  , ("BootstrapAdapter.environment", "temporary.mkdir")
-  , ("BootstrapAdapter.handoff", "os.execv")
-  , ("BootstrapAdapter.platform", "platform.machine")
-  , ("BootstrapAdapter.platform", "platform.system")
-  , ("BootstrapAdapter.repository_root", ".resolve")
-  , ("BootstrapAdapter.repository_root", "Path")
-  , ("BootstrapAdapter.run", "subprocess.run")
-  , ("bootstrap", "adapter.capture")
-  , ("bootstrap", "adapter.ensure_ghcup")
-  , ("bootstrap", "adapter.environment")
-  , ("bootstrap", "adapter.handoff")
-  , ("bootstrap", "adapter.platform")
-  , ("bootstrap", "adapter.repository_root")
-  , ("bootstrap", "adapter.run")
-  , ("bootstrap", "binary_bytes.decode")
-  , ("bootstrap", "binary_text.strip")
-  , ("bootstrap", "select_artifact")
-  , ("bootstrap", "str")
-  , ("main", "BootstrapAdapter")
-  , ("main", "bootstrap")
-  , ("module", "main")
-  , ("select_artifact", "RuntimeError")
-  ]
-
-expectedBootstrapEffects :: [(Text, Text)]
-expectedBootstrapEffects =
-  [ ("BootstrapAdapter.capture", "subprocess.run")
-  , ("BootstrapAdapter.ensure_ghcup", "response.read")
-  , ("BootstrapAdapter.ensure_ghcup", "target.chmod")
-  , ("BootstrapAdapter.ensure_ghcup", "target.is_file")
-  , ("BootstrapAdapter.ensure_ghcup", "target.parent.mkdir")
-  , ("BootstrapAdapter.ensure_ghcup", "target.read_bytes")
-  , ("BootstrapAdapter.ensure_ghcup", "target.write_bytes")
-  , ("BootstrapAdapter.ensure_ghcup", "urllib.request.urlopen")
-  , ("BootstrapAdapter.environment", "cache.mkdir")
-  , ("BootstrapAdapter.environment", "home.mkdir")
-  , ("BootstrapAdapter.environment", "temporary.mkdir")
-  , ("BootstrapAdapter.handoff", "os.execv")
-  , ("BootstrapAdapter.platform", "platform.machine")
-  , ("BootstrapAdapter.platform", "platform.system")
-  , ("BootstrapAdapter.repository_root", ".resolve")
-  , ("BootstrapAdapter.run", "subprocess.run")
-  ]
 
 expectedChallengeTags :: [(Text, Text)]
 expectedChallengeTags =
@@ -2233,6 +2328,9 @@ expectedCases =
   , ("package.fork-duplicate", "ForkDependencyUnregistered managed-1.0.11")
   , ("package.fork-other-version", "ForkDependencyUnregistered managed-1.0.11")
   , ("package.fork-store-growth", "accepted")
+  , ("package.fork-opaque-unit-id", "accepted")
+  , ("package.fork-version-spoof", "ForkDependencyUnregistered logging-3.0.6")
+  , ("package.fork-version-missing", "ForkDependencyUnregistered logging-3.0.6")
 
   , ("graph.plain-data-declaration", "projected")
   , ("graph.class-default-call", "accounted")
@@ -2378,6 +2476,9 @@ expectedSinkEntries =
   , ("file-write", "System.Posix.Files", [(0, "path"), (1, "path")], ["createSymbolicLink", "rename", "createLink"])
   , ("file-query", "System.Posix.Files", path0,
       ["getFileStatus", "getSymbolicLinkStatus", "fileExist", "readSymbolicLink"])
+  , ("file-query", "System.PosixCompat.Files", path0, ["getSymbolicLinkStatus"])
+  , ("file-query", "Data.Streaming.Filesystem", path0, ["openDirStream"])
+  , ("file-query", "Data.Streaming.Filesystem", [], ["readDirStream", "closeDirStream"])
   , ("file-write", "System.Posix.Directory", path0, ["createDirectory", "removeDirectory", "changeWorkingDirectory"])
   , ("file-query", "System.Posix.Directory", path0, ["openDirStream"])
   , ("file-query", "System.Posix.Directory", [], ["readDirStream"])

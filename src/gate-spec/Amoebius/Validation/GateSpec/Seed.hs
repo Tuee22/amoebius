@@ -1,10 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 -- | Finite seed: validator predicate subjects, three mutations, and custody probes.
 module Amoebius.Validation.GateSpec.Seed
-  ( custodyProbes
-  , phaseZeroSpecInput
-  , predicateCases
-  ) where
+  ( custodyProbes, phaseZeroSpecInput, predicateCases ) where
 import Amoebius.Validation.GateSpec
 -- | The three bypass cases the driver must refuse, plus the clean case.
 predicateCases :: [ExactCase]
@@ -42,9 +39,7 @@ phaseZeroSpecInput =
     , inputCases = predicateCases <> custodyProbes
     , inputMutants = MutantPolicy {stageModules = [], perModule = 8, perGateCap = 40, killRatio = 3 / 5, stageArtefacts = []}
     , inputBinaryFact = Nothing
-    , inputSpineFact = Nothing
-    , inputSubstrate = HardwareFree
-    , inputSeed =
+    , inputSpineFact = Nothing, inputSubstrate = HardwareFree, inputSeed =
         Just
           SeedSpec
             { seedPredicateCases = ["clean-predicate", "digest-equality-bypass", "snapshot-freshness-bypass", "bootstrap-path-bypass"]

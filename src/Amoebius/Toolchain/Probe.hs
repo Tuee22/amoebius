@@ -13,6 +13,15 @@ module Amoebius.Toolchain.Probe
   , ProbeRefusal (..)
   , Schedule (..)
   , Writer (..)
+  , ProbeCase (..)
+  , ProbeSourceFault (..)
+  , probeCases
+  , probeCaseName
+  , probeSourceExamples
+  , probeSourcePaths
+  , probeSourceRequiredPaths
+  , probeSourceFindings
+  , retainedProbeRows
   , bridgeProbe
   , cleanSchedule
   , codegenProbe
@@ -32,7 +41,7 @@ module Amoebius.Toolchain.Probe
 import Amoebius.Toolchain.Acquire (ChildRecord (..), spawnChild)
 import Control.Exception (SomeException, finally, fromException, try)
 import GHC.IO.Handle (hDuplicate, hDuplicateTo)
-import System.IO (IOMode (WriteMode), hClose, hFlush, openFile, stdout)
+import System.IO (hClose, hFlush, openTempFile, stdout)
 import Control.Monad (filterM)
 import Control.Monad.Class.MonadFork (MonadFork (..))
 import Control.Concurrent.Class.MonadSTM.TVar (newTVarIO, readTVarIO, writeTVar)
@@ -40,7 +49,7 @@ import Control.Monad.Class.MonadSTM (MonadSTM (..))
 import Control.Monad.Class.MonadTimer (MonadDelay (..))
 import Control.Monad.IOSim (IOSim, runSimOrThrow)
 import Data.ByteString qualified as ByteString
-import Data.List (sort)
+import Data.List (group, sort, isPrefixOf)
 import Data.ProtoLens.Encoding.Bytes (putBytes, putVarInt, runBuilder)
 import Data.Proxy (Proxy (..))
 import Data.Text (Text)
@@ -54,8 +63,75 @@ import GHC.Generics (Generic)
 import Language.PureScript.Bridge (buildBridge, defaultBridge, writePSTypes)
 import Language.PureScript.Bridge.SumType (mkSumType)
 import Numeric.Natural (Natural)
-import System.Directory (createDirectoryIfMissing, doesDirectoryExist, listDirectory)
-import System.FilePath (makeRelative, (</>))
+import System.Directory (removeFile, createDirectoryIfMissing, doesDirectoryExist, listDirectory)
+import System.FilePath (makeRelative, takeExtension, (</>))
+
+-- | The report executes this closed, typed inventory. The independent oracle
+-- restates both its names and observations without importing this declaration.
+data ProbeCase = PositiveDecode | MistypedDecode | CleanSimulation
+  | PerturbedSimulation | RuntimeEncoding | BrowserContract
+  deriving (Eq, Ord, Enum, Bounded, Show)
+
+probeCases :: [ProbeCase]
+probeCases = [PositiveDecode, MistypedDecode, CleanSimulation, PerturbedSimulation, RuntimeEncoding, BrowserContract]
+
+probeCaseName :: ProbeCase -> Text
+probeCaseName value = case value of
+  PositiveDecode -> "decode.positive"
+  MistypedDecode -> "decode.mistyped"
+  CleanSimulation -> "sim.clean"
+  PerturbedSimulation -> "sim.perturbed"
+  RuntimeEncoding -> "codegen.link-token"
+  BrowserContract -> "bridge.files"
+
+data ProbeSourceFault = ForeignProbeScript FilePath Text
+  | ForeignProbeFixture FilePath Text | OmittedProbeCase ProbeCase
+  deriving (Eq, Show)
+
+-- | Inputs only. Foreign bytes are materialised exclusively in run-owned scratch.
+probeSourceExamples :: [(Text, Text, ProbeSourceFault)]
+probeSourceExamples =
+  [("foreign-probe-script", "shell", ForeignProbeScript "probe/run.sh" "exit 0\n")
+  ,("foreign-probe-script", "python", ForeignProbeScript "probe/check.py" "print(True)\n")
+  ,("foreign-probe-script", "extensionless", ForeignProbeScript "src/probe/check" "#!/bin/sh\nexit 0\n")
+  ,("foreign-probe-fixture", "json", ForeignProbeFixture "probe/case.json" "{\"expected\":true}\n")
+  ,("foreign-probe-fixture", "yaml", ForeignProbeFixture "probe/case.yaml" "expected: true\n")
+  ,("foreign-probe-fixture", "tsv", ForeignProbeFixture "probe/expected.tsv" "case\taccepted\n")
+  ,("foreign-probe-fixture", "dhall", ForeignProbeFixture "probe/case.dhall" positiveCase)
+  ,("foreign-probe-fixture", "proto", ForeignProbeFixture "probe/probe.proto" probeProto)
+  ,("foreign-probe-fixture", "purescript", ForeignProbeFixture "src/probe/Contract.purs" "module Contract where\n")]
+  <> [("probe-case-omitted", probeCaseName value, OmittedProbeCase value) | value <- [minBound .. maxBound]]
+
+-- | Complete path inventory for the retained probe's authored roots. Global
+-- source-graph and arbitrary-path classification remain the layout gate's claim.
+probeSourcePaths :: [FilePath] -> [FilePath]
+probeSourcePaths = filter (\path -> path == "src/Amoebius/Toolchain/Probe.hs"
+  || any (`isPrefixOf` path) ["probe/", "src/probe/", "test/toolchain/", "test/oracle/toolchain/"])
+
+probeSourceFindings :: [FilePath] -> [Text] -> [Text]
+probeSourceFindings paths names =
+  ["ForeignProbeInput:" <> Text.pack path | path <- probeSourcePaths paths,
+    takeExtension path /= ".hs" && path /= "probe/probe.cabal"]
+  <> ["ProbeSourceMissing:" <> Text.pack path | path <- probeSourceRequiredPaths, path `notElem` paths]
+  <> ["ProbeCaseMissing:" <> name | name <- required, name `notElem` names]
+  <> ["ProbeCaseUnexpected:" <> name | name <- names, name `notElem` required]
+  <> ["ProbeCaseDuplicate:" <> name | name : _ : _ <- group (sort names)]
+ where required = map probeCaseName [minBound .. maxBound]
+
+probeSourceRequiredPaths :: [FilePath]
+probeSourceRequiredPaths = ["src/Amoebius/Toolchain/Probe.hs", "src/probe/ExtensionAdmission.hs",
+  "probe/probe.cabal", "probe/app/Decode.hs", "probe/app/Sim.hs", "probe/app/ProbeDeps.hs"]
+
+retainedProbeRows :: FilePath -> [ProbeCase] -> IO [(Text, Text)]
+retainedProbeRows directory = mapM (\value -> (probeCaseName value,) <$> run value)
+ where
+  run value = case value of
+    PositiveDecode -> renderDecodeOutcome <$> decodeCase (directory </> "decode") "positive" positiveCase
+    MistypedDecode -> renderDecodeOutcome <$> decodeCase (directory </> "decode") "mistyped" mistypedCase
+    CleanSimulation -> pure (simProbe cleanSchedule)
+    PerturbedSimulation -> pure (simProbe perturbedSchedule)
+    RuntimeEncoding -> pure linkToken
+    BrowserContract -> Text.intercalate "," . map Text.pack <$> bridgeProbe (directory </> "purs")
 
 data ProbeRefusal
   = CodegenToolAbsent Text
@@ -203,19 +279,19 @@ data ProbeContract = ProbeContract
 bridgeProbe :: FilePath -> IO [FilePath]
 bridgeProbe directory = do
   createDirectoryIfMissing True directory
-  silently (writePSTypes directory (buildBridge defaultBridge) [mkSumType (Proxy :: Proxy ProbeContract)])
+  silently directory (writePSTypes directory (buildBridge defaultBridge) [mkSumType (Proxy :: Proxy ProbeContract)])
   files <- filesBeneath directory
   pure (sort (map (makeRelative directory) files))
 
 -- | Run an action with standard output routed to the null device: the bridge
 -- library narrates on stdout, and a report's stdout is rows only.
-silently :: IO a -> IO a
-silently action = do
+silently :: FilePath -> IO a -> IO a
+silently directory action = do
   saved <- hDuplicate stdout
   hFlush stdout
-  sink <- openFile "/dev/null" WriteMode
+  (path, sink) <- openTempFile directory "bridge-stdout"
   hDuplicateTo sink stdout
-  result <- action `finally` (hFlush stdout >> hDuplicateTo saved stdout >> hClose sink >> hClose saved)
+  result <- action `finally` (hFlush stdout >> hDuplicateTo saved stdout >> hClose sink >> hClose saved >> removeFile path)
   pure result
 
 filesBeneath :: FilePath -> IO [FilePath]

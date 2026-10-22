@@ -7,8 +7,6 @@ module DecisionPropSpec
 
 import Amoebius.Dsl.Decision
   ( DecisionFragment
-  , Rke2Servers (..)
-  , allRke2Servers
   , composeDecisionFragments
   , decodeDecision
   , distinctHostIds
@@ -18,8 +16,8 @@ import Amoebius.Dsl.Decision
   , fragmentServices
   , fragmentSubstrates
   , mkDecisionFragment
-  , rke2ServerCount
   )
+import Amoebius.Topology.Rke2 (Rke2Quorum (..), rke2Servers)
 import Control.Monad (unless)
 import Data.Either (isLeft)
 import Data.List (nub)
@@ -58,9 +56,12 @@ instance Arbitrary FragmentCase where
         services = names "service" serviceCount
     FragmentCase <$> buildFragment substrates services resources
 
+quorums :: [Rke2Quorum Text]
+quorums = [Single "a", Three "a" "b" "c", Five "a" "b" "c" "d" "e"]
+
 data FoldCase
   = ResourceFold [Natural]
-  | ServerFold Rke2Servers
+  | ServerFold (Rke2Quorum Text)
   | HostFold [Text]
   deriving stock (Show)
 
@@ -69,7 +70,7 @@ instance Arbitrary FoldCase where
     family <- elements [0 :: Int, 1, 2]
     case family of
       0 -> ResourceFold <$> frequency [(2, pure []), (3, vectorOf 3 (natural 0 20))]
-      1 -> ServerFold <$> elements allRke2Servers
+      1 -> ServerFold <$> elements quorums
       _ -> HostFold <$> frequency [(2, pure ["h0", "h0"]), (3, pure ["h0", "h1"])]
 
 data CompositionCase = CompositionCase DecisionFragment DecisionFragment
@@ -95,7 +96,7 @@ runDecisionPropSpec = do
   let failures = [name | (name, result) <- results, not (isSuccess result)]
   mapM_ (putStrLn . ("decision-property: RED " <>)) failures
   unless (null failures) (fail ("decision properties failed: " <> show failures))
-  assert (fmap rke2ServerCount allRke2Servers == [1, 3, 5]) "Rke2Servers finite exhaustion changed"
+  assert (fmap (length . rke2Servers) quorums == [1, 3, 5]) "Rke2Servers finite exhaustion changed"
   putStrLn "decision-properties: TESTED sampled (3); PROVEN exhausted Rke2Servers (3/3 arms)"
 
 prop_decodeRoundTrip :: FragmentCase -> Property
@@ -114,7 +115,7 @@ prop_foldTotal foldCase = checkCoverage
  where
   total value = case value of
     ResourceFold resources -> foldResourceTotal resources == sum resources
-    ServerFold servers -> rke2ServerCount servers `elem` [1, 3, 5]
+    ServerFold servers -> length (rke2Servers servers) `elem` [1, 3, 5]
     HostFold hosts -> isLeft (distinctHostIds hosts) == (length hosts /= length (nub hosts))
 
 prop_compositionPreservesWellFormedness :: CompositionCase -> Property
@@ -153,8 +154,8 @@ isServer _ = False
 isHost HostFold {} = True
 isHost _ = False
 isBoundary (ResourceFold []) = True
-isBoundary (ServerFold Rke2One) = True
-isBoundary (ServerFold Rke2Five) = True
+isBoundary (ServerFold (Single _)) = True
+isBoundary (ServerFold (Five _ _ _ _ _)) = True
 isBoundary (HostFold [left, right]) = left == right
 isBoundary _ = False
 

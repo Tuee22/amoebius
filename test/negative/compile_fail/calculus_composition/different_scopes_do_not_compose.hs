@@ -2,6 +2,7 @@
 
 module DifferentScopesDoNotCompose where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition
@@ -16,7 +17,6 @@ import Amoebius.Scope.Index
   ( activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 
 differentScopeKinds :: Either String [Calculus]
@@ -26,8 +26,8 @@ differentScopeKinds = do
   membership <- firstShow (activeMembership tenant subject)
   nested <-
     firstShow
-      ( withRequestScope tenant subject membership $ \leftScope ->
-          withRequestScope tenant subject membership $ \rightScope ->
+      ( FixtureAuthority.withFixtureScope tenant subject membership $ \leftScope ->
+          FixtureAuthority.withFixtureScope tenant subject membership $ \rightScope ->
             compositionKinds
               ( compose
                   (artifactComponent leftScope "artifact" (ResourceVector 1 1 1 1) (RecipeId "recipe" 1))

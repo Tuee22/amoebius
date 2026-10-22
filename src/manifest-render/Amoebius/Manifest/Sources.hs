@@ -127,16 +127,19 @@ kindFor source = case renderSourceWitness source of
   ServiceConfigurationPart _ -> ConfigMapKind
   ServiceEndpointPart _ -> ServiceKind
   ServicePolicyPart _ -> NetworkPolicyKind
-  ServiceWorkloadPart _ -> workloadObjectKind (Map.findWithDefault "Deployment" "kind" (renderSourceFields source))
+  ServiceWorkloadPart _ -> workloadObjectKind (renderSourceFields source)
   AppNamespacePart _ -> NamespaceKind
   AppWorkloadPart _ -> DeploymentKind
   AppEndpointPart _ -> ServiceKind
 
-workloadObjectKind :: Text -> K8sObjectKind
-workloadObjectKind raw = case raw of
+workloadObjectKind :: Map Text Text -> K8sObjectKind
+workloadObjectKind fields = case Map.findWithDefault "Deployment" "kind" fields of
   "StatefulSet" -> StatefulSetKind
   "DaemonSet" -> DaemonSetKind
-  "EngineWorkload" -> DaemonSetKind
+  "EngineWorkload" -> case Map.lookup "engine-runtime" fields of
+    Just "Cuda" -> DaemonSetKind
+    Just "AppleMetal" -> CustomResourceKind
+    _ -> DeploymentKind
   "Job" -> JobKind
   "HostProcess" -> CustomResourceKind
   _ -> DeploymentKind
@@ -274,7 +277,9 @@ rendererVolumesBounded :: Bool
 rendererVolumesBounded = True
 
 rendererAcceleratorClaim :: Map Text Text -> Maybe Natural
-rendererAcceleratorClaim fields = if Map.lookup "kind" fields == Just "EngineWorkload" then Just 1 else Nothing
+rendererAcceleratorClaim fields =
+  if Map.lookup "kind" fields == Just "EngineWorkload" && Map.lookup "engine-runtime" fields == Just "Cuda"
+    then Just 1 else Nothing
 
 ownerText :: RenderSourceOwner -> Text
 ownerText owner = case owner of

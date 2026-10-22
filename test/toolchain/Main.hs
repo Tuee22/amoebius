@@ -1,225 +1,266 @@
 {-# LANGUAGE OverloadedStrings #-}
-
--- | The toolchain suite: a byte producer, never a verdict.
---
--- It verifies the GenesisTrust pins, performs two contained acquisitions beneath
--- the suite directory, elaborates their plans, exercises every probe, evaluates
--- each named negative, and writes one tab-separated file for the separately
--- authored oracle under @test/oracle/toolchain/Main.hs@ to judge from literals.
--- Every extracted tree is removed before the suite exits; the receipts stay.
+-- | Native observations and supplied version/platform fixtures. This producer
+-- never needs a Linux host, archive/signature files, devices, or a VM/container.
 module Main (main) where
-
 import Amoebius.Toolchain.Acquire
-import Amoebius.Toolchain.Pins
+import Amoebius.Toolchain.Versions
 import Amoebius.Toolchain.Probe
 import Amoebius.Toolchain.Provenance
 import Amoebius.Toolchain.Report
 import Amoebius.Toolchain.Resolve
-import Data.Bits (xor)
-import Data.ByteString qualified as ByteString
+import Control.Exception (finally)
+import Control.Monad (forM, forM_, when)
+import Data.List (isPrefixOf, isSuffixOf, sort)
 import Data.Text (Text)
 import Data.Text qualified as Text
-import Data.Text.Encoding qualified as TextEncoding
 import Data.Text.IO qualified as TextIO
-import System.Directory (createDirectoryIfMissing, findExecutable, getCurrentDirectory, makeAbsolute, removePathForcibly)
-import System.Environment (getArgs)
-import System.FilePath ((</>))
+import System.Directory (createDirectory, createDirectoryIfMissing, copyFile, doesPathExist, findExecutable, getCurrentDirectory, makeAbsolute, removePathForcibly)
+import System.Environment (getArgs, getExecutablePath, getProgName)
+import System.Exit (ExitCode (..), exitWith)
+import System.FilePath (dropExtension, takeExtension, takeDirectory, (</>))
 
 main :: IO ()
 main = do
-  arguments <- getArgs
-  let suiteDir = case arguments of
-        [path] -> path
-        _ -> ".build/runs/toolchain-suite"
-  createDirectoryIfMissing True suiteDir
-  absolute <- makeAbsolute suiteDir
+  rawProgram <- getProgName
+  let program = if takeExtension rawProgram == ".exe" then dropExtension rawProgram else rawProgram
+  case program of
+    "bad-ghc" -> putStrLn "9.10.1"
+    "bad-ghcup" -> putStrLn "0.1.50.1"
+    "malformed-ghcup" -> putStrLn "unparseable"
+    "failed-ghc" -> exitWith (ExitFailure 9)
+    "failed-cabal" -> exitWith (ExitFailure 9)
+    "toolchain-report" -> getArgs >>= runToolchainReport
+    _ | Just (code, response) <- lookup program admissionResponses -> do
+          arguments <- getArgs
+          let expected = if "ghcup" `isSuffixOf` program then ["--version"] else ["--numeric-version"]
+          if arguments == expected then putStr response >> exitWith (if code == 0 then ExitSuccess else ExitFailure code)
+            else exitWith (ExitFailure 2)
+      | "admission-" `isPrefixOf` program -> exitWith (ExitFailure 2)
+      | otherwise -> do
+          arguments <- getArgs
+          case arguments of
+            ["--native-tool-versions", output] -> writeAdmission output
+            ["--probe-source", output] -> writeProbeSource output
+            ["--vendor-source", output] -> writeVendorSource output
+            _ -> do
+              directory <- makeAbsolute (case arguments of [path] -> path; _ -> ".build/components/toolchain-versions")
+              createDirectoryIfMissing True directory
+              root <- getCurrentDirectory
+              rows <- observations root directory
+              TextIO.writeFile (directory </> "toolchain.tsv") (Text.unlines [key <> "\t" <> value | (key, value) <- rows])
+
+-- Native boundary inputs only: even a failed command can print a compatible version.
+admissionResponses :: [(String, (Int, String))]
+admissionResponses =
+  [("admission-good-ghcup", (0, "0.2.6.2")), ("admission-good-ghc", (0, "9.12.4"))
+  ,("admission-failed-ghcup", (9, "0.2.6.2")), ("admission-failed-ghc", (9, "9.12.4"))
+  ,("admission-malformed-ghcup", (0, "unparseable")), ("admission-malformed-ghc", (0, "unparseable"))
+  ,("admission-unsupported-ghcup", (0, "0.3.0")), ("admission-unsupported-ghc", (0, "9.10.1"))
+  ,("admission-cabal", (9, ""))]
+
+writeAdmission :: FilePath -> IO ()
+writeAdmission output = do
+  directory <- makeAbsolute output
+  createDirectoryIfMissing True directory
+  image <- getExecutablePath
   root <- getCurrentDirectory
-  located <- locateInputs absolute
-  rows <- case located of
-    Nothing -> pure [("inputs", "absent"), ("inputs.expected", Text.pack inputsDirectory)]
-    Just inputs -> suiteRows root inputs absolute
-  TextIO.writeFile (absolute </> "toolchain.tsv") (Text.unlines [key <> "\t" <> value | (key, value) <- rows])
-  putStrLn ("toolchain projection written: " <> (absolute </> "toolchain.tsv"))
+  let fixtures = directory </> "admission-tools"
+      suffix = if takeExtension image == ".exe" then ".exe" else ""
+      toolName :: AdmissionTool -> String
+      toolName InstallerTool = "ghcup"
+      toolName CompilerTool = "ghc"
+      faultName fault = case fault of MissingAdmissionTool -> "missing"; FailedAdmissionCommand -> "failed"; MalformedAdmissionVersion -> "malformed"; UnsupportedAdmissionVersion -> "unsupported"
+  present <- doesPathExist fixtures
+  when present (fail "AdmissionFixtureRootNotFresh")
+  createDirectory fixtures
+  observations' <- (do
+    forM_ admissionResponses $ \(name, _) -> copyFile image (fixtures </> name <> suffix)
+    rows <- concat <$> forM admissionExamples (\(name, tool, fault) -> forM [False, True] $ \negative -> do
+      let selected role = fixtures </> "admission-" <> (if negative && role == tool then faultName fault else "good") <> "-" <> toolName role <> suffix
+          paths = ToolchainPaths (Just (selected InstallerTool)) (Just (selected CompilerTool)) (Just (fixtures </> "admission-cabal" <> suffix))
+          control = if negative then "negative" else "positive"
+      result <- selectToolchain root paths
+      let rendered = either (Text.intercalate "," . map (Text.takeWhile (/= ':') . renderRefusal)) (const "accepted") result
+      pure ([name, Text.pack (toolName tool), control, rendered], (name, toolName tool, control, result)))
+    TextIO.writeFile (directory </> "admission-raw.data") (Text.pack (show (map snd rows)))
+    pure rows)
+    `finally` removePathForcibly fixtures
+  removed <- not <$> doesPathExist fixtures
+  TextIO.writeFile (directory </> "admission.tsv") (Text.unlines (map (Text.intercalate "\t")
+    (map fst observations' <> [["control", "cleanup", "observed", Text.pack (show removed)]])))
 
-suiteRows :: FilePath -> FilePath -> FilePath -> IO [(Text, Text)]
-suiteRows root inputs suiteDir = do
-  pins <- verifyPins inputs
-  let pinRows = case pins of
-        Right verified ->
-          ("pins.verdict", "ok")
-            : [("pin." <> Text.pack (pinName pin), "ok bytes=" <> showText (pinBytes pin) <> " sha256=" <> digest) | (pin, digest) <- verifiedObserved verified]
-              <> [("manifest." <> renderPinRole role, "agrees claimed=" <> claimed) | (role, claimed) <- verifiedClaimed verified]
-        Left refusals -> [("pins.verdict", Text.intercalate "; " (map renderRefusal refusals))]
-  acquisitionRows <- case pins of
-    Left _ -> pure [("acquisition.verdict", "pins refused")]
-    Right verified -> acquisitionSection root verified suiteDir
-  decodes <- decodeProbe (suiteDir </> "probe" </> "decode")
-  bridge <- bridgeProbe (suiteDir </> "probe" </> "purs")
-  authored <- authoredPaths root
-  forkProblems <- verifyFork root
-  let probeRows =
-        [("probe.decode." <> name, renderDecodeOutcome outcome) | (name, outcome) <- decodes]
-          <> [ ("probe.sim.clean", simProbe cleanSchedule)
-             , ("probe.sim.perturbed", simProbe perturbedSchedule)
-             , ("probe.codegen.link-token", linkToken)
-             , ("probe.bridge.files", Text.intercalate "," (map Text.pack bridge))
-             ]
-      planRows =
-        [ ("plan.steps", either (Text.intercalate "; " . map renderPlanRefusal) (Text.intercalate "; " . map renderStep) (planEnsure platform (Inventory []) probeCatalogue floorTools))
-        , ("plan.present", either (Text.intercalate "; " . map renderPlanRefusal) (Text.intercalate "; " . map renderStep) (planEnsure platform (Inventory [("ghc", [9, 12, 4]), ("cabal-install", [3, 16, 1, 0])]) probeCatalogue (take 2 floorTools)))
-        ]
-      layoutRows =
-        [ ("layout.resolve-refusals", noneOr (map renderResolveRefusal (refuseTrackedArtefacts authored)))
-        , ("layout.provenance-refusals", noneOr (map renderProvenanceRefusal (refuseLayout authored)))
-        , ("fork.missing", noneOr (map renderProvenanceRefusal forkProblems))
-        , ("fork.modules", showText (length forkModules))
-        , ("identity.pins", showText (length genesisPins))
-        , ("identity.platform", renderPlatform platform)
-        ]
-      pureNegatives =
-        [ ("negative.AmbientNetworkRead", "deferred")
-        , ("negative.TrackedResolutionOutput", refusalsText (map renderResolveRefusal (refuseTrackedArtefacts ["cabal.project.freeze"])))
-        , ("negative.DeveloperHomePath", refusalsText (map renderResolveRefusal (refuseTrackedArtefacts ["/home/developer/amoebius/probe.cabal"])))
-        , ("negative.TrackedProbeInput", refusalsText (map renderResolveRefusal (refuseTrackedArtefacts ["test/fixture/probe.dhall"])))
+-- Run foreign-source reintroductions as files in a copied probe tree. Discovery
+-- reads that tree; it never trusts a supplied count or a fixture's claimed role.
+writeProbeSource :: FilePath -> IO ()
+writeProbeSource output = do
+  directory <- makeAbsolute output
+  createDirectoryIfMissing True directory
+  root <- getCurrentDirectory
+  paths <- probeSourcePaths <$> authoredPaths root
+  let fixtures = directory </> "probe-source-tree"
+  present <- doesPathExist fixtures
+  when present (fail "ProbeSourceFixtureRootNotFresh")
+  createDirectory fixtures
+  raw <- (do
+    forM_ paths $ \path -> do
+      createDirectoryIfMissing True (takeDirectory (fixtures </> path))
+      copyFile (root </> path) (fixtures </> path)
+    concat <$> forM probeSourceExamples (\(name, variant, fault) -> forM [False, True] $ \negative -> do
+      let foreignFile = case fault of ForeignProbeScript path bytes -> Just (path, bytes); ForeignProbeFixture path bytes -> Just (path, bytes); _ -> Nothing
+          selected = case fault of OmittedProbeCase value | negative -> filter (/= value) probeCases; _ -> probeCases
+          control = if negative then "negative" else "positive"
+          generated = directory </> "probe-source-generated" </> Text.unpack name </> Text.unpack variant </> Text.unpack control
+      forM_ [entry | Just entry <- [foreignFile], negative] $ \(path, bytes) -> do
+        createDirectoryIfMissing True (takeDirectory (fixtures </> path))
+        TextIO.writeFile (fixtures </> path) bytes
+      observedPaths <- sort <$> authoredPaths fixtures
+      observed <- retainedProbeRows generated selected
+      bytes <- case foreignFile of Just (path, _) | negative -> TextIO.readFile (fixtures </> path); _ -> pure ""
+      let findings = probeSourceFindings observedPaths (map fst observed)
+      -- Force observations before removing the generated source input.
+      TextIO.writeFile (directory </> "probe-source-current.data") (Text.pack (show (observedPaths, observed, findings, bytes)))
+      forM_ [path | Just (path, _) <- [foreignFile], negative] (removePathForcibly . (fixtures </>))
+      pure (name, variant, control, observedPaths, observed, findings, bytes)))
+    `finally` removePathForcibly fixtures
+  let names = map probeCaseName probeCases
+      controls = [("empty", probeSourceFindings [] names)]
+        <> [(Text.pack path, probeSourceFindings (filter (/= path) paths) names) | path <- probeSourceRequiredPaths]
+        <> [("duplicate-case", probeSourceFindings paths (names <> ["decode.positive"]))
+           ,("unexpected-case", probeSourceFindings paths (names <> ["unknown"]))]
+  removed <- not <$> doesPathExist fixtures
+  TextIO.writeFile (directory </> "probe-source.data") (Text.pack (show raw))
+  TextIO.writeFile (directory </> "probe-source-controls.data") (Text.pack (show controls))
+  TextIO.writeFile (directory </> "probe-source-cleanup.data") (Text.pack (show removed))
+
+writeVendorSource :: FilePath -> IO ()
+writeVendorSource output = do
+  directory <- makeAbsolute output
+  createDirectoryIfMissing True directory
+  root <- getCurrentDirectory
+  paths <- vendorSourcePaths <$> authoredPaths root
+  let fixtures = directory </> "vendor-source-tree"
+      release = HackageRelease "supernova" "0.0.3"
+      modulePath name = "src/vendor/" <> Text.unpack (Text.replace "." "/" name) <> ".hs"
+  present <- doesPathExist fixtures
+  when present (fail "VendorSourceFixtureRootNotFresh")
+  createDirectory fixtures
+  (do
+    forM_ paths $ \path -> do
+      createDirectoryIfMissing True (takeDirectory (fixtures </> path))
+      copyFile (root </> path) (fixtures </> path)
+    rows <- concat <$> forM vendorSourceExamples (\(name, variant, fault) -> forM [False, True] $ \negative -> do
+      let foreignFile = case fault of ReintroducedVendorFile path bytes -> Just (path, bytes); _ -> Nothing
+          reference = case fault of MutableVendorReference value | negative -> value; _ -> release
+          control = if negative then "negative" else "positive" :: Text
+      forM_ [entry | Just entry <- [foreignFile], negative] $ \(path, bytes) -> do
+        createDirectoryIfMissing True (takeDirectory (fixtures </> path))
+        TextIO.writeFile (fixtures </> path) bytes
+      observedPaths <- sort <$> authoredPaths fixtures
+      bytes <- case foreignFile of Just (path, _) | negative -> TextIO.readFile (fixtures </> path); _ -> pure ""
+      let findings = map renderProvenanceRefusal (refuseLayout observedPaths)
+            <> either ((: []) . renderProvenanceRefusal) (const []) (admitReference reference)
+          row = (name, variant, control, observedPaths, findings, renderReference reference, bytes)
+      TextIO.writeFile (directory </> "vendor-source-current.data") (Text.pack (show row))
+      forM_ [path | Just (path, _) <- [foreignFile], negative] (removePathForcibly . (fixtures </>))
+      pure row)
+    clean <- map renderProvenanceRefusal <$> verifyFork fixtures
+    missing <- forM forkModules $ \name -> do
+      let path = modulePath name
+      removePathForcibly (fixtures </> path)
+      findings <- map renderProvenanceRefusal <$> verifyFork fixtures
+      copyFile (root </> path) (fixtures </> path)
+      pure (name, findings)
+    TextIO.writeFile (directory </> "vendor-source.data") (Text.pack (show rows))
+    TextIO.writeFile (directory </> "vendor-fork.data") (Text.pack (show (forkModules, ("clean", clean) : missing))))
+    `finally` removePathForcibly fixtures
+  removed <- not <$> doesPathExist fixtures
+  TextIO.writeFile (directory </> "vendor-source-cleanup.data") (Text.pack (show removed))
+
+observations :: FilePath -> FilePath -> IO [(Text, Text)]
+observations root directory = do
+  writeAdmission directory
+  writeProbeSource directory
+  writeVendorSource directory
+  selected <- selectToolchain root defaultToolchainPaths
+  decodes <- decodeProbe (directory </> "decode")
+  bridge <- bridgeProbe (directory </> "purs")
+  paths <- authoredPaths root
+  fork <- verifyFork root
+  image <- getExecutablePath
+  (absent, absentOut, absentErr) <- spawnChild root "amoebius-missing-4391860a" []
+  (failedCwd, failedOut, failedErr) <- spawnChild (directory </> "absent-cwd") image ["--version"]
+  cli <- cliObservations root directory image
+  let versions = [("version.case." <> showT index, Text.intercalate "|" [tool, raw, either (Text.takeWhile (/= ':') . renderVersionRefusal) (const "accepted") (checkVersion (if tool == "ghc" then ghcRequirement else ghcupRequirement) raw)]) | (index, (tool, raw)) <- zip [1 :: Int ..] versionExamples]
+      probes = [("probe.decode." <> name, renderDecodeOutcome value) | (name, value) <- decodes]
+        <> [("probe.sim.clean", simProbe cleanSchedule), ("probe.sim.perturbed", simProbe perturbedSchedule), ("probe.codegen.link-token", linkToken), ("probe.bridge.files", Text.intercalate "," (map Text.pack bridge)), ("fork.modules", showT (length forkModules)), ("fork.problems", none (map renderProvenanceRefusal fork)), ("layout.problems", none (map renderResolveRefusal (refuseTrackedArtefacts paths)))]
+      planned = planEnsure examplePlatform (Inventory []) probeCatalogue floorTools
+      pureRows = [("plan.steps", either (Text.intercalate "; " . map renderPlanRefusal) (Text.intercalate "; " . map renderStep) planned)
+        , ("child.absent.exit", showT (childExit absent)), ("child.absent.stdout", Text.pack absentOut), ("child.absent.stderr", Text.strip (Text.pack absentErr))
+        , ("child.failed-cwd.exit", showT (childExit failedCwd)), ("child.failed-cwd.stdout", Text.pack failedOut), ("child.failed-cwd.stderr", Text.strip (Text.pack failedErr))
+        , ("negative.TrackedResolutionOutput", none (map renderResolveRefusal (refuseTrackedArtefacts ["cabal.project.freeze"])))
+        , ("negative.TrackedProbeInput", none (map renderResolveRefusal (refuseTrackedArtefacts ["test/probe.dhall"])))
         , ("negative.MutableIdentity", either renderProvenanceRefusal renderReference (admitReference (GitBranch "https://github.com/cr-org/supernova" "main")))
-        , ("negative.AbsentIdentity", either renderProvenanceRefusal renderReference (admitReference (HackageRelease "" "")))
-        , ("negative.ProvenanceDeveloperHome", either renderProvenanceRefusal renderReference (admitReference (LocalPath "/home/developer/supernova")))
-        , ("negative.TopLevelVendor", refusalsText (map renderProvenanceRefusal (refuseLayout ["vendor/supernova/src/Pulsar.hs"])))
-        , ("negative.PatchProgram", refusalsText (map renderProvenanceRefusal (refuseLayout ["patches/supernova.patch"])))
-        , ("negative.TrackedForeignPackage", refusalsText (map renderProvenanceRefusal (refuseLayout ["vendor/supernova/supernova.cabal"])))
-        , ("negative.AbsentTool", either (refusalsText . map renderPlanRefusal) (refusalsText . map renderStep) (planEnsure platform (Inventory []) probeCatalogue [Tool "absent-tool" [1] [2]]))
-        , ("negative.OutOfRangeVersion", either (refusalsText . map renderPlanRefusal) (refusalsText . map renderStep) (planEnsure platform (Inventory [("ghc", [9, 10, 1])]) probeCatalogue (take 1 floorTools)))
-        , ("negative.NoPlatformAsset", either (refusalsText . map renderPlanRefusal) (refusalsText . map renderStep) (planEnsure (Platform "windows" "x86_64") (Inventory []) probeCatalogue (take 1 floorTools)))
-        ]
-  networkRefusal <- verifyPins "https://downloads.haskell.org/~ghc/9.12.4/.build/bootstrap-inputs"
-  missingPin <- verifyPinsWith inputs [(CompilerManifest, suiteDir </> "negatives" </> "absent-manifest")]
-  missingArchive <- verifyPinsWith inputs [(CompilerArchive, suiteDir </> "negatives" </> "absent-archive")]
-  missingSignature <- verifyPinsWith inputs [(PackageToolManifestSignature, suiteDir </> "negatives" </> "absent-signature")]
-  corrupted <- corruptedManifest inputs (suiteDir </> "negatives")
-  signatureNegative <- corruptedSignature inputs (suiteDir </> "negatives")
-  let inputNegatives =
-        [ ("negative.AmbientNetworkRead", either (refusalsText . map renderRefusal) (const "accepted") networkRefusal)
-        , ("negative.MissingPin", either (refusalsText . map renderRefusal) (const "accepted") missingPin)
-        , ("negative.MissingArchivePin", either (refusalsText . map renderRefusal) (const "accepted") missingArchive)
-        , ("negative.MissingSignaturePin", either (refusalsText . map renderRefusal) (const "accepted") missingSignature)
-        , ("negative.DigestMismatch", either (refusalsText . map renderRefusal) (const "accepted") corrupted)
-        , ("negative.ManifestDisagrees", either (refusalsText . map renderRefusal) (const "accepted") corrupted)
-        , ("negative.PinnedSignatureDigestMismatch", either (refusalsText . map renderRefusal) (const "accepted") signatureNegative)
-        ]
-  reportRowsObserved <- reportSection inputs suiteDir
-  pure (pinRows <> acquisitionRows <> probeRows <> planRows <> layoutRows <> [row | row <- pureNegatives, fst row /= "negative.AmbientNetworkRead"] <> inputNegatives <> reportRowsObserved)
-
--- | The shipped report's rows over the real pins and over a manifest whose
--- archive digest is rewritten, plus its argument refusal.
-reportSection :: FilePath -> FilePath -> IO [(Text, Text)]
-reportSection inputs suiteDir = do
-  let base = ReportOptions {optionInputs = Just inputs, optionCompilerManifest = Nothing, optionPackageToolManifest = Nothing, optionOutput = Nothing, optionProbeRoot = Just (suiteDir </> "report-probe"), optionAcquireRoot = Nothing}
-  clean <- reportRows base
-  createDirectoryIfMissing True (suiteDir </> "negatives")
-  original <- TextIO.readFile (inputs </> "ghc-SHA256SUMS")
-  let rewritten = suiteDir </> "negatives" </> "rewritten-compiler-manifest"
-  TextIO.writeFile rewritten (Text.replace "4da657809c06c1658ae5713911fcb168a32093e239f61fe77be78aba74132cfa" (Text.replicate 64 "0") original)
-  refused <- reportRows base {optionCompilerManifest = Just rewritten}
-  let pick rows key = maybe "<absent>" id (lookup key rows)
-      carried = ["pins.verdict", "identity.compiler", "identity.package-tool", "identity.platform", "identity.pins", "probe.decode.positive", "probe.decode.mistyped", "probe.sim.clean", "probe.sim.perturbed", "probe.sim.schedule.clean", "probe.codegen.link-token", "probe.bridge.files", "plan.steps", "provenance.upstream", "provenance.fork-modules", "provenance.requirements"]
-  pure
-    ( [("report." <> key, pick clean key) | key <- carried]
-        <> [ ("report.rows", showText (length clean))
-           , ("report.keys", Text.intercalate "," (map fst clean))
-           , ("pins.rendered", Text.intercalate "; " (map renderPin genesisPins))
-           , ("probe.codegen.schema-sha256", sha256Bytes (TextEncoding.encodeUtf8 probeProto))
-           , ("positive.GitCommit", either renderProvenanceRefusal renderReference (admitReference (GitCommit "https://github.com/cr-org/supernova" "0123456789abcdef0123456789abcdef01234567")))
-           , ("negative.ShortCommit", either renderProvenanceRefusal renderReference (admitReference (GitCommit "https://github.com/cr-org/supernova" "0123456789abcdef0123456789abcdef0123456")))
-           , ("report.refused.verdict", pick refused "pins.verdict")
-           , ("report.refused.keys", Text.intercalate "," [key | (key, _) <- refused, "pins.refusal." `Text.isPrefixOf` key])
-           , ("report.refused.manifest", Text.intercalate "; " [value | (key, value) <- refused, "pins.refusal." `Text.isPrefixOf` key, "ManifestDisagrees" `Text.isPrefixOf` value])
-           , ("negative.ReportUnknownArgument", either id (const "accepted") (parseReportOptions ["--acquire", "x", "--bogus"]))
-           , ("report.options", Text.pack (show (either (const Nothing) (Just . optionAcquireRoot) (parseReportOptions ["--acquire", "root", "--output", "out"]))))
-           ]
-    )
-
--- | Two contained acquisitions, their plans, the codegen probe over the first,
--- the upstream provenance acquisition, and the acquisition-bound negatives.
-acquisitionSection :: FilePath -> VerifiedPins -> FilePath -> IO [(Text, Text)]
-acquisitionSection _ verified suiteDir = do
-  let rootA = suiteDir </> "acquire" </> "a"
-      rootB = suiteDir </> "acquire" </> "b"
-  acquired <- acquireTwice verified rootA rootB
-  case acquired of
-    Left refusals -> pure [("acquisition.verdict", Text.intercalate "; " (map renderRefusal refusals))]
-    Right (a, b) -> do
-      planA <- elaborate a (rootA </> "resolve") probeRequirements
-      planB <- elaborate b (rootB </> "resolve") probeRequirements
-      missing <- elaborate a (suiteDir </> "negatives" </> "resolve") [Requirement "amoebius-absent-probe" "1" "2"]
-      tool <- installTool a (suiteDir </> "tools") "proto-lens-protoc" "proto-lens-protoc"
+        , ("negative.TopLevelVendor", none (map renderProvenanceRefusal (refuseLayout ["vendor/supernova/src/Pulsar.hs"])))
+        , ("negative.AbsentTool", either (Text.intercalate "; " . map renderPlanRefusal) (const "accepted") (planEnsure examplePlatform (Inventory []) probeCatalogue [Tool "absent-tool" [1] [2]]))
+        , ("negative.OutOfRangeVersion", either (Text.intercalate "; " . map renderPlanRefusal) (const "accepted") (planEnsure examplePlatform (Inventory [("ghc", [9, 10, 1])]) probeCatalogue (take 1 floorTools)))
+        , ("negative.NoPlatformAsset", either (Text.intercalate "; " . map renderPlanRefusal) (const "accepted") (planEnsure (Platform "unsupported" "unknown") (Inventory []) probeCatalogue (take 1 floorTools)))]
+  actual <- case selected of
+    Left refusals -> pure [("versions.verdict", Text.intercalate "; " (map renderRefusal refusals))]
+    Right native -> do
+      second <- selectToolchain root defaultToolchainPaths
+      let agreementRows = [("second.verdict", either (const "refused") (\other -> none (map renderRefusal (agreement native other))) second)]
+      let supplied = native {acquisitionGhcupVersion = "0.1.50.2", acquisitionCompilerVersion = "9.12.4"}
+          disagreements = [("second.mismatch.ghcup", none (map renderRefusal (agreement supplied supplied {acquisitionGhcupVersion = "0.2.6.2"}))), ("second.mismatch.compiler", none (map renderRefusal (agreement supplied supplied {acquisitionCompilerVersion = "9.10.1"}))), ("second.cabal-version", none (map renderRefusal (agreement supplied supplied {acquisitionPackageToolVersion = "unreported"})))]
+          unavailable = directory </> "failed-cabal"
+      copyFile image unavailable
+      cabalVersionFailure <- selectToolchain root (ToolchainPaths (Just (acquisitionGhcup native)) (Just (acquisitionCompiler native)) (Just unavailable))
+      failures <- forM [("MissingTool", "absent-ghc"), ("UnsupportedVersion", "bad-ghc"), ("UnsupportedGhcupVersion", "bad-ghcup"), ("MalformedVersion", "malformed-ghcup"), ("FailedVersionCommand", "failed-ghc")] $ \(label, file) -> do
+        let path = directory </> file
+            tools = ToolchainPaths (Just (if label `elem` ["MalformedVersion", "UnsupportedGhcupVersion"] then path else acquisitionGhcup native)) (Just (if label `elem` ["MalformedVersion", "UnsupportedGhcupVersion"] then acquisitionCompiler native else path)) (Just (acquisitionPackageTool native))
+        if label == "MissingTool" then pure () else copyFile image path
+        value <- selectToolchain root tools
+        pure ("negative." <> label, either (Text.intercalate "; " . map renderRefusal) (const "accepted") value)
+      plan <- elaborate native (directory </> "resolve") probeRequirements
+      missing <- elaborate native (directory </> "missing") [Requirement "amoebius-absent-probe" "1" "2"]
+      plugin <- installTool native (directory </> "tools") "proto-lens-protoc" "proto-lens-protoc"
       protoc <- findExecutable "protoc"
-      codegen <- case (tool, protoc) of
-        (Right (plugin, _), Just protocPath) -> either (Left . renderProbeRefusal) (Right . fst) <$> codegenProbe protocPath plugin (suiteDir </> "probe" </> "proto")
-        (Left refusal, _) -> pure (Left (renderResolveRefusal refusal))
-        (_, Nothing) -> pure (Left "CodegenToolAbsent: protoc")
-      upstream <- acquireUpstream a (suiteDir </> "vendor") forkUpstream
-      mismatch <- acquireUpstream a (suiteDir </> "negatives" </> "vendor") forkUpstream {upstreamTreeDigest = Text.replicate 64 "0"}
-      again <- acquire verified rootA
-      _ <- writeAcquisitionReceipt a
-      _ <- writeAcquisitionReceipt b
-      removeAcquisition a
-      removeAcquisition b
-      removePathForcibly (suiteDir </> "tools")
-      pure
-        ( [("acquisition.verdict", "agree")]
-            <> [("acquisition.a." <> key, value) | (key, value) <- renderAcquisition a]
-            <> [("acquisition.b." <> key, value) | (key, value) <- renderAcquisition b]
-            <> [ ("plan.a.digest", either renderResolveRefusal (planDigest . fst) planA)
-               , ("plan.b.digest", either renderResolveRefusal (planDigest . fst) planB)
-               , ("plan.a.packages", either renderResolveRefusal (Text.intercalate "," . planPackages . fst) planA)
-               , ("plan.a.units", either renderResolveRefusal (showText . length . planUnits . fst) planA)
-               , ("plan.agree", Text.pack (show (either (const Nothing) (Just . planDigest . fst) planA /= Nothing && either (const Nothing) (Just . planDigest . fst) planA == either (const Nothing) (Just . planDigest . fst) planB)))
-               , ("probe.codegen.files", either id (Text.intercalate "," . map Text.pack) codegen)
-               , ("upstream.verdict", either renderProvenanceRefusal (const "acquired") upstream)
-               ]
-            <> either (const []) renderAcquiredUpstream upstream
-            <> [ ("negative.MissingDependency", either renderResolveRefusal (const "accepted") missing)
-               , ("negative.UpstreamDigestMismatch", either renderProvenanceRefusal (const "accepted") mismatch)
-               , ("negative.RootNotAbsent", either (refusalsText . map renderRefusal) (const "accepted") again)
-               , ("negative.DisagreeingAcquisition", refusalsText (map renderRefusal (agreement a b {acquisitionCompilerDigest = Text.replicate 64 "0"})))
-               ]
-        )
+      generated <- case (plugin, protoc) of
+        (Right (compiler, _), Just executable) -> either renderProbeRefusal (Text.intercalate "," . map Text.pack . fst) <$> codegenProbe executable compiler (directory </> "proto")
+        (Left problem, _) -> pure (renderResolveRefusal problem)
+        _ -> pure "CodegenToolAbsent: protoc"
+      upstream <- acquireUpstream native (directory </> "upstream") forkUpstream
+      mismatch <- acquireUpstream native (directory </> "upstream-negative") forkUpstream {upstreamTreeDigest = Text.replicate 64 "0"}
+      pure (("versions.verdict", "accepted") : renderAcquisition native <> agreementRows <> disagreements <> [("versions.cabal-report-unavailable", either (const "refused") (const "accepted") cabalVersionFailure)] <> failures <>
+        [("probe.codegen.files", generated), ("plan.packages", either renderResolveRefusal (Text.intercalate "," . planPackages . fst) plan)
+        , ("negative.MissingDependency", either renderResolveRefusal (const "accepted") missing)
+        , ("upstream.verdict", either renderProvenanceRefusal (const "acquired") upstream)
+        , ("negative.UpstreamDigestMismatch", either renderProvenanceRefusal (const "accepted") mismatch)])
+  let options = ReportOptions defaultToolchainPaths Nothing (Just (directory </> "report-probe")) Nothing Nothing Nothing
+      request = directory </> "request.tsv"
+  report <- reportRows options
+  TextIO.writeFile request "label\tfixture-label\nghc.requested-version\t9.12.4\n"
+  supported <- reportRows options {optionRequest = Just request}
+  TextIO.writeFile request "label\tfixture-label\nghc.requested-version\t9.10.1\n"
+  unsupported <- reportRows options {optionRequest = Just request}
+  let pick rows = maybe "absent" id (lookup "request.verdict" rows)
+  pure (versions <> probes <> pureRows <> actual <> cli <> [("report." <> key, value) | (key, value) <- report]
+    <> [("report.request.positive", pick supported), ("report.request.negative", pick unsupported), ("negative.ReportUnknownArgument", either id (const "accepted") (parseReportOptions ["--bogus"]))])
+ where
+  none [] = "none"
+  none values = Text.intercalate "; " values
+  showT = Text.pack . show
 
--- | A copy of the package-tool manifest with one digit of the archive's digest
--- changed, substituted for the pinned manifest.
-corruptedManifest :: FilePath -> FilePath -> IO (Either [AcquisitionRefusal] VerifiedPins)
-corruptedManifest inputs negatives = do
-  createDirectoryIfMissing True negatives
-  case pinFor PackageToolManifest of
-    Nothing -> pure (Left [PinMissing "package-tool-manifest"])
-    Just pin -> do
-      contents <- TextIO.readFile (inputs </> pinName pin)
-      let path = negatives </> "corrupted-manifest"
-          flipped = Text.map (\c -> if c == '9' then '8' else c) contents
-      TextIO.writeFile path flipped
-      verifyPinsWith inputs [(PackageToolManifest, path)]
-
--- | A substituted pinned signature with changed bytes must be refused by its
--- independent size and digest pins, without interpreting the signature format.
-corruptedSignature :: FilePath -> FilePath -> IO (Either [AcquisitionRefusal] VerifiedPins)
-corruptedSignature inputs negatives = do
-  createDirectoryIfMissing True negatives
-  let path = negatives </> "corrupted-signature"
-  case pinFor PackageToolManifestSignature of
-    Nothing -> pure (Left [PinMissing "package-tool-manifest-signature"])
-    Just pin -> do
-      original <- ByteString.readFile (inputs </> pinName pin)
-      let changed = case ByteString.uncons original of
-            Nothing -> ByteString.singleton 0
-            Just (byte, rest) -> ByteString.cons (byte `xor` 1) rest
-      ByteString.writeFile path changed
-      verifyPinsWith inputs [(PackageToolManifestSignature, path)]
-
-showText :: Show value => value -> Text
-showText = Text.pack . show
-
-noneOr :: [Text] -> Text
-noneOr items = if null items then "none" else Text.intercalate "; " items
-
-refusalsText :: [Text] -> Text
-refusalsText items = if null items then "accepted" else Text.intercalate "; " items
+cliObservations :: FilePath -> FilePath -> FilePath -> IO [(Text, Text)]
+cliObservations root directory image = do
+  let cli = directory </> "cli"
+      child = cli </> "toolchain-report"
+      request = cli </> "request/deep/request.tsv"
+      output = cli </> "output/deep/report.tsv"
+      authored = cli </> "authored-request.tsv"
+  createDirectoryIfMissing True cli
+  copyFile image child
+  (unknown, _, unknownErr) <- spawnChild root child ["--bogus"]
+  (emitted, _, _) <- spawnChild root child ["--write-request", request]
+  TextIO.writeFile authored "label\tcli-fixture\nghc.requested-version\t9.10.1\n"
+  (rendered, renderedOut, _) <- spawnChild root child ["--output", output, "--probe-root", cli </> "probe", "--request", authored, "--acquire", cli </> "acquired"]
+  pure [("report.cli.unknown.exit", Text.pack (show (childExit unknown))), ("report.cli.unknown.stderr", Text.strip (Text.pack unknownErr)), ("report.cli.emit.exit", Text.pack (show (childExit emitted))), ("report.cli.run.exit", Text.pack (show (childExit rendered))), ("report.cli.run.stdout", Text.pack renderedOut)]

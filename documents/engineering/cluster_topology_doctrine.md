@@ -56,18 +56,24 @@ substrate doctrine already owns (Lima on apple, WSL2 on windows). This document 
 topology it induces; it owns **no** substrate names, no detection, no VM-provider mechanics, and no capacity
 numbers (those are [substrate_doctrine.md](./substrate_doctrine.md) and [resource_capacity_doctrine.md](./resource_capacity_doctrine.md)).
 
-**Observed implementation** ([GateSpec:typed_spine]). The reflected schema and decoder consumers of this
-relation are implemented by [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md)
-([DL-0023](../decision_log.md#dl-0023--phase-3-accepted-its-owed-by-paragraphs-become-observed-implementations)): `Amoebius.Dsl.Spec` types the cluster's
-host records and refuses an undeclared, an unreferenced, and a duplicated host, and `Amoebius.Dsl.Decode` decodes
-them from the frozen Dhall. The relation itself and its engine/environment matrix are not part of that claim.
+**Specification** ([DL-0032](../decision_log.md#dl-0032--pure-dsl-claims-retain-their-validation-owners)).
+Qualification of the reflected schema and decoder consumers of this relation is owed by
+[Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md). `Amoebius.Dsl.Spec` must type the cluster's host records and refuse undeclared,
+unreferenced and duplicated hosts; `Amoebius.Dsl.Decode` must decode them from frozen Dhall. The relation
+itself and its complete engine/environment matrix must remain outside that bounded claim.
 
-The pure relation is owed by [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md), and
-runtime engine realization by Phases 52–54. Phase 4 must validate `Amoebius.Dsl.Topology` at Register 1:
-compile-time index pairs, the exhausted engine/environment compatibility matrix, host distinctness, fixed
-placement, and elastic growth are accepted only with every generated production mutant red. No EKS resource, VM,
-or node join is claimed; those runtime facts remain **UNVERIFIED**. Status and gates live only in
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+**Specification** ([DL-0032](../decision_log.md#dl-0032--pure-dsl-claims-retain-their-validation-owners)).
+Qualification of fixed placement on the kind topology through placement witnesses and rendered node names
+is owed by [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md). The full
+engine/environment matrix, compile-time index pairs, host distinctness and elastic growth remain outside
+that bounded claim; component diagnostics cannot establish their complete gate qualification.
+
+**Specification** ([DL-0032](../decision_log.md#dl-0032--pure-dsl-claims-retain-their-validation-owners)).
+Qualification is owed by [Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md) for the closed
+substrate/profile/frame catalog, derived lanes, the payload-bearing three-server rke2 quorum and agents,
+and taint-respecting placement through supplied host observations and fake-applied bytes. Runtime engine
+realization remains with Phases 52–54; EKS resources, VMs, and node joins remain **UNVERIFIED**. Status and
+gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 

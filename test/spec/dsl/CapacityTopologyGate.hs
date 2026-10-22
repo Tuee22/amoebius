@@ -8,12 +8,14 @@ import Amoebius.Placement.Witness (podFits)
 import Amoebius.Capacity.Types
   ( HostEnvironment (..)
   , Node (..)
+  , NodeRole (..)
   , NodeCapacity (..)
   , CpuOvercommitPolicy (..)
   , VolumeAttachment (..)
   , Workload (..)
   )
 import Amoebius.Dsl.Topology (ComputeEngine (..), engineAcceptsEnvironment)
+import Amoebius.Vocabulary (Architecture (Amd64), linuxCpuDetected)
 import CapacityTopologyFixtures
   ( FixtureCase (..)
   , baseWorkload
@@ -75,7 +77,7 @@ foldOracle =
   , row "illegal_elastic_class_max_exhausted" "CandidateClassMaximumExceeded" "legal_elastic_class_max"
   , row "illegal_elastic_per_node_overhead_unplaceable" "Unschedulable" "legal_elastic_per_node_overhead"
   , row "illegal_elastic_worst_case_instances_over_quota" "GrowthQuotaExceeded:InstanceCountAxis" "legal_elastic_instance_quota"
-  , row "illegal_untolerated_taint" "Unschedulable" "legal_tolerated_taint"
+  , row "illegal_untolerated_taint" "TaintedOnlyHost" "legal_tolerated_taint"
   , row "illegal_memory_backed_underreserved" "PodStorageUnderreserved:MemoryAxis" "legal_memory_backed_reserved"
   , row "illegal_tmpfs_init_persistence_underreserved" "PodStorageUnderreserved:MemoryAxis" "legal_tmpfs_init_persistence_reserved"
   ]
@@ -108,7 +110,7 @@ checkCsiDeduplication =
     Left problem -> assert (tagPlacement problem == "Overcommit:CsiAttachmentsAxis") "CSI challenge returned the wrong axis"
     Right _ -> fail "two distinct CSI claims were admitted against a one-claim node budget"
  where
-  node = Node "csi-node" "csi-host" NativeLinux (NodeCapacity (resources 8 8 8 1) NoCpuOvercommit (Map.singleton "csi" 1)) Set.empty
+  node = Node "csi-node" "csi-host" NativeLinux (NodeCapacity (resources 8 8 8 1) NoCpuOvercommit (Map.singleton "csi" 1)) Set.empty (linuxCpuDetected Amd64) KindWorker
   workload =
     (baseWorkload "csi-workload" (resources 1 1 1 1) (resources 1 1 1 1) (resources 0 0 0 0))
       { workloadAttachments = [VolumeAttachment "csi" "claim-a", VolumeAttachment "csi" "claim-b"] }

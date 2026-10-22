@@ -69,7 +69,7 @@ generator, fixture, oracle, mutant, or generated source must classify it unambig
 
 - version-controlled Haskell (`.hs`) behavioral source;
 - the bounded `pb/**` Python bootstrap exception, which may only make the minimum platform distinction needed
-  to establish the pinned toolchain, build the source-bound binary, and `exec` Haskell with every user
+  to establish the version-compatible native toolchain, build the source-bound binary, and `exec` Haskell with every user
   argument unchanged; Haskell owns host-floor policy, help, version, validation, and every public command;
 - governed non-source input such as Markdown or minimal build/repository metadata;
 - immutable, verifier-issued historical validation evidence under `validation-records/**`, whose closed
@@ -858,6 +858,10 @@ as load-bearing as an authoritative one.
 wrong, which is slower than fixing it in place and is the point.
 
 ---
+
+
+Toolchain version admission and the hardware-free boundary follow
+[DL-0025](./decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier).
 
 ## Related Documents
 - [Development Plan](../DEVELOPMENT_PLAN/README.md)

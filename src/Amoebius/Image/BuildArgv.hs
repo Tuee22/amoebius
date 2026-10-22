@@ -4,6 +4,7 @@ module Amoebius.Image.BuildArgv (
     ImageFlavor (..),
     BuildArgvError (..),
     buildImageInvocation,
+    buildImageArguments,
     renderImageFlavor,
     renderPlatform,
     renderPublishedTag,
@@ -33,11 +34,15 @@ buildImageInvocation ::
     FilePath ->
     Either BuildArgvError [String]
 buildImageInvocation engine channel observed requested flavor dockerfile context
+    = (toolPath engine :) <$> buildImageArguments channel observed requested flavor dockerfile context
+
+-- | The shipped compiler emits this plan without resolving or starting an engine.
+buildImageArguments :: BaseChannel -> Platform -> Platform -> ImageFlavor -> FilePath -> FilePath -> Either BuildArgvError [String]
+buildImageArguments channel observed requested flavor dockerfile context
     | observed /= requested = Left (BuildArchitectureMismatch observed requested)
     | otherwise =
         Right $
-            [ toolPath engine
-            , buildSubcommand
+            [ buildSubcommand
             , "--file"
             , dockerfile
             , "--tag"

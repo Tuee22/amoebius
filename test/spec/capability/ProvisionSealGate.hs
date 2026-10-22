@@ -4,6 +4,7 @@ module ProvisionSealGate
   ( runProvisionSealGate
   ) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Capacity.Execution
   ( ProvisionedExecutionEpochs (..)
   )
@@ -90,7 +91,6 @@ import Amoebius.Scope.Index
   ( activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import BindFixtures
   ( CapabilityFixture (..)
@@ -395,7 +395,7 @@ checkProvisionCalculusProjection positives planners negatives properties mutants
   tenant <- either (fail . show) pure (trustedTenant "provision-seal-tenant")
   subject <- either (fail . show) pure (trustedSubject tenant "provision-seal-subject")
   membership <- either (fail . show) pure (activeMembership tenant subject)
-  action <- either (fail . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+  action <- either (fail . show) pure $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
     let resources count = ResourceVector 1 (fromIntegral count) 0 0
         artifact = artifactComponent scope "inherited-positives" (resources positives) (RecipeId "provision-seal-corpus" 1)
         budget = budgetComponent scope "planner-paths" (resources planners) (allowance (Bytes (fromIntegral planners)) (Slots 1) (Bytes (fromIntegral planners)))

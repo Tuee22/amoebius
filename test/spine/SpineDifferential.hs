@@ -43,7 +43,7 @@ differentialSection suite = do
     pure (Text.intercalate "\t" [name, refusalOf twin, Text.intercalate "," (changed base twin), envelopeOf twin])
 
 baseline :: Raw.RawRoot
-baseline = either (const (Raw.RawRoot [] [] [])) rawOf baselineRoot
+baseline = either (const (Raw.RawRoot [] [] [] [])) rawOf baselineRoot
 
 refusalOf :: Compiled -> Text
 refusalOf compiled = case compiledRefusal compiled of
@@ -97,6 +97,7 @@ onCluster change root = root {Raw.rootClusters = map change (Raw.rootClusters ro
 withKind :: (Raw.RawKind -> Raw.RawKind) -> Raw.RawCluster -> Raw.RawCluster
 withKind change cluster = case Raw.clusterTopology cluster of
   Raw.KindTopology kind -> cluster {Raw.clusterTopology = Raw.KindTopology (change kind)}
+  Raw.Rke2Topology _ -> cluster
 
 onHost :: (Raw.RawHost -> Raw.RawHost) -> Update
 onHost change = onCluster (\cluster -> cluster {Raw.clusterHosts = map change (Raw.clusterHosts cluster)})

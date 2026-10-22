@@ -3,6 +3,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition (
@@ -30,7 +31,7 @@ import Amoebius.Scope.Index (
     activeMembership,
     trustedSubject,
     trustedTenant,
-    withRequestScope,
+    FixtureAuthority.withFixtureScope,
  )
 import Amoebius.Transaction.Vocabulary
 import Control.Monad (forM_, unless)
@@ -52,7 +53,7 @@ main = do
     tenant <- either (fail . show) pure (trustedTenant "transaction-tenant")
     subject <- either (fail . show) pure (trustedSubject tenant "transaction-subject")
     membership <- either (fail . show) pure (activeMembership tenant subject)
-    action <- either (fail . show) pure $ withRequestScope tenant subject membership $ \scope -> runGreen scope output
+    action <- either (fail . show) pure $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> runGreen scope output
     action
 
 runGreen :: RequestScope scope -> Maybe FilePath -> IO ()

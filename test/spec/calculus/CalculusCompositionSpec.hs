@@ -5,6 +5,7 @@
 -- index-preservation properties.
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (..))
 import Amoebius.Calculus.Budget.Grant (Bytes (..), Slots (..), allowance)
 import Amoebius.Calculus.Composition
@@ -40,7 +41,6 @@ import Amoebius.Scope.Index
   , activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import Control.Monad (forM_, unless)
 import Data.List (nub, sort)
@@ -104,7 +104,7 @@ withFixtureScope continuation = case trustedTenant "phase-10-tenant" of
     Left problem -> pure (Left (show problem))
     Right subject -> case activeMembership tenant subject of
       Left problem -> pure (Left (show problem))
-      Right membership -> case withRequestScope tenant subject membership continuation of
+      Right membership -> case FixtureAuthority.withFixtureScope tenant subject membership continuation of
         Left problem -> pure (Left (show problem))
         Right action -> Right <$> action
 

@@ -757,7 +757,7 @@ consensus or provider storage.
 
 Phase 64 must re-exercise the delete/recreate mechanism after the authenticated edge is available. The
 destructive portion must run in a fresh, isolated, marker-owned `amoebius-keycloak-ingress-rebind` kind
-cluster established only after the DSL barrier (Phase 4) and Phase-55 live-kind owner. It may not assume or retain
+cluster established only after the [DSL barrier](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md) (`DSL_BARRIER`; [DL-0028](../decision_log.md#dl-0028--hardware-boundaries-follow-the-dsl-barrier-role)) and Phase-55 live-kind owner. It may not assume or retain
 any pre-barrier Phase 5–43 live stack. A Haskell-declared Keycloak-relational row payload and exact MinIO
 object must survive old node/API absence and a run-two control plane with different CA, kube-system namespace
 UID, and node-container ID; no post-recreate writes may precede readback, and the scratch cluster must then be

@@ -1,0 +1,6 @@
+green	True
+spec-digest	29c06e20e8eb8cb0f5210b4558ebebd12c839540bb1f57b965e8eedf25e8bcea
+chain	05ce21dcd2aaca406aeddbce7ff13413c052a536861f6b6e1168ac223eab91f3
+reproducible-core	252e12b02e5173d84e1c10bb760a977005e7973f64e94f1874eeca0b952883ee
+capability	substrates_lanes_image_recipe
+claim	Supplied host observations determine every node's substrate, architecture, and lanes through one profile that also owns the Linux frame. A payload-bearing three-server rke2 quorum and agents reach fake-applied bytes with control-plane and maintenance taints respected. Required lanes determine ordered recipe steps, exact resource fields, the bake catalog, and Dockerfiles; unrequired lanes and digest-bearing base channels refuse. Pure native build argument vectors cover both image flavors and architectures and refuse observed/requested mismatches. Distinct run-local resolutions leave recipe bytes unchanged. Profiles, base channels, and base resolutions cannot be forged by construction or record update. The Apple arm64 example stops after lowering and recipe rendering. The runner plants a nonce and moves a maintenance taint between agents without changing identities or replicas, and the independent oracle judges resulting placement from that input. Extensions, children, UI, hardware discovery, image execution, and publication are excluded.

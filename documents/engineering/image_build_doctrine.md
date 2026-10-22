@@ -20,7 +20,7 @@ nor the runtime asset cache that is the deliberate exception, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/decision_log.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -231,10 +231,11 @@ reference names bytes some machine actually ran. On a mixed-architecture cluster
 from the registry to the manifest that names the image, which is a deployment concern owned by
 [service_capability_doctrine.md](./service_capability_doctrine.md).
 
-[Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md) owns the future Register-1 boundary for
-this rule and is **NOT VALIDATED**. Its Haskell contract must cover all CPU/CUDA × amd64/arm64 cases and refuse
-observed/requested architecture mismatches before emission. Even a future pure result cannot establish an
-engine build, published image, or runtime correspondence.
+**Specification** ([DL-0033](../decision_log.md#dl-0033--image-and-bootstrap-source-claims-require-current-qualification)).
+Qualification is owed by [Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md) for the pure CPU/CUDA ×
+amd64/arm64 build argument vectors and exact refusal of supplied observed/requested architecture mismatches
+before emission. Engine builds, published images and runtime correspondence remain **UNVERIFIED** under their
+later hardware-bearing gates.
 
 Phase 52 applies the rule to its narrower run-local smoke image: the independent oracle qualifies exact
 requested/guest/engine mismatch refusals before the live candidate starts, while the live Incus observation
@@ -519,7 +520,7 @@ rather than in the image, because a build product's *inputs* are not something t
 
 **Language toolchains in an image are later parity tooling, never the validation frame.** Register-1 and
 Register-2 claims are established by the source-bound native Haskell binary before an image, container
-engine, registry, cluster, or hardware-specific phase exists. A later image may carry the pinned compiler
+engine, registry, cluster, or hardware-specific phase exists. A later image may carry the version-compatible compiler
 closure needed to replay that already-qualified behaviour, but `docker run --rm` is optional parity evidence
 and cannot create, strengthen, or replace the earlier result. The native-first ordering and the exact
 pre-binary handoff are owned by
@@ -659,11 +660,15 @@ enum (absolute-path `AbsExe`, probe-first `Ensure` reconcile), so it is discover
 `PATH`.
 
 For amoebius, that sibling seam informs the implementation but does not become a second source of truth.
-Haskell `Amoebius.Image.BakeCatalog` values, owed by [Phase
-5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md), are to be authoritative and lazily emit
-the catalog projection and Dockerfile beneath `.build/**`. Redis is added to that Haskell catalog and to a
-separately authored Haskell service-inventory oracle; tracked Dhall, a handwritten Dockerfile, or a serialized
-expected-service inventory is non-conforming.
+
+**Specification** ([DL-0033](../decision_log.md#dl-0033--image-and-bootstrap-source-claims-require-current-qualification)).
+[Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md) must qualify Haskell
+`Amoebius.Image.Bake` values that lazily emit the pure catalog projection, native build argument vectors
+and Dockerfiles beneath `.build/**`. Its independent oracle must judge lane, step, resource and recipe
+bytes. The complete service-binary inventory, including Redis and its independently authored
+service-inventory oracle, remains owed by
+[Phase 56](../../DEVELOPMENT_PLAN/phase_56_base_image_registry.md) and its platform-service consumers.
+Tracked Dhall, a handwritten Dockerfile, or a serialized expected-service inventory is non-conforming.
 
 Every member of the baked list is obtainable through the typed apt/official-artifact/source ladder. The fixed
 Registry provider is deliberately outside that list and runs only from the separately pinned and preloaded
@@ -709,12 +714,14 @@ which forces a concrete divergence from prodbox's mechanics:
   recorded resolution is a resolution *this run* performed. It also stops the rendered recipe changing every
   time an upstream base is republished, which is a diff nobody reads and everybody approves.
 
-  [Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md) binds the complete Register-1 gate
-  for this pure boundary: the Haskell catalog has no authored digest field,
-  `BaseChannel` excludes digest syntax, and the lazy renderer emits one base argument and one matching
-  `FROM` while distinct run-local resolutions leave the recipe bytes unchanged. Completion remains owned by
-  the exact Phase 5 gate;
-  registry resolution and use of an observed digest in a live build are later claims.
+  **Specification** ([DL-0033](../decision_log.md#dl-0033--image-and-bootstrap-source-claims-require-current-qualification)).
+  Qualification of this pure boundary is owed by [Phase 5](../../DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md):
+  the Haskell catalog must have no authored digest field, the opaque `BaseChannel` must exclude digest
+  syntax, and the lazy renderer must emit one base argument and one matching `FROM` while distinct supplied
+  run-local resolutions leave the recipe bytes unchanged. Constructor, record-update, malformed-resolution
+  and digest-bearing-channel twins must qualify the factory boundaries. Registry resolution and use of an observed
+  digest in a live build remain **UNVERIFIED**, owned by
+  [Phase 56](../../DEVELOPMENT_PLAN/phase_56_base_image_registry.md).
 - **No `DOCKER_CONFIG` environment variable — use `docker --config <dir>`.** prodbox isolated registry-push
   auth from public-pull auth with an **ephemeral `DOCKER_CONFIG`** (`local_registry_pipeline.md` §6.1).
   That mechanism is an environment variable, which amoebius forbids. amoebius instead points the build at an
@@ -756,7 +763,7 @@ move to MinIO's S3 driver after MinIO is serving
 is a separate ordinary migration, not this bootstrap cycle. This doc records the build-side consequence:
 
 - **The base image and fixed `registry:2` bootstrap image are preloaded before registry object initialization.** In the target
-  sequence, Phase 55 first establishes an empty cluster after the DSL barrier (Phase 4). The only upstream contact
+  sequence, Phase 55 first establishes an empty cluster after the [DSL barrier](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md) (`DSL_BARRIER`; [DL-0028](../decision_log.md#dl-0028--hardware-boundaries-follow-the-dsl-barrier-role)). The only upstream contact
   is the base-image *build* (apt/binary/source downloads on the
   builder, [§2](#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)/[§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)); the separately pinned
   Distribution image is the only Registry bootstrap image. Once both are admitted and preloaded, the
@@ -801,6 +808,10 @@ Delivery sequencing, completion status, and validation gates live only in
 the build-and-registry pipeline and links back for status; it never maintains a competing ledger.
 
 ---
+
+
+The version-admission and hardware-free boundary amendment is recorded in
+[DL-0025](../decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier).
 
 ## Related Documents
 - [Platform Services Doctrine](./platform_services_doctrine.md)

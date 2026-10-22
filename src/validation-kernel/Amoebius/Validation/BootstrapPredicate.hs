@@ -1,19 +1,9 @@
--- | The deliberately small production predicate qualified by the Phase-0
--- bootstrap harness.
---
--- This module depends only on @base@ so the harness can compile an exact
--- source copy directly with the genesis compiler.  Its three decisions are
--- the complete mutation surface of the finite seed; broader source,
--- toolchain, and self-reference claims belong to their numbered owners.
+-- | Base-only predicate qualified from exact source by the finite seed harness.
+-- Broader source, toolchain, and self-reference claims belong to their capability owners.
 module Amoebius.Validation.BootstrapPredicate
-  ( bootstrapDigestMatches
-  , bootstrapSnapshotMatches
-  , bootstrapInputPathAllowed
-  ) where
-
+  ( bootstrapDigestMatches, bootstrapSnapshotMatches, bootstrapInputPathAllowed ) where
 import Data.Char (isHexDigit)
 import Data.List (isPrefixOf)
-
 -- Keep each decision on one stable line. BootstrapQualification.Internal
 -- replaces exactly one complete line in an acquired source copy and refuses
 -- if the expected line is absent or duplicated.
@@ -22,7 +12,7 @@ bootstrapDigestMatches actual expected = validLowerSha256 actual && actual == ex
 bootstrapSnapshotMatches :: String -> String -> Bool
 bootstrapSnapshotMatches opening closing = validLowerSha256 opening && opening == closing
 bootstrapInputPathAllowed :: FilePath -> Bool
-bootstrapInputPathAllowed path = ".build/bootstrap-inputs/" `isPrefixOf` path && boundedRelativePath path
+bootstrapInputPathAllowed path = ".build/runs/" `isPrefixOf` path && boundedRelativePath path
 validLowerSha256 :: String -> Bool
 validLowerSha256 value =
   length value == 64

@@ -3,6 +3,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Extension.Laws.Security
   ( Identity
   , Keyspace (RowKey)
@@ -20,7 +21,6 @@ import Amoebius.Scope.Index
   , activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import Data.Text (Text)
 

@@ -2,6 +2,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition
@@ -153,7 +154,7 @@ checkCalculus _root = do
   subject <- requireRight "calculus subject" (CalculusScope.trustedSubject tenant "tool-generation-calculus-subject")
   membership <- requireRight "calculus membership" (CalculusScope.activeMembership tenant subject)
   action <- requireRight "calculus request scope" $
-    CalculusScope.withRequestScope tenant subject membership $ \scope -> do
+    FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
       let resources :: Int -> ResourceVector
           resources count = ResourceVector 1 (fromIntegral count) 0 0
           artifact = artifactComponent scope "generated-checking-corpus" (resources artifactCount)

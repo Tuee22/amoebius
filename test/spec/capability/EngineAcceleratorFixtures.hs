@@ -26,7 +26,7 @@ import Amoebius.Capacity.Accelerator
 import Amoebius.Capability.Engine
   ( CudaOwnerDemand (..)
   , EngineCoexistencePolicy (EngineCoexistencePolicy)
-  , EngineFamily (..)
+  , InferenceFamily (..)
   , EngineOwnerDemand (..)
   , EngineProvisionError
   , EngineWorkloadClass (..)
@@ -111,8 +111,8 @@ data EngineNegative = EngineNegative
 
 engineNegatives :: [EngineNegative]
 engineNegatives =
-  [ negative "illegal_engine_family_unavailable_on_lane" "EngineFamilyUnavailable" "legal_engine_family_available_on_lane" (provisionEngineOwner cpuOffering VllmFamily (CpuEngineOwner "cpu")) (provisionEngineOwner cpuOffering LlamaFamily (CpuEngineOwner "cpu"))
-  , negative "illegal_cuda_on_cpu_target" "MissingCapability" "legal_cuda_on_cuda_target" (provisionEngineOwner cpuOffering LlamaFamily (CudaEngineOwner baseCudaOwner)) basePositive
+  [ negative "illegal_engine_family_unavailable_on_lane" "EngineFamilyUnavailable" "legal_engine_family_available_on_lane" (provisionEngineOwner cpuOffering Vllm (CpuEngineOwner "cpu")) (provisionEngineOwner cpuOffering LlamaCpp (CpuEngineOwner "cpu"))
+  , negative "illegal_cuda_on_cpu_target" "MissingCapability" "legal_cuda_on_cuda_target" (provisionEngineOwner cpuOffering LlamaCpp (CudaEngineOwner baseCudaOwner)) basePositive
   , negative "illegal_accelerator_count_shortage" "AcceleratorCountShortage" "legal_accelerator_count_exact" (cudaResult baseCudaOwner {cudaOwnerDeviceIds = Set.singleton "cuda-a", cudaOwnerDeviceCount = 2}) (cudaResult baseCudaOwner {cudaOwnerDeviceIds = Set.singleton "cuda-a", cudaOwnerDeviceCount = 1})
   , negative "illegal_accelerator_vram_shortage" "VramOvercommit" "legal_accelerator_vram_exact" (cudaResult (singleWorkload 21 Unsharded)) (cudaResult (singleWorkload 20 Unsharded))
   , negative "illegal_accelerator_source_workload_mismatch" "EngineSourceWorkloadMismatch" "legal_accelerator_source_workload_equal" (cudaResult sourceMismatchCudaOwner) basePositive
@@ -125,7 +125,7 @@ engineNegatives =
   basePositive = cudaResult baseCudaOwner
 
 cudaResult :: CudaOwnerDemand -> Either EngineProvisionError ProvisionedEngineAccelerator
-cudaResult = provisionEngineOwner cudaOffering LlamaFamily . CudaEngineOwner
+cudaResult = provisionEngineOwner cudaOffering LlamaCpp . CudaEngineOwner
 
 ownerWith sources workloads policy =
   CudaOwnerDemand "engine-owner" "a10" (Set.singleton "cuda-a") 1 sources workloads policy

@@ -22,15 +22,15 @@ import Amoebius.Kernel.Interpret
   , stepRun
   )
 import Amoebius.Kernel.Step
-import Control.Exception (SomeException, try)
+import Control.Exception (SomeException, try, bracket)
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Char8 qualified as Char8
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as Encoding
-import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, getPermissions, makeAbsolute, setOwnerExecutable, setPermissions)
-import System.Environment (getExecutablePath, lookupEnv, setEnv)
-import System.Exit (ExitCode (ExitFailure), exitWith)
+import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, exeExtension, findExecutable, makeAbsolute, removeFile)
+import System.Environment (getExecutablePath, lookupEnv, setEnv, unsetEnv)
+import System.Exit (ExitCode (..), exitWith)
 import System.FilePath (takeDirectory, (</>))
 import System.Process (CreateProcess (cwd, env), proc, readCreateProcessWithExitCode)
 
@@ -115,7 +115,9 @@ interpretSection suite = do
   managed <- scenario suite image "from-managed" Nothing (\executor -> runChainFromFrame executor AfterManagedCapacityReadyFrame steps)
   boundary <- scenario suite image "from-boundary" Nothing (\executor -> runChainFromFrame executor BoundaryFrame steps)
   failing <- scenario suite image "fail-at-3" (Just 3) (\executor -> runChainFromFrame executor ImmediateFrame steps)
+  originalPath <- lookupEnv "PATH"
   hostile <- scenario suite image "hostile-path" Nothing (\executor -> hostilePath suite executor steps)
+  restoredPath <- lookupEnv "PATH"
   unsupported <- scenario suite image "unsupported-kind" Nothing (\executor -> runUnsupported executor)
   single <- scenario suite image "single-step" Nothing (\executor -> maybe (pure (Left (ExecutorUnavailable "no step"))) (fmap (fmap pure) . stepRun executor) (firstStep steps))
   applied <- applyToDirectory False image (suite </> "examples" </> "kind-single-objectstore.dhall") (suite </> "applied-suite")
@@ -129,6 +131,7 @@ interpretSection suite = do
     , tabs ["from-boundary.result", chainResult boundary]
     , tabs ["fail-at-3.result", chainResult failing]
     , tabs ["hostile-path.result", chainResult hostile]
+    , tabs ["hostile-path.environment-restored", Text.pack (show (originalPath == restoredPath))]
     , tabs ["unsupported-kind.result", chainResult unsupported]
     , tabs ["single-step.result", chainResult single]
     , tabs ["apply-full.result", case applied of { Applied count -> "applied:" <> Text.pack (show count); _ -> "not-applied" }]
@@ -168,12 +171,20 @@ hostilePath :: FilePath -> Executor -> [Step] -> IO (Either InterpretRefusal [()
 hostilePath suite executor steps = do
   let decoy = suite </> "decoy"
   createDirectoryIfMissing True decoy
-  writeText (decoy </> "kubectl") (Text.unlines ["#!/bin/sh", "echo ran > " <> Text.pack (decoy </> "ran")])
-  permissions <- getPermissions (decoy </> "kubectl")
-  setPermissions (decoy </> "kubectl") (setOwnerExecutable True permissions)
-  setEnv "PATH" decoy
-  outcome <- runChainFromFrame executor AfterManagedCapacityReadyFrame steps
-  pure (fmap (map (const ())) outcome)
+  let source = decoy </> "Main.hs"
+      image = decoy </> ("kubectl" <> exeExtension)
+      marker = decoy </> "ran"
+  writeFile source (unlines ["module Main where", "main :: IO ()", "main = writeFile " <> show marker <> " \"ran\\n\""])
+  ghc <- findExecutable "ghc" >>= maybe (fail "hostile PATH control needs native GHC") pure
+  (built, _, errors) <- readCreateProcessWithExitCode (proc ghc ["--make", "-v0", "-j1", "-outputdir", decoy </> "objects", "-o", image, source]) ""
+  if built /= ExitSuccess then fail errors else pure ()
+  (control, _, _) <- readCreateProcessWithExitCode (proc image []) ""
+  marked <- doesFileExist marker
+  if control /= ExitSuccess || not marked then fail "hostile PATH control did not run" else removeFile marker
+  bracket (lookupEnv "PATH") (maybe (unsetEnv "PATH") (setEnv "PATH")) $ \_ -> do
+    setEnv "PATH" decoy
+    outcome <- runChainFromFrame executor AfterManagedCapacityReadyFrame steps
+    pure (fmap (map (const ())) outcome)
 
 runUnsupported :: Executor -> IO (Either InterpretRefusal [()])
 runUnsupported executor = case mkStep "build" ImmediateFrame DockerBuild [] of

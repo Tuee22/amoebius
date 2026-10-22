@@ -1,39 +1,36 @@
 {-# LANGUAGE OverloadedStrings #-}
 -- | Transient certification state and immutable, tracked receipt bundles.
 module Amoebius.Validation.Custody.Store
-  ( GenerationId, Receipt (..), SeedRecord (..), Store (..)
-  , archivedBundlePath, auditArchivedInventory, defaultStore, generationDirectory, governanceDigest
-  , latestGeneration, listGenerations, parseReceipt, parseSeed
-  , readArchivedBundles, readArchivedReceipts, readCurrentArchivedBundles, readReceipts, readRecord, readSeed
-  , renderReceipt, renderSeed, verifierDigest
-  , writeArchivedReceipt, writeReceipt, writeRecord, writeReplayVoid, writeSeed ) where
+  ( GenerationId, Receipt (..), SeedRecord (..), Store (..), archivedBundlePath, archivedKernelCap, auditArchivedInventory
+  , generationDirectory, governanceDigest, latestGeneration, parseReceipt, parseSeed
+  , readArchivedBundles, readArchivedBundlesWith, readCurrentArchivedBundles, readRecord, readSeed
+  , renderReceipt, renderSeed, verifierDigest, writeArchivedReceipt, writeRecord, writeReplayVoid, writeSeed
+  , withResult ) where
 import Amoebius.Plan.Decisions qualified as Decisions
 import Amoebius.Plan.ValidationRecordPath (isValidationRecordPath, validationRecordRoot)
-import Amoebius.Validation.Runner.Observer (observe, runExit, runStdout, sha256Hex)
+import Amoebius.Validation.Runner.Observer (observe, runExit, runStdout, sha256Hex, sha256Bytes)
+import Amoebius.Validation.Runner.Hygiene (kernelBudget, TreePurpose (AuditArchive), walkFilesUnder, sourceAttempt, readSourceBytes)
 import Control.Exception (IOException, try)
 import Control.Monad (filterM, forM)
-import Crypto.Hash.SHA256 qualified as SHA256
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
-import Data.Char (intToDigit)
 import Data.List (nub, sort)
-import Data.Maybe (mapMaybe)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 import System.Directory (createDirectory, createDirectoryIfMissing, doesDirectoryExist, doesFileExist, doesPathExist, getFileSize, listDirectory, makeAbsolute, pathIsSymbolicLink, removePathForcibly, renameDirectory, renameFile)
 import System.Environment (getExecutablePath)
 import System.Exit (ExitCode (..))
-import System.FilePath (makeRelative, takeDirectory, takeExtension, takeFileName, (</>))
+import System.FilePath (makeRelative, takeDirectory, takeFileName, (</>))
 import System.IO.Error (isDoesNotExistError)
 type GenerationId = Text
 newtype Store = Store {storeRoot :: FilePath} deriving (Eq, Show)
-defaultStore :: Store
-defaultStore = Store ".build/certification"
+withResult :: IO (Either e a) -> (e -> IO b) -> (a -> IO b) -> IO b
+withResult action failed next = action >>= either failed next
 generationDirectory :: Store -> GenerationId -> FilePath
 generationDirectory store generation = storeRoot store </> ("generation-" <> Text.unpack (Text.take 16 generation))
 verifierDigest :: IO Text
-verifierDigest = hex . SHA256.hash <$> (getExecutablePath >>= ByteString.readFile)
+verifierDigest = sha256Bytes <$> (getExecutablePath >>= ByteString.readFile)
 governanceDigest :: Text
 governanceDigest = sha256Hex (Text.unlines [Text.pack (Decisions.frozenPath row) <> "\t" <> Decisions.frozenDigest row <> "\t" <> Decisions.renderDecisionId (Decisions.frozenDecision row) | row <- Decisions.frozenBaseline])
 data SeedRecord = SeedRecord
@@ -78,7 +75,7 @@ renderReceipt receipt = renderFields
     , ("closure-digest", receiptClosureDigest receipt), ("reproducible-digest", receiptReproducible receipt), ("verifier-digest", receiptVerifierDigest receipt), ("governance-digest", receiptGovernanceDigest receipt)
     , ("status-postimage", receiptStatusPostimage receipt), ("tree-commit", receiptTreeCommit receipt), ("issued-at", receiptIssuedAt receipt) ]
       <> [("witness", witness) | witness <- receiptWitnesses receipt]
-      <> maybe [] (\(gap, product) -> [("reset-validator-gap", gap), ("reset-product-gap", product)]) (receiptResetCause receipt)
+      <> maybe [] (\(gap, productGap) -> [("reset-validator-gap", gap), ("reset-product-gap", productGap)]) (receiptResetCause receipt)
       <> maybe [] (\demo -> [("operator-demonstration", demo)]) (receiptDemonstration receipt) )
 parseReceipt :: Text -> Either Text Receipt
 parseReceipt contents = do
@@ -100,52 +97,30 @@ writeRecord path payload = do
   attempt <- try (do
     let bytes = TextEncoding.encodeUtf8 payload
     ByteString.writeFile path bytes
-    ByteString.writeFile (path <> ".sha256") (TextEncoding.encodeUtf8 (hex (SHA256.hash bytes)))) :: IO (Either IOException ())
+    ByteString.writeFile (path <> ".sha256") (TextEncoding.encodeUtf8 (sha256Bytes bytes))) :: IO (Either IOException ())
   pure (either (\problem -> Left ("record not written: " <> Text.pack (show problem))) Right attempt)
 readRecord :: FilePath -> IO (Either Text Text)
 readRecord path = do
-  attempt <- try ((,) <$> ByteString.readFile path <*> ByteString.readFile (path <> ".sha256")) :: IO (Either IOException (ByteString, ByteString))
+  attempt <- try ((,) <$> readSourceBytes path <*> readSourceBytes (path <> ".sha256")) :: IO (Either IOException (ByteString, ByteString))
   pure $ case attempt of
     Left problem -> Left ("record unreadable: " <> Text.pack (show problem))
     Right (payload, sidecar) -> case (TextEncoding.decodeUtf8' payload, TextEncoding.decodeUtf8' sidecar) of
-      (Right value, Right digest) | digest == hex (SHA256.hash payload) -> Right value
+      (Right value, Right digest) | digest == sha256Bytes payload -> Right value
       _ -> Left ("record digest or UTF-8 is invalid: " <> Text.pack path)
 writeSeed :: Store -> SeedRecord -> IO (Either Text ())
 writeSeed store seed = do
   let directory = generationDirectory store (seedGeneration seed)
-  createDirectoryIfMissing True (directory </> "receipts") >> writeRecord (directory </> "generation.tsv") (renderSeed seed)
+  createDirectoryIfMissing True directory >> writeRecord (directory </> "generation.tsv") (renderSeed seed)
 readSeed :: Store -> GenerationId -> IO (Either Text SeedRecord)
 readSeed store generation = fmap (>>= parseSeed) (readRecord (generationDirectory store generation </> "generation.tsv"))
-writeReceipt :: Store -> Receipt -> IO (Either Text ())
-writeReceipt store receipt = do
-  let directory = generationDirectory store (receiptGeneration receipt) </> "receipts"
-  createDirectoryIfMissing True directory
-  writeRecord (directory </> name) (renderReceipt receipt)
- where
-  pad n = let s = show n in if length s < 2 then '0' : s else s
-  stamp = Text.unpack (Text.filter (\c -> c /= ' ' && c /= ':') (receiptIssuedAt receipt))
-  name = case receiptResetCause receipt of
-    Nothing -> "phase-" <> pad (receiptPhase receipt) <> ".tsv"
-    Just _ -> "reset-phase-" <> pad (receiptPhase receipt) <> "-" <> stamp <> ".tsv"
-readReceipts :: Store -> GenerationId -> IO [Receipt]
-readReceipts store generation = do
-  let directory = generationDirectory store generation </> "receipts"
-  exists <- doesDirectoryExist directory
-  if not exists then pure [] else do
-    names <- sort . filter ((== ".tsv") . takeExtension) <$> listDirectory directory
-    parsed <- forM names $ \name -> fmap (either (const Nothing) (either (const Nothing) Just . parseReceipt)) (readRecord (directory </> name))
-    pure (mapMaybe id parsed)
-listGenerations :: Store -> IO [FilePath]
-listGenerations store = do
-  exists <- doesDirectoryExist (storeRoot store)
-  if not exists then pure [] else do
-    names <- listDirectory (storeRoot store)
-    sort <$> filterM (\name -> doesFileExist (storeRoot store </> name </> "generation.tsv")) [name | name <- names, "generation-" `Text.isPrefixOf` Text.pack name]
 latestGeneration :: Store -> Text -> IO (Maybe SeedRecord)
 latestGeneration store verifier = do
-  names <- listGenerations store
-  seeds <- forM names $ \name -> fmap (either (const Nothing) (either (const Nothing) Just . parseSeed)) (readRecord (storeRoot store </> name </> "generation.tsv"))
-  pure (case [seed | Just seed <- seeds, seedVerifierDigest seed == verifier] of (seed : _) -> Just seed; [] -> Nothing)
+  exists <- doesDirectoryExist (storeRoot store)
+  if not exists then pure Nothing else do
+    names <- listDirectory (storeRoot store)
+    directories <- sort <$> filterM (\name -> doesFileExist (storeRoot store </> name </> "generation.tsv")) [name | name <- names, "generation-" `Text.isPrefixOf` Text.pack name]
+    seeds <- forM directories $ \name -> fmap (either (const Nothing) (either (const Nothing) Just . parseSeed)) (readRecord (storeRoot store </> name </> "generation.tsv"))
+    pure (case [seed | Just seed <- seeds, seedVerifierDigest seed == verifier] of (seed : _) -> Just seed; [] -> Nothing)
 -- The five bounded evidence values are Haskell renderings, never executable inputs.
 archiveEvidenceNames :: [FilePath]
 archiveEvidenceNames = ["candidate.tsv", "kill-table.tsv", "outcome.tsv", "oracle-ledger.tsv", "observer.tsv"]
@@ -165,16 +140,12 @@ archivedBundlePath :: FilePath -> Receipt -> [(FilePath, Text)] -> FilePath
 archivedBundlePath root receipt evidence = generationDirectory (Store root) (receiptGeneration receipt) </> "receipts" </> archiveName receipt evidence
 readEvidence :: FilePath -> IO (Either Text Text)
 readEvidence path = do
-  attempt <- try (ByteString.readFile path) :: IO (Either IOException ByteString)
+  attempt <- try (readSourceBytes path) :: IO (Either IOException ByteString)
   pure $ case attempt of
     Left problem -> Left ("archive evidence unreadable: " <> Text.pack (show problem))
     Right bytes -> either (const (Left ("archive evidence is not UTF-8: " <> Text.pack path))) Right (TextEncoding.decodeUtf8' bytes)
 hasSymlink :: [FilePath] -> IO Bool
-hasSymlink paths = or <$> mapM check paths
- where
-  check path = do
-    result <- try (pathIsSymbolicLink path) :: IO (Either IOException Bool)
-    pure (either (not . isDoesNotExistError) id result)
+hasSymlink paths = or <$> mapM (\path -> either (not . isDoesNotExistError) id <$> (try (pathIsSymbolicLink path) :: IO (Either IOException Bool))) paths
 -- | Publish a complete acceptance bundle with a single directory rename.
 -- A conflicting content address, including a partially written one, is refused.
 writeArchivedReceipt :: FilePath -> Receipt -> [(FilePath, Text)] -> IO (Either Text FilePath)
@@ -191,16 +162,18 @@ writeArchivedReceipt root receipt evidence
           staging = target <> ".pending"
           generationPath = generationDirectory (Store root) (receiptGeneration receipt)
           receiptsPath = generationPath </> "receipts"
+      rootFile <- doesFileExist root
       linked <- hasSymlink [root, generationPath, receiptsPath, target, staging]
       exists <- doesPathExist target
       pending <- doesPathExist staging
       earlier <- readArchivedBundles root (receiptGeneration receipt)
       let stale = either (const True) (any (\(old, _) -> receiptPhase old == receiptPhase receipt && receiptIssuedAt old >= receiptIssuedAt receipt)) earlier
-      if linked then pure (Left "archive path contains a symbolic link")
+      if rootFile then pure (Left "archive root is not a directory")
+      else if linked then pure (Left "archive path contains a symbolic link")
       else if pending then pure (Left "archive has an unfinished pending bundle")
       else if not exists && stale then pure (Left "archive receipt issued-at is not newer than the existing phase bundle")
       else if exists then do
-          prior <- readBundle target (receiptGeneration receipt)
+          prior <- readBundleWith hasSymlink target (receiptGeneration receipt)
           pure $ case prior of
             Right (old, rows) | old == receipt && sort rows == sort evidence -> Right target
             _ -> Left ("archive content address already exists with different or invalid evidence: " <> Text.pack target)
@@ -218,9 +191,7 @@ writeArchivedReceipt root receipt evidence
                   pure $ if savedReceipt == Right (renderReceipt receipt) && sequence savedEvidence == Right (replicate (length evidence) True) then Right () else Left "archive staging verification failed"
                 (Left problem, _) -> pure (Left problem)
                 (_, Left problem) -> pure (Left ("archive evidence not written: " <> Text.pack (show problem)))
-              published <- case checked of
-                Left problem -> pure (Left problem)
-                Right () -> do
+              published <- withResult (pure checked) (pure . Left) $ \() -> do
                   moved <- try (renameDirectory staging target) :: IO (Either IOException ())
                   pure (either (Left . Text.pack . show) (const (Right target)) moved)
               case published of
@@ -231,18 +202,16 @@ writeArchivedReceipt root receipt evidence
  where
   value name = maybe "" id (lookup name evidence)
 -- | Every record, sidecar, path key, and evidence digest must be valid.
-readBundle :: FilePath -> GenerationId -> IO (Either Text (Receipt, [(FilePath, Text)]))
-readBundle path generation = do
-  pathLinked <- hasSymlink [path]
+readBundleWith :: ([FilePath] -> IO Bool) -> FilePath -> GenerationId -> IO (Either Text (Receipt, [(FilePath, Text)]))
+readBundleWith queryLinks path generation = do
+  pathLinked <- queryLinks [path]
   listed <- if pathLinked then pure (Left "archive bundle is a symbolic link") else do
     attempt <- try (listDirectory path) :: IO (Either IOException [FilePath])
     pure (either (Left . ("archive bundle unreadable: " <>) . Text.pack . show) Right attempt)
-  case listed of
-    Left problem -> pure (Left problem)
-    Right names
-      | sort names /= sort ("receipt.tsv" : "receipt.tsv.sha256" : archiveEvidenceNames) -> pure (Left ("archive bundle has missing or extra records: " <> Text.pack path))
-      | otherwise -> do
-          linked <- hasSymlink (path : [path </> name | name <- names])
+  withResult (pure listed) (pure . Left) $ \names ->
+    if sort names /= sort ("receipt.tsv" : "receipt.tsv.sha256" : archiveEvidenceNames) then pure (Left ("archive bundle has missing or extra records: " <> Text.pack path))
+    else do
+          linked <- queryLinks (path : [path </> name | name <- names])
           if linked then pure (Left "archive bundle contains a symbolic link") else do
             sizes <- try (mapM (getFileSize . (path </>)) names) :: IO (Either IOException [Integer])
             if either (const True) (any (> 16 * 1024 * 1024)) sizes then pure (Left "archive record is unreadable or exceeds 16 MiB") else do
@@ -260,13 +229,17 @@ readBundle path generation = do
  where
   value name rows = maybe "" id (lookup name rows)
 -- | Missing generation means no evidence; malformed present evidence is fatal.
+-- Supplied path observations return untrusted receipt data, never gate authority.
+-- Acceptance and replay enter through the native reader below.
 readArchivedBundles :: FilePath -> GenerationId -> IO (Either Text [(Receipt, FilePath)])
-readArchivedBundles root generation
+readArchivedBundles = readArchivedBundlesWith hasSymlink
+readArchivedBundlesWith :: ([FilePath] -> IO Bool) -> FilePath -> GenerationId -> IO (Either Text [(Receipt, FilePath)])
+readArchivedBundlesWith queryLinks root generation
   | not (digestShape generation) = pure (Left "archive generation identity is invalid")
   | otherwise = do
       let parent = generationDirectory (Store root) generation
           directory = parent </> "receipts"
-      linked <- hasSymlink [root, parent, directory]
+      linked <- queryLinks [root, parent, directory]
       exists <- doesDirectoryExist directory
       if linked then pure (Left "archive path contains a symbolic link")
       else if not exists then do
@@ -276,9 +249,7 @@ readArchivedBundles root generation
           listed <- try (listDirectory directory) :: IO (Either IOException [FilePath])
           case listed of
             Left problem -> pure (Left ("archive receipts unreadable: " <> Text.pack (show problem)))
-            Right names -> fmap sequence (mapM (\name -> fmap (fmap (\(receipt, _) -> (receipt, directory </> name))) (readBundle (directory </> name) generation)) (sort names))
-readArchivedReceipts :: FilePath -> GenerationId -> IO (Either Text [Receipt])
-readArchivedReceipts root generation = fmap (fmap (map fst)) (readArchivedBundles root generation)
+            Right names -> fmap sequence (mapM (\name -> fmap (fmap (\(receipt, _) -> (receipt, directory </> name))) (readBundleWith queryLinks (directory </> name) generation)) (sort names))
 -- Select the latest unique bundle per phase before applying voids, so a red
 -- replay cannot fall back to an older bundle with the same receipt digest.
 readCurrentArchivedBundles :: FilePath -> GenerationId -> IO (Either Text [(Receipt, FilePath)])
@@ -307,7 +278,7 @@ writeReplayVoid root receipt bundle reason failure issued = do
       name = "phase-" <> pad (receiptPhase receipt) <> "-" <> Text.unpack bundleKey <> "-" <> Text.unpack (sha256Hex body) <> ".tsv"
       path = directory </> name
       pending = path <> ".pending"
-  valid <- readBundle bundle generation
+  valid <- readBundleWith hasSymlink bundle generation
   linked <- hasSymlink [root, directory, path, pending]
   exists <- doesPathExist path
   if either (const True) ((/= receipt) . fst) valid || not (digestShape failure) || reason `notElem` ["gate-red", "runner-refusal"]
@@ -323,10 +294,7 @@ readReplayVoid root path = do
   linked <- hasSymlink [path]
   sized <- try (getFileSize path) :: IO (Either IOException Integer)
   if linked || either (const True) (> 16 * 1024 * 1024) sized then pure (Left "void record is linked, unreadable, or oversized") else do
-    raw <- readEvidence path
-    case raw of
-      Left problem -> pure (Left problem)
-      Right body -> case traverse pair (Text.lines body) of
+    withResult (readEvidence path) (pure . Left) $ \body -> case traverse pair (Text.lines body) of
         Just fields | map fst fields == ["record", "target", "phase", "reproducible-digest", "verifier-digest", "governance-digest", "failure-digest", "reason", "issued-at"] -> do
           let field key = maybe "" id (lookup key fields)
               generation = field "verifier-digest"
@@ -334,7 +302,7 @@ readReplayVoid root path = do
               bundle = root </> makeRelative validationRecordRoot target
               bundleKey = last (Text.splitOn "-" (Text.pack (takeFileName bundle)))
               name = "phase-" <> pad (field "phase") <> "-" <> bundleKey <> "-" <> sha256Hex body <> ".tsv"
-          found <- if isValidationRecordPath (target </> "receipt.tsv") then readBundle bundle generation else pure (Left "void target path is invalid")
+          found <- if isValidationRecordPath (target </> "receipt.tsv") then readBundleWith hasSymlink bundle generation else pure (Left "void target path is invalid")
           pure $ case found of
             Right (receipt, _) | field "record" == "amoebius-replay-void.v1" && field "target" == Text.pack (validationRecordRoot </> makeRelative root bundle)
               && digestShape generation && takeFileName (takeDirectory (takeDirectory path)) == "generation-" <> Text.unpack (Text.take 16 generation)
@@ -358,7 +326,7 @@ readReplayVoids root generation = do
       Left problem -> pure (Left ("void directory unreadable: " <> Text.pack (show problem)))
       Right files -> fmap sequence (mapM (readReplayVoid root . (directory </>)) files)
 -- | Audit all generations and refuse edits to committed evidence.
-auditArchivedInventory :: FilePath -> IO (Either Text Text)
+auditArchivedInventory :: FilePath -> IO (Either Text (Text, [(Receipt, FilePath)]))
 auditArchivedInventory repository = do
   absolute <- makeAbsolute repository
   changed <- observe repository "git" ["-c", "safe.directory=" <> absolute, "diff", "--no-renames", "--name-only", "--diff-filter=MDRT", "HEAD", "--", validationRecordRoot]
@@ -368,44 +336,29 @@ auditArchivedInventory repository = do
       linked <- hasSymlink [root]
       exists <- doesPathExist root
       if linked then pure (Left "archive root is a symbolic link")
-      else if not exists then pure (Right (sha256Hex ""))
+      else if not exists then pure (Right (sha256Hex "", []))
       else do
-        paths <- walk root root
-        case paths of
-          Left problem -> pure (Left problem)
-          Right files -> case filter (not . isValidationRecordPath) (map (makeRelative repository) files) of
+        withResult (sourceAttempt (map (root </>) <$> walkFilesUnder root AuditArchive "")) (pure . Left) $ \files -> case filter (not . isValidationRecordPath) (map (makeRelative repository) files) of
             (bad : _) -> pure (Left ("archive path is not admitted: " <> Text.pack bad))
             [] -> do
-              bundles <- fmap sequence (mapM checkBundle (nub (sort [takeDirectory file | file <- files, takeFileName (takeDirectory (takeDirectory file)) == "receipts"])))
-              case bundles of
-                Left problem -> pure (Left problem)
-                Right _ -> do
-                  voids <- fmap sequence (mapM (readReplayVoid root) [file | file <- files, takeFileName (takeDirectory file) == "voids"])
-                  case voids of
-                    Left problem -> pure (Left problem)
-                    Right _ -> do
-                      bytes <- try (mapM ByteString.readFile (sort files)) :: IO (Either IOException [ByteString])
-                      pure (either (Left . Text.pack . show) (Right . sha256Hex . Text.unlines . zipWith (\path body -> Text.pack (makeRelative repository path) <> "\t" <> hex (SHA256.hash body)) (sort files)) bytes)
+              withResult (sequence <$> mapM checkBundle (nub (sort [takeDirectory file | file <- files, takeFileName (takeDirectory (takeDirectory file)) == "receipts"]))) (pure . Left) $ \checked ->
+                withResult (sequence <$> mapM (readReplayVoid root) [file | file <- files, takeFileName (takeDirectory file) == "voids"]) (pure . Left) $ \_ -> do
+                      bytes <- try (mapM readSourceBytes (sort files)) :: IO (Either IOException [ByteString])
+                      pure (either (Left . Text.pack . show) (\bodies -> Right (sha256Hex (Text.unlines (zipWith (\path body -> Text.pack (makeRelative repository path) <> "\t" <> sha256Bytes body) (sort files) bodies)), checked)) bytes)
  where
-  walk root path = do
-    linked <- hasSymlink [path]
-    if linked then pure (Left ("archive path is a symbolic link: " <> Text.pack path)) else do
-      directory <- doesDirectoryExist path
-      if directory then do
-        listed <- try (listDirectory path) :: IO (Either IOException [FilePath])
-        case listed of
-          Left problem -> pure (Left (Text.pack (show problem)))
-          Right [] | path /= root -> pure (Left ("archive has an empty directory: " <> Text.pack path))
-          Right names -> fmap (fmap concat . sequence) (mapM (walk root . (path </>)) names)
-      else fmap (\file -> if file then Right [path] else Left ("archive entry is unreadable: " <> Text.pack path)) (doesFileExist path)
-  checkBundle path = do
-    record <- readRecord (path </> "receipt.tsv")
-    case record >>= parseReceipt of
-      Left problem -> pure (Left problem)
-      Right receipt
-        | takeFileName (takeDirectory (takeDirectory path)) /= "generation-" <> Text.unpack (Text.take 16 (receiptGeneration receipt)) -> pure (Left "archive generation directory and receipt disagree")
-        | otherwise -> fmap (fmap (const ())) (readBundle path (receiptGeneration receipt))
-hex :: ByteString -> Text
-hex = Text.pack . concatMap byteHex . ByteString.unpack
- where
-  byteHex value = [intToDigit (fromIntegral value `div` 16), intToDigit (fromIntegral value `mod` 16)]
+  checkBundle path = withResult ((>>= parseReceipt) <$> readRecord (path </> "receipt.tsv")) (pure . Left) $ \receipt ->
+      if takeFileName (takeDirectory (takeDirectory path)) /= "generation-" <> Text.unpack (Text.take 16 (receiptGeneration receipt)) then pure (Left "archive generation directory and receipt disagree")
+      else fmap (fmap (\(accepted, _) -> (accepted, path))) (readBundleWith hasSymlink path (receiptGeneration receipt))
+-- Accepted observations only tighten the ratchet, across generations, resets, and voids.
+archivedKernelCap :: FilePath -> IO (Either Text (Maybe Int))
+archivedKernelCap repository = withResult (auditArchivedInventory repository) (pure . Left) $ \(_, records) -> do
+      counts <- forM [(receipt, path) | (receipt, path) <- records, receiptResetCause receipt == Nothing, receiptDemonstration receipt == Nothing] $ \(receipt, path) -> do
+        checked <- readBundleWith hasSymlink path (receiptGeneration receipt)
+        pure $ do
+          (observed, evidence) <- checked
+          if observed /= receipt then Left "archive changed while deriving kernel ratchet" else Right ()
+          let candidate = maybe "" id (lookup "candidate.tsv" evidence)
+          case [value | line <- Text.lines candidate, ["observation", "Legacy closure", "hygiene.kernel-lines", value] <- [Text.splitOn "\t" line]] of
+            [value] | [(count, "")] <- (reads (Text.unpack value) :: [(Integer, String)]), count > 0, count <= toInteger kernelBudget, Text.pack (show count) == value -> Right (fromInteger count)
+            _ -> Left "accepted kernel observation is absent, repeated, or invalid"
+      pure ((\values -> case values of [] -> Nothing; _ -> Just (minimum values)) <$> sequence counts)

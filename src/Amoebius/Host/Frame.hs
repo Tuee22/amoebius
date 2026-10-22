@@ -2,9 +2,8 @@
 --
 -- amoebius is Kubernetes-centric and the unit of compute it wants is a __Linux
 -- host__. Native Linux supplies one directly; Apple and Windows synthesize one in a
--- guest ("substrate_doctrine.md" §4). This module is the single table that answers
--- both questions for every catalogue member, so a substrate branch does not have to
--- be re-spelled at each site that needs one.
+-- guest ("substrate_doctrine.md" §4). The shared vocabulary profile owns the
+-- substrate-to-frame table; this module adds the frame's engine policy.
 --
 -- Two properties are deliberate.
 --
@@ -27,17 +26,9 @@ module Amoebius.Host.Frame
   , renderContainerEngine
   ) where
 
-import Amoebius.Host.Substrate (PristineLinuxProvider (..), Substrate (..))
-
--- | The Linux frame a substrate reaches its workload through.
-data Frame
-  = -- | Linux running on the metal: the frame is the host.
-    NativeLinux
-  | -- | An Apple host's Linux guest, supplied by Lima or Colima.
-    LimaGuest
-  | -- | A Windows host's Linux distribution, supplied by WSL2.
-    Wsl2Guest
-  deriving stock (Eq, Ord, Show, Enum, Bounded)
+import Amoebius.Host.Substrate (PristineLinuxProvider, Substrate, providerForFrame)
+import Amoebius.Vocabulary (profileFrame, substrateProfile)
+import Amoebius.Vocabulary.Frame (Frame (..), frameName)
 
 -- | What supplies the container endpoint inside a frame.
 data ContainerEngine
@@ -49,11 +40,7 @@ data ContainerEngine
 
 -- | Total, wildcard-free: every substrate names the frame it reaches Linux through.
 frameFor :: Substrate -> Frame
-frameFor substrate = case substrate of
-  LinuxCpu -> NativeLinux
-  LinuxCuda -> NativeLinux
-  Apple -> LimaGuest
-  Windows -> Wsl2Guest
+frameFor = profileFrame . substrateProfile
 
 -- | Total, wildcard-free: every frame names where its container engine comes from.
 --
@@ -74,16 +61,10 @@ engineForSubstrate = engineFor . frameFor
 -- | The provider that materializes a frame, drawn from the substrate registry rather
 -- than restated here.
 frameProvider :: Frame -> PristineLinuxProvider
-frameProvider frame = case frame of
-  NativeLinux -> Incus
-  LimaGuest -> Lima
-  Wsl2Guest -> Wsl2
+frameProvider = providerForFrame
 
 renderFrame :: Frame -> String
-renderFrame frame = case frame of
-  NativeLinux -> "native-linux"
-  LimaGuest -> "lima-guest"
-  Wsl2Guest -> "wsl2-guest"
+renderFrame = frameName
 
 renderContainerEngine :: ContainerEngine -> String
 renderContainerEngine engine = case engine of

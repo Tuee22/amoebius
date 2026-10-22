@@ -8,6 +8,10 @@
 -- module imports these types; none restates them.
 module Amoebius.Vocabulary
   ( Substrate (..)
+  , SubstrateProfile
+  , substrateProfile
+  , profileRequiredArchitecture
+  , profileFrame
   , Architecture (..)
   , Gpu (..)
   , OsName (..)
@@ -16,18 +20,27 @@ module Amoebius.Vocabulary
   , detectedSubstrate
   , detectedArchitecture
   , mkDetected
-  , hostEnvironment
+  , linuxCpuDetected
   , HostRefusal (..)
   , hostRefusalTag
   , Lane (..)
   , lanesOf
   , ComputeEngine (..)
   , EngineRuntime (..)
+  , engineRuntimeName
+  , InferenceFamily (..)
+  , inferenceFamilyName
   , CapabilityArm (..)
   , ExtensionId
   , mkExtensionId
   , extensionIdText
   , Unit (..)
+  , MetricQuantity
+  , mkMetricQuantity
+  , metricQuantityValue
+  , Duration
+  , mkDuration
+  , durationSeconds
   , Quantity (..)
   , quantityValue
   , quantityText
@@ -37,8 +50,10 @@ module Amoebius.Vocabulary
   , laneName
   ) where
 
-import Control.DeepSeq (NFData)
+import Control.DeepSeq (NFData (..))
+import Amoebius.Vocabulary.Frame (Frame (..))
 import Data.Char (isAsciiLower, isDigit)
+import Data.Ratio ((%))
 import Data.Text (Text)
 import Data.Text qualified as Text
 import GHC.Generics (Generic)
@@ -68,6 +83,13 @@ newtype RawArch = RawArch String
 data Detected = Detected Substrate Architecture
   deriving stock (Eq, Ord, Show)
 
+instance NFData Detected where
+  rnf (Detected substrate architecture) = rnf substrate `seq` rnf architecture
+
+-- | A Linux CPU node at either admitted architecture is always a legal pair.
+linuxCpuDetected :: Architecture -> Detected
+linuxCpuDetected = Detected LinuxCpu
+
 detectedSubstrate :: Detected -> Substrate
 detectedSubstrate (Detected substrate _) = substrate
 
@@ -89,43 +111,48 @@ hostRefusalTag refusal = case refusal of
 
 -- | Apple hosts are arm64 only and Windows hosts are amd64 only.
 mkDetected :: Substrate -> Architecture -> Either HostRefusal Detected
-mkDetected substrate architecture = case (substrate, architecture) of
-  (Apple, Amd64) -> Left (NotNaturalArchitecture Apple)
-  (Windows, Arm64) -> Left (NotNaturalArchitecture Windows)
+mkDetected substrate architecture = case profileRequiredArchitecture (substrateProfile substrate) of
+  Just required | architecture /= required -> Left (NotNaturalArchitecture substrate)
   _ -> Right (Detected substrate architecture)
-
--- | The three reads a host is classified from: operating system, architecture, and
--- whether a GPU device is present. Total: every input is a detection or a refusal.
-hostEnvironment :: OsName -> RawArch -> Gpu -> Either HostRefusal Detected
-hostEnvironment (OsName rawOs) (RawArch rawArch) gpu = do
-  architecture <- case rawArch of
-    "x86_64" -> Right Amd64
-    "amd64" -> Right Amd64
-    "aarch64" -> Right Arm64
-    "arm64" -> Right Arm64
-    _ -> Left UnknownArch
-  substrate <- case rawOs of
-    "linux" -> Right (if gpu == GpuPresent then LinuxCuda else LinuxCpu)
-    "darwin" -> Right Apple
-    "mingw32" -> Right Windows
-    "windows" -> Right Windows
-    _ -> Left UnknownOs
-  mkDetected substrate architecture
 
 -- | A place a workload can run on a host.
 data Lane = LinuxCpuAt Architecture | LinuxCudaAt Architecture | AppleMetalOnHost
   deriving stock (Eq, Generic, Ord, Show)
   deriving anyclass (NFData)
 
--- | The lanes a detected host offers. Every host offers a Linux CPU lane at its own
--- architecture; a CUDA lane exists only where a CUDA device was detected, and the
--- Apple Metal lane only on the Apple substrate.
+-- | One catalog site owns natural-architecture policy, lane offers, and frame.
+-- Nothing means the supplied native architecture; no host read occurs here.
+data SubstrateProfile = SubstrateProfile (Maybe Architecture) Frame Bool Bool
+  deriving stock (Eq, Ord, Show)
+
+instance NFData SubstrateProfile where
+  rnf (SubstrateProfile architecture frame cuda metal) = rnf architecture `seq` rnf frame `seq` rnf cuda `seq` rnf metal
+
+-- These are functions, not exported record labels: record updates cannot forge a profile.
+profileRequiredArchitecture :: SubstrateProfile -> Maybe Architecture
+profileRequiredArchitecture (SubstrateProfile architecture _ _ _) = architecture
+profileFrame :: SubstrateProfile -> Frame
+profileFrame (SubstrateProfile _ frame _ _) = frame
+profileOffersCuda :: SubstrateProfile -> Bool
+profileOffersCuda (SubstrateProfile _ _ cuda _) = cuda
+profileOffersMetal :: SubstrateProfile -> Bool
+profileOffersMetal (SubstrateProfile _ _ _ metal) = metal
+
+substrateProfile :: Substrate -> SubstrateProfile
+substrateProfile substrate = case substrate of
+  LinuxCpu -> SubstrateProfile Nothing NativeLinux False False
+  LinuxCuda -> SubstrateProfile Nothing NativeLinux True False
+  Apple -> SubstrateProfile (Just Arm64) LimaGuest False True
+  Windows -> SubstrateProfile (Just Amd64) Wsl2Guest False False
+
+-- | Project offers only from a legally constructed observation.
 lanesOf :: Detected -> [Lane]
-lanesOf (Detected substrate architecture) = case substrate of
-  LinuxCpu -> [LinuxCpuAt architecture]
-  LinuxCuda -> [LinuxCpuAt architecture, LinuxCudaAt architecture]
-  Apple -> [LinuxCpuAt Arm64, AppleMetalOnHost]
-  Windows -> [LinuxCpuAt Amd64]
+lanesOf (Detected substrate architecture) =
+  [LinuxCpuAt architecture]
+    <> [LinuxCudaAt architecture | profileOffersCuda profile]
+    <> [AppleMetalOnHost | profileOffersMetal profile]
+ where
+  profile = substrateProfile substrate
 
 data ComputeEngine = KindEngine | Rke2Engine | ManagedEksEngine
   deriving stock (Eq, Generic, Ord, Show)
@@ -133,12 +160,33 @@ data ComputeEngine = KindEngine | Rke2Engine | ManagedEksEngine
 
 -- | A named catalog lane of an inference engine. There is intentionally no URL or
 -- download arm.
-data EngineRuntime
-  = AppleMetal Text
-  | Cuda Text
-  | CpuRuntime Text
-  deriving stock (Eq, Generic, Ord, Show)
+data EngineRuntime = AppleMetal | Cuda | CpuRuntime
+  deriving stock (Bounded, Enum, Eq, Generic, Ord, Show)
   deriving anyclass (NFData)
+
+engineRuntimeName :: EngineRuntime -> Text
+engineRuntimeName runtime = case runtime of
+  AppleMetal -> "AppleMetal"
+  Cuda -> "Cuda"
+  CpuRuntime -> "LinuxCpu"
+
+-- Family is independent of lane. Neither catalog dimension contains an
+-- authored address, build expression, or unchecked text identity.
+data InferenceFamily
+  = LlamaCpp | WhisperCpp | Onnx | Vllm | Pytorch | Diffusers | Transformers | Audiveris
+  deriving stock (Bounded, Enum, Eq, Generic, Ord, Show)
+  deriving anyclass (NFData)
+
+inferenceFamilyName :: InferenceFamily -> Text
+inferenceFamilyName family = case family of
+  LlamaCpp -> "llama.cpp"
+  WhisperCpp -> "whisper.cpp"
+  Onnx -> "ONNX"
+  Vllm -> "vLLM"
+  Pytorch -> "pytorch"
+  Diffusers -> "diffusers"
+  Transformers -> "transformers"
+  Audiveris -> "Audiveris"
 
 -- | The capabilities an application can need.
 data CapabilityArm
@@ -163,6 +211,28 @@ mkExtensionId name = if isLabel name then Just (ExtensionId name) else Nothing
 
 extensionIdText :: ExtensionId -> Text
 extensionIdText (ExtensionId name) = name
+
+-- | Positive, exact dimensionless metric magnitude. Resource magnitudes stay
+-- natural-number quantities; monitoring ratios retain their rational precision.
+newtype MetricQuantity = MetricQuantity Rational
+  deriving stock (Eq, Ord, Show)
+
+mkMetricQuantity :: Integer -> Integer -> Maybe MetricQuantity
+mkMetricQuantity numerator denominator
+  | numerator > 0 && denominator > 0 = Just (MetricQuantity (numerator % denominator))
+  | otherwise = Nothing
+
+metricQuantityValue :: MetricQuantity -> Rational
+metricQuantityValue (MetricQuantity value) = value
+
+newtype Duration = Duration Natural
+  deriving stock (Eq, Ord, Show)
+
+mkDuration :: Natural -> Maybe Duration
+mkDuration seconds = if seconds > 0 then Just (Duration seconds) else Nothing
+
+durationSeconds :: Duration -> Natural
+durationSeconds (Duration seconds) = seconds
 
 -- | The unit a capacity quantity is measured in.
 data Unit = CpuUnit | MemoryUnit | EphemeralUnit | SlotUnit | DurableUnit

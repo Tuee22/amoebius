@@ -7,7 +7,7 @@ packages:
   ./probe/probe.cabal
 
 -- The compiler is an authored compatibility requirement, not a path. The range lives in
--- tools/toolchain_requirements.json and the phase gate passes the resolved compiler on the command
+-- Amoebius.Toolchain.Versions and the phase gate passes the resolved compiler on the command
 -- line, so no tracked file carries a developer-home path
 -- (repository_layout_doctrine.md section 4).
 

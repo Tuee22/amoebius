@@ -121,7 +121,7 @@ remains phase-local and cannot be supplied by this prose.
 ## Sprint 55.1: Substrate observation and classification ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Substrate/Observe.hs`, `src/Amoebius/Substrate/Classify.hs`
+**Implementation**: `src/Amoebius/Substrate/Observe.hs`, `src/capacity-topology/Amoebius/Substrate/Classify.hs`
 **Blocked by**: [Phase 54](phase_54_windows_engine_bringup.md) gate pass
 **Requires**: `natural-linux-cpu-amd64-host`
 **Independent Validation**: A separately authored Haskell decision table checks every closed OS/architecture/accelerator cell; paired reason-specific negatives and a changed-classifier mutant must fail without cluster effects.

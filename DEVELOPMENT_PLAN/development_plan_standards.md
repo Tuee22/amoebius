@@ -264,11 +264,10 @@ the later artefact is mis-ordered rather than forward-deferred.
 
 Until `BOOTSTRAP_HANDOFF` (Phase 50) passes its qualified gate,
 `pb` is an inadmissible validation transport: Phase 0 through the DSL barrier (Phase 9) invoke the exact
-source-bound Haskell verifier directly. Phase 0 carries only the narrow `GenesisTrust` local-custody and compile-time/platform
-assumption; it does not authenticate the actual compiler executable bytes or derivation. Phase 1 owns the
-pin-verified, reproducible toolchain acquisition bound by subsequent builds without retroactively providing
-Phase 0's compiler or proving publisher identity
-([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)). Phase 50
+source-bound Haskell verifier directly. Phase 0 assumes the semantic correctness of version-compatible native GHCup and GHC. Phase 1 checks
+those versions and retained probes; neither requires toolchain byte pins, archive/signature files, a fixed
+OS or CPU architecture, devices, or privileged host facilities
+([DL-0025](../documents/decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier)). Phase 50
 alone places the already source-bounded `pb` ensure/build/unchanged-argv/exec handoff under external runtime
 observation: its candidate starts the exact source-built Haskell supervisor directly, and that supervisor
 invokes `pb` as the child subject. The future public spelling cannot supervise its own handoff. Phase 51 and
@@ -681,6 +680,10 @@ The full rule is in
 [`development_plan_gate_integrity.md` §U](development_plan_gate_integrity.md#u-the-final-repository-layout).
 
 ---
+
+
+The version-admission and hardware-free boundary amendment is recorded in
+[DL-0026](../documents/decision_log.md#dl-0026--plan-gates-use-native-version-admission-without-hardware-prerequisites).
 
 ## Related Documents
 

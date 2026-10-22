@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds #-}
 module QuorumIllegal where
 import Amoebius.Dsl.Topology
-quorum = mkServerQuorum EvenTwoToken
+quorum :: Rke2Quorum Int
+quorum = Two 1 2

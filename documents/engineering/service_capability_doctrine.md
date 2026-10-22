@@ -186,18 +186,17 @@ would be reporting a designed extension point as a built one.
 
 ## 4. Capability → provider → shape: the binding
 
-**Observed implementation** ([GateSpec:typed_spine]). The binding seam in
+**Specification** ([DL-0032](../decision_log.md#dl-0032--pure-dsl-claims-retain-their-validation-owners)).
+Qualification is owed by [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md) for the binding seam in
 `src/capability-bind/Amoebius/Capability/Binding.hs` and the post-bind planner and seal in
-`src/provision-seal/Amoebius/Capacity/Provision.hs` are implemented by
-[Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md)
-([DL-0023](../decision_log.md#dl-0023--phase-3-accepted-its-owed-by-paragraphs-become-observed-implementations)) as stages of the typed spine. The
-object-store capability bound under both shapes reaches fake-applied bytes whose application objects are identical
-across the shape swap, an independent oracle judges the rendered object multiset from literals, and an unbound
-need, a dangling binding, an unknown deployment, an overcommitted demand, and a post-bind expansion overcommit are
-each refused at their exact tag and stage. The oracle's source scan allows no importer of the assembler other than
-`Amoebius.Dsl.Lower`. The other eight arms, the remaining planner arms, the activation stages, and runtime
-accounting are exercised only by component suites, which are development diagnostics that no phase gate records;
-provision and runtime provider health, and live realization, remain later-owned.
+`src/provision-seal/Amoebius/Capacity/Provision.hs` as typed-spine stages. The object-store capability under
+both shapes must reach fake-applied bytes with identical application objects across the shape swap.
+An independent literal oracle must judge the rendered object multiset and exact tag/stage refusals for an
+unbound need, dangling binding, unknown deployment, overcommitted demand and post-bind expansion overcommit.
+The source scan must permit only `Amoebius.Dsl.Lower` to import the assembler. The other eight arms,
+remaining planner arms, activation stages and runtime accounting must remain outside that gate's claim;
+component diagnostics cannot qualify them. Provision and runtime provider health and live realization
+retain their later owners.
 
 A capability becomes a running service through a **three-part binding**, and the three parts live on different
 surfaces:

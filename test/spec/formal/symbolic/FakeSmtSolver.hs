@@ -3,8 +3,10 @@ module Main (main) where
 import Data.List (nub)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
+import System.Environment (getExecutablePath)
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
+import System.FilePath (dropExtension)
 import Text.ParserCombinators.ReadP
 
 data SExp = Atom String | List [SExp] deriving stock (Eq, Show)
@@ -19,8 +21,11 @@ main = do
     Right forms -> case solve forms of
       Left problem -> hPutStrLn stderr problem >> exitFailure
       Right satisfiable -> do
-        putStrLn (if satisfiable then "sat" else "unsat")
-        if satisfiable && any isGetModel forms then putStrLn "(model)" else pure ()
+        let response = (if satisfiable then "sat\n" else "unsat\n")
+              <> (if satisfiable && any isGetModel forms then "(model)\n" else "")
+        self <- getExecutablePath
+        appendFile (dropExtension self <> ".transcript") (show (source, response) <> "\n")
+        putStr response
 
 solve :: [SExp] -> Either String Bool
 solve forms = do

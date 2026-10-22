@@ -39,7 +39,7 @@ import Amoebius.Capacity.Provision
   , deriveInfrastructureDemand
   , infrastructureRequiredResources
   )
-import Amoebius.Capacity.Types (CandidateNodeClass (CandidateNodeClass), CpuOvercommitPolicy (NoCpuOvercommit), GrowthQuota (GrowthQuota), HostEnvironment (NativeLinux), Node (Node), NodeCapacity (NodeCapacity))
+import Amoebius.Capacity.Types (CandidateNodeClass (CandidateNodeClass), CpuOvercommitPolicy (NoCpuOvercommit), GrowthQuota (GrowthQuota), HostEnvironment (NativeLinux), Node (Node), NodeRole (..), NodeCapacity (NodeCapacity))
 import Amoebius.Capacity.Vector (ResourceVector (..))
 import Amoebius.Capability.Assemble (assembleBoundDeployment)
 import Amoebius.Capability.Binding (bind)
@@ -62,6 +62,7 @@ import BindFixtures
   , distributedBinding
   , singleBinding
   )
+import Amoebius.Vocabulary (Architecture (Amd64), linuxCpuDetected)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
@@ -123,6 +124,7 @@ elasticFailingTopology =
     CandidateNodeClass
       "elastic"
       NativeLinux
+      (linuxCpuDetected Amd64)
       (NodeCapacity (ResourceVector 100 100 100 10) NoCpuOvercommit Map.empty)
       (ResourceVector 100 0 0 0)
       Set.empty
@@ -251,6 +253,7 @@ provisionNegatives observabilityFixture cudaFixture =
               ( CandidateNodeClass
                   "elastic-exact"
                   NativeLinux
+                  (linuxCpuDetected Amd64)
                   (NodeCapacity baselineCapacity NoCpuOvercommit Map.empty)
                   (ResourceVector 0 0 0 0)
                   Set.empty
@@ -271,6 +274,8 @@ node capacity =
     NativeLinux
     (NodeCapacity capacity NoCpuOvercommit Map.empty)
     Set.empty
+    (linuxCpuDetected Amd64)
+    KindWorker
 
 mutateFirstChild :: BoundDeployment -> Either ProvisionError BoundDeployment
 mutateFirstChild deployment = case boundDeploymentControllerExplanations deployment of

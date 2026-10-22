@@ -2,7 +2,7 @@
 
 -- | The only executor of steps. A step is data; this module reads it and, for an apply
 -- step, hands its payload to a @kubectl@ process. The one executor this phase admits is a
--- fake: the running program itself, reached through a link named @kubectl@, which records
+-- fake: a copy of the running program named @kubectl@, which records
 -- what it received and writes nothing to a cluster.
 module Amoebius.Kernel.Interpret
   ( Executor (..)
@@ -31,7 +31,7 @@ import Data.List (sort)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as Encoding
-import System.Directory (createDirectoryIfMissing, createFileLink, doesFileExist, doesPathExist, makeAbsolute, removeFile)
+import System.Directory (copyFile, createDirectoryIfMissing, doesFileExist, doesPathExist, exeExtension, makeAbsolute, removeFile)
 import System.Environment (getArgs, getEnvironment, getProgName, lookupEnv)
 import System.Exit (ExitCode (ExitFailure, ExitSuccess), exitWith)
 import System.FilePath ((</>))
@@ -125,17 +125,17 @@ sha256Hex bytes = Text.pack (concatMap hexByte (ByteString.unpack (SHA256.hash b
 transcriptVariable :: String
 transcriptVariable = "AMOEBIUS_FAKE_TRANSCRIPT"
 
--- | Make @directory/bin/kubectl@ a link to the given image and return the executor that
+-- | Copy the image to the native @directory/bin/kubectl@ name and return the executor that
 -- spawns it. Every path is made absolute, so the spawn never depends on a search path.
 materializeFake :: FilePath -> FilePath -> IO Executor
 materializeFake image directory = do
   absolute <- makeAbsolute directory
   let bin = absolute </> "bin"
-      link = bin </> "kubectl"
+      link = bin </> ("kubectl" <> exeExtension)
   createDirectoryIfMissing True bin
   present <- doesPathExist link
   if present then removeFile link else pure ()
-  createFileLink image link
+  copyFile image link
   pure (FakeKubectl link absolute)
 
 spawn :: Executor -> [String] -> ByteString -> IO (Either Text (ExitCode, Text))

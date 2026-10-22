@@ -2,6 +2,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RoleAnnotations #-}
 
 -- | A pure, bounded kernel for the six extension security laws.
 --
@@ -62,81 +63,28 @@ import Amoebius.Scope.Index
   , ScopeError
   , Tenant
   , Subject
-  , activeMembership
   , scopeSubject
   , scopeTenant
   , subjectText
   , tenantText
-  , trustedSubject
-  , trustedTenant
-  , withRequestScope
   )
-import Crypto.Hash.SHA256 qualified as SHA256
+import Amoebius.Scope.Attested
+  ( Trust (..), Identity, SignedIdentityEnvelope (..), VerificationKey
+  , verificationKey, claimedIdentity, verifyIdentity, identityTenantText
+  , identitySubjectText, attest, principalAttestation )
 import Data.ByteString (ByteString)
-import Data.ByteString qualified as ByteString
-import Data.ByteString.Builder qualified as Builder
-import Data.ByteString.Lazy qualified as LazyByteString
 import Data.Char (isDigit)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import Data.Text (Text)
 import Data.Text qualified as Text
-import Data.Text.Encoding qualified as Encoding
-import Numeric (showHex)
 import Numeric.Natural (Natural)
-
-data Trust = Claimed | Attested
-
-data Identity (trust :: Trust) = Identity Tenant Subject
-
-data SignedIdentityEnvelope = SignedIdentityEnvelope
-  { envelopeTenant :: Text
-  , envelopeSubject :: Text
-  , envelopeSignature :: Text
-  }
-  deriving stock (Eq, Ord, Show)
-
-newtype VerificationKey = VerificationKey ByteString
-
-verificationKey :: Text -> Maybe VerificationKey
-verificationKey value
-  | Text.null value = Nothing
-  | otherwise = Just (VerificationKey (Encoding.encodeUtf8 value))
-
-claimedIdentity :: Text -> Text -> Either ScopeError (Identity 'Claimed)
-claimedIdentity tenantValue subjectValue = do
-  tenant <- trustedTenant tenantValue
-  subject <- trustedSubject tenant subjectValue
-  pure (Identity tenant subject)
-
-verifyIdentity
-  :: VerificationKey
-  -> SignedIdentityEnvelope
-  -> Either Text (Identity 'Attested)
-verifyIdentity key envelope
-  | envelopeSignature envelope /= expectedSignature key envelope = Left "attestation-refused"
-  | otherwise = do
-      tenant <- firstText (trustedTenant (envelopeTenant envelope))
-      subject <- firstText (trustedSubject tenant (envelopeSubject envelope))
-      pure (Identity tenant subject)
-
-identityTenantText :: Identity trust -> Text
-identityTenantText (Identity tenant _) = tenantText tenant
-
-identitySubjectText :: Identity trust -> Text
-identitySubjectText (Identity _ subject) = subjectText subject
 
 withAttestedScope
   :: Identity 'Attested
   -> (forall scope. RequestScope scope -> result)
   -> Either ScopeError result
-withAttestedScope (Identity tenant subject) continuation = do
-  membership <- activeMembership tenant subject
-  withRequestScope tenant subject membership continuation
-
-expectedSignature :: VerificationKey -> SignedIdentityEnvelope -> Text
-expectedSignature (VerificationKey key) envelope =
-  hexDigest (frame [key, Encoding.encodeUtf8 (envelopeTenant envelope), Encoding.encodeUtf8 (envelopeSubject envelope)])
+withAttestedScope identity = attest (principalAttestation identity)
 
 data SecurityOperation = Read | Update | Delete | Replay | CacheLookup
   deriving stock (Eq, Ord, Show, Enum, Bounded)
@@ -192,6 +140,7 @@ data Keyspace = RowKey | ObjectPrefix | TopicName | CacheKey | ReplayKey
 everyKeyspace :: [Keyspace]
 everyKeyspace = [minBound .. maxBound]
 
+type role ScopedKey nominal
 newtype ScopedKey scope = ScopedKey Text
 
 renderScopedKey :: RequestScope scope -> Keyspace -> Text -> ScopedKey scope
@@ -431,21 +380,3 @@ s6Failures observations = concatMap check (revocationProbes observations)
       [RevocationEdgeDidNotFire (revocationLayerName probe) | not (revocationEdgeObserved probe)]
     Just (HasStalenessBound _) ->
       [ReconnectionBoundNotEnforced (revocationLayerName probe) | not (reconnectionBoundEnforced probe)]
-
-firstText :: Show error => Either error value -> Either Text value
-firstText value = case value of
-  Left problem -> Left (Text.pack (show problem))
-  Right result -> Right result
-
-frame :: [ByteString] -> ByteString
-frame = LazyByteString.toStrict . Builder.toLazyByteString . foldMap framed
- where
-  framed bytes = Builder.word64BE (fromIntegral (ByteString.length bytes)) <> Builder.byteString bytes
-
-hexDigest :: ByteString -> Text
-hexDigest bytes = Text.pack (concatMap hexByte (ByteString.unpack (SHA256.hash bytes)))
-
-hexByte :: (Integral byte, Show byte) => byte -> String
-hexByte byte = case showHex byte "" of
-  [single] -> ['0', single]
-  digits -> digits

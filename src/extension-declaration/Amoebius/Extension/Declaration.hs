@@ -1,3 +1,4 @@
+{-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The complete, inspectable declaration of one extension.
@@ -40,6 +41,7 @@ import Amoebius.Calculus.Composition
   , singleton
   )
 import Amoebius.Capacity.Vector (ResourceVector (..))
+import Amoebius.Vocabulary (quantityValue)
 import Crypto.Hash.SHA256 qualified as SHA256
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
@@ -73,14 +75,18 @@ data DeclaredComponent = DeclaredComponent
   }
   deriving stock (Eq, Ord, Show)
 
+type role ExtensionDeclaration nominal
 data ExtensionDeclaration scope = ExtensionDeclaration
-  { extensionName :: Text
+  { internalExtensionName :: Text
   , extensionArtifact :: Component scope
   , extensionBudget :: Component scope
   , extensionLift :: Component scope
   , extensionWorkflow :: Component scope
   , extensionEvidence :: Component scope
   }
+
+extensionName :: ExtensionDeclaration scope -> Text
+extensionName = internalExtensionName
 
 -- | Construct the only declaration shape admitted by the core.
 declareExtension
@@ -187,10 +193,10 @@ declarationDigest declaration =
   fields component =
     [ Encoding.encodeUtf8 (calculusTag (declaredCalculus component))
     , Encoding.encodeUtf8 (declaredName component)
-    , decimalBytes (resourceCpu resources)
-    , decimalBytes (resourceMemory resources)
-    , decimalBytes (resourceEphemeralStorage resources)
-    , decimalBytes (resourcePodSlots resources)
+    , decimalBytes (quantityValue (resourceCpu resources))
+    , decimalBytes (quantityValue (resourceMemory resources))
+    , decimalBytes (quantityValue (resourceEphemeralStorage resources))
+    , decimalBytes (quantityValue (resourcePodSlots resources))
     ]
       <> fmap Encoding.encodeUtf8 (declaredIdentityFields component)
    where

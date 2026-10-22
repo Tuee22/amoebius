@@ -14,7 +14,7 @@ promoted into [README.md](README.md), which remains the sole tracker.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -300,8 +300,8 @@ neither belongs in this candidate's gate.
 by the proof checker + the existing suite) **Entry conditions** (generation 2, `LTD-LIB-002` in the
 [legacy register](legacy_tracking_for_deletion.md#5-dsl-divergence)): the three audit defects of the parked
 checkers — interpreter error erasure, name-resolution precedence between parameters and state, and raw-line
-refinement-equation selection — are repaired with each former defect as a paired negative; an authenticated
-real decision procedure is a pinned, network-independent toolchain input, or the fake solver reports only
+refinement-equation selection — are repaired with each former defect as a paired negative; a version-compatible
+real decision procedure is a declared, network-independent tool input with its actual execution observed, or the fake solver reports only
 `Inconclusive`; and the parked libraries `formal-model`, `explicit-state-checker`, `symbolic-checker`, and
 `refinement-checker` are linked by this track's subject or deleted. **Scope** (one line): discharge — machine-checked — the **two**
 load-bearing meta-properties the rest of the suite currently only *tests*: (a) the `emitTLA`/`interpret`

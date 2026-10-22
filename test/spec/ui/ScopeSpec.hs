@@ -5,6 +5,7 @@
 -- values, not projections read from tracked fixture or documentation files.
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Scope.Flow
 import Amoebius.Scope.Index
 import Control.Monad (forM, forM_, unless)
@@ -128,7 +129,7 @@ coverageProperty fixture classes selected =
 rejectsClass :: KernelFixture -> RejectClass -> Bool
 rejectsClass fixture rejectClass =
   either (const False) id
-    (withRequestScope (tenantA fixture) (aliceA fixture) (aliceMembership fixture) $ \scope ->
+    (FixtureAuthority.withFixtureScope (tenantA fixture) (aliceA fixture) (aliceMembership fixture) $ \scope ->
       case rejectClass of
         TenantReject -> denied $ resolveOwned scope
           (subjectOwner (tenantB fixture) (carolB fixture)) (resourceId fixture)
@@ -196,7 +197,7 @@ buildFixture = do
 withAliceScope :: KernelFixture -> (forall scope. RequestScope scope -> IO value) -> IO value
 withAliceScope fixture continuation =
   requireRight "request scope"
-    (withRequestScope (tenantA fixture) (aliceA fixture) (aliceMembership fixture) continuation) >>= id
+    (FixtureAuthority.withFixtureScope (tenantA fixture) (aliceA fixture) (aliceMembership fixture) continuation) >>= id
 
 requireRight :: String -> Either problem value -> IO value
 requireRight label result = either (const (die label)) pure result

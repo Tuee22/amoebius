@@ -234,6 +234,19 @@ modeled passing seal to authenticated execution. SHA-256 collision absence is li
 
 ## 7. Link-time union closure
 
+The source-admission representation contract is fixed by [DL-0030](../decision_log.md#dl-0030--extension-admission-binds-source-scope-and-dependency-closure): one opaque `ExtensionSpec`, ten
+logical fields, one static contributed catalog, and a checker-issued seal for the actual source closure.
+The generic foundation does not permit an arbitrary seal to unify with the product's concrete source type.
+The legitimate five-calculus `ExtensionDeclaration` is its obligation field, not another registration record.
+The initial dependency closure contains the two workload members and their two capability peers described
+by the capability graph; neither a dummy core extension nor an import-only dependency satisfies it.
+
+The binding that introduces an application scope must be an actual result of that refined catalog.
+Constructor privacy includes record-update, generic conversion and nominal scope indices. A source-changed
+sibling is rebuilt and observed as another binary; a runtime registry override is not evidence of linking.
+Current qualification belongs to [Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md). These requirements add no claim that extension logic,
+C1, security-family composition, transaction-family composition or provider behavior has been proved.
+
 Here is the argument the whole doctrine exists to support.
 
 A **link set** is the finite set of extensions compiled into one amoebius binary. Composition is closed over

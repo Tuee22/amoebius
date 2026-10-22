@@ -1,0 +1,47 @@
+Amoebius.Toolchain.Versions	src/Amoebius/Toolchain/Versions.hs:23	constant-flip	d96b2e6584e8->8f3d934161b9	killed@version.case.2,version.case.3,version.case.13
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:35	branch-swap	9248cceb02c6->1b9c56ab6e22	killed@second.mismatch.ghcup,second.mismatch.compiler
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:81	constant-flip	5f1705130427->7ae0c33af48a	killed@report.probe.decode.positive,probe.decode.positive
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:125	constant-flip	5b5dde59eef4->d75d78e590e9	killed@observation.toolchain
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:57	field-drop	443c7d5340d9->e0eff0cf422a	killed@version.case.1,version.case.2,version.case.3
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:40	constant-flip	41562d8cbdaa->770daf900b4d	killed@report.cli.unknown.exit
+Amoebius.Toolchain.Versions	src/Amoebius/Toolchain/Versions.hs:23	list-truncation	d96b2e6584e8->78849e53f2a0	killed@version.case.2,version.case.3,version.case.13
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:57	constant-flip	9248cceb02c6->1c5583cb1447	killed@child.absent.exit
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:112	list-truncation	5f1705130427->5d9f2db01ed2	stillborn:test/oracle/toolchain/Main.hs:43:25: warning: [GHC-63397] [-Wname-shadowing]
+   
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:140	branch-swap	5b5dde59eef4->54f37c535686	killed@plan.packages
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:58	constant-flip	443c7d5340d9->2973cf565176	killed@upstream.verdict
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:43	constant-flip	41562d8cbdaa->b06cebacaab4	killed@report.cli.emit.exit,report.cli.files
+Amoebius.Toolchain.Versions	src/Amoebius/Toolchain/Versions.hs:24	constant-flip	d96b2e6584e8->5cf740e791d1	killed@version.case.6,version.case.15,versions.verdict
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:61	constant-flip	9248cceb02c6->868788e624f1	killed@child.failed-cwd.exit
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:163	constant-flip	5f1705130427->1d9486cacff0	survived
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:141	constant-flip	5b5dde59eef4->51604131a7ec	killed@plan.packages
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:132	constant-flip	443c7d5340d9->c3c2ebf9b73e	survived
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:47	list-truncation	41562d8cbdaa->5dd3a343aed4	stillborn:test/oracle/toolchain/Main.hs:43:25: warning: [GHC-63397] [-Wname-shadowing]
+   
+Amoebius.Toolchain.Versions	src/Amoebius/Toolchain/Versions.hs:24	list-truncation	d96b2e6584e8->ef89ac5116bc	killed@version.case.6,version.case.15,versions.verdict
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:83	list-truncation	9248cceb02c6->bc473dce363f	stillborn:test/oracle/toolchain/Main.hs:43:25: warning: [GHC-63397] [-Wname-shadowing]
+   
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:172	constant-flip	5f1705130427->0eb6b7887fde	killed@report.probe.codegen.link-token
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:173	list-truncation	5b5dde59eef4->5e09dd60e865	survived
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:151	list-truncation	443c7d5340d9->e8a79985c698	killed@observation.toolchain
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:50	constant-flip	41562d8cbdaa->ea749e1fb050	killed@report.cli.run.exit,report.cli.files
+Amoebius.Toolchain.Versions	src/Amoebius/Toolchain/Versions.hs:32	constant-flip	d96b2e6584e8->09e92713d030	killed@version.case.13,version.case.14
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:87	list-truncation	9248cceb02c6->b85a16b99bc7	survived
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:173	constant-flip	5f1705130427->10d8da36059f	killed@report.probe.codegen.link-token
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:175	constant-flip	5b5dde59eef4->2f309391c2e2	survived
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:162	list-truncation	443c7d5340d9->824608caa249	stillborn:test/oracle/toolchain/Main.hs:43:25: warning: [GHC-63397] [-Wname-shadowing]
+   
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:51	list-truncation	41562d8cbdaa->ef72ef090768	stillborn:test/oracle/toolchain/Main.hs:43:25: warning: [GHC-63397] [-Wname-shadowing]
+   
+Amoebius.Toolchain.Versions	src/Amoebius/Toolchain/Versions.hs:32	boundary-shift	d96b2e6584e8->8f0b116a207e	killed@version.case.13,version.case.14
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:88	constant-flip	9248cceb02c6->eb043a6f4ff1	killed@versions.cabal-report-unavailable
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:173	list-truncation	5f1705130427->687154e0fef2	killed@report.probe.codegen.link-token
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:286	list-truncation	5b5dde59eef4->c03d4f171465	killed@report.plan.steps,plan.steps
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:180	constant-flip	443c7d5340d9->953cd4e7130f	killed@upstream.verdict,negative.UpstreamDigestMismatch
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:62	list-truncation	41562d8cbdaa->bfc848e1d979	stillborn:test/oracle/toolchain/Main.hs:43:25: warning: [GHC-63397] [-Wname-shadowing]
+   
+Amoebius.Toolchain.Versions	src/Amoebius/Toolchain/Versions.hs:41	boundary-shift	d96b2e6584e8->0ad533380f4f	killed@version.case.14
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:89	list-truncation	9248cceb02c6->35355b86c85d	killed@negative.UnsupportedVersion
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:184	constant-flip	5f1705130427->ed60d424bdaf	survived
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:296	constant-flip	5b5dde59eef4->35c829501270	killed@report.plan.steps,plan.steps
+summary	killed=28	viable=34	stillborn=6

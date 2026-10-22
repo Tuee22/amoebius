@@ -2,6 +2,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition (
@@ -129,7 +130,8 @@ buildAuthorizationRegistry = do
     tenant <- requireRight "tenant" (trustedTenant "tenant-a")
     subject <- requireRight "subject" (trustedSubject tenant "alice")
     membership <- requireRight "membership" (activeMembership tenant subject)
-    context <- requireRight "context" (trustedRequestContext tenant subject membership)
+    identity <- requireRight "verified fixture principal" (FixtureAuthority.fixtureIdentityText (tenantText tenant) (subjectText subject))
+    context <- requireRight "context" (trustedRequestContext identity tenant subject membership)
     specs <- traverse typedAuthorizationAction actionRows
     let projections = map projectAuthorization specs
     requireRight "authorization registry" (bindActionRegistry (scopeCheckedProgram checked context) specs projections)
@@ -252,7 +254,7 @@ checkCalculus = do
     subject <- requireRight "calculus subject" (CalculusScope.trustedSubject tenant "ui-plan-compiler-calculus-subject")
     membership <- requireRight "calculus membership" (CalculusScope.activeMembership tenant subject)
     action <- requireRight "calculus request scope" $
-        CalculusScope.withRequestScope tenant subject membership $ \scope -> do
+        FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
             let resources :: Int -> ResourceVector
                 resources count = ResourceVector 1 (fromIntegral count) 0 0
                 counts = [4, 6, 14, 2, 6] :: [Int]

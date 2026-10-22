@@ -44,17 +44,17 @@ accelerator, or cloud account exists.
 This ordering is mandatory:
 
 ```text
-GenesisTrust records exact prepared local-custody bytes plus narrow compile-time/platform facts
-  → Phase 0 qualifies a finite governance, source-classification, and gate seed
-  → Phase 1 verifies pinned bytes and reproduces toolchain acquisition relative to that root
-  → Phase 2 closes the compiler-backed semantic source graph
-  → Phases 3–8 build the typed DSL slices over one growing corpus
-  → Phase 9, DSL_BARRIER, re-runs the union corpus through the shipped binary
-  → Phase 50 externally observes the already source-bounded pb handoff
-  → Phase 51 Haskell host-ensure against fake boundaries
-  → Phase 52 first hardware work
-  → optional image parity replay
+Version-compatible native GHCup/GHC (compiler correctness assumed)
+  -> governance seed and retained toolchain probes
+  -> complete hardware-free DSL validation through DSL_BARRIER
+  -> bounded bootstrap handoff and fake host-ensure gates
+  -> FIRST_HARDWARE and later native substrate observations
 ```
+
+Before the DSL barrier, OS, architecture, device, capacity, and provider observations are supplied values
+or fake boundaries. Rendered ARM/AMD64/CUDA/Apple examples require no corresponding physical host, GPU,
+container/VM, cluster, or privileged account. Toolchain admission checks versions, with no byte pins
+([DL-0025](../decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier)).
 
 A phase may not require a container merely because a compiler or interpreter used to be packaged in one.
 Haskell generates external-language artifacts lazily beneath `.build/**`. Their actual compiler or interpreter
@@ -73,32 +73,26 @@ provider boundary.
 
 ### 2.1 `GenesisTrust` is an irreducible root
 
-`GenesisTrust` is the explicit non-numbered `BootstrapRoot` below Phase 0. It records local custody of seven
-exact prepared compiler/package-tool archive and signature files, compile-time GHC `9.12.4`, absolute reported
-`ghc` and library-directory paths, and Linux/`x86_64`. The signature files are opaque pinned bytes, not a
-publisher-verification result. Those facts enter as a named operator input outside Git; they are neither
-generated source nor a capability supplied by a numbered phase.
+`GenesisTrust` declares the assumption that version-compatible native GHCup and GHC execute correctly.
+Admission checks version reports and must refuse a missing tool, failed version command, malformed report,
+or out-of-range version. Cabal is available to build the source, and its version may be recorded. No compiler
+or installer byte pin, signature, archive set, prepared bootstrap file, fixed OS, fixed CPU architecture,
+device, or privileged host is required. Native installed executable paths are explicit read-only inputs
+and may be outside the checkout.
 
-Phase 0 must bind that narrow input to its invocation and evidence. It cannot authenticate the compiler's
-derivation, publisher, loader, host, or reproducibility by inspecting only the binary that compiler produced.
-These are named root assumptions, not silently discharged proof obligations.
-
-Phase 1 owns broader pin-verified acquisition and recorded byte identity. It compares all seven file sizes and digests,
-requires each pinned `SHA256SUMS` archive entry to agree with its independently fixed archive pin, and runs
-two contained offline acquisitions. It requires no operator keyring or GPG result; the three signature files
-remain opaque pinned bytes, and publisher identity remains an explicit unverified assumption
-([DL-0017](../decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring)).
-Phase 2 owns compiler-backed source closure. The DSL barrier
-owns universal qualification. These later obligations must not become recursive prerequisites for the finite
-Phase-0 seed. Exact root inputs and supported build platform are owned by the
-[Phase-0 contract](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md).
+Phase 0 binds these version observations and the source-bound verifier. Phase 1 qualifies version checking
+and retained decoder, simulator, codegen, dependency, and provenance probes. Neither proves compiler semantics,
+publisher identity, or whole-host trust. Source/dependency-source integrity and receipt digests remain
+separate custody checks. Previous pin-based receipts remain immutable historical observations
+([DL-0025](../decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier)).
+Phase 2 owns compiler-backed source closure and the DSL barrier owns the complete hardware-free DSL claim.
 
 ### 2.2 The bounded `pb` handoff
 
 `pb/**` is the sole tracked non-Haskell source exception. It may:
 
 1. make the minimum platform distinction needed to select the toolchain-establishment adapter;
-2. establish the pinned Haskell toolchain into `.build/**`;
+2. establish the version-compatible native Haskell toolchain into `.build/**`;
 3. build the single source-bound Haskell binary; and
 4. replace itself with that binary while forwarding every user argument unchanged.
 
@@ -108,12 +102,12 @@ or host-floor policy, implement help/version or another public command, perform 
 after establish/build, the exact argv reaches Haskell by exec. A Python exit-code wrapper around another gate
 is prohibited.
 
-**Observed implementation** ([GateSpec:repository_layout_conformance]). Phase 0 requires the exact current
-captured bootstrap bytes; the pin of `pb/__main__.py` by its SHA-256 as the one admitted non-Haskell behavioral
-file and the compiler-backed source closure are implemented and receipt-backed by
+Previous source-admission receipts cover their recorded bootstrap program. The version-policy amendment
+changes that program and requires fresh source qualification through
 [Phase 2](../../DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md)
-([DL-0022](../decision_log.md#dl-0022--phase-2-accepted-its-owed-by-paragraphs-become-observed-implementations)).
-That static admission does not establish that an effect or exec occurred.
+([DL-0025](../decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier)).
+The source-admission hash still bounds the one non-Haskell behavioural exception. It is not a toolchain
+pin and does not establish that an effect or exec occurred.
 
 Every phase through the DSL barrier (Phase 9) invokes the
 verifier directly; the Phase-50 candidate has the runner's `ProcessObserver` launch `pb` as the observed
@@ -168,12 +162,8 @@ gate run ([DL-0015](../decision_log.md#dl-0015--accepted-validation-records-are-
 ## 3. Why native validation is `Substrate: none`
 
 `Substrate: none` means that the claim does not depend on a hardware-specific or live-infrastructure fact.
-For Phase 0, the compiler version/path and platform carried by the narrow GenesisTrust token are assumed build
-facts, not toolchain provenance; Phase 1 makes subsequent acquisition reproducible relative to fixed pins,
-without claiming publisher identity ([DL-0017](../decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring)).
-Through the DSL barrier (Phase 9) that toolchain remains a build prerequisite, not
-evidence about Linux, Apple, Windows, CUDA, Metal, a container engine, or a published image. Phase 50 separately observes the
-bounded `pb` runtime handoff; it cannot retroactively strengthen an earlier semantic result.
+For Phase 0, compatible native GHCup and GHC versions and selected paths are recorded; compiler semantics
+and publisher identity remain assumed. No particular compiler bytes or host platform are required.
 
 Pure and fake-boundary gates therefore remain Register 1 or 2 and `Substrate: none`. They record the compiler
 and source snapshot used for provenance, but no toolchain version or host identity strengthens the semantic
@@ -197,19 +187,23 @@ baseline, qualification corpus, tools, dependencies, and predecessor receipt bef
 Candidate code receives only declared read capabilities and run-owned write capabilities. It cannot replace
 those authorities, their parent directories, their process identities, or the runner's observations.
 
-Outside the explicitly assumed `GenesisTrust` root, tools must be bound to independently fixed digest pins
-and actual executable bytes, including the interpreter, loader,
-configuration, and dependency closure required by the claim. A wrapper reporting the expected compiler version
-cannot qualify as that compiler. Tool identity must survive replacement, symlink, and race challenges at the
-consumption boundary.
+GHCup and GHC admission requires only compatible version reports, never executable-byte or loader pins.
+Selected paths and observations are recorded and candidate code must not replace the declared tools or
+expectations. Source, dependency-source, receipt, and observation digests do not become toolchain admission
+pins. Compiler correctness and the honesty of the version reports remain declared trust assumptions.
 
-The privilege separation must be enforced by the execution environment, with its mechanism recorded and
-qualified. Directory permissions under the same unrestricted principal do not establish an adversarial
+Before `DSL_BARRIER`, boundary authority is judged through supplied capability values, independently authored
+expectations, changed-subject mutants, and fake interpreters. No Linux namespace, VM, container, privileged
+account, GPU, physical topology, or particular host/architecture is necessary to settle that claim. Adversarial
+host/loader enforcement and physical readback are later hardware claims, not recursive DSL prerequisites.
+
+For later live and hardware claims, privilege separation must be enforced by the execution environment,
+with its mechanism recorded and qualified. Directory permissions under the same unrestricted principal do not establish an adversarial
 boundary. If the required protection cannot be enforced, the gate refuses that claim rather than silently
 assuming protection from candidate tampering.
 
-The canonical source checkout and separately acquired oracle baseline remain readable inputs. Generated
-materializations, protected runner state, toolchains, dependency caches, and candidate evidence stay beneath
+The canonical source checkout and separately acquired oracle baseline remain readable inputs. Native installed toolchain paths are declared read-only exceptions. Generated
+materializations, protected runner state, dependency caches, and candidate evidence stay beneath
 physical repository-owned `.build/**` roots. The accepted historical bundle goes to the exact tracked
 `validation-records/**` grammar after qualification; it cannot supply an oracle or candidate input. Separate
 ownership or process capabilities do not authorize state outside the checkout
@@ -217,10 +211,9 @@ ownership or process capabilities do not authorize state outside the checkout
 The [repository-layout doctrine](./repository_layout_doctrine.md) owns those roots and their lifecycles.
 
 Each candidate begins with an absent run namespace under `.build/runs/**`. Retained inputs are explicit and
-read-only: pin-verified toolchain and integrity-checked package inputs, protected expectations, source snapshot, and the exact
+read-only: version-checked native toolchain and integrity-checked package inputs, protected expectations, source snapshot, and the exact
 required predecessor bundle from `validation-records/**`. Their presence is part of the acquisition contract; unlisted ignored artifacts
-or ambient caches are unavailable. Fixed pins do not authenticate publisher identity
-([DL-0021](../decision_log.md#dl-0021--cleanroom-input-names-respect-the-fixed-pin-trust-boundary)). Production `.data/**` is inaccessible and must never be deleted for validation.
+or ambient caches are unavailable. Version reports do not prove compiler correctness or publisher identity. Production `.data/**` is inaccessible and must never be deleted for validation.
 
 Phase 0 retains its bounded `GenesisTrust` exception and one uniquely owned qualification leaf. It records
 only its declared input closure and verifies its own leaf cleanup. Universal cleanroom and adversarial

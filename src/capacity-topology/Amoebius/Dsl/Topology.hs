@@ -3,6 +3,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Dsl.Topology
   ( Substrate (..)
@@ -11,11 +12,7 @@ module Amoebius.Dsl.Topology
   , bareLinuxHost
   , limaHost
   , wsl2Host
-  , ServerCount (..)
-  , OddQuorumToken (..)
-  , ServerCountToken (..)
-  , ServerQuorum (..)
-  , mkServerQuorum
+  , Rke2Quorum (..)
   , Site (..)
   , SiteToken (..)
   , HostAt
@@ -47,8 +44,10 @@ import Amoebius.Capacity.Types
   , GrowthQuota
   , HostEnvironment (..)
   , Node (..)
+  , NodeRole (..)
   )
 import Amoebius.Vocabulary (ComputeEngine (..), Substrate (..))
+import Amoebius.Topology.Rke2 (Rke2Quorum (..), rke2Servers)
 import Control.DeepSeq (NFData)
 import Data.List.NonEmpty (NonEmpty)
 import Data.List.NonEmpty qualified as NonEmpty
@@ -72,26 +71,6 @@ limaHost _ = LinuxHost
 
 wsl2Host :: SubstrateToken 'Windows -> Text -> LinuxHost 'Windows
 wsl2Host _ = LinuxHost
-
-data ServerCount = OneServer | TwoServers | ThreeServers | FiveServers
-
-data OddQuorumToken (count :: ServerCount) where
-  OddOneToken :: OddQuorumToken 'OneServer
-  OddThreeToken :: OddQuorumToken 'ThreeServers
-  OddFiveToken :: OddQuorumToken 'FiveServers
-
-data ServerCountToken (count :: ServerCount) where
-  EvenTwoToken :: ServerCountToken 'TwoServers
-
-data ServerQuorum = SingleServer | ThreeServerQuorum | FiveServerQuorum
-  deriving stock (Eq, Generic, Ord, Show)
-  deriving anyclass (NFData)
-
-mkServerQuorum :: OddQuorumToken count -> ServerQuorum
-mkServerQuorum token = case token of
-  OddOneToken -> SingleServer
-  OddThreeToken -> ThreeServerQuorum
-  OddFiveToken -> FiveServerQuorum
 
 data Site = SiteA | SiteB
 
@@ -159,13 +138,16 @@ mkTopology engine supply = case checkCompatibility engine supply of
   [] -> Right (Topology engine supply)
   incompatible -> Left (EngineSubstrateMismatch incompatible)
 
-mkRke2Topology :: ServerQuorum -> [Node] -> [Node] -> Either TopologyError Topology
-mkRke2Topology _ servers agents =
+mkRke2Topology :: Rke2Quorum Node -> [Node] -> Either TopologyError Topology
+mkRke2Topology quorum rawAgents =
   case duplicateHost (servers <> agents) of
     Just host -> Left (DuplicateHostId host)
     Nothing -> case NonEmpty.nonEmpty (servers <> agents) of
       Nothing -> Left EmptyRke2Topology
       Just nodes -> mkTopology Rke2Engine (FixedSupply nodes)
+ where
+  servers = [node {nodeRole = Rke2Server, nodeTaints = Set.insert "node-role.kubernetes.io/control-plane" (nodeTaints node)} | node <- rke2Servers quorum]
+  agents = [node {nodeRole = Rke2Agent} | node <- rawAgents]
 
 checkCompatibility :: ComputeEngine -> NodeSupply -> [IncompatibleEntry]
 checkCompatibility engine supply =

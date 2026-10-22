@@ -6,11 +6,11 @@
 -- Engine identities are catalog names; there is intentionally no URL form.
 module Amoebius.Capability.Engine
   ( EngineLane (..)
-  , EngineFamily (..)
+  , EngineFamily
+  , InferenceFamily (..)
   , TargetOffering (..)
   , offeringLane
   , offeringAccelerators
-  , familyForProfile
   , familyAvailable
   , EngineWorkloadClass (..)
   , EngineCoexistencePolicy (..)
@@ -39,13 +39,13 @@ import Amoebius.Capacity.Accelerator
   , VramShardAssignment (..)
   , provisionAccelerator
   )
+import Amoebius.Vocabulary (InferenceFamily (..))
 import Control.DeepSeq (NFData)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Text (Text)
-import Data.Text qualified as Text
 import GHC.Generics (Generic)
 import Numeric.Natural (Natural)
 
@@ -53,9 +53,7 @@ data EngineLane = AppleMetalLane | CudaLane | LinuxCpuLane
   deriving stock (Bounded, Enum, Eq, Generic, Ord, Show)
   deriving anyclass (NFData)
 
-data EngineFamily = LlamaFamily | VllmFamily | DiffusionFamily | OnnxFamily
-  deriving stock (Bounded, Enum, Eq, Generic, Ord, Show)
-  deriving anyclass (NFData)
+type EngineFamily = InferenceFamily
 
 data TargetOffering
   = AppleOffering Text (Map Text AcceleratorDevice)
@@ -79,21 +77,16 @@ offeringAccelerators offering = AcceleratorOffering $ case offering of
   LinuxCudaOffering _ devices -> devices
   WindowsCudaOffering _ devices -> devices
 
-familyForProfile :: Text -> EngineFamily
-familyForProfile profile
-  | "vllm" `Text.isPrefixOf` folded = VllmFamily
-  | "diffusion" `Text.isPrefixOf` folded = DiffusionFamily
-  | "onnx" `Text.isPrefixOf` folded = OnnxFamily
-  | otherwise = LlamaFamily
- where
-  folded = Text.toLower profile
-
-familyAvailable :: EngineFamily -> EngineLane -> Bool
+familyAvailable :: InferenceFamily -> EngineLane -> Bool
 familyAvailable family lane = case family of
-  LlamaFamily -> True
-  VllmFamily -> lane == CudaLane
-  DiffusionFamily -> lane == CudaLane || lane == AppleMetalLane
-  OnnxFamily -> lane == CudaLane || lane == LinuxCpuLane
+  LlamaCpp -> True
+  WhisperCpp -> True
+  Onnx -> lane == CudaLane || lane == LinuxCpuLane
+  Vllm -> lane == CudaLane
+  Pytorch -> True
+  Diffusers -> lane == CudaLane || lane == AppleMetalLane
+  Transformers -> True
+  Audiveris -> lane == LinuxCpuLane
 
 data EngineWorkloadClass = ServedModel | TrainingJob | JitCompilation | LibraryWork
   deriving stock (Bounded, Enum, Eq, Generic, Ord, Show)

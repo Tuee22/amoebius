@@ -5,6 +5,11 @@ module BindGate
   ( runBindGate
   ) where
 
+import Amoebius.Vocabulary (InferenceFamily (LlamaCpp), ExtensionId, mkExtensionId)
+import Amoebius.Extension.Capability (DeclaredCapability (JitBuild, Coordination))
+import Amoebius.Extension.Graph (linkRefusalTag, mergeExtensions)
+import Amoebius.Extension.Spec (ExtensionSpec, mkExtensionSpec)
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition
@@ -38,7 +43,6 @@ import Amoebius.Capability.Binding
   , boundDeploymentIsUnprovisioned
   , decodeCapabilityProvider
   , validateBindingCoverage
-  , validateExtensionGraph
   )
 import Amoebius.Capability.Types
   ( BoundDeployment (boundDeploymentServices)
@@ -48,8 +52,6 @@ import Amoebius.Capability.Types
   , CapabilityBinding (CapabilityBinding)
   , CapabilityNeed (..)
   , CapabilityProvider (CanonicalProvider)
-  , ExtensionDescriptor (ExtensionDescriptor)
-  , ExtensionName (..)
   , InferenceEngineNeed (InferenceEngineNeed)
   , ProviderObject (..)
   , ServiceShape (..)
@@ -62,7 +64,6 @@ import Amoebius.Scope.Index
   ( activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import BindProps (runBindProps)
 import CapabilityBindOracle
@@ -74,6 +75,7 @@ import CapabilityBindOracle
   , mutantSpecs
   )
 import Control.Monad (unless)
+import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
 import Data.Text (Text)
@@ -170,7 +172,7 @@ needFor oracle = case oracleArm oracle of
   "Edge" -> EdgeNeed (oracleResource oracle)
   "InferenceEngine" ->
     InferenceEngineCapabilityNeed
-      (InferenceEngineNeed (oracleResource oracle) "llama-3" (Cuda "cuda-llama-3"))
+      (InferenceEngineNeed (oracleResource oracle) "llama-3" Cuda LlamaCpp)
   other -> error ("unknown independent capability arm: " <> Text.unpack other)
 
 checkNegatives :: IO ()
@@ -184,29 +186,38 @@ checkNegatives = do
   checkDecodePair (byName "illegal_unbound_capability")
     (validateBindingCoverage (Set.singleton ObjectStore) (Map.singleton ObjectStore canonicalBinding))
     (validateBindingCoverage (Set.singleton ObjectStore) Map.empty)
-  checkDecodePair (byName "illegal_cyclic_extension")
-    (validateExtensionGraph legalExtensions)
-    (validateExtensionGraph [ExtensionDescriptor InfernixExtension (Set.singleton ObjectStore) (Set.singleton ObjectStore)])
-  checkDecodePair (byName "illegal_shadowing_extension")
-    (validateExtensionGraph legalExtensions)
-    (validateExtensionGraph
-      [ ExtensionDescriptor InfernixExtension (Set.singleton ObjectStore) Set.empty
-      , ExtensionDescriptor JitMLExtension (Set.singleton ObjectStore) Set.empty
+  checkPair linkRefusalTag (byName "illegal_cyclic_extension")
+    (mergeExtensions legalExtensions)
+    (mergeExtensions [extension "alpha" [JitBuild] [Coordination], extension "beta" [Coordination] [JitBuild]])
+  checkPair linkRefusalTag (byName "illegal_shadowing_extension")
+    (mergeExtensions legalExtensions)
+    (mergeExtensions
+      [ extension "alpha" [JitBuild] []
+      , extension "beta" [JitBuild] []
       ])
  where
   canonicalBinding = CapabilityBinding CanonicalProvider SingleNode
   legalExtensions =
-    [ ExtensionDescriptor InfernixExtension (Set.singleton InferenceEngine) Set.empty
-    , ExtensionDescriptor JitMLExtension (Set.singleton ObjectStore) Set.empty
+    [ extension "alpha" [JitBuild] []
+    , extension "beta" [Coordination] [JitBuild]
     ]
+  extension :: Text -> [DeclaredCapability] -> [DeclaredCapability]
+    -> ExtensionSpec ExtensionId () DeclaredCapability () () () () () () ()
+  extension name provides requires = case mkExtensionId name of
+    Nothing -> error "invalid trusted extension fixture identity"
+    Just identifier -> either (error . show) id
+      (mkExtensionSpec identifier () provides requires () (const []) [] (() :| []) () ())
 
 checkDecodePair :: NegativeRow -> Either DecodeError value -> Either DecodeError value -> IO ()
-checkDecodePair row positive negative = do
+checkDecodePair = checkPair decodeErrorTag
+
+checkPair :: Show problem => (problem -> Text) -> NegativeRow -> Either problem value -> Either problem value -> IO ()
+checkPair tag row positive negative = do
   case positive of
     Left problem -> fail (Text.unpack (negativeName row) <> " paired positive failed: " <> show problem)
     Right _ -> pure ()
   case negative of
-    Left problem -> assert (decodeErrorTag problem == negativeTag row)
+    Left problem -> assert (tag problem == negativeTag row)
       (Text.unpack (negativeName row) <> " negative tag drifted at " <> Text.unpack (negativeLocus row))
     Right _ -> fail (Text.unpack (negativeName row) <> " negative unexpectedly decoded")
 
@@ -222,7 +233,7 @@ checkCapabilityBindCalculusProjection propertyCount = do
   tenant <- either (fail . show) pure (trustedTenant "capability-bind-tenant")
   subject <- either (fail . show) pure (trustedSubject tenant "capability-bind-subject")
   membership <- either (fail . show) pure (activeMembership tenant subject)
-  action <- either (fail . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+  action <- either (fail . show) pure $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
     let resources :: Int -> ResourceVector
         resources count = ResourceVector 1 (fromIntegral count) 0 0
         artifact = artifactComponent scope "capability-arms" (resources 9) (RecipeId "capability-bind-corpus" 1)

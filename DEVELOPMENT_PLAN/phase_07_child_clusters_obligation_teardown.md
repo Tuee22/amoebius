@@ -74,28 +74,106 @@ New tags: `child`, `teardown`.
 
 ```gate-spec
 capability: child_clusters_obligation_teardown
-subjects:
-  - Amoebius.Dsl.Children
-  - Amoebius.Dsl.Lower
-  - Amoebius.Kernel.Step
-  - Amoebius.Calculus.Workflow.Obligation
+role: ordinary
+claim: The predecessor corpus and the forest-root-child and test-topology examples compile through the shipped binary. Projecting a child as a root preserves that child's deployment bytes; the obligation-indexed chain refuses a release-less workflow, and the separate fake executor observes reverse release order and zero owned resources. Live child clusters, spawn and the UI runtime are excluded.
+subjects: Amoebius.Dsl.Children, Amoebius.Dsl.Lower, Amoebius.Kernel.Step, Amoebius.Calculus.Workflow.Obligation
 suite: children-suite
 oracle: oracle-dsl
-positives: [forest-root-child, test-topology-up-workflow-down]
-negatives: [ReleaseLessChain, ChildNamesUnknownParent, CyclicForest]
-mutants: { perModule: 8, perGateCap: 40, killRatio: 0.6 }
-binaryFact:
-  command: amoebius compile
-  perturbation: sentinel-to-nonce
-  outputs: [child-manifest, root-manifest, release-ledger]
-substrate: HardwareFree
-corpus: { module: Amoebius.Dsl.Examples.ChildClusters, minimumPairs: 2 }
+positive: case:kind-single-objectstore | input=kind-single-objectstore.dhall | expected=objects equal the oracle rows
+positive: case:shape-swap-sibling | input=shape-swap-sibling.dhall | expected=provider objects change, application bytes do not
+positive: case:replicas-3-sibling | input=replicas-3-sibling.dhall | expected=one differing path
+positive: case:local-import-twin | input=local-import-twin.dhall | expected=freezes to the baseline
+positive: case:lanes-of | input=host grid | expected=total lane table
+positive: case:round-trip | input=encode then decode | expected=equal values
+positive: case:step-sequence | input=chain order | expected=frame then identity
+positive: case:dry-run-zero | input=dry run | expected=no step executed
+positive: case:fake-relay | input=fake kubectl | expected=stdin equals payload
+positive: case:endpoint-digest | input=control-plane endpoint | expected=manifest digest
+positive: case:fields-consumed | input=authored leaves | expected=each reaches a byte
+positive: case:corpus-discovery | input=rendered files | expected=equals inventory
+positive: case:shipped-binary | input=perturbed run | expected=nonce in every artefact
+positive: case:kind-two-nodes | input=kind-two-nodes.dhall | expected=application on the second node
+positive: case:exact-fit-sibling | input=exact-fit-sibling.dhall | expected=accepted on the boundary
+positive: case:kind-sql-distributed3 | input=kind-sql-distributed3.dhall | expected=one claim per member
+positive: case:kind-two-needs | input=kind-two-needs.dhall | expected=both providers' objects
+positive: case:fits-total | input=three-valued vectors | expected=every pair judged
+positive: case:volume-witness | input=volume identities | expected=names from identity
+positive: case:statefulset-claims | input=statefulset render | expected=claim bytes equal the witness
+negative: case:AppleNeedsArm64 | input=darwin amd64 | tag=NotNaturalArchitecture | stage=vocabulary
+negative: case:WindowsNeedsAmd64 | input=windows arm64 | tag=NotNaturalArchitecture | stage=vocabulary
+negative: case:ForbiddenImportEnv | input=forbidden-env.dhall | tag=ForbiddenImport | stage=freeze
+negative: case:ForbiddenImportRemote | input=forbidden-remote.dhall | tag=ForbiddenImport | stage=freeze
+negative: case:ForbiddenImportAlternative | input=forbidden-alternative.dhall | tag=ForbiddenImport | stage=freeze
+negative: case:ForbiddenImportTransitive | input=forbidden-transitive.dhall | tag=ForbiddenImport | stage=freeze
+negative: case:AbsoluteImport | input=forbidden-absolute.dhall | tag=AbsolutePath | stage=freeze
+negative: case:HomeImport | input=forbidden-home.dhall | tag=HomePath | stage=freeze
+negative: case:NonCodeImport | input=non-code-import.dhall | tag=NonCodeMode | stage=freeze
+negative: case:ParseFailure | input=parse-failure.dhall | tag=ParseFailure | stage=freeze
+negative: case:IllTypedAlternative | input=ill-typed-alternative.dhall | tag=IllTyped | stage=freeze
+negative: case:RequestsAboveLimits | input=requests-above-limits.dhall | tag=RequestsAboveLimits | stage=decode
+negative: case:EmptyNeeds | input=empty-needs.dhall | tag=EmptyNeeds | stage=decode
+negative: case:ZeroReplicas | input=zero-replicas.dhall | tag=ZeroReplicas | stage=decode
+negative: case:HeadroomAllZero | input=headroom-all-zero.dhall | tag=HeadroomAllZero | stage=decode
+negative: case:ProductNamedInApp | input=product-named-in-app.dhall | tag=DhallFailure | stage=decode
+negative: case:ShapeInApp | input=shape-in-app.dhall | tag=DhallFailure | stage=decode
+negative: case:UnboundNeed | input=unbound-need.dhall | tag=UnboundNeed | stage=lower
+negative: case:DanglingBinding | input=dangling-binding.dhall | tag=DanglingBinding | stage=lower
+negative: case:UnknownDeployment | input=unknown-deployment.dhall | tag=UnknownDeployment | stage=lower
+negative: case:HostShort | input=host-short.dhall | tag=InfrastructureDemandExceeded | stage=plan
+negative: case:ReplicasOverCapacity | input=replicas-over-capacity.dhall | tag=PostBindExpansionOvercommit | stage=provision
+negative: case:DetectedAppleAmd64 | input=Detected Apple Amd64 | tag=ConstructorNotExported | stage=compile
+negative: case:BoundDeploymentOutsideLower | input=BoundDeployment construction | tag=ConstructorNotExported | stage=compile
+negative: case:StepCarriesIO | input=Step with IO | tag=StepHasNoFunctionSlot | stage=compile
+negative: case:TwoServerQuorum | input=two-server quorum | tag=EvenQuorumUnspellable | stage=compile
+negative: case:OneShort | input=one-short-twin.dhall | tag=OneShort | stage=provision
+negative: case:OverCapacity | input=over-capacity-twin.dhall | tag=OverCapacity | stage=provision
+negative: case:UnitMismatch | input=cpu plus memory | tag=UnitsDoNotMix | stage=compile
+negative: case:RenderWithoutWitness | input=render without a placement | tag=WitnessRequired | stage=compile
+negative: case:PlacedOutsideFold | input=Placed construction | tag=ConstructorNotExported | stage=compile
+negative: case:PvcWithoutStatefulSet | input=claim on a Deployment | tag=PvcWithoutStatefulSet | stage=render
+negative: case:VolumeOutsideWitness | input=VolumeWitness construction | tag=ConstructorNotExported | stage=compile
+positive: case:rke2-three-agent | input=rke2-three-agent.dhall | expected=substrates, placement, and recipe equal the independent rows
+positive: case:rke2-cuda-three-agent | input=rke2-cuda-three-agent.dhall | expected=substrates, placement, and recipe equal the independent rows
+positive: case:apple-lima-rke2-arm64 | input=apple-lima-rke2-arm64.dhall | expected=substrates, placement, and recipe equal the independent rows
+positive: case:untainted-sibling | input=untainted-sibling.dhall | expected=substrates, placement, and recipe equal the independent rows
+positive: case:taint-move | input=tainted-first-agent.dhall + tainted-second-agent.dhall | expected=substrates, placement, and recipe equal the independent rows
+positive: case:substrate-profile | input=complete catalog and architecture product | expected=substrates, placement, and recipe equal the independent rows
+positive: case:native-image-argv | input=flavor and observed/requested architecture product | expected=substrates, placement, and recipe equal the independent rows
+positive: case:recipe-resource-bytes | input=exact catalog and stage resources | expected=substrates, placement, and recipe equal the independent rows
+positive: case:base-resolutions | input=two distinct supplied resolutions | expected=substrates, placement, and recipe equal the independent rows
+negative: case:Rke2TwoServers | input=two-server quorum | tag=EvenQuorumUnspellable | stage=compile
+negative: case:DuplicateHostId | input=duplicate-host-id.dhall | tag=DuplicateHostId | stage=lower
+negative: case:TaintedOnlyHost | input=tainted-only-host.dhall | tag=TaintedOnlyHost | stage=provision
+negative: case:UnrequiredLaneStep | input=unrequired lane | tag=UnrequiredLaneStep | stage=recipe
+negative: case:BaseChannelDigest | input=digest-bearing channel | tag=BaseChannelContainsDigest | stage=recipe
+negative: case:BuildArchitectureMismatch | input=mismatched supplied architectures | tag=BuildArchitectureMismatch | stage=build-argv
+negative: case:BaseResolutionDigestInvalid | input=short or uppercase digest | tag=BaseResolutionDigestInvalid | stage=resolution
+negative: case:ProfileOutsideCatalog | input=SubstrateProfile construction | tag=ConstructorNotExported | stage=compile
+negative: case:BaseChannelOutsideCatalog | input=BaseChannel construction or record update | tag=ConstructorNotExported | stage=compile
+negative: case:BaseResolutionOutsideFactory | input=BaseResolution construction or record update | tag=ConstructorNotExported | stage=compile
+positive: case:infernix-linked | input=infernix-linked | expected=provider objects and application binding
+positive: case:cuda-on-cuda-sibling | input=cuda-on-cuda-sibling | expected=cuda lane and DaemonSet
+positive: case:attested-scope | input=attested-scope | expected=one attested scope on every object
+negative: case:UnboundCapability | input=same app and need in a recompiled unlinked sibling | tag=UnboundCapability | stage=lower
+negative: case:LaneUnavailable | input=cuda request with only cpu lanes | tag=LaneUnavailable | stage=lower
+negative: case:AstEvasion | input=located native AST or pragma node | tag=AstEvasion | stage=extension-astcheck
+negative: case:UnattestedScope | input=unlabeled object | tag=UnattestedScope | stage=render
+positive: case:forest-root-child | input=forest-root-child.dhall | expected=root and projected-child manifests equal the independent rows
+positive: case:test-topology-up-workflow-down | input=test-topology.dhall | expected=reverse releases and zero owned resources
+negative: case:ReleaseLessChain | input=release-less workflow | tag=ReleaseLessChain | stage=compile
+negative: case:ChildNamesUnknownParent | input=unknown parent twin | tag=ChildNamesUnknownParent | stage=forest
+negative: case:CyclicForest | input=cyclic forest twin | tag=CyclicForest | stage=forest
+mutants: stages=Amoebius.Dsl.Children,Amoebius.Dsl.Lower,Amoebius.Kernel.Step,Amoebius.Calculus.Workflow.Obligation per-module=8 cap=40 kill-ratio=3/5 artefacts=Amoebius.Dsl.Children:child.,Amoebius.Dsl.Lower:child.,Amoebius.Kernel.Step:teardown.,Amoebius.Calculus.Workflow.Obligation:teardown.
+binary-fact: command=compile --input {input} --out {run}/compiled | input=root.dhall | perturbation=staged(pre=render-examples --example forest-root-child --output {input} post=compile --input {run}/compiled/projected-child.dhall --out {run}/child;apply --executor fake --input {input} --out {run}/applied then=sentinel-to-nonce(0b5e17e11a0c0ffee0de1e9a7e5ba5ed)) | outputs={run}/compiled/manifest.json,{run}/child/manifest.json,{run}/applied/fake/release-ledger.tsv
+substrate: none
 ```
 
 ## Gate integrity
 
-**Contract check**: BOUND — the gate specification above is the compiled value the runner executes; the
-documentation checker refuses a block that differs from it. Execution evidence remains phase-local.
+**Contract check**: BOUND — the capability is registered in
+`src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs`; the fenced block is its compiled rendering.
+This declaration does not establish subject implementation, oracle coverage or a gate pass. Execution
+evidence remains phase-local and requires the immediate predecessor gate pass.
 
 | Key | Contract |
 |---|---|
@@ -186,7 +264,7 @@ Implement the index and the twin.
 ## Sprint 7.3: The Phase-7 gate specification ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/gate-spec/Amoebius/Validation/GateSpec/ChildClusters.hs`
+**Implementation**: `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs`
 **Blocked by**: Sprint 7.2
 **Independent Validation**: The compiled specification equals the fenced block above; `verifySpec` accepts it; the corpus contains the Phase-6 corpus and at least two new pairs.
 **Oracle**: `test/oracle/runner/Main.hs` states the expected specification digest from literals.
@@ -208,7 +286,9 @@ phase's patch.
 
 ### Remaining Work
 
-Everything above. The `accept` ends this phase.
+The declaration and its compiled documentation rendering exist. The preceding subject and corpus work,
+independent oracle coverage, `verifySpec` admission and qualified gate execution remain required. Run this
+gate only after the Phase-6 gate passes; `accept` alone ends this phase.
 
 ## Documentation Requirements
 

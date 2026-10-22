@@ -34,6 +34,7 @@ import Amoebius.Capacity.Types
   , storageReservation
   )
 import Amoebius.Capacity.Vector (ResourceVector (..))
+import Amoebius.Placement.Taints (tolerates)
 import Amoebius.Vocabulary (Quantity, Unit (..), quantityValue)
 import Data.List (sortOn)
 import Data.Map.Strict (Map)
@@ -133,7 +134,7 @@ validateStorage workload =
 
 validateEligibility :: Workload -> Node -> Either PlacementError ()
 validateEligibility workload node
-  | nodeTaints node `Set.isSubsetOf` workloadTolerations workload = Right ()
+  | tolerates (nodeTaints node) (workloadTolerations workload) = Right ()
   | otherwise = Left (IneligibleNode (workloadId workload) (nodeId node))
 
 validateAntiAffinity :: Workload -> NodeLedger -> Either PlacementError ()

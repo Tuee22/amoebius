@@ -4,6 +4,7 @@ module BindProps
   ( runBindProps
   ) where
 
+import Amoebius.Vocabulary (InferenceFamily (LlamaCpp))
 import Amoebius.Capability.Binding (bind)
 import Amoebius.Capability.Types
   ( CapabilityArm (..)
@@ -80,15 +81,15 @@ capabilityNeedGen = do
     5 -> ObservabilityNeed "generated-observability"
     6 -> RegistryNeed "generated-registry"
     7 -> EdgeNeed "generated-edge"
-    _ -> InferenceEngineCapabilityNeed (InferenceEngineNeed "generated-engine" "catalog-profile" runtime)
+    _ -> InferenceEngineCapabilityNeed (InferenceEngineNeed "generated-engine" "catalog-profile" runtime LlamaCpp)
 
 engineRuntimeGen :: Gen EngineRuntime
 engineRuntimeGen = do
   lane <- chooseInt (0, 2)
   pure $ case lane of
-    0 -> AppleMetal "metal-catalog"
-    1 -> Cuda "cuda-catalog"
-    _ -> CpuRuntime "cpu-catalog"
+    0 -> AppleMetal
+    1 -> Cuda
+    _ -> CpuRuntime
 
 armOf :: CapabilityNeed -> CapabilityArm
 armOf need = case need of

@@ -59,7 +59,7 @@ application-data-path gate.
 component suite can supply supporting observations only; the sole acceptance command is `pb validate phase 66`. Split the phase if
 work adds an application data operation, UI interaction, another cluster, HA failover, a second substrate, or
 a separately useful provider feature.
-**Substrate:** `linux-cpu` — future live cluster observation only after the DSL barrier (Phase 4) and every predecessor gate pass.
+**Substrate:** `linux-cpu` — future live cluster observation only after the [DSL barrier](phase_09_dsl_barrier.md) (`DSL_BARRIER`) and every predecessor gate pass.
 **Lane:** `linux-cpu/amd64`.
 **Register:** 3 — live provider materialization and independent readback; NOT VALIDATED.
 

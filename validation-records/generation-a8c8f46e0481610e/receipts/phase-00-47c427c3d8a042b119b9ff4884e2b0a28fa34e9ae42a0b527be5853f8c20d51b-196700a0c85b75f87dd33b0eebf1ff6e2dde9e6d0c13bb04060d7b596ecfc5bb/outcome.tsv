@@ -1,0 +1,6 @@
+green	True
+spec-digest	fddcf0e7070fcad3d2c802838bd2fde4d3cc2cda0a54b9788238c6caa2c293c8
+chain	d4f54a2008de8ff121c5595f252fe0963887279aa75f83686441eb9f4c25b33e
+reproducible-core	05410e56dddd136833e3dcaf9dcbb1fed49202c9fc62032237184be90075e4b1
+capability	documentation_suite
+claim	For one snapshot, the standalone documentation checker reports zero findings on the governed corpus and the named finding on each rendered negative; the three bootstrap predicate mutants are judged by the independent driver; the custody probes pass; the hygiene row is green at the recorded cap; the generation-2 seed is content-addressed and agent-recorded with an immutable accepted bundle.

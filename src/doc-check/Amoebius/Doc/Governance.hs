@@ -336,8 +336,12 @@ withoutLinkTargets text = Text.intercalate "" (map dropTarget (zip [0 :: Int ..]
 
 -- | The fenced @gate-spec@ block of a phase must equal its compiled rendering.
 checkGateSpecBlocks :: [(Int, Text)] -> [(FilePath, Text)] -> [Finding]
-checkGateSpecBlocks compiled corpus = concatMap compare' compiled
+checkGateSpecBlocks compiled corpus = unregistered <> concatMap compare' compiled
  where
+  unregistered = [finding "DOC-GATE-SPEC-PHASE" path "a fenced gate specification has no compiled registration"
+    | row <- PhaseIdentity.allPhaseIdentities, PhaseIdentity.phaseIdentityOrdinal row `notElem` map fst compiled
+    , let path = PhaseIdentity.phaseIdentityPath row, Just contents <- [lookup path corpus]
+    , any ((== "```gate-spec") . Text.strip) (Text.lines contents)]
   compare' (ordinal, rendered) = case PhaseIdentity.lookupPhaseIdentity ordinal of
     Nothing -> [finding "DOC-GATE-SPEC-PHASE" "DEVELOPMENT_PLAN/" ("a compiled gate specification names an ordinal outside the phase table: " <> Text.pack (show ordinal))]
     Just row ->

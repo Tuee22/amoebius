@@ -72,6 +72,12 @@ changes must not redefine the accepted requirements used to judge that run. The
 
 ## Toolchain
 
+Hardware-free DSL validation uses native GHCup and GHC admitted by version checks. It requires no toolchain
+byte pins, archive/signature bundle, fixed OS/CPU architecture, GPU, VM/container, or particular physical host.
+Platform and hardware observations are supplied values or fake boundaries until the DSL barrier; later
+hardware gates establish actual native-lane behavior. Source and receipt hashes remain custody checks
+([DL-0025](./documents/decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier)).
+
 The bounded Python bootstrap under `pb/**` is specified to establish the toolchain, build the source-bound
 Haskell executable, and replace itself with that executable while preserving every argument. Haskell owns
 commands and verdicts. The bootstrap cannot validate its own handoff.

@@ -2,6 +2,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition
@@ -31,7 +32,6 @@ import Amoebius.Scope.Index
   , activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import Data.Text (Text)
 
@@ -45,8 +45,8 @@ program = do
   tenant <- firstShow (trustedTenant "composition-compile-tenant")
   subject <- firstShow (trustedSubject tenant "composition-compile-subject")
   membership <- firstShow (activeMembership tenant subject)
-  nested <- firstShow $ withRequestScope tenant subject membership $ \leftScope ->
-    withRequestScope tenant subject membership $ \rightScope ->
+  nested <- firstShow $ FixtureAuthority.withFixtureScope tenant subject membership $ \leftScope ->
+    FixtureAuthority.withFixtureScope tenant subject membership $ \rightScope ->
       () <$ crossScopeComposite leftScope rightScope
   inner <- firstShow nested
   firstShow inner

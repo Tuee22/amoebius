@@ -26,30 +26,63 @@ module Amoebius.Dsl.Spec
   , mkKindReplicas
   , kindReplicasCount
   , TopologySpec (..)
-  , ClusterSpec (clusterName, clusterTopology, clusterHosts)
+  , ClusterSpec
+  , clusterName
+  , clusterTopology
+  , clusterHosts
   , mkClusterSpec
-  , NeedSpec (needCapability, needName)
+  , mkRke2ClusterSpec
+  , NeedSpec
+  , needCapability
+  , needName
   , mkNeedSpec
-  , WorkloadSpec (workloadRequests, workloadLimits, workloadHeadroom)
+  , WorkloadSpec
+  , workloadRequests
+  , workloadLimits
+  , workloadHeadroom
   , mkWorkloadSpec
-  , AppSpec (appName, appNeeds, appWorkload)
+  , AppSpec
+  , appName
+  , appNeeds
+  , appWorkload
   , mkAppSpec
+  , applicationNeed
   , Replicas
   , mkReplicas
   , replicasCount
   , DistributionRule (..)
-  , BindingSpec (..)
-  , DeploymentRules (deploymentOf, deploymentBindings, deploymentDistribution)
+  , BindingSpec (BindingSpec)
+  , bindingNeed
+  , bindingProvider
+  , bindingShape
+  , bindingInference
+  , InferenceBinding
+  , mkInferenceBindingSpec
+  , inferenceBindingRuntime
+  , inferenceBindingFamily
+  , DeploymentRules
+  , deploymentOf
+  , deploymentBindings
+  , deploymentDistribution
   , mkDeploymentRules
-  , RootInForceSpec (rootClusters, rootApps, rootDeployments)
+  , RootInForceSpec
+  , rootClusters
+  , rootApps
+  , rootDeployments
   , mkRootInForceSpec
+  , mkRootWithExtensions
+  , rootExtensions
   ) where
 
+import Amoebius.Extension.Config (ExtensionRequest, ConfigurationRefusal, configurationRefusalTag, requestedExtension)
+import Amoebius.Extension.BindingSubject.Internal (BindingSubject (BindingSubject))
 import Amoebius.Capability.Types (CapabilityProvider, ServiceShape)
-import Amoebius.Vocabulary (CapabilityArm (..), Quantity, Unit (..), isLabel)
+import Amoebius.Topology.Rke2 (Rke2Quorum, rke2ServerHosts)
+import Amoebius.Vocabulary (CapabilityArm (..), EngineRuntime, InferenceFamily, extensionIdText, Detected, HostRefusal, Quantity, Unit (..), isLabel)
 import Data.List (nub)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.List.NonEmpty qualified as NonEmpty
+import Data.Set (Set)
 import Data.Text (Text)
 import Numeric.Natural (Natural)
 
@@ -59,7 +92,6 @@ data SpecError
   | UnreferencedHost Text
   | DuplicateHost Text
   | KindReplicasZero
-  | UnsupportedArm
   | RequestsAboveLimits
   | HeadroomAllZero
   | EmptyNeeds
@@ -70,6 +102,10 @@ data SpecError
   | EmptyClusters
   | UnbuiltProviderArm Text
   | DistributedShape Natural
+  | InvalidExtensionIdentity Text
+  | InvalidExtensionConfiguration ConfigurationRefusal
+  | DuplicateExtensionRequest Text
+  | InvalidDetection HostRefusal
   deriving stock (Eq, Ord, Show)
 
 -- | The stable tag of a refusal: the name of its constructor.
@@ -80,7 +116,6 @@ specErrorTag refusal = case refusal of
   UnreferencedHost _ -> "UnreferencedHost"
   DuplicateHost _ -> "DuplicateHost"
   KindReplicasZero -> "KindReplicasZero"
-  UnsupportedArm -> "UnsupportedArm"
   RequestsAboveLimits -> "RequestsAboveLimits"
   HeadroomAllZero -> "HeadroomAllZero"
   EmptyNeeds -> "EmptyNeeds"
@@ -91,6 +126,10 @@ specErrorTag refusal = case refusal of
   EmptyClusters -> "EmptyClusters"
   UnbuiltProviderArm _ -> "UnbuiltProviderArm"
   DistributedShape _ -> "DistributedShape"
+  InvalidExtensionIdentity _ -> "InvalidExtensionId"
+  InvalidExtensionConfiguration problem -> configurationRefusalTag problem
+  DuplicateExtensionRequest _ -> "DuplicateExtensionRequest"
+  InvalidDetection _ -> "InvalidDetection"
 
 newtype ClusterName = ClusterName Text
   deriving stock (Eq, Ord, Show)
@@ -152,6 +191,8 @@ data HostResources = HostResources
 data HostSpec = HostSpec
   { hostName :: HostName
   , hostResources :: HostResources
+  , hostDetected :: Detected
+  , hostTaints :: Set Text
   }
   deriving stock (Eq, Ord, Show)
 
@@ -165,13 +206,13 @@ kindReplicasCount :: KindReplicas -> Natural
 kindReplicasCount (KindReplicas count) = count
 
 -- | The one topology this phase spells: kind node containers on one declared host.
-data TopologySpec = KindTopology HostSpec KindReplicas
+data TopologySpec = KindTopology HostSpec KindReplicas | Rke2Topology (Rke2Quorum HostSpec) [HostSpec]
   deriving stock (Eq, Ord, Show)
 
 data ClusterSpec = ClusterSpec
-  { clusterName :: ClusterName
-  , clusterTopology :: TopologySpec
-  , clusterHosts :: NonEmpty HostSpec
+  { internalClusterName :: ClusterName
+  , internalClusterTopology :: TopologySpec
+  , internalClusterHosts :: NonEmpty HostSpec
   }
   deriving stock (Eq, Ord, Show)
 
@@ -190,22 +231,29 @@ mkClusterSpec name kindHost replicas hosts = do
         unreferenced : _ -> Left (UnreferencedHost unreferenced)
         [] -> Right (ClusterSpec name (KindTopology host replicas) hosts)
 
+-- | The quorum carries its actual hosts. Host reuse is deliberately refused
+-- by the lowering fold over servers and agents together, at its named stage.
+mkRke2ClusterSpec :: ClusterName -> Rke2Quorum HostSpec -> [HostSpec] -> ClusterSpec
+mkRke2ClusterSpec name quorum agents = ClusterSpec name (Rke2Topology quorum agents) hosts
+ where
+  first :| rest = rke2ServerHosts quorum
+  hosts = first :| (rest <> agents)
+
 data NeedSpec = NeedSpec
-  { needCapability :: CapabilityArm
-  , needName :: NeedName
+  { internalNeedCapability :: CapabilityArm
+  , internalNeedName :: NeedName
   }
   deriving stock (Eq, Ord, Show)
 
--- | An inference engine needs a profile and a runtime that a bare need cannot carry.
+-- | Application logic declares the capability only. Engine family and runtime
+-- are selected by its deployment binding, never by the application need.
 mkNeedSpec :: CapabilityArm -> NeedName -> Either SpecError NeedSpec
-mkNeedSpec arm name = case arm of
-  InferenceEngine -> Left UnsupportedArm
-  _ -> Right (NeedSpec arm name)
+mkNeedSpec arm name = Right (NeedSpec arm name)
 
 data WorkloadSpec = WorkloadSpec
-  { workloadRequests :: PodResources
-  , workloadLimits :: PodResources
-  , workloadHeadroom :: Maybe PodResources
+  { internalWorkloadRequests :: PodResources
+  , internalWorkloadLimits :: PodResources
+  , internalWorkloadHeadroom :: Maybe PodResources
   }
   deriving stock (Eq, Ord, Show)
 
@@ -224,9 +272,9 @@ mkWorkloadSpec requests limits headroom = do
     else Right (WorkloadSpec requests limits headroom)
 
 data AppSpec = AppSpec
-  { appName :: AppName
-  , appNeeds :: NonEmpty NeedSpec
-  , appWorkload :: WorkloadSpec
+  { internalAppName :: AppName
+  , internalAppNeeds :: NonEmpty NeedSpec
+  , internalAppWorkload :: WorkloadSpec
   }
   deriving stock (Eq, Ord, Show)
 
@@ -240,6 +288,15 @@ mkAppSpec name needs workload = case needs of
     case [duplicate | duplicate <- nub names, length (filter (== duplicate) names) > 1] of
       duplicate : _ -> Left (DuplicateNeed duplicate)
       [] -> Right (AppSpec name (first :| rest) workload)
+
+-- | A source-bound application declaration is the prerequisite to a binding
+-- proof. The private subject constructor is never a public text factory.
+applicationNeed :: AppSpec -> NeedName -> Maybe BindingSubject
+applicationNeed application wanted = case
+    [need | need <- NonEmpty.toList (appNeeds application), needName need == wanted] of
+  [need] -> Just (BindingSubject (appNameText (appName application))
+    (needNameText (needName need)) (needCapability need))
+  _ -> Nothing
 
 newtype Replicas = Replicas Natural
   deriving stock (Eq, Ord, Show)
@@ -255,17 +312,40 @@ newtype DistributionRule = DistributionRule
   }
   deriving stock (Eq, Ord, Show)
 
-data BindingSpec = BindingSpec
-  { bindingNeed :: NeedName
-  , bindingProvider :: CapabilityProvider
-  , bindingShape :: ServiceShape
-  }
+data InferenceBinding = InferenceBinding !EngineRuntime !InferenceFamily
   deriving stock (Eq, Ord, Show)
 
+inferenceBindingRuntime :: InferenceBinding -> EngineRuntime
+inferenceBindingRuntime (InferenceBinding runtime _) = runtime
+
+inferenceBindingFamily :: InferenceBinding -> InferenceFamily
+inferenceBindingFamily (InferenceBinding _ family) = family
+
+data BindingSpec
+  = BindingSpec NeedName CapabilityProvider ServiceShape
+  | InferenceBindingSpec NeedName CapabilityProvider ServiceShape InferenceBinding
+  deriving stock (Eq, Ord, Show)
+
+mkInferenceBindingSpec :: NeedName -> CapabilityProvider -> ServiceShape -> EngineRuntime -> InferenceFamily -> BindingSpec
+mkInferenceBindingSpec name provider shape runtime family =
+  InferenceBindingSpec name provider shape (InferenceBinding runtime family)
+
+bindingNeed :: BindingSpec -> NeedName
+bindingNeed binding = case binding of BindingSpec name _ _ -> name; InferenceBindingSpec name _ _ _ -> name
+
+bindingProvider :: BindingSpec -> CapabilityProvider
+bindingProvider binding = case binding of BindingSpec _ provider _ -> provider; InferenceBindingSpec _ provider _ _ -> provider
+
+bindingShape :: BindingSpec -> ServiceShape
+bindingShape binding = case binding of BindingSpec _ _ shape -> shape; InferenceBindingSpec _ _ shape _ -> shape
+
+bindingInference :: BindingSpec -> Maybe InferenceBinding
+bindingInference binding = case binding of BindingSpec {} -> Nothing; InferenceBindingSpec _ _ _ inference -> Just inference
+
 data DeploymentRules = DeploymentRules
-  { deploymentOf :: AppName
-  , deploymentBindings :: NonEmpty BindingSpec
-  , deploymentDistribution :: DistributionRule
+  { internalDeploymentOf :: AppName
+  , internalDeploymentBindings :: NonEmpty BindingSpec
+  , internalDeploymentDistribution :: DistributionRule
   }
   deriving stock (Eq, Ord, Show)
 
@@ -279,13 +359,76 @@ mkDeploymentRules app bindings distribution = case bindings of
       [] -> Right (DeploymentRules app (first :| rest) distribution)
 
 data RootInForceSpec = RootInForceSpec
-  { rootClusters :: NonEmpty ClusterSpec
-  , rootApps :: [AppSpec]
-  , rootDeployments :: [DeploymentRules]
+  { internalRootClusters :: NonEmpty ClusterSpec
+  , internalRootApps :: [AppSpec]
+  , internalRootDeployments :: [DeploymentRules]
+  , internalRootExtensions :: [ExtensionRequest]
   }
   deriving stock (Eq, Ord, Show)
 
+rootExtensions :: RootInForceSpec -> [ExtensionRequest]
+rootExtensions = internalRootExtensions
+
 mkRootInForceSpec :: [ClusterSpec] -> [AppSpec] -> [DeploymentRules] -> Either SpecError RootInForceSpec
-mkRootInForceSpec clusters apps deployments = case clusters of
-  [] -> Left EmptyClusters
-  first : rest -> Right (RootInForceSpec (first :| rest) apps deployments)
+mkRootInForceSpec clusters apps deployments = mkRootWithExtensions clusters apps deployments []
+
+mkRootWithExtensions :: [ClusterSpec] -> [AppSpec] -> [DeploymentRules] -> [ExtensionRequest] -> Either SpecError RootInForceSpec
+mkRootWithExtensions clusters apps deployments extensions = do
+  let names = map (extensionIdText . requestedExtension) extensions
+  case [name | name <- nub names, length (filter (== name) names) > 1] of
+    duplicate : _ -> Left (DuplicateExtensionRequest duplicate)
+    [] -> Right ()
+  case clusters of
+    [] -> Left EmptyClusters
+    first : rest -> Right (RootInForceSpec (first :| rest) apps deployments extensions)
+
+clusterName :: ClusterSpec -> ClusterName
+clusterName = internalClusterName
+
+clusterTopology :: ClusterSpec -> TopologySpec
+clusterTopology = internalClusterTopology
+
+clusterHosts :: ClusterSpec -> NonEmpty HostSpec
+clusterHosts = internalClusterHosts
+
+needCapability :: NeedSpec -> CapabilityArm
+needCapability = internalNeedCapability
+
+needName :: NeedSpec -> NeedName
+needName = internalNeedName
+
+workloadRequests :: WorkloadSpec -> PodResources
+workloadRequests = internalWorkloadRequests
+
+workloadLimits :: WorkloadSpec -> PodResources
+workloadLimits = internalWorkloadLimits
+
+workloadHeadroom :: WorkloadSpec -> Maybe PodResources
+workloadHeadroom = internalWorkloadHeadroom
+
+appName :: AppSpec -> AppName
+appName = internalAppName
+
+appNeeds :: AppSpec -> NonEmpty NeedSpec
+appNeeds = internalAppNeeds
+
+appWorkload :: AppSpec -> WorkloadSpec
+appWorkload = internalAppWorkload
+
+deploymentOf :: DeploymentRules -> AppName
+deploymentOf = internalDeploymentOf
+
+deploymentBindings :: DeploymentRules -> NonEmpty BindingSpec
+deploymentBindings = internalDeploymentBindings
+
+deploymentDistribution :: DeploymentRules -> DistributionRule
+deploymentDistribution = internalDeploymentDistribution
+
+rootClusters :: RootInForceSpec -> NonEmpty ClusterSpec
+rootClusters = internalRootClusters
+
+rootApps :: RootInForceSpec -> [AppSpec]
+rootApps = internalRootApps
+
+rootDeployments :: RootInForceSpec -> [DeploymentRules]
+rootDeployments = internalRootDeployments

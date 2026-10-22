@@ -34,6 +34,7 @@ import Amoebius.Capacity.Vector (ResourceVector (..))
 import Amoebius.Dsl.Topology (NodeSupply (..), Topology, topologySupply)
 import Amoebius.Placement.Elastic (placeElastic)
 import Amoebius.Placement.Ledger (NodeLedger (..), debitFirst, debitWorkload, decreasing, initialLedger)
+import Amoebius.Placement.Taints (tolerates)
 import Amoebius.Vocabulary (quantityValue)
 import Control.DeepSeq (NFData)
 import Data.List.NonEmpty qualified as NonEmpty
@@ -92,6 +93,9 @@ place topology workloads = Placed <$> case topologySupply topology of
 
 placeFixed :: [Node] -> [Workload] -> Either PlacementError Placement
 placeFixed nodes workloads = do
+  case [workloadId workload | workload <- workloads, not (any (\node -> tolerates (nodeTaints node) (workloadTolerations workload)) nodes)] of
+    first : _ | not (null nodes) -> Left (TaintedOnlyHost first)
+    _ -> Right ()
   final <- placeOnExisting (fmap (initialLedger . (`MaterializedNode` Nothing)) nodes) (decreasing workloads)
   pure
     Placement

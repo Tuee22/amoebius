@@ -18,4 +18,4 @@ resolverVersion = "0.1.0.0"
 runResolverCommand :: [String] -> IO ()
 runResolverCommand arguments = case arguments of
   ["--version"] -> Text.putStrLn resolverVersion
-  _ -> die "jit-build-resolver requires --version before the Phase-48 cache owner is provisioned"
+  _ -> die "jit-build-resolver requires --version before the content-addressed cache owner is provisioned"

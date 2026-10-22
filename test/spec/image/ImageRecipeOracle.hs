@@ -18,28 +18,27 @@ import Data.Text qualified as Text
 
 recipeRows :: [(Int, Text, Text)]
 recipeRows =
-    [ (1, "distribution", "AptPackage")
-    , (2, "redis-server", "AptPackage")
-    , (3, "redis-cli", "AptPackage")
-    , (4, "postgres", "AptPackage")
-    , (5, "patroni", "AptPackage")
-    , (6, "temurin", "AptPackage")
-    , (7, "g++", "AptPackage")
-    , (8, "minio", "OfficialArtifact")
-    , (9, "vault", "OfficialArtifact")
-    , (10, "prometheus", "OfficialArtifact")
-    , (11, "alertmanager", "OfficialArtifact")
-    , (12, "thanos", "OfficialArtifact")
-    , (13, "envoy", "OfficialArtifact")
-    , (14, "grafana", "OfficialArtifact")
-    , (15, "keycloak", "OfficialArtifact")
-    , (16, "pulsar", "OfficialArtifact")
-    , (17, "amoebius-jit-build-resolver", "BuildProduct")
-    , (18, "envoy-gateway", "BuildProduct")
-    , (19, "metallb-controller", "BuildProduct")
-    , (20, "metallb-speaker", "BuildProduct")
-    , (21, "percona-postgresql-operator", "BuildProduct")
-    , (22, "pgadmin", "BuildProduct")
+    [ (1, "redis-server", "AptPackage")
+    , (2, "redis-cli", "AptPackage")
+    , (3, "postgres", "AptPackage")
+    , (4, "patroni", "AptPackage")
+    , (5, "temurin", "AptPackage")
+    , (6, "g++", "AptPackage")
+    , (7, "minio", "OfficialArtifact")
+    , (8, "vault", "OfficialArtifact")
+    , (9, "prometheus", "OfficialArtifact")
+    , (10, "alertmanager", "OfficialArtifact")
+    , (11, "thanos", "OfficialArtifact")
+    , (12, "envoy", "OfficialArtifact")
+    , (13, "grafana", "OfficialArtifact")
+    , (14, "keycloak", "OfficialArtifact")
+    , (15, "pulsar", "OfficialArtifact")
+    , (16, "amoebius-jit-build-resolver", "BuildProduct")
+    , (17, "envoy-gateway", "BuildProduct")
+    , (18, "metallb-controller", "BuildProduct")
+    , (19, "metallb-speaker", "BuildProduct")
+    , (20, "percona-postgresql-operator", "BuildProduct")
+    , (21, "pgadmin", "BuildProduct")
     ]
 
 buildCaseRows :: [(Text, Text, Text, Text, String)]
@@ -74,8 +73,8 @@ calculusProjection :: [(Text, Text)]
 calculusProjection =
     [ ("calculus-kinds", "artifact,budget,lift,workflow,evidence")
     , ("component-names", "recipe-step-semantics,build-argv-tokens,renderer-laws,build-cases,mutant-evidence")
-    , ("projection-counts", "22,44,4,4,3")
-    , ("resource-vector", "5,77,0,0")
+    , ("projection-counts", "21,44,4,4,3")
+    , ("resource-vector", "5,76,0,0")
     ]
 
 mutantLoci :: [(Text, Text)]

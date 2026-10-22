@@ -2,6 +2,7 @@
 
 module SameScopeComposes where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition
@@ -16,7 +17,6 @@ import Amoebius.Scope.Index
   ( activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 
 sameScopeKinds :: Either String [Calculus]
@@ -25,7 +25,7 @@ sameScopeKinds = do
   subject <- firstShow (trustedSubject tenant "subject")
   membership <- firstShow (activeMembership tenant subject)
   firstShow
-    ( withRequestScope tenant subject membership $ \scope ->
+    ( FixtureAuthority.withFixtureScope tenant subject membership $ \scope ->
         compositionKinds
           ( compose
               (artifactComponent scope "artifact" (ResourceVector 1 1 1 1) (RecipeId "recipe" 1))

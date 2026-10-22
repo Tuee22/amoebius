@@ -1,0 +1,36 @@
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:133	constant-flip	68618093f3bb->bdf8020f51c4	killed@vocab.host-grid,decode.kind-single-objectstore.dump,lower.kind-single-objectstore.dump
+Amoebius.Substrate.Classify	src/capacity-topology/Amoebius/Substrate/Classify.hs:26	branch-swap	374d8edaf408->8ee1c63b0f9a	killed@vocab.host-grid,decode.roundtrip.kind-single-objectstore,decode.roundtrip.shape-swap-sibling
+Amoebius.Topology.Rke2	src/capacity-topology/Amoebius/Topology/Rke2.hs:26	list-truncation	114a840cc9aa->95e0cce740b9	killed@quorum.payloads,decode.substrates.rke2-three-agent.dump,lower.substrates.rke2-three-agent.dump
+Amoebius.Topology.Lanes	src/capacity-topology/Amoebius/Topology/Lanes.hs:15	list-truncation	e9f53c3f4146->0ee162f8eb55	killed@decode.kind-single-objectstore.dump,lower.kind-single-objectstore.dump,recipe.source.kind-single-objectstore.image.steps
+Amoebius.Placement.Taints	src/capacity-topology/Amoebius/Placement/Taints.hs:10	branch-swap	d8a71787c469->a2e2af88e35f	killed@provision.kind-single-objectstore.dump,render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes
+Amoebius.Image.Recipe	src/Amoebius/Image/Recipe.hs:92	list-truncation	9a278376f1f1->c61ac1317ba0	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:811:27: warning: [GHC-40910] [
+Amoebius.Image.Bake	src/Amoebius/Image/Bake.hs:24	constant-flip	2d72a84e1b9c->314dc74a6116	killed@bake.source.kind-single-objectstore.image.catalog,bake.source.shape-swap-sibling.image.catalog,bake.source.replicas-3-sibling.image.catalog
+Amoebius.Image.BaseChannel	src/Amoebius/Image/BaseChannel.hs:52	list-truncation	249b652560cb->281f0fc4c2c0	killed@recipe.base-channels,case:BaseChannelDigest
+Amoebius.Image.BuildArgv	src/Amoebius/Image/BuildArgv.hs:42	branch-swap	0a0b0296f407->8bf72b1dcf5e	killed@plan.kind-single-objectstore.dump,provision.kind-single-objectstore.dump,render.kind-single-objectstore.objects
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:134	constant-flip	68618093f3bb->e4b3800f84a3	killed@vocab.host-grid,lanes.detection,lanes.profiles
+Amoebius.Topology.Rke2	src/capacity-topology/Amoebius/Topology/Rke2.hs:27	list-truncation	114a840cc9aa->6d0354610ed7	killed@quorum.payloads,case:Rke2TwoServers,case:DuplicateHostId
+Amoebius.Topology.Lanes	src/capacity-topology/Amoebius/Topology/Lanes.hs:16	list-truncation	e9f53c3f4146->777c0e10ab2e	killed@lanes.detection,lanes.profiles,decode.substrates.rke2-cuda-three-agent.dump
+Amoebius.Image.Recipe	src/Amoebius/Image/Recipe.hs:102	list-truncation	9a278376f1f1->2caca15388d9	killed@recipe.source.kind-single-objectstore.image.steps,bake.source.kind-single-objectstore.image.catalog,recipe.source.shape-swap-sibling.image.steps
+Amoebius.Image.Bake	src/Amoebius/Image/Bake.hs:25	constant-flip	2d72a84e1b9c->ebd2b4993f85	survived
+Amoebius.Image.BaseChannel	src/Amoebius/Image/BaseChannel.hs:67	constant-flip	249b652560cb->db4f8c7e4520	killed@substrates.corpus.inventory,substrates.corpus.files,decode.substrates.rke2-three-agent.dump
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:135	constant-flip	68618093f3bb->983089710ba6	killed@vocab.host-grid,lanes.detection,lanes.profiles
+Amoebius.Image.Recipe	src/Amoebius/Image/Recipe.hs:106	list-truncation	9a278376f1f1->612a416833b7	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:811:27: warning: [GHC-40910] [
+Amoebius.Image.Bake	src/Amoebius/Image/Bake.hs:25	field-drop	2d72a84e1b9c->d70e956fda1b	killed@consume.section,chain.section,fake-apply.section
+Amoebius.Image.BaseChannel	src/Amoebius/Image/BaseChannel.hs:67	branch-swap	249b652560cb->f63952c7b03c	killed@substrates.corpus.inventory,substrates.corpus.files,decode.substrates.rke2-three-agent.dump
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:136	constant-flip	68618093f3bb->d70fb7af9682	killed@vocab.host-grid,lanes.detection,lanes.profiles
+Amoebius.Image.Recipe	src/Amoebius/Image/Recipe.hs:136	field-drop	9a278376f1f1->ce57a8336c0b	killed@consume.section,chain.section,fake-apply.section
+Amoebius.Image.Bake	src/Amoebius/Image/Bake.hs:27	field-drop	2d72a84e1b9c->2e253b635c4b	killed@consume.section,chain.section,fake-apply.section
+Amoebius.Image.BaseChannel	src/Amoebius/Image/BaseChannel.hs:69	constant-flip	249b652560cb->c25bdfc4cdac	survived
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:207	constant-flip	68618093f3bb->d9766413bb4b	killed@vocab.labels,spec.name.host.long,case:lanes-of
+Amoebius.Image.Recipe	src/Amoebius/Image/Recipe.hs:139	field-drop	9a278376f1f1->19c664c6cf40	killed@consume.section,chain.section,fake-apply.section
+Amoebius.Image.Bake	src/Amoebius/Image/Bake.hs:28	field-drop	2d72a84e1b9c->4f3a3b9a29e9	killed@consume.section,chain.section,fake-apply.section
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:207	boundary-shift	68618093f3bb->ed0b1af0d505	killed@vocab.labels,case:lanes-of
+Amoebius.Image.Recipe	src/Amoebius/Image/Recipe.hs:154	field-drop	9a278376f1f1->25555f0642eb	killed@consume.section,chain.section,fake-apply.section
+Amoebius.Image.Bake	src/Amoebius/Image/Bake.hs:29	field-drop	2d72a84e1b9c->cd79503e3c42	killed@consume.section,chain.section,fake-apply.section
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:208	branch-swap	68618093f3bb->fc7893e09bf1	killed@decode.section,vocab.labels,spec.name.app.underscore
+Amoebius.Image.Recipe	src/Amoebius/Image/Recipe.hs:156	field-drop	9a278376f1f1->9bf2a3ef17ed	killed@consume.section,chain.section,fake-apply.section
+Amoebius.Image.Bake	src/Amoebius/Image/Bake.hs:41	list-truncation	2d72a84e1b9c->1692a34cf28c	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:811:27: warning: [GHC-40910] [
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:210	constant-flip	68618093f3bb->9aa7de5de433	killed@decode.section,vocab.labels,freeze.hash.format
+Amoebius.Image.Recipe	src/Amoebius/Image/Recipe.hs:178	constant-flip	9a278376f1f1->ab84c4c6e7a5	survived
+Amoebius.Image.Bake	src/Amoebius/Image/Bake.hs:60	branch-swap	2d72a84e1b9c->b52fc8603296	killed@bake.source.kind-single-objectstore.image.linux-cpu-amd64.target,bake.source.kind-single-objectstore.image.linux-cpu-amd64.built,bake.source.shape-swap-sibling.image.linux-cpu-amd64.target
+summary	killed=29	viable=32	stillborn=3

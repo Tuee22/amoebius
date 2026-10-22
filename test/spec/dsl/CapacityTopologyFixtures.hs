@@ -14,13 +14,13 @@ module CapacityTopologyFixtures
 
 import Amoebius.Capacity.Fits (carve, fits)
 import Amoebius.Placement.Witness (placedPlacement, place)
-import Amoebius.Capacity.Types (AvailableCapacity (..), Axis (..), CandidateNodeClass (..), CpuOvercommitPolicy (..), Demand (..), GrowthQuota (..), HostEnvironment (..), Node (..), NodeCapacity (..), Overcommit (..), Placement, PlacementError (..), StorageDemand (..), Workload (..), emptyStorageDemand, mkResourceEnvelope)
+import Amoebius.Capacity.Types (AvailableCapacity (..), Axis (..), CandidateNodeClass (..), CpuOvercommitPolicy (..), Demand (..), GrowthQuota (..), HostEnvironment (..), Node (..), NodeRole (..), NodeCapacity (..), Overcommit (..), Placement, PlacementError (..), StorageDemand (..), Workload (..), emptyStorageDemand, mkResourceEnvelope)
 import Amoebius.Capacity.Vector (ResourceVector (..), zeroResources)
-import Amoebius.Vocabulary (Quantity (..))
+import Amoebius.Vocabulary (Architecture (Amd64), linuxCpuDetected, Quantity (..))
 import Amoebius.Dsl.Topology
   ( ComputeEngine (..)
   , NodeSupply (..)
-  , ServerQuorum (..)
+  , Rke2Quorum (..)
   , Topology
   , TopologyError (..)
   , mkRke2Topology
@@ -49,8 +49,8 @@ fixtureCases =
   , FixtureCase
       "illegal_rke2_reused_host"
       "legal_rke2_distinct_hosts"
-      (topologyOutcome (mkRke2Topology SingleServer [baseNode "server" "host-a"] [baseNode "agent" "host-a"]))
-      (topologyOutcome (mkRke2Topology SingleServer [baseNode "server" "host-a"] [baseNode "agent" "host-b"]))
+      (topologyOutcome (mkRke2Topology (Single (baseNode "server" "host-a")) [baseNode "agent" "host-a"]))
+      (topologyOutcome (mkRke2Topology (Single (baseNode "server" "host-a")) [baseNode "agent" "host-b"]))
   , FixtureCase
       "illegal_overcommit_host"
       "legal_host_exact_fit"
@@ -139,16 +139,16 @@ positiveElastic = do
   pure (topology, workloads, placement)
 
 baseNode :: Text -> Text -> Node
-baseNode name host = Node name host NativeLinux (capacity (resources 8 16 16 8)) Set.empty
+baseNode name host = Node name host NativeLinux (capacity (resources 8 16 16 8)) Set.empty (linuxCpuDetected Amd64) KindWorker
 
 virtualNode :: Text -> Text -> Node
-virtualNode name host = Node name host VirtualizedLinux (capacity (resources 8 16 16 8)) Set.empty
+virtualNode name host = Node name host VirtualizedLinux (capacity (resources 8 16 16 8)) Set.empty (linuxCpuDetected Amd64) KindWorker
 
 managedNode :: Text -> Node
-managedNode name = Node name name ManagedAws (capacity (resources 8 16 16 8)) Set.empty
+managedNode name = Node name name ManagedAws (capacity (resources 8 16 16 8)) Set.empty (linuxCpuDetected Amd64) KindWorker
 
 nodeWith :: ResourceVector -> CpuOvercommitPolicy -> Set.Set Text -> Node
-nodeWith allocatable policy taints = Node "node" "host" NativeLinux (capacityWithPolicy allocatable policy) taints
+nodeWith allocatable policy taints = Node "node" "host" NativeLinux (capacityWithPolicy allocatable policy) taints (linuxCpuDetected Amd64) KindWorker
 
 baseFitNode :: Node
 baseFitNode = nodeWith (resources 8 8 8 2) NoCpuOvercommit Set.empty
@@ -164,6 +164,7 @@ baseCandidate =
   CandidateNodeClass
     { candidateName = "standard"
     , candidateEnvironment = ManagedAws
+    , candidateDetected = linuxCpuDetected Amd64
     , candidateCapacity = capacityWithPolicy (resources 4 8 8 4) (BoundedCpuOvercommit 2)
     , candidatePerNodeDemand = zeroResources
     , candidateTaints = Set.empty
@@ -260,6 +261,7 @@ tagTopology problem = case problem of
 
 tagPlacement :: PlacementError -> Text
 tagPlacement problem = case problem of
+  TaintedOnlyHost _ -> "TaintedOnlyHost"
   CapacityOvercommit overcommit -> "Overcommit:" <> axisTag (overcommitAxis overcommit)
   Unschedulable _ -> "Unschedulable"
   CpuLimitPolicyExceeded {} -> "CpuLimitPolicyExceeded"

@@ -20,8 +20,9 @@ import Amoebius.Dsl.Decode (rootSchema)
 import Amoebius.Dsl.Encode (encodeRaw, encodeRoot, rawOf)
 import Amoebius.Dsl.Raw qualified as Raw
 import Amoebius.Dsl.Spec
-import Amoebius.Vocabulary (CapabilityArm (..), Quantity (..))
+import Amoebius.Vocabulary (Architecture (Amd64), linuxCpuDetected, CapabilityArm (..), Quantity (..))
 import Data.List.NonEmpty (NonEmpty (..))
+import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Numeric.Natural (Natural)
@@ -48,7 +49,7 @@ variant processors shape count = do
   hostLabel <- mkHostName "kind-host"
   kindReplicas <- mkKindReplicas 1
   cluster <- mkClusterSpec clusterLabel "kind-host"
-    kindReplicas (HostSpec hostLabel (HostResources (Quantity processors) 64 500 110) :| [])
+    kindReplicas (HostSpec hostLabel (HostResources (Quantity processors) 64 500 110) (linuxCpuDetected Amd64) Set.empty :| [])
   application <- mkAppName ("notes-" <> sentinel)
   needLabel <- mkNeedName ("assets-" <> sentinel)
   need <- mkNeedSpec ObjectStore needLabel
@@ -65,7 +66,7 @@ rendered = either (const "") encodeRoot
 rawBaseline :: Raw.RawRoot
 rawBaseline = either (const emptyRaw) rawOf baselineRoot
  where
-  emptyRaw = Raw.RawRoot [] [] []
+  emptyRaw = Raw.RawRoot [] [] [] []
 
 -- | Replace the first occurrence of a needle.
 replaceFirst :: Text -> Text -> Text -> Text
@@ -94,7 +95,7 @@ corpus =
   , Example "local-import-twin" (withAppName "./local-import-name.dhall")
   , Example "unbound-need" (encodeRaw (mapApp (\app -> app {Raw.needs = Raw.needs app <> [Raw.RawNeed Raw.ObjectStore ("cache-" <> sentinel)]})))
   , Example "dangling-binding" (encodeRaw (mapDeployment (\deployment ->
-      deployment {Raw.bindings = Raw.bindings deployment <> [Raw.RawBinding "ghost" "Canonical" Raw.SingleNode]})))
+      deployment {Raw.bindings = Raw.bindings deployment <> [Raw.RawBinding "ghost" "Canonical" Raw.SingleNode Nothing]})))
   , Example "unknown-deployment" (encodeRaw (mapDeployment (\deployment -> deployment {Raw.deploymentOf = "ghost-app"})))
   , Example "forbidden-env" (withAppName "env:SPINE_UNSET_VARIABLE")
   , Example "forbidden-remote" (withAppName "https://example.invalid/name.dhall")

@@ -5,6 +5,7 @@ module RenderGoldenGate
   , runRenderGoldenGate
   ) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition
@@ -30,13 +31,11 @@ import Amoebius.Capacity.RenderSource (K8sObjectIdentity (K8sObjectIdentity))
 import Amoebius.Capacity.Vector (ResourceVector (ResourceVector))
 import Amoebius.Vocabulary (quantityText)
 import Amoebius.Capability.Types (ServiceShape (..))
-import Amoebius.Manifest (renderAll)
 import Amoebius.Manifest.K8sObject
 import Amoebius.Scope.Index
   ( activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import BindFixtures (CapabilityFixture (..), capabilityFixtures)
 import Control.Monad (forM, forM_, unless)
@@ -50,7 +49,7 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as Text
 import ProvisionFixtures (provisionFixture)
-import RenderGoldenProps (renderInvariantFailures, runRenderGoldenProps)
+import RenderGoldenProps (renderInvariantFailures, runRenderGoldenProps, renderFixture)
 import RenderGoldenOracle
   ( expectedCalculusProjection
   , expectedKubernetesWireFields
@@ -126,7 +125,7 @@ runRenderGoldenGate = do
 checkFixture :: Map Text [Text] -> CapabilityFixture -> IO [(ProvisionedSpec, [K8sObject])]
 checkFixture oracle fixture = forM [SingleNode, Distributed 3] $ \shape -> do
   sealed <- either (fail . show) pure (provisionFixture fixture shape)
-  let objects = either (error . show) id (renderAll sealed)
+  let objects = either (error . show) id (renderFixture sealed)
       identities = fmap objectIdentity objects
       failures = renderInvariantFailures sealed objects
       deployment = deploymentName fixture shape
@@ -142,7 +141,7 @@ printRenderSemanticOracle = do
   Text.putStrLn "deployment\tobjects\tidentities\tkinds\tactivations\treconcile_modes\tworkloads\tnetwork_policies\tload_balancers\taccelerator_claims"
   forM_ capabilityFixtures $ \fixture -> forM_ [SingleNode, Distributed 3] $ \shape -> do
     sealed <- either (fail . show) pure (provisionFixture fixture shape)
-    Text.putStrLn (Text.intercalate "\t" (deploymentName fixture shape : semanticFields (either (error . show) id (renderAll sealed))))
+    Text.putStrLn (Text.intercalate "\t" (deploymentName fixture shape : semanticFields (either (error . show) id (renderFixture sealed))))
 
 deploymentName :: CapabilityFixture -> ServiceShape -> Text
 deploymentName fixture shape = fixtureSlug fixture <> "_" <> case shape of
@@ -195,7 +194,7 @@ checkRenderCalculusProjection deployments objects safety properties mutants = do
   tenant <- either (fail . show) pure (trustedTenant "render-manifest-tenant")
   subject <- either (fail . show) pure (trustedSubject tenant "render-manifest-subject")
   membership <- either (fail . show) pure (activeMembership tenant subject)
-  action <- either (fail . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+  action <- either (fail . show) pure $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
     let resources count = ResourceVector 1 (fromIntegral count) 0 0
         artifact = artifactComponent scope "semantic-deployments" (resources deployments) (RecipeId "render-manifest-corpus" 1)
         budget = budgetComponent scope "rendered-objects" (resources objects) (allowance (Bytes (fromIntegral objects)) (Slots 1) (Bytes (fromIntegral objects)))

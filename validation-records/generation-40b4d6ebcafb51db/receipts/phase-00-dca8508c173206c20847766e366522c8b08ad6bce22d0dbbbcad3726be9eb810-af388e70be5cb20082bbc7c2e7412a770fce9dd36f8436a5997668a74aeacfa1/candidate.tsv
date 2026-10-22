@@ -1,0 +1,9 @@
+candidate	phase=0	capability=documentation_suite
+spec-digest	a76c8103f22a1a2510a85cf11e83b0ea1d490b303c006afb6d4ee0d89a5bd797
+record	amoebius-status-reset.v1
+decision	"DL-0013"
+validator-gap	"Legacy closure omitted authenticated source-bound analyzer and reintroduction evidence"
+product-gap	LTD-VAL-001
+status-preimage	ba16a84877d1e7b537ef9b7b712a055b38e08313842ad020e6c7893302051948
+target	0
+

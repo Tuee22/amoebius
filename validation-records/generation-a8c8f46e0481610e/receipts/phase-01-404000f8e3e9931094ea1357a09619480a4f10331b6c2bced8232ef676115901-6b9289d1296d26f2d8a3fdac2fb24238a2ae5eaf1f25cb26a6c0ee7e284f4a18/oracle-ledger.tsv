@@ -1,0 +1,81 @@
+version.case.1	green	ghcup|0.1.50.1|ToolVersionMismatch
+version.case.2	green	ghcup|0.1.50.2|accepted
+version.case.3	green	ghcup|The GHCup Haskell installer, version 0.2.6.2|accepted
+version.case.4	green	ghcup|0.3.0|ToolVersionMismatch
+version.case.5	green	ghc|9.12.3|ToolVersionMismatch
+version.case.6	green	ghc|9.12.4|accepted
+version.case.7	green	ghc|9.12.5|ToolVersionMismatch
+version.case.8	green	ghc|9.13.0|ToolVersionMismatch
+version.case.9	green	ghc|9.12.invalid|ToolVersionMalformed
+version.case.10	green	ghcup||ToolVersionMalformed
+version.case.11	green	ghc|9.12.4 9.10.1|ToolVersionMalformed
+version.case.12	green	ghc|9.12.4.1|ToolVersionMismatch
+version.case.13	green	ghcup|0.2|accepted
+version.case.14	green	ghcup|0.3|ToolVersionMismatch
+version.case.15	green	ghc|v9.12.4|accepted
+version.case.16	green	ghc|18446744073709551625.12.4|ToolVersionMismatch
+version.discovery	green	version case inventory
+versions.verdict	green	accepted
+second.verdict	green	none
+report.versions.verdict	green	accepted
+report.request.positive	green	accepted
+report.request.negative	green	ToolVersionMismatch: ghc
+negative.ReportUnknownArgument	green	toolchain-report: unknown argument --bogus
+report.probe.decode.positive	green	decoded amoebius/3/True
+report.probe.decode.mistyped	green	refused type-error
+report.probe.sim.clean	green	b:2
+report.probe.sim.perturbed	green	a:1
+report.probe.codegen.link-token	green	0a08616d6f65626975731003
+report.probe.bridge.files	green	Amoebius/Toolchain/Probe.purs
+report.provenance.fork-modules	green	17
+probe.decode.positive	green	decoded amoebius/3/True
+probe.decode.mistyped	green	refused type-error
+probe.sim.clean	green	b:2
+probe.sim.perturbed	green	a:1
+fork.modules	green	17
+fork.problems	green	none
+layout.problems	green	none
+upstream.verdict	green	acquired
+probe.codegen.files	green	Proto/Probe.hs,Proto/Probe_Fields.hs
+plan.packages	green	Diff,OneTuple,QuickCheck,StateVar,adjunctions,aeson,aeson-pretty,ansi-terminal,ansi-terminal-types,appar,array,assoc,async,atomic-counter,atomic-write,attoparsec,attoparsec-aeson,base,base-compat,base-orphans,base16,base16-bytestring,base64,base64-bytestring,bifunctors,binary,blaze-builder,byteorder,bytestring,call-stack,case-insensitive,cborg,cborg-json,cereal,character-ps,charset,cmdargs,colour,comonad,containers,contravariant,cookie,cryptohash-md5,cryptohash-sha256,crypton,crypton-asn1-encoding,crypton-asn1-parse,crypton-asn1-types,crypton-connection,crypton-pem,crypton-socks,crypton-x509,crypton-x509-store,crypton-x509-system,crypton-x509-validation,data-default,data-default-class,data-fix,deepseq,dhall,directory,directory-ospath-streaming,distributive,dlist,dotgen,ech-config,either,exceptions,file-io,filepath,free,generic-deriving,ghc-bignum,ghc-boot-th,ghc-heap,ghc-internal,ghc-prim,half,hashable,haskeline,hpke,hsc2hs,http-client,http-client-tls,http-types,indexed-traversable,indexed-traversable-instances,integer-conversion,integer-gmp,integer-logarithms,invariant,io-classes,io-sim,iproute,kan-extensions,lens,lens-family,lens-family-core,megaparsec,microlens,microlens-mtl,mime-types,mlkem,mmorph,mtl,network,network-byte-order,network-uri,nothunks,optparse-applicative,os-string,parallel,parsec,parser-combinators,parsers,pretty,pretty-simple,prettyprinter,prettyprinter-ansi-terminal,primitive,probe-plan,process,profunctors,proto-lens,proto-lens-runtime,psqueues,purescript-bridge,quiet,ram,random,reflection,repline,rts,scientific,semialign,semigroupoids,serialise,splitmix,stm,streaming-commons,strict,tagged,tar,tasty,template-haskell,temporary,terminfo,text,text-iso8601,text-manipulate,text-short,th-abstraction,th-compat,th-lift,th-lift-instances,these,time,time-compat,time-hourglass,tls,transformers,transformers-base,transformers-compat,unix,unix-compat,unix-time,unordered-containers,uuid-types,vector,vector-stream,wherefrom-compat,witherable,zlib
+report.provenance.upstream	green	supernova-0.0.3 2e2f01be19b08128cd8549befcc1da3fea172b1f5b3471845d05ef8dc06dda33
+negative.MissingTool	green	ToolMissing: ghc
+negative.MalformedVersion	green	ToolVersionMalformed: ghcup
+negative.UnsupportedVersion	green	ToolVersionMismatch: ghc
+negative.UnsupportedGhcupVersion	green	ToolVersionMismatch: ghcup
+negative.FailedVersionCommand	green	ToolCommandFailed: /Users/matthewnowak/amoebius/.build/runs/phase-01/clean/suite/failed-ghc; ToolVersionMalformed: ghc
+negative.TrackedResolutionOutput	green	TrackedResolutionOutput: cabal.project.freeze
+negative.TrackedProbeInput	green	TrackedProbeInput: test/probe.dhall
+negative.MutableIdentity	green	MutableIdentity: git:https://github.com/cr-org/supernova#main
+negative.TopLevelVendor	green	TopLevelVendor: vendor/supernova/src/Pulsar.hs
+negative.AbsentTool	green	AbsentTool: absent-tool
+negative.OutOfRangeVersion	green	OutOfRangeVersion: ghc 9.10.1
+negative.NoPlatformAsset	green	NoPlatformAsset: ghc unsupported-unknown
+negative.UpstreamDigestMismatch	green	DigestMismatch: expected=0000000000000000000000000000000000000000000000000000000000000000 observed=2e2f01be19b08128cd8549befcc1da3fea172b1f5b3471845d05ef8dc06dda33
+negative.MissingDependency	green	MissingDependency: amoebius-absent-probe
+report.plan.steps	green	ensure ghc 9.12.4 versioned via ghcup; ensure cabal-install 3.16.1.0 managed via ghcup; ensure proto-lens-protoc 0.9.0.1 managed via cabal-install; ensure protoc 3.21.12 managed via package-manager
+plan.steps	green	ensure ghc 9.12.4 versioned via ghcup; ensure cabal-install 3.16.1.0 managed via ghcup; ensure proto-lens-protoc 0.9.0.1 managed via cabal-install; ensure protoc 3.21.12 managed via package-manager
+child.absent.exit	green	127
+child.absent.stdout	green	
+child.absent.stderr	green	executable not found: amoebius-missing-4391860a
+child.failed-cwd.exit	green	127
+child.failed-cwd.stdout	green	
+child.failed-cwd.stderr	green	spawn error observed
+second.mismatch.ghcup	green	AcquisitionsDisagree: ghcup.version 0.1.50.2 /= 0.2.6.2
+second.mismatch.compiler	green	AcquisitionsDisagree: compiler.version 9.12.4 /= 9.10.1
+second.cabal-version	green	none
+versions.cabal-report-unavailable	green	accepted
+report.cli.unknown.exit	green	2
+report.cli.unknown.stderr	green	toolchain-report: unknown argument --bogus
+report.cli.emit.exit	green	0
+report.cli.run.exit	green	0
+report.cli.run.stdout	green	
+binary.input-contract	green	ok
+binary.nonce-recovered	green	ok
+binary.version-request-refused	green	ok
+binary.native-versions-admitted	green	ok
+report.cli.request	green	ok
+report.cli.label	green	ok
+report.cli.refusal	green	ok
+report.cli.acquisition	green	ok
+report.cli.native	green	ok

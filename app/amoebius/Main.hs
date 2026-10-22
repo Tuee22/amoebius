@@ -1,8 +1,9 @@
 module Main (main) where
 
 import Amoebius.Cli.Formal (runFormalCommand)
+import Amoebius.Cli.Delegate (delegateValidate)
 import Amoebius.Cluster.Bootstrap (runBootstrap)
-import Amoebius.Dsl.Commands (runApply, runCompile, runRenderExamples)
+import Amoebius.Dsl.Commands (runApply, runCompile, runRenderExamples, runAstcheck)
 import Amoebius.Entry.ServeUi (runServeUi)
 import Amoebius.Entry.ControlPlane (runControlPlaneDaemon)
 import Amoebius.Exec.Boundary (mkBoundaryTools, runBoundaryCorpus)
@@ -17,12 +18,8 @@ import Amoebius.Vault.Seal (openUnlockMaterial, sealUnlockMaterialIO)
 import Data.ByteString.Base64 qualified as Base64
 import Data.ByteString.Char8 qualified as StrictByteString
 import Data.ByteString.Lazy qualified as ByteString
-import System.Directory (doesFileExist, findExecutable)
-import System.Environment (getArgs, getExecutablePath, getProgName)
-import System.Exit (ExitCode (..), exitWith)
-import System.FilePath (takeDirectory, (</>))
-import System.IO (hPutStrLn, stderr)
-import System.Posix.Process (executeFile)
+import System.Directory (exeExtension)
+import System.Environment (getArgs, getProgName)
 import Text.Read (readMaybe)
 
 -- | The program image is also the fake @kubectl@ the fake executor spawns: invoked under
@@ -30,7 +27,7 @@ import Text.Read (readMaybe)
 main :: IO ()
 main = do
   name <- getProgName
-  if name == "kubectl" then runFakeKubectl else getArgs >>= dispatch
+  if name `elem` ["kubectl", "kubectl" <> exeExtension] then runFakeKubectl else getArgs >>= dispatch
 
 dispatch :: [String] -> IO ()
 dispatch arguments =
@@ -50,6 +47,7 @@ dispatch arguments =
     "layout-report" : options -> runLayoutReport options
     "render-examples" : options -> runRenderExamples options
     "compile" : options -> runCompile options
+    "astcheck" : options -> runAstcheck options
     "apply" : options -> runApply options
     ["--version"] -> putStrLn "amoebius 0.1.0.0"
     ["dev", "linux-engine-guest-pass", passText, outputRoot]
@@ -78,19 +76,3 @@ runOpenUnlock = do
       encoded = StrictByteString.strip (StrictByteString.drop 1 envelopeWithNewline)
   envelope <- either fail pure (Base64.decode encoded)
   either fail StrictByteString.putStr (openUnlockMaterial password envelope)
-
--- | The product binary owns no verdict. @amoebius validate …@ replaces this
--- process with the verifier executable beside it (or on PATH), forwarding every
--- argument unchanged, so the bootstrap's public spelling and its pin are
--- untouched (gate_runner_doctrine.md section 6).
-delegateValidate :: [String] -> IO ()
-delegateValidate options = do
-  self <- getExecutablePath
-  let sibling = takeDirectory self </> "amoebius-validate"
-  siblingExists <- doesFileExist sibling
-  resolved <- if siblingExists then pure (Just sibling) else findExecutable "amoebius-validate"
-  case resolved of
-    Just verifier -> executeFile verifier False options Nothing
-    Nothing -> do
-      hPutStrLn stderr "amoebius validate: the verifier executable amoebius-validate is neither beside amoebius nor on PATH"
-      exitWith (ExitFailure 2)

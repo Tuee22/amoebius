@@ -36,7 +36,8 @@ module Amoebius.Toolchain.Resolve
   ) where
 
 import Amoebius.Toolchain.Acquire (Acquisition (..), ChildRecord (..), sha256Bytes, spawnChild)
-import Amoebius.Toolchain.Pins (Platform (..), renderPlatform)
+import Amoebius.Toolchain.Versions (Platform (..), renderPlatform, examplePlatform)
+import Amoebius.Toolchain.Probe (probeSourcePaths)
 import Control.Monad (filterM)
 import Data.Aeson (FromJSON (..), eitherDecodeStrict, withObject, (.:))
 import Data.ByteString qualified as ByteString
@@ -45,8 +46,8 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 import Data.Text.IO qualified as TextIO
-import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, listDirectory)
-import System.FilePath (makeRelative, (</>))
+import System.Directory (copyFile, createDirectoryIfMissing, doesDirectoryExist, doesFileExist, findExecutable, listDirectory)
+import System.FilePath (makeRelative, takeExtension, (</>))
 
 -- * Compatibility requirements and elaboration
 
@@ -98,7 +99,7 @@ renderResolveRefusal refusal = case refusal of
   TrackedProbeInput path -> "TrackedProbeInput: " <> Text.pack path
 
 -- | The elaborated plan: every unit the solver selected, sorted, and one digest
--- over them. Two acquisitions of the same pins must elaborate the same plan.
+-- over them. Two observations of the same compatible tools must elaborate the same plan.
 data Plan = Plan
   { planUnits :: [Text]
   , planPackages :: [Text]
@@ -177,17 +178,17 @@ elaborate acquisition root requirements = do
 
 -- | Materialise one executable package beneath the tools directory with the
 -- acquisition's package tool, offline; the user store is a cache, never evidence.
-installTool :: Acquisition -> FilePath -> Text -> Text -> IO (Either ResolveRefusal (FilePath, ChildRecord))
+installTool :: Acquisition -> FilePath -> Text -> Text -> IO (Either ResolveRefusal (FilePath, Maybe ChildRecord))
 installTool acquisition tools package executable = do
   createDirectoryIfMissing True tools
-  (child, _, err) <- spawnChild tools (acquisitionPackageTool acquisition) ["install", "--ignore-project", Text.unpack package, "--installdir=" <> tools, "--install-method=copy", "--overwrite-policy=always", "--offline", "--jobs=1", "-v0", "--with-compiler=" <> acquisitionCompiler acquisition]
+  available <- findExecutable (Text.unpack executable)
   let path = tools </> Text.unpack executable
-  present <- doesFileExist path
-  pure
-    ( if childExit child == 0 && present
-        then Right (path, child)
-        else Left (ToolInstallFailed package (Text.strip (Text.take 200 (Text.pack err))))
-    )
+  case available of
+    Just source -> copyFile source path >> pure (Right (path, Nothing))
+    Nothing -> do
+      (child, _, err) <- spawnChild tools (acquisitionPackageTool acquisition) ["install", "--ignore-project", Text.unpack package, "--installdir=" <> tools, "--install-method=copy", "--overwrite-policy=always", "--offline", "--jobs=1", "-v0", "--with-compiler=" <> acquisitionCompiler acquisition]
+      present <- doesFileExist path
+      pure (if childExit child == 0 && present then Right (path, Just child) else Left (ToolInstallFailed package (Text.strip (Text.take 200 (Text.pack err)))))
 
 -- * Tracked-artefact refusals
 
@@ -211,16 +212,17 @@ refuseTrackedArtefacts paths =
   concat
     [ [TrackedResolutionOutput path | any (`isSuffixOf` path) [".freeze", ".lock", "plan.json", "package-lock.json"] || "dist-newstyle/" `isPrefixOf` path]
         <> [DeveloperHomePath path | "/home/" `isPrefixOf` path || "/Users/" `isPrefixOf` path]
-        <> [TrackedProbeInput path | any (`isSuffixOf` path) [".dhall", ".proto", ".purs"]]
+        <> [TrackedProbeInput path | any (`isSuffixOf` path) [".dhall", ".proto", ".purs"]
+          || (path `elem` probeSourcePaths paths && takeExtension path /= ".hs" && path /= "probe/probe.cabal")]
     | path <- paths
     ]
 
 -- * The pure ensure planner
 
--- | Where a tool comes from: a pinned archive, or another resolved tool. There
+-- | Where a tool comes from: a versioned release, or another resolved tool. There
 -- is no host source kind.
 data SourceKind
-  = Pinned
+  = Versioned
   | Managed
   deriving (Eq, Ord, Show)
 
@@ -237,7 +239,7 @@ data Tool = Tool
 newtype Inventory = Inventory {inventoryTools :: [(Text, [Int])]}
   deriving (Eq, Show)
 
--- | One installable asset in the authenticated provider catalogue.
+-- | One installable asset in the supplied provider catalogue.
 data Asset = Asset
   { assetTool :: Text
   , assetVersion :: [Int]
@@ -270,7 +272,7 @@ renderStep step = case step of
   Ensure tool version kind installer -> "ensure " <> tool <> " " <> renderVersion version <> " " <> renderKind kind <> " via " <> installer
  where
   renderKind kind = case kind of
-    Pinned -> "pinned"
+    Versioned -> "versioned"
     Managed -> "managed"
 
 renderPlanRefusal :: PlanRefusal -> Text
@@ -288,16 +290,14 @@ floorTools =
   , Tool "protoc" [3] [100]
   ]
 
--- | The authenticated provider catalogue for the canonical platform.
+-- | A supplied abstract planner fixture; it never reads or constrains the host.
 probeCatalogue :: Catalogue
-probeCatalogue =
-  Catalogue
-    [ Asset "ghc" [9, 12, 4] (Platform "linux" "x86_64") Pinned "compiler-archive"
-    , Asset "cabal-install" [3, 16, 1, 0] (Platform "linux" "x86_64") Pinned "package-tool-archive"
-    , Asset "proto-lens-protoc" [0, 9, 0, 1] (Platform "linux" "x86_64") Managed "cabal-install"
-    , Asset "protoc" [3, 21, 12] (Platform "linux" "x86_64") Managed "package-manager"
-    , Asset "ghc" [9, 12, 4] (Platform "linux" "aarch64") Pinned "compiler-archive"
-    ]
+probeCatalogue = Catalogue
+  [ Asset "ghc" [9, 12, 4] examplePlatform Versioned "ghcup"
+  , Asset "cabal-install" [3, 16, 1, 0] examplePlatform Managed "ghcup"
+  , Asset "proto-lens-protoc" [0, 9, 0, 1] examplePlatform Managed "cabal-install"
+  , Asset "protoc" [3, 21, 12] examplePlatform Managed "package-manager"
+  ]
 
 inRange :: Tool -> [Int] -> Bool
 inRange tool version = version >= toolMinimum tool && version < toolBelow tool

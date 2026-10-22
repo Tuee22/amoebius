@@ -3,7 +3,10 @@
 module Amoebius.Image.BaseChannel
   ( BaseChannel
   , BaseChannelError (..)
-  , BaseResolution (..)
+  , BaseResolution
+  , resolvedChannel
+  , resolvedDigest
+  , resolvedVia
   , ResolutionSource (..)
   , mkBaseChannel
   , mkBaseResolution
@@ -14,20 +17,26 @@ import Data.Char (isSpace)
 import Data.Text (Text)
 import Data.Text qualified as Text
 
-newtype BaseChannel = BaseChannel {renderBaseChannel :: Text}
+newtype BaseChannel = BaseChannel Text
   deriving stock (Eq, Ord, Show)
+
+renderBaseChannel :: BaseChannel -> Text
+renderBaseChannel (BaseChannel channel) = channel
 
 data ResolutionSource
   = CanonicalRegistry
   | MirrorAfterRateLimit
   deriving stock (Bounded, Enum, Eq, Ord, Show)
 
-data BaseResolution = BaseResolution
-  { resolvedChannel :: BaseChannel
-  , resolvedDigest :: Text
-  , resolvedVia :: ResolutionSource
-  }
+data BaseResolution = BaseResolution BaseChannel Text ResolutionSource
   deriving stock (Eq, Show)
+
+resolvedChannel :: BaseResolution -> BaseChannel
+resolvedChannel (BaseResolution channel _ _) = channel
+resolvedDigest :: BaseResolution -> Text
+resolvedDigest (BaseResolution _ digest _) = digest
+resolvedVia :: BaseResolution -> ResolutionSource
+resolvedVia (BaseResolution _ _ source) = source
 
 data BaseChannelError
   = BaseChannelEmpty

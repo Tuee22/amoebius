@@ -20,6 +20,7 @@ module DslParse
   , parseObject
   , differingPaths
   , sha256Hex
+  , attestedScopeLabel
   , truncateText
   ) where
 
@@ -30,6 +31,8 @@ import Data.Aeson.Key qualified as Key
 import Data.Aeson.KeyMap qualified as KeyMap
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
+import Data.ByteString.Builder qualified as Builder
+import Data.ByteString.Lazy qualified as LazyByteString
 import Data.ByteString.Char8 qualified as Char8
 import Data.Char (intToDigit)
 import Data.Foldable (toList)
@@ -86,6 +89,15 @@ exists = doesFileExist
 
 sha256Hex :: ByteString -> Text
 sha256Hex bytes = Text.pack (concatMap (\byte -> [intToDigit (fromIntegral byte `div` 16), intToDigit (fromIntegral byte `mod` 16)]) (ByteString.unpack (SHA256.hash bytes)))
+
+-- The independent contract uses UTF-8 byte lengths, each framed by an unsigned
+-- 64-bit big-endian length, and retains sixty hex digits after the scope prefix.
+attestedScopeLabel :: Text -> Text -> Text -> Text
+attestedScopeLabel issuer application need = "s-" <> Text.take 60 (sha256Hex framed)
+ where
+  fields = map Encoding.encodeUtf8 ["scope/v1", issuer, application, need]
+  framed = LazyByteString.toStrict (Builder.toLazyByteString (foldMap
+    (\bytes -> Builder.word64BE (fromIntegral (ByteString.length bytes)) <> Builder.byteString bytes) fields))
 
 -- | One array of the manifest, as the bytes the executor received.
 type Payload = ByteString

@@ -165,7 +165,7 @@ orthogonal to the foreclosure layer above.
 must return their specific refusal tags and produce no pointer mutation; the Runtime witness must produce the
 only Prod advance. Even successful live wiring would be tested, never proven; Phase 7 owns only the pure
 test-workflow/evidence algebra, while Phase 90 owns later live topology derivation and execution after the
-DSL barrier (Phase 4).
+[DSL barrier](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md) (`DSL_BARRIER`; [DL-0028](../decision_log.md#dl-0028--hardware-boundaries-follow-the-dsl-barrier-role)).
 
 ### 3.43 An unmonitored workflow or extension (or an unauthenticated monitoring surface)
 

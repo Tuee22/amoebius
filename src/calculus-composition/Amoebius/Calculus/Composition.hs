@@ -1,3 +1,4 @@
+{-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Index-preserving composition over the five core calculi.
@@ -90,6 +91,7 @@ calculusTag calculus = case calculus of
 
 -- | One indexed declaration component.  The payload types come from the five owning
 -- calculi; this module combines their values without inventing replacement vocabulary.
+type role Component nominal
 data Component scope
   = ArtifactComponent Text ResourceVector RecipeId
   | BudgetComponent Text ResourceVector Allowance
@@ -99,19 +101,19 @@ data Component scope
   deriving stock (Eq, Show)
 
 artifactComponent :: RequestScope scope -> Text -> ResourceVector -> RecipeId -> Component scope
-artifactComponent _scope = ArtifactComponent
+artifactComponent scope name resources recipe = scope `seq` ArtifactComponent name resources recipe
 
 budgetComponent :: RequestScope scope -> Text -> ResourceVector -> Allowance -> Component scope
-budgetComponent _scope = BudgetComponent
+budgetComponent scope name resources granted = scope `seq` BudgetComponent name resources granted
 
 liftComponent :: RequestScope scope -> Text -> ResourceVector -> Layer -> Component scope
-liftComponent _scope = LiftComponent
+liftComponent scope name resources layer = scope `seq` LiftComponent name resources layer
 
 workflowComponent :: RequestScope scope -> Text -> ResourceVector -> Ledger -> Component scope
-workflowComponent _scope = WorkflowComponent
+workflowComponent scope name resources ledger = scope `seq` WorkflowComponent name resources ledger
 
 evidenceComponent :: RequestScope scope -> Text -> ResourceVector -> Register -> Component scope
-evidenceComponent _scope = EvidenceComponent
+evidenceComponent scope name resources register = scope `seq` EvidenceComponent name resources register
 
 componentCalculus :: Component scope -> Calculus
 componentCalculus component = case component of
@@ -196,11 +198,12 @@ renameComponent name component = case component of
 
 -- | An ordered composition at one request scope.  The constructor is private, so callers
 -- cannot retag a component or insert an unindexed value into the sequence.
+type role Composition nominal
 newtype Composition scope = Composition [Component scope]
   deriving stock (Eq, Show)
 
 emptyComposition :: RequestScope scope -> Composition scope
-emptyComposition _scope = Composition []
+emptyComposition scope = scope `seq` Composition []
 
 singleton :: Component scope -> Composition scope
 singleton component = Composition [component]

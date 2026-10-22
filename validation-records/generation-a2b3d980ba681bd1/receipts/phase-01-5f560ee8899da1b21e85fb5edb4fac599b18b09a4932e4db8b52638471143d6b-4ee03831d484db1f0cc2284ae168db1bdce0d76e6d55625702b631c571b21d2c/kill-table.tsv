@@ -1,0 +1,43 @@
+Amoebius.Toolchain.Versions	src/Amoebius/Toolchain/Versions.hs:17	constant-flip	c52a22bc3077->bed229e36ce2	killed@layout.problems,report.provenance.layout
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:46	constant-flip	9248cceb02c6->3716560cd167	killed@layout.problems,upstream.verdict,report.provenance.layout
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:80	constant-flip	9f80e1b1d1a0->12469cc03e03	killed@report.probe.decode.positive,layout.problems,report.provenance.layout
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:72	constant-flip	c461ea5726ef->756a211e22e9	killed@layout.problems,plan.packages,report.provenance.layout
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:78	constant-flip	9dd4a3d71bcd->22c7320dfcea	survived
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:32	constant-flip	c58ce2061f65->dfa05856f574	killed@layout.problems,report.provenance.layout,report.cli.run.exit
+Amoebius.Toolchain.Versions	src/Amoebius/Toolchain/Versions.hs:21	list-truncation	c52a22bc3077->31ecbde30597	stillborn:src/Amoebius/Toolchain/Versions.hs:21:85: error: [GHC-83865]
+    • Expecting one
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:63	constant-flip	9248cceb02c6->1435cd2ec60d	killed@layout.problems,report.provenance.layout
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:114	branch-swap	9f80e1b1d1a0->81877e4b4cd6	killed@layout.problems,report.probe.source.findings,report.provenance.layout
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:78	constant-flip	c461ea5726ef->bf1f06802180	killed@layout.problems,plan.packages,report.provenance.layout
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:82	constant-flip	9dd4a3d71bcd->4c1a1f69e1b5	survived
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:33	constant-flip	c58ce2061f65->20a207133773	killed@layout.problems,report.provenance.layout,report.cli.run.exit
+Amoebius.Toolchain.Versions	src/Amoebius/Toolchain/Versions.hs:24	list-truncation	c52a22bc3077->c623e3fd245b	killed@version.case.2,version.case.3,version.case.13
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:86	constant-flip	9248cceb02c6->3811138511f6	killed@layout.problems,report.provenance.layout
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:129	constant-flip	9f80e1b1d1a0->5988a049f2be	killed@layout.problems,report.provenance.layout
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:98	constant-flip	c461ea5726ef->32efe072fc40	killed@layout.problems,report.provenance.layout
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:107	constant-flip	9dd4a3d71bcd->6f54bdbf0d06	killed@layout.problems,report.provenance.layout,vendor-source.top-level-vendor.negative
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:37	constant-flip	c58ce2061f65->8916aecd2eed	killed@negative.ReportUnknownArgument,layout.problems,report.provenance.layout
+Amoebius.Toolchain.Versions	src/Amoebius/Toolchain/Versions.hs:25	list-truncation	c52a22bc3077->d26573677aaf	killed@version.case.6,version.case.15,versions.verdict
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:88	constant-flip	9248cceb02c6->eb043a6f4ff1	killed@layout.problems,report.provenance.layout,versions.cabal-report-unavailable
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:177	constant-flip	9f80e1b1d1a0->e8a76213d658	killed@layout.problems,report.provenance.layout
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:174	constant-flip	c461ea5726ef->6ed66a2dfd54	killed@layout.problems,negative.MissingDependency,report.provenance.layout
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:108	constant-flip	9dd4a3d71bcd->4b9f8576561e	killed@layout.problems,report.provenance.layout,vendor-source.tracked-patch-program.negative
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:44	constant-flip	c58ce2061f65->ddf9cd9ee51e	killed@layout.problems,report.provenance.layout,report.cli.request
+Amoebius.Toolchain.Versions	src/Amoebius/Toolchain/Versions.hs:33	constant-flip	c52a22bc3077->2476e201173d	killed@version.case.13,version.case.14,layout.problems
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:89	list-truncation	9248cceb02c6->35355b86c85d	killed@layout.problems,negative.UnsupportedVersion,report.provenance.layout
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:192	constant-flip	9f80e1b1d1a0->443cf75073c0	killed@probe.decode.positive,layout.problems,report.provenance.layout
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:215	constant-flip	c461ea5726ef->64f62de12567	killed@layout.problems,negative.TrackedProbeInput,report.provenance.layout
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:136	constant-flip	9dd4a3d71bcd->cc886ae82323	killed@layout.problems,report.provenance.layout,vendor-source.tracked-patch-program.negative
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:62	constant-flip	c58ce2061f65->035155122094	killed@report.request.positive,report.request.negative,layout.problems
+Amoebius.Toolchain.Versions	src/Amoebius/Toolchain/Versions.hs:42	boundary-shift	c52a22bc3077->f383020c81af	killed@version.case.14,layout.problems,report.provenance.layout
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:91	constant-flip	9248cceb02c6->6af62eb1c2ff	killed@layout.problems,report.provenance.layout
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:248	constant-flip	9f80e1b1d1a0->d817e9938ccd	killed@report.probe.codegen.link-token,layout.problems,report.provenance.layout
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:256	list-truncation	c461ea5726ef->084f3a34fa08	stillborn:src/Amoebius/Toolchain/Resolve.hs:256:18: error: [GHC-83865]
+    • Expecting one
+Amoebius.Toolchain.Provenance	src/Amoebius/Toolchain/Provenance.hs:206	constant-flip	9dd4a3d71bcd->d1dfe58633be	killed@layout.problems,report.provenance.layout
+Amoebius.Toolchain.Report	src/Amoebius/Toolchain/Report.hs:65	constant-flip	c58ce2061f65->a8908302f8c7	killed@report.request.positive,layout.problems,report.provenance.layout
+Amoebius.Toolchain.Versions	src/Amoebius/Toolchain/Versions.hs:48	constant-flip	c52a22bc3077->73a5c36c8d9d	killed@report.request.negative,layout.problems,report.provenance.layout
+Amoebius.Toolchain.Acquire	src/Amoebius/Toolchain/Acquire.hs:92	list-truncation	9248cceb02c6->8640d19c3b58	killed@layout.problems,report.provenance.layout
+Amoebius.Toolchain.Probe	src/Amoebius/Toolchain/Probe.hs:250	constant-flip	9f80e1b1d1a0->a1c7f2a8348d	killed@layout.problems,report.provenance.layout
+Amoebius.Toolchain.Resolve	src/Amoebius/Toolchain/Resolve.hs:272	constant-flip	c461ea5726ef->2e7ce1c12a31	killed@layout.problems,report.provenance.layout,report.plan.steps
+summary	killed=36	viable=38	stillborn=2

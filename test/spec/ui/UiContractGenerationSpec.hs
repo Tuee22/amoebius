@@ -2,6 +2,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition
@@ -62,7 +63,7 @@ checkCalculus = do
   tenant <- requireRight "calculus tenant" (CalculusScope.trustedTenant "ui-contract-calculus-tenant")
   subject <- requireRight "calculus subject" (CalculusScope.trustedSubject tenant "ui-contract-calculus-subject")
   membership <- requireRight "calculus membership" (CalculusScope.activeMembership tenant subject)
-  action <- requireRight "calculus request scope" $ CalculusScope.withRequestScope tenant subject membership $ \scope -> do
+  action <- requireRight "calculus request scope" $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
     let resources count = ResourceVector 1 (fromIntegral (count :: Int)) 0 0
         counts = [3, 1, 22, 2, 3] :: [Int]
         composition = append

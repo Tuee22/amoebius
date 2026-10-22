@@ -74,7 +74,7 @@ foreign-owner and foreign-tenant handles yield the same public denial and cannot
 `ui-projection-runtime-live` Haskell component suite can supply supporting observations only; the sole acceptance command is `pb
 validate phase 70`. Split if work adds a browser interaction, release transition, ML adapter, another
 substrate, HA fault, or a second independently useful claim.
-**Substrate:** `linux-cpu` — future live cluster observation only after the DSL barrier (Phase 4) and every predecessor gate pass.
+**Substrate:** `linux-cpu` — future live cluster observation only after the [DSL barrier](phase_09_dsl_barrier.md) (`DSL_BARRIER`) and every predecessor gate pass.
 **Lane:** `linux-cpu/amd64`.
 **Register:** 3 — live Pulsar/provider projection and independent readback; NOT VALIDATED.
 

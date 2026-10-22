@@ -8,6 +8,8 @@
 module DslTables
   ( sentinel
   , Params (..)
+  , HostP (..)
+  , nodeNames
   , Shape (..)
   , Arm (..)
   , NeedP (..)
@@ -78,6 +80,14 @@ data NeedP = NeedP
 
 -- | What the authored names, the needs and their shapes, the replica count, the nodes, and
 -- what each node holds are in a run, and the node the oracle states each workload lands on.
+data HostP = HostP
+  { hostPName :: Text
+  , hostPSubstrate :: Text
+  , hostPArchitecture :: Text
+  , hostPLanes :: [Text]
+  , hostPTaints :: [Text]
+  }
+
 data Params = Params
   { paramApp :: Text
   , paramNeeds :: [NeedP]
@@ -85,11 +95,12 @@ data Params = Params
   , paramNodes :: Natural
   , paramHost :: (Natural, Natural, Natural, Natural)
   , paramNodeOf :: Text -> Text
+  , paramRke2 :: [HostP]
   }
 
 -- | One kind node on a host of sixteen processors: every workload lands on the one node.
 baselineParams :: Params
-baselineParams = Params ("notes-" <> sentinel) [NeedP ObjectStoreArm ("assets-" <> sentinel) Single] 1 1 (16, 64, 500, 110) (const "kind-host-1")
+baselineParams = Params ("notes-" <> sentinel) [NeedP ObjectStoreArm ("assets-" <> sentinel) Single] 1 1 (16, 64, 500, 110) (const "kind-host-1") []
 
 -- | The first need's label, for the examples that author exactly one.
 paramNeed :: Params -> Text
@@ -148,7 +159,7 @@ bootstrapOf arm = case arm of
 
 -- | Every object a run renders, in no particular order.
 expectedObjects :: Params -> [Expected]
-expectedObjects params = app <> global <> concatMap provider (paramNeeds params)
+expectedObjects params = app <> global <> concatMap provider (paramNeeds params) <> [Expected ("node/" <> hostPName host) (Just "Node") (hostPName host) Nothing "Immediate" "ServerSideApply" "deployment-global" | host <- paramRke2 params]
  where
   name = paramApp params
   app =
@@ -234,17 +245,23 @@ supplyCommas params = let (cpu, memory, ephemeral, pods) = paramHost params; n =
 -- replicas, nodes, and what a node holds.
 expectedDecoded :: Params -> [Text]
 expectedDecoded params =
-  [ tab "cluster.0.name" "kind-a"
-  , tab "cluster.0.topology" "KindTopology"
-  , tab "cluster.0.topology.host" "kind-host"
-  , tab "cluster.0.topology.replicas" (natText (paramNodes params))
-  , tab "cluster.0.host.0.name" "kind-host"
-  , tab "cluster.0.host.0.cpu" (natText cpu)
-  , tab "cluster.0.host.0.memory" (natText memory)
-  , tab "cluster.0.host.0.ephemeral" (natText ephemeral)
-  , tab "cluster.0.host.0.pods" (natText pods)
-  , tab "app.0.name" (paramApp params)
-  ]
+  [tab "cluster.0.name" (if null (paramRke2 params) then "kind-a" else "rke2-a")]
+    <> topology
+    <> concat
+      [ [ tab (base <> ".name") (hostPName host)
+        , tab (base <> ".cpu") (natText cpu)
+        , tab (base <> ".memory") (natText memory)
+        , tab (base <> ".ephemeral") (natText ephemeral)
+        , tab (base <> ".pods") (natText pods)
+        , tab (base <> ".substrate") (hostPSubstrate host)
+        , tab (base <> ".architecture") (hostPArchitecture host)
+        , tab (base <> ".lanes") (commas (hostPLanes host))
+        , tab (base <> ".taints") (commas (hostPTaints host))
+        ]
+      | (index, host) <- zip [0 :: Int ..] hosts
+      , let base = "cluster.0.host." <> Text.pack (show index)
+      ]
+    <> [tab "app.0.name" (paramApp params)]
     <> concat
       [ [ tab ("app.0.need." <> index <> ".capability") (armName (needArm need))
         , tab ("app.0.need." <> index <> ".name") (needLabel need)
@@ -268,15 +285,33 @@ expectedDecoded params =
     <> [tab "deployment.0.distribution.replicas" (natText (paramReplicas params))]
  where
   (cpu, memory, ephemeral, pods) = paramHost params
+  hosts = if null (paramRke2 params) then [HostP "kind-host" "linux-cpu" "amd64" ["linux-cpu/amd64"] []] else paramRke2 params
+  topology = if null (paramRke2 params)
+    then [tab "cluster.0.topology" "KindTopology", tab "cluster.0.topology.host" "kind-host", tab "cluster.0.topology.replicas" (natText (paramNodes params))]
+    else [tab "cluster.0.topology" "Rke2Topology", tab "cluster.0.topology.servers" (commas (map hostPName (take 3 hosts))), tab "cluster.0.topology.agents" (commas (map hostPName (drop 3 hosts)))]
 
 -- | The lowered dump: the topology, the bound application, the bound services, and the supply.
 expectedLowered :: Params -> [Text]
 expectedLowered params =
-  [ tab "topology.cluster" "kind-a"
-  , tab "topology.engine" "KindEngine"
+  [ tab "topology.cluster" (if null (paramRke2 params) then "kind-a" else "rke2-a")
+  , tab "topology.engine" (if null (paramRke2 params) then "KindEngine" else "Rke2Engine")
   , tab "topology.nodes" (commas nodes)
   ]
-    <> concat [[tab ("topology.node." <> node <> ".host") "kind-host", tab ("topology.node." <> node <> ".allocatable") (hostCommas params), tab ("topology.node." <> node <> ".taints") ""] | node <- nodes]
+    <> concat
+      [ [ tab (base <> ".host") (if null (paramRke2 params) then "kind-host" else node)
+        , tab (base <> ".allocatable") (hostCommas params)
+        , tab (base <> ".taints") (commas taints)
+        , tab (base <> ".substrate") (hostPSubstrate host)
+        , tab (base <> ".architecture") (hostPArchitecture host)
+        , tab (base <> ".lanes") (commas (hostPLanes host))
+        , tab (base <> ".role") role
+        ]
+      | (index, node) <- zip [0 :: Int ..] nodes
+      , let base = "topology.node." <> node
+      , let host = if null (paramRke2 params) then HostP "kind-host" "linux-cpu" "amd64" ["linux-cpu/amd64"] [] else paramRke2 params !! index
+      , let role = if null (paramRke2 params) then "KindWorker" else if index < 3 then "Rke2Server" else "Rke2Agent"
+      , let taints = (if role == "Rke2Server" then ["node-role.kubernetes.io/control-plane"] else []) <> hostPTaints host
+      ]
     <> [ tab "bound.app" app
        , tab ("bound.app." <> app <> ".unit") ("app/" <> app)
        , tab ("bound.app." <> app <> ".replicas") (natText (paramReplicas params))
@@ -293,7 +328,7 @@ expectedLowered params =
        ]
  where
   app = paramApp params
-  nodes = ["kind-host-" <> natText ordinal | ordinal <- [1 .. paramNodes params]]
+  nodes = nodeNames params
   units = unitsOf params
   serviceRows need =
     let label = needLabel need
@@ -350,7 +385,7 @@ expectedPlan params =
 
 -- | The activation of every object, keyed by identity in the order identities sort.
 expectedRenderActivations :: Params -> [Text]
-expectedRenderActivations params = [tab ("provision.render." <> expectedIdentity item) (expectedActivation item) | item <- sortedByIdentity (expectedObjects params), expectedKind item /= Just "PersistentVolumeClaim"]
+expectedRenderActivations params = [tab ("provision.render." <> expectedIdentity item) (expectedActivation item) | item <- sortedByIdentity (expectedObjects params), expectedKind item /= Just "PersistentVolumeClaim", expectedKind item /= Just "Node"]
  where
   sortedByIdentity items = case items of
     [] -> []
@@ -363,8 +398,13 @@ expectedPlacementRow params = tab "provision.placement" (commas ["FixedPlacement
   (cpu, _, _, _) = paramHost params
 
 -- | The nodes the placement ranges over, in the order the topology names them.
+nodeNames :: Params -> [Text]
+nodeNames params = if null (paramRke2 params)
+  then ["kind-host-" <> natText ordinal | ordinal <- [1 .. paramNodes params]]
+  else map hostPName (paramRke2 params)
+
 expectedNodesRow :: Params -> Text
-expectedNodesRow params = tab "provision.nodes" (commas ["kind-host-" <> natText ordinal | ordinal <- [1 .. paramNodes params]])
+expectedNodesRow params = tab "provision.nodes" (commas (nodeNames params))
 
 -- | What was provisioned for each service, in the order the services' names sort.
 expectedServiceRow :: Params -> Text
@@ -463,7 +503,7 @@ specGrid =
   , ["need.observability", "ok"]
   , ["need.registry", "ok"]
   , ["need.edge", "ok"]
-  , ["need.inferenceengine", "refused:UnsupportedArm"]
+  , ["need.inferenceengine", "ok"]
   , ["workload.exact", "ok"]
   , ["workload.over-cpu", "refused:RequestsAboveLimits"]
   , ["workload.over-memory", "refused:RequestsAboveLimits"]
@@ -512,7 +552,7 @@ decodeRawGrid =
   , ("invalid-host-name", "refused:InvalidName")
   , ("invalid-app-name", "refused:InvalidName")
   , ("invalid-need-name", "refused:InvalidName")
-  , ("inference-engine-need", "refused:UnsupportedArm")
+  , ("inference-engine-need", "ok")
   , ("duplicate-need", "refused:DuplicateNeed")
   , ("empty-bindings", "refused:EmptyBindings")
   , ("duplicate-binding", "refused:DuplicateBinding")
@@ -613,6 +653,9 @@ stageFiles =
   [ ("freeze", "frozen.dhall")
   , ("decode", "decoded.dump")
   , ("lower", "lowered.dump")
+  , ("recipe", "image-recipe.tsv")
+  , ("bake", "bake-catalog.tsv")
+  , ("build-argv", "image-build-arguments.tsv")
   , ("plan", "plan.dump")
   , ("provision", "provisioned.dump")
   , ("chain", "manifest.json")
@@ -626,10 +669,11 @@ refusalStageFiles stage = case stage of
   "freeze" -> []
   "decode" -> ["frozen.dhall"]
   "lower" -> ["frozen.dhall", "decoded.dump"]
-  "plan" -> ["frozen.dhall", "decoded.dump", "lowered.dump"]
-  "provision" -> ["frozen.dhall", "decoded.dump", "lowered.dump", "plan.dump"]
-  "chain" -> ["frozen.dhall", "decoded.dump", "lowered.dump", "plan.dump", "provisioned.dump"]
-  _ -> ["frozen.dhall", "decoded.dump", "lowered.dump", "plan.dump", "provisioned.dump", "manifest.json", "chain.dump"]
+  "recipe" -> ["frozen.dhall", "decoded.dump", "lowered.dump"]
+  "plan" -> ["frozen.dhall", "decoded.dump", "lowered.dump", "image-recipe.tsv", "bake-catalog.tsv", "image-build-arguments.tsv", "images"]
+  "provision" -> ["frozen.dhall", "decoded.dump", "lowered.dump", "image-recipe.tsv", "bake-catalog.tsv", "image-build-arguments.tsv", "images", "plan.dump", "target-model.tsv"]
+  "chain" -> ["frozen.dhall", "decoded.dump", "lowered.dump", "image-recipe.tsv", "bake-catalog.tsv", "image-build-arguments.tsv", "images", "plan.dump", "provisioned.dump"]
+  _ -> ["frozen.dhall", "decoded.dump", "lowered.dump", "image-recipe.tsv", "bake-catalog.tsv", "image-build-arguments.tsv", "images", "plan.dump", "provisioned.dump", "manifest.json", "chain.dump"]
 
 -- | For each authored leaf: the artefacts that must change when it alone changes, or the
 -- refusal it must draw.
@@ -705,6 +749,7 @@ interpretTable =
   , ["from-managed.result", "ok:3"]
   , ["from-boundary.result", "ok:0"]
   , ["hostile-path.result", "ok:3"]
+  , ["hostile-path.environment-restored", "True"]
   , ["unsupported-kind.result", "UnsupportedStepKind:DockerBuild"]
   , ["single-step.result", "ok:1"]
   , ["apply-full.result", "applied:11"]
@@ -719,9 +764,10 @@ interpretTable =
 -- decoder the product derives it from.
 schemaLiteral :: Text
 schemaLiteral =
-  "{ rootClusters : List { clusterName : Text, clusterTopology : < KindTopology : { kindHost : Text, kindReplicas : Natural } >, clusterHosts : List { hostName : Text, hostCpu : Natural, hostMemory : Natural, hostEphemeral : Natural, hostPods : Natural } }"
+  "{ rootClusters : List { clusterName : Text, clusterTopology : < KindTopology : { kindHost : Text, kindReplicas : Natural } | Rke2Topology : { rke2Servers : < Single : Text | Three : { server1 : Text, server2 : Text, server3 : Text } | Five : { serverA : Text, serverB : Text, serverC : Text, serverD : Text, serverE : Text } >, rke2Agents : List Text } >, clusterHosts : List { hostName : Text, hostCpu : Natural, hostMemory : Natural, hostEphemeral : Natural, hostPods : Natural, hostOs : Text, hostArch : Text, hostGpu : Bool, hostTaints : List Text } }"
     <> ", rootApps : List { appName : Text, needs : List { needCapability : < ObjectStore | SecretStore | MessageBus | Sql | Identity | Observability | Registry | Edge | InferenceEngine >, needName : Text }, workload : { workloadRequests : { podCpu : Natural, podMemory : Natural, podEphemeral : Natural }, workloadLimits : { podCpu : Natural, podMemory : Natural, podEphemeral : Natural }, workloadHeadroom : Optional { podCpu : Natural, podMemory : Natural, podEphemeral : Natural } } }"
-    <> ", rootDeployments : List { deploymentOf : Text, bindings : List { bindingNeed : Text, bindingProvider : Text, bindingShape : < SingleNode | Distributed : Natural > }, distribution : { replicas : Natural } } }"
+    <> ", rootDeployments : List { deploymentOf : Text, bindings : List { bindingNeed : Text, bindingProvider : Text, bindingShape : < SingleNode | Distributed : Natural >, bindingInference : Optional { engineRuntime : < AppleMetal | Cuda | LinuxCpu >, engineFamily : < LlamaCpp | WhisperCpp | Onnx | Vllm | Pytorch | Diffusers | Transformers | Audiveris > } }, distribution : { replicas : Natural } }"
+    <> ", rootExtensions : List { extensionId : Text, extensionParameters : < BuildCacheParameters : { cacheBudgetBytes : Natural, cacheTemporaryBytes : Natural, cacheFirstMissConcurrency : Natural } | CoordinationParameters : Text | InferenceParameters : Natural | TrainingParameters : Text > } }"
 
 -- | The wire messages the repository declares: name, then field names with their numbers.
 wireMessages :: [(Text, [(Text, Integer)])]

@@ -48,9 +48,10 @@ generation 2.
 ## Phase Summary
 
 Phase 50 is `BOOTSTRAP_HANDOFF`. The runner's `ProcessObserver` launches `pb` as the child subject. `pb`
-makes only the platform distinction needed to select its adapter, establishes the pinned toolchain beneath
+makes only the platform distinction needed to select its adapter, establishes the version-compatible native toolchain beneath
 `.build/**`, builds the single source-bound `amoebius`, and replaces itself with that binary while forwarding
-`compile <corpus example>` unchanged. `amoebius validate` delegates by exec to `amoebius-validate`, so a public
+`compile <corpus example>` unchanged. `amoebius validate` launches the separate `amoebius-validate`, waits
+and propagates its exit status with argv, streams and environment unchanged, so a public
 `pb validate` spelling reaches the verifier only once this handoff is validated.
 
 `Amoebius.Host.Handoff` carries the SHA-256 pin of `pb/__main__.py`, the adapter contract, the challenge
@@ -78,17 +79,17 @@ remains phase-local and cannot be supplied by this prose.
 
 | Key | Contract |
 |---|---|
-| `Claim` | Given the Phase 9 receipt digest, `pb` launched by the runner makes only the platform distinction, establishes the contained toolchain offline and serially, builds the exact source-bound `amoebius`, and execs it with `compile <corpus example>` unchanged. The compile output byte-equals the barrier's recorded output for that example, and the SHA-256 of the `pb` bytes equals the pin in `Amoebius.Host.Handoff`. Python never interprets a command, policy, result, or verdict. |
+| `Claim` | Given the Phase 9 receipt digest, `pb` launched by the runner makes only the platform distinction, establishes native GHCup/GHC versions and builds serially, builds the exact source-bound `amoebius`, and execs it with `compile <corpus example>` unchanged. The compile output byte-equals the barrier's recorded output for that example, and the SHA-256 of the `pb` bytes equals the pin in `Amoebius.Host.Handoff`. Python never interprets a command, policy, result, or verdict. |
 | `Subject` | `Amoebius.Host.Handoff` in `src/Amoebius/Host/Handoff.hs` — the pin, the adapter contract, the challenge length, and the resource envelope — the exact `pb/__main__.py` bytes with their single injected `BootstrapAdapter`, and the `validate` exec-delegation in `app/amoebius/Main.hs`. No other tracked `pb/**` path is admitted. |
-| `Command` | Future public spelling is `pb validate phase 50`, which cannot supervise its own handoff. The agent runs `amoebius-validate preview phase 50`; then `amoebius-validate accept --phase 50` records the receipt and applies one phase's status patch. The runner's `ProcessObserver` launches `pb` as the child with `compile <corpus example>`; `pb` forwards it unchanged; `amoebius validate` delegates by exec to `amoebius-validate`. |
+| `Command` | Future public spelling is `pb validate phase 50`, which cannot supervise its own handoff. The agent runs `amoebius-validate preview phase 50`; then `amoebius-validate accept --phase 50` records the receipt and applies one phase's status patch. The runner's `ProcessObserver` launches `pb` as the child with `compile <corpus example>`; `pb` forwards it unchanged; `amoebius validate` launches the separate verifier with unchanged argv, inherited streams/environment and its exit status propagated. |
 | `Oracle` | `test/oracle/host/Main.hs` restates the pin, the expected argv, the process-replacement transcript, the challenge length, the resource envelope, and the corpus example's compile digest from literals; it depends on no `amoebius` library. |
-| `Positive controls` | The clean handoff on the host platform; absent and present verified acquisition; the contained environment; the exact serial offline build; the corpus compile through the handoff; empty, help, version, and unknown argv forwarded unchanged. |
+| `Positive controls` | The clean handoff on the host platform; absent and present version-compatible native tools; the contained environment; the exact serial offline build; the corpus compile through the handoff; empty, help, version, and unknown argv forwarded unchanged. |
 | `Paired negatives` | A changed `pb` byte, an ambient `PATH`, a network read, a rewritten argv, a return instead of exec, a wrong-length challenge, an endless entropy source, and a missing resource limit — each refused with its exact constructor and zero forbidden effects, with the twin accepted. |
 | `Mutants` | Runner-generated from the fixed operator catalogue over `Amoebius.Host.Handoff`, eight per module, at most forty per gate, kill ratio at least 0.6; a mutant that alters the pin, the challenge length, or the envelope is killed by the oracle. No authored mutant seam exists in any subject. |
 | `Discovery` | The package description's stanza module map is compared two-way with the subjects; the observer's inventory of interpreter, child, executable, argv, challenge, replacement, and exit observations is complete; an empty or unclassified observation refuses. |
 | `Challenge` | After the `pb` process starts, the runner obtains exactly 32 bytes through a fixed-count cryptographic operation and publishes them through a run-owned path; only the execed source-bound continuation can acknowledge them. The runner selects the corpus example after the run starts. |
 | `Observer` | `ProcessObserver` over the interpreter, the toolchain children, the build, and the execed binary; executable identity, argv, environment, replacement, exit, peak memory, and termination reason are runner-captured. No Python or child log is trusted. |
-| `Authority/bypass` | Only the authenticated interpreter, the verified `ghcup`, the exact contained GHC and Cabal, an explicit contained `PATH`, offline serial Cabal, fixed-count entropy, and enforced memory and deadline limits are admitted. Ambient `PATH`, network, host package managers, containers, providers, hardware, and recursive supervision are refused; `SUBJECT-NOT-SHIPPED` refuses a subject outside the closure. |
+| `Authority/bypass` | Only the selected native interpreter, version-compatible GHCup/GHC, and available Cabal, an explicit contained `PATH`, offline serial Cabal, fixed-count entropy, and enforced memory and deadline limits are admitted. Ambient `PATH`, network, host package managers, containers, providers, hardware, and recursive supervision are refused; `SUBJECT-NOT-SHIPPED` refuses a subject outside the closure. |
 | `Freshness` | A unique run root; a copied indexed source; a challenge unique after the child starts; the verifier digest equals the seed's; opening and closing source identities are equal. |
 | `Qualification` | The runner-generated mutant matrix over `Amoebius.Host.Handoff` — eight per module, at most forty, kill ratio at least 0.6 — precedes the clean candidate in the same run. |
 | `Cleanroom` | Everything generated lives beneath `.build/runs/phase-50/**` and is absent afterward; marker-scoped cleanup proves zero owned processes on every exit path; the kernel ratchet is recorded. |
@@ -99,7 +100,7 @@ remains phase-local and cannot be supplied by this prose.
 
 ## Resource provision
 
-- **Owner marker:** a run-local value binding the source snapshot, the Phase 9 receipt, the authenticated interpreter, the contained toolchain and build root, the process-tree identity, the resource budget, and the run identifier.
+- **Owner marker:** a run-local value binding the source snapshot, the Phase 9 receipt, the selected native interpreter, the contained toolchain and build root, the process-tree identity, the resource budget, and the run identifier.
 - **Preflight:** fresh read-only checks bind the `pb` bytes to the pin, the interpreter, an absent run root, the writable-path boundary, the memory-limit mechanism, and a monotonic clock before the child starts.
 - **Allowed mutations:** only marker-owned processes and files beneath the one fresh `.build/**` run root needed for contained toolchain establishment, the source-bound build, and observations.
 - **Forbidden mutations:** hardware, container engines, VMs, clusters, registries, networks, credentials, source-adjacent caches, tracked-tree writes, foreign processes, ambient tool selection, and paths outside the marked run root.
@@ -163,7 +164,7 @@ executable without ambient paths or source-adjacent output.
 
 ### Deliverables
 
-- The contained environment baseline as a product value: an explicit `PATH` for the verified `ghcup`, GHC, and Cabal children, with no ambient executable lookup.
+- The contained environment baseline as a product value: an explicit `PATH` for the version-checked GHCup/GHC and available Cabal children, with no ambient executable lookup.
 - Observation of probe-first contained toolchain establishment and of the source-snapshot-bound build and exact binary identity.
 
 ### Validation
@@ -181,7 +182,7 @@ being repaired inside this phase.
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Host/Handoff.hs` and `app/amoebius/Main.hs`
 **Blocked by**: Sprint 50.2
-**Independent Validation**: The execed source-bound binary replaces the Python process with `compile <corpus example>` unchanged, and `amoebius validate` delegates by exec to `amoebius-validate`. A wrong binary, a rewritten argv, a return instead of exec, a swallowed failure, and a parsed verdict are paired negatives refused at their exact observation.
+**Independent Validation**: The execed source-bound binary replaces the Python process with `compile <corpus example>` unchanged. `amoebius validate` launches the separate verifier with unchanged argv and inherited streams/environment, waits and propagates its exit status. A wrong binary, rewritten argv, a return instead of the bootstrap's exec, a swallowed failure and a parsed verdict are paired negatives refused at their exact observation.
 **Oracle**: `test/oracle/host/Main.hs` states the expected argv, replacement, and exit from literals.
 **Legacy IDs**: none
 **Docs to update**: `documents/engineering/testing_spoof_resistance.md`
@@ -195,7 +196,7 @@ a command parser or gate.
 
 - Verbatim handoff of every argv, including empty, help, version, validation, and unknown cases.
 - Exact binary-identity and process-replacement observation in one opaque receipt.
-- The `validate` subcommand delegating by exec to `amoebius-validate`, so `pb` and its pin are untouched.
+- The `validate` subcommand launching `amoebius-validate` with unchanged argv and inherited streams/environment, waiting and propagating its exit status; the bootstrap's exec remains unchanged.
 
 ### Validation
 

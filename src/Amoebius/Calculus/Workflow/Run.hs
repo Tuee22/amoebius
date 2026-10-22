@@ -1,3 +1,4 @@
+{-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The workflow itself: five arms over one vocabulary, indexed by what it still owes.
@@ -64,6 +65,7 @@ newtype Handle = Handle {handleResource :: Resource}
 -- over values: an arm is something that happened, and a workflow is the record of what
 -- happened together with the value it computed. The indices are phantom and carry the
 -- obligation discipline; the ledger carries what an oracle replays.
+type role Workflow nominal nominal representational
 newtype Workflow (before :: [Symbol]) (after :: [Symbol]) a
   = Workflow (Ledger -> (a, Ledger))
 

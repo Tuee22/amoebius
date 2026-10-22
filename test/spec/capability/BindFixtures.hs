@@ -9,6 +9,7 @@ module BindFixtures
   , fixturePath
   ) where
 
+import Amoebius.Vocabulary (InferenceFamily (LlamaCpp))
 import Amoebius.Capability.Types
   ( CapabilityArm (..)
   , CapabilityBinding (CapabilityBinding)
@@ -56,7 +57,7 @@ capabilityFixtures =
   , CapabilityFixture
       "inferenceengine"
       InferenceEngine
-      (InferenceEngineCapabilityNeed (InferenceEngineNeed "inference" "llama-3" (Cuda "cuda-llama-3")))
+      (InferenceEngineCapabilityNeed (InferenceEngineNeed "inference" "llama-3" Cuda LlamaCpp))
   ]
 
 singleBinding :: CapabilityBinding

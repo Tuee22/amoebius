@@ -7,6 +7,7 @@ module ExtensionDeclarationOracle
   ) where
 
 import Amoebius.Capacity.Vector (ResourceVector (..))
+import Amoebius.Vocabulary (quantityValue)
 import Crypto.Hash.SHA256 qualified as SHA256
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
@@ -66,10 +67,10 @@ oracleDeclarationDigest name rows =
   fields oracleRow =
     [ Encoding.encodeUtf8 (oracleCalculus oracleRow)
     , Encoding.encodeUtf8 (oracleComponent oracleRow)
-    , decimalBytes (resourceCpu resources)
-    , decimalBytes (resourceMemory resources)
-    , decimalBytes (resourceEphemeralStorage resources)
-    , decimalBytes (resourcePodSlots resources)
+    , decimalBytes (quantityValue (resourceCpu resources))
+    , decimalBytes (quantityValue (resourceMemory resources))
+    , decimalBytes (quantityValue (resourceEphemeralStorage resources))
+    , decimalBytes (quantityValue (resourcePodSlots resources))
     ] <> fmap Encoding.encodeUtf8 (oracleIdentityFields oracleRow)
    where resources = oracleResource oracleRow
 

@@ -65,14 +65,18 @@ governance digest, and the predecessor's product closure.
 ## Toolchain
 
 The [validation-execution doctrine](../documents/engineering/validation_frame_doctrine.md#2-the-bootstrap-boundary)
-owns the finite bootstrap assumption and pin-verified acquisition. Phase 0 states its irreducible trust
-boundary; Phase 1 qualifies reproducibility relative to the seven fixed size-and-digest pins while publisher
-identity and pin origin remain unverified ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)). Neither phase depends on implementing the DSL barrier.
+owns native version admission. GHCup and GHC version checks are sufficient: no compiler/installer byte pin,
+archive/signature set, prepared bootstrap directory, fixed OS/CPU architecture, physical device, privileged
+host, VM, or container is a prerequisite for the hardware-free DSL gates. Compiler correctness remains an
+explicit trust assumption. Native installed tool paths are read-only inputs; Cabal supplies the build tool.
+Source, dependency-source, receipt, and observation hashes retain their separate custody purpose
+([DL-0025](../documents/decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier)).
 
 Before the handoff gate passes, validation invokes the exact source-bound verifier `amoebius-validate`
-directly, which spawns the product binary `amoebius` as a child for every product command. Compiler-bearing
-development remains serial. Pin-verified, network-independent inputs are required by the phase contract; a
-locally available compiler supports only the diagnostics that actually used it.
+directly; the verifier spawns the shipped `amoebius` binary for product commands. Compiler-bearing work stays
+serial. Pre-DSL substrate, architecture, GPU, capacity, and provider observations are supplied Haskell values
+or fake boundaries. Real host discovery and physical native-lane proof belong to later hardware gates.
+The amended contracts require fresh qualification; existing receipts retain their historical scope.
 
 ## Document index
 
@@ -153,10 +157,10 @@ also inherits the universal postcondition above.
 |---|---|---|---|---|---|---|
 | 0 | Documentation, governance, and the validation seed | none | `none` | — | ✅ Done | [Contract](phase_00_documentation_suite.md) |
 | 1 | Haskell toolchain and probe-source closure | none | `none` | 2 | ✅ Done | [Contract](phase_01_toolchain_spike.md) |
-| 2 | Repository layout conformance and source closure | none | `none` | 2 | ✅ Done | [Contract](phase_02_repository_layout_conformance.md) |
-| 3 | The typed spine from one spec to fake-applied bytes | none | `none` | 2 | ✅ Done | [Contract](phase_03_typed_spine.md) |
-| 4 | Witness-driven manifests, capacity, and storage | none | `none` | 2 | ✅ Done | [Contract](phase_04_witness_manifests_capacity_storage.md) |
-| 5 | Substrates, lanes, rke2 quorum, and the image recipe | none | `none` | 2 | 🔄 Active — NOT VALIDATED | [Contract](phase_05_substrates_lanes_image_recipe.md) |
+| 2 | Repository layout conformance and source closure | none | `none` | 2 | 🔄 Active — NOT VALIDATED | [Contract](phase_02_repository_layout_conformance.md) |
+| 3 | The typed spine from one spec to fake-applied bytes | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_03_typed_spine.md) |
+| 4 | Witness-driven manifests, capacity, and storage | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_04_witness_manifests_capacity_storage.md) |
+| 5 | Substrates, lanes, rke2 quorum, and the image recipe | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_05_substrates_lanes_image_recipe.md) |
 | 6 | Extension admission and attested scope | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_06_extension_admission_attested_scope.md) |
 | 7 | Child clusters and obligation-indexed teardown | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_07_child_clusters_obligation_teardown.md) |
 | 8 | UI program language, binding, and plans | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_08_ui_program_language_binding.md) |

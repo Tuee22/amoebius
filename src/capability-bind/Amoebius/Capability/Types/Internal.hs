@@ -28,8 +28,6 @@ module Amoebius.Capability.Types.Internal
   , PriorVolumeProvisionRef (..)
   , PriorRegistryProvisionRef (..)
   , BoundDeployment (..)
-  , ExtensionName (..)
-  , ExtensionDescriptor (..)
   ) where
 
 import Amoebius.Capacity.Execution
@@ -37,10 +35,9 @@ import Amoebius.Capacity.Execution
   , ExecutionTransitionSource
   )
 import Amoebius.Dsl.Error (DecodeError (OutOfDomainArm))
-import Amoebius.Vocabulary (CapabilityArm (..), EngineRuntime (..))
+import Amoebius.Vocabulary (CapabilityArm (..), EngineRuntime (..), InferenceFamily (..))
 import Control.DeepSeq (NFData)
 import Data.Map.Strict (Map)
-import Data.Set (Set)
 import Data.Text (Text)
 import GHC.Generics (Generic)
 import Numeric.Natural (Natural)
@@ -49,6 +46,7 @@ data InferenceEngineNeed = InferenceEngineNeed
   { inferenceResourceName :: Text
   , inferenceProfile :: Text
   , inferenceRuntime :: EngineRuntime
+  , inferenceFamily :: InferenceFamily
   }
   deriving stock (Eq, Generic, Ord, Show)
   deriving anyclass (NFData)
@@ -217,18 +215,6 @@ data BoundDeployment = BoundDeployment
   , boundPriorVolumeRef :: Maybe PriorVolumeProvisionRef
   , boundPriorRegistryRef :: Maybe PriorRegistryProvisionRef
   , boundDeploymentApps :: [BoundApp]
-  }
-  deriving stock (Eq, Generic, Show)
-  deriving anyclass (NFData)
-
-data ExtensionName = InfernixExtension | JitMLExtension
-  deriving stock (Bounded, Enum, Eq, Generic, Ord, Show)
-  deriving anyclass (NFData)
-
-data ExtensionDescriptor = ExtensionDescriptor
-  { extensionName :: ExtensionName
-  , extensionProvides :: Set CapabilityArm
-  , extensionRequires :: Set CapabilityArm
   }
   deriving stock (Eq, Generic, Show)
   deriving anyclass (NFData)

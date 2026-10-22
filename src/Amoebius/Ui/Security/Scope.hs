@@ -1,4 +1,5 @@
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE DataKinds #-}
 
 module Amoebius.Ui.Security.Scope
   ( Tenant
@@ -37,6 +38,7 @@ module Amoebius.Ui.Security.Scope
   ) where
 
 import Amoebius.Ui.Check (CheckedUiProgram, checkedCaseName)
+import Amoebius.Scope.Attested qualified as Authority
 import Data.Char (isAlphaNum)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -59,7 +61,7 @@ data Owner
   | OwnedByGrant Tenant Subject Grant
   deriving stock (Eq, Ord, Show)
 
-data RequestContext = RequestContext Tenant Subject Membership
+data RequestContext = RequestContext Tenant Subject Membership (Authority.Identity 'Authority.Attested)
   deriving stock (Eq, Ord, Show)
 
 data SubjectScope
@@ -106,11 +108,17 @@ activeMembership tenant subject
   | tenant == subjectTenant subject = Right (Membership tenant subject)
   | otherwise = Left MembershipMismatch
 
-trustedRequestContext :: Tenant -> Subject -> Membership -> Either ScopeError RequestContext
-trustedRequestContext tenant subject membership@(Membership membershipTenant membershipSubject)
+trustedRequestContext
+  :: Authority.Identity 'Authority.Attested
+  -> Tenant -> Subject -> Membership -> Either ScopeError RequestContext
+trustedRequestContext identity tenant subject membership@(Membership membershipTenant membershipSubject)
   | tenant /= membershipTenant = Left MembershipMismatch
   | subject /= membershipSubject = Left MembershipMismatch
-  | otherwise = Right (RequestContext tenant subject membership)
+  | Authority.identityTenantText identity /= tenantText tenant = Left MembershipMismatch
+  | Authority.identitySubjectText identity /= subjectText subject = Left MembershipMismatch
+  | otherwise = either (const (Left MembershipMismatch)) Right
+      (Authority.attest (Authority.principalAttestation identity)
+        (\_ -> RequestContext tenant subject membership identity))
 
 subjectOwner :: Tenant -> Subject -> Owner
 subjectOwner = OwnedBySubject
@@ -136,7 +144,7 @@ trustedResourceId value
   | otherwise = Left (InvalidResourceId value)
 
 resolveOwned :: RequestContext -> Owner -> ResourceId -> Either ScopeError SomeScopedHandle
-resolveOwned (RequestContext requestTenant requestSubject _) owner resource = case owner of
+resolveOwned (RequestContext requestTenant requestSubject _ _) owner resource = case owner of
   OwnedBySubject ownerTenant ownerSubject
     | requestTenant /= ownerTenant -> Left TenantMismatch
     | requestSubject /= ownerSubject -> Left OwnerMismatch

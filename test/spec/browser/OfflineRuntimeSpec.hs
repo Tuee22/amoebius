@@ -2,6 +2,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition
@@ -93,7 +94,7 @@ checkCalculus = do
   tenant <- requireRight "calculus tenant" (CalculusScope.trustedTenant "offline-browser-calculus-tenant")
   subject <- requireRight "calculus subject" (CalculusScope.trustedSubject tenant "offline-browser-calculus-subject")
   membership <- requireRight "calculus membership" (CalculusScope.activeMembership tenant subject)
-  action <- requireRight "calculus request scope" $ CalculusScope.withRequestScope tenant subject membership $ \scope -> do
+  action <- requireRight "calculus request scope" $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
     let resources count = ResourceVector 1 (fromIntegral (count :: Int)) 0 0
         counts = [6, 7, 35, 14, 7] :: [Int]
         artifact = artifactComponent scope "production-offline-artifacts" (resources 6) (RecipeId "encrypted-browser-runtime" 6)

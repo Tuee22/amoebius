@@ -429,7 +429,7 @@ completion status, and validation gates are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the environment/promotion values compose with the SSA reconciler landing in
 **Phase 58**; pure test-workflow/evidence algebra is assigned to **Phase 7**, while live test-topology
-execution and its evidence observations are assigned to **Phase 90** after the DSL barrier (Phase 4); the DB-schema-migration
+execution and its evidence observations are assigned to **Phase 90** after the [DSL barrier](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md) (`DSL_BARRIER`; [DL-0028](../decision_log.md#dl-0028--hardware-boundaries-follow-the-dsl-barrier-role)); the DB-schema-migration
 `RolloutPhase` lands in **Phase 71**, while the remaining manifest-change-correctness hardening and the generic
 third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md). This doc states the target shape and links back for status.
 
@@ -468,6 +468,6 @@ third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/
 > Gateway API/Envoy, Keycloak, Pulsar, browser, Kubernetes, CNI, or provider observation is current.
 
 > **Phase-87 target — NOT VALIDATED.** Promotion must eventually require a finite path for every admitted
-> offline record kind. A live-browser contract may only run after the DSL barrier (Phase 4) and must independently
+> offline record kind. A live-browser contract may only run after the [DSL barrier](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md) (`DSL_BARRIER`; [DL-0028](../decision_log.md#dl-0028--hardware-boundaries-follow-the-dsl-barrier-role)) and must independently
 > observe stage, termination, atomic resume, reload, rollback, and incompatible-version refusal. Gateway,
 > Pulsar, provider, Keycloak, Kubernetes, and CNI observations are separate claims.

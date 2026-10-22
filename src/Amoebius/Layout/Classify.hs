@@ -8,6 +8,18 @@ module Amoebius.Layout.Classify
   , LayoutFinding (..)
   , classifyPath
   , classifyPaths
+  , testSourcePaths
+  , testSourceFindings
+  , testSourceExamples
+  , toolSourceExamples
+  , pulumiSourceExamples
+  , RuntimeIdentityInput (..)
+  , runtimeIdentityExamples
+  , runtimeIdentityControls
+  , checkRuntimeComponent
+  , IgnoreContextEdit (..)
+  , ignoreContextExamples
+  , ignoreContextControls
   , checkIgnorePolicy
   , checkRuntimeText
   , renderFinding
@@ -15,9 +27,11 @@ module Amoebius.Layout.Classify
   ) where
 
 import Data.List (group, sort)
+import Data.Char (isSymbol)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import System.FilePath (takeExtension)
+import System.FilePath.Posix qualified as Posix
 
 data PathClass
   = HaskellSource
@@ -92,12 +106,135 @@ classifyPath path
 classifyPaths :: [FilePath] -> ([(FilePath, PathClass)], [LayoutFinding])
 classifyPaths paths =
   ([(path, pathClass) | path <- sorted, Right pathClass <- [classifyPath path]]
-  , [finding | path <- sorted, Left finding <- [classifyPath path]]
-      <> [LayoutFinding "DuplicateTrackedPath" path | (path : _ : _) <- group sorted]
+  , [finding | path <- sorted, not ("test/" `prefix` path), Left finding <- [classifyPath path]]
+      <> testSourceFindings paths
+      <> [LayoutFinding "DuplicateTrackedPath" path | (path : _ : _) <- group sorted, not ("test/" `prefix` path)]
       <> [LayoutFinding "MissingMetadata" path | (path, _) <- metadataPaths, path `notElem` paths]
   )
  where
   sorted = sort paths
+
+-- | The complete authored test inventory, independent of extension or role.
+testSourcePaths :: [FilePath] -> [FilePath]
+testSourcePaths = filter ("test/" `prefix`)
+
+testSourceFindings :: [FilePath] -> [LayoutFinding]
+testSourceFindings paths =
+  [finding | path <- selected, Left finding <- [classifyPath path]]
+    <> [LayoutFinding "DuplicateTrackedPath" path | (path : _ : _) <- group selected]
+    <> [LayoutFinding "TestSourceInventoryEmpty" "test" | null selected]
+ where selected = sort (testSourcePaths paths)
+
+-- | Input examples only; foreign forms are emitted in owned scratch by callers.
+-- The shipped report projects their identities; independent oracles own verdicts.
+testSourceExamples :: [(Text, Text, FilePath, Text)]
+testSourceExamples =
+  [("tracked-test-script", "python", "test/source-control/check.py", "print(True)\n")
+  ,("tracked-test-script", "shell", "test/source-control/check.sh", "exit 0\n")
+  ,("tracked-test-script", "extensionless", "test/source-control/check", "#!/bin/sh\nexit 0\n")
+  ,("tracked-test-table", "json", "test/source-control/cases.json", "{\"expected\":true}\n")
+  ,("tracked-test-table", "yaml", "test/source-control/cases.yaml", "expected: true\n")
+  ,("tracked-test-table", "tsv", "test/source-control/cases.tsv", "case\texpected\ninput\tTrue\n")
+  ,("tracked-expected-output", "golden", "test/golden/output.expected", "accepted\n")
+  ,("tracked-expected-output", "output", "test/source-control/output.out", "accepted\n")
+  ,("tracked-expected-output", "markdown", "test/source-control/output.md", "expected: accepted\n")
+  ,("tracked-patch", "patch", "test/source-control/change.patch", "--- a/Input.hs\n+++ b/Input.hs\n@@ -1 +1 @@\n-old\n+new\n")
+  ,("tracked-patch", "diff", "test/source-control/change.diff", "--- a/Input.hs\n+++ b/Input.hs\n@@ -1 +1 @@\n-old\n+new\n")
+  ,("tracked-mutant-body", "python", "test/variants/altered.py", "accepted = False\n")
+  ,("tracked-mutant-body", "disabled-haskell", "test/variants/altered.hs.disabled", "module Altered where\naccepted = False\n")
+  ,("tracked-mutant-body", "extensionless", "test/variants/altered", "accepted = False\n")]
+
+-- | Tool migrations exercise both the retired root and arbitrary renamed roots.
+-- Verdicts belong to callers' independent oracles, never to these input values.
+toolSourceExamples :: [(Text, Text, FilePath, Text)]
+toolSourceExamples =
+  [("tracked-python-gate", "tool-root", "tools/layout_gate.py", "print(True)\n")
+  ,("tracked-python-gate", "renamed-python", "automation/layout_gate.py", "print(True)\n")
+  ,("renamed-tool-root", "haskell", "automation/LayoutGate.hs", "module LayoutGate where\naccepted = True\n")
+  ,("renamed-tool-root", "extensionless", "automation/layout-gate", "#!/bin/sh\nexit 0\n")
+  ,("renamed-tool-root", "state-name-file", "dist-newstyle", "#!/bin/sh\nexit 0\n")]
+
+-- | Foreign infrastructure inputs are refused even when their root is renamed.
+pulumiSourceExamples :: [(Text, Text, FilePath, Text)]
+pulumiSourceExamples =
+  [("tracked-pulumi-yaml", "original-root", "pulumi/Pulumi.yaml", "resources: {}\n")
+  ,("renamed-pulumi-program", "yaml", "infrastructure/Pulumi.yaml", "resources: {}\n")
+  ,("renamed-pulumi-program", "typescript", "infrastructure/index.ts", "export const accepted = true;\n")
+  ,("renamed-pulumi-program", "python", "infrastructure/__main__.py", "accepted = True\n")]
+
+-- | Counterexample inputs are assembled from an ordinal value; they are not
+-- names used by the product itself. Independent oracles own their verdicts.
+data RuntimeIdentityInput = RuntimeIdentitySource FilePath Text | RuntimeIdentityPackage FilePath Text
+  deriving (Eq, Show)
+
+runtimeIdentityExamples :: [(Text, Text, RuntimeIdentityInput)]
+runtimeIdentityExamples =
+  [("stale-ordinal", variant, RuntimeIdentitySource "src/Amoebius/IdentityInput.hs"
+      ("module IdentityInput where\ndiagnosticName = " <> Text.pack (show label) <> "\n"))
+    | (variant, label) <- [("plain", tag "phase"), ("mixed-case", tag "pHaSe"), ("hyphen", tag "phase-"), ("underscore", tag "phase_"), ("quoted-comment-marker", "{- " <> tag "phase" <> " -}")]]
+  <> [("copied-ordinal", variant, RuntimeIdentitySource path "module IdentityInput where\nidentity = \"runtime\"\n")
+     | (variant, path) <- [("plain", "src/Amoebius/" <> Text.unpack (tag "Phase") <> "Copy.hs"),
+         ("hyphen", "src/Amoebius/" <> Text.unpack (tag "phase-") <> "/Copy.hs"),
+         ("underscore", "app/" <> Text.unpack (tag "phase_") <> "/Main.hs")]]
+  <> [("phase-named-runtime", variant, RuntimeIdentityPackage "amoebius.cabal" (header <> stanza))
+     | (variant, stanza) <-
+       [("executable", "executable " <> tag "phase" <> "-runtime\n  main-is: Main.hs\n  hs-source-dirs: app/amoebius\n  default-language: Haskell2010\n")
+       ,("library", "library " <> tag "phase" <> "-library\n  exposed-modules: Example\n  hs-source-dirs: src\n  default-language: Haskell2010\n")
+       ,("empty-library", "library " <> tag "phase" <> "-empty\n  hs-source-dirs: src\n  buildable: False\n")
+       ,("foreign-library", "foreign-library " <> tag "phase" <> "-foreign\n  type: native-shared\n  hs-source-dirs: src\n  buildable: False\n")
+       ,("benchmark", "benchmark " <> tag "phase" <> "-benchmark\n  type: exitcode-stdio-1.0\n  main-is: Main.hs\n  hs-source-dirs: app/amoebius\n  default-language: Haskell2010\n")
+       ,("conditional", "executable " <> tag "phase" <> "-conditional\n  main-is: Main.hs\n  default-language: Haskell2010\n  if os(windows)\n    hs-source-dirs: test/oracle\n  else\n    hs-source-dirs: app/amoebius\n")]]
+  <> [("phase-named-runtime", "disguised-validation-root", RuntimeIdentityPackage "amoebius.cabal"
+      (header <> "library " <> tag "phase" <> "-disguised\n  hs-source-dirs: test/../src\n  buildable: False\n"))]
+ where
+  tag prefixText = prefixText <> Text.pack (show (42 :: Int))
+  header = "cabal-version: 3.0\nname: runtime-input\nversion: 0.1.0.0\n"
+
+runtimeIdentityControls :: [(Text, RuntimeIdentityInput)]
+runtimeIdentityControls =
+  [("validation-source", RuntimeIdentitySource ("test/oracle/" <> Text.unpack label <> "Contract.hs")
+      ("module Contract where\nvalidatedName = " <> Text.pack (show label) <> "\n"))
+  ,("validation-component", RuntimeIdentityPackage "amoebius.cabal"
+      (header <> "test-suite " <> Text.toLower label <> "-contract\n  type: exitcode-stdio-1.0\n  main-is: Main.hs\n  hs-source-dirs: test/oracle\n  default-language: Haskell2010\n"))
+  ,("malformed-package", RuntimeIdentityPackage "amoebius.cabal" "this is not a package description\n")]
+  <> [("block-comments", RuntimeIdentitySource "src/Amoebius/IdentityComments.hs"
+      ("module IdentityComments where\nquote = '\\''\n{- Outer " <> label <> "\n {- nested " <> Text.toLower label <> " -}\n-}\nidentity = \"runtime\" -- " <> label <> "\n"))]
+ where
+  label = "Phase" <> Text.pack (show (42 :: Int))
+  header = "cabal-version: 3.0\nname: runtime-input\nversion: 0.1.0.0\n"
+
+-- | A component is validation-only only when every declared source root is
+-- validation-owned; disabled and empty runtime components have no exemption.
+checkRuntimeComponent :: FilePath -> Text -> [FilePath] -> [LayoutFinding]
+checkRuntimeComponent packagePath name directories =
+  [LayoutFinding "OrdinalRuntimeIdentity" (packagePath <> ":" <> Text.unpack name)
+    | ordinalToken name, not (not (null directories) && all validationSourcePath directories)]
+
+validationSourcePath :: FilePath -> Bool
+validationSourcePath input = not (Posix.isAbsolute candidate) && ".." `notElem` Posix.splitDirectories candidate
+  && any (\root -> candidate == root || (root <> "/") `prefix` candidate)
+  ["test", "src/gate-spec", "src/validation-kernel", "src/doc-check", "src/plan-decisions", "src/tool-and-mutant-generation", "app/amoebius-validate"]
+ where candidate = Posix.normalise input
+
+-- | Input edits only. The original policy bytes are acquired by the caller.
+data IgnoreContextEdit = OmitIgnorePattern FilePath Text | AppendIgnoreLines FilePath Text
+  deriving (Eq, Show)
+
+ignoreContextExamples :: [(Text, Text, FilePath, Text)]
+ignoreContextExamples =
+  [("retired-generated-root", Text.pack path <> ":" <> root, path, root <> "\n")
+    | path <- [".gitignore", ".dockerignore"], root <- ["ui/", "dhall/", "proto/", "pulumi/", "tools/", "test/golden/"]]
+  <> [("undeclared-state-root", Text.pack path <> ":" <> patternText, path, patternText <> "\n")
+      | (path,patterns) <- [(".gitignore", ["/src/.generated/", "/scratch/"]), (".dockerignore", ["src/.generated", "scratch"])], patternText <- patterns]
+
+ignoreContextControls :: [(Text, IgnoreContextEdit)]
+ignoreContextControls =
+  [("missing-state:" <> Text.pack path, OmitIgnorePattern path patternText)
+    | (path,patternText) <- [(".gitignore", "/.build/"), (".dockerignore", ".build")]]
+  <> [("missing-spill:" <> Text.pack path, OmitIgnorePattern path patternText)
+      | (path,patternText) <- [(".gitignore", "*.o"), (".dockerignore", "**/*.o")]]
+  <> [("hidden-archive", AppendIgnoreLines ".gitignore" "validation-records/\n")]
+  <> [("comments:" <> Text.pack path, AppendIgnoreLines path "\n# tools/ is a comment\n\n") | path <- [".gitignore", ".dockerignore"]]
 
 -- | Policy files may catch tool spill, but cannot hide a retired authored
 -- root or omit a contained-state root. The container context also excludes
@@ -134,7 +271,7 @@ checkRuntimeText :: FilePath -> Text -> [LayoutFinding]
 checkRuntimeText path contents
   | not (productSource path) = []
   | otherwise = [LayoutFinding "OrdinalRuntimeIdentity" (path <> ":" <> show lineNumber)
-                | (lineNumber, line) <- zip [1 :: Int ..] (Text.lines contents)
+                | (lineNumber, line) <- zip [1 :: Int ..] (runtimeSourceLines contents)
                 , let sourceLine = Text.stripStart line
                 , not ("--" `Text.isPrefixOf` sourceLine)
                 , ordinalToken sourceLine]
@@ -142,13 +279,44 @@ checkRuntimeText path contents
   productSource candidate =
     ("src/" `prefix` candidate || "app/" `prefix` candidate)
       && takeExtension candidate == ".hs"
-      && not (any (`prefix` candidate)
-          ["src/gate-spec/", "src/validation-kernel/", "src/doc-check/", "src/plan-decisions/", "src/tool-and-mutant-generation/"])
+      && not (validationSourcePath candidate)
+
+-- Preserve source line numbers and literal contents while excluding nested
+-- block and line comments. Quoted comment-looking text remains observable.
+runtimeSourceLines :: Text -> [Text]
+runtimeSourceLines = Text.lines . Text.pack . scan 0 False . Text.unpack
+ where
+  scan :: Int -> Bool -> String -> String
+  scan _ _ [] = []
+  scan depth quoted input
+    | depth > 0 = case input of
+        '{' : '-' : rest -> ' ' : ' ' : scan (depth + 1) False rest
+        '-' : '}' : rest -> ' ' : ' ' : scan (depth - 1) False rest
+        '\n' : rest -> '\n' : scan depth False rest
+        _ : rest -> ' ' : scan depth False rest
+    | quoted = case input of
+        '\\' : next : rest -> '\\' : next : scan 0 True rest
+        '"' : rest -> '"' : scan 0 False rest
+        first : rest -> first : scan 0 True rest
+    | otherwise = case input of
+        '"' : rest -> '"' : scan 0 True rest
+        '\'' : '\\' : next : rest -> '\'' : '\\' : next : character rest
+        '\'' : value : '\'' : rest -> '\'' : value : '\'' : scan 0 False rest
+        '{' : '-' : rest -> ' ' : ' ' : scan 1 False rest
+        '-' : '-' : rest | commentAfterDashes rest -> map (const ' ') (takeWhile (/= '\n') rest) <> scan 0 False (dropWhile (/= '\n') rest)
+        first : rest -> first : scan 0 False rest
+  character [] = []
+  character ('\\' : next : rest) = '\\' : next : character rest
+  character ('\'' : rest) = '\'' : scan 0 False rest
+  character (first : rest) = first : character rest
+  commentAfterDashes rest = case dropWhile (== '-') rest of
+    [] -> True
+    next : _ -> not (next `elem` ("!#$%&*+./<=>?@\\^|~:" :: String) || isSymbol next)
 
 ordinalToken :: Text -> Bool
-ordinalToken source = any hasOrdinal ["Phase", "phase", "phase-", "phase_", "phase "]
+ordinalToken source = any hasOrdinal ["phase", "phase-", "phase_", "phase "]
  where
-  hasOrdinal needle = any (startsWithDigit . Text.drop (Text.length needle) . snd) (Text.breakOnAll needle source)
+  hasOrdinal needle = any (startsWithDigit . Text.drop (Text.length needle) . snd) (Text.breakOnAll needle (Text.toCaseFold source))
   startsWithDigit value = maybe False (asciiDigit . fst) (Text.uncons value)
 
 prefix :: String -> String -> Bool
@@ -162,18 +330,7 @@ splitPath path = case break (== '/') path of
 -- | Only source basename components are runtime identities. Plan documents and
 -- evidence paths intentionally retain phase ordinals.
 ordinalName :: FilePath -> Bool
-ordinalName path = any hasOrdinal (splitPath path)
- where
-  hasOrdinal component = any (isOrdinalAt component) [0 .. length component - 1]
-  isOrdinalAt component index =
-    let suffix = drop index component
-        after = case suffix of
-          'P' : 'h' : 'a' : 's' : 'e' : rest -> rest
-          'p' : 'h' : 'a' : 's' : 'e' : rest -> rest
-          _ -> ""
-     in case after of
-          first : _ -> asciiDigit first
-          _ -> False
+ordinalName = ordinalToken . Text.pack
 
 -- | The product checks the archive's closed filename shape. The verifier's
 -- separate custody reader checks the phase table, file set, bytes, and receipt

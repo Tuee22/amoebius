@@ -17,7 +17,7 @@ that active inventory to readers.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/decision_log.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -88,13 +88,13 @@ Operator-supplied values are neither generated source nor repository source. The
 runtime input, secret store, or ignored local test-input path. They are never committed merely because the
 runtime language happens to be Dhall, JSON, YAML, or another non-Haskell format.
 
-`GenesisTrust` is one such explicit external input and is the irreducible, non-numbered `BootstrapRoot` beneath
-Phase 0. It records local custody of seven exact prepared archive/signature files, compile-time GHC `9.12.4`,
-absolute reported `ghc` and library-directory paths, and Linux/`x86_64`. It does not authenticate publisher
-identity, actual compiler executable bytes or derivation, the loader, the broader host, or reproducibility. It
-is not a tracked manifest, a generated source file, a numbered-phase provision, or a legacy item Phase 0 can
-close by asking the resulting binary to verify its own compiler. Phase 1 owns those broader acquisition and
-provenance claims; Phase 2 owns compiler-backed semantic source-graph closure.
+`GenesisTrust` is the declared assumption that version-compatible native GHCup and GHC execute correctly.
+Their selected paths and version reports are explicit read-only external inputs; toolchain byte pins,
+archive/signature files, a prepared bootstrap directory, and a fixed OS/CPU architecture are not required.
+Installed native tools may be outside the checkout and are never written by a candidate. Source and receipt
+hashes retain their separate custody role. Phase 1 owns version-admission and retained probe qualification;
+Phase 2 owns compiler-backed source closure
+([DL-0025](../decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier)).
 
 All other files are one of these untracked classes:
 
@@ -115,8 +115,7 @@ A fresh Phase-N candidate ordinarily removes its current `.build/runs/**`, build
 roots. For N greater than zero, it acquires the exact read-only Phase-(N-1) accepted bundle from
 `validation-records/**`; a matching `.build/**` cache is optional and cannot supersede it. That bundle is an
 explicit predecessor input only when its verified postimage and compatibility closure match the candidate's
-opening source ([DL-0015](../decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence)). Phase 0 has one finite exception: it reads the seven exact GenesisTrust
-files beneath `.build/bootstrap-inputs/**`, creates a unique `.build/runs/phase-00/bootstrap-qualification-*`
+opening source ([DL-0015](../decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence)). Phase 0 records compatible native tool versions and paths, creates a unique `.build/runs/phase-00/bootstrap-qualification-*`
 leaf, and requires that exact leaf to be absent after qualification. It does not claim the whole `.build/**`
 tree was initially empty or universally detect prior runs; the DSL barrier (Phase 9) owns that closure. Ambiguous, stale, mutable, or
 implicitly discovered evidence is not a cleanroom input.
@@ -169,6 +168,17 @@ non-Haskell upstream program is resolved lazily into `.build/vendor/**`; it is n
 `test/` contains only Haskell modules: a positive fixture is a typed Haskell value, an oracle is a separately
 authored Haskell predicate or expected value, and a mutant is a Haskell transformation or alternate module.
 Their serialized forms exist only during a run.
+
+The native product build uses the Haskell source-admission driver under `src/probe/**` and the same
+closed GHC-parser checker the product ships. The driver builds a portable compiler transport beneath
+`.build/**` from explicit native tool paths. That transport checks the complete contributed source closure
+before invoking GHC, including incremental builds, so compiler pragmas, plugins or Template Haskell cannot
+run before admission. A compile-time-only check cannot substitute for this ordering. The transport contains
+no independent source judgment and never discovers hardware or dispatches an operator command. The driver,
+checker and generated transport are covered by complete source discovery and the observed build closure.
+No root setup wire, additional authored package or metadata exception is introduced. Generated source and
+all build outputs remain beneath `.build/**`; native installed tools remain version-compatible read-only
+inputs.
 
 ### 2.1 When a unit warrants its own build package
 
@@ -294,12 +304,15 @@ locus and that the clean control still succeeds; a copied bad file is not an ora
 ## 4. Dependency and toolchain resolution
 
 amoebius records compatibility requirements in Haskell or the minimal bootstrap metadata. Each clean run
-resolves current compatible tools and dependencies, verifies the fixed sizes and SHA-256 digests of its pinned
-inputs, and records the result beneath `.build/**`. Phase 1 also compares both pinned `SHA256SUMS` archive
-entries with the independently fixed archive pins; it does not require an operator keyring or claim publisher
-identity from the opaque pinned signature files
-([DL-0017](../decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring)).
-A missing tool is acquired rather than treated as an undeclared host prerequisite.
+resolves compatible dependencies, admits native GHCup/GHC through version checks, and records the result
+beneath `.build/**`. Cabal is an available build tool. Native tool paths may be explicit read-only inputs;
+toolchain archives, fixed sizes, SHA-256 pins, checksum manifests, signatures, and operator keyrings are not
+admission requirements. Source/dependency-source integrity and receipt hashes keep their custody role.
+This replaces the older archive-pin contract of
+[DL-0017](../decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring) under
+[DL-0025](../decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier).
+After the bootstrap handoff is validated, its bounded adapter may establish missing compatible tools; the
+hardware-free DSL gates use installed native tools directly and require no specific hardware.
 
 No tracked file contains a developer-home path, host-specific executable path, resolved archive digest, or
 dependency graph. Standard guest paths are contractual only when the generated guest image owns them.
@@ -330,6 +343,13 @@ bundle refuses. An earlier bundle is never overwritten by a refresh. No bundle i
 semantic oracle. A digest establishes provenance only; it does not establish correctness or change phase
 status ([DL-0015](../decision_log.md#dl-0015--accepted-validation-records-are-tracked-historical-evidence),
 [DL-0016](../decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
+
+The verifier's receipt-bearing `reset` must publish an immutable event in the same closed bundle path
+and seven-file shape. Its reset cause, decision, status preimage, target frontier and actual postimage must
+identify the completed status action. Its evidence must explicitly record that no gate or mutation matrix
+was executed and must supply no passing oracle verdict. Such an event must not qualify as a phase pass,
+predecessor or accepted kernel-count observation. Historical pass bundles and void markers must remain
+unchanged ([DL-0033](../decision_log.md#dl-0033--image-and-bootstrap-source-claims-require-current-qualification)).
 
 A red `replay` appends one immutable void marker at
 `validation-records/generation-<verifier16>/voids/phase-NN-<targetBundle64>-<void64>.tsv` after the failed
@@ -419,6 +439,10 @@ Documentation adoption, a passing legacy command, or the presence of Haskell wra
 evidence. A phase may close only after its old source is absent and its clean-room Haskell materialization is
 separately authored. The documentation gate also confirms that the one reader-facing register still corresponds to
 the compiled inventory. Git history is the archive; no second legacy-register file is admitted.
+
+
+The version-admission and hardware-free boundary amendment is recorded in
+[DL-0027](../decision_log.md#dl-0027--native-tool-inputs-and-portable-fake-process-observations).
 
 ## Related Documents
 

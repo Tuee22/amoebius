@@ -3,6 +3,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition
@@ -24,7 +25,6 @@ import Amoebius.Scope.Index
   , activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import Control.Monad (unless)
 import Data.List (sort)
@@ -77,7 +77,7 @@ observe name build = do
   tenant <- either (die . show) pure (trustedTenant (name <> "-tenant"))
   subject <- either (die . show) pure (trustedSubject tenant (name <> "-subject"))
   membership <- either (die . show) pure (activeMembership tenant subject)
-  nested <- either (die . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+  nested <- either (die . show) pure $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
     declaration <- mapLeft show (build scope)
     let rows = map (oracleRow name) (declarationComponents declaration)
     pure FixtureObservation
@@ -139,7 +139,7 @@ checkSemanticPairs = do
   tenant <- either (die . show) pure (trustedTenant "negative-tenant")
   subject <- either (die . show) pure (trustedSubject tenant "negative-subject")
   membership <- either (die . show) pure (activeMembership tenant subject)
-  result <- either (die . show) pure $ withRequestScope tenant subject membership $ \scope ->
+  result <- either (die . show) pure $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope ->
     let artifact = artifactComponent scope "a" zeroResources (RecipeId "a" 1)
         budget = budgetComponent scope "b" zeroResources (allowance (Bytes 1) (Slots 1) (Bytes 1))
         lift = liftComponent scope "l" zeroResources OnHost

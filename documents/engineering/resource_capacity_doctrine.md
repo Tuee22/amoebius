@@ -89,42 +89,30 @@ illegal and the technique that forecloses them is
 [illegal_state_catalog.md §3.17-§3.21 / §4.6](../illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded); this doc is the normative home of
 the model that catalog names.
 
-The model below begins with the base index owed by [Phase
-4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md), continues through the schema,
-provision, and render band, and ends with later live phases that enact and cross-check it. Phase 4 must
-validate the **base** `Amoebius.Capacity.Types` / `Amoebius.Capacity.Fold` slice: CPU, memory, logical
-pod-ephemeral storage, pod and driver-scoped CSI slots, finite CPU-limit policy, headroom, taint/anti-affinity
-eligibility, and fixed/elastic placement. Direct negatives, legal twins, carried positives, sampled
-properties, and generated production mutants must distinguish the subject at Register 1. This is a bound gate
-contract, not a live-enforcement claim. The same phase owes the storage-geometry folds, and its gate must
-validate the closed storage budget/growth arithmetic, BookKeeper/MinIO physical expansion,
-presentation/allocation rounding, uniform claims, the object inventory,
-service/migration/cache/root/control-plane geometry, backup/restore/pool checks, both Pulsar ceilings, and
-snapshot-bound policy-only scaling; the separately authored storage-geometry oracle replaces the retired
-serialized storage-case and calculus tables, with transient run evidence beneath `.build/runs/**`. Phase 4
-must also validate execution epochs, aggregate scheduler reservations, structural runtime/image accounting,
-physical partition and provider-root arithmetic, accelerator residency against net VRAM, host-only compute
-derivations, and the composed full-vector witness; direct cases must cover the peer graph and build/cache,
-engine-storage, monitoring-volume, and Pulumi-concurrency boundaries. No current ledger is asserted here.
-Post-bind provisioning, live storage mutation, device attachment, observed inventory, and all physical
-enforcement remain **UNVERIFIED** here. Status and gates live only in
+**Specification** ([DL-0032](../decision_log.md#dl-0032--pure-dsl-claims-retain-their-validation-owners)).
+Qualification is owed by [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) for unit-tagged
+vectors, the total three-valued fit table, fixed placement, authored resource envelopes, exact-fit and
+one-short/over-capacity twins, volume identities, and witness-driven claims and manifests through its
+bounded corpus. Its shipped subjects must include `Amoebius.Capacity.Vector`, `Amoebius.Capacity.Fits`,
+`Amoebius.Placement.Witness` and `Amoebius.Storage.Witness`. Linking modules must not establish the full
+engine/environment matrix, elastic growth, physical storage geometry, object inventories, runtime/image
+accounting, provider-root arithmetic or accelerator residency. Those broader folds must remain outside
+the witness claim. Live storage mutation, device attachment, observed inventory and physical enforcement
+remain **UNVERIFIED** until their own qualified observations exist.
+
+**Specification** ([DL-0032](../decision_log.md#dl-0032--pure-dsl-claims-retain-their-validation-owners)).
+Qualification is owed by [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md) for the pure post-bind pipeline in its
+object-store corpus through `planInfrastructure` and `provision`, including the baseline and its named
+refusals. The eighteen-deployment, complete token-replay and full five-calculus projections remain beyond
+that bounded claim. Broader component suites cannot establish their complete gate qualification.
+Provider realization, observed runtime capacity and
+model/runtime correspondence remain **UNVERIFIED**.
+
+The inference-owner specialization is a target beyond those bounded corpus obligations: all family/lane
+cells, identity-complete CUDA/Metal demand, coexistence epochs, and physical device readback need their own
+independent observation. Existing specialization diagnostics do not establish live engine resolution or
+cross-lane weight loading. Status and gates live only in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
-
-The [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md) must validate the pure post-bind consumer
-of those folds. Its `planInfrastructure` paths derive demand internally, distinguish pre-existing from one
-exact creation batch, reject plan/action token replay and promised identities, and admit receipt-bound
-materialization evidence. Its `provision` path accepts all 18 inherited bound deployments, rejects ten exact
-seal-locus failures, preserves the opaque render-source domain/key/owner correspondence and four activation
-stages, and must cover two boundary properties plus ten paired mutants. The 42-unit five-calculus projection
-and 40-row locus ledger must be exact. Provider realization, observed runtime capacity, and model/runtime
-correspondence remain **UNVERIFIED**.
-
-The [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) must validate the
-inference-owner specialization: four target offerings project onto three lanes, all twelve family/lane cells
-must match the authored relation, and the identity-complete CUDA/Metal demand must be checked across every permitted
-coexistence epoch. Eight distinct seal failures, exact-fit twins, the covered property, and five paired mutants
-must distinguish the subject; the opaque accelerator constructor remains hidden. Physical device observation, live engine resolution,
-and cross-lane weight loading remain **UNVERIFIED**.
 
 ---
 

@@ -599,13 +599,15 @@ one object, accounting-model version, and inventory pagination/version completen
 one-unit shortfall or a renderer/live value that differs from the witness refuses the next effect; it is never
 repaired by silently recomputing a smaller demand.
 
-Module ownership is to be explicit: `src/execution-accelerator-folds/Amoebius/Capacity/RuntimeStorage.hs` owns
-the shared structural component-role/layout and node-aggregate fold, owed by [Phase
-4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md); `src/Amoebius/Pulumi/Observed.hs`
-owns Pulumi executor/Job readback normalization, owed by [Phase
-76](../../DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md); and the provider oracle executable owns
-the planned-slot→observed-Pod-UID, SplitRuntime backing, scope/domain/ownership, reservation/observed
-no-double-debit, and alias-control conformance cases.
+**Specification** ([DL-0032](../decision_log.md#dl-0032--pure-dsl-claims-retain-their-validation-owners)).
+The shared structural component-role/layout and node-aggregate fold in
+`src/execution-accelerator-folds/Amoebius/Capacity/RuntimeStorage.hs` must belong to the product closure.
+[Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) must qualify its bounded
+witness corpus; complete runtime-metadata and provider readback claims must remain outside that scope.
+Pulumi executor/Job readback normalization in `src/Amoebius/Pulumi/Observed.hs` is owed by
+[Phase 76](../../DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md). The provider oracle must
+independently judge planned-slot→observed-Pod-UID, SplitRuntime backing, scope/domain/ownership,
+reservation/observed no-double-debit, and alias-control cases.
 
 This doc **does not own** that machinery. The reconciler-with-predicates pattern, the managed-resource
 registry, the totality/soundness/idempotence invariants, and the canonical teardown cascade are owned by

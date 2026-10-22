@@ -4,6 +4,7 @@ module StorageGeometryGate
   ( runStorageGeometryGate
   ) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition
@@ -30,7 +31,6 @@ import Amoebius.Scope.Index
   ( activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import Control.Monad (forM_, unless)
 import Data.Map.Strict qualified as Map
@@ -89,7 +89,7 @@ checkStorageCalculusProjection variants positives properties mutants = do
   tenant <- either (fail . show) pure (trustedTenant "storage-geometry-tenant")
   subject <- either (fail . show) pure (trustedSubject tenant "storage-geometry-subject")
   membership <- either (fail . show) pure (activeMembership tenant subject)
-  action <- either (fail . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+  action <- either (fail . show) pure $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
     let resources count = ResourceVector 1 (fromIntegral count) 0 0
         artifact = artifactComponent scope "storage-negatives" (resources variants) (RecipeId "storage-geometry-corpus" 1)
         budget = budgetComponent scope "storage-twins" (resources variants) (allowance (Bytes (fromIntegral variants)) (Slots 1) (Bytes (fromIntegral variants)))

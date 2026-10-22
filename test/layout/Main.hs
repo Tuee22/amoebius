@@ -2,6 +2,13 @@
 
 -- | Produce layout observations for the independently authored oracle.
 module Main (main) where
+import PackageImportCases (runPackageImportCases)
+import TestSourceCases (runTestSourceCases)
+import SourcePathCases (runSourcePathCases)
+import RuntimeIdentityCases (runRuntimeIdentityCases)
+import IgnoreContextCases (runIgnoreContextCases)
+import SourceGraphCases (runSourceGraphCases)
+import BootstrapSourceCases (runBootstrapSourceCases)
 
 import Amoebius.Layout.Classify
 import Amoebius.Layout.PackageMap
@@ -26,17 +33,35 @@ import Data.Text.IO qualified as TextIO
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import System.Directory (copyFile, createDirectoryIfMissing, doesDirectoryExist, getCurrentDirectory, listDirectory)
 import System.Environment (getArgs)
-import System.Exit (ExitCode (..))
+import System.Exit (ExitCode (..), exitSuccess)
 import System.FilePath (takeDirectory, (</>))
 import System.Process (readProcess)
 
 main :: IO ()
 main = do
   arguments <- getArgs
+  case arguments of
+    ["--bootstrap-source", target] -> runBootstrapSourceCases target >> exitSuccess
+    ["--source-graph", target] -> runSourceGraphCases target >> exitSuccess
+    ["--ignore-context", target] -> runIgnoreContextCases target >> exitSuccess
+    ["--runtime-identity", target] -> runRuntimeIdentityCases target >> exitSuccess
+    ["--pulumi-source", target] -> runSourcePathCases "pulumi-source" pulumiSourceExamples target >> exitSuccess
+    ["--tool-source", target] -> runSourcePathCases "tool-source" toolSourceExamples target >> exitSuccess
+    ["--test-source", target] -> runTestSourceCases target >> exitSuccess
+    ["--package-imports", target] -> runPackageImportCases target >> exitSuccess
+    _ -> pure ()
   let directory = case arguments of
         [path] -> path
         _ -> ".build/runs/layout-suite"
   createDirectoryIfMissing True directory
+  runPackageImportCases directory
+  runTestSourceCases directory
+  runSourcePathCases "tool-source" toolSourceExamples directory
+  runSourcePathCases "pulumi-source" pulumiSourceExamples directory
+  runRuntimeIdentityCases directory
+  runIgnoreContextCases directory
+  runSourceGraphCases directory
+  runBootstrapSourceCases directory
   root <- getCurrentDirectory
   discovered <- concat <$> mapM (walk root) sourceRoots
   let paths = sort (metadata <> filter (`notElem` metadata) discovered)
@@ -64,6 +89,20 @@ main = do
   let graphRoot = directory </> "graph-challenge"
   createDirectoryIfMissing True graphRoot
   createDirectoryIfMissing True (graphRoot </> "other")
+  TextIO.writeFile (graphRoot </> "QuoteControl.hs") (Text.unlines
+    [ "{-# LANGUAGE TemplateHaskell #-}"
+    , "module QuoteControl where"
+    , "callee value = value"
+    , "expression = [| callee () |]"
+    , "name = 'callee"
+    , "nested = [| $(pure [| callee () |]) |]"
+    , "unsupported = [d| local = callee () |]"
+    ])
+  (_, quoteRows) <- sourceGraph graphRoot ["QuoteControl.hs"] Map.empty Map.empty
+  TextIO.writeFile (directory </> "fixture-quotes.tsv") (Text.unlines
+    [row | row <- quoteRows, kind : _ <- [Text.splitOn "\t" row],
+      kind `elem` ["graph-call-site", "graph-reference-site", "graph-dynamic-load", "graph-unscanned"],
+      not ("\tcallee\t" `Text.isInfixOf` row)])
   TextIO.writeFile (graphRoot </> "Duplicate.hs")
     "module Duplicate (value, Item(..)) where\nvalue = ()\ndata Item = Item { itemField :: () }\ndata Hidden = Hidden\n"
   TextIO.writeFile (graphRoot </> "other/Duplicate.hs") "module Duplicate where\nvalue = ()\n"
@@ -166,6 +205,14 @@ main = do
     "module StandaloneProvider (provided) where\nprovided x = x\nhidden x = x\n"
   TextIO.writeFile (graphRoot </> "StandaloneUse.hs")
     "module StandaloneUse where\nimport StandaloneProvider (provided)\nuse = provided ()\nmissing = hidden ()\n"
+  TextIO.writeFile (graphRoot </> "StandaloneFacade.hs")
+    "module StandaloneFacade (Item(..)) where\nimport Duplicate (Item(..))\n"
+  TextIO.writeFile (graphRoot </> "StandaloneSelective.hs")
+    "module StandaloneSelective (Item(Item)) where\nimport Duplicate (Item(..))\n"
+  TextIO.writeFile (graphRoot </> "StandaloneReexport.hs")
+    "module StandaloneReexport where\nimport StandaloneFacade\nconstruct = Item ()\nselector value = itemField value\nhidden = Hidden ()\n"
+  TextIO.writeFile (graphRoot </> "StandaloneSelectiveUse.hs")
+    "module StandaloneSelectiveUse where\nimport StandaloneSelective\nconstruct = Item ()\nselector value = itemField value\n"
   TextIO.writeFile (graphRoot </> "UseJitFuture.hs")
     "module UseJitFuture where\nimport JitML.Codegen.RuntimeOperationsCuda\nvalue = ()\n"
   TextIO.writeFile (graphRoot </> "UseExternalBroad.hs")
@@ -300,6 +347,33 @@ main = do
       (Map.fromList [("UseExternalMember.hs", ["test:consumer"]),
         ("UseExternalWrongMember.hs", ["test:consumer"])]) Map.empty
       (memberCatalog catalog) Map.empty
+  let constructorSources =
+        [ ("ExternalFacade.hs", "module ExternalFacade (Thing(..)) where\nimport Example.Provider (Thing(..))\n")
+        , ("ExternalAbstract.hs", "module ExternalAbstract (Thing) where\nimport Example.Provider (Thing(..))\n")
+        , ("ExternalHidden.hs", "module ExternalHidden (Thing(..)) where\nimport Example.Provider hiding (Thing(..))\n")
+        , ("ExternalNamed.hs", "module ExternalNamed (Thing(Thing)) where\nimport Example.Provider (Thing(Thing))\n")
+        , ("ExternalRelay.hs", "module ExternalRelay (module F) where\nimport ExternalFacade as F\n")
+        , ("ExternalCycleA.hs", "module ExternalCycleA (module B) where\nimport ExternalCycleB as B\n")
+        , ("ExternalCycleB.hs", "module ExternalCycleB (module A) where\nimport ExternalCycleA as A\n")
+        , ("UseExternalFacades.hs", Text.unlines
+            [ "module UseExternalFacades where", "import qualified ExternalFacade as F"
+            , "import qualified ExternalAbstract as A", "import qualified ExternalHidden as H"
+            , "import qualified ExternalNamed as N", "import qualified ExternalRelay as R"
+            , "import qualified ExternalCycleA as C", "good = F.Thing ()"
+            , "abstract = A.Thing ()", "hidden = H.Thing ()", "named = N.Thing ()"
+            , "relayed = R.Thing ()", "cycle = C.Thing ()" ])
+        ]
+      constructorCatalog = packageCatalogWithModuleMembers
+        (Map.singleton ("provider-unit", "Example.Provider", "Thing") (Set.singleton "Thing"))
+        . packageCatalogWithModuleExports
+          (Map.singleton ("provider-unit", "Example.Provider") (Set.singleton "Thing"))
+  mapM_ (\(path, body) -> TextIO.writeFile (graphRoot </> path) body) constructorSources
+  (_, constructorRows) <- case selectedCatalog of
+    Left problem -> pure ([problem], [])
+    Right catalog -> sourceGraphWithPackageCatalog graphRoot (map fst constructorSources)
+      (Map.fromList [(path, ["test:consumer"]) | (path, _) <- constructorSources]) Map.empty
+      (constructorCatalog catalog) Map.empty
+  TextIO.writeFile (directory </> "fixture-constructor-reexports.tsv") (Text.unlines constructorRows)
   (availableMemberFindings, availableMemberRows) <- case unselectedCatalog of
     Left problem -> pure ([problem], [])
     Right catalog -> sourceGraphWithPackageCatalog graphRoot ["UseExternalMember.hs"]
@@ -512,6 +586,9 @@ main = do
     ["StandaloneLocal.hs"] Map.empty Map.empty
   (standaloneImportedFindings, standaloneImportedRows) <- sourceGraph graphRoot
     ["StandaloneProvider.hs", "StandaloneUse.hs"] Map.empty Map.empty
+  (_, standaloneExportRows) <- sourceGraph graphRoot
+    ["Duplicate.hs", "StandaloneFacade.hs", "StandaloneSelective.hs", "StandaloneReexport.hs", "StandaloneSelectiveUse.hs"] Map.empty Map.empty
+  TextIO.writeFile (directory </> "fixture-standalone-exports.tsv") (Text.unlines standaloneExportRows)
   (mismatchedFindings, _) <- sourceGraph graphRoot ["Mismatched.hs"]
     (Map.singleton "Mismatched.hs" ["test:graph"]) Map.empty
   (callFindings, callRows) <- sourceGraph graphRoot ["Calls.hs"]
@@ -539,16 +616,17 @@ main = do
     , ("expression", "StageExpression.hs", True), ("declaration", "StageDeclaration.hs", True) ]
   let forkPins = [("logging", "3.0.6"), ("managed", "1.0.11"), ("unagi-chan", "0.4.1.4")]
       forkEntry (package, version, suffix, moduleName) = Text.concat
-        [ "name: ", package, "\nid:\n    ", package, "-", version, "-", suffix
+        [ "name: ", package, "\nversion: ", version, "\nid:\n    ", package, "-", version, "-", suffix
         , "\nexposed-modules:\n    ", moduleName, "\n" ]
       forkDump entries = Text.intercalate "\n---\n" (map forkEntry entries)
       completeForks =
         [ ("logging", "3.0.6", "aa", "Control.Logging"), ("managed", "1.0.11", "bb", "Control.Monad.Managed")
         , ("unagi-chan", "0.4.1.4", "cc", "Control.Concurrent.Chan.Unagi") ]
       forkPlan = ByteString8.pack "{\"compiler-id\":\"ghc-9.12.4\",\"compiler-abi\":\"5301\",\"install-plan\":[]}"
-      forkOutcome entries = case packageCatalogWithForks forkPins Map.empty forkPlan (forkDump entries) of
+      forkDumpOutcome dumped = case packageCatalogWithForks forkPins Map.empty forkPlan dumped of
         Left finding -> Text.replace "\t" " " (renderFinding finding)
         Right _ -> "accepted"
+      forkOutcome = forkDumpOutcome . forkDump
       forkStandalone declared = case packageCatalogWithForks declared Map.empty forkPlan (forkDump completeForks) of
         Left finding -> pure [renderFinding finding]
         Right catalog -> snd <$> sourceGraphWithPackageCatalog graphRoot ["ForkUser.hs"] Map.empty Map.empty
@@ -1129,6 +1207,12 @@ main = do
             ([unit | unit@(package, _, _, _) <- completeForks, package /= "managed"]
               <> [("managed", "1.0.12", "bb", "Control.Monad.Managed")]))
         , ("package.fork-store-growth", forkOutcome (completeForks <> [("managed", "1.0.12", "bd", "Control.Monad.Managed")]))
+        , ("package.fork-opaque-unit-id", forkDumpOutcome
+            (Text.replace "id:\n    logging-" "id:\n    lggng-" (forkDump completeForks)))
+        , ("package.fork-version-spoof", forkDumpOutcome
+            (Text.replace "version: 3.0.6" "version: 3.0.7" (forkDump completeForks)))
+        , ("package.fork-version-missing", forkDumpOutcome
+            (Text.replace "version: 3.0.6\n" "" (forkDump completeForks)))
         , ("graph.plain-data-declaration", if null plainDataFindings &&
               all (`elem` plainDataRows)
                 ["graph-data\tPlainData.hs\tPlain",

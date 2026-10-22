@@ -2,6 +2,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition (
@@ -98,7 +99,8 @@ buildFixture = do
     alice <- requireRight "alice" (trustedSubject tenantA "alice")
     carol <- requireRight "carol" (trustedSubject tenantB "carol")
     membership <- requireRight "membership" (activeMembership tenantA alice)
-    context <- requireRight "request context" (trustedRequestContext tenantA alice membership)
+    identity <- requireRight "verified fixture principal" (FixtureAuthority.fixtureIdentityText (tenantText tenantA) (subjectText alice))
+    context <- requireRight "request context" (trustedRequestContext identity tenantA alice membership)
     resource <- requireRight "resource" (trustedResourceId "record-1")
     epochs <- requireRight "authority epochs" (authorityEpochs 4 7 9 12)
     stale <- requireRight "stale authority epochs" (authorityEpochs 3 7 9 12)
@@ -191,7 +193,7 @@ checkCalculus = do
     tenant <- requireRight "calculus tenant" (CalculusScope.trustedTenant "ui-authorization-calculus-tenant")
     subject <- requireRight "calculus subject" (CalculusScope.trustedSubject tenant "ui-authorization-calculus-subject")
     membership <- requireRight "calculus membership" (CalculusScope.activeMembership tenant subject)
-    action <- requireRight "calculus scope" $ CalculusScope.withRequestScope tenant subject membership $ \scope -> do
+    action <- requireRight "calculus scope" $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
         let resources count = ResourceVector 1 count 0 0
             counts = [5, 6, 8, 9, 2] :: [Int]
             artifact = artifactComponent scope "action-registry" (resources 5) (RecipeId "ui-authorization" 5)

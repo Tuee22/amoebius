@@ -535,11 +535,11 @@ predecessor's corpus and adds pairs, and the `DSL_BARRIER` re-runs the union
 ([`gate_runner_doctrine.md` §7](./gate_runner_doctrine.md#7-the-example-corpus-and-the-hardware-rule)). A field
 an example authors that reaches no byte on the wire is refused as `AuthoredFieldUnconsumed`.
 
-**Observed implementation** ([GateSpec:typed_spine]). The first corpus module, `Amoebius.Dsl.Examples.Spine`, is
-implemented by [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md)
-([DL-0023](../decision_log.md#dl-0023--phase-3-accepted-its-owed-by-paragraphs-become-observed-implementations)): the shipped executable links it,
-`amoebius render-examples` renders it, and the gate's `case:fields-consumed` differential is red when an authored
-field reaches no byte and is not refused.
+**Specification** ([DL-0031](../decision_log.md#dl-0031--unqualified-validation-claims-remain-obligations)).
+Qualification is owed by [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md) for the first corpus module,
+`Amoebius.Dsl.Examples.Spine`, through the shipped executable's link closure and `amoebius render-examples`.
+Its `case:fields-consumed` differential must refuse an authored field that reaches no byte and receives no
+typed refusal. A component footprint or historical receipt must not replace that complete gate.
 
 ---
 

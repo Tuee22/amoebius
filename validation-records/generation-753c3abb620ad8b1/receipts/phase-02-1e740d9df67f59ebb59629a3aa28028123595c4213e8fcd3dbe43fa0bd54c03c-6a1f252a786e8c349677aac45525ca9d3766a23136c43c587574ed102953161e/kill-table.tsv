@@ -1,0 +1,51 @@
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:65	constant-flip	e944ff2e6c88->9b6974ed9a93	survived
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:220	list-truncation	3b50c018654c->dd5e42052067	stillborn:src/Amoebius/Layout/PackageMap.hs:218:79: error: [GHC-88464]
+    Variable not in
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:68	list-truncation	fbd3e087c9dc->009ca33784ca	killed@bootstrap-effect-sites
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:35	constant-flip	3287f6c3c1ad->624b46097185	killed@compiler-parsed-source-set,compiler-import-control,compiler-module-reexport-control
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:257	branch-swap	fd6cff27cda4->5b5a3bfa6bed	killed@compiler-data-declaration-gap-control,case:graph-qualified,route-instance-coverage
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:73	branch-swap	e944ff2e6c88->cfbb3b8004fe	killed@path-set,finding-set,path:DEVELOPMENT_PLAN/README.md
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:314	list-truncation	3b50c018654c->7c0fa417c149	stillborn:src/Amoebius/Layout/PackageMap.hs:314:85: error: [GHC-58481]
+    parse error on 
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:81	constant-flip	fbd3e087c9dc->0ca0f13f6e5d	killed@bootstrap-call-sites,bootstrap-effect-sites
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:40	constant-flip	3287f6c3c1ad->f11f7c0451da	killed@case:report.paths-file-missing,case:report.inventory-failure
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:509	constant-flip	fd6cff27cda4->9bfbd7c0191c	killed@case:graph-qualified,case:graph.ambiguous-internal-call,case:graph.alias-imported-effect-route
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:118	branch-swap	e944ff2e6c88->2c48ac607371	killed@finding-set,case:report.nested-output,case:report.default-exit
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:325	list-truncation	3b50c018654c->ce9a7c226dec	stillborn:src/Amoebius/Layout/PackageMap.hs:325:58: error: [GHC-58481]
+    parse error on 
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:83	constant-flip	fbd3e087c9dc->47e9e7b3b688	killed@bootstrap-call-sites,bootstrap-effect-sites
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:82	constant-flip	3287f6c3c1ad->1bf5062aed91	survived
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:1394	list-truncation	fd6cff27cda4->38394eea6956	killed@compiler-call-site-coverage-control
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:138	field-drop	e944ff2e6c88->f54596f24e93	stillborn:src/Amoebius/Layout/Classify.hs:139:47: error: [GHC-88464]
+    Variable not in s
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:356	list-truncation	3b50c018654c->9b44f4bd9b87	stillborn:src/Amoebius/Layout/PackageMap.hs:356:81: error: [GHC-58481]
+    parse error on 
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:137	list-truncation	fbd3e087c9dc->6e3bc827ea51	killed@finding-set,bootstrap-call-sites,bootstrap-effect-sites
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:84	constant-flip	3287f6c3c1ad->738ce54fabd7	killed@case:report.nested-output,case:report.default-exit
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:2069	constant-flip	fd6cff27cda4->75fc7e39cba0	survived
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:185	list-truncation	e944ff2e6c88->4a4c6fa8e837	stillborn:src/Amoebius/Layout/Classify.hs:186:44: error: [GHC-88464]
+    Variable not in s
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:616	field-drop	3b50c018654c->89f3c94716ff	stillborn:src/Amoebius/Layout/PackageMap.hs:617:22: error: [GHC-58481]
+    parse error on 
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:184	branch-swap	fbd3e087c9dc->cf75310c181e	killed@finding-set,bootstrap-call-sites,bootstrap-effect-sites
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:86	constant-flip	3287f6c3c1ad->2f5996d08039	killed@case:report.shebang-exit,case:challenge.python,case:challenge.dhall
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:2122	field-drop	fd6cff27cda4->669625e6757a	stillborn:src/Amoebius/Layout/SourceGraph.hs:2118:73: error: [GHC-88464]
+    Variable not 
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:189	constant-flip	e944ff2e6c88->73db792d4534	killed@case:positive.archive,case:positive.void,case:report.default-exit
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:623	branch-swap	3b50c018654c->8da3428312fb	killed@finding-set,compiler-instance-external-contract-control,compiler-derived-class-member-control
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:224	constant-flip	fbd3e087c9dc->398c9db2a1b5	killed@finding-set,bootstrap-call-sites,bootstrap-effect-sites
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:94	constant-flip	3287f6c3c1ad->bb14604bf39a	killed@case:report.no-graph
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:2366	branch-swap	fd6cff27cda4->1660acd77aae	killed@compiler-instance-external-contract-control
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:202	branch-swap	e944ff2e6c88->257d94148467	killed@case:positive.archive,case:positive.void,case:report.default-exit
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:729	branch-swap	3b50c018654c->1302741b9771	killed@finding-set,compiler-instance-external-contract-control,compiler-derived-class-member-control
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:283	branch-swap	fbd3e087c9dc->ca64b25530a6	killed@finding-set,bootstrap-call-sites,bootstrap-effect-sites
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:139	branch-swap	3287f6c3c1ad->06572f7520ba	killed@finding-set,case:report.nested-output,case:report.default-exit
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:2742	list-truncation	fd6cff27cda4->1b3194429eba	stillborn:src/Amoebius/Layout/SourceGraph.hs:2742:38: error: [GHC-58481]
+    parse error o
+Amoebius.Layout.Classify	src/Amoebius/Layout/Classify.hs:203	branch-swap	e944ff2e6c88->c40b40412de1	killed@case:positive.archive,case:positive.void,case:report.default-exit
+Amoebius.Layout.PackageMap	src/Amoebius/Layout/PackageMap.hs:733	list-truncation	3b50c018654c->23fa8c5cc009	stillborn:src/Amoebius/Layout/PackageMap.hs:732:58: error: [GHC-88464]
+    Variable not in
+Amoebius.Layout.PbGrammar	src/Amoebius/Layout/PbGrammar.hs:284	branch-swap	fbd3e087c9dc->5460337fffab	killed@finding-set,bootstrap-call-sites,bootstrap-effect-sites
+Amoebius.Layout.Report	src/Amoebius/Layout/Report.hs:141	branch-swap	3287f6c3c1ad->60087f2f113d	killed@finding-set,case:report.nested-output,case:report.default-exit
+Amoebius.Layout.SourceGraph	src/Amoebius/Layout/SourceGraph.hs:2861	list-truncation	fd6cff27cda4->cac2deb5aa7f	killed@compiler-local-alias-control,case:graph.local-alias-route,case:graph.alias-parameter-route
+summary	killed=27	viable=30	stillborn=10

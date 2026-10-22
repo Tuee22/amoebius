@@ -11,8 +11,10 @@ import Amoebius.Capacity.Types
   ( Axis (..)
   , CandidateNodeClass (..)
   , GrowthQuota (..)
+  , HostEnvironment (..)
   , MaterializedNode (..)
   , Node (..)
+  , NodeRole (..)
   , NodeCapacity (..)
   , Placement (..)
   , PlacementError (..)
@@ -108,6 +110,11 @@ candidateLedger candidate ordinal =
           , nodeEnvironment = candidateEnvironment candidate
           , nodeCapacity = effectiveCandidateCapacity candidate
           , nodeTaints = candidateTaints candidate
+          , nodeDetected = candidateDetected candidate
+          , nodeRole = case candidateEnvironment candidate of
+              ManagedAws -> ManagedWorker
+              NativeLinux -> Rke2Agent
+              VirtualizedLinux -> Rke2Agent
           }
         (Just (candidateName candidate))
     )

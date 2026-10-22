@@ -174,7 +174,7 @@ provision.
   and [`pulsar_client_doctrine.md` §4 — Forked from supernova — what amoebius re-derives and what it adds](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-re-derives-and-what-it-adds)
   — *the native binary protocol* and *forked from supernova*: `proto-lens`-generated `BaseCommand` framing
   with hand-written size prefixes / magic / CRC32C only, one persistent TCP session per broker, forked from
-  `cr-org/supernova` onto the repo-wide GHC 9.12.4 pin — treated as a *starting point with sibling provenance*,
+  `cr-org/supernova` onto the repo-wide GHC 9.12.4 version requirement — treated as a *starting point with sibling provenance*,
   not a proven foundation.
 - [`pulsar_client_doctrine.md` §5 — The capability surface: lookup · produce · consume · subscribe · seek](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek)
   — *the capability surface: lookup · produce · consume · subscribe · seek*: long-lived producers,
@@ -217,7 +217,7 @@ Haskell and qualify the mechanism that first admits their result; component obse
 
 Adopt [`pulsar_client_doctrine.md §3`](../documents/engineering/pulsar_client_doctrine.md#3-the-native-binary-protocol)
 and [`§4`](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-re-derives-and-what-it-adds):
-fork `cr-org/supernova` into the `amoebius-pulsar` package on the repo-wide GHC 9.12.4 pin, and stand up the
+fork `cr-org/supernova` into the `amoebius-pulsar` package on the repo-wide GHC 9.12.4 version requirement, and stand up the
 framing layer, the CONNECT/CONNECTED handshake, and LOOKUP-based service discovery over one persistent TCP
 session per broker — the supernova provenance as **sibling evidence, not an amoebius result**.
 

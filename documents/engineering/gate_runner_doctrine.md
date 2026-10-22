@@ -7,8 +7,9 @@ This document owns the validator's mechanics: the gate-specification vocabulary,
 protocol, preflight refusals, commands, and receipts. It does not own the eighteen-row contract shape, which
 belongs to [gate integrity §M.1](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m1-the-fixed-gate-contract),
 nor bootstrap trust, which belongs to the
-[validation-frame doctrine](./validation_frame_doctrine.md). Every mechanism below is owed by
-[Phase 0](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md); nothing here is an observed result.
+[validation-frame doctrine](./validation_frame_doctrine.md). Qualification is phase-scoped: the finite
+seed and accepted toolchain observations below do not establish the later source, DSL spine or hardware claims
+([DL-0036](../decision_log.md#dl-0036--phase-1-acceptance-retires-its-qualified-toolchain-bindings)).
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -81,8 +82,21 @@ describe a gate the runner will not execute.
 
 ## 3. The runner
 
-**Observed implementation** ([GateSpec:documentation_suite]). The runner is one library,
-`Amoebius.Validation.Runner`, with these stages in order:
+**Qualification boundary** ([DL-0034](../decision_log.md#dl-0034--phase-0-acceptance-qualifies-the-finite-seed-boundary)).
+
+Observed implementation: `Amoebius.Validation.Runner` executes the finite seed protocol, the serial
+source-bound legacy collection, the eighteen-row capture and owned-root cleanup at the recorded ratchet
+[GateSpec:documentation_suite].
+
+The accepted toolchain execution additionally qualifies the product protocol over its six shipped subjects:
+all eighteen categories and 116 independent clean oracle rows pass, with 36 kills among 38 viable generated
+mutants and a kill in every subject. Its shipped-binary challenge preserves the nonce and refuses the
+unsupported requested compiler version [GateSpec:toolchain_spike]
+([DL-0036](../decision_log.md#dl-0036--phase-1-acceptance-retires-its-qualified-toolchain-bindings)).
+
+The following ordered stages define the product-gate protocol. Qualification remains bounded to each
+accepted subject and source; spine perturbation
+retains its [DSL-barrier owner](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md):
 
 1. **`verifySpec`.** Map every `ProductionModule` to exactly one library stanza, compute the executable's
    closure from the package description, and refuse any subject outside it. Check the oracle stanza's hygiene:
@@ -111,14 +125,25 @@ every Haskell line under `src/validation-kernel` and `src/gate-spec`. The docume
 
 ## 4. Runner-held verdicts and the oracle protocol
 
-**Observed implementation** ([GateSpec:documentation_suite]). A suite is a byte producer. The oracle
-executable for an area reads those bytes and prints a ledger derived from literals in its own source; it imports no product module, so it cannot regenerate an expectation from
-the subject. Each area has one exclusive source directory whose entry module is named exactly, for example
-`test/oracle/dsl/Main.hs`; the directory is never named alone. A suite receives the run's suite directory as
-its one argument and writes its bytes there; the oracle receives the same directory and prints its ledger to
-standard output. The runner digests the suite output, the
-oracle ledger, and the kill table into the receipt. A `PASS` token, a count, or a matching substring in a
-suite's output is not a verdict.
+**Qualification boundary** ([DL-0034](../decision_log.md#dl-0034--phase-0-acceptance-qualifies-the-finite-seed-boundary)).
+
+Observed implementation: the seed execution in `Amoebius.Validation.Runner` binds observed subject exits,
+raw oracle ledgers, missing-output rejection, complete required-row discovery and the finite custody
+controls [GateSpec:documentation_suite].
+
+Observed implementation: the accepted toolchain gate qualifies product use through a separate
+oracle, missing-output refusal, raw-ledger capture, complete required-row discovery and runner-generated
+changed-subject mutants [GateSpec:toolchain_spike]
+([DL-0036](../decision_log.md#dl-0036--phase-1-acceptance-retires-its-qualified-toolchain-bindings)).
+
+A suite must produce bytes. Its area's separately authored oracle executable must judge them from literals
+in its own source, with no product import or regenerated expectation. Each area must have one exclusive
+source directory and a named entry module; naming the directory alone is insufficient. The suite must
+receive one run-local directory argument and write its observations there.
+The oracle must receive that same directory and print its ledger to standard output. The runner must bind
+the suite output, oracle ledger and kill table into the receipt. A `PASS` token, count or matching substring
+in suite output must never supply a verdict. Every subsequent product gate must qualify this protocol for
+its own subjects and independently authored expectations.
 
 Oracle rows are authored from the requirement before the pipeline stage exists. A row derived from subject
 output, or added after a stage was written to match it, is a contract change under
@@ -235,10 +260,10 @@ subject. Hardware evidence that does not consume a barrier example is refused as
 
 ## 9. Planning ownership
 
-The runner, the gate-specification library, the custody edits, and the commands are owed by
-[Phase 0](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md). The first product specification is owed by
-[Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md). The `SpineFact` and `OperatorDemonstration` are owed
-by [Phase 9](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md).
+The accepted finite seed belongs to [Phase 0](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md).
+The first product-gate qualification belongs to [Phase 1](../../DEVELOPMENT_PLAN/phase_01_toolchain_spike.md);
+the typed DSL spine belongs to [Phase 3](../../DEVELOPMENT_PLAN/phase_03_typed_spine.md). The `SpineFact`
+and `OperatorDemonstration` retain [Phase 9](../../DEVELOPMENT_PLAN/phase_09_dsl_barrier.md) as their owner.
 
 ## Related Documents
 

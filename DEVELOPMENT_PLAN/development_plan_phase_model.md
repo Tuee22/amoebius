@@ -12,7 +12,7 @@ This slice owns the phase model. [`README.md`](README.md) is the sole current-st
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_03_typed_spine.md, DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md, DEVELOPMENT_PLAN/phase_05_substrates_lanes_image_recipe.md, DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md, DEVELOPMENT_PLAN/phase_07_child_clusters_obligation_teardown.md, DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md, DEVELOPMENT_PLAN/phase_09_dsl_barrier.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_90_test_topology_live.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, DEVELOPMENT_PLAN/substrates.md, documents/decision_log.md, documents/engineering/formal_model_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_03_typed_spine.md, DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md, DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md, DEVELOPMENT_PLAN/phase_07_child_clusters_obligation_teardown.md, DEVELOPMENT_PLAN/phase_08_ui_program_language_binding.md, DEVELOPMENT_PLAN/phase_09_dsl_barrier.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_90_test_topology_live.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, DEVELOPMENT_PLAN/substrates.md, documents/decision_log.md, documents/engineering/formal_model_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -118,13 +118,12 @@ applicability.
   and updates its reader explanation in
   [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
 - A band is a reading aid over a contiguous ordinal range, never a second identifier.
-- `GenesisTrust` is the irreducible, non-numbered `BootstrapRoot`: an explicit local-custody assumption over
-  seven exact prepared archive/signature files, compile-time GHC `9.12.4`, absolute reported `ghc` and library
-  paths, and Linux/`x86_64`. It does not authenticate publisher identity, actual compiler executable bytes or
-  derivation, the loader, the broader host, or reproducibility. It has no phase ordinal, does not advance
-  status, and cannot be proved by the Phase-0 binary it compiled. Phase 1 owns executable-byte identity and
-  reproducibility relative to the fixed pins; publisher identity and pin origin remain unverified
-  ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)).
+- `GenesisTrust` is the non-numbered `BootstrapRoot`: the explicit assumption that native GHCup and GHC
+  whose versions satisfy the Haskell compatibility requirements execute correctly. There is no compiler
+  byte pin, seven-file input, platform tuple, device, or hardware-host requirement. Selected tool paths and
+  version observations are recorded. Phase 1 qualifies version admission and the retained probes; neither
+  phase proves the compiler's semantics or publisher identity
+  ([DL-0025](../documents/decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier)).
 - The accepted seed verifier and its custody boundary are explicit bootstrap assumptions. Phase 0 qualifies
   only its finite seed; it does not depend on the full language, later host transport, or the DSL barrier's
   union corpus. A later verifier is a new content-addressed generation entered by the first `accept` or
@@ -138,7 +137,7 @@ The ordering has one non-negotiable semantic cut:
 ```text
 GenesisTrust (non-numbered root)
   → Phase 0 governance, validator, and finite bootstrap seed
-  → Phase 1 pin-verified and reproducible toolchain acquisition; publisher identity unverified
+  → Phase 1 native version admission and retained probes; compiler correctness remains assumed
   → Phase 2 layout conformance and source closure
   → Phase 3 the typed spine: one spec to fake-applied bytes
   → Phases 4–8 breadth over the same growing corpus
@@ -229,13 +228,10 @@ Unknown impact fails closed under [gate integrity §M.6](development_plan_gate_i
 
 `Substrate: none` means the claim is decidable without hardware-specific or live infrastructure. It does not
 mean “validated inside a container.” Before the Phase-50 gate passes, a pure candidate invokes the exact
-source-bound Haskell binary directly. Phase 0 carries its narrow `GenesisTrust` local-custody and
-compile-time/platform assumption; subsequent builds bind the pin-verified, network-independent Phase-1
-acquisition derived from that root, with publisher identity remaining unverified under
-[DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope);
-it does not trust `pb` as transport. The Phase-50 candidate likewise starts the exact Haskell OS supervisor
-directly; the supervisor invokes `pb` as its observed child, so the public target cannot validate itself. After
-Phase 50 gate pass, later pure work may use that bounded handoff.
+source-bound Haskell binary directly. Phase 0 assumes the semantic correctness of version-compatible native GHCup and GHC. Phase 1 checks
+those versions and retained probes; neither requires toolchain byte pins, archive/signature files, a fixed
+OS or CPU architecture, devices, or privileged host facilities
+([DL-0025](../documents/decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier)). After the Phase-50 gate passes, later pure work may use that bounded handoff.
 Either route precedes every image, container-engine, registry, cluster, GPU, or cloud phase.
 
 A phase that requires a real substrate declares exactly one of `apple`, `linux-cpu`, `linux-cuda`, or
@@ -371,6 +367,10 @@ unit is the falsifiable seam and its final register.
 | Typed reset cause and the audit map of a re-sequence | This document §N and [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md#7-the-audit-map) |
 
 ---
+
+
+The version-admission and hardware-free boundary amendment is recorded in
+[DL-0026](../documents/decision_log.md#dl-0026--plan-gates-use-native-version-admission-without-hardware-prerequisites).
 
 ## Related Documents
 

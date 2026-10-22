@@ -76,14 +76,14 @@ flowchart TD
 residue that the kernel and kubelet honour the caps remains runtime-checked. Gate status remains owned by the
 development-plan tracker.*
 
-**Base-fold bound contract.** `Amoebius.Capacity.Types`, `Amoebius.Capacity.Fold`, and `Amoebius.Dsl.Topology`
-are owed by [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md), built with
-exhaustive-pattern warnings promoted to errors. Direct negative/twin pairs, Haskell topology positives,
-sampled properties with independent witness recomputation, and generated production mutants must challenge the
-base CPU, memory, logical ephemeral, pod-slot, CSI-attach, finite CPU-policy, eligibility, and fixed/elastic
-placement axes. The storage, execution/runtime, accelerator, and provider-root extensions described below
-remain **UNVERIFIED** until Phase 9 decides the parked calculi (`LTD-LIB-001`); live enforcement is not
-established by this result.
+**Specification** ([DL-0032](../decision_log.md#dl-0032--pure-dsl-claims-retain-their-validation-owners)).
+Qualification is owed by [Phase 4](../../DEVELOPMENT_PLAN/phase_04_witness_manifests_capacity_storage.md) for
+`Amoebius.Capacity.Vector`, `Amoebius.Capacity.Fits` and `Amoebius.Placement.Witness` through the total
+three-valued fit table, fixed-placement corpus, resource envelopes, exact-fit twins and generated
+production mutants. The complete engine/environment relation, elastic growth, CSI accounting, finite CPU
+policy and eligibility extensions must remain outside that bounded claim. The storage, execution/runtime,
+accelerator and provider-root extensions described below remain **UNVERIFIED** until their own gate
+observations exist. Pure observations must not establish live enforcement.
 
 ### The four total functions
 

@@ -37,6 +37,7 @@ module Amoebius.Capacity.Provision
   , emptyPriorProvisionCatalog
   , ProvisionContext
   , mkProvisionContext
+  , provisionWithEngineOfferings
   , ProvisionedServicePart (..)
   , ProvisionedCapacitySchedulerSystem (..)
   , ProvisionedSpec
@@ -120,7 +121,7 @@ import Amoebius.Capacity.Storage
   , StorageWitness
   , fitBacking
   )
-import Amoebius.Capacity.Types (Axis, Overcommit (..), PlacementError (..), Workload (..), divideResources, emptyStorageDemand, envelopeLimits, envelopeRequests, firstExceeded)
+import Amoebius.Capacity.Types (Axis, Node (..), Overcommit (..), PlacementError (..), Workload (..), divideResources, emptyStorageDemand, envelopeLimits, envelopeRequests, firstExceeded)
 import Amoebius.Capacity.Vector (ResourceVector (..), addResources, zeroResources)
 import Amoebius.Capability.Types
   ( BoundApp (..)
@@ -150,17 +151,18 @@ import Amoebius.Capability.Engine
   , MetalOwnerDemand (MetalOwnerDemand)
   , ProvisionedEngineAccelerator
   , TargetOffering (..)
-  , familyForProfile
   , offeringAccelerators
+  , offeringLane
   , provisionEngineOwner
   )
-import Amoebius.Dsl.Topology (NodeSupply (ElasticSupply), Topology, topologySupply)
+import Amoebius.Dsl.Topology (NodeSupply (..), Topology, topologySupply)
 import Amoebius.Placement.Witness (Epoch, Placed, epochNamed, place)
 import Amoebius.Storage.Catalog (volumeBytesFor)
-import Amoebius.Vocabulary (Quantity, Unit (..), quantityText, quantityValue)
+import Amoebius.Vocabulary (Quantity, Unit (..), Lane (..), lanesOf, detectedArchitecture, quantityText, quantityValue, engineRuntimeName, inferenceFamilyName)
 import Control.DeepSeq (NFData)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
+import Data.List.NonEmpty qualified as NonEmpty
 import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Text (Text)
@@ -423,6 +425,7 @@ provisionErrorTag problem = case problem of
   StalePriorProvisionRef {} -> "StalePriorProvisionRef"
   WrongGenerationPriorProvisionRef {} -> "WrongGenerationPriorProvisionRef"
   WrongArmPriorProvisionRef {} -> "WrongArmPriorProvisionRef"
+  PlacementProvisionFailure (TaintedOnlyHost _) -> "TaintedOnlyHost"
   PlacementProvisionFailure {} -> "PlacementProvisionFailure"
   OneShort {} -> "OneShort"
   OverCapacity {} -> "OverCapacity"
@@ -546,7 +549,31 @@ mkProvisionContext deployment generation policy catalog observation
           }
 
 provision :: ProvisionContext -> Topology -> BoundDeployment -> Either ProvisionError ProvisionedSpec
-provision context topology deployment = do
+provision = provisionUsing Nothing
+
+-- | An explicit observation boundary, keyed by each actual inference service.
+-- The pure DSL uses supplied Haskell fakes. Live callers must supply their
+-- own observed devices; this function never discovers a host or accelerator.
+provisionWithEngineOfferings :: Map Text TargetOffering -> ProvisionContext -> Topology -> BoundDeployment -> Either ProvisionError ProvisionedSpec
+provisionWithEngineOfferings offerings context topology deployment = do
+  let expected = Map.fromList [(capabilityResourceName (boundCapabilityNeed service), inferenceRuntime inference)
+        | service <- Map.elems (boundDeploymentServices deployment),
+          InferenceEngineCapabilityNeed inference <- [boundCapabilityNeed service]]
+  if Map.keysSet expected /= Map.keysSet offerings then Left (MissingCapability "exact-engine-offering-domain") else Right ()
+  mapM_ (\(name, runtime) -> case Map.lookup name offerings of
+    Nothing -> Left (MissingCapability name)
+    Just offering -> if any (eligible runtime offering) nodes then Right () else Left (MissingCapability ("eligible-engine-target:" <> name))) (Map.toList expected)
+  provisionUsing (Just offerings) context topology deployment
+ where
+  nodes = case topologySupply topology of FixedSupply values -> NonEmpty.toList values; ElasticSupply {} -> []
+  eligible runtime offering node = Set.null (nodeTaints node) && target offering == nodeId node && offeringLane offering == requiredLane runtime
+    && nodeLane runtime node `elem` lanesOf (nodeDetected node)
+  requiredLane runtime = case runtime of CpuRuntime -> LinuxCpuLane; Cuda -> CudaLane; AppleMetal -> AppleMetalLane
+  nodeLane runtime node = case runtime of CpuRuntime -> LinuxCpuAt (detectedArchitecture (nodeDetected node)); Cuda -> LinuxCudaAt (detectedArchitecture (nodeDetected node)); AppleMetal -> AppleMetalOnHost
+  target offering = case offering of AppleOffering identity _ -> identity; LinuxCpuOffering identity -> identity; LinuxCudaOffering identity _ -> identity; WindowsCudaOffering identity _ -> identity
+
+provisionUsing :: Maybe (Map Text TargetOffering) -> ProvisionContext -> Topology -> BoundDeployment -> Either ProvisionError ProvisionedSpec
+provisionUsing offerings context topology deployment = do
   let demand = deriveInfrastructureDemand deployment
       available = observedMaterializedCapacity (contextObservation context)
       BoundExecutionSet unitMap = boundDeploymentExecutions deployment
@@ -559,7 +586,7 @@ provision context topology deployment = do
   execution <- mapExecution (provisionExecutionEpochs (priorExecutionCatalog (contextPriorCatalog context)) available (BoundExecutionInventory (boundDeploymentTransition deployment) units))
   runtime <- provisionRuntime context execution
   monitoring <- provisionMonitoring context deployment
-  accelerators <- provisionAccelerators context deployment
+  accelerators <- provisionAccelerators offerings context deployment
   serviceParts <- provisionServices context deployment
   pulumi <- mapHostCompute (provisionPulumiExecution (pulumiDemand demand))
   let scheduler =
@@ -727,10 +754,11 @@ provisionMonitoring context deployment
   budget = MonitoringWorkBudget count rules series (count * 20) 1 5 10 1 1 (count * 10) (count * 5) (policyMonitoringVolumeBytes policy)
 
 provisionAccelerators
-  :: ProvisionContext
+  :: Maybe (Map Text TargetOffering)
+  -> ProvisionContext
   -> BoundDeployment
   -> Either ProvisionError (Map Text ProvisionedEngineAccelerator)
-provisionAccelerators context deployment = fmap Map.fromList (mapM provisionOne inferenceServices)
+provisionAccelerators offerings context deployment = fmap Map.fromList (mapM provisionOne inferenceServices)
  where
   policy = contextPolicy context
   inferenceServices =
@@ -739,8 +767,10 @@ provisionAccelerators context deployment = fmap Map.fromList (mapM provisionOne 
     , InferenceEngineCapabilityNeed inference <- [boundCapabilityNeed service]
     ]
   provisionOne (name, inference) = do
-    offering <- selectedOffering policy
-    let family = familyForProfile (inferenceProfile inference)
+    offering <- case offerings of
+      Nothing -> selectedOffering policy
+      Just supplied -> maybe (Left (MissingCapability ("target-offering:" <> name))) Right (Map.lookup name supplied)
+    let family = inferenceFamily inference
         owner = ownerDemandFor name (inferenceRuntime inference) offering
     checked <- mapEngine (provisionEngineOwner offering family owner)
     Right (name, checked)
@@ -763,9 +793,9 @@ limitOfferingVram limit offering = case offering of
 
 ownerDemandFor :: Text -> EngineRuntime -> TargetOffering -> EngineOwnerDemand
 ownerDemandFor owner runtime offering = case runtime of
-  Cuda _ -> CudaEngineOwner (CudaOwnerDemand owner profile deviceIds deviceCount sources workloads policy)
-  AppleMetal _ -> MetalEngineOwner (MetalOwnerDemand owner profile deviceIds sources workloads policy)
-  CpuRuntime _ -> CpuEngineOwner owner
+  Cuda -> CudaEngineOwner (CudaOwnerDemand owner profile deviceIds deviceCount sources workloads policy)
+  AppleMetal -> MetalEngineOwner (MetalOwnerDemand owner profile deviceIds sources workloads policy)
+  CpuRuntime -> CpuEngineOwner owner
  where
   devices = case offeringAccelerators offering of
     AcceleratorOffering rows -> rows
@@ -867,10 +897,16 @@ serviceCandidates service = fmap fromObject (boundProviderGraph service)
       (providerObjectIdentity object)
       (witnessFor name object)
       ( Map.fromList [("kind", providerObjectKind object), ("role", providerObjectRole object)]
+          <> engineFields
           <> executionFields (Map.lookup (providerObjectIdentity object) executionUnits)
           <> Map.fromList [("volume-bytes", quantityText size) | Just size <- [memberVolume arm object]]
       )
       (if providerObjectKind object == "Job" then ReplaceOnChange else ServerSideApply)
+  engineFields = case boundCapabilityNeed service of
+    InferenceEngineCapabilityNeed inference -> Map.fromList
+      [("engine-runtime", engineRuntimeName (inferenceRuntime inference)),
+       ("engine-family", inferenceFamilyName (inferenceFamily inference))]
+    _ -> Map.empty
 
 -- | An application renders as its own namespace, its workload, and its endpoint,
 -- all named after the application.  The workload carries the authored requests,
@@ -940,6 +976,7 @@ candidate identityText witness fields mode =
 
 mapPlacementFor :: Topology -> Either PlacementError value -> Either ProvisionError value
 mapPlacementFor topology outcome = case outcome of
+  Left problem@(TaintedOnlyHost _) -> Left (PlacementProvisionFailure problem)
   Left problem -> case topologySupply topology of
     ElasticSupply {} -> Left (ElasticPerNodeExpansionOvercommit (Text.pack (show problem)))
     _ -> case problem of

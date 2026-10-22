@@ -1,0 +1,245 @@
+candidate	phase=0	capability=documentation_suite
+spec-digest	fddcf0e7070fcad3d2c802838bd2fde4d3cc2cda0a54b9788238c6caa2c293c8
+challenge	082995a4e27775897598979bd71e101b
+chain	0587ef2b22050f7a6167136044b7f8d25a1c1102704aa41cebfbd316192bbeb1
+reproducible-core	506f1e8daf23ab0f0e99b30ada439e7a98e1d51f58815958f868b152b70082bb
+row	Claim	green
+observation	Claim	claim	For one snapshot, the standalone documentation checker reports zero findings on the governed corpus and the named finding on each rendered negative; the three bootstrap predicate mutants are judged by the independent driver; the custody probes pass; the hygiene row is green at the recorded cap; the generation-2 seed is content-addressed and agent-recorded with an immutable accepted bundle.
+observation	Claim	spec-digest	fddcf0e7070fcad3d2c802838bd2fde4d3cc2cda0a54b9788238c6caa2c293c8
+observation	Claim	role	SeedGate
+row	Subject	green
+observation	Subject	subject.Amoebius.Doc.Check	doc-check
+observation	Subject	subject.Amoebius.Validation.BootstrapPredicate	validation-kernel
+observation	Subject	subject.Amoebius.Validation.Custody	validation-runner
+observation	Subject	subject.Amoebius.Validation.Runner	validation-runner
+row	Command	green
+observation	Command	command	amoebius-validate preview phase 0
+observation	Command	suite	plan-decisions-suite
+observation	Command	oracle	oracle-doc
+row	Oracle	green
+observation	Oracle	oracle.directories	test/oracle/doc
+observation	Oracle	oracle.ledger-sha256	1fd72030ed55cb4611274bb32d8bdd5b276f4372e12d6bd5cbeea7997478eaec
+observation	Oracle	oracle.rows	186
+row	Positive controls	green
+observation	Positive controls	positive.count	4
+observation	Positive controls	ledger.red-rows	
+observation	Positive controls	doc.findings	0
+observation	Positive controls	doc.negatives	broken-link=named,stale-backlink=named,missing-status-line=named,non-frontier-status-vector=named,unauthorised-frozen-edit=named,uncited-module-claim=named,gate-spec-block-mismatch=named,decision-log-out-of-order=named,receipt-line-unexpected=named
+row	Paired negatives	green
+observation	Paired negatives	negative.count	6
+observation	Paired negatives	ledger.red-rows	
+observation	Paired negatives	doc.findings	0
+observation	Paired negatives	doc.negatives	broken-link=named,stale-backlink=named,missing-status-line=named,non-frontier-status-vector=named,unauthorised-frozen-edit=named,uncited-module-claim=named,gate-spec-block-mismatch=named,decision-log-out-of-order=named,receipt-line-unexpected=named
+row	Mutants	green
+observation	Mutants	seed.compiler	/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4
+observation	Mutants	seed.chain	642e71c0dc822d21f86cbee15fedd29a6769b61ac56974dc59c84047af90906f
+observation	Mutants	seed.green	True
+observation	Mutants	seed.clean.executable	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/clean/driver
+observation	Mutants	seed.clean.argv	
+observation	Mutants	seed.clean.cwd	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/clean
+observation	Mutants	seed.clean.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Mutants	seed.clean.exit	ExitSuccess
+observation	Mutants	seed.clean.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Mutants	seed.clean.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Mutants	seed.clean.stdout-bytes	0
+observation	Mutants	seed.clean.digest	f68f2b6547aab9ea8bfaca100809d7ffa59af58a81f41e3c0f47d709c51a50a4
+observation	Mutants	seed.digest-equality-bypass.executable	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/digest-equality-bypass/driver
+observation	Mutants	seed.digest-equality-bypass.argv	
+observation	Mutants	seed.digest-equality-bypass.cwd	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/digest-equality-bypass
+observation	Mutants	seed.digest-equality-bypass.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Mutants	seed.digest-equality-bypass.exit	ExitFailure 1
+observation	Mutants	seed.digest-equality-bypass.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Mutants	seed.digest-equality-bypass.stderr-sha256	da9cd1b374123f158f6fe7e7bf9975ae76cd36e8977f8154debd1eb0a13f28f0
+observation	Mutants	seed.digest-equality-bypass.stdout-bytes	0
+observation	Mutants	seed.digest-equality-bypass.digest	b4345fc3607323ef03a3711c96e8b7b5068fc9e98c36726a24789d60775a18ed
+observation	Mutants	seed.snapshot-freshness-bypass.executable	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/snapshot-freshness-bypass/driver
+observation	Mutants	seed.snapshot-freshness-bypass.argv	
+observation	Mutants	seed.snapshot-freshness-bypass.cwd	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/snapshot-freshness-bypass
+observation	Mutants	seed.snapshot-freshness-bypass.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Mutants	seed.snapshot-freshness-bypass.exit	ExitFailure 1
+observation	Mutants	seed.snapshot-freshness-bypass.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Mutants	seed.snapshot-freshness-bypass.stderr-sha256	e61150774605dc9e6da61cb9bd975945e42c7db95ce055aba2336f2eef5560b4
+observation	Mutants	seed.snapshot-freshness-bypass.stdout-bytes	0
+observation	Mutants	seed.snapshot-freshness-bypass.digest	69fe62e58c0e38d63d8ecf6d0bdada8ee7ccb3bfbfa38e4a5b51e79fcb044bb3
+observation	Mutants	seed.bootstrap-path-bypass.executable	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/bootstrap-path-bypass/driver
+observation	Mutants	seed.bootstrap-path-bypass.argv	
+observation	Mutants	seed.bootstrap-path-bypass.cwd	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/bootstrap-path-bypass
+observation	Mutants	seed.bootstrap-path-bypass.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Mutants	seed.bootstrap-path-bypass.exit	ExitFailure 1
+observation	Mutants	seed.bootstrap-path-bypass.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Mutants	seed.bootstrap-path-bypass.stderr-sha256	8544abd7a1b5c85920d6b3d342cbf66650158431ff0c17147bb9da833e071247
+observation	Mutants	seed.bootstrap-path-bypass.stdout-bytes	0
+observation	Mutants	seed.bootstrap-path-bypass.digest	0376d52e797671cfec002f31a77d6ed39150356875227221533b5601cab29b70
+row	Discovery	green
+observation	Discovery	closure.stanzas	doc-check,gate-spec,plan-decisions,toolchain,validation-kernel,validation-runner
+observation	Discovery	subjects.mapped	4
+observation	Discovery	subjects.declared	4
+row	Challenge	green
+observation	Challenge	challenge.nonce	082995a4e27775897598979bd71e101b
+observation	Challenge	challenge.kind	pure predicate judged by the independent driver
+observation	Challenge	challenge.binary	absent
+observation	Challenge	challenge.spine	absent
+row	Observer	green
+observation	Observer	run.1.executable	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/clean/driver
+observation	Observer	run.1.argv	
+observation	Observer	run.1.cwd	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/clean
+observation	Observer	run.1.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.1.exit	ExitSuccess
+observation	Observer	run.1.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.1.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.1.stdout-bytes	0
+observation	Observer	run.1.digest	f68f2b6547aab9ea8bfaca100809d7ffa59af58a81f41e3c0f47d709c51a50a4
+observation	Observer	run.2.executable	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/digest-equality-bypass/driver
+observation	Observer	run.2.argv	
+observation	Observer	run.2.cwd	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/digest-equality-bypass
+observation	Observer	run.2.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.2.exit	ExitFailure 1
+observation	Observer	run.2.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.2.stderr-sha256	da9cd1b374123f158f6fe7e7bf9975ae76cd36e8977f8154debd1eb0a13f28f0
+observation	Observer	run.2.stdout-bytes	0
+observation	Observer	run.2.digest	b4345fc3607323ef03a3711c96e8b7b5068fc9e98c36726a24789d60775a18ed
+observation	Observer	run.3.executable	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/snapshot-freshness-bypass/driver
+observation	Observer	run.3.argv	
+observation	Observer	run.3.cwd	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/snapshot-freshness-bypass
+observation	Observer	run.3.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.3.exit	ExitFailure 1
+observation	Observer	run.3.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.3.stderr-sha256	e61150774605dc9e6da61cb9bd975945e42c7db95ce055aba2336f2eef5560b4
+observation	Observer	run.3.stdout-bytes	0
+observation	Observer	run.3.digest	69fe62e58c0e38d63d8ecf6d0bdada8ee7ccb3bfbfa38e4a5b51e79fcb044bb3
+observation	Observer	run.4.executable	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/bootstrap-path-bypass/driver
+observation	Observer	run.4.argv	
+observation	Observer	run.4.cwd	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/bootstrap-path-bypass
+observation	Observer	run.4.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.4.exit	ExitFailure 1
+observation	Observer	run.4.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.4.stderr-sha256	8544abd7a1b5c85920d6b3d342cbf66650158431ff0c17147bb9da833e071247
+observation	Observer	run.4.stdout-bytes	0
+observation	Observer	run.4.digest	0376d52e797671cfec002f31a77d6ed39150356875227221533b5601cab29b70
+observation	Observer	run.5.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.5.argv	run -v0 --jobs=1 --builddir=.build/source-admission-bootstrap --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 exe:extension-source-admission -- --cabal /Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 /Users/matthewnowak/.ghcup/bin/cabal build -v0 --builddir=.build/dist-native amoebius:test:runner-suite amoebius:test:oracle-runner
+observation	Observer	run.5.cwd	.
+observation	Observer	run.5.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.5.exit	ExitSuccess
+observation	Observer	run.5.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.5.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.5.stdout-bytes	0
+observation	Observer	run.5.digest	9767344fad2c1c671c488c552a721779c6a8a5588ffdc642bbc36de8a44b560b
+observation	Observer	run.6.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.6.argv	run -v0 --jobs=1 --builddir=.build/source-admission-bootstrap --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 exe:extension-source-admission -- --cabal /Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 /Users/matthewnowak/.ghcup/bin/cabal run -v0 --builddir=.build/dist-native amoebius:test:runner-suite -- ./.build/runs/phase-00/custody/suite
+observation	Observer	run.6.cwd	.
+observation	Observer	run.6.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.6.exit	ExitSuccess
+observation	Observer	run.6.stdout-sha256	a92e200809a1296258ef69271b8565c02591c75cb17ffa643daa898a28caeec8
+observation	Observer	run.6.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.6.stdout-bytes	75
+observation	Observer	run.6.digest	16bff4079f5f9083e3a567fc97e521cff844539047daa2b07c57eb7e8df48a71
+observation	Observer	run.7.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.7.argv	run -v0 --jobs=1 --builddir=.build/source-admission-bootstrap --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 exe:extension-source-admission -- --cabal /Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 /Users/matthewnowak/.ghcup/bin/cabal run -v0 --builddir=.build/dist-native amoebius:test:oracle-runner -- ./.build/runs/phase-00/custody/suite
+observation	Observer	run.7.cwd	.
+observation	Observer	run.7.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.7.exit	ExitSuccess
+observation	Observer	run.7.stdout-sha256	78b911897ffeef846fe64911b1e9936953cbb401123162a03c6049c65c61f6cf
+observation	Observer	run.7.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.7.stdout-bytes	6895
+observation	Observer	run.7.digest	4c8558006a923e1e04bbad95f839fc7c4c492ebecebb543ddfc599176abe5c15
+observation	Observer	run.8.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.8.argv	run -v0 --jobs=1 --builddir=.build/source-admission-bootstrap --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 exe:extension-source-admission -- --cabal /Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 /Users/matthewnowak/.ghcup/bin/cabal build -v0 --builddir=.build/dist-native amoebius:test:plan-decisions-suite amoebius:test:oracle-doc
+observation	Observer	run.8.cwd	.
+observation	Observer	run.8.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.8.exit	ExitSuccess
+observation	Observer	run.8.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.8.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.8.stdout-bytes	0
+observation	Observer	run.8.digest	8f0eccfc419ced56bec26d59d1462cda3a18bbfde21f438fa16adfb806958af5
+observation	Observer	run.9.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.9.argv	run -v0 --jobs=1 --builddir=.build/source-admission-bootstrap --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 exe:extension-source-admission -- --cabal /Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 /Users/matthewnowak/.ghcup/bin/cabal run -v0 --builddir=.build/dist-native amoebius:test:plan-decisions-suite -- ./.build/runs/phase-00/clean/suite
+observation	Observer	run.9.cwd	.
+observation	Observer	run.9.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.9.exit	ExitSuccess
+observation	Observer	run.9.stdout-sha256	0672cf5d0dfdb1469f61b689168ca2b50ca54df8d36e99d2d20d5a8edfec80fb
+observation	Observer	run.9.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.9.stdout-bytes	89
+observation	Observer	run.9.digest	4fb81520e05fdb4add567fdfcc79c356d4760b11c4b43a72f1558aff86354dd4
+observation	Observer	run.10.executable	/Users/matthewnowak/.ghcup/bin/cabal
+observation	Observer	run.10.argv	run -v0 --jobs=1 --builddir=.build/source-admission-bootstrap --with-compiler=/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 exe:extension-source-admission -- --cabal /Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4 /Users/matthewnowak/.ghcup/bin/cabal run -v0 --builddir=.build/dist-native amoebius:test:oracle-doc -- ./.build/runs/phase-00/clean/suite
+observation	Observer	run.10.cwd	.
+observation	Observer	run.10.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Observer	run.10.exit	ExitSuccess
+observation	Observer	run.10.stdout-sha256	b342f09c73c17697b3a7aa4ee23b22abd1c3ffbec219b13a9eebfee3ca915255
+observation	Observer	run.10.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Observer	run.10.stdout-bytes	15346
+observation	Observer	run.10.digest	96a37954b05e624af3c18b0832c374ac5485cd7a8d94d34102a2ff16db8194b9
+row	Authority/bypass	green
+observation	Authority/bypass	closure.validator-free	True
+observation	Authority/bypass	closure.product	artifact-calculus,binding-subject,budget-calculus,calculus-composition,capability-bind,capacity-topology,dsl-core,dsl-spine,evidence-calculus,execution-accelerator-folds,extension-admission,extension-calculi,extension-capabilities,extension-config,extension-conformance-gate,extension-contributions,extension-declaration,extension-graph,extension-laws-compositional,extension-laws-per-extension,extension-link,extension-monitoring,extension-security-laws,extension-spec,extension-surface,formal-model,kernel-steps,layout,lift-calculus,manifest-render,offline-language-types,provider-pulumi,provision-seal,scope-index,storage-geometry-folds,toolchain,vocabulary,workflow-calculus
+observation	Authority/bypass	subjects.validator	4
+row	Freshness	green
+observation	Freshness	source.opening	0953f20f5faa6f96a9e07f705c253da25ef0da4fd503d17f481f8b4b5a0f7da4
+observation	Freshness	source.closing	0953f20f5faa6f96a9e07f705c253da25ef0da4fd503d17f481f8b4b5a0f7da4
+observation	Freshness	run-root	./.build/runs/phase-00
+row	Qualification	green
+observation	Qualification	qualification	finite-seed-protocol
+observation	Qualification	matrix.precedes-clean	true
+observation	Qualification	seed.compiler	/Users/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc-9.12.4
+observation	Qualification	seed.chain	642e71c0dc822d21f86cbee15fedd29a6769b61ac56974dc59c84047af90906f
+observation	Qualification	seed.green	True
+observation	Qualification	seed.clean.executable	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/clean/driver
+observation	Qualification	seed.clean.argv	
+observation	Qualification	seed.clean.cwd	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/clean
+observation	Qualification	seed.clean.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Qualification	seed.clean.exit	ExitSuccess
+observation	Qualification	seed.clean.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Qualification	seed.clean.stderr-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Qualification	seed.clean.stdout-bytes	0
+observation	Qualification	seed.clean.digest	f68f2b6547aab9ea8bfaca100809d7ffa59af58a81f41e3c0f47d709c51a50a4
+observation	Qualification	seed.digest-equality-bypass.executable	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/digest-equality-bypass/driver
+observation	Qualification	seed.digest-equality-bypass.argv	
+observation	Qualification	seed.digest-equality-bypass.cwd	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/digest-equality-bypass
+observation	Qualification	seed.digest-equality-bypass.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Qualification	seed.digest-equality-bypass.exit	ExitFailure 1
+observation	Qualification	seed.digest-equality-bypass.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Qualification	seed.digest-equality-bypass.stderr-sha256	da9cd1b374123f158f6fe7e7bf9975ae76cd36e8977f8154debd1eb0a13f28f0
+observation	Qualification	seed.digest-equality-bypass.stdout-bytes	0
+observation	Qualification	seed.digest-equality-bypass.digest	b4345fc3607323ef03a3711c96e8b7b5068fc9e98c36726a24789d60775a18ed
+observation	Qualification	seed.snapshot-freshness-bypass.executable	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/snapshot-freshness-bypass/driver
+observation	Qualification	seed.snapshot-freshness-bypass.argv	
+observation	Qualification	seed.snapshot-freshness-bypass.cwd	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/snapshot-freshness-bypass
+observation	Qualification	seed.snapshot-freshness-bypass.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Qualification	seed.snapshot-freshness-bypass.exit	ExitFailure 1
+observation	Qualification	seed.snapshot-freshness-bypass.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Qualification	seed.snapshot-freshness-bypass.stderr-sha256	e61150774605dc9e6da61cb9bd975945e42c7db95ce055aba2336f2eef5560b4
+observation	Qualification	seed.snapshot-freshness-bypass.stdout-bytes	0
+observation	Qualification	seed.snapshot-freshness-bypass.digest	69fe62e58c0e38d63d8ecf6d0bdada8ee7ccb3bfbfa38e4a5b51e79fcb044bb3
+observation	Qualification	seed.bootstrap-path-bypass.executable	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/bootstrap-path-bypass/driver
+observation	Qualification	seed.bootstrap-path-bypass.argv	
+observation	Qualification	seed.bootstrap-path-bypass.cwd	/Users/matthewnowak/amoebius/.build/runs/phase-00/seed-protocol/seed/bootstrap-path-bypass
+observation	Qualification	seed.bootstrap-path-bypass.environment-policy	inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG
+observation	Qualification	seed.bootstrap-path-bypass.exit	ExitFailure 1
+observation	Qualification	seed.bootstrap-path-bypass.stdout-sha256	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+observation	Qualification	seed.bootstrap-path-bypass.stderr-sha256	8544abd7a1b5c85920d6b3d342cbf66650158431ff0c17147bb9da833e071247
+observation	Qualification	seed.bootstrap-path-bypass.stdout-bytes	0
+observation	Qualification	seed.bootstrap-path-bypass.digest	0376d52e797671cfec002f31a77d6ed39150356875227221533b5601cab29b70
+row	Cleanroom	green
+observation	Cleanroom	cleanroom.run-root	./.build/runs/phase-00
+observation	Cleanroom	cleanroom.tracked-unchanged	True
+row	Legacy closure	green
+observation	Legacy closure	hygiene.kernel-lines	3357
+observation	Legacy closure	hygiene.kernel-cap	3357
+observation	Legacy closure	hygiene.doc-check-lines	6046
+observation	Legacy closure	hygiene.doc-check-cap	7000
+observation	Legacy closure	hygiene.conditional-compilation-lines	0
+observation	Legacy closure	hygiene.run-modules	0
+observation	Legacy closure	hygiene.phase-literals	0
+observation	Legacy closure	hygiene.phase-tables	0
+observation	Legacy closure	hygiene.duplicate-vocabulary	0
+observation	Legacy closure	hygiene.product-duplicate-vocabulary	
+observation	Legacy closure	hygiene.verdict	green
+observation	Legacy closure	legacy.due	LTD-VAL-001,LTD-VAL-002,LTD-VAL-003,LTD-VAL-004,LTD-VAL-006,LTD-KRN-001,LTD-KRN-002,LTD-KRN-003
+row	Predecessor	green
+observation	Predecessor	predecessor	genesis
+row	Residue	green
+observation	Residue	residue.tracked-unchanged	True
+observation	Residue	residue.unverified	later-owned capabilities remain UNVERIFIED by construction
+row	Pass criterion	green
+observation	Pass criterion	pass-criterion	qualified-gate-pass

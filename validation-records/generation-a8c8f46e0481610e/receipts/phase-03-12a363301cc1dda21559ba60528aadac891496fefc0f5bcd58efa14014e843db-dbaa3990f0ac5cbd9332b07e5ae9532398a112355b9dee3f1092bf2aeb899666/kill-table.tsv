@@ -1,0 +1,41 @@
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:105	branch-swap	68618093f3bb->9f7dfa422a49	killed@vocab.host-grid,vocab.detect,vocab.apple-needs-arm64
+Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:169	branch-swap	584ff2cf9851->8df0d44cfaaf	killed@decode.section,spec.kind-replicas.zero,spec.kind-replicas.one
+Amoebius.Dsl.Import	src/dsl-spine/Amoebius/Dsl/Import.hs:88	field-drop	2b6d506f4bee->982e87093c8d	killed@consume.section,fake-apply.section,freeze.kind-single-objectstore.equivalent
+Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:99	boundary-shift	5bb1fb93aa7a->3146f3af8a9c	killed@decode.substrates.rke2-three-agent.dump,lower.substrates.rke2-three-agent.dump,plan.substrates.rke2-three-agent.dump
+Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:132	field-drop	e65a26325488->a4c9f85a728b	killed@consume.section,chain.section,fake-apply.section
+Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:97	branch-swap	5be0dae83c1a->9728b055a00d	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.kind-single-objectstore.app-deployment
+Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:117	constant-flip	91748d57bbd6->26fca8e56605	killed@dry-run.kind-single-objectstore.dump,dry-run.shape-swap-sibling.dump,dry-run.replicas-3-sibling.dump
+Amoebius.Dsl.Pipeline	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:206	branch-swap	0fcb09fdbf79->dc2afef9a38e	killed@render.kind-single-objectstore.objects,chain.kind-single-objectstore.dump,chain.kind-single-objectstore.manifest
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:133	constant-flip	68618093f3bb->bdf8020f51c4	killed@vocab.host-grid,decode.kind-single-objectstore.dump,lower.kind-single-objectstore.dump
+Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:196	list-truncation	584ff2cf9851->e21c7f970d7f	killed@decode.section,spec.cluster.ok,spec.root.ok
+Amoebius.Dsl.Import	src/dsl-spine/Amoebius/Dsl/Import.hs:89	field-drop	2b6d506f4bee->a8ff65a8f074	killed@freeze.section,freeze.hash.format,freeze.hash.independent
+Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:106	list-truncation	5bb1fb93aa7a->e26e95432f81	killed@decode.substrates.rke2-three-agent.dump,lower.substrates.rke2-three-agent.dump,plan.substrates.rke2-three-agent.dump
+Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:152	field-drop	e65a26325488->998f443ee6db	killed@decode.section,consume.section,chain.section
+Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:141	boundary-shift	5be0dae83c1a->e9c534981967	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.kind-single-objectstore.app-deployment
+Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:122	constant-flip	91748d57bbd6->fd15ff1ca3c6	killed@dry-run.kind-single-objectstore.dump,dry-run.shape-swap-sibling.dump,dry-run.replicas-3-sibling.dump
+Amoebius.Dsl.Pipeline	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:213	field-drop	0fcb09fdbf79->6f45cd9afe71	killed@render.substrates.rke2-three-agent.objects,claims.substrates.rke2-three-agent.volumes,render.substrates.rke2-three-agent.app-deployment
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:134	constant-flip	68618093f3bb->e4b3800f84a3	killed@vocab.host-grid,lanes.detection,lanes.profiles
+Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:232	constant-flip	584ff2cf9851->b52fe0f639e6	killed@spec.workload.pad-zero,decode.example.headroom-all-zero,pipeline.refusal.headroom-all-zero
+Amoebius.Dsl.Import	src/dsl-spine/Amoebius/Dsl/Import.hs:119	branch-swap	2b6d506f4bee->5eb7f7f8693e	killed@freeze.hash.twin,freeze.nested,freeze.parent
+Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:198	field-drop	5bb1fb93aa7a->f11c3221e01f	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:811:27: warning: [GHC-40910] [
+Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:162	field-drop	e65a26325488->47910b314526	killed@consume.section,chain.section,fake-apply.section
+Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:144	constant-flip	5be0dae83c1a->38ec43651939	killed@chain.table,case:step-sequence
+Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:122	list-truncation	91748d57bbd6->23601848f570	killed@dry-run.kind-single-objectstore.dump,dry-run.shape-swap-sibling.dump,dry-run.replicas-3-sibling.dump
+Amoebius.Dsl.Pipeline	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:215	field-drop	0fcb09fdbf79->9dd2014b4f7b	killed@render.substrates.rke2-three-agent.objects,claims.substrates.rke2-three-agent.volumes,render.substrates.rke2-three-agent.app-deployment
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:135	constant-flip	68618093f3bb->983089710ba6	killed@vocab.host-grid,lanes.detection,lanes.profiles
+Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:235	boundary-shift	584ff2cf9851->64149f32f0cb	killed@spec.workload.exact,spec.workload.pad-exact,spec.app.ok
+Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:214	field-drop	5bb1fb93aa7a->d2142be8c80c	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:811:27: warning: [GHC-40910] [
+Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:163	field-drop	e65a26325488->4a3c0837c56f	killed@consume.section,chain.section,fake-apply.section
+Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:144	boundary-shift	5be0dae83c1a->3d8f7c34503a	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.kind-single-objectstore.app-deployment
+Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:135	constant-flip	91748d57bbd6->96fa1153f301	killed@fake-apply.section,fake-apply.full.result,fake-apply.from-cutover.result
+Amoebius.Dsl.Pipeline	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:217	field-drop	0fcb09fdbf79->f1a5794e32b7	killed@decode.substrates.rke2-three-agent.dump,lower.substrates.rke2-three-agent.dump,plan.substrates.rke2-three-agent.dump
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:136	constant-flip	68618093f3bb->d70fb7af9682	killed@vocab.host-grid,lanes.detection,lanes.profiles
+Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:237	boundary-shift	584ff2cf9851->40b87914f025	killed@spec.workload.exact,spec.workload.pad-exact,spec.workload.pad-one-axis
+Amoebius.Dsl.Decode	src/dsl-spine/Amoebius/Dsl/Decode.hs:229	list-truncation	5bb1fb93aa7a->eba4035e026c	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:811:27: warning: [GHC-40910] [
+Amoebius.Dsl.Lower	src/dsl-spine/Amoebius/Dsl/Lower.hs:178	branch-swap	e65a26325488->7ed3f09aaabb	killed@lower.example.kind-single-objectstore,lower.example.shape-swap-sibling,lower.example.replicas-3-sibling
+Amoebius.Kernel.Step	src/kernel-steps/Amoebius/Kernel/Step.hs:144	list-truncation	5be0dae83c1a->bbd83739e9ca	killed@render.kind-single-objectstore.objects,claims.kind-single-objectstore.volumes,render.kind-single-objectstore.app-deployment
+Amoebius.Kernel.Interpret	src/kernel-steps/Amoebius/Kernel/Interpret.hs:143	list-truncation	91748d57bbd6->da35d62de65f	stillborn:src/provision-seal/Amoebius/Capacity/Provision.hs:811:27: warning: [GHC-40910] [
+Amoebius.Dsl.Pipeline	src/dsl-spine/Amoebius/Dsl/Pipeline.hs:218	field-drop	0fcb09fdbf79->3eb75400684e	killed@render.substrates.rke2-three-agent.objects,claims.substrates.rke2-three-agent.volumes,render.substrates.rke2-three-agent.app-deployment
+Amoebius.Vocabulary	src/vocabulary/Amoebius/Vocabulary.hs:207	constant-flip	68618093f3bb->d9766413bb4b	killed@vocab.labels,spec.name.host.long,case:lanes-of
+Amoebius.Dsl.Spec	src/dsl-spine/Amoebius/Dsl/Spec.hs:255	boundary-shift	584ff2cf9851->5284f68964ef	killed@decode.section,spec.app.ok,freeze.hash.format
+summary	killed=36	viable=36	stillborn=4

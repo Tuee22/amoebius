@@ -90,6 +90,14 @@ and `transfer` remove — with a runner that accepts only a workflow whose set i
 combinator that shrinks the set another way. Separately authored Haskell compile-fail cases cover a workflow
 that ends owing, a transfer without its condition, and a discharge of an obligation the workflow never held;
 current delivery and validation remain in the plan.
+
+**Nominal index contract.** Before a linked workflow satisfies the extension barrier, its before/after
+obligation indices must have nominal roles; scope-bearing component and declaration indices obey the same
+rule. `Coerce` cannot discard an outstanding obligation or retag a scope. Legal and illegal compiler twins
+check that boundary, and the extension path must consume the real Build/Deploy/Observe ledger rather than
+merely import the calculus. [DL-0030](../decision_log.md#dl-0030--extension-admission-binds-source-scope-and-dependency-closure) assigns the linking and coercion controls to [Phase 6](../../DEVELOPMENT_PLAN/phase_06_extension_admission_attested_scope.md); the
+balanced child and release workflow remains owned by Phase 7. These are type and pure-model obligations,
+not observations of provider deletion or crash recovery.
 This is the same shape as a region that ends holding an unreaped artifact
 ([`jit_artifact_doctrine.md` §5](./jit_artifact_doctrine.md#5-materialize-consume-reap)).
 

@@ -54,6 +54,7 @@ judgeFindings rows =
 -- and never from the renderer's own expectation column.
 judgeNegatives :: [[Text]] -> [LedgerRow]
 judgeNegatives rows =
+  expect "negative.discovery" (Text.intercalate "," (sort (map fst expectedNegatives))) (Text.intercalate "," (sort [name | name : _ <- rows])) :
   [ expect ("negative." <> name) code (if code `elem` observedCodes name then code else "absent:" <> Text.intercalate "," (observedCodes name))
   | (name, code) <- expectedNegatives
   ]
@@ -72,6 +73,7 @@ expectedNegatives =
   , ("uncited-module-claim", "DOC-HONESTY-MOOD")
   , ("gate-spec-block-mismatch", "DOC-GATE-SPEC-MISMATCH")
   , ("decision-log-out-of-order", "DOC-DECISION-LOG-ORDER")
+  , ("receipt-line-unexpected", "PLAN-STATUS-RECEIPT-UNEXPECTED")
   ]
 
 data LedgerRow = LedgerRow
@@ -210,7 +212,7 @@ expectedLegacy =
   , ("LTD-SEED-002", "jitml_rederivation"), ("LTD-BOOT-001", "toolchain_spike")
   , ("LTD-KRN-001", "documentation_suite"), ("LTD-KRN-002", "documentation_suite"), ("LTD-KRN-003", "documentation_suite")
   , ("LTD-DSL-001", "typed_spine"), ("LTD-DSL-002", "typed_spine"), ("LTD-DSL-003", "witness_manifests_capacity_storage")
-  , ("LTD-DSL-004", "typed_spine"), ("LTD-DSL-005", "extension_admission_attested_scope")
+  , ("LTD-DSL-004", "substrates_lanes_image_recipe"), ("LTD-DSL-005", "extension_admission_attested_scope")
   , ("LTD-DSL-006", "ui_program_language_binding"), ("LTD-DSL-007", "extension_admission_attested_scope")
   , ("LTD-DSL-008", "extension_admission_attested_scope"), ("LTD-DSL-009", "typed_spine")
   , ("LTD-LIB-001", "dsl_barrier"), ("LTD-LIB-002", "later-phases-track"), ("LTD-UI-001", "ui_program_release")
@@ -218,46 +220,72 @@ expectedLegacy =
   ]
 
 expectedDecisions :: [Text]
-expectedDecisions = ["DL-0001", "DL-0002", "DL-0003", "DL-0004", "DL-0005", "DL-0006", "DL-0007", "DL-0008", "DL-0009", "DL-0010", "DL-0011", "DL-0012", "DL-0013", "DL-0014", "DL-0015", "DL-0016", "DL-0017", "DL-0018", "DL-0019", "DL-0020", "DL-0021", "DL-0022", "DL-0023"]
+expectedDecisions = ["DL-0001", "DL-0002", "DL-0003", "DL-0004", "DL-0005", "DL-0006", "DL-0007", "DL-0008", "DL-0009", "DL-0010", "DL-0011", "DL-0012", "DL-0013", "DL-0014", "DL-0015", "DL-0016", "DL-0017", "DL-0018", "DL-0019", "DL-0020", "DL-0021", "DL-0022", "DL-0023", "DL-0024", "DL-0025", "DL-0026", "DL-0027", "DL-0028", "DL-0029", "DL-0030", "DL-0031", "DL-0032", "DL-0033", "DL-0034", "DL-0035", "DL-0036"]
 
 expectedFrozenAmendments :: [(Text, Text)]
 expectedFrozenAmendments =
-  [ ("AGENTS.md", "DL-0019")
-  , ("documents/documentation_standards.md", "DL-0015")
-  , ("documents/engineering/repository_layout_doctrine.md", "DL-0019")
+  [ ("AGENTS.md", "DL-0025")
+  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "DL-0035")
+  , ("DEVELOPMENT_PLAN/development_plan_phase_model.md", "DL-0026")
+  , ("DEVELOPMENT_PLAN/development_plan_standards.md", "DL-0026")
+  , ("DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md", "DL-0036")
+  , ("documents/documentation_standards.md", "DL-0025")
+  , ("documents/engineering/capability_extension_doctrine.md", "DL-0030")
+  , ("documents/engineering/cluster_topology_doctrine.md", "DL-0032")
+  , ("documents/engineering/dsl_doctrine.md", "DL-0033")
+  , ("documents/engineering/extension_conformance_doctrine.md", "DL-0030")
+  , ("documents/engineering/gate_runner_doctrine.md", "DL-0036")
+  , ("documents/engineering/gateway_migration_model_doctrine.md", "DL-0027")
   , ("documents/engineering/generated_artifacts_doctrine.md", "DL-0020")
-  , ("documents/engineering/validation_frame_doctrine.md", "DL-0022")
-  , ("documents/engineering/substrate_doctrine.md", "DL-0022")
-  , ("documents/engineering/gate_runner_doctrine.md", "DL-0019")
-  , ("documents/engineering/testing_spoof_resistance.md", "DL-0021")
-  , ("DEVELOPMENT_PLAN/development_plan_standards.md", "DL-0019")
-  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "DL-0022")
-  , ("DEVELOPMENT_PLAN/development_plan_phase_model.md", "DL-0020")
-  , ("DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md", "DL-0021")
-  , ("documents/engineering/cluster_topology_doctrine.md", "DL-0023")
-  , ("documents/engineering/service_capability_doctrine.md", "DL-0023")
-  , ("documents/engineering/testing_doctrine.md", "DL-0023")
+  , ("documents/engineering/image_build_doctrine.md", "DL-0033")
+  , ("documents/engineering/release_lifecycle_doctrine.md", "DL-0028")
+  , ("documents/engineering/storage_lifecycle_doctrine.md", "DL-0028")
+  , ("documents/engineering/ui_realtime_coordination_doctrine.md", "DL-0028")
+  , ("documents/illegal_state/illegal_state_lifecycle.md", "DL-0028")
+  , ("documents/engineering/pulumi_iac_doctrine.md", "DL-0032")
+  , ("documents/engineering/repository_layout_doctrine.md", "DL-0033")
+  , ("documents/engineering/resource_capacity_doctrine.md", "DL-0032")
+  , ("documents/engineering/resource_capacity_folds.md", "DL-0032")
+  , ("documents/engineering/service_capability_doctrine.md", "DL-0032")
+  , ("documents/engineering/substrate_doctrine.md", "DL-0033")
+  , ("documents/engineering/testing_doctrine.md", "DL-0031")
+  , ("documents/engineering/testing_spoof_resistance.md", "DL-0027")
+  , ("documents/engineering/validation_frame_doctrine.md", "DL-0025")
+  , ("documents/engineering/workflow_calculus_doctrine.md", "DL-0030")
   ]
 
 -- These are independent exact expectations for every frozen body amended in
 -- the current validation-record and toolchain decision series.
 expectedFrozenAmendmentDigests :: [(Text, Text)]
 expectedFrozenAmendmentDigests =
-  [ ("AGENTS.md", "f8ccc140627f68ebe65475de2f296b82e567bd76829d78d21a2f16280e1697ef")
-  , ("documents/documentation_standards.md", "dc00a283b4f6c3a17b9790d6738f1b5d8856e19129e3c3e7915258cdf2f91fff")
-  , ("documents/engineering/repository_layout_doctrine.md", "3124452f70262d851c54a226cf955b2e9115431236d6c5723c72818ddb1db57f")
+  [ ("AGENTS.md", "7be90c67243b16190ea0e617001abffcbc1bfc2b4e964a009237a8a9ea497e4a")
+  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "ba79ad93b92b9f598830b36cccc400c766f2fe3023cf2b8abd5715a9254f1709")
+  , ("DEVELOPMENT_PLAN/development_plan_phase_model.md", "1136bf4ed4c58706bbf1b6b56be94fc53ac3f92c9ccdc0d23541818cb6029da4")
+  , ("DEVELOPMENT_PLAN/development_plan_standards.md", "4c9e6cd0a1807fd567d016c957b4e1ab89a007a2dcd8e5fa8b9a25274da9d540")
+  , ("DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md", "667104f4613154482cc5b833131bea2dd6e2287adec1a6f0d72779dba1b92072")
+  , ("documents/documentation_standards.md", "a4106423d4b91b09e0c7d06ccd77e11ac3d803df225ef5f975d7aa34b77581f6")
+  , ("documents/engineering/capability_extension_doctrine.md", "b49391608c652002512a1e96e16d8c851d3ea9c5ee74649184d55a8bc048cb4f")
+  , ("documents/engineering/cluster_topology_doctrine.md", "8bd3a30192bb5c5a503d2d83810d76643e4d00b2e4499bf7e090b810165b3a76")
+  , ("documents/engineering/dsl_doctrine.md", "04a07eb05059211cee20e41124b57a4d142a6c17d5f72ba1475680dee60ba897")
+  , ("documents/engineering/extension_conformance_doctrine.md", "fff6ab90d9326aa71bf9a2132f1b45de1c573fe2975a9796b37cf000bd807980")
+  , ("documents/engineering/gate_runner_doctrine.md", "4fc1b68341f849fd59696c789eae9d56dc728e0ee53468d522867ca6c4760161")
+  , ("documents/engineering/gateway_migration_model_doctrine.md", "e631499a6a16cbf4e410ba0aa766163356fbc5fc922dca5a8d37f896e74489a6")
   , ("documents/engineering/generated_artifacts_doctrine.md", "5dfae009252ba074136652107c465097eb9ef06dbbaaf7b768f4fdd2109ee763")
-  , ("documents/engineering/validation_frame_doctrine.md", "d6959a127d938e597257c74c5f0e5e090de721a94e3a90f96613000a0f3196b5")
-  , ("documents/engineering/substrate_doctrine.md", "382de47ea27e3404d43f36f1e3541aa3cd98f0cdea8c6eb25d14fd8c8bae0c78")
-  , ("documents/engineering/gate_runner_doctrine.md", "2e860dc817200dcf5ef9d56fc54482028e3709b89c44caeaca492cc32a4b6f30")
-  , ("documents/engineering/testing_spoof_resistance.md", "553a845f6f715e661093218a82c168e228abf77733f65d7b8935fdc35f683e8c")
-  , ("DEVELOPMENT_PLAN/development_plan_standards.md", "3a2f52668a26a488366038572c4e0ff15c644da71a06307469d984ab55e702c5")
-  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "db119e16d46d3f14e8c648dcb49c4c91fda35dda7e9a0db80d063720fdf2d6cc")
-  , ("DEVELOPMENT_PLAN/development_plan_phase_model.md", "445f50e3de44f577ad4f729473d716330f68f82279b6b97ced71d09ddff7bec6")
-  , ("DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md", "1a8a4cbc9987e83fef478291c588b345dd4e72dbd9bbdb5d358d526415aa1eea")
-  , ("documents/engineering/cluster_topology_doctrine.md", "24634261aba8b9038afa8080a26d2be3f0485632fe61f5399adc46652fd62ff9")
-  , ("documents/engineering/service_capability_doctrine.md", "e728bf72bf98f534ddfb8fa25b5c6ebbe9cb48aa0745ae9b1e859b9ded45b5d5")
-  , ("documents/engineering/testing_doctrine.md", "9c0303f08df8dd1c76e15020f2713a81e93eaf3b10b04793f898ccf1960d0050")
+  , ("documents/engineering/image_build_doctrine.md", "1fbdd374a3c78146aef8486ce31f4026356b3d8856c67e9281e072683bdc92ca")
+  , ("documents/engineering/release_lifecycle_doctrine.md", "efddb925672f5086f77e91e3bc70acd701985aec9690989effd704dc3aa87775")
+  , ("documents/engineering/storage_lifecycle_doctrine.md", "735104f10f59ea24ada4b608722268f90f9ae103cf47ff32dbb85e5db2a6d0a9")
+  , ("documents/engineering/ui_realtime_coordination_doctrine.md", "e7cae4b084e066ecb1c11a86f1a4084a0f4e43f17fef157fbac2d534af13000d")
+  , ("documents/illegal_state/illegal_state_lifecycle.md", "415dc6a76ed763017f7893240b5e3b684914108d73ff42778acb12349d3eeb84")
+  , ("documents/engineering/pulumi_iac_doctrine.md", "03887129e8d058a9c11796afb6802d123d67f23e9e027f861911146e47a0710b")
+  , ("documents/engineering/repository_layout_doctrine.md", "2e5cdd0506c42722463fa3727d1ac2e6ec57a01bb3c41563f18d4495b1b73e4a")
+  , ("documents/engineering/resource_capacity_doctrine.md", "9da1a36d04e71eeb62ed8d19eaafa51f45f1e64e574169272132730557affc26")
+  , ("documents/engineering/resource_capacity_folds.md", "0005bdd4b9cba4c4077666d270dee20cf62b4373ad31548718d32ffa49de9674")
+  , ("documents/engineering/service_capability_doctrine.md", "b1e5f1e55ade47e3c9ff2b15fb40df78b470878943313e6f8326050f5900607b")
+  , ("documents/engineering/substrate_doctrine.md", "c3a29d025f2555a6fb13f6e9418d40f6f107d5feb39206b75724a5cca9a8fab8")
+  , ("documents/engineering/testing_doctrine.md", "9cb5839096e92d787c67cbcf6fa0183c148c2203275dccf0e2a9a5f86002ee61")
+  , ("documents/engineering/testing_spoof_resistance.md", "c163e53389da71a20c30b5fd44a4641968b598381fe00625e24ae7c6cffe8f14")
+  , ("documents/engineering/validation_frame_doctrine.md", "7d8db0a1730a300d5a6b57fdd8c0d9c3b17d9e7323fd8edbc6f108dac691ca91")
+  , ("documents/engineering/workflow_calculus_doctrine.md", "c39af56f17e3f7372817b0c2cbc0d044cd9f5cc7ac1a6d6c5a5c9768bbcd5cca")
   ]
 
 -- Independent admission expectations for the narrow tracked evidence class.

@@ -47,10 +47,8 @@ Live effects also require the preceding named barriers in [the phase model](deve
 
 The tracker previously recorded Phase 52 and every earlier gate as Done. The inspected Apple checkout was on
 macOS `arm64`, but the 2026-09-08 inspection found no transferred predecessor receipt, matching original candidate, bootstrap
-inputs, or authenticated source-repository cache. The existing Phase-53 dispatcher also acquires the
-Linux/`x86_64`-only `GenesisTrust` token before reaching its Apple runner. Native toolchain acquisition and
-the predecessor evidence must be bound without relaxing the original genesis assumption or substituting
-tracker status for execution evidence.
+inputs, or authenticated source-repository cache. The old Linux/x86_64-only bootstrap requirement is retired by DL-0025. Native GHCup/GHC version admission
+and the predecessor evidence remain required; tracker status cannot substitute for execution evidence.
 
 The Haskell subject, independent oracle, paired negatives, six production mutation selectors, runner, and
 typed gate/resource contracts exist. Serialized native direct-source component diagnostics in that Apple
@@ -112,7 +110,7 @@ remains phase-local and cannot be supplied by this prose.
 | `Observer` | The outer Haskell supervisor records absolute argv and exits for `uname`, `xcode-select`, `sysctl`, `df`, Homebrew, Colima, and Docker; Colima inventory, Docker-context inventory, and the active Docker context before/after; host/frame/engine/image architecture; guest `binfmt_misc` registrations; container stdout; and cleanup inventory. |
 | `Authority/bypass` | A unique Phase-53 profile and image reference bound the mutable scope. Colima/Lima/Docker root and selector environment overrides are cleared. Colima is started with host mounts, ambient templates, active-context mutation, SSH-agent/config integration, Kubernetes, and binfmt emulation disabled. Only that profile and image may be created; no foreign profile, cluster, registry, published tag, provider-cloud resource, or emulation path is admitted. |
 | `Freshness` | The run root, profile, and image name are newly absent; source and Phase-52 receipt precede mutation; floor and capacity preflight precede provider ensure/start; observations are regenerated; opening and closing source identities match. |
-| `Qualification` | The fixed clean row and six-mutant corpus qualify the Haskell harness with pinned absolute compiler/store, `--jobs=1`, and offline resolution before the live verdict is admitted. |
+| `Qualification` | The fixed clean row and six-mutant corpus qualify the Haskell harness with version-compatible native GHC selected by absolute path, an explicit package store, `--jobs=1`, and offline resolution before the live verdict is admitted. |
 | `Cleanroom` | Generated recipes, logs, and compiler products remain below `.build/runs/phase-53/**`; the exact owned image, Colima profile, and separate runtime data are destroyed in an unconditional bracket and Colima/Docker-context inventories return to their pre-run values. |
 | `Legacy closure` | Phase 53 owns no legacy ID; the acquired legacy reverse map must remain empty for this ordinal. |
 | `Predecessor` | Authenticated `ImmediatePredecessorPass` for Phase 52 in the admitted certification generation, plus the accepted verifier's current compatibility decision under [§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass). Missing, forged, revoked, incompatible, or wrong-phase evidence refuses before any phase effect. Historical source identity remains recorded; reuse requires unchanged relevant dependency and acceptance closures. |

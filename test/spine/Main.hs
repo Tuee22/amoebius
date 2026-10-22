@@ -9,6 +9,7 @@ module Main (main) where
 
 import Control.Exception (SomeException, try)
 import SpineCapacity (capacitySection)
+import SpineSubstrates (substrateSection)
 import SpineDifferential (differentialSection)
 import SpineFake (chainSection, fakeImage, interpretSection)
 import SpineSections
@@ -20,7 +21,7 @@ import SpineSections
   , stagesSection
   , vocabularySection
   )
-import System.Directory (createDirectoryIfMissing, makeAbsolute)
+import System.Directory (createDirectoryIfMissing, exeExtension, makeAbsolute)
 import System.Environment (getArgs, getProgName)
 import System.Exit (die)
 import System.FilePath ((</>))
@@ -29,7 +30,7 @@ import System.Timeout (timeout)
 main :: IO ()
 main = do
   name <- getProgName
-  if name == "kubectl"
+  if name `elem` ["kubectl", "kubectl" <> exeExtension]
     then fakeImage
     else do
       arguments <- getArgs
@@ -51,6 +52,7 @@ run suite = do
   guarded suite "interpret" (interpretSection suite)
   guarded suite "endpoint" (endpointSection suite)
   guarded suite "capacity" (capacitySection suite)
+  guarded suite "substrates" (substrateSection suite)
   writeFile (suite </> "complete.marker") "complete\n"
 
 -- | Run one section under a clock; a failure or an overrun leaves a marker named for the

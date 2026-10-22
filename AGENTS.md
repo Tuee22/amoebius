@@ -14,7 +14,7 @@ not duplicate, summarize, qualify, or override this file; the documentation chec
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: CLAUDE.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_dsl_barrier.md, README.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md
+**Referenced by**: CLAUDE.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_dsl_barrier.md, README.md, documents/decision_log.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -64,7 +64,7 @@ Markdown may be checked for documentation structure, links, and status syntax, b
 into product behaviour, a semantic test expectation, a coverage registry, a generator input, or a validation
 verdict. Those executable declarations and their independent expectations are Haskell.
 
-`pb` may make only the minimal platform distinction needed to establish the pinned toolchain beneath
+`pb` may make only the minimal platform distinction needed to establish a version-compatible toolchain beneath
 `.build/**`, build the source-bound Haskell binary, and replace itself with that exact binary via `exec` while
 forwarding every user argument unchanged. Haskell owns host-floor decisions, help, version, validation, and
 every public command. Python must not implement product behavior, dispatch a user command, decide or
@@ -109,10 +109,14 @@ all of its predecessors. That barrier requires every source-migration query—in
 through the shipped `amoebius` binary, and every hardware phase binds that receipt and runs a corpus example
 through its own subject. Before `BOOTSTRAP_HANDOFF` passes, `pb` is not an admissible validation transport: every
 phase up to and including `DSL_BARRIER` builds and invokes the exact source-bound Haskell executable directly
-from a pin-verified, network-independent toolchain input. The seven pinned bootstrap files require no
-operator keyring or GPG verification; their signature files are opaque digest-checked inputs, and publisher
-identity remains unverified
-([DL-0017](documents/decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring)).
+using version-compatible native GHCup and GHC. Version checks are sufficient toolchain admission: no
+archive, executable digest pin, signature, prepared bootstrap file set, operating-system, CPU-architecture,
+GPU, device, container/VM engine, privileged account, or specific host is required before `DSL_BARRIER`.
+All substrate and hardware observations in those gates are supplied Haskell values or fake boundaries;
+generic preflight must not discover hardware. Installed native tool paths are explicit read-only inputs;
+Cabal is an available build tool rather than a digest-pinned prerequisite. Compiler correctness remains an
+assumption. Source and receipt hashes retain their separate custody role
+([DL-0025](documents/decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier)).
 Their `pb validate phase NN` spelling is the future public target, not
 evidence that the unvalidated bootstrap ran correctly.
 

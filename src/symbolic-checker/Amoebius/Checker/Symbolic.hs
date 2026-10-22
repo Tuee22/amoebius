@@ -1,9 +1,10 @@
 
 
--- | Amoebius-owned inductive safety checking over the Phase-11 formal 'Model'.
+-- | Diagnostic induction queries over the formal 'Model'.
 --
--- The checker owns the translation and induction schema.  A resolved absolute Z3
--- path is injected by the caller; no executable is discovered through ambient PATH.
+-- The checker owns the translation and induction schema. The caller supplies an
+-- absolute executable path, which carries no decision authority. Parsed responses
+-- remain inconclusive; this parked API has no positive proof constructor.
 -- The supported proof fragment is quantifier-free linear integer arithmetic plus
 -- booleans.  Every other Model constructor is classified explicitly as unsupported,
 -- so totality does not turn a partial encoding into a proof.
@@ -12,7 +13,6 @@ module Amoebius.Checker.Symbolic
   , mkSolver
   , UnsupportedFeature (..)
   , ObligationKind (..)
-  , InductionWitness (..)
   , InductionCounterexample (..)
   , SymbolicResult (..)
   , SymbolicVerdict (..)
@@ -53,11 +53,6 @@ data ObligationKind
   | StepCase Name Name [Value]
   deriving stock (Eq, Ord, Show)
 
-data InductionWitness = InductionWitness
-  { witnessObligations :: [(ObligationKind, String)]
-  }
-  deriving stock (Eq, Ord, Show)
-
 data InductionCounterexample = InductionCounterexample
   { counterexampleObligation :: ObligationKind
   , counterexampleQueryDigest :: String
@@ -66,8 +61,7 @@ data InductionCounterexample = InductionCounterexample
   deriving stock (Eq, Ord, Show)
 
 data SymbolicResult
-  = Inductive InductionWitness
-  | NotInductive InductionCounterexample
+  = NotInductive InductionCounterexample
   | Unsupported [UnsupportedFeature]
   | Inconclusive ObligationKind String
   deriving stock (Eq, Ord, Show)
@@ -135,24 +129,22 @@ runObligations
   -> [(ObligationKind, String)]
   -> [Obligation]
   -> IO (Either SymbolicError SymbolicResult)
-runObligations _ passed [] = pure (Right (Inductive (InductionWitness (reverse passed))))
+runObligations _ passed [] = pure (Right (case reverse passed of
+  (kind, _) : _ -> Inconclusive kind "UNADMITTED-SOLVER: unsat responses do not establish induction"
+  [] -> Unsupported [NoSafetyInvariants]))
 runObligations solver passed (obligation : rest) = do
   outcome <- runSolver solver obligation
   case outcome of
     Left problem -> pure (Left problem)
     Right (SolverUnknown reason, _) ->
-      pure (Right (Inconclusive (obligationKind obligation) reason))
+      pure (Right (Inconclusive (obligationKind obligation) ("UNADMITTED-SOLVER: unknown response: " <> reason)))
     Right (SolverUnsat, _) ->
       runObligations solver ((obligationKind obligation, digest query) : passed) rest
     Right (SolverSat, solverModel) ->
-      pure (Right (counterexample solverModel))
+      pure (Right (Inconclusive (obligationKind obligation)
+        ("UNADMITTED-SOLVER: sat response is an unverified counterexample\n" <> solverModel)))
  where
   query = obligationQuery obligation
-  counterexample solverModel = NotInductive InductionCounterexample
-    { counterexampleObligation = obligationKind obligation
-    , counterexampleQueryDigest = digest query
-    , counterexampleSolverModel = solverModel
-    }
 
 runSolver :: Solver -> Obligation -> IO (Either SymbolicError (SolverStatus, String))
 runSolver (Solver path) obligation = do

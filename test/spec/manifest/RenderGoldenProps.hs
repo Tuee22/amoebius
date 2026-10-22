@@ -3,6 +3,7 @@
 module RenderGoldenProps
   ( renderInvariantFailures
   , runRenderGoldenProps
+  , renderFixture
   ) where
 
 import Amoebius.Capacity.Provision (ProvisionedSpec, provisionedPlacement, provisionedRenderSources)
@@ -17,11 +18,15 @@ import Amoebius.Capacity.RenderSource
   , renderSourceIdentity
   , renderSourceReconcileMode
   , renderSourceWitness
+  , renderSourceOwner
   )
 import Amoebius.Capacity.Vector (ResourceVector (..))
 import Amoebius.Vocabulary (Quantity (..))
 import Amoebius.Capability.Types qualified as Capability
 import Amoebius.Manifest (renderAll)
+import Amoebius.Manifest.Render (RenderRefusal (UnattestedScope))
+import Amoebius.Scope.Attested (attest, principalAttestation, scopeStamp)
+import Amoebius.Test.ScopeFixture (fixtureIdentityText)
 import Amoebius.Manifest.K8sObject
 import Amoebius.Placement.Witness (placedPlacement)
 import BindFixtures (CapabilityFixture (..), capabilityFixtures)
@@ -47,6 +52,14 @@ import Test.QuickCheck
   , stdArgs
   )
 import Text.Read (readMaybe)
+
+renderFixture :: ProvisionedSpec -> Either RenderRefusal [K8sObject]
+renderFixture sealed = do
+  identity <- either (const (Left (UnattestedScope "fixture identity"))) Right (fixtureIdentityText "fixture" "renderer")
+  nested <- either (const (Left (UnattestedScope "fixture scope"))) Right $ attest (principalAttestation identity) $ \scope ->
+    renderAll (Map.fromList [(renderSourceOwner source, scopeStamp scope) |
+      source <- Map.elems (provisionedRenderSourceMap (provisionedRenderSources sealed))]) sealed
+  nested
 
 renderInvariantFailures :: ProvisionedSpec -> [K8sObject] -> [Text]
 renderInvariantFailures sealed objects =
@@ -317,5 +330,5 @@ propLegalRender (GeneratedRenderCase selected) =
   assertion = case provisionFixture fixture shape of
     Left problem -> counterexample (show problem) (property False)
     Right sealed ->
-      let failures = renderInvariantFailures sealed (either (error . show) id (renderAll sealed))
+      let failures = renderInvariantFailures sealed (either (error . show) id (renderFixture sealed))
        in counterexample (show failures) (property (null failures))

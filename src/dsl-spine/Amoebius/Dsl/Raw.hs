@@ -10,6 +10,10 @@ module Amoebius.Dsl.Raw
   , RawCluster (..)
   , RawTopology (..)
   , RawKind (..)
+  , RawRke2 (..)
+  , RawQuorum (..)
+  , RawThree (..)
+  , RawFive (..)
   , RawHost (..)
   , RawApp (..)
   , RawNeed (..)
@@ -18,6 +22,12 @@ module Amoebius.Dsl.Raw
   , RawPod (..)
   , RawDeployment (..)
   , RawBinding (..)
+  , RawEngineRuntime (..)
+  , RawInferenceFamily (..)
+  , RawInferenceBinding (..)
+  , RawCacheParameters (..)
+  , RawExtensionParameters (..)
+  , RawExtensionRequest (..)
   , RawShape (..)
   , RawDistribution (..)
   , rootDecoder
@@ -38,6 +48,10 @@ data RawHost = RawHost
   , hostMemory :: Natural
   , hostEphemeral :: Natural
   , hostPods :: Natural
+  , hostOs :: Text
+  , hostArch :: Text
+  , hostGpu :: Bool
+  , hostTaints :: [Text]
   }
   deriving stock (Eq, Generic, Show)
   deriving anyclass (FromDhall, ToDhall)
@@ -51,8 +65,25 @@ data RawKind = RawKind
 
 -- | The one topology this phase spells. A single alternative is still a union in the
 -- authored text, so its codec is written by hand.
-newtype RawTopology = KindTopology RawKind
-  deriving stock (Eq, Show)
+data RawThree = RawThree {server1 :: Text, server2 :: Text, server3 :: Text}
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (FromDhall, ToDhall)
+
+data RawFive = RawFive {serverA :: Text, serverB :: Text, serverC :: Text, serverD :: Text, serverE :: Text}
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (FromDhall, ToDhall)
+
+data RawQuorum = Single Text | Three RawThree | Five RawFive
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (FromDhall, ToDhall)
+
+data RawRke2 = RawRke2 {rke2Servers :: RawQuorum, rke2Agents :: [Text]}
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (FromDhall, ToDhall)
+
+data RawTopology = KindTopology RawKind | Rke2Topology RawRke2
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (FromDhall, ToDhall)
 
 data RawCluster = RawCluster
   { clusterName :: Text
@@ -113,6 +144,45 @@ data RawBinding = RawBinding
   { bindingNeed :: Text
   , bindingProvider :: Text
   , bindingShape :: RawShape
+  , bindingInference :: Maybe RawInferenceBinding
+  }
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (FromDhall, ToDhall)
+
+data RawEngineRuntime = AppleMetal | Cuda | LinuxCpu
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (FromDhall, ToDhall)
+
+data RawInferenceFamily = LlamaCpp | WhisperCpp | Onnx | Vllm | Pytorch | Diffusers | Transformers | Audiveris
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (FromDhall, ToDhall)
+
+data RawInferenceBinding = RawInferenceBinding
+  { engineRuntime :: RawEngineRuntime
+  , engineFamily :: RawInferenceFamily
+  }
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (FromDhall, ToDhall)
+
+data RawCacheParameters = RawCacheParameters
+  { cacheBudgetBytes :: Natural
+  , cacheTemporaryBytes :: Natural
+  , cacheFirstMissConcurrency :: Natural
+  }
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (FromDhall, ToDhall)
+
+data RawExtensionParameters
+  = BuildCacheParameters RawCacheParameters
+  | CoordinationParameters Text
+  | InferenceParameters Natural
+  | TrainingParameters Text
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (FromDhall, ToDhall)
+
+data RawExtensionRequest = RawExtensionRequest
+  { extensionId :: Text
+  , extensionParameters :: RawExtensionParameters
   }
   deriving stock (Eq, Generic, Show)
   deriving anyclass (FromDhall, ToDhall)
@@ -135,16 +205,15 @@ data RawRoot = RawRoot
   { rootClusters :: [RawCluster]
   , rootApps :: [RawApp]
   , rootDeployments :: [RawDeployment]
+  , rootExtensions :: [RawExtensionRequest]
   }
   deriving stock (Eq, Show)
 
 topologyDecoder :: Decoder RawTopology
-topologyDecoder = Dhall.union (KindTopology <$> Dhall.constructor "KindTopology" Dhall.auto)
+topologyDecoder = Dhall.auto
 
 topologyEncoder :: Encoder RawTopology
-topologyEncoder = Dhall.unionEncoder (unwrap >$< Dhall.encodeConstructor "KindTopology")
- where
-  unwrap (KindTopology kind) = kind
+topologyEncoder = Dhall.inject
 
 clusterDecoder :: Decoder RawCluster
 clusterDecoder = Dhall.record
@@ -180,6 +249,7 @@ rootDecoder = Dhall.record
       <$> Dhall.field "rootClusters" (Dhall.list clusterDecoder)
       <*> Dhall.field "rootApps" (Dhall.list Dhall.auto)
       <*> Dhall.field "rootDeployments" (Dhall.list Dhall.auto)
+      <*> Dhall.field "rootExtensions" (Dhall.list Dhall.auto)
   )
 
 rootEncoder :: Encoder RawRoot
@@ -188,6 +258,7 @@ rootEncoder = Dhall.recordEncoder
       >$< Dhall.encodeFieldWith "rootClusters" clusterListEncoder
       >*< Dhall.encodeFieldWith "rootApps" Dhall.inject
       >*< Dhall.encodeFieldWith "rootDeployments" Dhall.inject
+      >*< Dhall.encodeFieldWith "rootExtensions" Dhall.inject
   )
  where
-  fields root = (rootClusters root, (rootApps root, rootDeployments root))
+  fields root = (rootClusters root, (rootApps root, (rootDeployments root, rootExtensions root)))

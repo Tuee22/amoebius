@@ -1,0 +1,55 @@
+record	amoebius-phase-receipt.v2
+phase	1
+capability	toolchain_spike
+generation	f7e3616cb2f0713bafea619e45fd11bda2865cc7db70fffca13c74b7eb533cd2
+spec-digest	b0198974bf36001c2c6d00190c447d502738aa11653669288e7f0ae249a6f49d
+spec	capability: toolchain_spike\nrole: ordinary\nclaim: The shipped toolchain-report accepts native GHCup and GHC by their declared version requirements, with no toolchain digest pin, signature, archive, operating-system, architecture, or device prerequisite. Two observations agree on versions; the independent oracle judges version boundaries, actual missing/malformed/failed tools, retained decoder/simulator/codegen/provenance probes, and pure planning from supplied platform fixtures. The runner plants a nonce and requests an unsupported compiler version, which the shipped binary reports as refused. Builds remain serial. Compiler correctness and publisher identity remain assumptions.\nsubjects: Amoebius.Toolchain.Versions, Amoebius.Toolchain.Acquire, Amoebius.Toolchain.Probe, Amoebius.Toolchain.Resolve, Amoebius.Toolchain.Provenance, Amoebius.Toolchain.Report\nsuite: toolchain-suite\noracle: oracle-toolchain\npositive: version-compatible-native-tools | input=GHCup and GHC version reports | expected=accepted without an OS, architecture, archive, signature, or executable digest requirement\npositive: second-observation | input=same compatible versions | expected=agree\npositive: version-boundaries | input=separately authored version grid | expected=exact admitted and refused boundaries\npositive: probe-decode | input=positive.dhall | expected=decoded amoebius/3/True\npositive: probe-sim | input=clean schedule | expected=b:2\npositive: probe-codegen | input=probe.proto | expected=Proto/Probe.hs,Proto/Probe_Fields.hs\npositive: probe-bridge | input=ProbeContract | expected=Amoebius/Toolchain/Probe.purs\npositive: probe-plan | input=empty inventory | expected=four ensure steps\npositive: provenance-acquired | input=supernova-0.0.3 | expected=tree digest equal\nnegative: MissingTool | input=absent compiler | tag=ToolMissing | stage=versions\nnegative: MalformedVersion | input=malformed GHCup output | tag=ToolVersionMalformed | stage=versions\nnegative: UnsupportedGhcupVersion | input=GHCup 0.1.50.1 | tag=ToolVersionMismatch | stage=versions\nnegative: UnsupportedVersion | input=GHC 9.10.1 | tag=ToolVersionMismatch | stage=versions\nnegative: FailedVersionCommand | input=nonzero version command | tag=ToolCommandFailed | stage=versions\nnegative: MistypedDecode | input=mistyped.dhall | tag=type-error | stage=probe\nnegative: PerturbedSchedule | input=perturbed schedule | tag=a:1 | stage=probe\nnegative: MissingDependency | input=absent package | tag=MissingDependency | stage=resolve\nnegative: TrackedResolutionOutput | input=cabal.project.freeze | tag=TrackedResolutionOutput | stage=resolve\nnegative: TrackedProbeInput | input=probe.dhall | tag=TrackedProbeInput | stage=resolve\nnegative: MutableIdentity | input=git branch | tag=MutableIdentity | stage=provenance\nnegative: TopLevelVendor | input=vendor/ | tag=TopLevelVendor | stage=provenance\nnegative: UpstreamDigestMismatch | input=altered tree digest | tag=DigestMismatch | stage=provenance\nnegative: AbsentTool | input=absent-tool | tag=AbsentTool | stage=plan\nnegative: OutOfRangeVersion | input=ghc 9.10.1 | tag=OutOfRangeVersion | stage=plan\nnegative: NoPlatformAsset | input=unsupported-unknown | tag=NoPlatformAsset | stage=plan\nmutants: stages=Amoebius.Toolchain.Versions,Amoebius.Toolchain.Acquire,Amoebius.Toolchain.Probe,Amoebius.Toolchain.Resolve,Amoebius.Toolchain.Provenance,Amoebius.Toolchain.Report per-module=8 cap=40 kill-ratio=3/5\nbinary-fact: command=toolchain-report --request {input} --output {run}/toolchain-report.tsv --probe-root {run}/probe | input=toolchain-request.tsv | perturbation=staged(pre=toolchain-report --write-request {input} post= then=sentinel-to-nonce(0b5e17e11a0c0ffee0de1e9a7e5ba5ed),rewrite(ghc.requested-version\t9.12.4 => ghc.requested-version\t9.10.1)) | outputs={run}/toolchain-report.tsv\nsubstrate: none\n
+candidate-digest	db296d4593c595b823b677070f99937c7a07b2e817b94e481bc3040433e9c81e
+kill-table-digest	8c2c48aab2ffd1fdaa3ecc077b9bb46652e81283058f7f53c7dbc8295565e369
+closure-digest	150bb3bfae2eabb56bc723089e5ab2a0d7bb4cb750cc0327bc3c2464c0aecaf8
+reproducible-digest	4977db9a54e3234206f37c59a610595337fdc7b281762f55614e1d72c4322f45
+verifier-digest	f7e3616cb2f0713bafea619e45fd11bda2865cc7db70fffca13c74b7eb533cd2
+governance-digest	eab5c1e9e3b3ecc34281f6861e664a7404bd7ebc5fc817371ab45a3774afebba
+status-postimage	498677ade6ff1269886482d155b7aafdd7d44137bf3069558cca4d66cdafc2c6
+tree-commit	2fcd371da1e28a075dd7dd76bc2353ef62175c96
+issued-at	2026-10-21 22:18:12.369576 UTC
+witness	src/Amoebius/Toolchain/Versions.hs:17 constant-flip c52a22bc3077->bed229e36ce2
+witness	src/Amoebius/Toolchain/Acquire.hs:46 constant-flip 9248cceb02c6->3716560cd167
+witness	src/Amoebius/Toolchain/Probe.hs:80 constant-flip 9f80e1b1d1a0->12469cc03e03
+witness	src/Amoebius/Toolchain/Resolve.hs:72 constant-flip c461ea5726ef->756a211e22e9
+witness	src/Amoebius/Toolchain/Provenance.hs:78 constant-flip 9dd4a3d71bcd->22c7320dfcea
+witness	src/Amoebius/Toolchain/Report.hs:32 constant-flip c58ce2061f65->dfa05856f574
+witness	src/Amoebius/Toolchain/Versions.hs:21 list-truncation c52a22bc3077->31ecbde30597
+witness	src/Amoebius/Toolchain/Acquire.hs:63 constant-flip 9248cceb02c6->1435cd2ec60d
+witness	src/Amoebius/Toolchain/Probe.hs:114 branch-swap 9f80e1b1d1a0->81877e4b4cd6
+witness	src/Amoebius/Toolchain/Resolve.hs:78 constant-flip c461ea5726ef->bf1f06802180
+witness	src/Amoebius/Toolchain/Provenance.hs:82 constant-flip 9dd4a3d71bcd->4c1a1f69e1b5
+witness	src/Amoebius/Toolchain/Report.hs:33 constant-flip c58ce2061f65->20a207133773
+witness	src/Amoebius/Toolchain/Versions.hs:24 list-truncation c52a22bc3077->c623e3fd245b
+witness	src/Amoebius/Toolchain/Acquire.hs:86 constant-flip 9248cceb02c6->3811138511f6
+witness	src/Amoebius/Toolchain/Probe.hs:129 constant-flip 9f80e1b1d1a0->5988a049f2be
+witness	src/Amoebius/Toolchain/Resolve.hs:98 constant-flip c461ea5726ef->32efe072fc40
+witness	src/Amoebius/Toolchain/Provenance.hs:107 constant-flip 9dd4a3d71bcd->6f54bdbf0d06
+witness	src/Amoebius/Toolchain/Report.hs:37 constant-flip c58ce2061f65->8916aecd2eed
+witness	src/Amoebius/Toolchain/Versions.hs:25 list-truncation c52a22bc3077->d26573677aaf
+witness	src/Amoebius/Toolchain/Acquire.hs:88 constant-flip 9248cceb02c6->eb043a6f4ff1
+witness	src/Amoebius/Toolchain/Probe.hs:177 constant-flip 9f80e1b1d1a0->e8a76213d658
+witness	src/Amoebius/Toolchain/Resolve.hs:174 constant-flip c461ea5726ef->6ed66a2dfd54
+witness	src/Amoebius/Toolchain/Provenance.hs:108 constant-flip 9dd4a3d71bcd->4b9f8576561e
+witness	src/Amoebius/Toolchain/Report.hs:44 constant-flip c58ce2061f65->ddf9cd9ee51e
+witness	src/Amoebius/Toolchain/Versions.hs:33 constant-flip c52a22bc3077->2476e201173d
+witness	src/Amoebius/Toolchain/Acquire.hs:89 list-truncation 9248cceb02c6->35355b86c85d
+witness	src/Amoebius/Toolchain/Probe.hs:192 constant-flip 9f80e1b1d1a0->443cf75073c0
+witness	src/Amoebius/Toolchain/Resolve.hs:215 constant-flip c461ea5726ef->64f62de12567
+witness	src/Amoebius/Toolchain/Provenance.hs:136 constant-flip 9dd4a3d71bcd->cc886ae82323
+witness	src/Amoebius/Toolchain/Report.hs:62 constant-flip c58ce2061f65->035155122094
+witness	src/Amoebius/Toolchain/Versions.hs:42 boundary-shift c52a22bc3077->f383020c81af
+witness	src/Amoebius/Toolchain/Acquire.hs:91 constant-flip 9248cceb02c6->6af62eb1c2ff
+witness	src/Amoebius/Toolchain/Probe.hs:248 constant-flip 9f80e1b1d1a0->d817e9938ccd
+witness	src/Amoebius/Toolchain/Resolve.hs:256 list-truncation c461ea5726ef->084f3a34fa08
+witness	src/Amoebius/Toolchain/Provenance.hs:206 constant-flip 9dd4a3d71bcd->d1dfe58633be
+witness	src/Amoebius/Toolchain/Report.hs:65 constant-flip c58ce2061f65->a8908302f8c7
+witness	src/Amoebius/Toolchain/Versions.hs:48 constant-flip c52a22bc3077->73a5c36c8d9d
+witness	src/Amoebius/Toolchain/Acquire.hs:92 list-truncation 9248cceb02c6->8640d19c3b58
+witness	src/Amoebius/Toolchain/Probe.hs:250 constant-flip 9f80e1b1d1a0->a1c7f2a8348d
+witness	src/Amoebius/Toolchain/Resolve.hs:272 constant-flip c461ea5726ef->2e7ce1c12a31

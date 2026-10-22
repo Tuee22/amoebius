@@ -1,34 +1,23 @@
 {-# LANGUAGE OverloadedStrings #-}
-
--- | Stage 3 of the runner (gate_runner_doctrine.md section 3; gate integrity
--- section M.3): the fixed operator catalogue, deterministic sampling of loci in
--- the specification's stage modules, application to a copy of the tracked tree,
--- and the kill table. Mutants are generated, never authored, and every applied
--- mutant records a 'SubjectChangeWitness'.
+-- | Generate mutations in captured source copies from a fixed catalogue and
 module Amoebius.Validation.Runner.Mutants
-  ( KillTable (..), Locus (..), MutantOutcome (..), Operator (..)
-  , SubjectChangeWitness (..), allOperators, applyLocus, enumerateLoci, isAttributed
-  , killTable, renderKillTable, renderOperator, sampleLoci
-  ) where
-
+  ( KillTable (..), Locus (..), MutantOutcome (..), Operator (..), SubjectChangeWitness (..), allOperators, applyLocus
+  , enumerateLoci, isAttributed, truncateListLocus, killTable, renderKillTable, renderOperator, sampleLoci ) where
 import Amoebius.Validation.Runner.Observer (sha256Hex)
+import Amoebius.Validation.Runner.Hygiene (readSourceText)
+import Data.Bits (xor, shiftL, shiftR)
 import Data.Char (isAlphaNum, isDigit)
 import Data.List (sortOn)
+import Data.Maybe (listToMaybe)
 import Data.Ratio ((%))
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as TextIO
-
-data Operator
-  = ConstantFlip
-  | BoundaryShift
-  | BranchSwap
-  | FieldDrop
-  | ListTruncation
+import Data.Word (Word64)
+data Operator = ConstantFlip | BoundaryShift | BranchSwap | FieldDrop | ListTruncation
   deriving (Bounded, Enum, Eq, Ord, Show)
 allOperators :: [Operator]
 allOperators = [minBound .. maxBound]
--- | A kill counts for a module only when a red row carries a prefix the module owns; a
 -- module that owns none keeps the rule that any red row kills.
 isAttributed :: [(Text, Text)] -> Text -> [Text] -> Bool
 isAttributed owned moduleName reds = null mine || any (\row -> any (`Text.isPrefixOf` row) mine) reds
@@ -41,19 +30,11 @@ renderOperator operator = case operator of
   BranchSwap -> "branch-swap"
   FieldDrop -> "field-drop"
   ListTruncation -> "list-truncation"
-
 -- | One production locus: the module, its file, the line, the operator, and the
 -- exact before/after line text.
 data Locus = Locus
-  { locusModule :: Text
-  , locusFile :: FilePath
-  , locusLine :: Int
-  , locusOperator :: Operator
-  , locusBefore :: Text
-  , locusAfter :: Text
-  }
-  deriving (Eq, Ord, Show)
-
+  { locusModule :: Text, locusFile :: FilePath, locusLine :: Int
+  , locusOperator :: Operator, locusBefore :: Text, locusAfter :: Text } deriving (Eq, Ord, Show)
 -- | Every locus an operator can rewrite in a source text, in line order.
 -- Comment and pragma lines are skipped; a line yields at most one locus per
 -- operator so the sample stays spread across the module.
@@ -66,14 +47,8 @@ enumerateLoci moduleName file operator source =
   , rewritten /= line
   ]
  where
-  eligible line =
-    let trimmed = Text.stripStart line
-     in not (Text.null trimmed)
-          && not ("--" `Text.isPrefixOf` trimmed)
-          && not ("{-" `Text.isPrefixOf` trimmed)
-          && not ("import " `Text.isPrefixOf` trimmed)
-          && not ("module " `Text.isPrefixOf` trimmed)
-          && not ("#" `Text.isPrefixOf` trimmed)
+  eligible line = let trimmed = Text.stripStart line
+    in not (Text.null trimmed || any (`Text.isPrefixOf` trimmed) ["--", "{-", "import ", "module ", "#"])
 rewrite :: Operator -> Text -> Maybe Text
 rewrite operator line = case operator of
   ConstantFlip -> constantFlip line
@@ -82,21 +57,17 @@ rewrite operator line = case operator of
   FieldDrop -> fieldDrop line
   ListTruncation -> listTruncation line
 firstReplacement :: [(Text, Text)] -> Text -> Maybe Text
-firstReplacement [] _ = Nothing
-firstReplacement ((needle, replacement) : rest) line =
-  case Text.breakOn needle line of
-    (before, after)
-      | Text.null after -> firstReplacement rest line
-      | otherwise -> Just (before <> replacement <> Text.drop (Text.length needle) after)
-
--- | Flip the first standalone integer literal or Boolean constant on the line.
+firstReplacement replacements line = listToMaybe
+  [before <> replacement <> Text.drop (Text.length needle) after
+  | (needle, replacement) <- replacements, let (before, after) = Text.breakOn needle line, not (Text.null after)]
+-- | Flip a Boolean or integer first, otherwise the first lexed string constant.
 constantFlip :: Text -> Maybe Text
 constantFlip line
   | Just rewritten <- firstReplacement [(" True", " False"), (" False", " True")] line = Just rewritten
   | otherwise = go "" line
  where
   go done rest
-    | Text.null rest = Nothing
+    | Text.null rest = stringConstant "" line
     | isDigit (Text.head rest) && boundaryBefore done =
         let (digits, after) = Text.span isDigit rest
          in if Text.null after || not (isAlphaNum (Text.head after) || Text.head after == '.')
@@ -106,7 +77,16 @@ constantFlip line
               else go (done <> digits) after
     | otherwise = go (Text.snoc done (Text.head rest)) (Text.tail rest)
   boundaryBefore done = Text.null done || not (isAlphaNum (Text.last done) || Text.last done `elem` ("_'." :: String))
-
+  -- A comment or malformed token ends this bounded single-line operator.
+  stringConstant before remaining
+    | Text.take 2 (Text.stripStart remaining) `elem` ["--", "{-"] = Nothing
+    | [(token, after)] <- lex (Text.unpack remaining), not (null token) =
+        let consumed = Text.length remaining - length after
+            prefix = before <> Text.take (consumed - length token) remaining
+         in case reads token :: [(String, String)] of
+              [(value, "")] | take 1 token == "\"" -> Just (prefix <> Text.pack (show (value <> "!")) <> Text.pack after)
+              _ -> stringConstant (before <> Text.take consumed remaining) (Text.pack after)
+    | otherwise = Nothing
 -- | Drop a record field assignment written as its own @, field = value@ line.
 fieldDrop :: Text -> Maybe Text
 fieldDrop line =
@@ -118,19 +98,18 @@ fieldDrop line =
   fieldName rest =
     let name = Text.takeWhile (\c -> isAlphaNum c || c == '_' || c == '\'') rest
      in not (Text.null name) && Text.head name `elem` ['a' .. 'z']
-
--- | Remove the last element of a one-line list literal with at least two elements.
+-- | Remove the last element of a simple one-line term list, including its singleton.
 listTruncation :: Text -> Maybe Text
 listTruncation line = case Text.breakOnEnd "]" line of
-  (withBracket, after)
-    | Text.null withBracket -> Nothing
-    | otherwise ->
-        let body = Text.dropEnd 1 withBracket
-            (beforeComma, lastElement) = Text.breakOnEnd ", " body
-         in if Text.null beforeComma || Text.null (Text.strip lastElement) || "[" `Text.isInfixOf` lastElement || "\"" `Text.isInfixOf` lastElement
-              then Nothing
-              else Just (Text.dropEnd 2 beforeComma <> "]" <> after)
-
+  (closed, after) | not (Text.null closed), (prefix, body) <- Text.breakOnEnd "[" (Text.dropEnd 1 closed),
+    not (Text.null prefix || Text.null (Text.strip body)), not (Text.any (`elem` ("[]\"" :: String)) body),
+    not ("::" `Text.isInfixOf` prefix || ".." `Text.isInfixOf` body) ->
+      Just (prefix <> Text.intercalate ", " (init (Text.splitOn ", " body)) <> "]" <> after)
+  _ -> Nothing
+truncateListLocus :: Locus -> Locus
+truncateListLocus locus = case enumerateLoci (locusModule locus) (locusFile locus) ListTruncation (locusAfter locus) of
+  next : _ -> truncateListLocus locus {locusAfter = locusAfter next}
+  [] -> locus
 -- | Deterministic sampling: a xorshift stream seeded from the specification digest
 -- and the module name selects at most @count@ loci, spread over the operators.
 sampleLoci :: Text -> Int -> [Locus] -> [Locus]
@@ -143,39 +122,25 @@ sampleLoci seed count loci = sortOn (\locus -> (locusLine locus, locusOperator l
         index = fromIntegral (next `mod` fromIntegral (length pool))
         (before, chosen : after) = splitAt index pool
      in chosen : go next (remaining - 1) (before <> after)
-seedValue :: Text -> Word
-seedValue seed = max 1 (fromIntegral (Text.foldl' (\acc c -> acc * 31 + fromEnum c) (7 :: Int) seed))
-xorshift :: Word -> Word
+seedValue :: Text -> Word64
+seedValue seed = max 1 (Text.foldl' (\acc c -> acc * 31 + fromIntegral (fromEnum c)) 7 seed)
+xorshift :: Word64 -> Word64
 xorshift state0 =
-  let state1 = state0 `xorW` (state0 * 8192)
-      state2 = state1 `xorW` (state1 `div` 128)
-      state3 = state2 `xorW` (state2 * 131072)
+  let state1 = state0 `xor` (state0 `shiftL` 13)
+      state2 = state1 `xor` (state1 `shiftR` 7)
+      state3 = state2 `xor` (state2 `shiftL` 17)
    in if state3 == 0 then 88172645463325252 else state3
- where
-  xorW a b = fromIntegral ((fromIntegral a :: Integer) `xorInteger` fromIntegral b)
-  xorInteger a b = a + b - 2 * andInteger a b
-  andInteger a b
-    | a == 0 || b == 0 = 0
-    | otherwise = (a `mod` 2) * (b `mod` 2) + 2 * andInteger (a `div` 2) (b `div` 2)
-
 -- | The proof that a mutant changed the subject: file, line, and the digests of
 -- the source before and after the rewrite.
 data SubjectChangeWitness = SubjectChangeWitness
-  { witnessFile :: FilePath
-  , witnessLine :: Int
-  , witnessOperator :: Operator
-  , witnessBeforeDigest :: Text
-  , witnessAfterDigest :: Text
-  , witnessDiff :: Text
-  }
-  deriving (Eq, Ord, Show)
-
+  { witnessFile :: FilePath, witnessLine :: Int, witnessOperator :: Operator
+  , witnessBeforeDigest :: Text, witnessAfterDigest :: Text, witnessDiff :: Text } deriving (Eq, Ord, Show)
 -- | Rewrite one line of the file at the locus inside a copied tree, returning the
 -- witness. Left when the file no longer carries the expected line.
 applyLocus :: FilePath -> Locus -> IO (Either Text SubjectChangeWitness)
 applyLocus copyRoot locus = do
   let path = copyRoot <> "/" <> locusFile locus
-  original <- TextIO.readFile path
+  original <- readSourceText path
   let lines' = Text.lines original
       index = locusLine locus - 1
   if index < 0 || index >= length lines' || lines' !! index /= locusBefore locus
@@ -186,34 +151,18 @@ applyLocus copyRoot locus = do
       pure
         ( Right
             SubjectChangeWitness
-              { witnessFile = locusFile locus
-              , witnessLine = locusLine locus
-              , witnessOperator = locusOperator locus
-              , witnessBeforeDigest = sha256Hex original
-              , witnessAfterDigest = sha256Hex rewritten
-              , witnessDiff = "-" <> locusBefore locus <> "\n+" <> locusAfter locus
-              }
+              { witnessFile = locusFile locus, witnessLine = locusLine locus, witnessOperator = locusOperator locus
+              , witnessBeforeDigest = sha256Hex original, witnessAfterDigest = sha256Hex rewritten
+              , witnessDiff = "-" <> locusBefore locus <> "\n+" <> locusAfter locus }
         )
-data MutantOutcome
-  = Killed Text
-  | Survived
-  | Stillborn Text
-  | Unapplied Text
+data MutantOutcome = Killed Text | Survived | Stillborn Text | Unapplied Text
   deriving (Eq, Ord, Show)
 data KillTable = KillTable
   { killRows :: [(Locus, Maybe SubjectChangeWitness, MutantOutcome)]
-  , killedCount :: Int
-  , viableCount :: Int
-  , stillbornCount :: Int
-  , killRatioObserved :: Rational
-  }
-  deriving (Eq, Show)
+  , killedCount :: Int, viableCount :: Int, stillbornCount :: Int, killRatioObserved :: Rational } deriving (Eq, Show)
 killTable :: [(Locus, Maybe SubjectChangeWitness, MutantOutcome)] -> KillTable
-killTable rows =
-  KillTable
-    { killRows = rows
-    , killedCount = killed
-    , viableCount = viable
+killTable rows = KillTable
+    { killRows = rows, killedCount = killed, viableCount = viable
     , stillbornCount = length [() | (_, _, Stillborn _) <- rows]
     , killRatioObserved = if viable == 0 then 0 else fromIntegral killed % fromIntegral viable
     }
@@ -222,16 +171,13 @@ killTable rows =
   viable = killed + length [() | (_, _, Survived) <- rows]
 renderKillTable :: KillTable -> [Text]
 renderKillTable table =
-  [ Text.intercalate
-      "\t"
+  [ Text.intercalate "\t"
       [ locusModule locus
       , Text.pack (locusFile locus) <> ":" <> Text.pack (show (locusLine locus))
       , renderOperator (locusOperator locus)
       , maybe "no-witness" (\w -> Text.take 12 (witnessBeforeDigest w) <> "->" <> Text.take 12 (witnessAfterDigest w)) witness
-      , renderOutcome outcome
-      ]
-  | (locus, witness, outcome) <- killRows table
-  ]
+      , renderOutcome outcome ]
+  | (locus, witness, outcome) <- killRows table ]
     <> [ "summary\tkilled=" <> showText (killedCount table) <> "\tviable=" <> showText (viableCount table) <> "\tstillborn=" <> showText (stillbornCount table)
        ]
  where

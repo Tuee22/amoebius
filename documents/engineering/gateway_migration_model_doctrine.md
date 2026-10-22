@@ -280,7 +280,8 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
 **Target source boundary.** Phase 75's production model is to be `Amoebius.Formal.GatewayMigration`; its
 per-spec cutoff `Amoebius.Multicluster.StructuralFit`. A separately authored Haskell oracle fixes constants,
 actions, obligations, renderer facts, cutoff cases, and cutoff-deletion expectations. The gate runner invokes
-Cabal serially and offline, injects digest-pinned Java and TLA+ inputs, and confines every rendered
+Cabal serially and offline, supplies version-compatible Java and TLA+ tools as explicit read-only inputs,
+records their versions and observations without toolchain byte-pin admission, and confines every rendered
 TLA/CFG/DOT/log/result product to a fresh run root beneath `.build/runs/**`; generated mutants change
 production ownership, cutoff, and fairness loci. Tracked Python gates and serialized behavioral expectations
 are not part of this boundary. Owed by [Phase
@@ -298,6 +299,10 @@ child brokers remain UNVERIFIED. Phase order, status, and gates live only in
 [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
+
+
+The version-admission and hardware-free boundary amendment is recorded in
+[DL-0027](../decision_log.md#dl-0027--native-tool-inputs-and-portable-fake-process-observations).
 
 ## Related Documents
 - [Engineering Doctrine Index](./README.md)

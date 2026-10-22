@@ -1,18 +1,19 @@
 # Phase 1: Haskell toolchain and probe-source closure
 
-> **Purpose**: Consume the explicit non-numbered `GenesisTrust` root, reproduce the contained Haskell toolchain acquisition, report its digests through the shipped binary, and build the retained probe set from pinned network-independent inputs without tracking resolution output or host-specific paths.
+> **Purpose**: Check native GHCup/GHC versions, exercise the retained decoder, simulator, codegen, dependency and provenance probes, and report observations through the shipped binary without requiring toolchain byte pins or a particular OS/CPU architecture.
 > **Read this if**: Phase 1 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 1 specifies the first reproducibility claim of the plan. The toolchain Phase 0 assumed is acquired
-twice from the pinned files, and the shipped `amoebius` binary reports digests equal to the pins spelled once
-in product code. Its predecessor is [Phase 0](phase_00_documentation_suite.md).
+Phase 1 specifies native tool-version admission and the retained probe-source boundary. Two fresh
+observations select compatible installed GHCup/GHC tools, and the shipped `amoebius` binary reports their
+versions and the probe results. No toolchain archive or executable pin is required. Its predecessor is
+[Phase 0](phase_00_documentation_suite.md).
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, documents/engineering/content_addressing_determinism.md, documents/engineering/gate_runner_doctrine.md, documents/engineering/pulsar_client_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, documents/decision_log.md, documents/engineering/content_addressing_determinism.md, documents/engineering/gate_runner_doctrine.md, documents/engineering/pulsar_client_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -39,36 +40,41 @@ in product code. Its predecessor is [Phase 0](phase_00_documentation_suite.md).
 ## Phase Status
 
 ✅ Done.
-**Receipt**: c1cd255cbb2285b85cf2a7d4080f4a45007d3d0a123d6d18cabb2ce36ff8cc6a
+**Receipt**: 5f560ee8899da1b21e85fb5edb4fac599b18b09a4932e4db8b52638471143d6b
 
-The contract is reopened under [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) by
-[DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice): the subject moves
-from the validator into product code. Under §N step 3, every generation-1 receipt for this phase is
-incompatible with certification generation 2 and supplies no authority. Gate execution is held shut by the
-Phase-0 predecessor receipt in certification generation 2.
+The complete preview and separate acceptance passed at the exact source snapshot recorded by the receipt.
+All eighteen gate categories and 116 independent clean oracle rows are green. The owning source/admission
+qualifications passed all 32 rows. The generated matrix killed 36 of 38 viable production mutants, with a
+kill in every subject; two non-buildable mutants supplied no kill. The shipped report retained the nonce
+and refused the unsupported requested compiler version. Both runs reproduced the complete predecessor gate.
+
+The earlier reset and failed mutation run remain historical observations. Their missing inherited authority
+was repaired through the exact-source predecessor handle in
+[DL-0035](../documents/decision_log.md#dl-0035--retired-legacy-checks-inherit-an-exact-source-predecessor-pass).
+The accepted owning bindings now retire under
+[DL-0036](../documents/decision_log.md#dl-0036--phase-1-acceptance-retires-its-qualified-toolchain-bindings),
+with their identities, queries and independent reintroduction cases retained. Subsequent source or governance
+changes require current compatibility or numerical replay before the next gate can use this evidence.
+
+Native GHCup/GHC version admission requires no toolchain byte pin, particular host architecture or hardware.
+Compiler correctness and publisher identity remain assumptions. Complete source closure, DSL validation and
+live hardware retain their later owners; this receipt establishes only the toolchain gate's bounded claim.
 
 ## Phase Summary
 
-Phase 1 moves the toolchain claim out of the validator and into the product. `Amoebius.Toolchain.Pins` spells
-the seven `GenesisTrust` pins and the compiler and package-tool identities once; `amoebius toolchain-report`
-prints its pin checks, manifest agreement, declared identities, and probe outcomes; the independent oracle
-restates the pins from literals and compares. The suite separately performs two contained acquisitions from
-the same pinned files and compares observed executable identity and elaborated plan. The ordinary clean
-`toolchain-report` call does not request its optional `--acquire` mode
-([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)).
+Phase 1 requires `Amoebius.Toolchain.Versions` and `Amoebius.Toolchain.Acquire` to admit native GHCup and
+GHC solely by compatible version reports. Missing tools, failed version commands, malformed reports, and
+unsupported versions are refused independently. Cabal is an available build tool whose version is recorded;
+no archive, signature, manifest, executable digest, OS, architecture, device, container/VM, or privileged
+host is a prerequisite. Installed tool paths are explicit read-only inputs.
 
-The probe set is retained. The in-process decoder, the deterministic simulator, the resolver dependencies, the
-browser-contract generator, and the codegen runtime link into the shipped binary and are exercised by the same
-report; the codegen tool renders bindings beneath the run root, and the fork's upstream identity is verified
-against an archive extraction. No resolution output, package-integrity pin, generated code, or host-specific
-path is tracked; every derived product is rendered beneath `.build/**` during the run.
+The retained decoder, deterministic simulator, codegen runtime, browser-contract generator, dependency
+resolver, pure ensure planner, and maintained-fork provenance probes retain their independent expectations.
+Every build remains serial. Planner platform values are supplied fixtures, not discoveries of the host.
+Compiler correctness and publisher identity remain assumptions. Source/dependency integrity and receipt
+hashes retain their separate purpose under [DL-0025](../documents/decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier).
 
-`GenesisTrust` remains the explicit assumption. Agreement between two acquisitions closes `LTD-BOOT-001`
-relative to the independently fixed pins; it does not establish the publisher's identity or the origin of
-those pins. The three signature files are pinned opaque bytes, with no operator keyring or GPG check
-([DL-0017](../documents/decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring)).
-
-**Phase scope:** One cohesive claim — the shipped binary's ordinary toolchain report checks the fixed pins and probes, the suite separately compares two contained acquisitions and their elaborated plans, and the retained probe set builds and executes offline; it splits if a claim needs compiler-wide source semantics, product behaviour, or a host.
+**Phase scope:** One cohesive claim — native version admission and the retained toolchain probes are judged through the shipped report and independent oracle, with exact version/refusal boundaries and no physical substrate requirement.
 **Substrate:** `none`
 **Lane:** `none`
 **Register:** 2
@@ -81,26 +87,24 @@ those pins. The three signature files are pinned opaque bytes, with no operator 
 ```gate-spec
 capability: toolchain_spike
 role: ordinary
-claim: From GenesisTrust and its seven pinned files, two contained acquisitions produce the pinned compiler and package tool and agree on executable identity and elaborated plan; the shipped toolchain-report prints the pin digests, pinned-manifest agreement, identities, and probe outcomes the oracle restates; the retained probe set builds and executes offline and serially; every negative is refused by name at its locus. Publisher identity remains an explicit unverified assumption.
-subjects: Amoebius.Toolchain.Pins, Amoebius.Toolchain.Acquire, Amoebius.Toolchain.Probe, Amoebius.Toolchain.Resolve, Amoebius.Toolchain.Provenance, Amoebius.Toolchain.Report
+claim: The shipped toolchain-report accepts native GHCup and GHC by their declared version requirements, with no toolchain digest pin, signature, archive, operating-system, architecture, or device prerequisite. Two observations agree on versions; the independent oracle judges version boundaries, actual missing/malformed/failed tools, retained decoder/simulator/codegen/provenance probes, and pure planning from supplied platform fixtures. The runner plants a nonce and requests an unsupported compiler version, which the shipped binary reports as refused. Builds remain serial. Compiler correctness and publisher identity remain assumptions.
+subjects: Amoebius.Toolchain.Versions, Amoebius.Toolchain.Acquire, Amoebius.Toolchain.Probe, Amoebius.Toolchain.Resolve, Amoebius.Toolchain.Provenance, Amoebius.Toolchain.Report
 suite: toolchain-suite
 oracle: oracle-toolchain
-positive: pinned-acquisition | input=seven pins | expected=agree
-positive: second-acquisition | input=same pins, absent root | expected=same identities and plan
-positive: pinned-manifest-agreement | input=two pinned SHA256SUMS files | expected=archive digests equal pins
+positive: version-compatible-native-tools | input=GHCup and GHC version reports | expected=accepted without an OS, architecture, archive, signature, or executable digest requirement
+positive: second-observation | input=same compatible versions | expected=agree
+positive: version-boundaries | input=separately authored version grid | expected=exact admitted and refused boundaries
 positive: probe-decode | input=positive.dhall | expected=decoded amoebius/3/True
 positive: probe-sim | input=clean schedule | expected=b:2
 positive: probe-codegen | input=probe.proto | expected=Proto/Probe.hs,Proto/Probe_Fields.hs
 positive: probe-bridge | input=ProbeContract | expected=Amoebius/Toolchain/Probe.purs
 positive: probe-plan | input=empty inventory | expected=four ensure steps
 positive: provenance-acquired | input=supernova-0.0.3 | expected=tree digest equal
-negative: MissingPin | input=absent manifest | tag=PinMissing | stage=pins
-negative: MissingArchivePin | input=absent compiler archive | tag=PinMissing | stage=pins
-negative: MissingSignaturePin | input=absent pinned signature bytes | tag=PinMissing | stage=pins
-negative: DigestMismatch | input=corrupted manifest | tag=PinDigestMismatch | stage=pins
-negative: PinnedSignatureDigestMismatch | input=corrupted pinned signature bytes | tag=PinDigestMismatch | stage=pins
-negative: AmbientNetworkRead | input=URL source | tag=AmbientNetworkRefused | stage=pins
-negative: DisagreeingAcquisition | input=altered identity | tag=AcquisitionsDisagree | stage=acquire
+negative: MissingTool | input=absent compiler | tag=ToolMissing | stage=versions
+negative: MalformedVersion | input=malformed GHCup output | tag=ToolVersionMalformed | stage=versions
+negative: UnsupportedGhcupVersion | input=GHCup 0.1.50.1 | tag=ToolVersionMismatch | stage=versions
+negative: UnsupportedVersion | input=GHC 9.10.1 | tag=ToolVersionMismatch | stage=versions
+negative: FailedVersionCommand | input=nonzero version command | tag=ToolCommandFailed | stage=versions
 negative: MistypedDecode | input=mistyped.dhall | tag=type-error | stage=probe
 negative: PerturbedSchedule | input=perturbed schedule | tag=a:1 | stage=probe
 negative: MissingDependency | input=absent package | tag=MissingDependency | stage=resolve
@@ -111,9 +115,9 @@ negative: TopLevelVendor | input=vendor/ | tag=TopLevelVendor | stage=provenance
 negative: UpstreamDigestMismatch | input=altered tree digest | tag=DigestMismatch | stage=provenance
 negative: AbsentTool | input=absent-tool | tag=AbsentTool | stage=plan
 negative: OutOfRangeVersion | input=ghc 9.10.1 | tag=OutOfRangeVersion | stage=plan
-negative: NoPlatformAsset | input=windows-x86_64 | tag=NoPlatformAsset | stage=plan
-mutants: stages=Amoebius.Toolchain.Pins,Amoebius.Toolchain.Acquire,Amoebius.Toolchain.Probe,Amoebius.Toolchain.Resolve,Amoebius.Toolchain.Provenance,Amoebius.Toolchain.Report per-module=8 cap=40 kill-ratio=3/5
-binary-fact: command=toolchain-report --compiler-manifest {input} --output {run}/toolchain-report.tsv --probe-root {run}/probe | input=.build/bootstrap-inputs/ghc-SHA256SUMS | perturbation=sentinel-to-nonce(4da657809c06c1658ae5713911fcb168a32093e239f61fe77be78aba74132cfa) | outputs={run}/toolchain-report.tsv
+negative: NoPlatformAsset | input=unsupported-unknown | tag=NoPlatformAsset | stage=plan
+mutants: stages=Amoebius.Toolchain.Versions,Amoebius.Toolchain.Acquire,Amoebius.Toolchain.Probe,Amoebius.Toolchain.Resolve,Amoebius.Toolchain.Provenance,Amoebius.Toolchain.Report per-module=8 cap=40 kill-ratio=3/5
+binary-fact: command=toolchain-report --request {input} --output {run}/toolchain-report.tsv --probe-root {run}/probe | input=toolchain-request.tsv | perturbation=staged(pre=toolchain-report --write-request {input} post= then=sentinel-to-nonce(0b5e17e11a0c0ffee0de1e9a7e5ba5ed),rewrite(ghc.requested-version	9.12.4 => ghc.requested-version	9.10.1)) | outputs={run}/toolchain-report.tsv
 substrate: none
 ```
 
@@ -124,30 +128,30 @@ documentation checker refuses a block that differs from it. Execution evidence r
 
 | Key | Contract |
 |---|---|
-| `Claim` | From `GenesisTrust` and its seven pinned files, the ordinary `amoebius toolchain-report` prints pin checks, pinned-manifest agreement, declared tool identities, and probe outcomes that the oracle restates. Separately, the suite acquires the pinned compiler and package tool twice and compares observed executable identities and elaborated dependency plans. The retained probe set builds offline and serially and prints the oracle's expected outputs. Publisher identity, network, host, product, and source-closure claims are excluded ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)). |
+| `Claim` | The shipped report checks native GHCup/GHC versions and retained probes. Supplied version boundaries and actual missing, malformed, unsupported, and failed tools are judged independently. Compiler correctness remains assumed; no toolchain byte pins or specific host are required. |
 | `Subject` | The six stage modules named in the gate specification and the `toolchain-report` subcommand in `app/amoebius/Main.hs`; the maintained fork modules beneath `src/vendor/**` are verified present by `Amoebius.Toolchain.Provenance`, and their own compilation is owed to the Pulsar-client phase. Every subject is inside the closure of `executable amoebius`. |
 | `Command` | Future public spelling is `pb validate phase 01`, inadmissible before `BOOTSTRAP_HANDOFF`. The agent runs `amoebius-validate preview phase 01`; then `amoebius-validate accept --phase 01` records the receipt and applies one phase's status patch. The runner spawns the shipped `amoebius` binary for an ordinary `toolchain-report` without `--acquire`; the separate suite calls `acquireTwice` and elaborates two plans. Every Cabal child the suite starts carries `--offline` and `--jobs=1`. |
-| `Oracle` | `test/oracle/toolchain/Main.hs` restates the seven pins, the compiler and package-tool identities, the expected probe outputs, and the refusal loci from literals; it depends on no `amoebius` library. |
-| `Positive controls` | Exact size and SHA-256 checks of all seven pinned files, agreement of the two pinned `SHA256SUMS` archive entries with their independent archive pins, two contained acquisitions agreeing on executable identity and plan, the probe set linked and executed, the positive decode, and the unperturbed simulation terminal state. |
-| `Paired negatives` | A missing or corrupted pinned signature file, a mistyped decode case, a perturbed simulation schedule, a missing required dependency, a mutable acquisition identity, a tracked foreign probe input, a top-level vendor reintroduction, and a tracked resolution output — each refused at its exact locus with its twin accepted. |
-| `Mutants` | Runner-generated from the fixed operator catalogue over the six stage modules, eight per module, at most forty per gate, kill ratio at least 0.6; a mutant in `Amoebius.Toolchain.Pins` is killed by the oracle's pin comparison. No authored mutant seam exists in any subject. |
+| `Oracle` | `test/oracle/toolchain/Main.hs` restates native version requirements, the expected probe outputs, and the refusal loci from literals; it depends on no `amoebius` library. |
+| `Positive controls` | Compatible native versions, a second observation agreeing on versions, each admitted range boundary, decoder/simulation/codegen probes, dependency elaboration, maintained upstream provenance, and supplied ensure-planner inputs. |
+| `Paired negatives` | MissingTool, MalformedVersion, UnsupportedVersion, and FailedVersionCommand refuse at versions. Retained dependency, provenance, malformed-decode, simulation, tracked-output and pure-planning negatives keep their exact tags and stages. |
+| `Mutants` | Runner-generated from the fixed operator catalogue over the six stage modules, eight per module, at most forty per gate, kill ratio at least 0.6; a mutant in `Amoebius.Toolchain.Versions` is killed by the oracle's version comparison. No authored mutant seam exists in any subject. |
 | `Discovery` | The package description's stanza module map is compared two-way with the subjects; the probe entry points the report exercises equal the oracle's set; empty discovery refuses. |
-| `Challenge` | After the run starts, the runner copies the pinned compiler manifest beneath the run root and rewrites the compiler archive's digest to a nonce; the report over that copy must carry the nonce as the claimed digest, and the pin comparison must refuse at exactly that archive. |
-| `Observer` | `ProcessObserver` over the shipped binary and the suite; the acquisition records the extractor, the codegen tool, and every Cabal child it starts by resolved executable and digest; executable identity, argv, environment policy, exit, and complete output are runner-captured. No subject log is trusted. |
-| `Authority/bypass` | Network, `pb`, compiler concurrency above one, a `PATH`-selected compiler, a mutable reference, and tracked generated behaviour are refused by name. `SUBJECT-NOT-SHIPPED` refuses a subject outside the executable's closure; the oracle stanza's hygiene refuses a product dependency. Cabal's user store is a cache, never evidence. |
+| `Challenge` | The runner renders a request, replaces its label sentinel with a nonce, and changes the requested compiler version from 9.12.4 to unsupported 9.10.1. The shipped report must carry the nonce and report ToolVersionMismatch for that request while observing native tool versions. |
+| `Observer` | Separate child processes capture native version commands and retained build/codegen tools. Every compiler-bearing command is serial. Host/substrate/provider inputs are supplied fixtures; no hardware discovery occurs. |
+| `Authority/bypass` | The oracle imports no product library. Version commands must succeed, parse unambiguously, and satisfy the declared range. Source identity, independent expectations, changed-subject mutants, and receipt custody remain required. Version output is not a proof of compiler semantics. |
 | `Freshness` | A unique run root; both acquisition roots absent at acquisition; the verifier digest equals the seed's; opening and closing source identities are equal; no prior candidate can satisfy the nonce. |
 | `Qualification` | The runner-generated mutant matrix over the six stage modules — eight per module, at most forty, kill ratio at least 0.6 — precedes the clean candidate in the same run. |
-| `Cleanroom` | Everything generated lives beneath `.build/runs/phase-01/**` and is absent afterward; the kernel ratchet is recorded. |
+| `Cleanroom` | Fresh run-owned outputs beneath `.build/**`; native installed tools are declared read-only inputs. No seven-file bootstrap directory or fixed toolchain archive is required. Source, dependency-source and receipt hashes retain their distinct custody purpose. |
 | `Legacy closure` | `LTD-BOOT-001`, `LTD-SRC-007`, and `LTD-SRC-009` close here through the compiled inventory; the due-count for every other identifier is zero. |
 | `Predecessor` | The Phase-0 receipt in certification generation 2, chained by the digest of Phase 0's product closure plus the verifier and governance digests. |
-| `Residue` | `GenesisTrust`, publisher identity, and the origin of the fixed pins remain explicit unverified assumptions; no keyring or GPG result is required. Phase-2 source closure and every product and hardware claim remain explicit limitations ([DL-0017](../documents/decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring)). |
+| `Residue` | Compiler correctness, honest version reports, and publisher identity remain assumptions. Toolchain byte identity and cross-host identical build output are not acceptance claims. Phase-2 source closure, the complete DSL barrier, and all live hardware claims retain their separate owners. |
 | `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and `accept` records it. |
 
 ## Resource provision
 
 - **Owner marker:** the source snapshot, the Phase-0 receipt, the unique Phase-1 run root, and the two acquisition-root identities.
-- **Preflight:** the run root and both acquisition roots are absent; the seven pinned files are present at their pinned sizes and digests.
-- **Allowed mutations:** compiler products, extracted toolchains, rendered probe cases, and observations beneath `.build/runs/phase-01/**`.
+- **Preflight:** a fresh run root, native GHCup/GHC versions meeting the declared requirements, and available build/probe dependencies; no fixed host or archive inputs.
+- **Allowed mutations:** compiler products, rendered probe cases, and observations beneath `.build/runs/phase-01/**`; installed native tool paths are read-only inputs.
 - **Forbidden mutations:** network, host package managers, ambient `PATH`, authored source, and any path outside the owner root.
 - **External observer:** the runner's `ProcessObserver` records every child executable, argv, exit, and transcript digest.
 - **Scoped cleanup:** the owner root is removed on every exit path; Cabal's user store is neither created nor removed as evidence.
@@ -167,35 +171,49 @@ documentation checker refuses a block that differs from it. Execution evidence r
 ## Sprint 1.1: GenesisTrust-bound toolchain acquisition ✅
 
 **Status**: Done
-**Implementation**: `src/Amoebius/Toolchain/Pins.hs` and `src/Amoebius/Toolchain/Acquire.hs`
+**Implementation**: `src/Amoebius/Toolchain/Versions.hs` and `src/Amoebius/Toolchain/Acquire.hs`
 **Blocked by**: [Phase 0](phase_00_documentation_suite.md) gate pass
-**Independent Validation**: Two contained acquisitions from the seven pinned files that agree on compiler and package-tool executable identity and on the elaborated plan are the positive control. Both pinned publisher-supplied manifests must name their archives' independently fixed digests. A missing pin, a digest mismatch, a missing or corrupted pinned signature byte file, an ambient-network read, and a disagreeing second acquisition are paired negatives refused by name. A generated mutant in `Amoebius.Toolchain.Pins` is killed by the oracle's pin comparison. Publisher identity is unverified under [DL-0017](../documents/decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring).
-**Oracle**: `test/oracle/toolchain/Main.hs` states the seven pins and the expected executable identities from literals; it imports no `amoebius` module.
-**Legacy IDs**: `LTD-BOOT-001` — pin-verified reproducible acquisition
+**Independent Validation**: Compatible native GHCup/GHC versions are the positive control. Missing tools, failed version commands, malformed reports, and out-of-range versions refuse at their exact version tags. The independent oracle supplies range boundaries; a changed version predicate must be killed at those rows. Compiler correctness remains explicit residue.
+**Oracle**: `test/oracle/toolchain/VersionExpectations.hs`, `test/oracle/toolchain/Admission.hs` and `test/oracle/toolchain/Main.hs`; the independent source/evidence join is in `test/oracle/runner/LegacyAudit.hs`.
+**Legacy IDs**: `LTD-BOOT-001` — version admission and explicit compiler trust
 **Docs to update**: `documents/engineering/validation_frame_doctrine.md`
 
 ### Objective
 
-Turn the irreducible `GenesisTrust` input into a reproducible, pin-verified contained acquisition whose
-identities are spelled once in product code, without claiming publisher identity or pretending that the
-resulting binary proves its own compiler.
+Admit compatible native GHCup/GHC versions without toolchain byte pins or a hardware-specific prerequisite.
 
 ### Deliverables
 
-- `Amoebius.Toolchain.Pins` with the seven pins and the compiler and package-tool identities.
-- `Amoebius.Toolchain.Acquire` checking every pinned file's size and digest, comparing both pinned manifest archive entries with the independent archive pins, and extracting into two contained roots; the suite elaborates the same dependency requirements under both acquired toolchains with offline serial Cabal children.
-- A typed acquisition receipt per root, rendered beneath `.build/**` and never tracked.
+- The version requirements and unambiguous parser in `Amoebius.Toolchain.Versions`.
+- Native executable selection and separate version-command observations in `Amoebius.Toolchain.Acquire`.
+- Specific missing, malformed, failed-command and unsupported-version refusals with their positive twins.
 
 ### Validation
 
-Acquire twice; compare identities and plans with the oracle's literals; refuse each negative at its named
-locus. Preserve `GenesisTrust` as an explicit assumption in the residue row.
+Run the independently authored version boundary grid and child-process negatives. Keep source and receipt
+identity checks separate from toolchain admission. GHCup >=0.1.50.2 and <0.3, and GHC 9.12.4,
+are the current Haskell requirements; they do not select an OS or CPU architecture.
 
 ### Remaining Work
 
-None beyond the gate: the seven pin checks, both manifest agreements, the two contained extractions, and
-their agreement are the implementation the gate runs. The three pinned signature files have no claimed
-verification role ([DL-0017](../documents/decision_log.md#dl-0017--phase-1-verifies-pinned-bytes-without-an-operator-keyring)).
+None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
+The receipt above owns the integrated result. The component observations below describe the checks that
+preceded it; later source changes still require compatibility or numerical replay.
+
+The native admission component now passes ten independent oracle rows. Its four canonical fault groups
+each exercise GHCup and GHC with both positive and negative controls. Every positive also tolerates an
+unavailable Cabal version report; toolchain byte identity supplies no admission verdict. The examples are
+Haskell values linked from the product version module, and the boundary fakes are copied Haskell executables.
+The source-bound factory retains the observations and image identities and removes its copied source tree.
+Its qualified diagnostic removes the owning admission refusal while retaining the other due and inherited
+refusals. The serial qualification matrix now passes all forty-two independent evidence-binding controls.
+Five compiled production weakenings each produce exactly their assigned red row while preserving the other
+nine green rows: missing-tool detection, command-exit checking, malformed-version rejection, exact-version
+checking and range checking. The independent audit binds the full source rewrite, changed executable
+identities, complete ledger discovery, source-tree cleanup and owner/source correspondence; missing, reused,
+duplicate, forged and other-analyzer evidence refuse. A current query qualification cannot retire an earlier
+owner. These admission-component results supplied no phase authority on their own. The subsequent complete
+preview and acceptance separately established the integrated result recorded above.
 
 ## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ✅
 
@@ -210,12 +228,12 @@ verification role ([DL-0017](../documents/decision_log.md#dl-0017--phase-1-verif
 ### Objective
 
 Adopt [`dsl_doctrine.md` §9 — toolchain note](../documents/engineering/dsl_doctrine.md#9-toolchain-note): prove
-that the in-process decoder dependency builds and executes on the pin before Phase 3 promises a typed decoder.
+that the in-process decoder dependency builds and executes with compatible native tools before Phase 3 promises a typed decoder.
 
 ### Deliverables
 
 - The decode probe as a module the report exercises, with one positive and one mistyped case.
-- The compatibility requirement that makes the decoder build on the pinned compiler, authored as a Haskell value and never as a freeze file.
+- The compatibility requirement that makes the decoder build on the version-compatible compiler, authored as a Haskell value and never as a freeze file.
 
 ### Validation
 
@@ -223,8 +241,9 @@ Decode the positive and refuse the twin; compare both outcomes with the oracle's
 
 ### Remaining Work
 
-None beyond the gate: the decoder probe and its two rendered cases are in the probe module, and its version
-window is a compatibility requirement in the resolver.
+None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
+The receipt above owns the integrated result. The component observations below describe the checks that
+preceded it; later source changes still require compatibility or numerical replay.
 
 ## Sprint 1.3: `io-sim` + `io-classes` simulation build probe ✅
 
@@ -239,7 +258,7 @@ window is a compatibility requirement in the resolver.
 ### Objective
 
 Adopt [`gateway_migration_model_doctrine.md` §4 — simulate and prove](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove):
-prove that the deterministic-simulation dependency builds and runs on the pin before the gateway-migration
+prove that the deterministic-simulation dependency builds and runs with compatible native tools before the gateway-migration
 model is authored.
 
 ### Deliverables
@@ -253,7 +272,9 @@ Run both arms; compare the terminal states with the oracle's literals.
 
 ### Remaining Work
 
-None beyond the gate: both arms run under the deterministic simulator and print their terminal states.
+None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
+The receipt above owns the integrated result. The component observations below describe the checks that
+preceded it; later source changes still require compatibility or numerical replay.
 
 ## Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe ✅
 
@@ -267,7 +288,7 @@ None beyond the gate: both arms run under the deterministic simulator and print 
 
 ### Objective
 
-De-risk the native Pulsar client's fork and its codegen on the shared pin before the Pulsar-client phase
+De-risk the native Pulsar client's fork and its codegen with compatible native tools before the Pulsar-client phase
 promises it, so a fork that will not compile is found here rather than mid-implementation.
 
 ### Deliverables
@@ -281,16 +302,17 @@ Build and link; compare the token and the generated set with the oracle; refuse 
 
 ### Remaining Work
 
-None beyond the gate: the schema is rendered from a value, the tool is materialised beneath the run root, and
-the generated module set is compared with the oracle's literal.
+None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
+The receipt above owns the integrated result. The component observations below describe the checks that
+preceded it; later source changes still require compatibility or numerical replay.
 
 ## Sprint 1.5: Dynamic resolution and generated-output migration ✅
 
 **Status**: Done
-**Implementation**: `src/Amoebius/Toolchain/Resolve.hs`
+**Implementation**: `src/Amoebius/Toolchain/Resolve.hs` and `src/Amoebius/Toolchain/Probe.hs`
 **Blocked by**: Sprint 1.4
-**Independent Validation**: A compatibility declaration that names no resolved path, checksum, or solver graph resolves to a plan beneath `.build/toolchain/**`; a tracked freeze file, a tracked package pin, and a developer-home path are paired negatives refused at the source-closure locus.
-**Oracle**: `test/oracle/toolchain/Main.hs` states the refused path set from literals.
+**Independent Validation**: A compatibility declaration that names no resolved path, checksum, or solver graph resolves to a plan beneath `.build/toolchain/**`; a tracked freeze file, a tracked package pin, and a tracked developer-home path are paired negatives refused at the source-closure locus. Explicit read-only native tool paths are permitted inputs.
+**Oracle**: `test/oracle/toolchain/Main.hs` and `test/oracle/toolchain/ProbeSource.hs` state path, generated-byte and probe-inventory expectations independently; `test/oracle/runner/LegacyAudit.hs` judges the source/evidence join.
 **Legacy IDs**: `LTD-SRC-007` — foreign probe inputs
 **Docs to update**: `documents/engineering/repository_layout_doctrine.md`
 
@@ -307,20 +329,32 @@ generated evidence with run-local resolution from authored Haskell requirements.
 
 ### Validation
 
-Resolve twice from the pinned input; confirm every generated output is ignored and every authored path is
+Resolve twice with compatible native tools; confirm every generated output is ignored and every authored path is
 unchanged; refuse each tracked artefact by name.
 
 ### Remaining Work
 
-None beyond the gate: the requirements are values, the elaborated plan is written beneath the run root, and the
-tracked-artefact refusals are evaluated over the authored tree.
+None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
+The receipt above owns the integrated result. The component observations below describe the checks that
+preceded it; later source changes still require compatibility or numerical replay.
+
+The probe-source component currently passes nine independent oracle rows over fifteen paired inputs:
+three script forms, six foreign fixture formats, and omission of each of the report's six typed cases.
+The oracle also checks missing source files, empty inventory, duplicate and unexpected cases, actual
+generated bytes, and removal of the copied source tree. Missing observations produce nine red rows.
+Its source-bound qualification and three changed-production-source builds now pass all thirty-two
+independent join checks. Removing foreign-input detection makes both foreign-input negative rows red;
+removing case-omission detection makes its canonical negative red; removing source-presence detection
+makes the inventory control red. Each changed executable is refused qualification, its source witness
+is checked independently, and each copied source tree is absent afterward. These component observations
+mint no phase evidence and do not retire `LTD-SRC-007`.
 
 ## Sprint 1.6: Pure discovery/ensure planning over injected inputs ✅
 
 **Status**: Done
 **Implementation**: `src/Amoebius/Toolchain/Resolve.hs`
 **Blocked by**: Sprint 1.5
-**Independent Validation**: The plan over an injected empty inventory and an authenticated provider catalogue equals the oracle's literal step list; an absent tool, an out-of-range version, and a platform with no asset are refused rather than substituted. The plan reads no host.
+**Independent Validation**: The plan over an injected empty inventory and an supplied provider catalogue equals the oracle's literal step list; an absent tool, an out-of-range version, and a platform with no asset are refused rather than substituted. The plan reads no host.
 **Oracle**: `test/oracle/toolchain/Main.hs` states the expected step list and the refusals from literals.
 **Legacy IDs**: none
 **Docs to update**: `documents/engineering/substrate_doctrine.md`
@@ -335,7 +369,7 @@ as a pure plan over injected inventories, ahead of the boundary-with-fakes inter
 
 - A `managed` source kind — a tool installed by another resolved tool — and no `host` source kind.
 - The floor as a Haskell value evaluated only against an injected inventory, each failure carrying its remedy.
-- One canonical `<os>-<arch>` platform value, supplied as a case rather than discovered.
+- An abstract supplied platform fixture that imposes no OS/CPU requirement on the executing host.
 
 ### Validation
 
@@ -343,7 +377,9 @@ Evaluate the plan; compare with the oracle; refuse each negative without selecti
 
 ### Remaining Work
 
-None beyond the gate: the planner is pure over an injected inventory and catalogue.
+None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
+The receipt above owns the integrated result. The component observations below describe the checks that
+preceded it; later source changes still require compatibility or numerical replay.
 
 ## Sprint 1.7: Remove top-level vendor source and own the Haskell fork ✅
 
@@ -351,7 +387,7 @@ None beyond the gate: the planner is pure over an injected inventory and catalog
 **Implementation**: `src/Amoebius/Toolchain/Provenance.hs` and the maintained fork modules beneath `src/vendor/**`
 **Blocked by**: Sprint 1.6
 **Independent Validation**: A clean build from the immutable upstream identity is the positive control; a mutable reference, an absent identity, a developer-home path, and a digest that does not match the acquired bytes are refused; a reintroduced top-level `vendor/**` path is refused at the layout locus.
-**Oracle**: `test/oracle/toolchain/Main.hs` states the upstream identity and the refusals from literals.
+**Oracle**: `test/oracle/toolchain/Main.hs` and `test/oracle/toolchain/VendorSource.hs` state upstream, source-inventory, generated-byte and refusal expectations independently; `test/oracle/runner/LegacyAudit.hs` judges source/evidence binding.
 **Legacy IDs**: `LTD-SRC-009`
 **Docs to update**: `documents/engineering/repository_layout_doctrine.md`, `documents/engineering/pulsar_client_doctrine.md`
 
@@ -370,19 +406,31 @@ identity, and no patch root.
 
 ### Validation
 
-Build from the pinned input; refuse each negative at its named locus.
+Build with compatible native tools; refuse each negative at its named locus.
 
 ### Remaining Work
 
-None beyond the gate: the upstream release is extracted from the package input, its tree digest compared, and
-the layout refusals evaluated over the authored tree.
+None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
+The receipt above owns the integrated result. The component observations below describe the checks that
+preceded it; later source changes still require compatibility or numerical replay.
+
+The vendor-source component passes thirteen independent oracle rows over ten paired reintroductions
+covering the five canonical groups, with actual generated-file discovery and independently restated
+bytes. Its fork inventory is checked against seventeen literal module names and each module's removal.
+Missing observations produce thirteen red rows. The source-bound qualification and all six
+changed-production-source builds now pass forty-seven independent join checks. Weakening each of the
+five refusal groups makes its canonical negative red; disabling fork-presence checks makes the fork
+control red. Each changed executable is refused qualification, its source witness and binary delta are
+checked independently, and each copied source tree is removed. These component observations record no
+phase result and do not retire `LTD-SRC-009`; upstream acquisition and fork compilation retain the scope
+stated in the gate contract.
 
 ## Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ✅
 
 **Status**: Done
 **Implementation**: `src/Amoebius/Toolchain/Report.hs`, `app/amoebius/Main.hs`, `src/gate-spec/Amoebius/Validation/GateSpec/Toolchain.hs`, and `amoebius.cabal`
 **Blocked by**: Sprint 1.7
-**Independent Validation**: `amoebius toolchain-report` prints the digests and probe outputs the oracle restates; the compiled specification equals the fenced block above; a dropped compatibility allowance is refused at the resolution locus; a stanza whose module map disagrees with the subjects is refused at discovery.
+**Independent Validation**: `amoebius toolchain-report` prints version observations and probe outputs the oracle restates; the compiled specification equals the fenced block above; a dropped compatibility allowance is refused at the resolution locus; a stanza whose module map disagrees with the subjects is refused at discovery.
 **Oracle**: `test/oracle/toolchain/Main.hs` for the report; `test/oracle/runner/Main.hs` for the specification digest.
 **Legacy IDs**: none due here beyond the closures recorded above
 **Docs to update**: `DEVELOPMENT_PLAN/README.md` only through `accept`
@@ -406,7 +454,30 @@ phase's patch.
 
 ### Remaining Work
 
-The `accept` ends this phase.
+None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
+The receipt above owns the integrated result. The component observations below describe the checks that
+preceded it; later source changes still require compatibility or numerical replay.
+
+An earlier complete toolchain component run passed 112 independent oracle rows on fresh generated outputs.
+It covers native version admission and negatives, retained decoder/simulator/codegen/bridge probes,
+offline dependency elaboration, cached immutable upstream acquisition and digest mismatch, pure ensure
+planning, shipped-report CLI behavior and exact probe discovery, and both new source-boundary corpora.
+That run was a component diagnostic. The subsequent complete gate additionally judged the shipped-binary
+challenge, reproduced the predecessor and recorded acceptance with 116 clean oracle rows.
+
+The runner regression after integrating the source qualifiers and lifecycle handoff passes all 745
+independent rows. The validation kernel is 3,354 lines, below the 3,357-line cap used for these checks. Nine native API
+pairs admit legal use and reject construction or deserialization of opaque source, qualification, collection
+and predecessor handles. The missing-predecessor diagnostic refuses before gate execution. The documentation
+suite passes all 41 independent rows, including its nine named negatives.
+
+[DL-0035](../documents/decision_log.md#dl-0035--retired-legacy-checks-inherit-an-exact-source-predecessor-pass)
+records the eight Phase-0 retirements. The generic runner now issues an opaque handle only for a complete
+green gate. Custody reproduces the accepted predecessor at the current verifier, governance and closure;
+the next gate requires the immediate predecessor and exact captured source before inheriting its retained
+snapshot qualifications. Raw digests and component collections do not create that handle. Current Phase-0
+replay and the complete Phase-1 preview and acceptance subsequently passed; the component checks alone
+supplied no integrated phase authority.
 
 ## Documentation Requirements
 
@@ -424,7 +495,7 @@ The `accept` ends this phase.
 ## Related Documents
 
 - [Development-plan tracker](README.md)
-- [Phase 0 documentation suite](phase_00_documentation_suite.md) — the predecessor and the `GenesisTrust` pins
+- [Phase 0 documentation suite](phase_00_documentation_suite.md) — the predecessor and the `GenesisTrust` version assumption
 - [Phase 2 repository layout conformance](phase_02_repository_layout_conformance.md) — source closure over the toolchain this phase establishes
 - [Phase 9](phase_09_dsl_barrier.md) — re-runs this gate through the shipped binary
 - [Reader-facing legacy register](legacy_tracking_for_deletion.md)

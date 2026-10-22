@@ -3,6 +3,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Extension.Laws.Security
   ( Identity
   , Keyspace (RowKey)
@@ -20,7 +21,6 @@ import Amoebius.Scope.Index
   , activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import Data.Text (Text)
 
@@ -39,8 +39,8 @@ crossKeyProgram = do
   tenant <- firstShow (trustedTenant "tenant-a")
   subject <- firstShow (trustedSubject tenant "alice")
   membership <- firstShow (activeMembership tenant subject)
-  nested <- firstShow $ withRequestScope tenant subject membership $ \left ->
-    withRequestScope tenant subject membership $ \right ->
+  nested <- firstShow $ FixtureAuthority.withFixtureScope tenant subject membership $ \left ->
+    FixtureAuthority.withFixtureScope tenant subject membership $ \right ->
       crossKey left right
   firstShow nested
 

@@ -13,9 +13,6 @@ module Amoebius.Dsl.Decision
   , composeDecisionFragments
   , foldResourceTotal
   , distinctHostIds
-  , Rke2Servers (..)
-  , allRke2Servers
-  , rke2ServerCount
   ) where
 
 import Control.DeepSeq (NFData)
@@ -64,19 +61,6 @@ distinctHostIds :: [Text] -> Either Text [Text]
 distinctHostIds hosts
   | unique hosts = Right hosts
   | otherwise = Left "cluster.rke2.distinctHostIds"
-
-data Rke2Servers = Rke2One | Rke2Three | Rke2Five
-  deriving stock (Bounded, Enum, Eq, Generic, Ord, Read, Show)
-  deriving anyclass (NFData)
-
-allRke2Servers :: [Rke2Servers]
-allRke2Servers = [minBound .. maxBound]
-
-rke2ServerCount :: Rke2Servers -> Natural
-rke2ServerCount servers = case servers of
-  Rke2One -> 1
-  Rke2Three -> 3
-  Rke2Five -> 5
 
 unique :: Ord value => [value] -> Bool
 unique values = length values == Set.size (Set.fromList values)

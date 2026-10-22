@@ -4,6 +4,7 @@ module EngineAcceleratorGate
   ( runEngineAcceleratorGate
   ) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Capacity.Accelerator
   ( ProvisionedAccelerator (..)
   , ProvisionedAcceleratorEpoch (..)
@@ -34,7 +35,7 @@ import Amoebius.Capacity.Provision
   ( provisionedEngineAccelerators
   )
 import Amoebius.Capability.Engine
-  ( EngineFamily (..)
+  ( InferenceFamily (..)
   , EngineLane (..)
   , EngineOwnerDemand (CudaEngineOwner)
   , engineProvisionErrorTag
@@ -50,7 +51,6 @@ import Amoebius.Scope.Index
   ( activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import BindFixtures
   ( CapabilityFixture (..)
@@ -141,14 +141,14 @@ checkFamilyRelation = do
           , lane <- [minBound .. maxBound]
           ]
       expected = Set.fromList expectedFamilies
-  assert (length expectedFamilies == 12 && observed == expected) "family/lane availability relation drifted"
+  assert (length expectedFamilies == 24 && observed == expected) "family/lane availability relation drifted"
   pure (length expectedFamilies)
 
 checkClassCompleteOwner :: IO Int
 checkClassCompleteOwner = do
-  checked <- either (fail . show) pure (provisionEngineOwner cudaOffering LlamaFamily (CudaEngineOwner classCompleteCudaOwner))
+  checked <- either (fail . show) pure (provisionEngineOwner cudaOffering LlamaCpp (CudaEngineOwner classCompleteCudaOwner))
   assert (provisionedEngineLane checked == CudaLane) "provisioned engine lane differs from selected offering"
-  assert (provisionedEngineFamily checked == LlamaFamily) "provisioned engine family changed"
+  assert (provisionedEngineFamily checked == LlamaCpp) "provisioned engine family changed"
   let capacity = provisionedEngineCapacity checked
       observed =
         Set.fromList
@@ -200,7 +200,7 @@ checkEngineAcceleratorCalculusProjection positives availability negatives proper
   tenant <- either (fail . show) pure (trustedTenant "inference-accelerator-tenant")
   subject <- either (fail . show) pure (trustedSubject tenant "inference-accelerator-subject")
   membership <- either (fail . show) pure (activeMembership tenant subject)
-  action <- either (fail . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+  action <- either (fail . show) pure $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
     let resources count = ResourceVector 1 (fromIntegral count) 0 0
         artifact = artifactComponent scope "inference-positives" (resources positives) (RecipeId "inference-accelerator-corpus" 1)
         budget = budgetComponent scope "availability-cells" (resources availability) (allowance (Bytes (fromIntegral availability)) (Slots 1) (Bytes (fromIntegral availability)))

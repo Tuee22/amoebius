@@ -266,11 +266,10 @@ is defined by [validation_frame_doctrine.md](./validation_frame_doctrine.md#2-th
 Tokens, filenames, comments, and help output cannot establish either obligation.
 
 Each candidate uses a fresh, isolated run namespace under `.build/**`. Its permitted read-only inputs include
-the exact source snapshot, pin-verified toolchain inputs, and required predecessor receipt. Fixed pins bind
-the admitted bytes without proving publisher identity
-([DL-0021](../decision_log.md#dl-0021--cleanroom-input-names-respect-the-fixed-pin-trust-boundary)). Their acquisition
-and the finite bootstrap exception are owned by
-[validation_frame_doctrine.md](./validation_frame_doctrine.md#4-generated-output-and-cleanroom-execution).
+the exact source snapshot, native tool paths with compatible GHCup/GHC versions, and required predecessor
+receipt. Version admission requires no archive, signature, executable digest, OS/CPU tuple, device, or
+privileged host. Source and receipt hashes remain custody checks; compiler correctness is assumed
+([DL-0025](../decision_log.md#dl-0025--native-version-checks-replace-toolchain-pins-before-the-dsl-barrier)).
 Unlisted caches and generated fallbacks are unavailable. Production `.data/**` remains inaccessible; validation
 never deletes production state to manufacture an empty cleanroom.
 
@@ -289,6 +288,10 @@ rationale; it is never inferred from a full test count. This doctrine contains n
 instances; the [development-plan tracker](../../DEVELOPMENT_PLAN/README.md#phase-overview) alone reports status.
 
 ---
+
+
+The version-admission and hardware-free boundary amendment is recorded in
+[DL-0027](../decision_log.md#dl-0027--native-tool-inputs-and-portable-fake-process-observations).
 
 ## Related Documents
 

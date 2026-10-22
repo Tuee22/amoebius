@@ -8,8 +8,11 @@ module DslStages
   , corpusView
   , stageRows
   , fakeTranscriptRows
+  , environmentPolicyRows
   , manifestObjects
   , manifestEntries
+  , annotationText, apiVersionOf, appDeploymentRow, appSmallRow
+  , chainRow, chainManifestRow, dryRunRow
   ) where
 
 import Data.Aeson (Value (..), eitherDecodeStrict')
@@ -18,6 +21,7 @@ import Data.Aeson.KeyMap qualified as KeyMap
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
 import Data.Foldable (toList)
+import Data.List (sortOn)
 import Data.Map.Strict qualified as Map
 import Data.Maybe (fromMaybe, mapMaybe)
 import Data.Text (Text)
@@ -25,7 +29,8 @@ import Data.Text qualified as Text
 import Data.Text.Encoding qualified as Encoding
 import DslParse
 import DslTables
-import System.Directory (doesDirectoryExist, listDirectory)
+import DslRecipe (recipeRows)
+import System.Directory (doesDirectoryExist, exeExtension, listDirectory)
 import System.FilePath ((</>))
 
 -- | Where a run's artefacts are, what it was given, and how its rows are named.
@@ -58,8 +63,11 @@ stageRows view = do
   present <- directoryFiles directory
   let payloads = maybe [] splitPayloads manifest
       objects = mapMaybe parseObject payloads
+      lanes = if null (paramRke2 params) then ["linux-cpu/amd64"] else Map.keys (Map.fromList [(lane, ()) | host <- paramRke2 params, lane <- hostPLanes host, lane /= "apple-metal"])
+      laneRows = [(lane, "amoebius-base-" <> Text.replace "/" "-" (Text.drop (Text.length "linux-") lane), if "linux-cuda/" `Text.isPrefixOf` lane then "nvidia/cuda:12.8.2-devel-ubuntu24.04" else "ubuntu:24.04") | lane <- lanes]
+  recipes <- recipeRows directory (name "source" "image") (paramApp params) (not (null (paramRke2 params))) laneRows
   pure
-    [ expectEqual (name "decode" "dump") (expectedDecoded params) (linesOf decoded)
+    ([ expectEqual (name "decode" "dump") (expectedDecoded params) (linesOf decoded)
     , expectEqual (name "lower" "dump") (expectedLowered params) (linesOf lowered)
     , expectEqual (name "plan" "dump") (expectedPlan params) (linesOf plan)
     , provisionedRow (name "provision" "dump") params (linesOf provisioned)
@@ -74,7 +82,7 @@ stageRows view = do
     , dryRunRow (name "dry-run" "dump") expectedChain payloads dryRun
     , expectEqual (name "pipeline" "artefacts") (sortTexts (map snd stageFiles)) (Just (sortTexts (filter (`elem` map snd stageFiles) present)))
     , check (name "pipeline" "no-refusal") (not ("refusal.tsv" `elem` present) && not ("exception.txt" `elem` present)) (Text.pack (show present))
-    ]
+    ] <> recipes)
 
 sortTexts :: [Text] -> [Text]
 sortTexts items = case items of
@@ -105,7 +113,7 @@ provisionedRow name params actual = case actual of
 -- activation and reconcile mode its annotations name, and the kind, name, namespace,
 -- owner, and API version the contract gives it.
 objectsRow :: Text -> Params -> [Expected] -> [Payload] -> [Manifested] -> Row
-objectsRow name _ expected payloads objects = check name ok detail
+objectsRow name params expected payloads objects = check name ok detail
  where
   ok = length payloads == length expected && length objects == length expected && null mismatches
   detail = Text.pack (show (length payloads, length objects, length expected, take 3 mismatches))
@@ -121,8 +129,18 @@ objectsRow name _ expected payloads objects = check name ok detail
       <> [label "owner" | Map.lookup "amoebius.io/owner" (mLabels found) /= Just (expectedOwner wanted)]
       <> [label "managed-by" | Map.lookup "app.kubernetes.io/managed-by" (mLabels found) /= Just "amoebius"]
       <> [label "epoch" | Map.lookup "amoebius.io/epoch" (mLabels found) /= Just "generation-1"]
+      <> [label "scope" | Map.lookup "amoebius.io/scope" (mLabels found) /= Just (attestedScopeLabel issuer application need)]
+      <> [label "scope-issuer" | Map.lookup "amoebius.io/scope-issuer" (mAnnotations found) /= Just issuer]
+      <> [label "scope-application" | Map.lookup "amoebius.io/scope-application" (mAnnotations found) /= Just application]
+      <> [label "scope-need" | Map.lookup "amoebius.io/scope-need" (mAnnotations found) /= Just need]
    where
     label what = expectedIdentity wanted <> ":" <> what
+    application = paramApp params
+    (issuer, need) = case filter ((== expectedOwner wanted) . needLabel) (paramNeeds params) of
+      owner : _ -> ("core/" <> armName (needArm owner), needLabel owner)
+      [] -> case sortOn needLabel (paramNeeds params) of
+        primary : _ -> ("core/" <> armName (needArm primary), needLabel primary)
+        [] -> ("missing-actual-need", "missing-actual-need")
 
 -- | Each workload names the node the placement gave its unit: the application's deployment the
 -- node of the application's unit, every provider workload the node of its own identity, and an
@@ -180,6 +198,7 @@ annotationText key object = do
 apiVersionOf :: Text -> Text
 apiVersionOf kind = case kind of
   "Deployment" -> "apps/v1"
+  "DaemonSet" -> "apps/v1"
   "StatefulSet" -> "apps/v1"
   "Job" -> "batch/v1"
   "NetworkPolicy" -> "networking.k8s.io/v1"
@@ -298,14 +317,14 @@ fakeTranscriptRows name directory expectedPayloads = do
   applied <- readText (directory </> "applied.sha256")
   let count = fromMaybe 0 (countText >>= readCount)
   calls <- mapM (call directory) [1 .. length expectedPayloads]
-  let argvOk = all (\(argv, _, _) -> argv == Just ["kubectl", "apply", "--server-side=true", "-f", "-"]) calls
-      envOk = all (\(_, env, _) -> env == Just ["AMOEBIUS_FAKE_TRANSCRIPT"]) calls
+  let argvOk = all (\(argv, _, _) -> argv == Just ["kubectl" <> Text.pack exeExtension, "apply", "--server-side=true", "-f", "-"]) calls
+      envOk = all (\(_, env, _) -> fakeEnvironmentAllowed env) calls
       stdinOk = and (zipWith (\(_, _, stdin) wanted -> stdin == Just wanted) calls expectedPayloads)
       wantedCombined = ByteString.concat expectedPayloads
   pure
     [ check (name <> ".count") (count == length expectedPayloads) (Text.pack (show (count, length expectedPayloads)))
     , check (name <> ".argv") argvOk "a call did not receive the apply arguments"
-    , check (name <> ".environment") envOk "a call saw an environment other than the transcript variable"
+    , check (name <> ".environment") envOk "a call saw an undeclared application or runtime environment key"
     , check (name <> ".stdin") stdinOk "a call's stdin differs from the payload the chain hands it"
     , check (name <> ".combined") (if null expectedPayloads then combined == Nothing else combined == Just wantedCombined) "the combined stdin differs from the concatenated payloads"
     , check (name <> ".digest") (if null expectedPayloads then applied == Nothing else applied == Just (sha256Hex wantedCombined <> "\n")) "the applied digest differs from the digest of the combined stdin"
@@ -322,3 +341,11 @@ call directory index = do
   env <- readText (stem <> ".env")
   stdin <- readBytes (stem <> ".stdin")
   pure (fmap Text.lines argv, fmap Text.lines env, stdin)
+
+-- | A finite runtime marker allowance; supplied application keys still refuse.
+fakeEnvironmentAllowed :: Maybe [Text] -> Bool
+fakeEnvironmentAllowed env = env `elem` [Just ["AMOEBIUS_FAKE_TRANSCRIPT"], Just ["AMOEBIUS_FAKE_TRANSCRIPT", "__CF_USER_TEXT_ENCODING"]]
+environmentPolicyRows :: [Row]
+environmentPolicyRows = [check "fake.environment-policy-controls"
+  (and [fakeEnvironmentAllowed (Just ["AMOEBIUS_FAKE_TRANSCRIPT"]), fakeEnvironmentAllowed (Just ["AMOEBIUS_FAKE_TRANSCRIPT", "__CF_USER_TEXT_ENCODING"]), not (fakeEnvironmentAllowed Nothing), not (fakeEnvironmentAllowed (Just ["AMOEBIUS_FAKE_TRANSCRIPT", "UNDECLARED"])), not (fakeEnvironmentAllowed (Just ["AMOEBIUS_FAKE_TRANSCRIPT", "__CF_USER_TEXT_ENCODING", "UNDECLARED"]))])
+  "runtime marker controls did not retain rejection of undeclared environment keys"]

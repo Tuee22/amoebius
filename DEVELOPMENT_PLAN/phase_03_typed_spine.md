@@ -37,19 +37,20 @@ slice phases own in order. Its predecessor is [Phase 2](phase_02_repository_layo
 
 ## Phase Status
 
-✅ Done.
-**Receipt**: 10af51a4dfc8c3fbfaa4a3af684b21d5a26fd8df47d8e7f1e7d900fef917e67b
+⏸️ Blocked — NOT VALIDATED.
 
-The complete qualified gate for the exact source passed and `accept` recorded the receipt above; the
-observations are the immutable bundle beneath `validation-records/`. The change that registered this gate also
-changed the verifier (the staged perturbation, the own-family kill attribution, the per-stage observation, and the
-product-wide vocabulary check), and [DL-0023](../documents/decision_log.md#dl-0023--phase-3-accepted-its-owed-by-paragraphs-become-observed-implementations)
-re-mooded the paragraphs that had named this phase as owing; that is a verifier change, so `replay` must
-re-derive the receipts of Phases 0 through 3 under the resulting generation before the next `accept`. The gate's
-`Residue` row lists what the receipt does not
-establish. Any later edit to a `.hs` file beneath `src/` reopens this receipt and its predecessors under
-[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) until the next replay; an edit beneath
-`test/` changes the Phase-2 oracle's whole-tree counts, so an uncommitted predecessor bundle stops re-deriving.
+The verifier revoked the selected receipt and reopened the documentation gate after finding the missing
+inherited legacy analyzer/evidence join. Historical spine runs remain immutable observations beneath
+`validation-records/`; they do not establish a current complete gate pass. This phase requires fresh
+numerical qualification after the earlier boundary is repaired.
+
+The binary oracle selects the active constructor from independently parsed, typechecked, import-free
+Dhall. It therefore distinguishes Kind from rke2 even when the shared union schema names both arms;
+missing or unsupported input emits a named refusal. The complete gate includes the runner's nonce-bearing
+compile/apply challenge and exact fake-process observations. Cross-generation receipt revocation and the
+kernel ratchet have component regression coverage and require current predecessor qualification. Later edits within the closure require fresh
+replay under [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase). The gate's explicit
+residue keeps the remaining DSL and live-system claims outside this scope.
 
 ## Phase Summary
 
@@ -184,9 +185,9 @@ documentation checker refuses a block that differs from it. Execution evidence r
 
 ## Sprints
 
-## Sprint 3.1: Vocabulary and ui-core split ✅
+## Sprint 3.1: Vocabulary and ui-core split ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/vocabulary/Amoebius/Vocabulary.hs`
 **Blocked by**: [Phase 2](phase_02_repository_layout_conformance.md) gate pass
 **Forward-deferred**: the `ui-core` split of the `Amoebius.Ui.*` value types — [Phase 8](phase_08_ui_program_language_binding.md) `ui_program_language_binding`
@@ -217,9 +218,9 @@ compile-negative twin to fail at the constructor; require the hygiene row to ref
 The library and the consolidation are implemented; the gate is the remaining work. Re-homing the UI value types under a
 `ui-core` library is owned by Phase 8, which is the first phase that needs them apart from the product core.
 
-## Sprint 3.2: The typed root specification ✅
+## Sprint 3.2: The typed root specification ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/dsl-spine/Amoebius/Dsl/Spec.hs`
 **Blocked by**: Sprint 3.1
 **Independent Validation**: `RootInForceSpec` with `ClusterSpec`, `TopologySpec = KindTopology HostSpec KindReplicas`, `AppSpec` with a non-empty need list and a typed `WorkloadSpec`, and `DeploymentRules` with its dials is the positive control; a two-server quorum, an app with an empty need list, and a deployment naming an unknown app are compile-negative or refused twins at their exact loci.
@@ -246,9 +247,9 @@ each twin to fail at its named locus.
 The module is implemented; the compile-negative twin for a two-server quorum is the oracle's own, written and compiled at run time.
 The gate is the remaining work.
 
-## Sprint 3.3: Import, decode, encode, and examples ✅
+## Sprint 3.3: Import, decode, encode, and examples ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/dsl-spine/Amoebius/Dsl/Import.hs`, `src/dsl-spine/Amoebius/Dsl/Decode.hs`, `src/dsl-spine/Amoebius/Dsl/Encode.hs`, and `src/dsl-spine/Amoebius/Dsl/Examples/Spine.hs`
 **Blocked by**: Sprint 3.2
 **Independent Validation**: Encode-then-decode returns the authored value for every corpus example, and the Dhall schema rendered from the decoder typechecks every rendered positive; the four `ForbiddenImport` twins are refused before resolution under an empty environment; an import written with an absolute or home path is refused by the freeze, and a document that does not typecheck is refused by name.
@@ -275,9 +276,9 @@ Round-trip every example; typecheck every rendered positive; refuse every twin a
 The four modules are implemented and the substring import policy, the toy decoder, and the hand-written schema strings
 are deleted. The gate is the remaining work.
 
-## Sprint 3.4: Lowering into the bind input ✅
+## Sprint 3.4: Lowering into the bind input ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/dsl-spine/Amoebius/Dsl/Lower.hs`
 **Blocked by**: Sprint 3.3
 **Independent Validation**: `lowerDeployment` produces the `Topology`, `BoundDeployment`, and target supply for each corpus example equal to the oracle rows; `UnboundNeed`, `DanglingBinding`, and `UnknownDeployment` are refused at the lowering stage; no `BoundDeployment` can be constructed outside this module, checked by a compile-negative twin.
@@ -302,9 +303,9 @@ Lower every example and compare with the oracle; refuse every twin at the loweri
 
 The module and the link boundary are implemented. The gate is the remaining work.
 
-## Sprint 3.5: Steps as data and the product subcommands ✅
+## Sprint 3.5: Steps as data and the product subcommands ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/kernel-steps/Amoebius/Kernel/Step.hs`, `src/kernel-steps/Amoebius/Kernel/Interpret.hs`, `src/dsl-spine/Amoebius/Dsl/Commands.hs`, and `app/amoebius/Main.hs`
 **Blocked by**: Sprint 3.4
 **Independent Validation**: `Step` is closed data with no function slot, `Amoebius.Kernel.Interpret` is its only executor, and a dry run executes zero steps; `amoebius compile`, `amoebius apply --executor fake`, `amoebius render-examples`, `amoebius toolchain-report`, and `amoebius layout-report` exist as subcommands of the shipped binary; a `Step` carrying `IO` is a compile-negative twin.
@@ -329,9 +330,9 @@ Chain every example and compare the step sequence with the oracle; require the d
 
 The modules and subcommands are implemented and the legacy step carrying a function slot is deleted. The gate is the remaining work.
 
-## Sprint 3.6: The pipeline and the control-plane endpoint ✅
+## Sprint 3.6: The pipeline and the control-plane endpoint ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/dsl-spine/Amoebius/Dsl/Pipeline.hs` and `app/amoebius/Amoebius/Entry/ControlPlane.hs`
 **Blocked by**: Sprint 3.5
 **Forward-deferred**: the endpoint as a generated-mutant subject — [Phase 9](phase_09_dsl_barrier.md) `dsl_barrier`
@@ -359,9 +360,9 @@ The pipeline is implemented and the endpoint rewired. The runner mutates library
 module itself is not a generated-mutant subject here; its decision logic is the subject `Amoebius.Dsl.Pipeline`, and Phase 9
 re-verifies the endpoint as a subject. The untracked runtime helper on the deploy path stays visible as `LTD-HELPER-001` until Phase 50.
 
-## Sprint 3.7: The Phase-3 gate specification and front-half deletions ✅
+## Sprint 3.7: The Phase-3 gate specification and front-half deletions ⏸️
 
-**Status**: Done
+**Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs` and `amoebius.cabal`
 **Blocked by**: Sprint 3.6
 **Independent Validation**: The compiled specification equals the fenced block above; `verifySpec` accepts it; the old front half — the structural node tree, the toy decoder, the hand-written schema strings, the covering fixture library, the barrier report checker — is absent from the package description, and the oracle's source scan is red if any returns; the vocabulary duplicates it carried are refused by the hygiene row.

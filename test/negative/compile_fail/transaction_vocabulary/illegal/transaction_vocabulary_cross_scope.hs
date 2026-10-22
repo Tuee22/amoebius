@@ -2,11 +2,11 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Scope.Index
   ( activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import Amoebius.Transaction.Vocabulary qualified as Vocabulary
 
@@ -20,8 +20,8 @@ program = do
   tenant <- firstShow (trustedTenant "transaction-tenant")
   subject <- firstShow (trustedSubject tenant "transaction-subject")
   membership <- firstShow (activeMembership tenant subject)
-  nested <- firstShow $ withRequestScope tenant subject membership $ \leftScope ->
-    withRequestScope tenant subject membership $ \rightScope ->
+  nested <- firstShow $ FixtureAuthority.withFixtureScope tenant subject membership $ \leftScope ->
+    FixtureAuthority.withFixtureScope tenant subject membership $ \rightScope ->
       sameScope
         (Vocabulary.readDocument leftScope (Vocabulary.DocumentId "document-1"))
         (Vocabulary.listSubjectJobs rightScope)

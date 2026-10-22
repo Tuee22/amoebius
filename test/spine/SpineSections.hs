@@ -25,6 +25,8 @@ import Amoebius.Dsl.Raw qualified as Raw
 import Amoebius.Dsl.Spec
 import Amoebius.Kernel.Interpret (sha256Hex)
 import Amoebius.Pulsar.Wire (ProtocolField (..), ProtocolMessage (..), protocolDeclarations, renderProtocol)
+import Amoebius.Substrate.Classify (hostEnvironment)
+import Amoebius.Vocabulary (linuxCpuDetected)
 import Amoebius.Vocabulary
   ( Architecture (..)
   , CapabilityArm (..)
@@ -35,7 +37,6 @@ import Amoebius.Vocabulary
   , architectureName
   , detectedArchitecture
   , detectedSubstrate
-  , hostEnvironment
   , hostRefusalTag
   , isLabel
   , laneName
@@ -48,6 +49,7 @@ import Control.Exception (SomeException, try)
 import Control.Monad (void)
 import Data.ByteString qualified as ByteString
 import Data.List.NonEmpty (NonEmpty (..))
+import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as Encoding
@@ -198,7 +200,7 @@ specSection suite = writeLines (suite </> "spec.tsv") (map (\(name, result) -> t
          , ("root.ok", verdict (root [cluster "h1" ["h1"]]))
          , ("root.empty-clusters", verdict (root []))
          ]
-  host name = HostSpec <$> mkHostName name <*> pure (HostResources 1 1 1 1)
+  host name = HostSpec <$> mkHostName name <*> pure (HostResources 1 1 1 1) <*> pure (linuxCpuDetected Amd64) <*> pure Set.empty
   cluster kindHost names = do
     name <- mkClusterName "c"
     replicas <- mkKindReplicas 1
@@ -328,7 +330,7 @@ decodeSection suite = do
             Right _ -> "ok"
       ]
   base = rawOf' baselineRoot
-  rawOf' built = either (const (Raw.RawRoot [] [] [])) rawOf built
+  rawOf' built = either (const (Raw.RawRoot [] [] [] [])) rawOf built
   cluster0 = case Raw.rootClusters base of
     first : _ -> first
     [] -> Raw.RawCluster "" (Raw.KindTopology (Raw.RawKind "" 0)) []
@@ -343,7 +345,8 @@ decodeSection suite = do
   withDeployment change = base {Raw.rootDeployments = [change deployment0]}
   withKind change cluster = case Raw.clusterTopology cluster of
     Raw.KindTopology kind -> cluster {Raw.clusterTopology = Raw.KindTopology (change kind)}
-  extraHost name cluster = cluster {Raw.clusterHosts = Raw.clusterHosts cluster <> [Raw.RawHost name 1 1 1 1]}
+    Raw.Rke2Topology _ -> cluster
+  extraHost name cluster = cluster {Raw.clusterHosts = Raw.clusterHosts cluster <> [Raw.RawHost name 1 1 1 1 "linux" "amd64" False []]}
   firstBinding change deployment = case Raw.bindings deployment of
     first : rest -> deployment {Raw.bindings = change first : rest}
     [] -> deployment

@@ -3,6 +3,7 @@
 
 module Main (main) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition
@@ -168,7 +169,7 @@ checkCalculus = do
   subject <- requireRight "calculus subject" (CalculusScope.trustedSubject tenant "test-workflow-calculus-subject")
   membership <- requireRight "calculus membership" (CalculusScope.activeMembership tenant subject)
   action <- requireRight "calculus request scope" $
-    CalculusScope.withRequestScope tenant subject membership $ \scope -> do
+    FixtureAuthority.withFixtureScope tenant subject membership $ \scope -> do
       let resources count = Capacity.ResourceVector 1 count 0 0
           artifact = artifactComponent scope "test-topology-projection" (resources 5) (RecipeId "test-workflow-algebra" 5)
           budget = budgetComponent scope "supplied-model-budget" (resources 9) (allowance (Bytes 1) (Slots 1) (Bytes 1))

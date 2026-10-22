@@ -7,6 +7,7 @@ module CalculusProjection
   , referenceCalculusModel
   ) where
 
+import Amoebius.Test.ScopeFixture qualified as FixtureAuthority
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (..))
 import Amoebius.Calculus.Budget.Grant (Bytes (..), Slots (..), allowance)
 import Amoebius.Calculus.Composition
@@ -34,7 +35,6 @@ import Amoebius.Scope.Index
   ( activeMembership
   , trustedSubject
   , trustedTenant
-  , withRequestScope
   )
 import Data.Bifunctor (first)
 import Data.Text (Text)
@@ -68,7 +68,7 @@ withReferenceComposition continuation = do
   tenant <- first show (trustedTenant "phase-16-tenant")
   subject <- first show (trustedSubject tenant "phase-16-subject")
   membership <- first show (activeMembership tenant subject)
-  first show $ withRequestScope tenant subject membership $ \scope ->
+  first show $ FixtureAuthority.withFixtureScope tenant subject membership $ \scope ->
     let composition =
           append
             ( append

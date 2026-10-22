@@ -22,8 +22,9 @@ import Amoebius.Dsl.Encode (encodeRoot)
 import Amoebius.Dsl.Examples.Spine (Example (..), helperFiles, sentinel)
 import Amoebius.Dsl.Examples.Spine qualified as Spine
 import Amoebius.Dsl.Spec
-import Amoebius.Vocabulary (CapabilityArm (..), Quantity (..))
+import Amoebius.Vocabulary (Architecture (Amd64), linuxCpuDetected, CapabilityArm (..), Quantity (..))
 import Data.List.NonEmpty (NonEmpty (..))
+import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Numeric.Natural (Natural)
@@ -48,7 +49,7 @@ buildRoot build = do
   clusterLabel <- mkClusterName "kind-a"
   hostLabel <- mkHostName "kind-host"
   kindReplicas <- mkKindReplicas (buildNodes build)
-  cluster <- mkClusterSpec clusterLabel "kind-host" kindReplicas (HostSpec hostLabel (buildHost build) :| [])
+  cluster <- mkClusterSpec clusterLabel "kind-host" kindReplicas (HostSpec hostLabel (buildHost build) (linuxCpuDetected Amd64) Set.empty :| [])
   application <- mkAppName ("notes-" <> sentinel)
   needs <- mapM (\(arm, label, _) -> mkNeedLabelled arm label) (buildNeeds build)
   workload <- mkWorkloadSpec (PodResources 1 2 4) (PodResources 2 4 8) Nothing

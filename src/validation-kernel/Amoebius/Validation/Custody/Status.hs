@@ -1,64 +1,43 @@
 {-# LANGUAGE OverloadedStrings #-}
-
--- | The status surface and the one-phase status patch (DL-0009). The surface is
--- every line the plan's status vocabulary governs: the tracker's status cells,
--- each phase document's status line, and each sprint's heading marker and status
--- field. Its digest is what a receipt records as the postimage; the patch rewrites
--- exactly those lines to the next frontier and nothing else.
+-- | Status acquisition and one-frontier projection (DL-0009).
 module Amoebius.Validation.Custody.Status
-  ( StatusSurface (..)
-  , patchToFrontier
-  , recordedFrontier
-  , statusSurface
-  , surfaceDigest
-  ) where
-
+  ( StatusSurface (..), patchToFrontier, recordedFrontier, statusSurface, surfaceConsistent, surfaceDigest ) where
 import Amoebius.Plan.PhaseIdentity qualified as PhaseIdentity
 import Amoebius.Plan.StatusFrontier qualified as Status
-import Amoebius.Validation.Runner.Observer (sha256Hex)
+import Amoebius.Validation.Runner.Observer (sha256Hex, renderTsv)
+import Amoebius.Validation.Runner.Hygiene (readSourceText, sourceAttempt)
 import Data.Char (isDigit)
 import Data.Map.Strict qualified as Map
 import Data.Maybe (mapMaybe)
 import Data.Text (Text)
 import Data.Text qualified as Text
-import Data.Text.IO qualified as TextIO
 import System.Directory (doesFileExist)
 import System.FilePath ((</>))
-
--- | One status-bearing line: path, line number, and the exact line.
 data StatusSurface = StatusSurface
   { surfaceTracker :: [(Int, Int, Text)] -- phase, line number, status cell
   , surfacePhaseLines :: [(Int, Int, Text)] -- phase, line number, status line
   , surfaceSprints :: [(Int, Int, Int, Text, Text)] -- phase, sprint, heading line, heading, status field line
   , surfaceReceipts :: [(Int, Text)] -- phase, receipt digest recorded beside a Done status
-  }
-  deriving (Eq, Show)
+  } deriving (Eq, Show)
 trackerPath :: FilePath
 trackerPath = "DEVELOPMENT_PLAN/README.md"
-
--- | Read the surface from a tree.
 statusSurface :: FilePath -> IO (Either Text StatusSurface)
-statusSurface root = do
+statusSurface root = either Left id <$> sourceAttempt (do
   trackerExists <- doesFileExist (root </> trackerPath)
   if not trackerExists
     then pure (Left "tracker absent")
     else do
-      tracker <- TextIO.readFile (root </> trackerPath)
+      tracker <- readSourceText (root </> trackerPath)
       phases <- mapM (readPhase root) PhaseIdentity.allPhaseIdentities
-      pure
-        ( Right
-            StatusSurface
-              { surfaceTracker = mapMaybe trackerRow (zip [1 ..] (Text.lines tracker))
-              , surfacePhaseLines = concat [lines' | (lines', _, _) <- phases]
-              , surfaceSprints = concat [sprints | (_, sprints, _) <- phases]
-              , surfaceReceipts = concat [receipts | (_, _, receipts) <- phases]
-              }
-        )
+      pure (Right StatusSurface
+        { surfaceTracker = mapMaybe trackerRow (zip [1 ..] (Text.lines tracker))
+        , surfacePhaseLines = concat [lines' | (lines', _, _) <- phases]
+        , surfaceSprints = concat [sprints | (_, sprints, _) <- phases]
+        , surfaceReceipts = concat [receipts | (_, _, receipts) <- phases] }))
 trackerRow :: (Int, Text) -> Maybe (Int, Int, Text)
 trackerRow (number, line) = case map Text.strip (Text.splitOn "|" line) of
   ("" : ordinalText : _ : _ : _ : _ : status : _ : _)
-    | Text.all isDigit ordinalText
-    , not (Text.null ordinalText) ->
+    | not (Text.null ordinalText) && Text.all isDigit ordinalText ->
         Just (read (Text.unpack ordinalText), number, status)
   _ -> Nothing
 readPhase :: FilePath -> PhaseIdentity.PhaseIdentity -> IO ([(Int, Int, Text)], [(Int, Int, Int, Text, Text)], [(Int, Text)])
@@ -69,7 +48,7 @@ readPhase root row = do
   if not exists
     then pure ([], [], [])
     else do
-      contents <- TextIO.readFile path
+      contents <- readSourceText path
       let numbered = zip [1 ..] (Text.lines contents)
           statusBody = case dropWhile ((/= "## Phase Status") . snd) numbered of
             (_ : rest) -> filter (not . Text.null . Text.strip . snd) (takeWhile (not . ("## " `Text.isPrefixOf`) . snd) rest)
@@ -92,36 +71,38 @@ readPhase root row = do
 receiptPrefix :: Text
 receiptPrefix = "**Receipt**: "
 sprintOrdinal :: Int -> Text -> Maybe Int
-sprintOrdinal ordinal heading =
-  case Text.stripPrefix ("## Sprint " <> Text.pack (show ordinal) <> ".") heading of
-    Just rest ->
-      let digits = Text.takeWhile isDigit rest
-       in if Text.null digits then Nothing else Just (read (Text.unpack digits))
-    Nothing -> Nothing
-
--- | The frontier the tracker records, when its vector is exactly one frontier.
+sprintOrdinal ordinal heading = do
+  rest <- Text.stripPrefix ("## Sprint " <> Text.pack (show ordinal) <> ".") heading
+  let digits = Text.takeWhile isDigit rest
+  if Text.null digits then Nothing else Just (read (Text.unpack digits))
 recordedFrontier :: StatusSurface -> Maybe Status.StatusFrontier
 recordedFrontier surface = do
   statuses <- mapM (\ordinal -> lookup ordinal [(phase, status) | (phase, _, status) <- surfaceTracker surface] >>= Status.parseTrackerStatus) PhaseIdentity.phaseOrdinals
   Status.recognizeStatusFrontier statuses
 surfaceDigest :: StatusSurface -> Text
 surfaceDigest surface =
-  sha256Hex
-    ( Text.unlines
-        ( [Text.pack (show phase) <> "\ttracker\t" <> status | (phase, _, status) <- surfaceTracker surface]
-            <> [Text.pack (show phase) <> "\tphase\t" <> line | (phase, _, line) <- surfacePhaseLines surface]
-            <> [Text.pack (show phase) <> "\tsprint\t" <> Text.pack (show sprint) <> "\t" <> heading <> "\t" <> status | (phase, sprint, _, heading, status) <- surfaceSprints surface]
-            <> [Text.pack (show phase) <> "\treceipt\t" <> digest | (phase, digest) <- surfaceReceipts surface]
-        )
-    )
-
--- | Rewrite every status carrier to the projection of a frontier, writing the
--- receipt digest beside every Done status that has one and removing receipt
--- lines everywhere else. Returns the changed files with their new contents;
--- unchanged files are omitted.
+  sha256Hex (renderTsv
+    ([[Text.pack (show phase), "tracker", status] | (phase, _, status) <- surfaceTracker surface] <>
+     [[Text.pack (show phase), "phase", line] | (phase, _, line) <- surfacePhaseLines surface] <>
+     [[Text.pack (show phase), "sprint", Text.pack (show sprint), heading, status] | (phase, sprint, _, heading, status) <- surfaceSprints surface] <>
+     [[Text.pack (show phase), "receipt", digest] | (phase, digest) <- surfaceReceipts surface]))
+-- Structural agreement only; this establishes no gate or receipt authority.
+surfaceConsistent :: StatusSurface -> Bool
+surfaceConsistent surface = case recordedFrontier surface of
+  Nothing -> False
+  Just frontier -> map (\(phase, _, _) -> phase) (surfaceTracker surface) == ordinals
+    && map (\(phase, _, _) -> phase) (surfacePhaseLines surface) == ordinals
+    && all (\(phase, _, line) -> line == Status.renderPhaseStatusLine (Status.phaseStatusAt frontier phase)) (surfacePhaseLines surface)
+    && map fst (surfaceReceipts surface) == [phase | phase <- ordinals, Status.phaseStatusAt frontier phase == Status.Done]
+    && all (\(_, digest) -> Text.length digest == 64 && Text.all (\c -> c >= '0' && c <= '9' || c >= 'a' && c <= 'f') digest) (surfaceReceipts surface)
+    && all (\phase -> let rows = [sprint | (p, sprint, _, _, _) <- surfaceSprints surface, p == phase] in not (null rows) && rows == [1 .. length rows]) ordinals
+    && all (\(phase, sprint, _, heading, status) -> let wanted = Status.sprintStatusAt frontier phase sprint in
+      status == "**Status**: " <> Status.renderSprintStatus wanted && Status.renderStatusMarker wanted `Text.isSuffixOf` heading) (surfaceSprints surface)
+ where ordinals = PhaseIdentity.phaseOrdinals
+-- | Return changed frontier/receipt contents without writing files.
 patchToFrontier :: FilePath -> Status.StatusFrontier -> Map.Map Int Text -> IO [(FilePath, Text)]
 patchToFrontier root frontier receipts = do
-  tracker <- TextIO.readFile (root </> trackerPath)
+  tracker <- readSourceText (root </> trackerPath)
   let tracker' = Text.unlines (map patchTrackerLine (Text.lines tracker))
   phases <- mapM patchPhase PhaseIdentity.allPhaseIdentities
   pure ([(trackerPath, tracker') | tracker' /= tracker] <> concat phases)
@@ -139,7 +120,7 @@ patchToFrontier root frontier receipts = do
     if not exists
       then pure []
       else do
-        contents <- TextIO.readFile (root </> path)
+        contents <- readSourceText (root </> path)
         let lines' = Text.lines contents
             statusIndex = case break (== "## Phase Status") lines' of
               (before, _ : rest) -> Just (length before + 1 + length (takeWhile (Text.null . Text.strip) rest))

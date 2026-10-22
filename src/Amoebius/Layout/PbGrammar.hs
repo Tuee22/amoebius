@@ -10,6 +10,9 @@ module Amoebius.Layout.PbGrammar
   , admittedBootstrapDigest
   , admitBootstrap
   , bootstrapGraphRows
+  , bootstrapSourceRows
+  , BootstrapSourceEdit (..)
+  , bootstrapSourceExamples
   , renderBootstrapRefusal
   ) where
 
@@ -36,10 +39,11 @@ data BootstrapRefusal
   | BootstrapDynamicCall Text
   | BootstrapControlFlowRefusal Text
   | BootstrapEffectOutsideAdapter Text
+  | BootstrapInventoryRefusal Text
   deriving (Eq, Ord, Show)
 
 admittedBootstrapDigest :: Text
-admittedBootstrapDigest = "c978ad12876e570bc12704543b5c59c98fe03362acb19d4e527cbeb6090888bc"
+admittedBootstrapDigest = "1dc366fbf309694dcab66915a9449cca1fe79a547aba565f26049915e027ac7a"
 
 admitBootstrap :: ByteString -> Either BootstrapRefusal ()
 admitBootstrap bytes
@@ -67,6 +71,31 @@ bootstrapGraphRows bytes = do
       | (owner, call) <- calls]
       <> [Text.intercalate "\t" ["bootstrap-effect", owner, call]
          | (owner, call) <- calls, effectCall call])))
+
+-- | Whole-source static admission. The complete supplied inventory is projected
+-- independently of the bounded Python graph; a short inventory is not a claim
+-- about the repository. Callers bind it to their separately acquired snapshot.
+bootstrapSourceRows :: [(FilePath, ByteString)] -> Either BootstrapRefusal [Text]
+bootstrapSourceRows files
+  | null files = Left (BootstrapInventoryRefusal "empty source inventory")
+  | paths /= nub paths = Left (BootstrapInventoryRefusal "duplicate source path")
+  | otherwise = case bootstrapFiles of
+      [("pb/__main__.py", bytes)] -> do
+        rows <- bootstrapGraphRows bytes
+        pure (["bootstrap-source-path\t" <> Text.pack path | path <- paths] <> rows)
+      [] -> Left BootstrapMissing
+      _ -> Left (BootstrapInventoryRefusal (Text.intercalate "," (map (Text.pack . fst) bootstrapFiles)))
+ where
+  paths = sort (map fst files)
+  bootstrapFiles = sort [(path,bytes) | (path,bytes) <- files,path == "pb" || "pb/" `Text.isPrefixOf` Text.pack path]
+
+data BootstrapSourceEdit = AppendBootstrapBytes Text | RewriteBootstrapArguments deriving (Eq, Show)
+
+bootstrapSourceExamples :: [(Text, BootstrapSourceEdit)]
+bootstrapSourceExamples =
+  [("bootstrap-byte-changed", AppendBootstrapBytes "\n# whole-source byte change\n")
+  ,("bootstrap-extra-role", AppendBootstrapBytes "\nif sys.argv[1] == \"help\":\n    main()\n")
+  ,("bootstrap-argv-rewritten", RewriteBootstrapArguments)]
 
 ownedCalls :: Text -> Statement -> [(Text, Text)]
 ownedCalls owner statement = case statement of
@@ -96,7 +125,7 @@ firstRefusal source = case refusals of
   stripped = map Text.strip lines'
   imports = filter (\line -> "import " `Text.isPrefixOf` line || "from " `Text.isPrefixOf` line) stripped
   expectedImports =
-    [ "import hashlib", "import os", "import platform", "import subprocess"
+    [ "import os", "import platform", "import subprocess"
     , "import sys", "import urllib.request", "from pathlib import Path"
     ]
   forbiddenControl =
@@ -111,10 +140,10 @@ firstRefusal source = case refusals of
   dynamic = ["eval", "exec", "compile", "getattr", "setattr", "delattr", "__import__", "globals", "locals"]
   allowedCalls =
     [ "Path", ".resolve", "RuntimeError", "BootstrapAdapter", "str", "select_artifact", "bootstrap", "main"
-    , "platform.system", "platform.machine", "hashlib.sha256", "urllib.request.urlopen"
+    , "platform.system", "platform.machine", "urllib.request.urlopen"
     , "subprocess.run", "os.execv", "target.is_file", "target.read_bytes"
     , "target.parent.mkdir", "target.write_bytes", "target.chmod", "response.read"
-    , "existing_hash_value.hexdigest", "hash_value.hexdigest", "home.mkdir"
+    , "ghcup_version_bytes.decode", "ghc_version_bytes.decode", "home.mkdir"
     , "cache.mkdir", "temporary.mkdir", "binary_bytes.decode", "binary_text.strip"
     , "adapter.repository_root", "adapter.platform", "adapter.ensure_ghcup"
     , "adapter.environment", "adapter.run", "adapter.capture", "adapter.handoff"
@@ -155,7 +184,7 @@ callSites insideAdapter statement = case statement of
     Right Nothing -> []
     Right (Just parsed) -> [(inside, line, call) | call <- expressionCalls parsed]
 
--- | A closed indentation and statement grammar for the pinned bootstrap.
+-- | A closed indentation and statement grammar for the source-admitted bootstrap.
 -- Expressions remain bounded by the exact-byte check and their direct calls
 -- are extracted separately above.
 data Statement
@@ -205,7 +234,7 @@ admittedLeaf line =
     || ("(" `Text.isInfixOf` line && ")" `Text.isSuffixOf` line)
 
 -- This bounded expression grammar is deliberately smaller than Python. It
--- accepts every expression in the pinned bootstrap and refuses unknown forms
+-- accepts every expression in the source-admitted bootstrap and refuses unknown forms
 -- before the final byte-identity check. Calls are read from the expression
 -- tree, including nested arguments, rather than from token-shaped substrings.
 data Expression
@@ -344,3 +373,4 @@ renderBootstrapRefusal refusal = case refusal of
   BootstrapDynamicCall detail -> "BootstrapDynamicCall: " <> detail
   BootstrapControlFlowRefusal detail -> "BootstrapControlFlowRefusal: " <> detail
   BootstrapEffectOutsideAdapter detail -> "BootstrapEffectOutsideAdapter: " <> detail
+  BootstrapInventoryRefusal detail -> "BootstrapInventoryRefusal: " <> detail
