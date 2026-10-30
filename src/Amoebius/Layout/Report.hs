@@ -10,18 +10,31 @@ module Amoebius.Layout.Report
 import Amoebius.Layout.Classify
 import Amoebius.Layout.PackageMap (emptyPackageCatalog, loadPackageCatalog, packageMapReport)
 import Amoebius.Layout.PbGrammar
-import Amoebius.Layout.SourceGraph (sourceGraphWithPackageCatalog)
+import Amoebius.Internal.SourceText.Lexical qualified as Lexical
+import Amoebius.Layout.SourceGraph
+  ( StaticTextCheckResult, sourceGraphWithPackageCatalogChecked, unavailableStaticTextCheck
+  , staticTextCheckName, staticTextCheckFindings, staticTextCheckObservations
+  , staticTextFindingCode, staticTextFindingSubject, staticTextFindingDetail
+  , staticTextObservationKey, staticTextObservationValue
+  , staticTextExamples, staticTextExamplePath, staticTextCaptureExamples, staticTextSurfaceExamples )
 import Control.Exception (IOException, try)
 import Control.Monad (filterM)
-import Control.Monad (forM)
+import Control.Monad (forM, forM_)
+import Codec.Compression.GZip qualified as GZip
 import Crypto.Hash.SHA256 qualified as SHA256
 import Data.Bits ((.&.))
+import Data.Binary.Put qualified as Put
 import Data.ByteString qualified as ByteString
+import Data.ByteString.Base64 qualified as Base64
+import Data.ByteString.Lazy qualified as LazyBytes
+import Data.Map.Strict qualified as Map
+import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 import Data.Text.IO qualified as TextIO
 import Data.List (group, sort)
+import Data.Word (Word64)
 import Numeric (showHex)
 import Text.Read (readMaybe)
 import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, listDirectory, pathIsSymbolicLink)
@@ -74,14 +87,20 @@ runLayoutReport arguments = case parseOptions (Options "." Nothing Nothing True 
               Right (loaded, rows) -> ([], rows, loaded)
         -- The graph is the report's costliest stage. A caller that judges only the
         -- classification may skip it; the report then says so and states no stage.
-        (graphFindings, graphRows) <- if optionGraph options
-          then sourceGraphWithPackageCatalog
+        (graphFindings, graphRows, staticText) <- if optionGraph options
+          then sourceGraphWithPackageCatalogChecked
             (optionRoot options) paths componentMap dependencyMap catalog forwardOwned
-          else pure ([], ["graph-stage\tnot-computed"])
-        let rows =
+          else pure ([], ["graph-stage\tnot-computed"], unavailableStaticTextCheck)
+        let oldRows =
               [Text.intercalate "\t" ["path", Text.pack path, renderPathClass pathClass] | (path, pathClass) <- classified]
                 <> [Text.intercalate "\t" ["source-snapshot", Text.pack path, kind, Text.pack (show mode), digest] | (path,kind,mode,digest) <- snapshot]
                 <> [Text.intercalate "\t" ["source-graph-example", name, Text.pack sourceGraphExamplePath] | (name,_) <- sourceGraphExamples]
+                <> [Text.intercalate "\t" ["static-text-example", name, Text.pack staticTextExamplePath] | (name,_) <- staticTextExamples]
+                <> [Text.intercalate "\t" ["static-text-capture-example", name, Text.pack staticTextExamplePath] | (name,_) <- staticTextCaptureExamples]
+                <> [Text.intercalate "\t" ["lexical-compatibility-example",name,Text.pack (show spans),sourceDigest (TextEncoding.encodeUtf8 source)]
+                   | (name,source,spans) <- Lexical.lexicalCompatibilityExamples]
+                <> [Text.intercalate "\t" ["opaque-surface-example",name,sourceDigest (TextEncoding.encodeUtf8 source)]
+                   | (name,source) <- staticTextSurfaceExamples]
                 <> [Text.intercalate "\t" ["bootstrap-source-example", name, "pb/__main__.py"] | (name,_) <- bootstrapSourceExamples]
                 <> ["finding\t" <> renderFinding finding | finding <- snapshotFindings]
                 <> [Text.intercalate "\t" ["test-source-example", name, variant, Text.pack path] | (name, variant, path, _) <- testSourceExamples]
@@ -100,9 +119,10 @@ runLayoutReport arguments = case parseOptions (Options "." Nothing Nothing True 
                 <> ["finding\t" <> renderFinding finding | finding <- catalogFindings]
                 <> catalogRows
                 <> ["finding\t" <> renderFinding finding | finding <- graphFindings]
-                <> graphRows
+                <> packedReportRows graphRows
                 <> either (const []) id bootstrap
                 <> either (\problem -> ["finding\t" <> renderBootstrapRefusal problem <> "\tpb/__main__.py"]) (const []) bootstrap
+            rows = oldRows <> renderStaticTextDiagnostic staticText
             rendered = Text.unlines rows
         case optionOutput options of
           Nothing -> TextIO.putStr rendered
@@ -110,8 +130,56 @@ runLayoutReport arguments = case parseOptions (Options "." Nothing Nothing True 
             createDirectoryIfMissing True (takeDirectory destination)
             TextIO.writeFile destination rendered
         if null snapshotFindings && null pathFindings && null shapeFindings && null ignoreFindings && null packageFindings && null catalogFindings && null graphFindings && all (== Nothing) absent && either (const False) (const True) bootstrap
+            && null (staticTextCheckFindings staticText)
           then pure ()
           else exitWith (ExitFailure 1)
+
+renderStaticTextDiagnostic :: StaticTextCheckResult -> [Text]
+renderStaticTextDiagnostic result =
+  ["static-text-check\t" <> quoteDiagnosticField (staticTextCheckName result)]
+    <> [Text.intercalate "\t"
+          ["finding", quoteDiagnosticField (staticTextFindingCode item)
+          , quoteDiagnosticField (staticTextFindingSubject item)
+          , quoteDiagnosticField (staticTextFindingDetail item)]
+       | item <- staticTextCheckFindings result]
+    <> packedReportRows ["static-text-observation\t" <> quoteDiagnosticField
+          (staticTextObservationKey item, staticTextObservationValue item)
+       | item <- staticTextCheckObservations result]
+
+-- The graph and native traces can exceed the bounded consumer's artifact read.
+-- Intern complete TSV fields and compress their exact ordered rows. Findings,
+-- path classification and small reports retain their ordinary visible spelling.
+-- This is a lossless transport; it grants no source or semantic authority.
+packedReportRows :: [Text] -> [Text]
+packedReportRows rows
+  | ByteString.length original <= 1024 * 1024 = rows
+  | otherwise = [Text.intercalate "\t"
+      ["layout-packed-rows.v1", "fields64be-gzip-base64.v1"
+      , Text.pack (show (length fields)), Text.pack (show (ByteString.length original))
+      , sourceDigest original, TextEncoding.decodeUtf8 (Base64.encode compressed)]]
+ where
+  rendered = Text.unlines rows
+  original = TextEncoding.encodeUtf8 rendered
+  fields = map (Text.splitOn "\t") (Text.lines rendered)
+  dictionary = Set.toAscList (Set.fromList (concat fields))
+  identifiers = Map.fromList (zip dictionary [0 :: Word64 ..])
+  retained = Put.runPut $ do
+    Put.putWord64be (fromIntegral (length dictionary))
+    forM_ dictionary $ \field -> do
+      let bytes = TextEncoding.encodeUtf8 field
+      Put.putWord64be (fromIntegral (ByteString.length bytes))
+      Put.putByteString bytes
+    Put.putWord64be (fromIntegral (length fields))
+    forM_ fields $ \row -> do
+      Put.putWord64be (fromIntegral (length row))
+      mapM_ (Put.putWord64be . (identifiers Map.!)) row
+  compressed = LazyBytes.toStrict (GZip.compress retained)
+
+quoteDiagnosticField :: Show value => value -> Text
+quoteDiagnosticField = Text.pack . show
+
+sourceDigest :: ByteString.ByteString -> Text
+sourceDigest = Text.pack . concatMap (\byte -> let digits=showHex byte "" in replicate (2-length digits) '0'<>digits) . ByteString.unpack . SHA256.hash
 
 parseOptions :: Options -> [String] -> Either String Options
 parseOptions options arguments = case arguments of

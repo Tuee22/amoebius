@@ -1,0 +1,9 @@
+candidate	phase=0	capability=documentation_suite
+spec-digest	5d73f15775ea9d7063673225e2caa65ef45b07d03590d095bb176a574bf17f5e
+record	amoebius-status-reset.v1
+decision	"DL-0041"
+validator-gap	"M.3/M.4 actual finite-seed and ordinary matrices lack source-bound clean-to-mutant rebuilt executed-image byte witnesses; oracle completion and observer/native joins also remain unqualified"
+product-gap	LTD-VAL-001
+status-preimage	0454ad2d0e2265d20fd6f83c5ec2f1352df5c5a54ed5b5a121fac2d0f728ccac
+target	0
+

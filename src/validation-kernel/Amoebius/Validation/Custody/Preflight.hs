@@ -17,7 +17,7 @@ data PreflightRefusal
 renderPreflightRefusal :: PreflightRefusal -> Text
 renderPreflightRefusal refusal = case refusal of
   StatusSurfaceDirty -> "StatusSurfaceDirty: the status surface differs from the last recorded postimage"
-  PredecessorNotCommitted -> "PredecessorNotCommitted: the predecessor receipt's tree is not an ancestor of the current tree"
+  PredecessorNotCommitted -> "PredecessorNotCommitted: predecessor ancestry, publication binding, or complete re-derivation is unavailable"
   StatusWithoutReceipt phases -> "STATUS-WITHOUT-RECEIPT: " <> Text.intercalate "," (map (Text.pack . show) phases)
   PredecessorNotReproduced phases -> "PredecessorNotReproduced: no store record of this generation re-derives the receipt digest recorded for phase " <> Text.intercalate "," (map (Text.pack . show) phases) <> "; run `amoebius-validate replay`"
   GovernanceUnaccepted detail -> "GOVERNANCE-UNACCEPTED: " <> detail

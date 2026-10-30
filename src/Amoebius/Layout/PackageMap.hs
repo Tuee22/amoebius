@@ -49,6 +49,9 @@ module Amoebius.Layout.PackageMap
   ) where
 
 import Amoebius.Layout.Classify (LayoutFinding (..), checkRuntimeComponent)
+import Amoebius.Internal.Cabal.ComponentDescription
+  ( ComponentTree (..), descriptionResult, parseDescription
+  , enumerateComponents, aggregateAll, dependencyLibrariesFor )
 import Control.Exception (IOException, SomeException, displayException, try)
 import Control.Monad (filterM)
 import Control.Monad.IO.Class (liftIO)
@@ -63,8 +66,6 @@ import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
-import Distribution.Compat.NonEmptySet qualified as NonEmptySet
-import Distribution.Fields.ParseResult (runParseResult)
 import Distribution.PackageDescription
   ( Benchmark (..)
   , BuildInfo (..)
@@ -74,14 +75,12 @@ import Distribution.PackageDescription
   , Library (..)
   , TestSuite (..)
   )
-import Distribution.PackageDescription.Parsec (parseGenericPackageDescription)
 import Distribution.Pretty (prettyShow)
 import Distribution.Types.Dependency (Dependency (..))
 import Distribution.Types.LibraryName (LibraryName (..))
-import Distribution.Types.PackageName (unPackageName)
+import Distribution.Types.PackageName (mkPackageName, unPackageName)
 import Distribution.Types.UnqualComponentName (unUnqualComponentName)
 import Distribution.Types.BenchmarkInterface (BenchmarkInterface (..))
-import Distribution.Types.CondTree (CondBranch (..), CondTree (..))
 import Distribution.Types.TestSuiteInterface (TestSuiteInterface (..))
 import Distribution.Utils.Path (getSymbolicPath)
 import GHC (getSession, getSessionDynFlags, runGhc)
@@ -175,26 +174,27 @@ packageMapReport mainBytes probeBytes present = case (parse "amoebius.cabal" mai
       | path `Set.member` Set.fromList maintainedForkPaths = Just "maintained-fork"
       | otherwise = Nothing
  where
-  parse path bytes = case runParseResult (parseGenericPackageDescription bytes) of
-    (_, Left _) -> Left (LayoutFinding "PackageDescriptionUnparsable" path)
-    (_, Right description) -> Right description
+  parse path bytes = case descriptionResult (parseDescription bytes) of
+    Left _ -> Left (LayoutFinding "PackageDescriptionUnparsable" path)
+    Right description -> Right description
 
 -- | Parse component identities independently of module claims: a disabled or
 -- empty component still has an authored name, and all conditional roots count.
 runtimeComponentFindings :: FilePath -> ByteString.ByteString -> [LayoutFinding]
-runtimeComponentFindings path bytes = case runParseResult (parseGenericPackageDescription bytes) of
-  (_, Left _) -> [LayoutFinding "PackageDescriptionUnparsable" path]
-  (_, Right description) -> concat
+runtimeComponentFindings path bytes = case descriptionResult (parseDescription bytes) of
+  Left _ -> [LayoutFinding "PackageDescriptionUnparsable" path]
+  Right description -> concat
     [checkRuntimeComponent path component (map getSymbolicPath (hsSourceDirs info))
       | (component, info) <- components description]
  where
-  components description =
-    [("library", libBuildInfo (flatten tree)) | tree <- maybe [] pure (condLibrary description)]
-    <> [("library:" <> Text.pack (prettyShow name), libBuildInfo (flatten tree)) | (name, tree) <- condSubLibraries description]
-    <> [("executable:" <> Text.pack (prettyShow name), buildInfo (flatten tree)) | (name, tree) <- condExecutables description]
-    <> [("test:" <> Text.pack (prettyShow name), testBuildInfo (flatten tree)) | (name, tree) <- condTestSuites description]
-    <> [("benchmark:" <> Text.pack (prettyShow name), benchmarkBuildInfo (flatten tree)) | (name, tree) <- condBenchmarks description]
-    <> [("foreign-library:" <> Text.pack (prettyShow name), foreignLibBuildInfo (flatten tree)) | (name, tree) <- condForeignLibs description]
+  components = map componentInfo . enumerateComponents
+  componentInfo component = case component of
+    MainLibraryTree tree -> ("library", libBuildInfo (aggregateAll tree))
+    SubLibraryTree name tree -> ("library:" <> Text.pack (prettyShow name), libBuildInfo (aggregateAll tree))
+    ExecutableTree name tree -> ("executable:" <> Text.pack (prettyShow name), buildInfo (aggregateAll tree))
+    TestSuiteTree name tree -> ("test:" <> Text.pack (prettyShow name), testBuildInfo (aggregateAll tree))
+    BenchmarkTree name tree -> ("benchmark:" <> Text.pack (prettyShow name), benchmarkBuildInfo (aggregateAll tree))
+    ForeignLibraryTree name tree -> ("foreign-library:" <> Text.pack (prettyShow name), foreignLibBuildInfo (aggregateAll tree))
 
 -- | External packages, each at the version the maintained fork tracks, that the
 -- fork imports beyond the planned dependency universe. The fork has no Cabal
@@ -236,19 +236,19 @@ sourceClaims packageRoot description =
   concat . concat $
     [ [moduleClaims "library" (libBuildInfo library)
         (map prettyShow (exposedModules library <> otherModules (libBuildInfo library)))
-      | tree <- maybe [] pure (condLibrary description), let library = flatten tree]
+      | tree <- maybe [] pure (condLibrary description), let library = aggregateAll tree]
     , [moduleClaims (Text.pack ("library:" <> prettyShow name)) (libBuildInfo library)
         (map prettyShow (exposedModules library <> otherModules (libBuildInfo library)))
-      | (name, tree) <- condSubLibraries description, let library = flatten tree]
+      | (name, tree) <- condSubLibraries description, let library = aggregateAll tree]
     , [moduleClaims (Text.pack ("executable:" <> prettyShow name)) (buildInfo executable)
         (map prettyShow (otherModules (buildInfo executable)) <> [getSymbolicPath (modulePath executable)])
-      | (name, tree) <- condExecutables description, let executable = flatten tree]
+      | (name, tree) <- condExecutables description, let executable = aggregateAll tree]
     , [moduleClaims (Text.pack ("test:" <> prettyShow name)) (testBuildInfo suite)
         (map prettyShow (otherModules (testBuildInfo suite)) <> testMain suite)
-      | (name, tree) <- condTestSuites description, let suite = flatten tree]
+      | (name, tree) <- condTestSuites description, let suite = aggregateAll tree]
     , [moduleClaims (Text.pack ("benchmark:" <> prettyShow name)) (benchmarkBuildInfo benchmark)
         (map prettyShow (otherModules (benchmarkBuildInfo benchmark)) <> benchmarkMain benchmark)
-      | (name, tree) <- condBenchmarks description, let benchmark = flatten tree]
+      | (name, tree) <- condBenchmarks description, let benchmark = aggregateAll tree]
     ]
  where
   moduleClaims component info names =
@@ -263,9 +263,7 @@ sourceClaims packageRoot description =
     [case libraryName of
        LMainLibName -> "library"
        LSubLibName name -> Text.pack ("library:" <> unUnqualComponentName name)
-    | Dependency packageName _ libraries <- targetBuildDepends info
-    , unPackageName packageName == "amoebius"
-    , libraryName <- NonEmptySet.toList libraries]
+    | libraryName <- dependencyLibrariesFor (mkPackageName "amoebius") info]
   sourceName name
     | ".hs" `suffix` name = name
     | otherwise = Text.unpack (Text.replace "." "/" (Text.pack name)) <> ".hs"
@@ -276,13 +274,6 @@ sourceClaims packageRoot description =
   benchmarkMain benchmark = case benchmarkInterface benchmark of
     BenchmarkExeV10 _ path -> [getSymbolicPath path]
     BenchmarkUnsupported _ -> []
-
-flatten :: Monoid a => CondTree v c a -> a
-flatten tree =
-  condTreeData tree
-    <> mconcat
-      [flatten (condBranchIfTrue branch) <> maybe mempty flatten (condBranchIfFalse branch)
-      | branch <- condTreeComponents tree]
 
 prefix :: String -> String -> Bool
 prefix start value = take (length start) value == start

@@ -197,6 +197,14 @@ the clean subject digest, applies a named operator to a named production locus i
 that changed subject, and observes the specified red result. A missing locus, no-op transform, unchanged
 binary, unexecuted mutant, skipped mutant, or red result at another locus fails the gate.
 
+Before counting a generated-mutant result, run an unmodified source control through the same matrix
+materialization, build, suite, oracle, output-root placement, invocation, environment policy, and discovery
+path used for the mutants. The control must produce the complete expected ledger with every row green.
+Generated suite outputs must remain beneath the acquired copy's admitted state roots and must not enter
+authored-path discovery. A red control or a context mismatch refuses qualification; a harness-only refusal
+supplies no kill. Retain the control's raw observations with the matrix
+([DL-0037](../documents/decision_log.md#dl-0037--an-unmodified-matrix-control-prevents-harness-only-kills)).
+
 The operator catalogue is a Haskell value inside the runner, and mutants are generated, never authored:
 constant flip, boundary shift, branch swap, field drop, and list truncation, applied with deterministic
 sampling to copies of the specification's stage modules beneath `.build/runs/**` — eight per module, at most

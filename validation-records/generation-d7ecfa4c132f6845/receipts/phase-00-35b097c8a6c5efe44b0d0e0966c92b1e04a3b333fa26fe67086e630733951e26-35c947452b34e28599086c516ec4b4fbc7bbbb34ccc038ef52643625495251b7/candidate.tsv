@@ -1,0 +1,9 @@
+candidate	phase=0	capability=documentation_suite
+spec-digest	a360b04154839052f8aeeb7883291816914573cace04b0471201275aaf59d915
+record	amoebius-status-reset.v1
+decision	"DL-0039"
+validator-gap	"recursive uncommitted predecessor postimage admission"
+product-gap	LTD-VAL-003
+status-preimage	58c341e977985147a44edee2e2fba6c2f0563cc909ce7afcec6298cd0bb2ebd4
+target	0
+

@@ -146,7 +146,7 @@ processChecks directory = do
  where
   shown :: Show value => value -> Text
   shown = Text.pack . show
-  policy = "inherit:PATH,HOME,CABAL_DIR,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,LANG" :: Text
+  policy = "inherit:PATH,HOME,CABAL_DIR,CABAL_CONFIG,GHCUP_INSTALL_BASE_PREFIX,XDG_CACHE_HOME,XDG_CONFIG_HOME,XDG_DATA_HOME,XDG_STATE_HOME,APPDATA,LOCALAPPDATA,SystemRoot,SYSTEMROOT,WINDIR,COMSPEC,PATHEXT,LANG;temp:cwd/.build/observer-tmp" :: Text
 
 expectations :: [(Text, Text)]
 expectations =

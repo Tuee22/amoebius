@@ -36,6 +36,8 @@ module Amoebius.Toolchain.Probe
   , renderProbeRefusal
   , renderSchedule
   , simProbe
+  , simulationTerminal
+  , simulateSchedule
   ) where
 
 import Amoebius.Toolchain.Acquire (ChildRecord (..), spawnChild)
@@ -136,12 +138,14 @@ retainedProbeRows directory = mapM (\value -> (probeCaseName value,) <$> run val
 data ProbeRefusal
   = CodegenToolAbsent Text
   | CodegenFailed Text
+  | SimulationNoOutput
   deriving (Eq, Show)
 
 renderProbeRefusal :: ProbeRefusal -> Text
 renderProbeRefusal refusal = case refusal of
   CodegenToolAbsent tool -> "CodegenToolAbsent: " <> tool
   CodegenFailed detail -> "CodegenFailed: " <> detail
+  SimulationNoOutput -> "SimulationNoOutput: simulation completed without a terminal value"
 
 -- * The in-process decoder
 
@@ -217,12 +221,18 @@ perturbedSchedule = Schedule [Writer "a" 30 1, Writer "b" 20 2]
 
 -- | The terminal state of the cell under the schedule, run deterministically.
 simProbe :: Schedule -> Text
-simProbe (Schedule writers) = runSimOrThrow (simulation writers)
+simProbe = either renderProbeRefusal id . simulateSchedule
 
-simulation :: [Writer] -> IOSim s Text
+simulateSchedule :: Schedule -> Either ProbeRefusal Text
+simulateSchedule = maybe (Left SimulationNoOutput) Right . simulationTerminal
+
+simulationTerminal :: Schedule -> Maybe Text
+simulationTerminal (Schedule writers) = runSimOrThrow (simulation writers)
+
+simulation :: [Writer] -> IOSim s (Maybe Text)
 simulation writers = do
-  cell <- newTVarIO "none"
-  mapM_ (\writer -> forkIO (threadDelay (writerDelay writer) >> atomically (writeTVar cell (writerName writer <> ":" <> Text.pack (show (writerValue writer)))))) writers
+  cell <- newTVarIO Nothing
+  mapM_ (\writer -> forkIO (threadDelay (writerDelay writer) >> atomically (writeTVar cell (Just (writerName writer <> ":" <> Text.pack (show (writerValue writer))))))) writers
   threadDelay (maximum (0 : map writerDelay writers) + 1)
   readTVarIO cell
 
@@ -256,7 +266,8 @@ codegenProbe protoc plugin directory = do
   let output = directory </> "generated"
   createDirectoryIfMissing True output
   TextIO.writeFile (directory </> "probe.proto") probeProto
-  (child, _, err) <- spawnChild directory protoc ["--plugin=protoc-gen-haskell=" <> plugin, "--haskell_out=" <> output, "-I", directory, "probe.proto"]
+  observation@(child, _, err) <- spawnChild directory protoc ["--plugin=protoc-gen-haskell=" <> plugin, "--haskell_out=" <> output, "-I", directory, "probe.proto"]
+  TextIO.writeFile (directory </> "codegen-process.data") (Text.pack (show observation))
   if childExit child == 127
     then pure (Left (CodegenToolAbsent (Text.pack protoc)))
     else

@@ -1,0 +1,17 @@
+record	amoebius-phase-receipt.v2
+phase	0
+capability	documentation_suite
+generation	cb7e5824edef6f0185dcc2846450344c66c50354461afdb5a73d60a5bb4a038b
+spec-digest	5d73f15775ea9d7063673225e2caa65ef45b07d03590d095bb176a574bf17f5e
+spec	record\tamoebius-status-reset.v1\ndecision\t"DL-0041"\nvalidator-gap\t"M.3/M.4 actual finite-seed and ordinary matrices lack source-bound clean-to-mutant rebuilt executed-image byte witnesses; oracle completion and observer/native joins also remain unqualified"\nproduct-gap\tLTD-VAL-001\nstatus-preimage\t0454ad2d0e2265d20fd6f83c5ec2f1352df5c5a54ed5b5a121fac2d0f728ccac\ntarget\t0\n
+candidate-digest	7b506cdcb9d4f7cb8d7b86ba20882df1237cd3cb7eb646145b0c8d04a81f2909
+kill-table-digest	f402cb8b4b0dbecd8015e4717ebc59ec857e43946494ceef00dc611aff05b27b
+closure-digest	5d73f15775ea9d7063673225e2caa65ef45b07d03590d095bb176a574bf17f5e
+reproducible-digest	d038b39e4408fe5b9493ba326cca0eb09f1d8bc7e496d95a912d084f6d45c3c6
+verifier-digest	cb7e5824edef6f0185dcc2846450344c66c50354461afdb5a73d60a5bb4a038b
+governance-digest	04d784db24be4fd0a0a348d5e47bc8373b59c4191555eaf6bba46fb72d6de4fb
+status-postimage	12fcbc4b5d3b8bba0c59b5d8177e08387ee386795102c94cc248c7e51ca1b728
+tree-commit	7fe37674d88526e1d876a28a99f26f7e679dfb39
+issued-at	2026-10-24 11:26:08.465405 UTC
+reset-validator-gap	M.3/M.4 actual finite-seed and ordinary matrices lack source-bound clean-to-mutant rebuilt executed-image byte witnesses; oracle completion and observer/native joins also remain unqualified
+reset-product-gap	LTD-VAL-001

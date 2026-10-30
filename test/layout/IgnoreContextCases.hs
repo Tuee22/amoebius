@@ -5,7 +5,7 @@ module IgnoreContextCases (runIgnoreContextCases) where
 import Amoebius.Layout.Classify
 import SourcePathCases (sourcePathInventory)
 import Control.Exception (finally)
-import Control.Monad (forM, forM_, unless, when)
+import Control.Monad (forM, forM_, when)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as TextIO
@@ -32,34 +32,41 @@ runIgnoreContextCases output = do
     TextIO.writeFile (file "-baseline.data") (Text.pack (show baseline))
     rows <- concat <$> forM ignoreContextExamples (\(name,variant,path,suffix) -> forM [False,True] $ \negative -> do
       let role = if negative then "negative" else "positive" :: Text
-      restore <- if negative then applyEdit tree (AppendIgnoreLines path suffix) else pure (pure ())
-      (do
-        discovered <- sourcePathInventory tree
-        (bytes,findings) <- observePolicies tree
-        let row = (name,variant,role,discovered,bytes,findings)
-        TextIO.writeFile (file "-current.data") (Text.pack (show row))
-        pure row) `finally` restore)
+      attempted <- if negative then applyEdit tree (AppendIgnoreLines path suffix) else pure (Right (pure ()))
+      observed <- case attempted of
+        Left refusal -> pure (Left refusal)
+        Right restore -> (do
+          discovered <- sourcePathInventory tree
+          (bytes,findings) <- observePolicies tree
+          pure (Right (discovered,bytes,findings))) `finally` restore
+      let row = (name,variant,role,observed)
+      TextIO.writeFile (file "-current.data") (Text.pack (show row))
+      pure row)
     controls <- forM ignoreContextControls $ \(name,edit) -> do
-      restore <- applyEdit tree edit
-      (do
-        (bytes,findings) <- observePolicies tree
-        TextIO.writeFile (file "-current-control.data") (Text.pack (show (name,bytes,findings)))
-        pure (name,bytes,findings)) `finally` restore
+      attempted <- applyEdit tree edit
+      observed <- case attempted of
+        Left refusal -> pure (Left refusal)
+        Right restore -> (Right <$> observePolicies tree) `finally` restore
+      let row = (name,observed)
+      TextIO.writeFile (file "-current-control.data") (Text.pack (show row))
+      pure row
     pure (rows,controls)) `finally` removePathForcibly tree
   removed <- not <$> doesPathExist tree
   TextIO.writeFile (file ".data") (Text.pack (show rows))
   TextIO.writeFile (file "-controls.data") (Text.pack (show controls))
   TextIO.writeFile (file "-cleanup.data") (Text.pack (show removed))
 
-applyEdit :: FilePath -> IgnoreContextEdit -> IO (IO ())
+applyEdit :: FilePath -> IgnoreContextEdit -> IO (Either Text (IO ()))
 applyEdit tree edit = do
   let (path, change) = case edit of
         OmitIgnorePattern target patternText -> (target, Text.unlines . filter ((/= patternText) . Text.strip) . Text.lines)
         AppendIgnoreLines target suffix -> (target, (<> suffix))
-  unless (path `elem` [".gitignore", ".dockerignore"]) (fail "IgnoreContextEditEscape")
-  before <- TextIO.readFile (tree </> path)
-  TextIO.writeFile (tree </> path) (change before)
-  pure (TextIO.writeFile (tree </> path) before)
+  if path `notElem` [".gitignore", ".dockerignore"]
+    then pure (Left ("IgnoreContextEditEscape:" <> Text.pack path))
+    else do
+      before <- TextIO.readFile (tree </> path)
+      TextIO.writeFile (tree </> path) (change before)
+      pure (Right (TextIO.writeFile (tree </> path) before))
 
 observePolicies :: FilePath -> IO ([(FilePath, Text)], [Text])
 observePolicies tree = do

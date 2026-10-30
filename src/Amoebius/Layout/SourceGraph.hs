@@ -5,9 +5,20 @@
 -- possible same-module and imported callees retained as candidates. Potential
 -- IO reachability uses only unique internal call candidates. Indirect calls,
 -- full effects, sinks, provenance, and consumers remain open.
-module Amoebius.Layout.SourceGraph (sourceGraph, sourceGraphWithPackageCatalog) where
+module Amoebius.Layout.SourceGraph
+  ( sourceGraph, sourceGraphWithPackageCatalog, sourceGraphWithPackageCatalogChecked
+  , StaticTextCheckResult, StaticTextFinding, StaticTextObservation
+  , staticTextCheckName, staticTextCheckFindings, staticTextCheckObservations
+  , staticTextFindingCode, staticTextFindingSubject, staticTextFindingDetail
+  , staticTextObservationKey, staticTextObservationValue, unavailableStaticTextCheck
+  , staticTextExamples, staticTextExamplePath
+  , StaticTextCaptureEdit, staticTextCaptureExamples, observeStaticTextCaptureExample
+  , staticTextSurfaceExamples
+  ) where
 
 import Amoebius.Layout.Classify (LayoutFinding (..))
+import Amoebius.Internal.Cabal.ComponentDescription (reachableFrom)
+import Amoebius.Internal.SourceText.Lexical qualified as Lexical
 import Amoebius.Layout.PackageMap
   ( ComponentDependencyMap, ForwardOwnedModuleMap, PackageCatalog, SourceComponentMap
   , emptyPackageCatalog, lookupExternalModule, lookupUnselectedModule
@@ -23,14 +34,15 @@ import Amoebius.Layout.PackageMap
   , loadExternalInterfaces, packageCatalogHasComponent, packageCatalogHasModuleInterface
   , packageCatalogSourceUnit, packageCatalogSourceDependency)
 import Control.Applicative ((<|>))
-import Control.Exception (IOException, SomeException, try)
+import Control.Exception (IOException, SomeAsyncException, SomeException, displayException, evaluate, fromException, throwIO, try)
 import Crypto.Hash.SHA256 qualified as SHA256
 import Data.Aeson (Value, eitherDecodeStrict', withObject, (.:))
 import Data.Aeson.Types (Parser, parseEither)
 import Data.ByteString qualified as ByteString
+import Data.Bits ((.&.))
 import Data.Char (intToDigit, isAlpha, isAlphaNum, isControl, isLower, isUpper)
 import Data.Foldable (toList)
-import Data.List (isPrefixOf, isSuffixOf, sort, stripPrefix)
+import Data.List (isPrefixOf, isSuffixOf, sort, sortOn, stripPrefix)
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.Map.Strict qualified as Map
 import Data.Maybe (fromMaybe, isJust, listToMaybe)
@@ -40,7 +52,7 @@ import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 import GHC.Data.EnumSet qualified as EnumSet
 import GHC.Data.FastString (mkFastString, unpackFS)
-import GHC.Data.StringBuffer (StringBuffer, hGetStringBuffer)
+import GHC.Data.StringBuffer (stringToStringBuffer)
 import GHC.Builtin.Types (consDataConName, tupleDataCon)
 import GHC.Core.DataCon (dataConName)
 import GHC.Hs
@@ -80,10 +92,11 @@ import GHC.Unit.Types (unitIdString)
 import Language.Haskell.Syntax.Basic (Boxity (..), FieldLabelString (..))
 import GHC.Utils.Error (emptyDiagOpts)
 import GHC.Utils.Outputable (Outputable, ppr, showSDocUnsafe)
-import System.Directory (createDirectoryIfMissing, doesDirectoryExist, makeAbsolute)
+import System.Directory (createDirectoryIfMissing, createFileLink, doesDirectoryExist, listDirectory, makeAbsolute, removeFile)
 import System.Exit (ExitCode (..))
 import System.FilePath (takeDirectory, takeExtension, (</>))
 import System.Process (CreateProcess (cwd), proc, readCreateProcessWithExitCode)
+import System.PosixCompat.Files (fileMode, getSymbolicLinkStatus, isDirectory, isRegularFile, setFileMode)
 
 sourceGraph :: FilePath -> [FilePath] -> SourceComponentMap -> ComponentDependencyMap -> IO ([LayoutFinding], [Text])
 sourceGraph root paths componentMap dependencyMap =
@@ -91,6 +104,47 @@ sourceGraph root paths componentMap dependencyMap =
 
 sourceGraphWithPackageCatalog :: FilePath -> [FilePath] -> SourceComponentMap -> ComponentDependencyMap -> PackageCatalog -> ForwardOwnedModuleMap -> IO ([LayoutFinding], [Text])
 sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatalog forwardOwned = do
+  (findings, rows, _) <- sourceGraphWithPackageCatalogChecked root paths componentMap dependencyMap initialCatalog forwardOwned
+  pure (findings, rows)
+
+sourceGraphWithPackageCatalogChecked :: FilePath -> [FilePath] -> SourceComponentMap -> ComponentDependencyMap -> PackageCatalog -> ForwardOwnedModuleMap -> IO ([LayoutFinding], [Text], StaticTextCheckResult)
+sourceGraphWithPackageCatalogChecked = sourceGraphObserved PreserveCapture
+
+-- The normal call has no interlude. Shipped paired inputs can perform one
+-- declared native edit after observation, exercising this same closing path.
+sourceGraphObserved :: StaticTextCaptureEdit -> FilePath -> [FilePath] -> SourceComponentMap -> ComponentDependencyMap -> PackageCatalog -> ForwardOwnedModuleMap -> IO ([LayoutFinding], [Text], StaticTextCheckResult)
+sourceGraphObserved edit root paths componentMap dependencyMap initialCatalog forwardOwned = do
+  opening <- captureStaticTextInputs root
+  attempted <- try (do
+    result@(findings, rows, diagnostic) <- sourceGraphFromCapture opening root paths componentMap dependencyMap initialCatalog forwardOwned
+    -- Finish every native graph/query observation before the closing acquisition.
+    mapM_ (\(LayoutFinding code path) -> forceText code >> forceText (Text.pack path)) findings
+    mapM_ forceText rows
+    forceText (staticTextCheckName diagnostic)
+    mapM_ (\(StaticTextFinding code subject detail) ->
+      forceText code >> forceText (Text.pack subject) >> forceText detail)
+      (staticTextCheckFindings diagnostic)
+    mapM_ (\(StaticTextObservation key value) -> forceText key >> forceText value)
+      (staticTextCheckObservations diagnostic)
+    pure result) :: IO (Either SomeException ([LayoutFinding], [Text], StaticTextCheckResult))
+  (findings, rows, diagnostic) <- case attempted of
+    Right result -> pure result
+    Left problem -> case fromException problem :: Maybe SomeAsyncException of
+      Just _ -> throwIO problem
+      Nothing -> do
+        let detail = Text.pack (displayException problem)
+        forceText detail
+        pure ([LayoutFinding "SourceGraphQueryUnavailable" "source"], ["graph-stage\tunavailable"],
+          (makeStaticTextCheck [StaticTextFinding "StaticTextQueryUnavailable" "source" detail] [])
+            {internalStaticTextCaptureState = CaptureRefused})
+  applyStaticTextCaptureEdit root edit
+  closing <- captureStaticTextInputs root
+  pure (findings, rows, bindStaticTextCapture opening closing paths diagnostic)
+ where
+  forceText text = evaluate (Text.length text) >> pure ()
+
+sourceGraphFromCapture :: Either StaticTextFinding [StaticTextInput] -> FilePath -> [FilePath] -> SourceComponentMap -> ComponentDependencyMap -> PackageCatalog -> ForwardOwnedModuleMap -> IO ([LayoutFinding], [Text], StaticTextCheckResult)
+sourceGraphFromCapture opening root paths componentMap dependencyMap initialCatalog forwardOwned = do
   parsed <- mapM parseSource (sort [path | path <- paths, takeExtension path == ".hs"])
   let modules = [entry | Right entry <- parsed]
       moduleNames = Set.fromList (map entryName modules)
@@ -422,6 +476,31 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
                , not (looksQualified target)
                , target `notElem` entryValueNames entry
                , row <- Map.findWithDefault [] ("Prelude", target) sinkIndex]]
+      -- Raw occurrence order and repeated uses survive this diagnostic route.
+      -- The old span/Set/widest consumers below keep their existing contracts.
+      staticTextRows =
+        [Text.pack (show (entryPath entry,
+           Lexical.occurrenceId use, Lexical.occurrencePath use, Lexical.occurrenceRawSpan use,
+           (target, spelling), moduleName, name, kind, position, argumentRole,
+           Lexical.occurrenceId argumentView, Lexical.occurrencePath argumentView,
+           headProjection, Lexical.queryWholeText argument))
+        | entry <- modules
+        , use <- Lexical.moduleOccurrences (Lexical.inspectLexicalModule (entryLexical entry))
+        , HsApp {} <- [unLoc (Lexical.occurrenceAst use)]
+        , Just (headOccurrence, arguments) <- [staticTextApplication use]
+        , let headProjection = Lexical.queryFunctionSpelling headOccurrence
+        , Just target <- [Lexical.queryScalar headProjection]
+        , spelling <- nubOrdered (target :
+            [importQualifier ref <> "." <> suffix | ref <- entryImports entry
+            , Just suffix <- [Text.stripPrefix (importName ref <> ".") target]])
+        , (moduleName, name, kind) <- sinkResolutions entry spelling
+        , row <- Map.findWithDefault [] (moduleName, name) sinkIndex, sinkKind row == kind
+        , (position, argumentRole) <- sinkArguments row
+        , (at, argument) <- zip [0 ..] arguments, at == position
+        , let argumentView = Lexical.inspectOccurrence argument]
+      staticTextResult = makeStaticTextCheck
+        [StaticTextFinding code path "Existing SourceGraph source acquisition refused."
+        | Left (LayoutFinding code path) <- parsed] staticTextRows
       preferModule rowA rowB = if sinkModule rowA <= sinkModule rowB then rowA else rowB
       sinkRowIdentity row = (sinkModule row, sinkName row, sinkKind row)
       sinkCallUses = Set.toAscList . Set.fromList $
@@ -1527,7 +1606,7 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
         <> [Text.intercalate "\t" ["graph-record-selector-candidate", component, Text.pack path,
              owner, site, kind, field, targetComponent, Text.pack provider, parent, imported]
            | (component, path, owner, site, kind, field, targetComponent, provider, parent, imported)
-               <- recordSelectorCandidates])
+               <- recordSelectorCandidates], staticTextResult)
  where
   baseExtensions =
     [Extension.PackageImports, Extension.PatternSynonyms, Extension.TemplateHaskell,
@@ -1547,10 +1626,14 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
   extensionNames = [(show extension, extension)
     | extension <- ([minBound .. maxBound] :: [Extension.Extension])]
   parseSource path = do
-    let absolute = root </> path
-    source <- try (hGetStringBuffer absolute) :: IO (Either IOException StringBuffer)
+    let source = case opening of
+          Left _ -> Left (LayoutFinding "HaskellSourceUnreadable" path)
+          Right captured -> case [bytes | StaticTextInput found _ bytes <- captured, found == path] of
+            [bytes] -> either (const (Left (LayoutFinding "HaskellSourceEncodingInvalid" path)))
+              (Right . stringToStringBuffer . Text.unpack) (TextEncoding.decodeUtf8' bytes)
+            _ -> Left (LayoutFinding "HaskellSourceUnreadable" path)
     pure $ case source of
-      Left _ -> Left (LayoutFinding "HaskellSourceUnreadable" path)
+      Left problem -> Left problem
       Right buffer ->
         let options = map unLoc (snd (getOptions parserOptions buffer path))
             state = initParserState (parserOptionsFor (extensionsFor options)) buffer
@@ -1627,7 +1710,7 @@ sourceGraphWithPackageCatalog root paths componentMap dependencyMap initialCatal
                 exportItems = unLoc <$> hsmodExports parsedModule
                 exports = exportedValueNames dataDeclarations classDeclarations <$> exportItems
                 reexports = maybe [] (reexportedModuleNames . unLoc) (hsmodExports parsedModule)
-            in Right (SourceEntry path (Text.pack moduleName) exports exportItems reexports imports implicitPrelude topLevel signatures calls lexicalBindingCalls localBinders parameterBinders localAliases references controls dynamicLoads recordFields projections gaps declarationGaps dataDeclarations classDeclarations classNames classDefaults classSignatures classSuperclasses foreignDeclarations typeFamilies standaloneDeriving classInstances deriveAnyClass standaloneDetails callLiterals)
+            in Right (SourceEntry path (Text.pack moduleName) exports exportItems reexports imports implicitPrelude topLevel signatures calls lexicalBindingCalls localBinders parameterBinders localAliases references controls dynamicLoads recordFields projections gaps declarationGaps dataDeclarations classDeclarations classNames classDefaults classSignatures classSuperclasses foreignDeclarations typeFamilies standaloneDeriving classInstances deriveAnyClass standaloneDetails callLiterals (Lexical.prepareLexicalModule parsedModule))
 
 reverseReachable :: Ord node => Map.Map node (Set.Set node) -> Set.Set node -> Set.Set node
 reverseReachable predecessors seeds = visit seeds (Set.toList seeds)
@@ -1638,13 +1721,8 @@ reverseReachable predecessors seeds = visit seeds (Set.toList seeds)
     in visit (reached `Set.union` fresh) (Set.toList fresh <> remaining)
 
 reachableComponents :: ComponentDependencyMap -> Text -> Set.Set Text
-reachableComponents dependencies start = visit Set.empty [start]
- where
-  visit reached [] = reached
-  visit reached (component : remaining)
-    | component `Set.member` reached = visit reached remaining
-    | otherwise = visit (Set.insert component reached)
-        (Map.findWithDefault [] component dependencies <> remaining)
+reachableComponents dependencies start =
+  reachableFrom (\component -> Map.findWithDefault [] component dependencies) [start]
 
 data ImportRef = ImportRef
   { importName :: Text
@@ -1692,7 +1770,219 @@ data SourceEntry = SourceEntry
   , entryDeriveAnyClass :: Bool
   , entryStandaloneDetails :: [(Text, Maybe Text, Maybe Text)]
   , entryCallLiterals :: [(Text, Text, Text, [(Int, Bool, Text)])]
+  , entryLexical :: Lexical.LexicalModule
   }
+
+-- The bytes and modes are acquired by the producer itself. No caller can
+-- manufacture an input carrier or turn a serialized diagnostic into one.
+data StaticTextInput = StaticTextInput FilePath Integer ByteString.ByteString
+  deriving (Eq)
+
+captureStaticTextInputs :: FilePath -> IO (Either StaticTextFinding [StaticTextInput])
+captureStaticTextInputs root = do
+  attempted <- try (do
+    status <- getSymbolicLinkStatus root
+    if isDirectory status then sortOn inputPath <$> walk ""
+      else fail "StaticTextSourceRootUnavailable") :: IO (Either IOException [StaticTextInput])
+  pure (either (Left . StaticTextFinding "StaticTextCaptureUnavailable" "source" . Text.pack . show) Right attempted)
+ where
+  inputPath (StaticTextInput path _ _) = path
+  walk relative = do
+    status <- getSymbolicLinkStatus (root </> relative)
+    if isDirectory status then do
+      names <- sort <$> listDirectory (root </> relative)
+      concat <$> mapM (\name -> do
+        let path = if null relative then name else relative <> "/" <> name
+        child <- getSymbolicLinkStatus (root </> path)
+        if null relative && (name == ".git" || isDirectory child && name `elem` [".build", ".data", ".test_data", "dist-newstyle", "validation-records"])
+          then pure [] else walk path) names
+    else if isRegularFile status then do
+      bytes <- ByteString.readFile (root </> relative)
+      pure [StaticTextInput relative (toInteger (fileMode status .&. 0o7777)) bytes]
+    else fail ("StaticTextSourceKindUnavailable: " <> relative)
+
+bindStaticTextCapture :: Either StaticTextFinding [StaticTextInput] -> Either StaticTextFinding [StaticTextInput] -> [FilePath] -> StaticTextCheckResult -> StaticTextCheckResult
+bindStaticTextCapture opening closing paths diagnostic = diagnostic
+  { internalStaticTextCheckFindings = internalStaticTextCheckFindings diagnostic <> extraFindings
+  , internalStaticTextCaptureState = case internalStaticTextCaptureState diagnostic of
+      CaptureRefused -> CaptureRefused
+      _ -> case extraFindings of [] -> CaptureClosed; _ -> CapturePending
+  , internalStaticTextCheckObservations = captureObservations "source-opening" opening
+      <> [StaticTextObservation "source-manifest" (Text.pack (show paths))]
+      <> internalStaticTextCheckObservations diagnostic
+      <> captureObservations "source-closing" closing
+  }
+ where
+  extraFindings = either pure (const []) opening <> either pure (const []) closing
+    <> [StaticTextFinding "StaticTextHaskellInventoryEmpty" "source" "A native source-text observation requires a Haskell input."
+       | Right before <- [opening], null [() | StaticTextInput path _ _ <- before, takeExtension path == ".hs"]]
+    <> [StaticTextFinding "StaticTextSourceChanged" "source" "The complete closing source bytes or modes differ."
+       | Right before <- [opening], Right after <- [closing], before /= after]
+    <> [StaticTextFinding "StaticTextSourceInventoryMismatch" "source" "The supplied paths differ from the complete physical source inventory."
+       | Right before <- [opening]
+       , sort paths /= [path | StaticTextInput path _ _ <- before]]
+  captureObservations label captured = case captured of
+    Left problem -> [StaticTextObservation label (Text.pack (show
+      (staticTextFindingCode problem, staticTextFindingSubject problem, staticTextFindingDetail problem)))]
+    Right inputs -> [StaticTextObservation label (Text.pack (show
+      [(path,mode,ByteString.length bytes,digest bytes) | StaticTextInput path mode bytes <- inputs]))]
+  digest = Text.pack . concatMap (\byte ->
+    [intToDigit (fromIntegral byte `div` 16),intToDigit (fromIntegral byte `mod` 16)])
+    . ByteString.unpack . SHA256.hash
+
+-- Three opaque diagnostic carriers. No constructor, record label, Read or
+-- Generic route is exported. Only actual complete, stable native acquisitions
+-- can close the capture state; syntax refusals remain ordinary findings.
+data StaticTextCaptureState = CapturePending | CaptureClosed | CaptureRefused
+data StaticTextCheckResult = StaticTextCheckResult
+  { internalStaticTextCheckName :: Text
+  , internalStaticTextCheckFindings :: [StaticTextFinding]
+  , internalStaticTextCheckObservations :: [StaticTextObservation]
+  , internalStaticTextCaptureState :: StaticTextCaptureState
+  }
+data StaticTextFinding = StaticTextFinding Text FilePath Text
+data StaticTextObservation = StaticTextObservation Text Text
+
+data StaticTextCaptureEdit = PreserveCapture | ChangeCaptureMode | AppendCaptureBytes
+  | AddCaptureSource | RemoveCaptureSource | LinkCaptureSource
+
+staticTextCaptureExamples :: [(Text, StaticTextCaptureEdit)]
+staticTextCaptureExamples =
+  [("closing-control",PreserveCapture),("closing-mode",ChangeCaptureMode)
+  ,("closing-bytes",AppendCaptureBytes),("closing-added",AddCaptureSource)
+  ,("closing-removed",RemoveCaptureSource),("closing-symlink",LinkCaptureSource)]
+
+-- Clients of the shipped opaque surface. The positive getter client and every
+-- forbidden construction/decoding route are compiled against the actual unit.
+staticTextSurfaceExamples :: [(Text, Text)]
+staticTextSurfaceExamples =
+  [(name,header <> body) | (name,body) <-
+    [("getters","result = staticTextCheckName\nfinding = staticTextFindingCode\nobservation = staticTextObservationValue\n")
+    ,("result-constructor","value = StaticTextCheckResult\n")
+    ,("finding-constructor","value = StaticTextFinding\n")
+    ,("observation-constructor","value = StaticTextObservation\n")
+    ,("result-read","value = read \"value\" :: StaticTextCheckResult\n")
+    ,("finding-read","value = read \"value\" :: StaticTextFinding\n")
+    ,("observation-read","value = read \"value\" :: StaticTextObservation\n")
+    ,("result-generic","value = from (undefined :: StaticTextCheckResult)\n")
+    ,("finding-generic","value = from (undefined :: StaticTextFinding)\n")
+    ,("observation-generic","value = from (undefined :: StaticTextObservation)\n")
+    ,("hidden-field","value = internalStaticTextCheckName\n")
+    ,("capture-state","value = CaptureClosed\n")]]
+ where header = "module Client where\nimport Amoebius.Layout.SourceGraph\nimport GHC.Generics (from)\n"
+
+-- The caller supplies an owned fixture directory, never captured bytes or an
+-- AST. Both acquisitions and the intervening edit are actual native effects.
+observeStaticTextCaptureExample :: FilePath -> StaticTextCaptureEdit -> IO StaticTextCheckResult
+observeStaticTextCaptureExample root edit = do
+  (_,_,result) <- sourceGraphObserved edit root [staticTextExamplePath] Map.empty Map.empty emptyPackageCatalog Map.empty
+  pure result
+
+applyStaticTextCaptureEdit :: FilePath -> StaticTextCaptureEdit -> IO ()
+applyStaticTextCaptureEdit root edit = change
+ where
+  file = root </> staticTextExamplePath
+  change = case edit of
+    PreserveCapture -> pure ()
+    ChangeCaptureMode -> setFileMode file 0o644
+    AppendCaptureBytes -> ByteString.appendFile file "\n-- closing change\n"
+    AddCaptureSource -> ByteString.writeFile (root </> "Extra.hs") "module Extra where\nextra = ()\n" >> setFileMode (root </> "Extra.hs") 0o600
+    RemoveCaptureSource -> removeFile file
+    LinkCaptureSource -> removeFile file >> createFileLink "Missing.hs" file
+
+-- Shipped inputs for the bounded native text projection. They describe parser
+-- and compatibility-query behavior, not Haskell evaluation or type checking.
+staticTextExamplePath :: FilePath
+staticTextExamplePath = "Fixture.hs"
+
+staticTextExamples :: [(Text, ByteString.ByteString)]
+staticTextExamples = [(name,TextEncoding.encodeUtf8 (header <> source)) | (name,source) <- textCases]
+  <> [("invalid-utf8",ByteString.pack [255,254,10])]
+  <> [("capture-control","module StaticTextFixture where\nimport System.IO (readFile)\nvalue = readFile \"control\"\n")]
+  <> [("pattern-shadows-prelude","module StaticTextFixture where\n(readFile, other) = (undefined, ())\nvalue = readFile \"shadowed\"\n")
+     ,("selector-shadows-prelude","module StaticTextFixture where\ndata Box = Box { readFile :: String -> String }\nvalue = readFile undefined \"shadowed\"\n")
+     ,("class-shadows-prelude","module StaticTextFixture where\nclass C a where\n  readFile :: a -> IO String\nvalue = readFile \"shadowed\"\n")
+     ,("foreign-shadows-prelude","module StaticTextFixture where\nforeign import ccall unsafe \"puts\" readFile :: String -> IO ()\nvalue = readFile \"shadowed\"\n")]
+ where
+  header = "{-# LANGUAGE OverloadedStrings #-}\nmodule StaticTextFixture where\nimport System.IO (readFile)\nimport System.Directory (copyFile)\nimport qualified Data.Text as T\n"
+  textCases =
+    [("literal","value = readFile \"left\"\n")
+    ,("append","value = readFile (\"left\" <> \"right\")\n")
+    ,("append-left-unknown","value = readFile (unknown <> \"right\")\n")
+    ,("append-right-unknown","value = readFile (\"left\" <> unknown)\n")
+    ,("alias-repeated","value = readFile (name <> name)\nname = \"repeat\"\n")
+    ,("identity","value = readFile (id \"path\")\n")
+    ,("text-pack-unpack","value = readFile (T.unpack (T.pack \"path\"))\n")
+    ,("concat","value = readFile (concat [\"a\",\"b\"])\n")
+    ,("concat-short-circuit","value = readFile (concat [\"a\",unknown,\"ignored\"])\n")
+    ,("characters","value = readFile ['a','b']\n")
+    ,("non-character","value = readFile ['a',unknown,'c']\n")
+    ,("type-signature","value = readFile (\"path\" :: String)\n")
+    ,("let-shadow","value = readFile (let name = \"inner\" in name)\nname = \"outer\"\n")
+    ,("where-alias","value = readFile name where name = \"where\"\n")
+    ,("parameter-shadow","value name = readFile name\nname = \"outer\"\n")
+    ,("function-nonvalue","value = readFile name\nname argument = argument\n")
+    ,("duplicate-declarations","value = readFile name\nname = \"one\"\nname = \"two\"\n")
+    ,("alias-cycle","value = readFile one\none = two\ntwo = one\n")
+    ,("line-pragma-refusal","value = readFile one\n{-# LINE 1 \"Alias.hs\" #-}\none = two\n{-# LINE 1 \"Alias.hs\" #-}\ntwo = one\n")
+    ,("ambiguous-qualifier","import qualified Data.Text.Lazy as T\nvalue = readFile (T.unpack \"path\")\n")
+    ,("qualified-sink","import qualified System.IO as IO\nvalue = IO.readFile \"qualified\"\n")
+    ,("sink-alias","value = reader \"alias\"\nreader = readFile\n")
+    ,("parenthesized-sink","value = (readFile) (\"parenthesized\")\n")
+    ,("partial-sink","value = copyFile \"source\"\n")
+    ,("full-sink","value = copyFile \"source\" \"destination\"\n")
+    ,("repeated-uses","value = do { readFile \"same\"; readFile \"same\" }\n")
+    ,("escaped-unicode","value = readFile \"雪\\tline\\n\\\"quote\"\n")
+    ,("syntax-refusal","value = readFile (\n")]
+
+staticTextCheckName :: StaticTextCheckResult -> Text
+staticTextCheckName = internalStaticTextCheckName
+staticTextCheckFindings :: StaticTextCheckResult -> [StaticTextFinding]
+staticTextCheckFindings result = case internalStaticTextCaptureState result of
+  CaptureClosed -> internalStaticTextCheckFindings result
+  _ -> StaticTextFinding "StaticTextBoundaryUnavailable" "layout-report"
+    "Complete source capture, closing recheck, native syntax/byte observation and independent qualification remain unavailable."
+      : internalStaticTextCheckFindings result
+staticTextCheckObservations :: StaticTextCheckResult -> [StaticTextObservation]
+staticTextCheckObservations = internalStaticTextCheckObservations
+staticTextFindingCode :: StaticTextFinding -> Text
+staticTextFindingCode (StaticTextFinding code _ _) = code
+staticTextFindingSubject :: StaticTextFinding -> FilePath
+staticTextFindingSubject (StaticTextFinding _ subject _) = subject
+staticTextFindingDetail :: StaticTextFinding -> Text
+staticTextFindingDetail (StaticTextFinding _ _ detail) = detail
+staticTextObservationKey :: StaticTextObservation -> Text
+staticTextObservationKey (StaticTextObservation key _) = key
+staticTextObservationValue :: StaticTextObservation -> Text
+staticTextObservationValue (StaticTextObservation _ value) = value
+
+makeStaticTextCheck :: [StaticTextFinding] -> [Text] -> StaticTextCheckResult
+makeStaticTextCheck findings rows = StaticTextCheckResult "layout-static-text"
+  findings
+  [StaticTextObservation "static-text-observation" row | row <- rows]
+  CapturePending
+
+unavailableStaticTextCheck :: StaticTextCheckResult
+unavailableStaticTextCheck = makeStaticTextCheck [] []
+
+-- This adapter uses only actual children of the SAME retained AST forest. It
+-- does not recover expressions from TSV, spans, fragments or a second parse.
+staticTextApplication :: Lexical.OccurrenceView -> Maybe (Lexical.LexicalOccurrence, [Lexical.LexicalOccurrence])
+staticTextApplication view = case unLoc (Lexical.occurrenceAst view) of
+  HsApp {} -> case Lexical.occurrenceChildren view of
+    [function, argument] -> Just (spine function [argument])
+    _ -> error "StaticTextApplicationShapeUnavailable"
+  _ -> Nothing
+ where
+  spine occurrence arguments = let child = Lexical.inspectOccurrence occurrence
+    in case unLoc (Lexical.occurrenceAst child) of
+      HsApp {} -> case Lexical.occurrenceChildren child of
+        [function, argument] -> spine function (argument : arguments)
+        _ -> error "StaticTextApplicationShapeUnavailable"
+      HsPar {} -> case Lexical.occurrenceChildren child of
+        [inner] -> spine inner arguments
+        _ -> error "StaticTextParenthesisShapeUnavailable"
+      _ -> (occurrence, arguments)
 
 data CompilerRejection = CompilerRejection Text Int FilePath Int Int [Text]
 
@@ -1766,6 +2056,11 @@ observeRejectedNegativeCalls root modules byModuleName calls = do
       observed <- try (readCreateProcessWithExitCode
         ((proc "cabal" arguments) {cwd = Just absoluteRoot}) "")
         :: IO (Either SomeException (ExitCode, String, String))
+      case observed of
+        Left problem -> case fromException problem :: Maybe SomeAsyncException of
+          Just _ -> throwIO problem
+          Nothing -> pure ()
+        Right _ -> pure ()
       after <- try (ByteString.readFile sourcePath) :: IO (Either IOException ByteString.ByteString)
       pure $ case (before, observed, after) of
         (Right first, Right (ExitFailure _, _, compilerStderr), Right lastBytes)

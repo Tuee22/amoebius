@@ -162,7 +162,7 @@ requiredBinding identifier = case identifier of
   LtdMeta001 -> binding "ignore-context" "retired-generated-root" ["undeclared-state-root"]
   LtdVal001 -> binding "runner-authority" "noop-subject" ["constant-success-checker", "forged-exit", "omitted-discovery", "unavailable-boundary"]
   LtdVal002 -> binding "contract-correspondence" "gate-spec-mismatch" ["phase-role-swap", "byte-copy-equivalence", "subject-not-shipped", "retired-domain-literal"]
-  LtdVal003 -> binding "receipt-custody" "generation-one-receipt" ["verifier-diverged", "predecessor-closure-edited"]
+  LtdVal003 -> binding "receipt-custody" "generation-one-receipt" ["verifier-diverged", "predecessor-closure-edited", "uncommitted-prefix-series"]
   LtdVal004 -> binding "status-authority" "status-surface-dirty" ["status-without-receipt", "predecessor-not-reproduced", "status-edit-without-receipt"]
   LtdVal005 -> binding "spine-handoffs" "hand-built-stage" ["noop-stage", "render-omitted", "executed-argv-diverged"]
   LtdVal006 -> binding "fresh-inputs" "stale-run" ["ignored-input", "authored-output", "ambient-temp", "replayed-input", "empty-discovery"]

@@ -17,7 +17,8 @@ import Amoebius.Plan.Legacy qualified as Legacy
 import Amoebius.Plan.StatusFrontier qualified as Status
 import Amoebius.Validation.Custody.Preflight
 import Amoebius.Validation.BootstrapPredicate (bootstrapSnapshotMatches)
-import Amoebius.Validation.Custody (CommandOutcome (..), CustodyConfig (..), defaultCustodyConfig, resetGeneration, runFresh, voidFromPhase, receiptCompatibility, acceptPhase, previewPhase)
+import Amoebius.Validation.BootstrapQualification.Internal
+import Amoebius.Validation.Custody (CommandOutcome (..), CustodyConfig (..), defaultCustodyConfig, resetGeneration, runFresh, voidFromPhase, receiptCompatibility, acceptPhase, previewPhase, receiptPublicationBound)
 import Amoebius.Validation.Compatibility (closureDigest)
 import Amoebius.Validation.Custody.Status
 import Amoebius.Validation.Custody.Store
@@ -47,24 +48,33 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 import Data.Text.IO qualified as TextIO
-import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, doesPathExist, findExecutable, listDirectory, makeAbsolute, removeFile, removePathForcibly)
+import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, doesPathExist, executable, findExecutable, getPermissions, listDirectory, makeAbsolute, removeFile, removePathForcibly, setPermissions)
 import System.Environment (getArgs, getProgName)
 import System.Exit (ExitCode (..))
 import System.FilePath (takeBaseName, takeDirectory, makeRelative, splitDirectories, (</>))
 import System.IO.Error (ioeGetErrorString)
+import SeedImages (seedImageRows)
+import OracleTranscripts (oracleTranscriptRows)
 import SourceCapture (sourceCaptureRows, sourceRewriteRows, sourceTreeRows)
 import LegacyAudit (legacyAuditRows, legacyKernelRows, legacyMutationRows, legacySolverRows, legacyBootstrapRows, legacyCorrespondenceRows, legacyCustodyRows, legacyStatusRows, legacyAuthorityRows, legacyFreshRows, legacyAdmissionRows, legacyProbeSourceRows, legacyVendorSourceRows, legacyTestSourceRows, legacyToolSourceRows, legacyPulumiSourceRows, legacyRuntimeIdentityRows, legacyIgnoreContextRows, legacySourceGraphRows, legacyBootstrapSourceRows, mutationRows, solverReintroductionRows, solverSourceRows)
-import Portability (portabilityRows, verifierChild, observerRows)
+import Portability (portabilityRows, verifierChild, observerRows, nativePreparationRows, nativePreparationChild)
 
 main :: IO ()
 main = do
   arguments <- getArgs
   name <- getProgName
   if takeBaseName name == "amoebius-validate" then verifierChild arguments else case arguments of
+    ["--oracle-transcripts", output] -> oracleTranscriptRows output
+    ["--seed-image-completion", output] -> do
+      compiler <- findExecutable "ghc" >>= maybe (fail "finite seed native compiler absent") pure
+      seedImageRows output compiler
+    ["--seed-interruption", output] -> seedInterruptionRows output
+    ["--native-preparation-child", output] -> nativePreparationChild output
     "--delegation-parent" : options -> delegateValidate options
     ["--observer", output] -> do
       createDirectoryIfMissing True output
       TextIO.writeFile (output </> "observer.tsv") (Text.unlines (map (Text.intercalate "\t") observerRows))
+      nativePreparationRows output
     ["--oracle-build", output] -> do
       rows <- oracleBuildRows output
       TextIO.writeFile (output </> "oracle-build.tsv") (Text.unlines (map (Text.intercalate "\t") rows))
@@ -97,6 +107,9 @@ main = do
     ["--runner-authority", output] -> do
       rows <- runnerAuthorityRows output
       TextIO.writeFile (output </> "authority.tsv") (Text.unlines (map (Text.intercalate "\t") rows))
+      compiler <- findExecutable "ghc" >>= maybe (fail "authority seed native compiler absent") pure
+      seedImageRows (output </> "authority-seed-images") compiler
+      oracleTranscriptRows output
     ["--fresh-inputs", output] -> do
       rows <- freshInputRows output
       TextIO.writeFile (output </> "fresh-inputs.tsv") (Text.unlines (map (Text.intercalate "\t") rows))
@@ -206,10 +219,53 @@ runnerChecks arguments = do
   custody <- map ("custody-native" :) <$> receiptCustodyRows output
   authority <- map ("status-native" :) <$> statusAuthorityRows output
   runnerAuthority <- map ("authority-native" :) <$> runnerAuthorityRows output
+  seedCompiler <- findExecutable "ghc" >>= maybe (fail "authority seed native compiler absent") pure
+  seedImageRows (output </> "authority-seed-images") seedCompiler
+  oracleTranscriptRows output
   freshInputs <- map ("fresh-native" :) <$> freshInputRows output
   rows <- concat <$> sequence [contractRows, constructorRows, verifyRows output, oracleHygieneRows output, map ("oracle-build" :) <$> oracleBuildRows output, map ("oracle-input" :) <$> oracleInputRows output, map ("package-syntax" :) <$> packageSyntaxRows output, operatorRows output, killRows', hygieneRows output, legacyRows output, freshnessRows output, legacyInventoryRows, kernelRatchetRows output, captureRows, preflightRows, storeRows output, archiveRows output, replayVoidRows output, crossGenerationVoidRows output, statusRows output, resetRows output, reproducibleRows, packageRows]
   TextIO.writeFile (output </> "runner.tsv") (Text.unlines (map (Text.intercalate "\t") (rows <> trees <> isolation <> sourceReads <> contracts <> correspondence <> custody <> authority <> runnerAuthority <> freshInputs)))
   putStrLn ("runner projection written: " <> (output </> "runner.tsv"))
+
+-- The fake compilers are explicit inputs to this component. They supply no
+-- native-toolchain admission and cannot mint a gate or a qualification.
+seedInterruptionRows :: FilePath -> IO ()
+seedInterruptionRows output = do
+  absolute <- makeAbsolute output
+  createDirectoryIfMissing True absolute
+  compiler <- findExecutable "ghc" >>= maybe (fail "seed component compiler absent") pure
+  let build name body = do
+        let source = absolute </> name <> ".hs"
+            image = absolute </> name <> ".exe"
+        TextIO.writeFile source (Text.unlines body)
+        actual <- observe "." compiler ["-v0", "-j1", "-package", "directory", "-package", "process", "-outputdir", absolute </> name <> "-objects", "-o", image, source]
+        if runExit actual == ExitSuccess && runSpawnFailure actual == Nothing then pure image else fail (show actual)
+  known127 <- build "known-127" ["module Main where", "import System.Exit", "main = exitWith (ExitFailure 127)"]
+  unavailableRun <- build "unavailable-run"
+    ["module Main where", "import Data.List (isInfixOf)", "import System.Directory", "import System.Environment", "import System.Exit", "import System.Process"
+    ,"main = do", "  source <- readFile \"Amoebius/Validation/BootstrapPredicate.hs\""
+    ,"  if \"bootstrapDigestMatches actual _expected\" `isInfixOf` source then do"
+    ,"    writeFile \"driver.exe\" \"#!" <> Text.pack (absolute </> "reserved-absent-interpreter") <> "\\n\""
+    ,"    permissions <- getPermissions \"driver.exe\"", "    setPermissions \"driver.exe\" permissions {executable = True}"
+    ,"  else getArgs >>= rawSystem " <> Text.pack (show compiler) <> " >>= exitWith"]
+  let unavailableBuild = absolute </> "unavailable-build.exe"
+  TextIO.writeFile unavailableBuild ("#!" <> Text.pack (absolute </> "reserved-absent-interpreter") <> "\n")
+  permissions <- getPermissions unavailableBuild
+  setPermissions unavailableBuild permissions {executable = True}
+  rows <- forM [("normal",compiler),("unavailable-build",unavailableBuild),("known-127",known127),("unavailable-run",unavailableRun)] $ \(label, selected) -> do
+    let protocol = (defaultSeedProtocol "." (absolute </> label)) {protocolCompiler = Just selected}
+    actual <- runSeedProtocol protocol (Text.replicate 64 "a")
+    let attempts = seedAttempts actual
+        runs = concatMap attemptRuns attempts
+        stopped = [attempt | attempt <- attempts, any ((/= Nothing) . runSpawnFailure) (attemptRuns attempt)]
+        unattempted = all (\attempt -> attemptGeneratedAfter attempt == Left "not attempted"
+          && attemptImageAfter attempt == Left "not attempted" && attemptCleanup attempt == Left "not attempted") stopped
+    leaves <- mapM (doesPathExist . attemptDirectory) attempts
+    TextIO.writeFile (absolute </> label <> ".data") (Text.pack (show (renderSeedOutcome actual)))
+    pure [Text.pack label, Text.intercalate "," (map attemptLabel attempts), Text.pack (show (length runs))
+      ,Text.pack (show (length (filter ((/= Nothing) . runSpawnFailure) runs)))
+      ,Text.intercalate "," (map (Text.pack . show) leaves), Text.pack (show (seedGreen actual)), Text.pack (show (seedInterrupted actual)), Text.pack (show unattempted)]
+  TextIO.writeFile (absolute </> "seed-interruption.tsv") (Text.unlines (map (Text.intercalate "\t") rows))
 
 -- * Fixtures
 
@@ -519,7 +575,7 @@ receiptCustodyRows output = do
       kills = "mutant\tkilled\n"
       evidence = [("candidate.tsv",candidate),("kill-table.tsv",kills),("outcome.tsv","green\tTrue\n"),("oracle-ledger.tsv","clean\tgreen\n"),("observer.tsv","observed\n")]
       receipt = Receipt phase "typed_spine" verifier "spec" (renderGateSpec spec) (sha256Hex candidate) (sha256Hex kills)
-        original repro verifier governanceDigest postimage "fixture" [] Nothing Nothing "2026-10-20 00:00:00 UTC"
+        original repro verifier governanceDigest postimage "fixture" [] Nothing Nothing "2026-10-20 00:00:00 UTC" Nothing
       result = either id (const "accepted")
       matching closure value = receiptCompatibility phase repro verifier governanceDigest closure value
       summarize value = case value of
@@ -547,6 +603,7 @@ receiptCustodyRows output = do
   TextIO.writeFile outside "module Other where\nvalue = 1\n"
   unchanged <- closureDigest root graph verified verifier governanceDigest
   dependencies <- receiptDependencyRows output verifier
+  recursive <- recursiveCustodyRows output verifier
   pure
     [["generation-one-receipt","positive",result (parseReceipt (renderReceipt receipt))]
     ,["generation-one-receipt","negative",result (parseReceipt (Text.replace "amoebius-phase-receipt.v2" "amoebius-phase-receipt.v1" (renderReceipt receipt)))]
@@ -564,7 +621,165 @@ receiptCustodyRows output = do
     ,["control","governance-binding",result (matching (Just (original,renderGateSpec spec)) receipt {receiptGovernanceDigest = "foreign"})]
     ,["control","specification-binding",result (matching (Just (original,renderGateSpec spec <> "claim: changed\n")) receipt)]
     ,["control","phase-binding",result (receiptCompatibility Identity.phaseDomainLowerOrdinal repro verifier governanceDigest (Just (original,renderGateSpec spec)) receipt)]]
-    >>= \rows -> pure (rows <> dependencies)
+    >>= \rows -> pure (rows <> dependencies <> recursive)
+
+-- These are untrusted metadata protocol observations, not gate evidence. Explicit
+-- fixture writes exercise typed status projection and archive IO; the private
+-- acceptance publisher and opaque PassedGate remain outside this component seam.
+recursiveCustodyRows :: FilePath -> Text -> IO [[Text]]
+recursiveCustodyRows output verifier = do
+  root <- makeAbsolute (output </> "recursive-custody")
+  exists <- doesDirectoryExist root
+  if exists then removePathForcibly root else pure ()
+  let phase0 = Identity.phaseDomainLowerOrdinal
+  phase1 <- maybe (fail "custody fixture has no successor") pure (Identity.successorOrdinal phase0)
+  phase2 <- maybe (fail "custody fixture has no second successor") pure (Identity.successorOrdinal phase1)
+  frontier1 <- maybe (fail "custody first frontier absent") pure (Status.frontierAfterPass Status.initialFrontier phase0)
+  frontier2 <- maybe (fail "custody second frontier absent") pure (Status.frontierAfterPass frontier1 phase1)
+  writeStatusFixture root Status.initialFrontier Map.empty
+  headRun <- observe root "git" ["rev-parse", "HEAD"]
+  if runExit headRun == ExitSuccess then pure () else fail "custody fixture is outside the actual worktree"
+  let archive = root </> "validation-records"
+      config = (defaultCustodyConfig root) {custodyCompiler = Just (root </> "must-not-run-ghc"), custodyCabal = Just (root </> "must-not-run-cabal")}
+      digest char = Text.replicate 64 char
+      firstDigest = digest "1"
+      secondDigest = digest "2"
+      replayFirstDigest = digest "3"
+      replaySecondDigest = digest "4"
+      require result = either (fail . Text.unpack) pure result
+      current = readCurrentArchivedBundles archive verifier >>= require
+      surface = statusSurface root >>= require
+      recordFor phase records = case [receipt | (receipt,_) <- records,receiptPhase receipt == phase] of
+        [receipt] -> pure receipt
+        _ -> fail "custody selected record absent or repeated"
+      publish phase repro issued frontier receipts = do
+        (_,spec) <- either (fail . show) pure (resolveSpec registeredSpecInputs phase)
+        let candidate = Text.unlines ["candidate\tphase=" <> Text.pack (show phase) <> "\tcapability=" <> gateCapability spec,"spec-digest\t" <> sha256Hex (renderGateSpec spec)]
+            kills = "mutant\tkilled\n"
+            evidence = [("candidate.tsv",candidate),("kill-table.tsv",kills),("outcome.tsv","green\tFalse\ncomponent\tmetadata-only\n"),("oracle-ledger.tsv","component.metadata\tred\tno gate was run\n"),("observer.tsv",Text.pack (show headRun))]
+            receipt = Receipt phase (gateCapability spec) verifier (sha256Hex (renderGateSpec spec)) (renderGateSpec spec) (sha256Hex candidate) (sha256Hex kills)
+              "closure-unavailable" repro verifier governanceDigest (digest "0") (Text.strip (runStdout headRun)) [] Nothing Nothing issued Nothing
+        patch <- patchToFrontier root frontier receipts
+        forM_ patch $ \(file,contents) -> TextIO.writeFile (root </> file) contents
+        observed <- surface
+        prefix <- maybe (fail "custody published prefix absent") pure (statusPrefixDigest phase observed)
+        let published = receipt {receiptStatusPostimage = surfaceDigest observed,receiptAcceptedPrefix = Just prefix}
+        path <- writeArchivedReceipt archive published evidence >>= require
+        selected <- current
+        value <- recordFor phase selected
+        pure (value,path)
+      bool key value = ["prefix",key,Text.pack (show value)]
+      bound durable observed records receipt = receiptPublicationBound verifier durable observed records receipt
+      pool first second = [first,second]
+      replaceFirst value rows = [(phase,if phase == phase0 then value else value_) | (phase,value_) <- rows]
+  (first,firstPath) <- publish phase0 firstDigest "2026-10-23 00:00:00 UTC" frontier1 (Map.singleton phase0 firstDigest)
+  afterFirst <- surface
+  (second,_) <- publish phase1 secondDigest "2026-10-23 00:00:01 UTC" frontier2 (Map.fromList [(phase0,firstDigest),(phase1,secondDigest)])
+  afterSecond <- surface
+  records <- current
+  let selected = map fst records
+      -- Observe actual lack of tracked durability; do not claim a supplied True.
+      names = ["receipt.tsv","receipt.tsv.sha256","candidate.tsv","kill-table.tsv","outcome.tsv","oracle-ledger.tsv","observer.tsv"]
+  tracked <- observe root "git" (["ls-files","--error-unmatch","--"] <> map ((makeRelative root firstPath) </>) names)
+  let durable = runExit tracked == ExitSuccess
+      headingChanged = afterSecond {surfaceSprints = [(phase,sprint,line,if phase == phase0 && sprint == 1 then Text.replace "Fixture" "Changed fixture" heading else heading,status) | (phase,sprint,line,heading,status) <- surfaceSprints afterSecond]}
+      headingAnchor = second {receiptStatusPostimage = surfaceDigest headingChanged}
+      receiptChanged = afterSecond {surfaceReceipts = replaceFirst (digest "5") (surfaceReceipts afterSecond)}
+      receiptAnchor = first {receiptReproducible = digest "5",receiptStatusPostimage = surfaceDigest receiptChanged,receiptIssuedAt = "2026-10-23 00:00:09 UTC"}
+      inconsistentTracker = afterSecond {surfaceTracker = [(phase,line,if phase == phase0 then "Active — NOT VALIDATED" else status) | (phase,line,status) <- surfaceTracker afterSecond]}
+      inconsistentPhase = afterSecond {surfacePhaseLines = [(phase,line,if phase == phase0 then "**Status**: Active — NOT VALIDATED" else status) | (phase,line,status) <- surfacePhaseLines afterSecond]}
+      inconsistentSprint = afterSecond {surfaceSprints = [(phase,sprint,line,heading,if phase == phase0 && sprint == 1 then "**Status**: Active — NOT VALIDATED" else status) | (phase,sprint,line,heading,status) <- surfaceSprints afterSecond]}
+      legacyFirst = first {receiptAcceptedPrefix = Nothing}
+      legacySecond = second {receiptAcceptedPrefix = Nothing}
+      resetFirst = first {receiptResetCause = Just ("LTD-VAL-003","LTD-VAL-003")}
+      foreignFirst = first {receiptVerifierDigest = digest "6"}
+      foreignGovernance = first {receiptGovernanceDigest = digest "7"}
+      staleFirst = first {receiptReproducible = digest "8"}
+      badAnchor = second {receiptStatusPostimage = digest "9"}
+      malformedFirst = first {receiptAcceptedPrefix = Just "not-a-digest"}
+      tiedSecond = second {receiptIssuedAt = receiptIssuedAt first}
+      malformed = Text.unlines [line | line <- Text.lines (renderReceipt first),not ("accepted-prefix-digest\t" `Text.isPrefixOf` line)] <> "accepted-prefix-digest\tnot-a-digest\n"
+      repeated = renderReceipt first <> "accepted-prefix-digest\t" <> maybe "absent" id (receiptAcceptedPrefix first) <> "\n"
+      parseResult = either id (const "accepted") . parseReceipt
+      prefixShape = all (\receipt -> maybe False (\value -> Text.length value == 64 && parseReceipt (renderReceipt receipt) == Right receipt) (receiptAcceptedPrefix receipt)) selected
+      metadataEligible = bound durable afterSecond selected first
+      negative = bound durable headingChanged (pool first headingAnchor) first
+  TextIO.writeFile (root </> "publication-processes.data") (Text.pack (show [headRun,tracked]))
+  TextIO.writeFile (root </> "publication-observations.data") (Text.pack (show (afterFirst,afterSecond,records)))
+  -- Eligible metadata is not a sealed gate observation. The existing public
+  -- command refuses this red component bundle before any candidate execution.
+  beforePreview <- auditArchivedInventory root
+  unavailable <- previewPhase config phase2
+  TextIO.writeFile (root </> "public-preview.data") (Text.pack (show (outcomeExit unavailable,outcomeLines unavailable)))
+  afterPreview <- auditArchivedInventory root
+  runDirectory <- doesDirectoryExist (root </> ".build/runs")
+  originalReceipt <- TextIO.readFile (firstPath </> "receipt.tsv")
+  _ <- writeRecord (firstPath </> "receipt.tsv") repeated >>= require
+  duplicateRead <- readCurrentArchivedBundles archive verifier
+  _ <- writeRecord (firstPath </> "receipt.tsv") originalReceipt >>= require
+  originalObserver <- TextIO.readFile (firstPath </> "observer.tsv")
+  TextIO.writeFile (firstPath </> "observer.tsv") "corrupt component observation\n"
+  corruptRead <- readCurrentArchivedBundles archive verifier
+  TextIO.writeFile (firstPath </> "observer.tsv") originalObserver
+  removeFile (firstPath </> "observer.tsv")
+  missingRead <- readCurrentArchivedBundles archive verifier
+  TextIO.writeFile (firstPath </> "observer.tsv") originalObserver
+  -- Replay publication at the same frontier changes the older receipt while
+  -- the downstream phase remains Done; it does not force an artificial reset.
+  (replayedFirst,_) <- publish phase0 replayFirstDigest "2026-10-23 00:00:02 UTC" frontier2 (Map.fromList [(phase0,replayFirstDigest),(phase1,secondDigest)])
+  afterReplayFirst <- surface
+  replayFirstRecords <- current
+  let replayStalePrefix = bound durable afterReplayFirst (map fst replayFirstRecords) second
+      replayFirstEligible = bound durable afterReplayFirst (map fst replayFirstRecords) replayedFirst
+      superseded = bound durable afterReplayFirst (map fst replayFirstRecords) first
+  (replayedSecond,replayedSecondPath) <- publish phase1 replaySecondDigest "2026-10-23 00:00:03 UTC" frontier2 (Map.fromList [(phase0,replayFirstDigest),(phase1,replaySecondDigest)])
+  afterReplaySecond <- surface
+  replaySecondRecords <- current
+  let replaySeriesEligible = bound durable afterReplaySecond (map fst replaySecondRecords) replayedFirst && bound durable afterReplaySecond (map fst replaySecondRecords) replayedSecond
+  _ <- writeReplayVoid archive replayedSecond replayedSecondPath "gate-red" (digest "a") "2026-10-23 00:00:04 UTC" >>= require
+  voided <- current
+  evidenceRed <- TextIO.readFile (firstPath </> "outcome.tsv")
+  pure
+    [ ["uncommitted-prefix-series","positive",Text.pack (show (metadataEligible && replayFirstEligible && replaySeriesEligible))]
+    , ["uncommitted-prefix-series","negative",Text.pack (show negative)]
+    , bool "publication-prefixes" prefixShape
+    , bool "earlier-whole-changed" (receiptStatusPostimage first == surfaceDigest afterFirst && receiptStatusPostimage first /= surfaceDigest afterSecond)
+    , bool "latest-whole" (receiptStatusPostimage second == surfaceDigest afterSecond)
+    , bool "uncommitted-observed" (not durable && runExit tracked /= ExitSuccess)
+    , bool "metadata-red" (evidenceRed == "green\tFalse\ncomponent\tmetadata-only\n")
+    , bool "prefix-heading" negative
+    , bool "prefix-receipt" (bound durable receiptChanged (pool receiptAnchor second) second)
+    , bool "prefix-tracker" (statusPrefixDigest phase0 inconsistentTracker /= Nothing)
+    , bool "prefix-phase" (statusPrefixDigest phase0 inconsistentPhase /= Nothing)
+    , bool "prefix-sprint" (statusPrefixDigest phase0 inconsistentSprint /= Nothing)
+    , bool "malformed-target" (bound durable afterSecond (pool malformedFirst second) malformedFirst)
+    , bool "ambiguous-bound" (bound durable afterSecond (pool first tiedSecond) tiedSecond)
+    , bool "latest-anchor" (bound durable afterSecond (pool first badAnchor) first)
+    , bool "current-selection" (bound durable afterSecond selected (first {receiptAcceptedPrefix = Nothing}))
+    , bool "missing-target" (bound durable afterSecond [second] first)
+    , bool "stale-identity" (bound durable afterSecond (pool staleFirst second) staleFirst)
+    , bool "verifier" (bound durable afterSecond (pool foreignFirst second) foreignFirst)
+    , bool "governance" (bound durable afterSecond (pool foreignGovernance second) foreignGovernance)
+    , bool "reset-target" (bound durable afterSecond (pool resetFirst second) resetFirst)
+    , bool "legacy-none" (bound durable afterSecond (pool legacyFirst second) legacyFirst)
+    , bool "legacy-bytes" (not ("accepted-prefix-digest" `Text.isInfixOf` renderReceipt legacyFirst) && parseReceipt (renderReceipt legacyFirst) == Right legacyFirst)
+    , bool "legacy-whole" (bound durable afterSecond (pool first legacySecond) legacySecond)
+    -- A typed policy branch control only; actual fixture durability above is False.
+    , bool "legacy-durable" (bound True afterSecond (pool legacyFirst second) legacyFirst)
+    , ["prefix","malformed",parseResult malformed]
+    , ["prefix","repeated",parseResult repeated]
+    , bool "duplicate-reader" (either (const False) (const True) duplicateRead)
+    , bool "corrupt-reader" (either (const False) (const True) corruptRead)
+    , bool "missing-reader" (either (const False) (const True) missingRead)
+    , ["prefix","ambiguous-latest",either id (const "accepted") (latestWholePostimage [first,second {receiptIssuedAt = receiptIssuedAt first}])]
+    , bool "unknown-phase" (statusPrefixDigest (Identity.phaseDomainUpperOrdinal + 1) afterSecond /= Nothing)
+    , bool "inconsistent-surface" (statusPrefixDigest phase0 (afterSecond {surfaceReceipts = []}) /= Nothing)
+    , bool "public-evidence-refusal" (outcomeExit unavailable == ExitFailure 1 && beforePreview == afterPreview && not runDirectory)
+    , ["prefix","public-evidence-reason",Text.intercalate ";" (outcomeLines unavailable)]
+    , bool "replay-stale-prefix" replayStalePrefix
+    , bool "superseded" superseded
+    , bool "voided" (bound durable afterReplaySecond (map fst voided) replayedSecond)
+    ]
 
 receiptDependencyRows :: FilePath -> Text -> IO [[Text]]
 receiptDependencyRows output verifier = do
@@ -1388,7 +1603,7 @@ storeRows output = do
   let store = Store (output </> "fixture-store")
   createDirectoryIfMissing True (storeRoot store)
   let seed = SeedRecord "abc123" "accept phase 0" "abc123" "gov" "surface" "commit" "now"
-      receipt = Receipt 0 "documentation_suite" "abc123" "spec" "rendered\nspec" "cand" "kill" "closure" "repro" "abc123" "gov" "post" "commit" ["w1", "w2"] Nothing Nothing "2026-09-18 00:00:01 UTC"
+      receipt = Receipt 0 "documentation_suite" "abc123" "spec" "rendered\nspec" "cand" "kill" "closure" "repro" "abc123" "gov" "post" "commit" ["w1", "w2"] Nothing Nothing "2026-09-18 00:00:01 UTC" Nothing
       resetReceipt = receipt {receiptResetCause = Just ("gap", "LTD-DSL-001"), receiptIssuedAt = "2026-09-18 00:00:00 UTC"}
       receiptPath = storeRoot store </> "pass.tsv"
       resetPath = storeRoot store </> "reset.tsv"
@@ -1439,7 +1654,7 @@ archiveRows output = do
         ]
       receipt = Receipt 0 "documentation_suite" generation "spec" "rendered\nspec"
         (sha256Hex candidate) (sha256Hex killTable) "closure" (Text.replicate 64 "b")
-        generation "governance" (Text.replicate 64 "c") "commit" ["w1"] Nothing Nothing "2026-09-23 00:00:00 UTC"
+        generation "governance" (Text.replicate 64 "c") "commit" ["w1"] Nothing Nothing "2026-09-23 00:00:00 UTC" Nothing
       bundle = archivedBundlePath root receipt evidence
       changedEvidence = [(name, if name == "outcome.tsv" then "green\tTrue\nrun\tsecond\n" else body) | (name, body) <- evidence]
       secondReceipt = receipt {receiptIssuedAt = "2026-09-23 00:00:01 UTC"}
@@ -1495,7 +1710,7 @@ replayVoidRows output = do
       evidence attempt = [("candidate.tsv", candidate), ("kill-table.tsv", killTable), ("outcome.tsv", "green\tTrue\nattempt\t" <> attempt <> "\n"), ("oracle-ledger.tsv", "clean\tgreen\n"), ("observer.tsv", "run\texit-success\n")]
       receipt = Receipt 0 "documentation_suite" generation "spec" "rendered\nspec"
         (sha256Hex candidate) (sha256Hex killTable) "closure" (Text.replicate 64 "b")
-        generation "governance" (Text.replicate 64 "c") "commit" [] Nothing Nothing "2026-09-23 00:00:00 UTC"
+        generation "governance" (Text.replicate 64 "c") "commit" [] Nothing Nothing "2026-09-23 00:00:00 UTC" Nothing
       newer = receipt {receiptIssuedAt = "2026-09-23 00:00:01 UTC"}
       recovered = receipt {receiptIssuedAt = "2026-09-23 00:00:02 UTC"}
       failure = Text.replicate 64 "e"
@@ -1559,7 +1774,7 @@ crossGenerationVoidRows output = case take 3 Identity.phaseOrdinals of
         evidence ordinal label = [("candidate.tsv", candidate ordinal), ("kill-table.tsv", killTable), ("outcome.tsv", "green\tTrue\nattempt\t" <> label <> "\n"), ("oracle-ledger.tsv", "clean\tgreen\n"), ("observer.tsv", "run\texit-success\n")]
         receipt ordinal generation digest label issued = Receipt ordinal "fixture" generation "spec" "rendered"
           (sha256Hex (candidate ordinal)) (sha256Hex killTable) "closure" digest generation "governance"
-          (Text.replicate 64 "8") "commit" [label] Nothing Nothing issued
+          (Text.replicate 64 "8") "commit" [label] Nothing Nothing issued Nothing
         records =
           [ receipt phase oldGeneration recordedDigest "old" "2026-09-23 00:00:00 UTC"
           , receipt phase oldGeneration recordedDigest "newer-same" "2026-09-23 00:00:01 UTC"
@@ -1603,7 +1818,7 @@ kernelRatchetRows output = do
             killed = "mutant\tkilled\n"
             evidence = [("candidate.tsv", candidate), ("kill-table.tsv", killed), ("outcome.tsv", "green\tTrue\n"), ("oracle-ledger.tsv", "clean\tgreen\n"), ("observer.tsv", "run\texit-success\n")]
             receipt = Receipt phase "fixture" generation "spec" "rendered" (sha256Hex candidate) (sha256Hex killed)
-              "closure" generation generation "governance" (Text.replicate 64 "8") "commit" [] reset Nothing "2026-10-15 00:00:00 UTC"
+              "closure" generation generation "governance" (Text.replicate 64 "8") "commit" [] reset Nothing "2026-10-15 00:00:00 UTC" Nothing
         written <- writeArchivedReceipt (root </> "validation-records") receipt evidence
         pure (receipt, written)
       projection result = either id (maybe "none" (Text.pack . show)) result

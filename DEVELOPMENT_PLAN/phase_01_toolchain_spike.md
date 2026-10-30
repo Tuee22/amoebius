@@ -13,7 +13,7 @@ versions and the probe results. No toolchain archive or executable pin is requir
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, documents/decision_log.md, documents/engineering/content_addressing_determinism.md, documents/engineering/gate_runner_doctrine.md, documents/engineering/pulsar_client_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, documents/decision_log.md, documents/engineering/content_addressing_determinism.md, documents/engineering/gate_runner_doctrine.md, documents/engineering/pulsar_client_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -40,25 +40,161 @@ versions and the probe results. No toolchain archive or executable pin is requir
 ## Phase Status
 
 ✅ Done.
-**Receipt**: 5f560ee8899da1b21e85fb5edb4fac599b18b09a4932e4db8b52638471143d6b
+**Receipt**: f553c8e9abcc4b3f8e8d6d303c4bfe496309a13a9e8a5315fa2b51896769aa9c
 
-The complete preview and separate acceptance passed at the exact source snapshot recorded by the receipt.
-All eighteen gate categories and 116 independent clean oracle rows are green. The owning source/admission
-qualifications passed all 32 rows. The generated matrix killed 36 of 38 viable production mutants, with a
-kill in every subject; two non-buildable mutants supplied no kill. The shipped report retained the nonce
-and refused the unsupported requested compiler version. Both runs reproduced the complete predecessor gate.
+**Historical predecessor repair — DL-0042.** The complete repaired Phase-0 preview passed,
+and its separate acceptance issued the [owning receipt](phase_00_documentation_suite.md#phase-status)
+at 2026-10-26 22:11:40.134788 UTC. It qualified the image/completion boundary reopened under DL-0041
+and mechanically activated this phase. [DL-0042](../documents/decision_log.md#dl-0042--qualified-image-and-completion-custody-retires-runner-authority) retires exactly `LTD-VAL-001` while preserving its identity, five canonical cases, explicit extension,
+source-bound qualification and inherited guards. At that checkpoint, the changed governance required
+complete Phase-0 replay before this phase's fresh complete preview and separate acceptance. Those gates
+were prerequisites for Phase 2. The earlier Phase-1 receipts below retain their recorded scope; status and receipt
+fields remain the verifier's mechanical projection.
 
-The earlier reset and failed mutation run remain historical observations. Their missing inherited authority
-was repaired through the exact-source predecessor handle in
-[DL-0035](../documents/decision_log.md#dl-0035--retired-legacy-checks-inherit-an-exact-source-predecessor-pass).
-The accepted owning bindings now retire under
-[DL-0036](../documents/decision_log.md#dl-0036--phase-1-acceptance-retires-its-qualified-toolchain-bindings),
-with their identities, queries and independent reintroduction cases retained. Subsequent source or governance
-changes require current compatibility or numerical replay before the next gate can use this evidence.
+The complete ordered reproduction on 2026-10-28 issued the receipt recorded above after all eighteen
+categories passed. Its forty attempts contained thirty-six kills among thirty-nine viable mutants and one
+stillborn, with a named kill for every subject. Later Phase-2 repairs changed the verifier and shared
+source. Their ordered reproduction published a green Phase-0 record on 2026-10-30, but its own Phase-1
+run was interrupted at the user's request with controller exit 130 before a new receipt was published.
+The [Phase-2 handoff](phase_02_repository_layout_conformance.md#phase-status) records the remaining work.
+The older complete result supplies no current-source reproduction; fresh affected-closure replay is
+required before the next Phase-2 gate.
 
-Native GHCup/GHC version admission requires no toolchain byte pin, particular host architecture or hardware.
-Compiler correctness and publisher identity remain assumptions. Complete source closure, DSL validation and
-live hardware retain their later owners; this receipt establishes only the toolchain gate's bounded claim.
+At the 2026-10-27 mutation-evidence checkpoint, the complete preview reproduced its predecessor and
+completed all forty sampled attempts. Fifteen gate categories were green; mutation completeness,
+qualification and the pass criterion were red, so no acceptance was attempted. The unmodified control
+had 135 green judgments, the clean candidate had 139, and thirty-three mutations had named kills across
+all six subjects. One compiler-negative lacked its stillborn classification, two actual CLI refusals
+shortened the oracle namespace, and a discovery mutation made fixture setup copy a directory as a file.
+The repair preserves complete semantic judgments for absent product outputs, enumerates fixture-copy
+and unchanged-source inputs independently, and requires a known changed-source compiler diagnostic,
+a closed failing compiler record and an unchanged source copy before excluding a stillborn attempt.
+Missing native or oracle boundaries remain failures. This checkpoint supplied no phase pass: the changed
+verifier still required predecessor replay and this phase's complete preview and separate acceptance.
+
+The same checkpoint retained an approximately 84 MB candidate diagnostic projection, above the existing
+16 MiB archive record bound. At that checkpoint, large native diagnostic fields used an explicit `interned-gzip-utf8-hex.v1`
+envelope: a Haskell token dictionary and reference list, compressed and hex-encoded, reconstruct their
+complete UTF-8 projection; observations and judgments remain complete before encoding.
+Small diagnostic fields retain their existing representation. Preview checks the archive's record-size
+bound before reporting a pass. Lossless round trips, the retained full projection's encoded size and
+source-bound native cases required checking before the subsequent complete gates; the archive size limit
+and historical bundles remain unchanged. The subsequent Phase-2 repair uses the lossless
+`interned-gzip-utf8-base64.v2:` representation for large retained native diagnostic fields; historical
+archives retain their original bytes. Its component checks and pending complete-gate qualification are
+described in the linked handoff rather than supplying a new Phase-1 result here.
+
+The focused repair checks completed with nineteen oracle-protocol checks, eight paired CLI-output
+absence, I/O-refusal and restoration checks and five lossless/archive-size checks green. The fresh native 135-row control
+was green; the compiler-negative was correctly retained as stillborn, and its actual positive plus nine
+missing/mismatched observation negatives were green. Each of the three runtime subjects completed the
+135-row namespace, known process returns, source guard and stable actual images, with the specific CLI
+or discovery refusal and a suite image differing from the matching control. An earlier focused process
+was interrupted by signal 15 and supplied no runtime pass; separate serial processes completed the cases.
+The first runtime's final binary comparison was completed against its retained observation after replacing
+a source-size-bounded diagnostic reader. None of these diagnostics minted phase evidence. At that
+checkpoint, the complete predecessor replay, fresh complete preview and separate acceptance remained due.
+
+The framed oracle integration now declares two explicit Haskell namespaces: `toolchain.full.v1` has
+the existing 135 core judgments, and `toolchain.gate.v1` adds the four existing shipped-binary judgments.
+The declaration is authored from the independent oracle's existing checks, not from subject output.
+The generic runner selects the latter only for the clean candidate with a compiled `BinaryFact`;
+matrix and component observations use the core profile. Inventory, missing-primary probe and normal
+completion retain separate challenges. This preserves the matrix's suite-linked product subjects and
+the clean candidate's separate shipped-binary obligation. Legacy file/directory and specialized
+diagnostics retain their previous routes. The counted kernel remains twenty files and 3,353 lines.
+The integration built serially. A source-bound native component run retained the actual seven process
+observations, three complete frames, 135 green judgments and stable suite/oracle images. Nineteen
+independent component checks passed, including both inventory declarations, missing-primary probes,
+malformed requests and a specific semantic refusal followed by exact restoration. The source-built
+shipped executable then completed the fresh nonce/version-request challenge. Its independent oracle
+returned all 139 gate judgments green; the explicit core profile still returned 135, and both executable
+images remained stable. These were component diagnostics only. Numerical progression then required a
+complete green Phase-0 replay followed by this phase's fresh complete preview and separate acceptance; its
+predecessor's recorded receipt and any replay revocation are described in [Phase 0](phase_00_documentation_suite.md#phase-status).
+
+Historical custody checkpoint and its then-current successor requirement: numerical replay through Phase 1 completed on 2026-10-23 at 16:20:40 UTC,
+publishing Phase-0 receipt `62e40f509f659bcf35b03708801d157fbdf6e0a4af18b87cc74ccb862d20f6b7` and Phase-1 receipt
+`c6d4a39786a4050aad934eaabdc8c6b55497e977e21a0714e117aefe16238d47`. The subsequent Phase-2 preview refused before its gate
+with `PredecessorNotCommitted` and `PREDECESSOR-GATE-UNAVAILABLE`; it exposed recursive predecessor
+custody comparing Phase 0's older whole-status postimage with the later Phase-1 surface. The new
+source-bound verifier completed the [reset receipt](../validation-records/generation-d7ecfa4c132f6845/receipts/phase-00-35b097c8a6c5efe44b0d0e0966c92b1e04a3b333fa26fe67086e630733951e26-35c947452b34e28599086c516ec4b4fbc7bbbb34ccc038ef52643625495251b7/receipt.tsv)
+on 2026-10-23 at 17:41:25 UTC under [DL-0039](../documents/decision_log.md#dl-0039--recursive-custody-preserves-accepted-completed-prefixes), naming product gap `LTD-VAL-003` and validator gap
+`recursive uncommitted predecessor postimage admission`. This is a nongate reset to the earliest owner,
+Phase 0. Focused custody components recorded 67 green oracle rows, 52 green independent evidence-binding
+checks and exact expected red-row sets for all seven changed production subjects. They do not establish a
+complete owning gate pass. The subsequent distinct complete Phase-0 acceptance is recorded by
+[receipt `6d072c6371298209b4b1baaf77be7e6010a77e6ad84bdb17e71e137ec8bf02ee`](../validation-records/generation-d7ecfa4c132f6845/receipts/phase-00-6d072c6371298209b4b1baaf77be7e6010a77e6ad84bdb17e71e137ec8bf02ee-dd94cde77cf45d3cbe84a0cbf6b43c1623e00bb60dfa1dd6186a016d3b16f8e4/receipt.tsv), issued at 2026-10-23 19:25:31.985079 UTC
+and completed at 2026-10-23 19:25:32 UTC; its [bounded observations](phase_00_documentation_suite.md#phase-status)
+qualify the reopened binding. [DL-0040](../documents/decision_log.md#dl-0040--qualified-recursive-custody-retires-its-reopened-binding) retires exactly that binding and requires complete numerical Phase-0 replay
+at the amended source and governance before a fresh complete Phase-1 preview and separate acceptance,
+and only then Phase 2. No owning Phase-0 pass or historical result below supplies the fresh Phase-1 gate.
+
+At the earlier DL-0038 checkpoint, the repaired complete preview finished on 2026-10-23 at 08:22:36 UTC with all eighteen categories green
+and minted nothing. The separate complete acceptance finished at 11:50:45 UTC after re-deriving its
+immediate predecessor and recorded receipt `1d571c43452ba121ef5c3b17c29502dc1dc85ab6a9b20a767531580f02d96d20`. The
+[accepted candidate](../validation-records/generation-73b9725848c60d62/receipts/phase-01-1d571c43452ba121ef5c3b17c29502dc1dc85ab6a9b20a767531580f02d96d20-cdababd6c28a3033b58d644e2613df53fa84708f06beb969ba4b58abdcc97b97/candidate.tsv),
+[clean oracle ledger](../validation-records/generation-73b9725848c60d62/receipts/phase-01-1d571c43452ba121ef5c3b17c29502dc1dc85ab6a9b20a767531580f02d96d20-cdababd6c28a3033b58d644e2613df53fa84708f06beb969ba4b58abdcc97b97/oracle-ledger.tsv) and
+[receipt](../validation-records/generation-73b9725848c60d62/receipts/phase-01-1d571c43452ba121ef5c3b17c29502dc1dc85ab6a9b20a767531580f02d96d20-cdababd6c28a3033b58d644e2613df53fa84708f06beb969ba4b58abdcc97b97/receipt.tsv)
+retain the bounded observations described here. The preview and acceptance used specification
+`bbf321ff3fa847360eaad59dc7847b3c8e68e7e3c343accb642dd48cfbf67611` and identical forty-locus mutation witnesses.
+
+That historical accepted candidate recorded all eighteen categories green. The same-context unmodified matrix control had 135 unique
+green rows, a successful source guard and five full process records retained in `matrix.control.raw`.
+The clean independent oracle had the same 135 names plus four shipped-binary input/nonce/version checks,
+all 139 green. Forty selected mutations yielded thirty-two kills among thirty-nine viable, one stillborn
+and seven survivors. The six subjects' killed/survived/stillborn counts were Versions 6/0/1, Acquire 4/3/0,
+Probe 7/0/0, Resolve 6/1/0, Provenance 6/0/0 and Report 3/3/0. Each subject had a recorded named product
+kill; the later M.3 image-witness audit prevents treating that record as current qualified mutation evidence. The six Provenance loci were refused by the fork, unsafe-archive diagnostic or exact public-renderer
+checks, rather than layout contamination.
+
+The eleven source-bound qualification transcripts contain 231 green rows: the three owning bindings
+contribute 32 (probe-source 9, vendor-source 13 and native admission 10), and eight inherited Phase-0
+bindings contribute 199. All forty-four reports and retained guards remain. The accepted kernel count
+and cap are 3,353. Opening and closing source identities agree at
+`26931ae88e6ad290bda2b1334dfe26ab33556492748d3348806da166fbd2e982`; the verifier is
+`73b9725848c60d62206cafccd3e152ba5e629b04b9f4853652ea3572f439072b`, governance
+`cdf54628d937a8b0aecc69507d963c214533f3680eb81e8de639f87672931528` and reproducible core
+`76ced110592c1681574f9c491b1789e1009c5a5eaf7ff8222b5482bc7f7103f2`.
+
+The accepted candidate's raw control-oracle stdout and clean ledger retain the actual toolchain evidence.
+The isolated offline install records contain the repository dry-run child and plan, selected
+`proto-lens-protoc` version 0.9.0.1/source hash, 448 copied-cache entries with matching observed hashes,
+the verified local archive/project input, a separate local-install child/plan and installed executable
+checks. The two plans each contain 55 units, including the configured root library and executable;
+equality of repository/local graphs or compressed archives is not assumed. The missing-package dry-run
+records its precise unknown-package refusal, no installed executable/local-install observations and
+owned-cache cleanup. Native configuration, caches and the installed package database were read-only
+inputs; generated configuration, stores, temporaries and output belonged to physical owned roots.
+
+Codegen observations contain the actual `(ChildRecord, stdout, stderr)`, matching returned child, schema
+and complete generated paths, hashes and bytes. The independent oracle joined actual protoc identity and
+argv to the installed plugin and checked both generated modules, message fields, tags and lenses.
+Upstream observations contain both actual public eight-field renderers, immutable identity, archive/tree
+hashes, 22 extracted files, optional native cache-query child and 31 read/create/write actions per
+acquisition. The wrong-release twin retains the real `CachedArchiveInvalid: unsafe archive path
+supernova-0.0.3` refusal and no created destination. Malformed declared fork names remain observable
+through all clean-plus-seventeen fork records. The oracle checked physical inputs/outputs during the
+run; cleanup removed the owned artifacts. The accepted archive retains records and embedded bytes, not
+a claim that deleted binaries or archives can now be physically rehashed.
+
+This amendment retires exactly `LTD-BOOT-001`, `LTD-SRC-007` and `LTD-SRC-009` while retaining all identities,
+owners, analyzers, source queries, independent expectations, canonical reintroductions and inherited
+guards ([DL-0038](../documents/decision_log.md#dl-0038--a-qualified-repaired-toolchain-pass-retires-its-three-bindings)). The earlier contaminated acceptance, receipt-bearing reset,
+red per-module preview and focused components remain historical observations; they supply none of this
+acceptance's authority. DL-0037's same-context control rule remains normative.
+
+Native version admission requires no toolchain byte pin, particular host architecture or hardware.
+Compiler correctness and publisher identity remain assumptions. The finite predecessor's captured
+bootstrap scope does not close the whole-snapshot bootstrap query; its binding remains active and the
+runtime handoff belongs to Phase 50. Complete source closure, maintained-fork compilation in Phase 67,
+the DSL spine and live hardware retain their later owners. The exact-source predecessor handle under
+[DL-0035](../documents/decision_log.md#dl-0035--retired-legacy-checks-inherit-an-exact-source-predecessor-pass)
+remains required. The numerical replay required by the DL-0038 lifecycle/governance amendment completed
+through Phase 1 at 16:20:40 UTC on 2026-10-23. The later custody refusal, completed earliest-owner reset
+and new Phase-0 owning acceptance are recorded above. The separate retirement under
+[DL-0040](../documents/decision_log.md#dl-0040--qualified-recursive-custody-retires-its-reopened-binding) requires complete Phase-0 replay, then fresh Phase-1 preview and separate acceptance before Phase 2.
+This prose changes no status or receipt line.
 
 ## Phase Summary
 
@@ -116,6 +252,28 @@ negative: UpstreamDigestMismatch | input=altered tree digest | tag=DigestMismatc
 negative: AbsentTool | input=absent-tool | tag=AbsentTool | stage=plan
 negative: OutOfRangeVersion | input=ghc 9.10.1 | tag=OutOfRangeVersion | stage=plan
 negative: NoPlatformAsset | input=unsupported-unknown | tag=NoPlatformAsset | stage=plan
+negative: case:simulation.terminal-pair | input=completed simulation without a terminal value | tag=SimulationNoOutput with clean terminal control | stage=probe
+negative: case:planner.paired-remedies | input=missing tool, unsupported version and absent platform asset | tag=exact actionable remedies with supported controls | stage=plan
+negative: case:resolution.source-pairs | input=tracked freeze, package pin and developer-home metadata | tag=named source refusals with contained controls | stage=resolve
+positive: case:build.fixed-serial-arguments | input=caller concurrency and compiler options, native configuration pairs, and actual successful and absent-package tool installs | expected=fixed offline serial native invocation, preserved payload, owned configuration and temporary paths, read-only native inputs, complete cache-copy evidence and cleanup
+positive: case:resolution.first-plan | input=first native compatible resolution | expected=actual plan units, packages and digest agree with independent JSON decoding
+positive: case:resolution.second-plan | input=second native compatible resolution | expected=actual plan units, packages and digest agree with independent JSON decoding
+positive: case:resolution.agreement | input=two independently observed native resolutions | expected=equal complete unit graphs, package sets and digests
+negative: case:resolution.disagreement | input=changed observed units, packages and digest | tag=PlansDisagree at each changed field | stage=resolve
+negative: case:resolution.dropped-allowance | input=removed decoder dependency declaration | tag=MissingCompatibilityAllowance before effects | stage=resolve
+negative: case:resolution.outside-root | input=resolution output outside the build root | tag=ResolutionRootOutsideBuild before effects | stage=resolve
+positive: case:resolution.authored-unchanged | input=two actual resolutions | expected=complete authored source identity unchanged
+positive: case:resolution.generated-ignored | input=actual generated resolution files | expected=every output is beneath the admitted ignored root
+positive: case:upstream.cache-positive | input=native package cache archive | expected=actual local extraction, source digest and complete action projection
+positive: case:upstream.supplied-cache-positive | input=explicit cached archive input with outside-root and ancestor-symlink twins | expected=same source identity without any child process; unsafe destinations refused before effects
+positive: case:upstream.cache-only-query | input=native cache discovery | expected=only the read-only offline package-cache query executes
+negative: case:upstream.digest-negative | input=wrong upstream source digest | tag=DigestMismatch before destination creation | stage=provenance
+negative: case:upstream.missing-cache-negative | input=absent cached upstream archive | tag=CachedArchiveMissing without fallback or destination creation | stage=provenance
+negative: case:upstream.absent-identity | input=empty release name or version | tag=AbsentIdentity before acquisition effects | stage=provenance
+positive: case:report.cli.plan-a | input=public acquisition report first plan | expected=actual JSON units, compatible packages and digest match report
+positive: case:report.cli.plan-b | input=public acquisition report second plan | expected=actual JSON units, compatible packages and digest match report
+positive: case:report.cli.plans-agree | input=public acquisition report repeated plans | expected=observed complete plans agree
+positive: case:report.cli.source | input=public report source inspection | expected=no tracked resolution findings
 mutants: stages=Amoebius.Toolchain.Versions,Amoebius.Toolchain.Acquire,Amoebius.Toolchain.Probe,Amoebius.Toolchain.Resolve,Amoebius.Toolchain.Provenance,Amoebius.Toolchain.Report per-module=8 cap=40 kill-ratio=3/5
 binary-fact: command=toolchain-report --request {input} --output {run}/toolchain-report.tsv --probe-root {run}/probe | input=toolchain-request.tsv | perturbation=staged(pre=toolchain-report --write-request {input} post= then=sentinel-to-nonce(0b5e17e11a0c0ffee0de1e9a7e5ba5ed),rewrite(ghc.requested-version	9.12.4 => ghc.requested-version	9.10.1)) | outputs={run}/toolchain-report.tsv
 substrate: none
@@ -196,24 +354,11 @@ are the current Haskell requirements; they do not select an OS or CPU architectu
 
 ### Remaining Work
 
-None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
-The receipt above owns the integrated result. The component observations below describe the checks that
-preceded it; later source changes still require compatibility or numerical replay.
+Preserve the [current evidence boundary](#phase-status) and this sprint's independent expectations.
+The sprint closes only through this phase's complete current acceptance after its predecessor has been
+reproduced. Component diagnostics and historical receipts do not close it.
 
-The native admission component now passes ten independent oracle rows. Its four canonical fault groups
-each exercise GHCup and GHC with both positive and negative controls. Every positive also tolerates an
-unavailable Cabal version report; toolchain byte identity supplies no admission verdict. The examples are
-Haskell values linked from the product version module, and the boundary fakes are copied Haskell executables.
-The source-bound factory retains the observations and image identities and removes its copied source tree.
-Its qualified diagnostic removes the owning admission refusal while retaining the other due and inherited
-refusals. The serial qualification matrix now passes all forty-two independent evidence-binding controls.
-Five compiled production weakenings each produce exactly their assigned red row while preserving the other
-nine green rows: missing-tool detection, command-exit checking, malformed-version rejection, exact-version
-checking and range checking. The independent audit binds the full source rewrite, changed executable
-identities, complete ledger discovery, source-tree cleanup and owner/source correspondence; missing, reused,
-duplicate, forged and other-analyzer evidence refuse. A current query qualification cannot retire an earlier
-owner. These admission-component results supplied no phase authority on their own. The subsequent complete
-preview and acceptance separately established the integrated result recorded above.
+Native-version admission must retain the actual missing, malformed, failed and unsupported twins, with discovery and cleanup in its ten-row owning admission qualification.
 
 ## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ✅
 
@@ -241,9 +386,11 @@ Decode the positive and refuse the twin; compare both outcomes with the oracle's
 
 ### Remaining Work
 
-None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
-The receipt above owns the integrated result. The component observations below describe the checks that
-preceded it; later source changes still require compatibility or numerical replay.
+Preserve the [current evidence boundary](#phase-status) and this sprint's independent expectations.
+The sprint closes only through this phase's complete current acceptance after its predecessor has been
+reproduced. Component diagnostics and historical receipts do not close it.
+
+The gate must independently judge the linked decoder result and the precise mistyped-input refusal.
 
 ## Sprint 1.3: `io-sim` + `io-classes` simulation build probe ✅
 
@@ -272,9 +419,11 @@ Run both arms; compare the terminal states with the oracle's literals.
 
 ### Remaining Work
 
-None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
-The receipt above owns the integrated result. The component observations below describe the checks that
-preceded it; later source changes still require compatibility or numerical replay.
+Preserve the [current evidence boundary](#phase-status) and this sprint's independent expectations.
+The sprint closes only through this phase's complete current acceptance after its predecessor has been
+reproduced. Component diagnostics and historical receipts do not close it.
+
+The gate must independently judge deterministic terminal values and the successful simulation without a terminal value, including its named refusal.
 
 ## Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe ✅
 
@@ -288,8 +437,9 @@ preceded it; later source changes still require compatibility or numerical repla
 
 ### Objective
 
-De-risk the native Pulsar client's fork and its codegen with compatible native tools before the Pulsar-client phase
-promises it, so a fork that will not compile is found here rather than mid-implementation.
+De-risk the native Pulsar client's immutable upstream identity and codegen with compatible native tools
+before the Pulsar-client phase promises runtime integration. Maintained-fork compilation remains owned by
+Phase 67; this sprint qualifies the retained runtime token, generated bindings and provenance boundary.
 
 ### Deliverables
 
@@ -302,9 +452,11 @@ Build and link; compare the token and the generated set with the oracle; refuse 
 
 ### Remaining Work
 
-None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
-The receipt above owns the integrated result. The component observations below describe the checks that
-preceded it; later source changes still require compatibility or numerical replay.
+Preserve the [current evidence boundary](#phase-status) and this sprint's independent expectations.
+The sprint closes only through this phase's complete current acceptance after its predecessor has been
+reproduced. Component diagnostics and historical receipts do not close it.
+
+The gate must join the actual offline executable install, runtime token, codegen child, schema and complete generated bytes to the absent-identity twins. Maintained-fork compilation remains Phase 67's claim.
 
 ## Sprint 1.5: Dynamic resolution and generated-output migration ✅
 
@@ -334,20 +486,11 @@ unchanged; refuse each tracked artefact by name.
 
 ### Remaining Work
 
-None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
-The receipt above owns the integrated result. The component observations below describe the checks that
-preceded it; later source changes still require compatibility or numerical replay.
+Preserve the [current evidence boundary](#phase-status) and this sprint's independent expectations.
+The sprint closes only through this phase's complete current acceptance after its predecessor has been
+reproduced. Component diagnostics and historical receipts do not close it.
 
-The probe-source component currently passes nine independent oracle rows over fifteen paired inputs:
-three script forms, six foreign fixture formats, and omission of each of the report's six typed cases.
-The oracle also checks missing source files, empty inventory, duplicate and unexpected cases, actual
-generated bytes, and removal of the copied source tree. Missing observations produce nine red rows.
-Its source-bound qualification and three changed-production-source builds now pass all thirty-two
-independent join checks. Removing foreign-input detection makes both foreign-input negative rows red;
-removing case-omission detection makes its canonical negative red; removing source-presence detection
-makes the inventory control red. Each changed executable is refused qualification, its source witness
-is checked independently, and each copied source tree is absent afterward. These component observations
-mint no phase evidence and do not retire `LTD-SRC-007`.
+The gate must retain both actual resolutions and independently decoded plans, physical-root controls, unchanged authored-source inventories, tracked package-pin/home-path negatives and the nine-row probe-source qualification.
 
 ## Sprint 1.6: Pure discovery/ensure planning over injected inputs ✅
 
@@ -377,9 +520,11 @@ Evaluate the plan; compare with the oracle; refuse each negative without selecti
 
 ### Remaining Work
 
-None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
-The receipt above owns the integrated result. The component observations below describe the checks that
-preceded it; later source changes still require compatibility or numerical replay.
+Preserve the [current evidence boundary](#phase-status) and this sprint's independent expectations.
+The sprint closes only through this phase's complete current acceptance after its predecessor has been
+reproduced. Component diagnostics and historical receipts do not close it.
+
+The gate must independently judge planning over supplied inventory/catalogue inputs and every named refusal with its actionable remedy. These supplied values require no host discovery.
 
 ## Sprint 1.7: Remove top-level vendor source and own the Haskell fork ✅
 
@@ -410,20 +555,11 @@ Build with compatible native tools; refuse each negative at its named locus.
 
 ### Remaining Work
 
-None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
-The receipt above owns the integrated result. The component observations below describe the checks that
-preceded it; later source changes still require compatibility or numerical replay.
+Preserve the [current evidence boundary](#phase-status) and this sprint's independent expectations.
+The sprint closes only through this phase's complete current acceptance after its predecessor has been
+reproduced. Component diagnostics and historical receipts do not close it.
 
-The vendor-source component passes thirteen independent oracle rows over ten paired reintroductions
-covering the five canonical groups, with actual generated-file discovery and independently restated
-bytes. Its fork inventory is checked against seventeen literal module names and each module's removal.
-Missing observations produce thirteen red rows. The source-bound qualification and all six
-changed-production-source builds now pass forty-seven independent join checks. Weakening each of the
-five refusal groups makes its canonical negative red; disabling fork-presence checks makes the fork
-control red. Each changed executable is refused qualification, its source witness and binary delta are
-checked independently, and each copied source tree is removed. These component observations record no
-phase result and do not retire `LTD-SRC-009`; upstream acquisition and fork compilation retain the scope
-stated in the gate contract.
+The gate must join cache-only extraction, both public renderers, source/archive/tree/action observations, the wrong-release unsafe-archive/no-output twin and the thirteen-row vendor-source qualification. Publisher identity remains an assumption; maintained-fork compilation remains Phase 67's claim.
 
 ## Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ✅
 
@@ -454,30 +590,11 @@ phase's patch.
 
 ### Remaining Work
 
-None within this sprint's bounded scope: the complete preview and subsequent acceptance passed.
-The receipt above owns the integrated result. The component observations below describe the checks that
-preceded it; later source changes still require compatibility or numerical replay.
+Preserve the [current evidence boundary](#phase-status) and this sprint's independent expectations.
+The sprint closes only through this phase's complete current acceptance after its predecessor has been
+reproduced. Component diagnostics and historical receipts do not close it.
 
-An earlier complete toolchain component run passed 112 independent oracle rows on fresh generated outputs.
-It covers native version admission and negatives, retained decoder/simulator/codegen/bridge probes,
-offline dependency elaboration, cached immutable upstream acquisition and digest mismatch, pure ensure
-planning, shipped-report CLI behavior and exact probe discovery, and both new source-boundary corpora.
-That run was a component diagnostic. The subsequent complete gate additionally judged the shipped-binary
-challenge, reproduced the predecessor and recorded acceptance with 116 clean oracle rows.
-
-The runner regression after integrating the source qualifiers and lifecycle handoff passes all 745
-independent rows. The validation kernel is 3,354 lines, below the 3,357-line cap used for these checks. Nine native API
-pairs admit legal use and reject construction or deserialization of opaque source, qualification, collection
-and predecessor handles. The missing-predecessor diagnostic refuses before gate execution. The documentation
-suite passes all 41 independent rows, including its nine named negatives.
-
-[DL-0035](../documents/decision_log.md#dl-0035--retired-legacy-checks-inherit-an-exact-source-predecessor-pass)
-records the eight Phase-0 retirements. The generic runner now issues an opaque handle only for a complete
-green gate. Custody reproduces the accepted predecessor at the current verifier, governance and closure;
-the next gate requires the immediate predecessor and exact captured source before inheriting its retained
-snapshot qualifications. Raw digests and component collections do not create that handle. Current Phase-0
-replay and the complete Phase-1 preview and acceptance subsequently passed; the component checks alone
-supplied no integrated phase authority.
+The gate must bind the shipped report challenge, both public plan observations, dropped compatibility allowance, complete discovery and the exact compiled specification. It requires the 135-row unmodified matrix control, forty sampled production loci and the separate 139-row clean candidate; component diagnostics do not supply that qualification.
 
 ## Documentation Requirements
 

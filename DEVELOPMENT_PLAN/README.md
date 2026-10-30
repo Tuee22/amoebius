@@ -121,15 +121,16 @@ This documentation change is not a qualified gate run. It closes no phase and re
 
 1. The agent runs one gate serially (`--jobs=1`) with `amoebius-validate preview phase NN`, which runs the
    complete gate, prints the would-be receipt, and mints nothing.
-2. The agent stops at the phase boundary and reports the preview.
+2. The agent reports the preview before the separate acceptance run.
 3. The agent runs `amoebius-validate accept --phase NN`, which runs the gate again, records the receipt, writes
    its reproducible digest beside the Done status, and applies exactly one phase's status patch; the agent
    reports the printed Claim, specification digest, kill table, spine outcome, and corpus delta.
-4. The human reads `git diff` (status lines and the receipt line only) and commits.
-5. The next gate's preflight compares HEAD's status surface with the receipt's postimage and requires every
-   predecessor receipt to reproduce; it refuses `StatusSurfaceDirty`, `PredecessorNotCommitted`, or
-   `PredecessorNotReproduced` on any difference. A wiped store is re-established by
-   `amoebius-validate replay`.
+4. The human reviews the status projection and accepted bundle in `git diff` and commits them for durability.
+5. The next numerical gate may run before that commit only when the verifier exact-reads the just-published
+   accepted bundle, binds its status postimage and accepted closure, and fully re-derives the predecessor gate
+   under the current verifier and governance digests. A closure-digest comparison alone is insufficient; an
+   incompatible status surface or unreproduced predecessor refuses. A wiped store is re-established by
+   `amoebius-validate replay` ([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 
 ## Generation-2 reset
 
@@ -141,9 +142,9 @@ reset started the frontier at Phase 0 with every other phase Blocked; the table 
 and supply no authority. The typed reset cause is
 `ResetCause { validatorGap = "gates measured the harness", productGap = LTD-DSL-001 }`.
 
-Until the reopened Phase 0 reconciles the checker, the existing documentation checker reports the reserved
-gap as missing phases, the tracker and identity table as the wrong cardinality, and Phase 50's predecessor
-edge as non-adjacent. Those findings are the reconciliation target of Phase 0's second sprint. The reasons
+At the reset checkpoint, the documentation checker reported the reserved gap as missing phases, the tracker
+and identity table as the wrong cardinality, and Phase 50's predecessor edge as non-adjacent. Phase 0's second
+sprint reconciled those findings before the accepted gate run. The reasons
 behind this reset are recorded in the decision log
 ([DL-0006](../documents/decision_log.md#dl-0006--the-honesty-backlog-is-struck-or-re-mooded)) and the active
 divergence in the [legacy register](legacy_tracking_for_deletion.md); this tracker carries no audit narrative.

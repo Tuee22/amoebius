@@ -5,15 +5,22 @@
 -- literals below; it exits non-zero when any row is red.
 module Main (main) where
 
-import Control.Monad (unless)
-import Control.Exception (IOException, try)
+import Control.Monad (unless, when)
+import Control.Exception (IOException, evaluate, throwIO, try)
+import Crypto.Hash.SHA256 qualified as SHA256
+import Data.ByteString qualified as ByteString
 import Data.List (isPrefixOf, sort)
 import Data.Text (Text)
 import Data.Text qualified as Text
+import Data.Text.Encoding qualified as Encoding
 import Data.Text.IO qualified as TextIO
 import System.Directory (createDirectoryIfMissing, doesDirectoryExist, findExecutable)
 import System.Environment (getArgs)
-import System.Exit (ExitCode (..), exitFailure)
+import System.Exit (ExitCode (..), exitFailure, exitWith)
+import System.IO (hFlush, hSetEncoding, hSetNewlineMode, noNewlineTranslation, stderr, stdout, utf8)
+import System.IO.Error (isDoesNotExistError)
+import Numeric (showHex)
+import Numeric.Natural (Natural)
 import System.FilePath (takeDirectory, (</>))
 import System.FilePath.Posix qualified as Logical
 import System.Process (readProcessWithExitCode)
@@ -21,14 +28,46 @@ import SolverDemotion (solverDemotionChecks, solverApiChecks, solverReintroducti
 import SourceCapture (sourceCaptureChecks, sourceApiChecks, predecessorApiChecks, sourceRewriteChecks, sourceTreeChecks, sourceTreeJudge)
 import LegacyAudit (legacyAuditChecks, kernelQualificationChecks, kernelJoinChecks, mutationQualificationChecks, mutationJoinChecks, mutationChecks, solverJoinChecks, bootstrapQualificationChecks, bootstrapJoinChecks, correspondenceJoinChecks, custodyJoinChecks, statusJoinChecks, authorityJoinChecks, freshJoinChecks, admissionJoinChecks, probeSourceJoinChecks, vendorSourceJoinChecks, testSourceJoinChecks, toolSourceJoinChecks, pulumiSourceJoinChecks, runtimeIdentityJoinChecks, ignoreContextJoinChecks, sourceGraphJoinChecks, bootstrapSourceJoinChecks)
 import Portability (portabilityChecks, observerChecks)
+import SeedImages (seedImageChecks,seedImageNames)
+import OracleTranscripts (oracleTranscriptChecks,oracleTranscriptNames)
 import NativeApi (writeAuthorityCheckers, seedAuthorityRows)
 
 main :: IO ()
 main = do
-  arguments <- getArgs
+  supplied <- getArgs
+  when (any (`elem` supplied) ["--oracle-invocation", "--oracle-inventory"]) $ do
+    hSetEncoding stderr utf8
+    hSetNewlineMode stderr noNewlineTranslation
+  (invocation, arguments) <- invocationArguments supplied
+  inventory <- inventoryRequest invocation arguments
+  case inventory of
+    Just challenge -> emitInventory challenge
+    Nothing -> case invocation of
+      Nothing -> legacyMain arguments
+      Just challenge -> runNormalInvocation challenge arguments
+
+-- Existing diagnostics retain their original dispatch, judgments and output.
+legacyMain :: [String] -> IO ()
+legacyMain arguments = do
   ledger <- case arguments of
+    ["--oracle-transcripts", directory] -> map (\(name,green,observed) -> LedgerRow name green observed) <$> oracleTranscriptChecks directory
+    ["--seed-image-completion", directory] -> map (\(name,green,observed) -> LedgerRow name green observed) <$> seedImageChecks directory
+    ["--seed-interruption", directory] -> do
+      rows <- map (Text.splitOn "\t") . Text.lines <$> TextIO.readFile (directory </> "seed-interruption.tsv")
+      let expected =
+            [ ("normal", ["clean,digest-equality-bypass,snapshot-freshness-bypass,bootstrap-path-bypass", "8", "0", "False,False,False,False", "True", "False", "True"])
+            , ("unavailable-build", ["clean", "1", "1", "True", "False", "True", "True"])
+            , ("known-127", ["clean,digest-equality-bypass,snapshot-freshness-bypass,bootstrap-path-bypass", "4", "0", "False,False,False,False", "False", "False", "True"])
+            , ("unavailable-run", ["clean,digest-equality-bypass", "4", "1", "False,True", "False", "True", "True"])
+            ]
+      pure (LedgerRow "seed-interruption.discovery" (sort (map (take 1) rows) == sort [[key] | (key, _) <- expected]) "complete four-case inventory"
+        : [LedgerRow ("seed-interruption." <> key) ([values | name : values <- rows, name == key] == [wanted]) (Text.pack (show [values | name : values <- rows, name == key])) | (key, wanted) <- expected])
     ["--write-authority-checkers", directory] -> writeAuthorityCheckers directory >> pure []
-    ["--runner-authority", directory] -> runnerAuthorityJudge . map (Text.splitOn "\t") . Text.lines <$> TextIO.readFile (directory </> "authority.tsv")
+    ["--runner-authority", directory] -> do
+      ordinary <- runnerAuthorityJudge . map (Text.splitOn "\t") . Text.lines <$> TextIO.readFile (directory </> "authority.tsv")
+      images <- seedImageChecks (directory </> "authority-seed-images")
+      transcripts <- oracleTranscriptChecks directory
+      pure (ordinary <> map (\(name,green,observed) -> LedgerRow ("authority."<>name) green observed) (images<>transcripts))
     ["--fresh-inputs", directory] -> freshInputJudge . map (Text.splitOn "\t") . Text.lines <$> TextIO.readFile (directory </> "fresh-inputs.tsv")
     ["--reproducible", directory] -> reproducibleJudge . map (Text.splitOn "\t") . Text.lines <$> TextIO.readFile (directory </> "reproducible.tsv")
     ["--oracle-build", directory] -> oracleBuildChecks directory
@@ -80,6 +119,901 @@ main = do
   mapM_ (TextIO.putStrLn . renderRow) ledger
   unless (all rowGreen ledger) exitFailure
 
+
+-- Inventory is a separately selected, no-input declaration, not a semantic pass.
+inventoryRequest :: Maybe Text -> [String] -> IO (Maybe Text)
+inventoryRequest invocation arguments
+  | "--oracle-inventory" `notElem` arguments = pure Nothing
+  | otherwise = case invocation of
+      Nothing -> invocationFailure "InvocationRequired"
+      Just challenge -> case arguments of
+        ["--oracle-inventory", profile]
+          | profile == "--oracle-inventory" -> invocationFailure "InventoryArguments"
+          | profile == "runner.full.v2" -> pure (Just challenge)
+          | otherwise -> invocationFailure "InventoryProfileUnknown"
+        _ -> invocationFailure "InventoryArguments"
+
+emitInventory :: Text -> IO ()
+emitInventory challenge = do
+  let prefix = Text.unlines [name <> "\tgreen\tdeclared" | name <- runnerInventoryNames]
+      count = foldr (const (+ 1)) 0 runnerInventoryNames :: Natural
+  emitCompletion challenge prefix count "all-green" "-"
+  exitWith ExitSuccess
+
+-- These oracle-local literals restate the separately authored full namespace.
+-- They are independent of judged inputs, product registries and current output.
+runnerInventoryNames :: [Text]
+runnerInventoryNames =
+  -- direct core requirements; independent Main.hs:314-490
+  [ "contract.extension-oracle"
+  , "refusal.legal-ordinary"
+  , "refusal.kernel-subject"
+  , "refusal.missing-binary-fact"
+  , "refusal.barrier-without-spine"
+  , "refusal.seed-with-binary-fact"
+  , "refusal.hardware-substrate-ordinary"
+  , "refusal.hardware-role-without-substrate"
+  , "refusal.stage-not-subject"
+  , "refusal.duplicate-case"
+  , "refusal.legal-seed"
+  , "refusal.ordinary-with-spine"
+  , "render.lines"
+  , "render.staged"
+  , "perturb.staged-direct"
+  , "verify.closure"
+  , "verify.legal"
+  , "verify.outside-closure"
+  , "verify.not-in-package"
+  , "verify.oracle-depends-on-product"
+  , "verify.oracle-cpp"
+  , "verify.oracle-missing"
+  , "oracle-syntax.discovery"
+  , "verify.suite-missing"
+  , "loci.constant-flip"
+  , "loci.boundary-shift"
+  , "loci.branch-swap"
+  , "loci.field-drop"
+  , "loci.list-truncation"
+  , "sample.deterministic"
+  , "sample.seed-sensitive"
+  , "sample.size"
+  , "sample.cap"
+  , "sample.fixed-a"
+  , "sample.fixed-b"
+  , "apply.witness"
+  , "apply.line-6"
+  , "apply.stale-locus"
+  , "string.plain"
+  , "string.empty"
+  , "string.escaped"
+  , "string.unicode"
+  , "string.character-before-string"
+  , "string.character-only"
+  , "string.comment"
+  , "string.inline-comment"
+  , "string.block-comment"
+  , "string.unterminated"
+  , "string.integer-priority"
+  , "string.boolean-priority"
+  , "string.import"
+  , "string.shipped-lanes-loci"
+  , "string.shipped-lanes-witness"
+  , "kill.killed"
+  , "kill.viable"
+  , "kill.stillborn"
+  , "kill.ratio"
+  , "kill.rows"
+  , "attribution.owned-red"
+  , "attribution.unowned-red"
+  , "attribution.no-policy"
+  , "attribution.empty-ledger"
+  , "hygiene.fixture.kernel-lines"
+  , "hygiene.fixture.cap"
+  , "hygiene.fixture.cpp"
+  , "hygiene.fixture.run-modules"
+  , "hygiene.fixture.phase-literals"
+  , "hygiene.fixture.phase-tables"
+  , "hygiene.fixture.duplicates"
+  , "hygiene.fixture.product-duplicates"
+  , "hygiene.fixture.problems"
+  , "hygiene.clean.green"
+  , "hygiene.clean.cap"
+  , "legacy.clean-hygiene"
+  , "legacy.required-evidence"
+  , "legacy.required-evidence.run-root"
+  , "legacy.preflight-disabled"
+  , "legacy.preflight-disabled.run-root"
+  , "legacy.unknown-phase"
+  , "legacy.unknown-phase.run-root"
+  , "fresh.directory-refusal"
+  , "fresh.directory-sentinel"
+  , "fresh.file-refusal"
+  , "fresh.file-bytes"
+  , "fresh.absent-refusal"
+  , "fresh.absent-created"
+  , "fresh.custody-refusal"
+  , "fresh.custody-sentinel"
+  , "fresh.custody-entries"
+  , "ratchet.empty"
+  , "ratchet.history"
+  , "ratchet.reset"
+  , "ratchet.void"
+  , "ratchet.missing"
+  , "ratchet.duplicate"
+  , "ratchet.malformed"
+  , "ratchet.oversized"
+  , "ratchet.overflow"
+  , "ratchet.noncanonical"
+  , "ratchet.command-guard"
+  , "hygiene.vocabulary"
+  , "capture.all-green"
+  , "capture.one-red"
+  , "capture.empty-observation"
+  , "capture.reordered"
+  , "capture.rows"
+  , "capture.categories"
+  , "preflight.clean"
+  , "preflight-status-surface-dirty"
+  , "preflight.predecessor-not-committed"
+  , "preflight.status-without-receipt"
+  , "preflight-predecessor-not-reproduced"
+  , "preflight.frozen-finding"
+  , "preflight.hardware-before-barrier"
+  , "preflight.hardware-after-barrier"
+  , "preflight.substrate-absent"
+  , "preflight.kernel-over-budget"
+  , "preflight.spec-weakened"
+  , "preflight.spec-unchanged"
+  , "preflight.first-run"
+  , "preflight.weakened-detail"
+  , "store.write-seed"
+  , "store.write-receipt"
+  , "store-seed-roundtrip"
+  , "store-receipt-roundtrip"
+  , "store.reset-receipt"
+  , "store.latest-generation"
+  , "store.other-generation"
+  , "store-tampered-receipt"
+  , "store.corrupted-record"
+  , "store.restored-receipt"
+  , "store.generation-directory"
+  , "archive.write"
+  , "archive.roundtrip"
+  , "archive.repeat"
+  , "archive.tampered-evidence"
+  , "archive.missing-file"
+  , "archive.symlink"
+  , "archive.symlink-root"
+  , "archive.symlink-bundle"
+  , "archive.symlink-queries"
+  , "archive.restored"
+  , "archive.distinct-run-bundle"
+  , "void.setup"
+  , "void.latest-before-red"
+  , "void.tied-publication"
+  , "void.backdated-publication"
+  , "void.wrong-target"
+  , "void.invalid-failure"
+  , "void.write"
+  , "void.repeat"
+  , "void.no-fallback"
+  , "void.history-retained"
+  , "void.tampered"
+  , "void.green-recovery"
+  , "crossvoid.targets"
+  , "crossvoid.unrecorded-green"
+  , "crossvoid.downstream"
+  , "crossvoid.unrelated"
+  , "crossvoid.history"
+  , "crossvoid.missing"
+  , "status.recorded-frontier"
+  , "status.surface-digest-stable"
+  , "status.patched-files"
+  , "status.bare-receipt-missing"
+  , "status.receipted-receipt-missing"
+  , "status.receipted-structural-findings"
+  , "status.after-active"
+  , "status.after-successor"
+  , "status.after-active-sprints"
+  , "status.receipt-recorded"
+  , "status.receipt-line"
+  , "package.product-closure-validator-free"
+  , "package.verifier-links-runner"
+  , "package.flags"
+  , "package.executables"
+  -- oracle source syntax; independent Main.hs:492,534-549
+  , "oracle-syntax.baseline"
+  , "oracle-syntax.comment"
+  , "oracle-syntax.quoted-language"
+  , "oracle-syntax.quoted-foreign"
+  , "oracle-syntax.operator"
+  , "oracle-syntax.cpp-pragma"
+  , "oracle-syntax.compact-cpp"
+  , "oracle-syntax.cpp-directive"
+  , "oracle-syntax.tab-cpp"
+  , "oracle-syntax.th-pragma"
+  , "oracle-syntax.th-quotes"
+  , "oracle-syntax.splice"
+  , "oracle-syntax.typed-splice"
+  , "oracle-syntax.quote"
+  , "oracle-syntax.name-quote"
+  , "oracle-syntax.constructor-quote"
+  , "oracle-syntax.operator-quote"
+  , "oracle-syntax.type-name-quote"
+  , "oracle-syntax.promoted-type"
+  , "oracle-syntax.promoted-list"
+  , "oracle-syntax.typed-quote"
+  , "oracle-syntax.pattern-quote"
+  , "oracle-syntax.declaration-quote"
+  , "oracle-syntax.type-quote"
+  , "oracle-syntax.quasiquote"
+  , "oracle-syntax.foreign-comment"
+  , "oracle-syntax.foreign-export"
+  , "oracle-syntax.options"
+  , "oracle-syntax.malformed"
+  , "oracle-syntax.multiline-data"
+  -- oracle Cabal build policy; independent Main.hs:100-123
+  , "oracle-build.discovery"
+  , "oracle-build.baseline"
+  , "oracle-build.legacy-clean"
+  , "oracle-build.warnings"
+  , "oracle-build.optimization"
+  , "oracle-build.ordinary-extension"
+  , "oracle-build.disabled-th"
+  , "oracle-build.default-th"
+  , "oracle-build.other-quotes"
+  , "oracle-build.old-quasiquotes"
+  , "oracle-build.default-cpp"
+  , "oracle-build.option-extension"
+  , "oracle-build.plugin"
+  , "oracle-build.profiling-plugin"
+  , "oracle-build.shared-plugin"
+  , "oracle-build.profiling-shared-plugin"
+  , "oracle-build.ghcjs-profiling-shared-plugin"
+  , "oracle-build.ghcjs-plugin"
+  , "oracle-build.preprocessor"
+  , "oracle-build.package-option"
+  , "oracle-build.cpp-options"
+  , "oracle-build.c-source"
+  , "oracle-build.cxx-source"
+  , "oracle-build.javascript-source"
+  , "oracle-build.assembly-source"
+  , "oracle-build.cmm-source"
+  , "oracle-build.linker-options"
+  , "oracle-build.extra-library"
+  , "oracle-build.build-tool"
+  , "oracle-build.legacy-build-tool"
+  , "oracle-build.pkg-config"
+  , "oracle-build.conditional-th"
+  , "oracle-build.conditional-else"
+  , "oracle-build.conditional-clean"
+  , "oracle-build.common-clean"
+  , "oracle-build.common-plugin"
+  -- oracle entry and source admission; independent Main.hs:125-161
+  , "oracle-input.discovery"
+  , "oracle-input.main"
+  , "oracle-input.alternate"
+  , "oracle-input.missing-entry"
+  , "oracle-input.preprocessed-entry"
+  , "oracle-input.module"
+  , "oracle-input.missing-module"
+  , "oracle-input.preprocessed-module"
+  , "oracle-input.shadow-preprocessor"
+  , "oracle-input.split-directories"
+  , "oracle-input.parent-directory"
+  , "oracle-input.custom-build"
+  , "oracle-input.configure-build"
+  , "oracle-input.hooks-build"
+  , "oracle-input.custom-setup"
+  , "oracle-input.implicit-custom-setup"
+  , "oracle-input.library-interface"
+  , "oracle-input.external-import"
+  , "oracle-input.comment-import"
+  , "oracle-input.literal-import"
+  , "oracle-input.import-product"
+  , "oracle-input.import-qualified"
+  , "oracle-input.import-postqualified"
+  , "oracle-input.import-package"
+  , "oracle-input.import-source"
+  , "oracle-input.import-alias"
+  , "oracle-input.helper-product"
+  , "oracle-input.shadow-product"
+  , "oracle-input.malformed-module"
+  , "oracle-input.implicit-main"
+  , "oracle-input.wrong-entry-name"
+  , "oracle-input.wrong-helper-name"
+  , "oracle-input.unlisted-helper"
+  , "oracle-input.duplicate-helper"
+  , "oracle-input.duplicate-entry"
+  , "oracle-input.module-path-spoof"
+  , "oracle-input.helper-external"
+  -- oracle source area isolation; independent Main.hs:163-173
+  , "oracle-isolation.discovery"
+  , "oracle-isolation.alone"
+  , "oracle-isolation.sibling"
+  , "oracle-isolation.area-entry"
+  , "oracle-isolation.area-helper"
+  , "oracle-isolation.repository.oracle-doc"
+  , "oracle-isolation.repository.oracle-runner"
+  , "oracle-isolation.repository.oracle-dsl"
+  , "oracle-isolation.repository.oracle-extensions"
+  , "oracle-isolation.repository.oracle-layout"
+  , "oracle-isolation.repository.oracle-toolchain"
+  , "oracle-isolation.library-shared"
+  , "oracle-isolation.library-parent"
+  , "oracle-isolation.library-child"
+  , "oracle-isolation.library-normalized"
+  , "oracle-isolation.library-case"
+  , "oracle-isolation.library-default"
+  , "oracle-isolation.conditional"
+  , "oracle-isolation.common"
+  , "oracle-isolation.executable-shared"
+  , "oracle-isolation.executable-default"
+  , "oracle-isolation.test-product"
+  , "oracle-isolation.test-child"
+  , "oracle-isolation.test-default"
+  , "oracle-isolation.area-unsafe-peer"
+  , "oracle-isolation.area-partial"
+  -- bounded source read policy; independent Main.hs:281-295
+  , "source-read.discovery"
+  , "source-read.package-clean"
+  , "source-read.package-limit"
+  , "source-read.package-over"
+  , "source-read.package-missing"
+  , "source-read.source-not-regular"
+  , "source-read.oracle-clean"
+  , "source-read.oracle-over"
+  , "source-read.oracle-utf8"
+  , "source-read.hygiene-over"
+  , "source-read.capture-limit"
+  , "source-read.gate-hygiene-over"
+  , "source-read.fresh-hygiene-over"
+  , "source-read.status-over"
+  , "source-read.capture-over"
+  -- contract structure and current source correspondence; independent Main.hs:253-279
+  , "contracts.discovery"
+  , "contracts.registered"
+  , "contracts.empty"
+  , "contracts.duplicate"
+  , "contracts.duplicate-resolve"
+  , "contracts.unknown"
+  , "contracts.capability-mismatch"
+  , "contracts.missing-binary"
+  , "contracts.missing-seed"
+  , "contracts.unregistered"
+  , "contracts.out-of-domain"
+  , "contracts.reserved-gap"
+  , "contracts.document-unregistered"
+  , "contracts.document-duplicate-fence"
+  , "contracts.document-mismatch"
+  , "contracts.document-matched"
+  , "contracts.native"
+  , "contracts.children-subjects"
+  , "contracts.ui-subjects"
+  , "contracts.children-negatives"
+  , "contracts.ui-negatives"
+  , "contracts.barrier-negatives"
+  , "contracts.barrier-inherits-subjects"
+  , "contracts.barrier-spine"
+  , "contracts.slice-substrates"
+  , "contracts.slice-oracles"
+  , "contracts.barrier-inherits-cases"
+  , "contracts.role-root"
+  , "contracts.role-upper"
+  , "contracts.role-barrier"
+  , "contracts.role-bootstrap"
+  , "contracts.role-ensure"
+  , "contracts.role-hardware"
+  -- contract correspondence pairs and controls; independent Main.hs:235-251
+  , "correspondence.discovery"
+  , "correspondence.gate-spec-mismatch.positive"
+  , "correspondence.gate-spec-mismatch.negative"
+  , "correspondence.phase-role-swap.positive"
+  , "correspondence.phase-role-swap.negative"
+  , "correspondence.byte-copy-equivalence.positive"
+  , "correspondence.byte-copy-equivalence.negative"
+  , "correspondence.subject-not-shipped.positive"
+  , "correspondence.subject-not-shipped.negative"
+  , "correspondence.retired-domain-literal.positive"
+  , "correspondence.retired-domain-literal.negative"
+  , "correspondence.control.render-collision"
+  , "correspondence.entry.phase-role-swap"
+  , "correspondence.entry.byte-copy-equivalence"
+  , "correspondence.entry-root.phase-role-swap"
+  , "correspondence.entry-root.byte-copy-equivalence"
+  , "correspondence.snapshot.contracts"
+  , "correspondence.snapshot.selected"
+  -- receipt custody current prefix rules; independent Main.hs:212-233
+  , "custody.discovery"
+  , "custody.generation-one-receipt.positive"
+  , "custody.generation-one-receipt.negative"
+  , "custody.verifier-diverged.positive"
+  , "custody.verifier-diverged.negative"
+  , "custody.predecessor-closure-edited.positive"
+  , "custody.predecessor-closure-edited.negative"
+  , "custody.binding.verifier-positive"
+  , "custody.binding.verifier-negative"
+  , "custody.control.closure-source"
+  , "custody.control.closure-restored"
+  , "custody.control.outside-closure"
+  , "custody.control.unknown-closure"
+  , "custody.control.closure-sentinel"
+  , "custody.control.capability-binding"
+  , "custody.control.governance-binding"
+  , "custody.control.specification-binding"
+  , "custody.control.phase-binding"
+  , "custody.dependency.suite"
+  , "custody.dependency.oracle"
+  , "custody.dependency.custody-suite"
+  , "custody.dependency.entry"
+  , "custody.dependency.build-tool"
+  , "custody.dependency.seed-driver"
+  , "custody.dependency.metadata"
+  , "custody.dependency.bootstrap"
+  , "custody.dependency.documentation"
+  , "custody.dependency.status-projection"
+  , "custody.dependency.cleanup"
+  , "custody.uncommitted-prefix-series.positive"
+  , "custody.uncommitted-prefix-series.negative"
+  , "custody.prefix.publication-prefixes"
+  , "custody.prefix.earlier-whole-changed"
+  , "custody.prefix.latest-whole"
+  , "custody.prefix.uncommitted-observed"
+  , "custody.prefix.metadata-red"
+  , "custody.prefix.legacy-bytes"
+  , "custody.prefix.legacy-whole"
+  , "custody.prefix.legacy-durable"
+  , "custody.prefix.public-evidence-refusal"
+  , "custody.prefix.prefix-heading"
+  , "custody.prefix.prefix-receipt"
+  , "custody.prefix.prefix-tracker"
+  , "custody.prefix.prefix-phase"
+  , "custody.prefix.prefix-sprint"
+  , "custody.prefix.malformed-target"
+  , "custody.prefix.ambiguous-bound"
+  , "custody.prefix.latest-anchor"
+  , "custody.prefix.current-selection"
+  , "custody.prefix.missing-target"
+  , "custody.prefix.stale-identity"
+  , "custody.prefix.verifier"
+  , "custody.prefix.governance"
+  , "custody.prefix.reset-target"
+  , "custody.prefix.legacy-none"
+  , "custody.prefix.duplicate-reader"
+  , "custody.prefix.corrupt-reader"
+  , "custody.prefix.missing-reader"
+  , "custody.prefix.unknown-phase"
+  , "custody.prefix.inconsistent-surface"
+  , "custody.prefix.replay-stale-prefix"
+  , "custody.prefix.superseded"
+  , "custody.prefix.voided"
+  , "custody.prefix.malformed"
+  , "custody.prefix.repeated"
+  , "custody.prefix.ambiguous-latest"
+  , "custody.prefix.public-evidence-reason"
+  -- status authority pairs and controls; independent Main.hs:203-210
+  , "status.discovery"
+  , "status.status-surface-dirty.positive"
+  , "status.status-without-receipt.positive"
+  , "status.predecessor-not-reproduced.positive"
+  , "status.status-edit-without-receipt.positive"
+  , "status.status-surface-dirty.negative"
+  , "status.status-without-receipt.negative"
+  , "status.predecessor-not-reproduced.negative"
+  , "status.status-edit-without-receipt.negative"
+  , "status.accept.status-surface-dirty"
+  , "status.accept.status-without-receipt"
+  , "status.accept.predecessor-not-reproduced"
+  , "status.accept.status-edit-without-receipt"
+  , "status.preview.status-surface-dirty"
+  , "status.preview.status-without-receipt"
+  , "status.preview.predecessor-not-reproduced"
+  , "status.preview.status-edit-without-receipt"
+  , "status.unchanged.status-surface-dirty"
+  , "status.unchanged.status-without-receipt"
+  , "status.unchanged.predecessor-not-reproduced"
+  , "status.unchanged.status-edit-without-receipt"
+  , "status.control.cleanup"
+  -- actual runner authority privacy and discovery; independent Main.hs:191-201; NativeApi.hs:35-46
+  , "authority.discovery"
+  , "authority.noop-subject.positive"
+  , "authority.noop-subject.negative"
+  , "authority.constant-success-checker.positive"
+  , "authority.constant-success-checker.negative"
+  , "authority.forged-exit.positive"
+  , "authority.forged-exit.negative"
+  , "authority.omitted-discovery.positive"
+  , "authority.omitted-discovery.negative"
+  , "authority.unavailable-boundary.positive"
+  , "authority.unavailable-boundary.negative"
+  , "authority.control.subject-exit"
+  , "authority.control.subject-token"
+  , "authority.control.constant-probe"
+  , "authority.control.missing-probe"
+  , "authority.control.cleanup"
+  , "authority.manifest.seed-names"
+  , "authority.manifest.seed-positive"
+  , "authority.manifest.omitted.phase.cardinality"
+  , "authority.manifest.omitted.phase.table"
+  , "authority.manifest.omitted.phase.resource-required"
+  , "authority.manifest.omitted.phase.paths"
+  , "authority.manifest.omitted.predecessor.50"
+  , "authority.manifest.omitted.predecessor.0"
+  , "authority.manifest.omitted.predecessor.1"
+  , "authority.manifest.omitted.successor.9"
+  , "authority.manifest.omitted.successor.95"
+  , "authority.manifest.omitted.role.DSL_BARRIER"
+  , "authority.manifest.omitted.role.BOOTSTRAP_HANDOFF"
+  , "authority.manifest.omitted.role.HOST_ENSURE"
+  , "authority.manifest.omitted.role.FIRST_HARDWARE"
+  , "authority.manifest.omitted.role.REGISTRY_BOUNDARY"
+  , "authority.manifest.omitted.gap"
+  , "authority.manifest.omitted.integrity.problems"
+  , "authority.manifest.omitted.legacy.cardinality"
+  , "authority.manifest.omitted.legacy.owners"
+  , "authority.manifest.omitted.decision.ids"
+  , "authority.manifest.omitted.frozen.paths"
+  , "authority.manifest.omitted.frozen.digests"
+  , "authority.manifest.omitted.frozen.decisions"
+  , "authority.manifest.omitted.frozen.amendments"
+  , "authority.manifest.omitted.frozen.amendment-digests"
+  , "authority.manifest.omitted.evidence-path.cardinality"
+  , "authority.manifest.omitted.evidence-path.results"
+  , "authority.manifest.omitted.evidence-parser.bundle-only"
+  , "authority.manifest.omitted.evidence-parser.void-only"
+  , "authority.manifest.omitted.evidence-parser.void-fields"
+  , "authority.manifest.omitted.doc.findings"
+  , "authority.manifest.omitted.doc.governed-count-observed"
+  , "authority.manifest.omitted.negative.discovery"
+  , "authority.manifest.omitted.negative.broken-link"
+  , "authority.manifest.omitted.negative.stale-backlink"
+  , "authority.manifest.omitted.negative.missing-status-line"
+  , "authority.manifest.omitted.negative.non-frontier-status-vector"
+  , "authority.manifest.omitted.negative.unauthorised-frozen-edit"
+  , "authority.manifest.omitted.negative.uncited-module-claim"
+  , "authority.manifest.omitted.negative.gate-spec-block-mismatch"
+  , "authority.manifest.omitted.negative.decision-log-out-of-order"
+  , "authority.manifest.omitted.negative.receipt-line-unexpected"
+  -- fresh acquired inputs and ownership; independent Main.hs:175-189
+  , "fresh.discovery"
+  , "fresh.stale-run.positive"
+  , "fresh.stale-run.negative"
+  , "fresh.ignored-input.positive"
+  , "fresh.ignored-input.negative"
+  , "fresh.authored-output.positive"
+  , "fresh.authored-output.negative"
+  , "fresh.ambient-temp.positive"
+  , "fresh.ambient-temp.negative"
+  , "fresh.replayed-input.positive"
+  , "fresh.replayed-input.negative"
+  , "fresh.empty-discovery.positive"
+  , "fresh.empty-discovery.negative"
+  , "fresh.control.stale-sentinel"
+  , "fresh.control.ignored-captured"
+  , "fresh.control.source-changed"
+  , "fresh.control.replayed-copy"
+  , "fresh.control.authored-restored"
+  , "fresh.control.ambient-entry"
+  , "fresh.control.ambient-created"
+  , "fresh.control.cleanup"
+  , "fresh.control.collection-unknown"
+  , "fresh.control.collection-phase"
+  , "fresh.control.collection-source"
+  -- Cabal parser native and admission agreement; independent Main.hs:297-309
+  , "package-syntax.discovery"
+  , "package-syntax.clean.native"
+  , "package-syntax.clean.admission"
+  , "package-syntax.custom-field.native"
+  , "package-syntax.custom-field.admission"
+  , "package-syntax.deprecated.native"
+  , "package-syntax.deprecated.admission"
+  , "package-syntax.unknown-root.native"
+  , "package-syntax.unknown-root.admission"
+  , "package-syntax.unknown-target.native"
+  , "package-syntax.unknown-target.admission"
+  , "package-syntax.unknown-section.native"
+  , "package-syntax.unknown-section.admission"
+  , "package-syntax.too-new-field.native"
+  , "package-syntax.too-new-field.admission"
+  , "package-syntax.conditional-unknown.native"
+  , "package-syntax.conditional-unknown.admission"
+  , "package-syntax.common-unknown.native"
+  , "package-syntax.common-unknown.admission"
+  , "package-syntax.repository.native"
+  , "package-syntax.repository.admission"
+  -- physical source tree boundaries; independent SourceCapture.hs:18-60
+  , "source-tree.discovery"
+  , "source-tree.normal"
+  , "source-tree.reverse"
+  , "source-tree.empty"
+  , "source-tree.missing-scan"
+  , "source-tree.missing-copy"
+  , "source-tree.missing-archive"
+  , "source-tree.root-file"
+  , "source-tree.unsafe-root"
+  , "source-tree.unsafe-file"
+  , "source-tree.unsafe-directory"
+  , "source-tree.missing-child"
+  , "source-tree.unsafe-ancestor"
+  , "source-tree.parent-root"
+  , "source-tree.absolute-root"
+  , "source-tree.windows-root"
+  , "source-tree.parent-entry"
+  , "source-tree.nested-entry"
+  , "source-tree.absolute-entry"
+  , "source-tree.windows-entry"
+  , "source-tree.duplicate-entry"
+  , "source-tree.copy-generated"
+  , "source-tree.copy-generated-unsafe"
+  , "source-tree.copy-generated-file"
+  , "source-tree.copy-nested-generated"
+  , "source-tree.archive-empty-root"
+  , "source-tree.archive-empty-child"
+  , "source-tree.inspect-failure"
+  , "source-tree.open-failure"
+  , "source-tree.read-failure"
+  , "source-tree.nested-open-failure"
+  , "source-tree.nested-read-failure"
+  , "source-tree.entries-at-limit"
+  , "source-tree.entries-over-limit"
+  , "source-tree.global-entry-limit"
+  , "source-tree.depth-at-limit"
+  , "source-tree.depth-over-limit"
+  , "source-tree.initial-depth-limit"
+  , "source-tree.native"
+  , "source-tree.classify.file"
+  , "source-tree.classify.directory"
+  , "source-tree.classify.linked-file"
+  , "source-tree.classify.linked-directory"
+  , "source-tree.classify.file-symlink-type"
+  , "source-tree.classify.directory-symlink-type"
+  , "source-tree.classify.outside-file"
+  , "source-tree.classify.outside-directory"
+  , "source-tree.classify.other"
+  , "source-tree.classify.linked-other"
+  -- reproducible semantic ledger and diagnostic independence; independent Main.hs:515-532
+  , "reproducible.discovery"
+  , "receipt-reproducible-digest-stable"
+  , "reproducible.diagnostic-path-independent"
+  , "reproducible.diagnostic-nonce-independent"
+  , "reproducible.diagnostic-fields-independent"
+  , "reproducible.row-order-independent"
+  , "reproducible.verdict-sensitive"
+  , "reproducible.ledger-sensitive"
+  , "reproducible.spec-sensitive"
+  , "reproducible.ledger-verdict-sensitive"
+  , "reproducible.ledger-row-omitted"
+  , "reproducible.ledger-row-added"
+  , "reproducible.ledger-exit-sensitive"
+  , "reproducible.ledger-missing-exit-sensitive"
+  , "reproducible.mutant-outcome-sensitive"
+  , "reproducible.mutant-stage-sensitive"
+  , "reproducible.mutant-location-sensitive"
+  , "reproducible.mutant-operator-sensitive"
+  , "reproducible.raw-transcript-retained"
+  , "reproducible.valid-ledger"
+  , "reproducible.valid-observation-tabs"
+  , "reproducible.red-ledger"
+  , "reproducible.failed-exit"
+  , "reproducible.missing-exit"
+  , "reproducible.empty-ledger"
+  , "reproducible.blank-line"
+  , "reproducible.garbage-line"
+  , "reproducible.duplicate-row"
+  , "reproducible.empty-name"
+  , "reproducible.unknown-verdict"
+  , "reproducible.truncated-row"
+  -- independent closed legacy declaration inventory; independent Main.hs:656-727
+  , "legacy.inventory.LTD-SRC-000"
+  , "legacy.inventory.LTD-SRC-001"
+  , "legacy.inventory.LTD-SRC-002"
+  , "legacy.inventory.LTD-SRC-003"
+  , "legacy.inventory.LTD-SRC-004"
+  , "legacy.inventory.LTD-SRC-005"
+  , "legacy.inventory.LTD-SRC-006"
+  , "legacy.inventory.LTD-SRC-007"
+  , "legacy.inventory.LTD-SRC-008"
+  , "legacy.inventory.LTD-SRC-009"
+  , "legacy.inventory.LTD-META-001"
+  , "legacy.inventory.LTD-VAL-001"
+  , "legacy.inventory.LTD-VAL-002"
+  , "legacy.inventory.LTD-VAL-003"
+  , "legacy.inventory.LTD-VAL-004"
+  , "legacy.inventory.LTD-VAL-005"
+  , "legacy.inventory.LTD-VAL-006"
+  , "legacy.inventory.LTD-VAL-007"
+  , "legacy.inventory.LTD-VAL-008"
+  , "legacy.inventory.LTD-DOC-001"
+  , "legacy.inventory.LTD-NAME-001"
+  , "legacy.inventory.LTD-HOST-001"
+  , "legacy.inventory.LTD-HOST-002"
+  , "legacy.inventory.LTD-IMG-001"
+  , "legacy.inventory.LTD-RUN-001"
+  , "legacy.inventory.LTD-SEED-001"
+  , "legacy.inventory.LTD-SEED-002"
+  , "legacy.inventory.LTD-BOOT-001"
+  , "legacy.inventory.LTD-KRN-001"
+  , "legacy.inventory.LTD-KRN-002"
+  , "legacy.inventory.LTD-KRN-003"
+  , "legacy.inventory.LTD-DSL-001"
+  , "legacy.inventory.LTD-DSL-002"
+  , "legacy.inventory.LTD-DSL-003"
+  , "legacy.inventory.LTD-DSL-004"
+  , "legacy.inventory.LTD-DSL-005"
+  , "legacy.inventory.LTD-DSL-006"
+  , "legacy.inventory.LTD-DSL-007"
+  , "legacy.inventory.LTD-DSL-008"
+  , "legacy.inventory.LTD-DSL-009"
+  , "legacy.inventory.LTD-LIB-001"
+  , "legacy.inventory.LTD-LIB-002"
+  , "legacy.inventory.LTD-UI-001"
+  , "legacy.inventory.LTD-HELPER-001"
+  , "legacy.inventory.complete"
+  , "legacy.inventory.bootstrap-scope"
+  , "legacy.inventory.supported"
+  -- receipt-bearing reset status projection; independent Main.hs:617-654
+  , "reset.exit"
+  , "reset.tracker-changed"
+  , "reset.archive-count"
+  , "reset.cause"
+  , "reset.postimage"
+  , "reset.receipts-remaining"
+  , "reset.no-gate-pass"
+  , "reset.blocked-archive.exit"
+  , "reset.blocked-archive.unchanged"
+  , "reset.blocked-archive.reason"
+  , "reset.missing-document.exit"
+  , "reset.missing-document.unchanged"
+  , "reset.missing-document.reason"
+  , "reset.future-owner.exit"
+  , "reset.future-owner.unchanged"
+  , "reset.empty-gap.exit"
+  , "reset.empty-gap.unchanged"
+  , "reset.empty-gap.reason"
+  , "reset.unknown-decision.exit"
+  , "reset.unknown-decision.unchanged"
+  , "reset.unknown-decision.reason"
+  , "reset.unknown-product.exit"
+  , "reset.unknown-product.unchanged"
+  , "reset.unknown-product.reason"
+  , "reset.unowned-product.exit"
+  , "reset.unowned-product.unchanged"
+  , "reset.unowned-product.reason"
+  , "reset.projection.0"
+  , "reset.projection.1"
+  , "reset.projection.2"
+  , "reset.projection.3"
+  , "reset.projection.4"
+  , "reset.projection.5"
+  , "reset.projection.6"
+  , "reset.projection.7"
+  , "reset.projection.8"
+  , "reset.projection.9"
+  , "reset.projection.50"
+  , "reset.projection.51"
+  , "reset.projection.52"
+  , "reset.projection.53"
+  , "reset.projection.54"
+  , "reset.projection.55"
+  , "reset.projection.56"
+  , "reset.projection.57"
+  , "reset.projection.58"
+  , "reset.projection.59"
+  , "reset.projection.60"
+  , "reset.projection.61"
+  , "reset.projection.62"
+  , "reset.projection.63"
+  , "reset.projection.64"
+  , "reset.projection.65"
+  , "reset.projection.66"
+  , "reset.projection.67"
+  , "reset.projection.68"
+  , "reset.projection.69"
+  , "reset.projection.70"
+  , "reset.projection.71"
+  , "reset.projection.72"
+  , "reset.projection.73"
+  , "reset.projection.74"
+  , "reset.projection.75"
+  , "reset.projection.76"
+  , "reset.projection.77"
+  , "reset.projection.78"
+  , "reset.projection.79"
+  , "reset.projection.80"
+  , "reset.projection.81"
+  , "reset.projection.82"
+  , "reset.projection.83"
+  , "reset.projection.84"
+  , "reset.projection.85"
+  , "reset.projection.86"
+  , "reset.projection.87"
+  , "reset.projection.88"
+  , "reset.projection.89"
+  , "reset.projection.90"
+  , "reset.projection.91"
+  , "reset.projection.92"
+  , "reset.projection.93"
+  , "reset.projection.94"
+  , "reset.projection.95"
+  , "reset.tracker-projection"
+  , "reset.complete-document-discovery"
+  -- actual native constructor/privacy pairs; independent Main.hs:563-614
+  , "legacy.native.requirement-constructor"
+  , "legacy.native.analyzer-key-constructor"
+  , "legacy.native.case-key-constructor"
+  , "legacy.native.scope-constructor"
+  , "legacy.native.lifecycle-constructor"
+  , "legacy.native.case-record-update"
+  , "legacy.native.requirement-read"
+  ] <> map ("authority."<>) (seedImageNames<>oracleTranscriptNames)
+
+
+-- Gated completion is available only for the existing full directory mode.
+runNormalInvocation :: Text -> [String] -> IO ()
+runNormalInvocation challenge arguments = do
+  input <- case arguments of
+    [directory] -> do
+      present <- doesDirectoryExist directory
+      if present then pure (directory </> "runner.tsv") else invocationFailure "InvocationDirectoryRequired"
+    _ -> invocationFailure "InvocationArguments"
+  contents <- requiredRead challenge input
+  native <- inventoryNativeChecksWith True (takeDirectory input </> "legacy-native")
+  images <- seedImageChecks (takeDirectory input </> "authority-seed-images")
+  transcripts <- oracleTranscriptChecks (takeDirectory input)
+  let rows = map (Text.splitOn "\t") (filter (not . Text.null) (Text.lines contents))
+      ledger = judge rows <> native <> map (\(name,green,observed) -> LedgerRow ("authority."<>name) green observed) (images<>transcripts)
+      prefix = Text.unlines (map renderRow ledger)
+      count = foldr (const (+ 1)) 0 ledger :: Natural
+      green = all rowGreen ledger
+  emitCompletion challenge prefix count (if green then "all-green" else "some-red") "-"
+  exitWith (if green then ExitSuccess else ExitFailure 1)
+
+-- A leading challenge opts into bookkeeping, never a caller-issued gate proof.
+invocationArguments :: [String] -> IO (Maybe Text, [String])
+invocationArguments arguments = case arguments of
+  "--oracle-invocation" : challenge : rest
+    | "--oracle-invocation" `elem` rest -> invocationFailure "InvocationRepeated"
+    | length challenge /= 64 || not (all lowerHex challenge) -> invocationFailure "InvocationMalformed"
+    | otherwise -> pure (Just (Text.pack challenge), rest)
+  ["--oracle-invocation"] -> invocationFailure "InvocationValueMissing"
+  _ | "--oracle-invocation" `elem` arguments -> invocationFailure "InvocationPosition"
+    | otherwise -> pure (Nothing, arguments)
+ where lowerHex char = ('0' <= char && char <= '9') || ('a' <= char && char <= 'f')
+
+invocationFailure :: String -> IO a
+invocationFailure reason = do
+  TextIO.hPutStrLn stderr ("oracle-runner: " <> Text.pack reason)
+  exitWith (ExitFailure 2)
+
+-- Only the actual required primary read's missing IOException earns this marker.
+requiredRead :: Text -> FilePath -> IO Text
+requiredRead challenge path = do
+  attempted <- try (TextIO.readFile path >>= \body -> evaluate (Text.length body) >> pure body)
+  case attempted of
+    Right body -> pure body
+    Left problem | isDoesNotExistError problem -> do
+      TextIO.hPutStrLn stderr (Text.pack (show (problem :: IOException)))
+      hFlush stderr
+      emitCompletion challenge "" 0 "required-input-missing" (Text.pack (show (Text.pack path)))
+      exitWith (ExitFailure 1)
+    Left problem -> throwIO (problem :: IOException)
+
+emitCompletion :: Text -> Text -> Natural -> Text -> Text -> IO ()
+emitCompletion challenge prefix count purpose locus = do
+  let digest = Text.pack (concatMap hexByte (ByteString.unpack (SHA256.hash (Encoding.encodeUtf8 prefix))))
+      footer = Text.intercalate "\t"
+        ["oracle.protocol.complete.v1", "green", "retained-text-utf8.v1", challenge,
+         Text.pack (show count), digest, purpose, locus] <> "\n"
+  _ <- evaluate (Text.length prefix)
+  _ <- evaluate (Text.length footer)
+  hSetEncoding stdout utf8
+  hSetNewlineMode stdout noNewlineTranslation
+  TextIO.hPutStr stdout prefix
+  hFlush stdout
+  TextIO.hPutStr stdout footer
+  hFlush stdout
+ where hexByte byte = let digits = showHex byte "" in if length digits == 1 then '0' : digits else digits
+
 runnerChecks :: [String] -> IO [LedgerRow]
 runnerChecks arguments = do
   input <- case arguments of
@@ -89,8 +1023,10 @@ runnerChecks arguments = do
     _ -> pure ".build/runs/phase-00/runner/runner.tsv"
   contents <- TextIO.readFile input
   native <- inventoryNativeChecks (takeDirectory input </> "legacy-native")
+  images <- seedImageChecks (takeDirectory input </> "authority-seed-images")
+  transcripts <- oracleTranscriptChecks (takeDirectory input)
   let rows = map (Text.splitOn "\t") (filter (not . Text.null) (Text.lines contents))
-  pure (judge rows <> native)
+  pure (judge rows <> native <> map (\(name,green,observed) -> LedgerRow ("authority."<>name) green observed) (images<>transcripts))
 
 data LedgerRow = LedgerRow {rowName :: Text, rowGreen :: Bool, rowObserved :: Text}
 
@@ -224,6 +1160,10 @@ receiptCustodyJudge rows =
         ,("control","capability-binding","ReceiptIdentityMismatch"),("control","governance-binding","ReceiptGovernanceMismatch")
         ,("control","specification-binding","ReceiptSpecificationMismatch"),("control","phase-binding","ReceiptIdentityMismatch")]
         <> [("dependency",key,"True") | key <- ["suite","oracle","custody-suite","entry","build-tool","seed-driver","metadata","bootstrap","documentation","status-projection","cleanup"]]
+        <> [("uncommitted-prefix-series","positive","True"),("uncommitted-prefix-series","negative","False")]
+        <> [("prefix",key,"True") | key <- ["publication-prefixes","earlier-whole-changed","latest-whole","uncommitted-observed","metadata-red","legacy-bytes","legacy-whole","legacy-durable","public-evidence-refusal"]]
+        <> [("prefix",key,"False") | key <- ["prefix-heading","prefix-receipt","prefix-tracker","prefix-phase","prefix-sprint","malformed-target","ambiguous-bound","latest-anchor","current-selection","missing-target","stale-identity","verifier","governance","reset-target","legacy-none","duplicate-reader","corrupt-reader","missing-reader","unknown-phase","inconsistent-surface","replay-stale-prefix","superseded","voided"]]
+        <> [("prefix","malformed","receipt accepted-prefix digest is malformed or repeated"),("prefix","repeated","receipt accepted-prefix digest is malformed or repeated"),("prefix","ambiguous-latest","ArchiveLatestPublicationAmbiguous"),("prefix","public-evidence-reason","accepted kernel observation is absent, repeated, or invalid")]
       observed name role = [value | [key,control,value] <- rows,key == name,control == role]
   in LedgerRow "custody.discovery" (sort [(key,role) | [key,role,_] <- rows] == sort [(key,role) | (key,role,_) <- expected] && all ((==3) . length) rows) "canonical receipt pairs and complete bindings"
     : [LedgerRow ("custody." <> key <> "." <> role) (observed key role == [value]) (Text.pack (show (observed key role))) | (key,role,value) <- expected]
@@ -557,7 +1497,9 @@ archiveLinkQueries input = case reads (Text.unpack input) :: [([[FilePath]], Str
 -- The independent clients observe the actual public source API. Missing GHC
 -- or a different error/locus cannot establish an opaque boundary.
 inventoryNativeChecks :: FilePath -> IO [LedgerRow]
-inventoryNativeChecks directory = do
+inventoryNativeChecks = inventoryNativeChecksWith False
+inventoryNativeChecksWith :: Bool -> FilePath -> IO [LedgerRow]
+inventoryNativeChecksWith propagateNativeException directory = do
   compiler <- findExecutable "ghc"
   mapM (observe compiler) boundaries
  where
@@ -589,7 +1531,9 @@ inventoryNativeChecks directory = do
           _ -> False
     pure (LedgerRow ("legacy.native." <> name) (positive && negative)
       (Text.pack (show (positive, negative, refused))))
-  compile Nothing _ _ _ _ = pure (Left "native GHC unavailable")
+  compile Nothing _ _ _ _
+    | propagateNativeException = fail "NativeGhcUnavailable"
+    | otherwise = pure (Left "native GHC unavailable")
   compile (Just compiler) name moduleName signature expression = do
     let root = directory </> Text.unpack name </> moduleName
         source = root </> "Illegal.hs"
@@ -601,6 +1545,7 @@ inventoryNativeChecks directory = do
       "-fdiagnostics-color=never", "-fno-diagnostics-show-caret", "-isrc/plan-decisions", "-outputdir", root, path] "")
       :: IO (Either IOException (ExitCode, String, String))
     case result of
+      Left problem | propagateNativeException -> throwIO problem
       Left problem -> pure (Left (show problem))
       Right (code, out, err) -> do
         TextIO.writeFile (root </> "stdout") (Text.pack out)
@@ -684,7 +1629,7 @@ inventoryChecks rows =
     , ("LTD-META-001", "repository_layout_conformance", "ignore-context", "retired-generated-root,undeclared-state-root")
     , ("LTD-VAL-001", "documentation_suite", "runner-authority", "noop-subject,constant-success-checker,forged-exit,omitted-discovery,unavailable-boundary")
     , ("LTD-VAL-002", "documentation_suite", "contract-correspondence", "gate-spec-mismatch,phase-role-swap,byte-copy-equivalence,subject-not-shipped,retired-domain-literal")
-    , ("LTD-VAL-003", "documentation_suite", "receipt-custody", "generation-one-receipt,verifier-diverged,predecessor-closure-edited")
+    , ("LTD-VAL-003", "documentation_suite", "receipt-custody", "generation-one-receipt,verifier-diverged,predecessor-closure-edited,uncommitted-prefix-series")
     , ("LTD-VAL-004", "documentation_suite", "status-authority", "status-surface-dirty,status-without-receipt,predecessor-not-reproduced,status-edit-without-receipt")
     , ("LTD-VAL-005", "typed_spine", "spine-handoffs", "hand-built-stage,noop-stage,render-omitted,executed-argv-diverged")
     , ("LTD-VAL-006", "documentation_suite", "fresh-inputs", "stale-run,ignored-input,authored-output,ambient-temp,replayed-input,empty-discovery")

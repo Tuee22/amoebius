@@ -7,7 +7,8 @@ import Amoebius.Layout.Report
 import Amoebius.Layout.PackageMap (packageMapReport, loadPackageCatalog)
 import Amoebius.Layout.SourceGraph (sourceGraph, sourceGraphWithPackageCatalog)
 import SourcePathCases (sourcePathInventory)
-import Control.Exception (finally)
+import Control.Exception (SomeAsyncException, SomeException, displayException, evaluate,
+  finally, fromException, throwIO, try)
 import Control.Monad (forM, forM_, unless, when)
 import Data.Bits (xor)
 import Data.ByteString qualified as Bytes
@@ -41,12 +42,17 @@ runSourceGraphCases output = do
     mainPackage <- Bytes.readFile (tree </> "amoebius.cabal")
     probePackage <- Bytes.readFile (tree </> "probe/probe.cabal")
     let (packageFindings,_,components,dependencies,packages,forward) = packageMapReport mainPackage probePackage paths
-    catalog <- loadPackageCatalog packages >>= either (fail . show) (pure . fst)
     -- Compiler-rejected negative calls need the native build's package inputs.
     -- Both source inventories above still bind the copied bytes to this root.
-    (findings,graphRows) <- sourceGraphWithPackageCatalog root paths components dependencies catalog forward
     let relevant row = any (`Text.isPrefixOf` row) ["graph-stage\t","graph-file\t","graph-import-unresolved\t","graph-import-standalone-unresolved\t","graph-call-site-opaque\t","graph-unscanned\t","graph-unscanned-declaration\t"]
-    TextIO.writeFile (file "-whole.data") (Text.pack (show (map renderFinding (packageFindings <> findings),filter relevant graphRows)))
+    whole <- observeWhole "catalogue-exception" $ do
+      acquired <- loadPackageCatalog packages
+      case acquired of
+        Left finding -> pure (Left ("catalogue-refused",renderFinding finding))
+        Right (catalog,_) -> observeWhole "query-exception" $ do
+          (findings,graphRows) <- sourceGraphWithPackageCatalog root paths components dependencies catalog forward
+          pure (Right (map renderFinding (packageFindings <> findings),filter relevant graphRows))
+    TextIO.writeFile (file "-whole.data") (Text.pack (show whole))
     unless (sourceGraphExamplePath `notElem` paths) (fail "SourceGraphControlCollision")
     let restore = copyFile (root </> "test/layout/SourceGraphCases.hs") target >> TextIO.writeFile target sourceGraphExampleSource
     restore
@@ -80,3 +86,19 @@ runSourceGraphCases output = do
   TextIO.writeFile (file ".data") (Text.pack (show rows))
   TextIO.writeFile (file "-controls.data") (Text.pack (show controls))
   TextIO.writeFile (file "-cleanup.data") (Text.pack (show removed))
+
+-- A subject refusal must remain an observation, so the remaining independent
+-- contracts can still be judged. Force its complete payload within the same
+-- boundary; asynchronous interruption is never a completed observation.
+observeWhole :: Text -> IO (Either (Text,Text) ([Text],[Text]))
+  -> IO (Either (Text,Text) ([Text],[Text]))
+observeWhole stage action = do
+  attempted <- try (do
+    observed <- action
+    _ <- evaluate (Text.length (Text.pack (show observed)))
+    pure observed) :: IO (Either SomeException (Either (Text,Text) ([Text],[Text])))
+  case attempted of
+    Right observed -> pure observed
+    Left problem -> case fromException problem :: Maybe SomeAsyncException of
+      Just _ -> throwIO problem
+      Nothing -> pure (Left (stage,Text.pack (displayException problem)))

@@ -2,7 +2,7 @@
 -- Broader source, toolchain, and self-reference claims belong to their capability owners.
 module Amoebius.Validation.BootstrapPredicate
   ( bootstrapDigestMatches, bootstrapSnapshotMatches, bootstrapInputPathAllowed ) where
-import Data.Char (isHexDigit)
+import Data.Char (isAlphaNum, isAscii, isAsciiUpper, isHexDigit)
 import Data.List (isPrefixOf)
 -- Keep each decision on one stable line. BootstrapQualification.Internal
 -- replaces exactly one complete line in an acquired source copy and refuses
@@ -16,9 +16,7 @@ bootstrapInputPathAllowed path = ".build/runs/" `isPrefixOf` path && boundedRela
 validLowerSha256 :: String -> Bool
 validLowerSha256 value =
   length value == 64
-    && all (\character -> isHexDigit character && not (isLetterUpper character)) value
- where
-  isLetterUpper character = character >= 'A' && character <= 'F'
+    && all (\character -> isHexDigit character && not (isAsciiUpper character)) value
 boundedRelativePath :: FilePath -> Bool
 boundedRelativePath path =
   not (null path)
@@ -33,10 +31,7 @@ boundedRelativePath path =
       && length segment <= 128
       && all validPathCharacter segment
   validPathCharacter character =
-    (character >= 'a' && character <= 'z')
-      || (character >= 'A' && character <= 'Z')
-      || (character >= '0' && character <= '9')
-      || character `elem` ("-_." :: String)
+    isAscii character && (isAlphaNum character || character `elem` ("-_." :: String))
 splitSlash :: String -> [String]
 splitSlash value = case break (== '/') value of
   (segment, []) -> [segment]

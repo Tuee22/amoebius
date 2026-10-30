@@ -1,11 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 -- | Native observations of the shipped portable transport and bounded reader.
-module Portability (portabilityRows, verifierChild, observerRows) where
+module Portability (portabilityRows, verifierChild, observerRows, nativePreparationRows, nativePreparationChild) where
 
 import Amoebius.Cli.Delegate (verifierFileName)
 import Amoebius.Doc.Check (discoverDocuments)
 import Amoebius.Doc.Types (Finding (..))
-import Amoebius.Validation.Runner.Observer (ObservedRun (..), observedDigest, renderObserved)
+import Amoebius.Validation.Runner.Observer (ObservedRun (..), observedDigest, renderObserved, observeActualNativeCabal, observeNativeCabal, prepareNativeCabalRequest)
+import Control.Exception (IOException, try)
 import Control.Monad (forM)
 import Data.List (sort)
 import Data.Text (Text)
@@ -14,10 +15,11 @@ import Data.Text.IO qualified as TIO
 import System.Directory
   ( copyFile, createDirectoryIfMissing, doesDirectoryExist, doesFileExist, exeExtension
   , getCurrentDirectory, getPermissions, makeAbsolute, removePathForcibly, setPermissions )
-import System.Environment (getExecutablePath, lookupEnv)
+import System.Environment (getEnvironment, getExecutablePath, lookupEnv)
 import System.Exit (ExitCode (..), die, exitWith)
 import System.FilePath ((</>))
 import System.IO (hPutStr, stderr)
+import System.IO.Error (ioeGetErrorString)
 import System.Process (CreateProcess (cwd, env), proc, readCreateProcessWithExitCode)
 import Text.Read (readMaybe)
 
@@ -81,7 +83,8 @@ portabilityRows output = do
 observerRows :: [[Text]]
 observerRows = [[name, shown (renderObserved "process" observation), observedDigest observation] | (name, observation) <- samples]
  where
-  base = ObservedRun "/subject" ["a b", "c"] "/work" "policy:a" ExitSuccess "λ\n" "" Nothing
+  -- Explicit supplied DTO data; this sample is not a native observation.
+  base = ObservedRun "/subject" ["a b", "c"] "/work" [("SUPPLIED_FIXTURE", "value λ"), ("EMPTY", "")] "policy:a" ExitSuccess "λ\n" "" Nothing
   samples = [("base", base), ("argv", base {runArgv = ["a", "b c"]})
     ,("policy", base {runEnvironmentPolicy = "policy:b"}), ("spawn", base {runSpawnFailure = Just "failed"})
     ,("executable", base {runExecutable = "/other"}), ("cwd", base {runCwd = "/elsewhere"})
@@ -89,3 +92,32 @@ observerRows = [[name, shown (renderObserved "process" observation), observedDig
 
 shown :: Show value => value -> Text
 shown = T.pack . show
+
+-- Config selection must fail before the native child/environment boundary.
+-- The subprocess supplies CABAL_CONFIG exactly, without mutating this process.
+nativePreparationRows :: FilePath -> IO ()
+nativePreparationRows output = do
+  absolute <- makeAbsolute output
+  self <- getExecutablePath
+  directory <- getCurrentDirectory
+  inherited <- getEnvironment
+  let missing = absolute </> "reserved-absent.config"
+      environment = [(key,value) | (key,value) <- inherited, key /= "CABAL_CONFIG"] <> [("CABAL_CONFIG",missing)]
+  (exit,out,err) <- readCreateProcessWithExitCode
+    ((proc self ["--native-preparation-child",absolute]) {cwd = Just directory,env = Just environment}) ""
+  TIO.writeFile (absolute </> "native-preparation.data") (shown (exit,out,err))
+
+nativePreparationChild :: FilePath -> IO ()
+nativePreparationChild root = do
+  rows <- forM ["strict","prepare-compatibility","observer-compatibility"] $ \role -> do
+    let work = root </> role
+        cabal = work </> "reserved-absent-cabal"
+    createDirectoryIfMissing True work
+    result <- try (case role of
+      "strict" -> observeActualNativeCabal work cabal (Just "supplied-unused-compiler") ["build","exe:amoebius"] >> pure ()
+      "prepare-compatibility" -> prepareNativeCabalRequest work cabal (Just "supplied-unused-compiler") ["build","exe:amoebius"] >> pure ()
+      _ -> observeNativeCabal work cabal (Just "supplied-unused-compiler") ["build","exe:amoebius"] >> pure ()) :: IO (Either IOException ())
+    owner <- doesDirectoryExist (work </> ".build/source-admission-bootstrap")
+    later <- doesDirectoryExist (work </> ".build/observer-tmp")
+    pure (role,either (Left . ioeGetErrorString) Right result,owner,later)
+  print rows

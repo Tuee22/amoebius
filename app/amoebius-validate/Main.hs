@@ -15,7 +15,7 @@ import Amoebius.Plan.PhaseIdentity (phaseDomainLowerOrdinal)
 import Amoebius.Validation.Custody
 import Amoebius.Validation.Runner qualified as Runner
 import Amoebius.Validation.Runner.Hygiene (captureSource)
-import Amoebius.Validation.Runner.Legacy (observeLegacy, auditLegacyReports, renderLegacyReports, runLegacyProbe, qualifyLegacy, qualifiedLegacyReports, auditQualifiedLegacyReports)
+import Amoebius.Validation.Runner.Legacy (observeLegacy, auditLegacyReports, renderLegacyReports, runLegacyProbe, runAuthorityObservation, qualifyLegacy, qualifiedLegacyReports, auditQualifiedLegacyReports)
 import Amoebius.Validation.Custody.Store (Store (..), archivedKernelCap)
 import Amoebius.Validation.GateSpec (renderGateSpec)
 import Amoebius.Validation.GateSpec.Registry (registeredSpecInputs)
@@ -50,6 +50,7 @@ main = do
     ["mutation-observe"] | Just input <- lookup "input" options -> runLegacyProbe Legacy.LtdKrn002 input >>= TextIO.putStrLn
     ["solver-observe"] | Just input <- lookup "input" options -> runLegacyProbe Legacy.LtdKrn003 input >>= TextIO.putStrLn
     ["bootstrap-observe"] | Just input <- lookup "input" options -> runLegacyProbe Legacy.LtdSrc008 input >>= TextIO.putStrLn
+    ["authority-observe"] | Just input <- lookup "input" options -> runAuthorityObservation input >>= TextIO.putStrLn
     ["legacy-qualify"] | Just phase <- readMaybe =<< lookup "phase" options -> legacyQualifyDiagnostic config phase (option "analyzer" "kernel" options) (option "out" ".build/legacy-qualification" options)
     ["preview", "phase", ordinal] | Just phase <- readMaybe ordinal -> previewPhase config phase >>= finish
     ["phase", ordinal] | Just phase <- readMaybe ordinal -> previewPhase config phase >>= finish
@@ -73,6 +74,7 @@ usage =
   , "  reset --decision DL-NNNN --product-gap LTD-XXX-NNN [--validator-gap TEXT]"
   , "  demo --file PATH                      record the digest of an operator-authored input"
   , "  doc-check | doc-negatives [--out DIR] the documentation checker and its rendered negatives"
+  , "  authority-observe --input PATH        collect source-bound native observations; mint nothing"
   , "  legacy-audit --phase NN              print untrusted reports and prequalification refusals; mint nothing"
   , "  legacy-qualify --phase NN [--analyzer kernel|mutation|solver|bootstrap|correspondence|custody|status|authority|fresh|admission|probe-source|vendor-source|test-source|tool-source|pulumi-source|runtime-identity|ignore-context|source-graph|bootstrap-source] [--out DIR] mint no phase evidence"
   , "  spec phase NN                         print the registered specification's rendering (the gate-spec block)"

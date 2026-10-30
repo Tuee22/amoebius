@@ -225,7 +225,7 @@ qualificationRowsAt phase identifier output = do
        else if identifier == L.LtdKrn003 then [("fake-inductive", "| sort expected /= sort (concatMap constructors", "| typeName == \"RefinementStatus\" && sort expected /= sort (concatMap constructors")
            ,("fake-proved", "| sort expected /= sort (concatMap constructors", "| typeName == \"SymbolicResult\" && sort expected /= sort (concatMap constructors")]
        else [("all-bootstrap-negatives", "Pb.admitBootstrap (E.encodeUtf8 body)", "Right ()")]
-      variants = if identifier == L.LtdSrc008 && phase /= P.phaseDomainLowerOrdinal then bootstrapSourceVariants else if identifier == L.LtdSrc000 then sourceGraphVariants else if identifier == L.LtdMeta001 then ignoreContextVariants else if identifier == L.LtdName001 then runtimeIdentityVariants else if identifier == L.LtdSrc005 then pulumiSourceVariants else if identifier == L.LtdSrc001 then toolSourceVariants else if identifier == L.LtdSrc006 then testSourceVariants else if identifier == L.LtdSrc009 then vendorSourceVariants else if identifier == L.LtdSrc007 then probeSourceVariants else if identifier == L.LtdBoot001 then admissionVariants else if identifier == L.LtdVal006 then freshVariants else if identifier == L.LtdVal001 then authorityVariants else if identifier == L.LtdVal002 then correspondenceVariants else if identifier == L.LtdVal003 then custodyVariants else if identifier == L.LtdVal004 then statusVariants else [(key,"src/validation-kernel/Amoebius/Validation/Runner/Legacy.hs",needle,replacement) | (key,needle,replacement) <- queryVariants]
+      variants = if identifier == L.LtdSrc008 && phase /= P.phaseDomainLowerOrdinal then bootstrapSourceVariants else if identifier == L.LtdSrc000 then sourceGraphVariants else if identifier == L.LtdMeta001 then ignoreContextVariants else if identifier == L.LtdName001 then runtimeIdentityVariants else if identifier == L.LtdSrc005 then pulumiSourceVariants else if identifier == L.LtdSrc001 then toolSourceVariants else if identifier == L.LtdSrc006 then testSourceVariants else if identifier == L.LtdSrc009 then vendorSourceVariants else if identifier == L.LtdSrc007 then probeSourceVariants else if identifier == L.LtdBoot001 then admissionVariants else if identifier == L.LtdVal006 then freshVariants else if identifier == L.LtdVal001 then authorityVariants else if identifier == L.LtdVal002 then correspondenceVariants else if identifier == L.LtdVal003 then custodyVariants else if identifier == L.LtdVal004 then statusVariants else [(key,"src/validation-kernel/Amoebius/Validation/Authority/Core.hs",needle,replacement) | (key,needle,replacement) <- queryVariants]
   weakenedRows <- forM variants $ \(key, subjectFile, needle, replacement) -> do
       let work = absolute </> "weakened" </> Text.unpack key
       createDirectoryIfMissing True work
@@ -359,18 +359,22 @@ freshVariants =
   ,("ignored-input",hygiene,"  forM_ entries $ \\(file, expected) -> do", "  forM_ [entry | entry@(file,_) <- entries, take 1 (splitDirectories file) /= [\".build\"]] $ \\(file, expected) -> do")
   ,("authored-output",hygiene,"unless (sort names == sort [file | (file, Just _) <- entries, take 1 (splitDirectories file) /= [\".build\"]])", "unless True")
   ,("ambient-temp",hygiene,"runRootWithinFrame root path = (\\base absolute physical -> equalFilePath absolute physical && bootstrapInputPathAllowed (intercalate \"/\" (splitDirectories (makeRelative base absolute)))) <$> canonicalizePath root <*> makeAbsolute path <*> canonicalizePath path", "runRootWithinFrame _ _ = pure True")
-  ,("ambient-temp.entry","src/validation-kernel/Amoebius/Validation/Runner.hs","not frameAllowed","False")
+  ,("ambient-temp.entry","src/validation-kernel/Amoebius/Validation/Authority/Core.hs","not frameAllowed","False")
   ,("replayed-input","src/validation-kernel/Amoebius/Validation/BootstrapPredicate.hs","bootstrapSnapshotMatches opening closing = validLowerSha256 opening && opening == closing", "bootstrapSnapshotMatches _ _ = True")
   ,("empty-discovery",hygiene,"| Text.null output = Left \"SourceInventoryEmpty\"", "| Text.null output = Right []")]
- where hygiene = "src/validation-kernel/Amoebius/Validation/Runner/Hygiene.hs"
+ where hygiene = "src/validation-kernel/Amoebius/Validation/Authority/Core.hs"
 
 authorityVariants :: [(Text, FilePath, Text, Text)]
-authorityVariants = [(key,"src/validation-kernel/Amoebius/Validation/Runner.hs",needle,replacement) | (key,needle,replacement) <-
+authorityVariants = [(key,"src/validation-kernel/Amoebius/Validation/Authority/Core.hs",needle,replacement) | (key,needle,replacement) <-
   [("noop-subject","ledgerValid ledger && ledgerExit ledger == Just ExitSuccess && all (\\(_, verdict, _) -> verdict == \"green\") (ledgerRows ledger)","True")
   ,("constant-success-checker","runExit probe /= ExitSuccess","True")
   ,("forged-exit","runExit subject == ExitSuccess","True")
   ,("omitted-discovery","all (`elem` map (\\(name,_,_) -> name) (ledgerRows parsed)) required","True")
-  ,("unavailable-boundary","all (isNothing . runSpawnFailure) [subject,oracle,probe]","all (isNothing . runSpawnFailure) [subject,oracle]")]] <> [("omitted-discovery.seed","src/validation-kernel/Amoebius/Validation/Runner/Spec.hs","requiredSuiteRows spec | Just _ <- gateSeed spec =","requiredSuiteRows spec | False =")]
+  ,("unavailable-boundary","all (isNothing . runSpawnFailure) [subject,oracle,probe]","all (isNothing . runSpawnFailure) [subject,oracle]")]] <> [("omitted-discovery.seed","src/validation-kernel/Amoebius/Validation/Authority/Core.hs","requiredSuiteRows spec | Just _ <- gateSeed spec =","requiredSuiteRows spec | False =")] <> [("seed-image-change","src/validation-kernel/Amoebius/Validation/Authority/Core.hs","attemptImageBefore clean /= attemptImageBefore actual","attemptImageBefore clean == attemptImageBefore actual")
+  ,("seed-image-window","src/validation-kernel/Amoebius/Validation/Authority/Core.hs","\n        && before == after\n","\n        && before /= after\n")] <> [(key,"src/validation-kernel/Amoebius/Validation/Authority/Core.hs",needle,replacement) | (key,needle,replacement)<-
+  [("wire-summary","wireRequire SummaryMismatch FooterPurpose (footerPurpose frame == if someRed then FinishedSomeRed else FinishedAllGreen)","wireRequire SummaryMismatch FooterPurpose True")
+  ,("wire-normal-terminal","wireRequire TerminalMismatch NativeTerminal (exit == if someRed then 1 else 0)","wireRequire TerminalMismatch NativeTerminal True")
+  ,("wire-probe-terminal","wireRequire TerminalMismatch NativeTerminal (exit == 1)","wireRequire TerminalMismatch NativeTerminal True")]]
 
 statusVariants :: [(Text, FilePath, Text, Text)]
 statusVariants = [(key,"src/validation-kernel/Amoebius/Validation/Custody/Preflight.hs",needle,"False") | (key,needle) <-
@@ -385,10 +389,12 @@ custodyVariants =
   ,("verifier-diverged.reader",store,"receiptVerifierDigest receipt /= generation || ","")
   ,("verifier-diverged.binding",custody,"receiptGeneration receipt == verifier && receiptVerifierDigest receipt == verifier","True")
   ,("predecessor-closure-edited",custody,"fmap fst expected == Just (receiptClosureDigest receipt)","True")
-  ,("predecessor-closure-edited.oracle","src/validation-kernel/Amoebius/Validation/Compatibility.hs","target <- targets, Just (info,_)","target <- filter (/= oracleExecutableName (gateOracle spec)) targets, Just (info,_)")]
+  ,("predecessor-closure-edited.oracle","src/validation-kernel/Amoebius/Validation/Authority/Core.hs","target <- targets, Just (info,_)","target <- filter (/= oracleExecutableName (gateOracle spec)) targets, Just (info,_)")
+  ,("uncommitted-prefix-series.old-whole",custody,"prefixBound = maybe False (\\prefix -> Just prefix == statusPrefixDigest phase surface) (receiptAcceptedPrefix receipt)","prefixBound = False")
+  ,("uncommitted-prefix-series.bypassed-prefix",custody,"prefixBound = maybe False (\\prefix -> Just prefix == statusPrefixDigest phase surface) (receiptAcceptedPrefix receipt)","prefixBound = True")]
  where
-  store = "src/validation-kernel/Amoebius/Validation/Custody/Store.hs"
-  custody = "src/validation-kernel/Amoebius/Validation/Custody.hs"
+  store = "src/validation-kernel/Amoebius/Validation/Authority/Core.hs"
+  custody = "src/validation-kernel/Amoebius/Validation/Authority/Core.hs"
 
 correspondenceVariants :: [(Text, FilePath, Text, Text)]
 correspondenceVariants =
@@ -401,7 +407,7 @@ correspondenceVariants =
   ,("retired-domain-literal","src/plan-decisions/Amoebius/Plan/PhaseIdentity.hs",
     "lookupPhaseIdentity ordinal = Map.lookup ordinal phaseIdentityByOrdinal",
     "lookupPhaseIdentity ordinal = case [row | row <- allPhaseIdentities, phaseIdentityOrdinal row == ordinal || (ordinal == fst reservedGap && phaseIdentityCapability row == \"typed_spine\")] of row : _ -> Just row; [] -> Nothing")]
- where spec = "src/validation-kernel/Amoebius/Validation/Runner/Spec.hs"
+ where spec = "src/validation-kernel/Amoebius/Validation/Authority/Core.hs"
 
 legacyAuditRows :: FilePath -> IO [[Text]]
 legacyAuditRows output = do

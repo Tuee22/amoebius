@@ -55,6 +55,7 @@ reportRows options = do
   observed <- selectToolchain here (optionTools options)
   retained <- retainedProbeRows probeRoot probeCases
   paths <- authoredPaths here
+  resolutionFindings <- inspectTrackedArtefacts here
   request <- case optionRequest options of
     Nothing -> pure []
     Just path -> do
@@ -70,11 +71,32 @@ reportRows options = do
         Right selected -> ("versions.verdict", "accepted") : renderAcquisition selected
       probes = [("probe." <> name, value) | (name, value) <- retained]
         <> [("probe.source.findings", Text.intercalate ";" (probeSourceFindings paths (map fst retained)))]
-      planning = [("plan.steps", either (Text.intercalate "; " . map renderPlanRefusal) (Text.intercalate "; " . map renderStep) (planEnsure examplePlatform (Inventory []) probeCatalogue floorTools))]
+      planning = [("plan.steps", either (Text.intercalate "; " . map renderPlanRefusal) (Text.intercalate "; " . map renderStep) (planEnsure examplePlatform (Inventory []) probeCatalogue floorTools)), ("resolution.source.findings", Text.intercalate ";" (map renderResolveRefusal resolutionFindings))]
       provenance = [("provenance.upstream", upstreamName forkUpstream <> "-" <> upstreamVersion forkUpstream <> " " <> upstreamTreeDigest forkUpstream), ("provenance.fork-modules", Text.pack (show (length forkModules))), ("provenance.layout", Text.intercalate ";" (map renderProvenanceRefusal (refuseLayout paths)))]
   acquired <- case optionAcquireRoot options of
     Nothing -> pure []
     Just root -> do
-      result <- acquireTwice (optionTools options) (root </> "a") (root </> "b")
-      pure [("acquisition.verdict", either (Text.intercalate "; " . map renderRefusal) (const "agree") result)]
+      admitted <- admitGeneratedRoot root
+      case admitted of
+        Left problem -> pure [("acquisition.verdict", renderResolveRefusal problem)]
+        Right owned -> do
+          result <- acquireTwice (optionTools options) (owned </> "a") (owned </> "b")
+          case result of
+            Left problems -> pure [("acquisition.verdict", Text.intercalate "; " (map renderRefusal problems))]
+            Right (first, second) -> do
+              firstPlan <- elaborateProbe first (owned </> "plan-a") probeRequirements
+              secondPlan <- elaborateProbe second (owned </> "plan-b") probeRequirements
+              let planVerdict = case (firstPlan, secondPlan) of
+                    (Right (a, _), Right (b, _)) -> case planAgreement a b of
+                      [] -> "agree"
+                      problems -> Text.intercalate "; " (map renderResolveRefusal problems)
+                    _ -> "plans-unavailable"
+                  observations name plan =
+                    [(name <> ".verdict", either renderResolveRefusal (const "accepted") plan)
+                    ,(name <> ".sha256", either (const "absent") (planDigest . fst) plan)
+                    ,(name <> ".units", either (const "absent") (Text.intercalate "," . planUnits . fst) plan)
+                    ,(name <> ".packages", either (const "absent") (Text.intercalate "," . planPackages . fst) plan)
+                    ,(name <> ".child", either (const "absent") (Text.pack . show . snd) plan)]
+              pure ([("acquisition.verdict", "agree"), ("acquisition.plans.verdict", planVerdict)]
+                <> observations "acquisition.plan-a" firstPlan <> observations "acquisition.plan-b" secondPlan)
   pure (admission <> request <> probes <> planning <> provenance <> acquired)

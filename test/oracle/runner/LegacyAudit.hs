@@ -5,6 +5,8 @@ module LegacyAudit (legacyAuditChecks, kernelQualificationChecks, kernelJoinChec
 
 import Data.List (sort)
 import NativeApi (seedAuthorityRows)
+import SeedImages (seedImageNames)
+import OracleTranscripts (oracleTranscriptNames)
 import Control.Monad (forM)
 import Data.Text (Text)
 import Data.Text qualified as Text
@@ -115,7 +117,7 @@ correspondenceJoinChecks = behaviorJoinChecks "correspondence" "LTD-VAL-002"
   (["control.render-collision","snapshot.contracts","snapshot.selected"] <> [part <> "." <> key | part <- ["entry","entry-root"],key <- ["phase-role-swap","byte-copy-equivalence"]])
   [(key,path,needle,replacement,["correspondence." <> key <> ".negative"] <> ["correspondence.entry." <> key | key `elem` ["phase-role-swap","byte-copy-equivalence"]]) | (key,path,needle,replacement) <- variants]
  where
-  spec = "src/validation-kernel/Amoebius/Validation/Runner/Spec.hs"
+  spec = "src/validation-kernel/Amoebius/Validation/Authority/Core.hs"
   variants =
     [("gate-spec-mismatch","src/doc-check/Amoebius/Doc/Governance.hs","| Text.strip block /= Text.strip rendered","| False")
     ,("phase-role-swap",spec,
@@ -129,16 +131,18 @@ correspondenceJoinChecks = behaviorJoinChecks "correspondence" "LTD-VAL-002"
 
 custodyJoinChecks :: FilePath -> IO [(Text, Bool, Text)]
 custodyJoinChecks = behaviorJoinChecks "custody" "LTD-VAL-003"
-  ["generation-one-receipt","verifier-diverged","predecessor-closure-edited"]
-  (["binding.verifier-positive","binding.verifier-negative"] <> ["control." <> key | key <- ["closure-source","closure-restored","outside-closure","unknown-closure","closure-sentinel","capability-binding","governance-binding","specification-binding","phase-binding"]] <> ["dependency." <> key | key <- ["suite","oracle","custody-suite","entry","build-tool","seed-driver","metadata","bootstrap","documentation","status-projection","cleanup"]])
+  ["generation-one-receipt","verifier-diverged","predecessor-closure-edited","uncommitted-prefix-series"]
+  (["binding.verifier-positive","binding.verifier-negative"] <> ["prefix." <> key | key <- ["publication-prefixes","earlier-whole-changed","latest-whole","uncommitted-observed","metadata-red","prefix-heading","prefix-receipt","prefix-tracker","prefix-phase","prefix-sprint","malformed-target","ambiguous-bound","latest-anchor","current-selection","missing-target","stale-identity","verifier","governance","reset-target","legacy-none","legacy-bytes","legacy-whole","legacy-durable","malformed","repeated","duplicate-reader","corrupt-reader","missing-reader","ambiguous-latest","unknown-phase","inconsistent-surface","public-evidence-refusal","public-evidence-reason","replay-stale-prefix","superseded","voided"]] <> ["control." <> key | key <- ["closure-source","closure-restored","outside-closure","unknown-closure","closure-sentinel","capability-binding","governance-binding","specification-binding","phase-binding"]] <> ["dependency." <> key | key <- ["suite","oracle","custody-suite","entry","build-tool","seed-driver","metadata","bootstrap","documentation","status-projection","cleanup"]])
   [("generation-one-receipt",store,"if record /= \"amoebius-phase-receipt.v2\" then Left","if False then Left",["custody.generation-one-receipt.negative"])
   ,("verifier-diverged.reader",store,"receiptVerifierDigest receipt /= generation || ","",["custody.verifier-diverged.negative"])
   ,("verifier-diverged.binding",custody,"receiptGeneration receipt == verifier && receiptVerifierDigest receipt == verifier","True",["custody.binding.verifier-negative"])
   ,("predecessor-closure-edited",custody,"fmap fst expected == Just (receiptClosureDigest receipt)","True",["custody.predecessor-closure-edited.negative"])
-  ,("predecessor-closure-edited.oracle","src/validation-kernel/Amoebius/Validation/Compatibility.hs","target <- targets, Just (info,_)","target <- filter (/= oracleExecutableName (gateOracle spec)) targets, Just (info,_)",["custody.dependency.oracle"])]
+  ,("predecessor-closure-edited.oracle","src/validation-kernel/Amoebius/Validation/Authority/Core.hs","target <- targets, Just (info,_)","target <- filter (/= oracleExecutableName (gateOracle spec)) targets, Just (info,_)",["custody.dependency.oracle"])
+  ,("uncommitted-prefix-series.old-whole",custody,"prefixBound = maybe False (\\prefix -> Just prefix == statusPrefixDigest phase surface) (receiptAcceptedPrefix receipt)","prefixBound = False",["custody.uncommitted-prefix-series.positive"])
+  ,("uncommitted-prefix-series.bypassed-prefix",custody,"prefixBound = maybe False (\\prefix -> Just prefix == statusPrefixDigest phase surface) (receiptAcceptedPrefix receipt)","prefixBound = True",["custody.uncommitted-prefix-series.negative","custody.prefix.prefix-heading","custody.prefix.prefix-receipt","custody.prefix.legacy-none","custody.prefix.replay-stale-prefix"])]
  where
-  store = "src/validation-kernel/Amoebius/Validation/Custody/Store.hs"
-  custody = "src/validation-kernel/Amoebius/Validation/Custody.hs"
+  store = "src/validation-kernel/Amoebius/Validation/Authority/Core.hs"
+  custody = "src/validation-kernel/Amoebius/Validation/Authority/Core.hs"
 
 freshJoinChecks :: FilePath -> IO [(Text, Bool, Text)]
 freshJoinChecks = behaviorJoinChecks "fresh" "LTD-VAL-006"
@@ -148,23 +152,29 @@ freshJoinChecks = behaviorJoinChecks "fresh" "LTD-VAL-006"
   ,("ignored-input",hygiene,"  forM_ entries $ \\(file, expected) -> do", "  forM_ [entry | entry@(file,_) <- entries, take 1 (splitDirectories file) /= [\".build\"]] $ \\(file, expected) -> do",["fresh.ignored-input.negative"])
   ,("authored-output",hygiene,"unless (sort names == sort [file | (file, Just _) <- entries, take 1 (splitDirectories file) /= [\".build\"]])", "unless True",["fresh.authored-output.negative"])
   ,("ambient-temp",hygiene,"runRootWithinFrame root path = (\\base absolute physical -> equalFilePath absolute physical && bootstrapInputPathAllowed (intercalate \"/\" (splitDirectories (makeRelative base absolute)))) <$> canonicalizePath root <*> makeAbsolute path <*> canonicalizePath path", "runRootWithinFrame _ _ = pure True",["fresh.ambient-temp.negative","fresh.control.ambient-entry"])
-  ,("ambient-temp.entry","src/validation-kernel/Amoebius/Validation/Runner.hs","not frameAllowed","False",["fresh.control.ambient-entry"])
+  ,("ambient-temp.entry","src/validation-kernel/Amoebius/Validation/Authority/Core.hs","not frameAllowed","False",["fresh.control.ambient-entry"])
   ,("replayed-input","src/validation-kernel/Amoebius/Validation/BootstrapPredicate.hs","bootstrapSnapshotMatches opening closing = validLowerSha256 opening && opening == closing", "bootstrapSnapshotMatches _ _ = True",["fresh.replayed-input.negative"])
   ,("empty-discovery",hygiene,"| Text.null output = Left \"SourceInventoryEmpty\"", "| Text.null output = Right []",["fresh.empty-discovery.negative"])]
- where hygiene = "src/validation-kernel/Amoebius/Validation/Runner/Hygiene.hs"
+ where hygiene = "src/validation-kernel/Amoebius/Validation/Authority/Core.hs"
 
 authorityJoinChecks :: FilePath -> IO [(Text, Bool, Text)]
 authorityJoinChecks = behaviorJoinChecks "authority" "LTD-VAL-001" keys
-  (["control." <> key | key <- ["subject-exit","subject-token","constant-probe","missing-probe","cleanup"]] <> ["manifest.seed-names","manifest.seed-positive"] <> ["manifest.omitted." <> key | key <- seedAuthorityRows])
-  ([(key,"src/validation-kernel/Amoebius/Validation/Runner.hs",needle,replacement,
+  (["control." <> key | key <- ["subject-exit","subject-token","constant-probe","missing-probe","cleanup"]] <> ["manifest.seed-names","manifest.seed-positive"] <> ["manifest.omitted." <> key | key <- seedAuthorityRows] <> seedImageNames <> oracleTranscriptNames)
+  ([(key,"src/validation-kernel/Amoebius/Validation/Authority/Core.hs",needle,replacement,
     ["authority." <> name <> ".negative" | name <- if key == "noop-subject" then keys else [key]] <> ["authority.manifest.omitted." <> name | key `elem` ["noop-subject","omitted-discovery"], name <- seedAuthorityRows]) | (key,needle,replacement) <-
       [("noop-subject","ledgerValid ledger && ledgerExit ledger == Just ExitSuccess && all (\\(_, verdict, _) -> verdict == \"green\") (ledgerRows ledger)","True")
       ,("constant-success-checker","runExit probe /= ExitSuccess","True")
       ,("forged-exit","runExit subject == ExitSuccess","True")
       ,("omitted-discovery","all (`elem` map (\\(name,_,_) -> name) (ledgerRows parsed)) required","True")
       ,("unavailable-boundary","all (isNothing . runSpawnFailure) [subject,oracle,probe]","all (isNothing . runSpawnFailure) [subject,oracle]")]]
-    <> [("omitted-discovery.seed","src/validation-kernel/Amoebius/Validation/Runner/Spec.hs","requiredSuiteRows spec | Just _ <- gateSeed spec =","requiredSuiteRows spec | False =", "authority.manifest.seed-names" : ["authority.manifest.omitted." <> name | name <- seedAuthorityRows])])
+    <> [("omitted-discovery.seed","src/validation-kernel/Amoebius/Validation/Authority/Core.hs","requiredSuiteRows spec | Just _ <- gateSeed spec =","requiredSuiteRows spec | False =", "authority.manifest.seed-names" : ["authority.manifest.omitted." <> name | name <- seedAuthorityRows])]
+    <> [("seed-image-change","src/validation-kernel/Amoebius/Validation/Authority/Core.hs","attemptImageBefore clean /= attemptImageBefore actual","attemptImageBefore clean == attemptImageBefore actual",["authority.finite.normal.verdict","authority.finite.same-image.verdict","authority.finite.same-image.same-image-refused"])
+       ,("seed-image-window","src/validation-kernel/Amoebius/Validation/Authority/Core.hs","\n        && before == after\n","\n        && before /= after\n",["authority.finite.normal.verdict","authority.finite.changed-image.verdict"])]
+    <> [(key,"src/validation-kernel/Amoebius/Validation/Authority/Core.hs",needle,replacement,red) | (key,needle,replacement,red)<-authorityTranscriptVariants])
  where keys = ["noop-subject","constant-success-checker","forged-exit","omitted-discovery","unavailable-boundary"]
+
+authorityTranscriptVariants :: [(Text,Text,Text,[Text])]
+authorityTranscriptVariants = [("wire-summary","wireRequire SummaryMismatch FooterPurpose (footerPurpose frame == if someRed then FinishedSomeRed else FinishedAllGreen)","wireRequire SummaryMismatch FooterPurpose True",["authority.transcript.red-summary-over-green-rows","authority.transcript.green-summary-over-red-rows"]),("wire-normal-terminal","wireRequire TerminalMismatch NativeTerminal (exit == if someRed then 1 else 0)","wireRequire TerminalMismatch NativeTerminal True",["authority.transcript.red-prefix-exit-zero","authority.transcript.green-prefix-exit-one","authority.transcript.red-prefix-exit-two"]),("wire-probe-terminal","wireRequire TerminalMismatch NativeTerminal (exit == 1)","wireRequire TerminalMismatch NativeTerminal True",["authority.transcript.probe-complete-footer-but-exit-zero"])]
 
 statusJoinChecks :: FilePath -> IO [(Text, Bool, Text)]
 statusJoinChecks = behaviorJoinChecks "status" "LTD-VAL-004" keys
@@ -580,7 +590,7 @@ bootstrapJoinChecks directory = do
         _ -> False
       sameSource = case (identity, other) of (Just (_, a, ac, _, _), Just (_, b, bc, _, _)) -> a == b && ac == bc; _ -> False
       changedSource = case witness :: Maybe (FilePath, Text, Text) of
-        Just (path, before, after) -> path == "src/validation-kernel/Amoebius/Validation/Runner/Legacy.hs"
+        Just (path, before, after) -> path == "src/validation-kernel/Amoebius/Validation/Authority/Core.hs"
           && Text.count "Pb.admitBootstrap (E.encodeUtf8 body)" before == 1 && before /= after
           && after == Text.replace "Pb.admitBootstrap (E.encodeUtf8 body)" "Right ()" before
         _ -> False
@@ -625,7 +635,7 @@ queryWeakeningChecks stem variants directory clean rows = fmap concat $ forM var
     removed <- not <$> doesPathExist (work </> "qualified/source")
     let identity = readMaybe (Text.unpack identities) :: Maybe KernelIdentity
         changedSource = case readMaybe (Text.unpack witness) :: Maybe (FilePath, Text, Text) of
-          Just (path, before, after) -> path == "src/validation-kernel/Amoebius/Validation/Runner/Legacy.hs"
+          Just (path, before, after) -> path == "src/validation-kernel/Amoebius/Validation/Authority/Core.hs"
             && Text.count needle before == 1 && after == Text.replace needle replacement before && before /= after
           _ -> False
         changedBinary = case (clean, identity) of

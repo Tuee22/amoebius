@@ -13,7 +13,7 @@ import System.Exit (exitFailure)
 import System.FilePath ((</>))
 import Text.Read (readMaybe)
 
-type Observation = (Text, Text, Text, [FilePath], [(FilePath, Text)], [Text])
+type Observation = (Text, Text, Text, Either Text ([FilePath], [(FilePath, Text)], [Text]))
 
 runIgnoreContextOracle :: FilePath -> IO ()
 runIgnoreContextOracle directory = do
@@ -28,7 +28,7 @@ ignoreContextChecks directory = do
   originalBytes <- try (mapM (\path -> (path,) <$> TextIO.readFile (root </> path)) policies) :: IO (Either IOException [(FilePath, Text)])
   baseline <- readValue (directory <> "/ignore-context-baseline.data") :: IO (Maybe [FilePath])
   observations <- readValue (directory <> "/ignore-context.data") :: IO (Maybe [Observation])
-  controls <- readValue (directory <> "/ignore-context-controls.data") :: IO (Maybe [(Text, [(FilePath, Text)], [Text])])
+  controls <- readValue (directory <> "/ignore-context-controls.data") :: IO (Maybe [(Text, Either Text ([(FilePath, Text)], [Text]))])
   cleanup <- readValue (directory <> "/ignore-context-cleanup.data") :: IO (Maybe Bool)
   present <- doesPathExist (directory <> "/ignore-context-tree")
   let paths = maybe [] id baseline
@@ -39,21 +39,23 @@ ignoreContextChecks directory = do
         && map fst originals == policies
         && all (`elem` paths) (policies <> ["src/Amoebius/Layout/Classify.hs", "test/layout/IgnoreContextCases.hs", "test/oracle/layout/IgnoreContextOracle.hs"])
       keys = [(name, variant, role) | (name, variant, _, _, _) <- examples, role <- ["positive", "negative"]]
-      selected name role = [(variant, found, bytes, findings) | (key, variant, control, found, bytes, findings) <- rows, key == name, control == role]
-      expected name role = [(variant, paths, [(path, bytes <> if path == target && role == "negative" then suffix else "") | (path,bytes) <- originals],
-          [code <> "\t" <> Text.pack target <> ":" <> Text.strip suffix | role == "negative"])
+      selected name role = [(variant, observed) | (key, variant, control, observed) <- rows, key == name, control == role]
+      expected name role = [(variant, Right (paths, [(path, bytes <> if path == target && role == "negative" then suffix else "") | (path,bytes) <- originals],
+          [code <> "\t" <> Text.pack target <> ":" <> Text.strip suffix | role == "negative"]))
         | (key, variant, target, suffix, code) <- examples, key == name]
-      expectedControls = [(name, [(path, if path == target then transform bytes else bytes) | (path,bytes) <- originals], findings)
+      expectedControls = [(name, Right ([(path, if path == target then transform bytes else bytes) | (path,bytes) <- originals], findings))
         | (name,target,transform,findings) <- controlCases]
       inventoryDelta = either (const Nothing) (\found -> Just (length found,
         sort (filter (`notElem` paths) found), filter (`notElem` found) paths)) original
       check name green detail = ("ignore-context." <> name, green, detail)
-  pure (check "discovery" (complete && sort [(a,b,c) | (a,b,c,_,_,_) <- rows] == sort keys)
-      (Text.pack (show (length paths, inventoryDelta, [(a,b,c) | (a,b,c,_,_,_) <- rows])))
+  pure (check "discovery" (complete && sort [(a,b,c) | (a,b,c,_) <- rows] == sort keys)
+      (Text.pack (show (length paths, inventoryDelta, [(a,b,c) | (a,b,c,_) <- rows])))
     : [check (name <> "." <> role) (complete && sort (selected name role) == sort (expected name role))
-        (Text.pack (show [(variant, length found, findings) | (variant,found,_,findings) <- selected name role]))
+        (Text.pack (show [(variant, fmap (\(found,_,findings) -> (length found,findings)) observed)
+          | (variant,observed) <- selected name role]))
         | name <- ["retired-generated-root", "undeclared-state-root"], role <- ["positive", "negative"]]
-    <> [check "control.inventory" (complete && controls == Just expectedControls) (Text.pack (show (fmap (map (\(name,_,findings) -> (name,findings))) controls))),
+    <> [check "control.inventory" (complete && controls == Just expectedControls)
+          (Text.pack (show (fmap (map (\(name,observed) -> (name,fmap snd observed))) controls))),
         check "control.cleanup" (cleanup == Just True && not present) (Text.pack (show (cleanup,present)))])
 
 walk :: FilePath -> [FilePath] -> IO [FilePath]

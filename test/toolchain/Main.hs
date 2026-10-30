@@ -8,16 +8,20 @@ import Amoebius.Toolchain.Probe
 import Amoebius.Toolchain.Provenance
 import Amoebius.Toolchain.Report
 import Amoebius.Toolchain.Resolve
-import Control.Exception (finally)
-import Control.Monad (forM, forM_, when)
+import Amoebius.Build.Serial (serialCabalArguments, serialGhcArguments)
+import Amoebius.Internal.Process.EmptyInput (tryReadEmptyInput)
+import Control.Exception (IOException, evaluate, finally)
+import Control.Monad (forM, forM_, when, filterM)
 import Data.List (isPrefixOf, isSuffixOf, sort)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as TextIO
-import System.Directory (createDirectory, createDirectoryIfMissing, copyFile, doesPathExist, findExecutable, getCurrentDirectory, makeAbsolute, removePathForcibly)
-import System.Environment (getArgs, getExecutablePath, getProgName)
+import System.Directory (createDirectory, createDirectoryIfMissing, createDirectoryLink, copyFile, doesDirectoryExist, doesFileExist, doesPathExist, findExecutable, getCurrentDirectory, listDirectory, makeAbsolute, removeDirectoryLink, removePathForcibly)
+import System.Environment (getArgs, getEnvironment, getExecutablePath, getProgName, lookupEnv, setEnv, unsetEnv)
 import System.Exit (ExitCode (..), exitWith)
-import System.FilePath (dropExtension, takeExtension, takeDirectory, (</>))
+import System.FilePath (dropExtension, makeRelative, takeExtension, takeDirectory, (</>))
+import System.Mem.StableName (makeStableName)
+import Text.Read (readMaybe)
 
 main :: IO ()
 main = do
@@ -40,6 +44,11 @@ main = do
           arguments <- getArgs
           case arguments of
             ["--native-tool-versions", output] -> writeAdmission output
+            ["--native-config-origin", output] -> do
+              directory <- makeAbsolute output
+              createDirectoryIfMissing True directory
+              writeNativeConfigPairs directory
+            ["--native-config-attempt", name, owner] -> observeNativeConfigOrigin (Text.pack name) owner >>= print
             ["--probe-source", output] -> writeProbeSource output
             ["--vendor-source", output] -> writeVendorSource output
             _ -> do
@@ -96,7 +105,7 @@ writeProbeSource output = do
   directory <- makeAbsolute output
   createDirectoryIfMissing True directory
   root <- getCurrentDirectory
-  paths <- probeSourcePaths <$> authoredPaths root
+  paths <- probeSourcePaths <$> fixtureSourcePaths root
   let fixtures = directory </> "probe-source-tree"
   present <- doesPathExist fixtures
   when present (fail "ProbeSourceFixtureRootNotFresh")
@@ -137,7 +146,7 @@ writeVendorSource output = do
   directory <- makeAbsolute output
   createDirectoryIfMissing True directory
   root <- getCurrentDirectory
-  paths <- vendorSourcePaths <$> authoredPaths root
+  paths <- vendorSourcePaths <$> fixtureSourcePaths root
   let fixtures = directory </> "vendor-source-tree"
       release = HackageRelease "supernova" "0.0.3"
       modulePath name = "src/vendor/" <> Text.unpack (Text.replace "." "/" name) <> ".hs"
@@ -166,9 +175,10 @@ writeVendorSource output = do
     clean <- map renderProvenanceRefusal <$> verifyFork fixtures
     missing <- forM forkModules $ \name -> do
       let path = modulePath name
-      removePathForcibly (fixtures </> path)
+      fixtureFilePresent <- doesFileExist (fixtures </> path)
+      when fixtureFilePresent (removePathForcibly (fixtures </> path))
       findings <- map renderProvenanceRefusal <$> verifyFork fixtures
-      copyFile (root </> path) (fixtures </> path)
+      when fixtureFilePresent (copyFile (root </> path) (fixtures </> path))
       pure (name, findings)
     TextIO.writeFile (directory </> "vendor-source.data") (Text.pack (show rows))
     TextIO.writeFile (directory </> "vendor-fork.data") (Text.pack (show (forkModules, ("clean", clean) : missing))))
@@ -181,6 +191,8 @@ observations root directory = do
   writeAdmission directory
   writeProbeSource directory
   writeVendorSource directory
+  writeSemanticPairs directory
+  writeResolutionSources directory
   selected <- selectToolchain root defaultToolchainPaths
   decodes <- decodeProbe (directory </> "decode")
   bridge <- bridgeProbe (directory </> "purs")
@@ -220,16 +232,111 @@ observations root directory = do
         if label == "MissingTool" then pure () else copyFile image path
         value <- selectToolchain root tools
         pure ("negative." <> label, either (Text.intercalate "; " . map renderRefusal) (const "accepted") value)
-      plan <- elaborate native (directory </> "resolve") probeRequirements
+      before <- sourceIdentity root
+      plan <- elaborateProbe native (directory </> "resolve-a") probeRequirements
+      other <- selectToolchain root defaultToolchainPaths
+      secondPlan <- case other of
+        Left refusals -> fail (Text.unpack (Text.intercalate "; " (map renderRefusal refusals)))
+        Right independent -> elaborateProbe independent (directory </> "resolve-b") probeRequirements
+      dropped <- elaborateProbe native (directory </> "resolve-dropped") (filter ((/= "dhall") . requirementPackage) probeRequirements)
+      droppedRoot <- doesPathExist (directory </> "resolve-dropped")
+      after <- sourceIdentity root
+      generatedPaths <- concat <$> mapM filesBelow [directory </> "resolve-a", directory </> "resolve-b"]
+      (ignored, ignoredOut, ignoredErr) <- spawnChild root "git" (["check-ignore", "--"] <> generatedPaths)
+      let projectPlan result = either (Left . renderResolveRefusal) (\(value, child) -> Right (planUnits value, planPackages value, planDigest value, childExit child, childArgv child)) result
+          compared = case (plan, secondPlan) of (Right (a, _), Right (b, _)) -> map renderResolveRefusal (planAgreement a b); _ -> ["ResolutionUnavailable"]
+          disagreement = case (plan, secondPlan) of
+            (Right (a, _), Right (b, _)) -> map renderResolveRefusal (planAgreement a (b
+              {planUnits = planUnits b <> ["unexpected-unit"], planPackages = planPackages b <> ["unexpected-package"], planDigest = Text.replicate 64 "0"}))
+            _ -> ["ResolutionUnavailable"]
+      TextIO.writeFile (directory </> "resolution.data") (Text.pack (show (projectPlan plan, projectPlan secondPlan, compared, disagreement, either (Left . renderResolveRefusal) (const (Right ())) dropped, droppedRoot, before, after, generatedPaths, childExit ignored)))
+      TextIO.writeFile (directory </> "resolution-raw.data") (Text.pack (show (native, plan, other, secondPlan, dropped, ignored, ignoredOut, ignoredErr)))
+      let forbiddenRoot = root </> "amoebius-resolution-refused"
+      occupied <- doesPathExist forbiddenRoot
+      when occupied (fail "ResolutionRefusalSentinelAlreadyPresent")
+      outside <- elaborateProbe native forbiddenRoot probeRequirements
+      outsideCreated <- doesPathExist forbiddenRoot
+      TextIO.writeFile (directory </> "resolution-root.data") (Text.pack (show
+        (forbiddenRoot, either (Left . renderResolveRefusal) (const (Right ())) outside, outsideCreated)))
       missing <- elaborate native (directory </> "missing") [Requirement "amoebius-absent-probe" "1" "2"]
       plugin <- installTool native (directory </> "tools") "proto-lens-protoc" "proto-lens-protoc"
+      TextIO.writeFile (directory </> "install-positive.data") (Text.pack (show (either (Left . renderResolveRefusal) Right plugin)))
+      let missingPackage = "amoebius-absent-tool-4391860a"
+          missingTools = directory </> "tools-missing"
+      availableMissing <- findExecutable missingPackage
+      when (availableMissing /= Nothing) (fail "FallbackExecutableMustBeAbsent")
+      fallback <- installTool native missingTools (Text.pack missingPackage) (Text.pack missingPackage)
+      fallbackExecutable <- doesPathExist (missingTools </> missingPackage)
+      let fallbackRefusal :: (Text,Text,Text)
+          fallbackRefusal = case fallback of
+            Left (ToolInstallFailed package detail) -> ("ToolInstallFailed",package,detail)
+            Left problem -> ("OtherRefusal",renderResolveRefusal problem,"")
+            Right _ -> ("accepted","","")
+      TextIO.writeFile (directory </> "install-fallback.data") (Text.pack (show (fallbackRefusal,fallbackExecutable)))
+      TextIO.writeFile (directory </> "install-fallback-raw.data") (Text.pack (show fallback))
       protoc <- findExecutable "protoc"
       generated <- case (plugin, protoc) of
-        (Right (compiler, _), Just executable) -> either renderProbeRefusal (Text.intercalate "," . map Text.pack . fst) <$> codegenProbe executable compiler (directory </> "proto")
-        (Left problem, _) -> pure (renderResolveRefusal problem)
-        _ -> pure "CodegenToolAbsent: protoc"
+        (Right (compiler, _), Just executable) -> do
+          result <- codegenProbe executable compiler (directory </> "proto")
+          recordCodegen directory (either (Left . renderProbeRefusal) Right result)
+        (Left problem, _) -> recordCodegen directory (Left (renderResolveRefusal problem))
+        _ -> recordCodegen directory (Left "CodegenToolAbsent: protoc")
       upstream <- acquireUpstream native (directory </> "upstream") forkUpstream
       mismatch <- acquireUpstream native (directory </> "upstream-negative") forkUpstream {upstreamTreeDigest = Text.replicate 64 "0"}
+      repeated <- case upstream of
+        Right acquired -> acquireUpstreamFromArchive (acquiredArchive acquired) (directory </> "upstream-second") forkUpstream
+        Left problem -> pure (Left problem)
+      let renderedUpstream = either (Left . renderProvenanceRefusal) (Right . renderAcquiredUpstream)
+          invalidIdentity = forkUpstream {upstreamName = "amoebius-other"}
+          invalidRoot = directory </> "upstream-invalid"
+      TextIO.writeFile (directory </> "upstream-rendered.data") (Text.pack (show (renderedUpstream upstream, renderedUpstream repeated)))
+      invalidUpstream <- case upstream of
+        Right acquired -> acquireUpstreamFromArchive (acquiredArchive acquired) invalidRoot invalidIdentity
+        Left problem -> pure (Left problem)
+      invalidCreated <- doesPathExist invalidRoot
+      TextIO.writeFile (directory </> "upstream-invalid.data") (Text.pack (show
+        (upstreamName invalidIdentity, either renderProvenanceRefusal (const "accepted") invalidUpstream, invalidCreated)))
+      TextIO.writeFile (directory </> "upstream-invalid-raw.data") (Text.pack (show invalidUpstream))
+      let missingArchive = directory </> "absent-upstream.tar.gz"
+          missingRoot = directory </> "upstream-missing"
+      missingUpstream <- acquireUpstreamFromArchive missingArchive missingRoot forkUpstream
+      missingCreated <- doesPathExist missingRoot
+      mismatchCreated <- doesPathExist (directory </> "upstream-negative")
+      let projectUpstream = either (Left . renderProvenanceRefusal) (\value -> Right
+            (upstreamName (acquiredIdentity value), upstreamVersion (acquiredIdentity value), acquiredDigest value, acquiredFiles value,
+             acquiredArchive value, acquiredArchiveDigest value, acquiredRoot value,
+             fmap (\child -> (childExit child, childArgv child)) (acquiredCacheQuery value),
+             [case action of CachedArchiveRead path digest -> ("read" :: Text,path,digest); ArchiveDirectoryCreated path -> ("directory",path,""); ArchiveFileWritten path digest -> ("file",path,digest) | action <- acquiredActions value]))
+      TextIO.writeFile (directory </> "upstream.data") (Text.pack (show
+        (projectUpstream upstream, projectUpstream repeated, either (Left . renderProvenanceRefusal) (const (Right ())) mismatch,
+         mismatchCreated, either (Left . renderProvenanceRefusal) (const (Right ())) missingUpstream, missingCreated)))
+      TextIO.writeFile (directory </> "upstream-raw.data") (Text.pack (show (upstream,repeated,mismatch,missingUpstream)))
+      identities <- forM [("empty-name",forkUpstream {upstreamName = ""}), ("empty-version",forkUpstream {upstreamVersion = ""})] $ \(name, identity) -> do
+        let destination = directory </> "upstream-identity" </> name
+        value <- acquireUpstream native destination identity
+        created <- doesPathExist destination
+        pure (name, either renderProvenanceRefusal (const "accepted") value, created)
+      TextIO.writeFile (directory </> "upstream-identities.data") (Text.pack (show identities))
+      let outsideUpstream = root </> "amoebius-upstream-refused"
+          linkedTarget = root </> "amoebius-upstream-link-refused"
+          link = directory </> "upstream-root-link"
+          linkedRequest = link </> "amoebius-upstream-link-refused"
+      occupiedOutside <- doesPathExist outsideUpstream
+      occupiedLinked <- doesPathExist linkedTarget
+      when (occupiedOutside || occupiedLinked) (fail "UpstreamRefusalSentinelAlreadyPresent")
+      rootPairs <- case upstream of
+        Left problem -> pure [("outside" :: Text,renderProvenanceRefusal problem,True),("symlink",renderProvenanceRefusal problem,True)]
+        Right acquired -> do
+          outsideUpstreamResult <- acquireUpstreamFromArchive (acquiredArchive acquired) outsideUpstream forkUpstream
+          outsideUpstreamCreated <- doesPathExist outsideUpstream
+          createDirectoryLink root link
+          (do
+            linked <- acquireUpstreamFromArchive (acquiredArchive acquired) linkedRequest forkUpstream
+            linkedCreated <- doesPathExist linkedTarget
+            pure [("outside",either renderProvenanceRefusal (const "accepted") outsideUpstreamResult,outsideUpstreamCreated)
+                 ,("symlink",either renderProvenanceRefusal (const "accepted") linked,linkedCreated)])
+            `finally` removeDirectoryLink link
+      TextIO.writeFile (directory </> "upstream-roots.data") (Text.pack (show rootPairs))
       pure (("versions.verdict", "accepted") : renderAcquisition native <> agreementRows <> disagreements <> [("versions.cabal-report-unavailable", either (const "refused") (const "accepted") cabalVersionFailure)] <> failures <>
         [("probe.codegen.files", generated), ("plan.packages", either renderResolveRefusal (Text.intercalate "," . planPackages . fst) plan)
         , ("negative.MissingDependency", either renderResolveRefusal (const "accepted") missing)
@@ -249,6 +356,168 @@ observations root directory = do
   none [] = "none"
   none values = Text.intercalate "; " values
   showT = Text.pack . show
+
+recordCodegen :: FilePath -> Either Text ([FilePath],ChildRecord) -> IO Text
+recordCodegen directory result = do
+  let schema = directory </> "proto/probe.proto"
+      output = directory </> "proto/generated"
+  schemaPresent <- doesPathExist schema
+  schemaBytes <- if schemaPresent then TextIO.readFile schema else pure ""
+  paths <- sort <$> filesBelow output
+  generated <- forM paths $ \path -> do
+    digest <- sha256File path
+    bytes <- TextIO.readFile path
+    pure (makeRelative output path,digest,bytes)
+  TextIO.writeFile (directory </> "codegen.data") (Text.pack (show (result,schemaBytes,generated)))
+  pure (either id (Text.intercalate "," . map Text.pack . fst) result)
+
+writeNativeConfigPairs :: FilePath -> IO ()
+writeNativeConfigPairs directory = do
+  let owner = directory </> "native-config-cases"
+      existing = owner </> "explicit.config"
+      missing = owner </> "explicit-missing.config"
+      implicit = owner </> "implicit-missing"
+  createDirectory owner
+  TextIO.writeFile existing "-- supplied read-only native configuration\n"
+  configObservations <- forM [("existing",Just existing),("implicit-missing",Nothing),("explicit-missing",Just missing)] $ \(name,explicit) ->
+    withEnvironment [("CABAL_CONFIG",explicit),("CABAL_DIR",Just implicit)] $ do
+      selected <- nativeCabalConfig owner
+      contents <- either (const (pure "")) TextIO.readFile selected
+      implicitCreated <- doesPathExist implicit
+      missingCreated <- doesPathExist missing
+      pure (name,selected,contents,implicitCreated,missingCreated)
+  TextIO.writeFile (directory </> "native-config.data") (Text.pack (show (configObservations :: [(Text,Either Text FilePath,Text,Bool,Bool)])))
+  root <- getCurrentDirectory
+  image <- getExecutablePath
+  environment <- getEnvironment
+  raw <- forM [("explicit-present",owner,Just existing),("implicit-fresh",owner,Nothing)
+    ,("explicit-missing",owner,Just missing),("explicit-empty",owner,Just "")
+    ,("owner-outside",root,Just existing)] $ \(name,selectedOwner,explicit) -> do
+      let selectedEnvironment = [(key,value) | (key,value) <- environment, key `notElem` ["CABAL_CONFIG","CABAL_DIR"]]
+            <> [("CABAL_DIR",implicit)] <> maybe [] (\value -> [("CABAL_CONFIG",value)]) explicit
+      child <- tryReadEmptyInput root image ["--native-config-attempt",name,selectedOwner] (Just selectedEnvironment)
+      case child of
+        Right (ExitSuccess,out,"") | Just row <- readMaybe out -> pure row
+        _ -> fail "NativeConfigControlChildUnavailable"
+  TextIO.writeFile (directory </> "native-config-origin.data") (Text.pack (show (raw :: [NativeConfigOriginRow])))
+
+type NativeConfigOriginRow = (Text,FilePath,[(String,Maybe (Either String String))],Maybe String,Maybe FilePath,Maybe String,Either String FilePath,Either Text FilePath,Bool)
+observeNativeConfigOrigin :: Text -> FilePath -> IO NativeConfigOriginRow
+observeNativeConfigOrigin name owner = do
+  attempt <- acquireNativeCabalConfigAttempt owner
+  let view = projectNativeCabalConfigAttempt attempt
+      result = actualNativeCabalConfigResult attempt
+      observations' = configAttemptObservations view
+      failures = [problem | NativeConfigObservation _ (Just (Left problem)) <- observations']
+  sameCause <- case (result,failures) of
+    (Left original,[recorded]) -> sameException original recorded
+    (Right _,[]) -> pure True
+    _ -> pure False
+  pure (name,configAttemptOwnerInput view
+    ,[(show step,fmap (either (Left . show) (Right . show)) returned) | NativeConfigObservation step returned <- observations']
+    ,show <$> configAttemptSelection view,configAttemptSelectedOperand view
+    ,show <$> configAttemptOrigin view,either (Left . show) Right result
+    ,projectNativeCabalConfigCompatibility attempt,sameCause)
+
+sameException :: IOException -> IOException -> IO Bool
+sameException original recorded = do
+  a <- evaluate original >>= makeStableName
+  b <- evaluate recorded >>= makeStableName
+  pure (a == b)
+
+withEnvironment :: [(String,Maybe String)] -> IO a -> IO a
+withEnvironment values action = do
+  previous <- forM values (\(key,_) -> (key,) <$> lookupEnv key)
+  let apply = mapM_ (\(key,value) -> maybe (unsetEnv key) (setEnv key) value)
+  (apply values >> action) `finally` apply previous
+
+-- Actual pure-domain observations, including a successful simulator run with
+-- no terminal value. These are observations, never alternate subject modes.
+writeSemanticPairs :: FilePath -> IO ()
+writeSemanticPairs directory = do
+  writeNativeConfigPairs directory
+  let schedules :: [(Text, Schedule)]
+      schedules = [("positive", cleanSchedule), ("negative", Schedule [])]
+      simulations = [(role, [(writerName w, writerDelay w, writerValue w) | w <- scheduleWriters schedule],
+        simulationTerminal schedule, either (Left . renderProbeRefusal) Right (simulateSchedule schedule), simProbe schedule)
+        | (role, schedule) <- schedules]
+      renderPlan result = either (Left . map renderPlanRefusal) (Right . map renderStep) result
+      cases :: [(Text,Text,Platform,Inventory,Catalogue)]
+      cases = [("absent-tool", role, examplePlatform, Inventory [], if negative then Catalogue [] else probeCatalogue)
+              | (role, negative) <- [("positive", False), ("negative", True)]]
+        <> [("out-of-range", role, examplePlatform, Inventory [("ghc", version)], probeCatalogue)
+              | (role, version) <- [("positive", [9,12,4]), ("negative", [9,10,1])]]
+        <> [("platform-asset", role, platform, Inventory [], probeCatalogue)
+              | (role, platform) <- [("positive", examplePlatform), ("negative", Platform "unsupported" "unknown")]]
+      plans = [(name, role, renderPlatform platform, inventoryTools inventory,
+        [assetTool asset <> "@" <> renderVersion (assetVersion asset) <> ":" <> renderPlatform (assetPlatform asset)
+          | asset <- catalogueAssets catalogue], renderPlan (planEnsure platform inventory catalogue (take 1 floorTools)))
+        | (name, role, platform, inventory, catalogue) <- cases]
+  TextIO.writeFile (directory </> "simulation.data") (Text.pack (show simulations))
+  TextIO.writeFile (directory </> "planner-pairs.data") (Text.pack (show plans))
+  TextIO.writeFile (directory </> "planner-pairs-raw.data") (Text.pack (show
+    [(name, role, platform, inventory, catalogue, take 1 floorTools, planEnsure platform inventory catalogue (take 1 floorTools))
+      | (name, role, platform, inventory, catalogue) <- cases]))
+  let cabalInputs = [["build","--dry-run"], ["build","-j","16","--jobs=8","--ghc-options=-O0 -j4","--","-j7"],
+        ["run","--with-compiler=/foreign/ghc","--with-ghc","foreign","-wother","-j8","--","--jobs=12"], ["build","-j","--jobs"],
+        ["build","--offline=False","--online","true","--no-offline","--offline","False","--online=False","--no-offline=true","--","--online"]]
+      ghcInputs = [["-fno-code"], ["-fno-code","-j","12","--","-j9"], ["-j","-O0"]]
+  TextIO.writeFile (directory </> "serial-arguments.data") (Text.pack (show
+    ([(input,serialCabalArguments "/native/ghc" input) | input <- cabalInputs], [(input,serialGhcArguments input) | input <- ghcInputs])))
+
+-- The source admission pairs inspect real files and their actual discovery,
+-- including an ignored generated freeze versus its tracked-root twin.
+writeResolutionSources :: FilePath -> IO ()
+writeResolutionSources directory = do
+  let fixture = directory </> "resolution-source-tree"
+      examples :: [(Text, FilePath, Text, FilePath, Text)]
+      examples = [("freeze", ".build/cabal.project.freeze", "constraints: dhall >=1.42 && <1.43\n", "cabal.project.freeze", "constraints: dhall >=1.42 && <1.43\n")
+        ,("package-pin", "cabal.project", "packages: .\n", "cabal.project", "constraints: dhall ==1.42.3\n")
+        ,("developer-home", "cabal.project.local", "with-compiler: ghc\n", "cabal.project.local", "with-compiler: /home/developer/ghc\n")
+        ,("multiline-pin", "cabal.project", "constraints:\n  dhall >=1.42 && <1.43, -- == is a comment\n  io-sim >=1.10 && <1.11\n", "cabal.project", "constraints:\n  dhall >=1.42 && <1.43, -- == is a comment\n  io-sim ==1.10.1.0\n")
+        ,("comment-only", "cabal.project", "-- constraints: dhall ==1.42.3\n", "cabal.project", "constraints: dhall ==1.42.3\n")]
+  present <- doesPathExist fixture
+  when present (fail "ResolutionSourceRootNotFresh")
+  rows <- forM examples $ \(name, positivePath, positiveBytes, negativePath, negativeBytes) ->
+    forM [("positive" :: Text, positivePath, positiveBytes), ("negative", negativePath, negativeBytes)] $ \(role, path, bytes) -> do
+      createDirectoryIfMissing True (takeDirectory (fixture </> path))
+      (do
+        TextIO.writeFile (fixture </> path) bytes
+        discovered <- sort <$> authoredPaths fixture
+        observed <- inspectTrackedArtefacts fixture
+        actual <- TextIO.readFile (fixture </> path)
+        pure (name, role, path, actual, discovered, map renderResolveRefusal observed))
+        `finally` removePathForcibly fixture
+  removed <- not <$> doesPathExist fixture
+  TextIO.writeFile (directory </> "resolution-sources.data") (Text.pack (show (concat rows, removed)))
+
+sourceIdentity :: FilePath -> IO [(FilePath, Text)]
+sourceIdentity root = do
+  paths <- fixtureSourcePaths root
+  mapM (\path -> (path,) <$> sha256File (root </> path)) paths
+
+-- Fixture copying and the unchanged-source measurement do not consume the
+-- product discovery result that the independent oracle is judging.
+fixtureSourcePaths :: FilePath -> IO [FilePath]
+fixtureSourcePaths root = sort . map (makeRelative root) <$> walk root
+ where
+  walk directory = do
+    names <- filter (`notElem` [".build", ".git", "dist-newstyle", ".data", ".test_data"]) <$> listDirectory directory
+    concat <$> forM names (\name -> do
+      let path = directory </> name
+      directoryPresent <- doesDirectoryExist path
+      if directoryPresent then walk path else do
+        filePresent <- doesFileExist path
+        pure [path | filePresent])
+
+filesBelow :: FilePath -> IO [FilePath]
+filesBelow root = do
+  present <- doesDirectoryExist root
+  if not present then pure [] else do
+    names <- sort <$> listDirectory root
+    directories <- filterM (doesDirectoryExist . (root </>)) names
+    nested <- concat <$> mapM (filesBelow . (root </>)) directories
+    pure ([root </> name | name <- names, name `notElem` directories] <> nested)
 
 cliObservations :: FilePath -> FilePath -> FilePath -> IO [(Text, Text)]
 cliObservations root directory image = do

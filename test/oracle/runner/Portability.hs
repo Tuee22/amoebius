@@ -12,13 +12,25 @@ import Data.Text.Encoding qualified as Encoding
 import Numeric (showHex)
 import System.Directory (exeExtension, makeAbsolute)
 import System.FilePath ((</>))
+import System.Exit (ExitCode (..))
 import Text.Read (readMaybe)
 
 observerChecks :: FilePath -> IO [(Text, Bool, Text)]
 observerChecks directory = do
   input <- TIO.readFile (directory </> "observer.tsv")
+  native <- TIO.readFile (directory </> "native-preparation.data")
+  absolute <- makeAbsolute directory
+  let child = do
+        (exit,out,err) <- readMaybe (T.unpack native) :: Maybe (ExitCode,String,String)
+        rows <- readMaybe out :: Maybe [(String,Either String (),Bool,Bool)]
+        pure (exit,rows,err)
+      problem = "NativeCabalConfigAbsent: " <> (absolute </> "reserved-absent.config")
+      expectedNative = [("strict",Left problem,True,False)
+        ,("prepare-compatibility",Left ("user error (" <> problem <> ")"),True,False)
+        ,("observer-compatibility",Left ("user error (" <> problem <> ")"),True,False)]
   let rows = map (T.splitOn "\t") (T.lines input)
       base = [("executable", "/subject"), ("argv", "[\"a b\",\"c\"]"), ("cwd", "/work"), ("environment-policy", "policy:a")
+        ,("environment", "[(\"SUPPLIED_FIXTURE\",\"value \\955\"),(\"EMPTY\",\"\")]")
         ,("exit", "ExitSuccess"), ("stdout-sha256", digest "λ\n"), ("stderr-sha256", digest ""), ("stdout-bytes", "3")]
       replace key value = map (\(k, v) -> (k, if key == k then value else v)) base
       cases = [("base", base), ("argv", replace "argv" "[\"a\",\"b c\"]"), ("policy", replace "environment-policy" "policy:b")
@@ -35,7 +47,8 @@ observerChecks directory = do
             wantedFields = [("process." <> key, value) | (key, value) <- fields] <> [("process.digest", wantedHash)]
          in [("observer." <> name <> ".fields", actual == Just wantedFields, T.pack (show actual))
             ,("observer." <> name <> ".digest", hash == wantedHash, hash)]
-  pure (("observer.discovery", sort [name | name : _ <- rows] == sort (map fst cases) && length rows == length cases, T.pack (show rows))
+  pure (("observer.native-preparation",child == Just (ExitSuccess,expectedNative,""),native)
+    : ("observer.discovery", sort [name | name : _ <- rows] == sort (map fst cases) && length rows == length cases, T.pack (show rows))
     : concatMap checks cases)
  where
   digest = T.pack . concatMap (\byte -> let digits = showHex byte "" in if length digits == 1 then '0' : digits else digits) . B.unpack . SHA256.hash . Encoding.encodeUtf8

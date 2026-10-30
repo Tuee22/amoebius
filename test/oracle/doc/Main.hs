@@ -9,20 +9,47 @@
 module Main (main) where
 
 import Control.Monad (unless)
+import Control.Exception (IOException, evaluate, throwIO, try)
+import Crypto.Hash.SHA256 qualified as SHA256
+import Data.ByteString qualified as ByteString
 import Data.List (sort)
 import Data.Map.Strict qualified as Map
 import Data.Text (Text)
 import Data.Text qualified as Text
+import Data.Text.Encoding qualified as Encoding
 import Data.Text.IO qualified as TextIO
+import Numeric (showHex)
+import Numeric.Natural (Natural)
 import System.Directory (doesDirectoryExist, doesFileExist)
 import System.Environment (getArgs)
-import System.Exit (exitFailure)
+import System.Exit (ExitCode (..), exitFailure, exitWith)
+import System.IO (hFlush, hSetEncoding, hSetNewlineMode, noNewlineTranslation, stderr, stdout, utf8)
+import System.IO.Error (isDoesNotExistError)
 
 main :: IO ()
 main = do
-  arguments <- getArgs
-  (input, findingsPath, negativesPath) <- case arguments of
-    [path] -> do
+  supplied <- getArgs
+  (invocation, arguments) <- invocationArguments supplied
+  case invocation of
+    Just _ -> do
+      hSetEncoding stderr utf8
+      hSetNewlineMode stderr noNewlineTranslation
+    Nothing -> pure ()
+  inventory <- inventoryRequest invocation arguments
+  case inventory of
+    Just challenge -> emitInventory challenge
+    Nothing -> runJudgments invocation arguments
+
+runJudgments :: Maybe Text -> [String] -> IO ()
+runJudgments invocation arguments = do
+  (input, findingsPath, negativesPath) <- case (invocation, arguments) of
+    (Just _, [path]) -> do
+      directory <- doesDirectoryExist path
+      if directory
+        then pure (path <> "/plan-decisions.tsv", Just (path <> "/findings.tsv"), Just (path <> "/negatives.tsv"))
+        else invocationFailure "InvocationDirectoryRequired"
+    (Just _, _) -> invocationFailure "InvocationArguments"
+    (Nothing, [path]) -> do
       directory <- doesDirectoryExist path
       if directory
         then do
@@ -30,15 +57,139 @@ main = do
           negativesPresent <- doesFileExist (path <> "/negatives.tsv")
           pure (path <> "/plan-decisions.tsv", if findingsPresent then Just (path <> "/findings.tsv") else Nothing, if negativesPresent then Just (path <> "/negatives.tsv") else Nothing)
         else pure (path, Nothing, Nothing)
-    [path, findings] -> pure (path, Just findings, Nothing)
-    [path, findings, negatives] -> pure (path, Just findings, Just negatives)
-    _ -> pure (".build/runs/phase-00/plan-decisions.tsv", Nothing, Nothing)
-  contents <- TextIO.readFile input
-  findingRows <- maybe (pure Nothing) (fmap (Just . tsvRows) . TextIO.readFile) findingsPath
-  negativeRows <- maybe (pure Nothing) (fmap (Just . tsvRows) . TextIO.readFile) negativesPath
+    (Nothing, [path, findings]) -> pure (path, Just findings, Nothing)
+    (Nothing, [path, findings, negatives]) -> pure (path, Just findings, Just negatives)
+    (Nothing, _) -> pure (".build/runs/phase-00/plan-decisions.tsv", Nothing, Nothing)
+  contents <- requiredRead invocation input
+  findingRows <- maybe (pure Nothing) (fmap (Just . tsvRows) . requiredRead invocation) findingsPath
+  negativeRows <- maybe (pure Nothing) (fmap (Just . tsvRows) . requiredRead invocation) negativesPath
   let ledger = judge (tsvRows contents) <> maybe [] judgeFindings findingRows <> maybe [] judgeNegatives negativeRows
-  mapM_ (TextIO.putStrLn . renderRow) ledger
-  unless (all rowGreen ledger) exitFailure
+  case invocation of
+    Nothing -> do
+      mapM_ (TextIO.putStrLn . renderRow) ledger
+      unless (all rowGreen ledger) exitFailure
+    Just challenge -> do
+      let prefix = Text.unlines (map renderRow ledger)
+          count = foldr (const (+ 1)) 0 ledger :: Natural
+          green = all rowGreen ledger
+      emitCompletion challenge prefix count (if green then "all-green" else "some-red") "-"
+      exitWith (if green then ExitSuccess else ExitFailure 1)
+
+-- Inventory is a separately selected, no-input declaration, not a semantic pass.
+inventoryRequest :: Maybe Text -> [String] -> IO (Maybe Text)
+inventoryRequest invocation arguments
+  | "--oracle-inventory" `notElem` arguments = pure Nothing
+  | otherwise = case invocation of
+      Nothing -> invocationFailure "InvocationRequired"
+      Just challenge -> case arguments of
+        ["--oracle-inventory", profile]
+          | profile == "--oracle-inventory" -> invocationFailure "InventoryArguments"
+          | profile == "doc.full.v1" -> pure (Just challenge)
+          | otherwise -> invocationFailure "InventoryProfileUnknown"
+        _ -> invocationFailure "InventoryArguments"
+
+emitInventory :: Text -> IO ()
+emitInventory challenge = do
+  let prefix = Text.unlines [name <> "\tgreen\tdeclared" | name <- docInventoryNames]
+      count = foldr (const (+ 1)) 0 docInventoryNames :: Natural
+  emitCompletion challenge prefix count "all-green" "-"
+  exitWith ExitSuccess
+
+-- These literals declare this oracle's complete required-input profile.
+-- They are independent of judged inputs, optional-file discovery and GateSpec.
+docInventoryNames :: [Text]
+docInventoryNames =
+  [ "phase.cardinality"
+  , "phase.table"
+  , "phase.resource-required"
+  , "phase.paths"
+  , "predecessor.50"
+  , "predecessor.0"
+  , "predecessor.1"
+  , "successor.9"
+  , "successor.95"
+  , "role.DSL_BARRIER"
+  , "role.BOOTSTRAP_HANDOFF"
+  , "role.HOST_ENSURE"
+  , "role.FIRST_HARDWARE"
+  , "role.REGISTRY_BOUNDARY"
+  , "gap"
+  , "integrity.problems"
+  , "legacy.cardinality"
+  , "legacy.owners"
+  , "decision.ids"
+  , "frozen.paths"
+  , "frozen.digests"
+  , "frozen.decisions"
+  , "frozen.amendments"
+  , "frozen.amendment-digests"
+  , "evidence-path.cardinality"
+  , "evidence-path.results"
+  , "evidence-parser.bundle-only"
+  , "evidence-parser.void-only"
+  , "evidence-parser.void-fields"
+  , "doc.findings"
+  , "doc.governed-count-observed"
+  , "negative.discovery"
+  , "negative.broken-link"
+  , "negative.stale-backlink"
+  , "negative.missing-status-line"
+  , "negative.non-frontier-status-vector"
+  , "negative.unauthorised-frozen-edit"
+  , "negative.uncited-module-claim"
+  , "negative.gate-spec-block-mismatch"
+  , "negative.decision-log-out-of-order"
+  , "negative.receipt-line-unexpected"
+  ]
+
+-- This flag opts into the full directory contract before legacy dispatch.
+-- A marker is bookkeeping from this oracle, never a caller-issued gate proof.
+invocationArguments :: [String] -> IO (Maybe Text, [String])
+invocationArguments arguments = case arguments of
+  "--oracle-invocation" : challenge : rest
+    | "--oracle-invocation" `elem` rest -> invocationFailure "InvocationRepeated"
+    | length challenge /= 64 || not (all lowerHex challenge) -> invocationFailure "InvocationMalformed"
+    | otherwise -> pure (Just (Text.pack challenge), rest)
+  ["--oracle-invocation"] -> invocationFailure "InvocationValueMissing"
+  _ | "--oracle-invocation" `elem` arguments -> invocationFailure "InvocationPosition"
+    | otherwise -> pure (Nothing, arguments)
+ where lowerHex char = ('0' <= char && char <= '9') || ('a' <= char && char <= 'f')
+
+invocationFailure :: String -> IO a
+invocationFailure reason = do
+  TextIO.hPutStrLn stderr ("oracle-doc: " <> Text.pack reason)
+  exitWith (ExitFailure 2)
+
+-- Only an actual named missing read earns the separate input-refusal marker.
+-- Other IO failures propagate without a completion marker or invented rows.
+requiredRead :: Maybe Text -> FilePath -> IO Text
+requiredRead Nothing path = TextIO.readFile path
+requiredRead (Just challenge) path = do
+  attempted <- try (TextIO.readFile path >>= \body -> evaluate (Text.length body) >> pure body)
+  case attempted of
+    Right body -> pure body
+    Left problem | isDoesNotExistError problem -> do
+      TextIO.hPutStrLn stderr (Text.pack (show (problem :: IOException)))
+      hFlush stderr
+      emitCompletion challenge "" 0 "required-input-missing" (Text.pack (show (Text.pack path)))
+      exitWith (ExitFailure 1)
+    Left problem -> throwIO (problem :: IOException)
+
+emitCompletion :: Text -> Text -> Natural -> Text -> Text -> IO ()
+emitCompletion challenge prefix count purpose locus = do
+  let digest = Text.pack (concatMap hexByte (ByteString.unpack (SHA256.hash (Encoding.encodeUtf8 prefix))))
+      footer = Text.intercalate "\t"
+        ["oracle.protocol.complete.v1", "green", "retained-text-utf8.v1", challenge,
+         Text.pack (show count), digest, purpose, locus] <> "\n"
+  _ <- evaluate (Text.length prefix)
+  _ <- evaluate (Text.length footer)
+  hSetEncoding stdout utf8
+  hSetNewlineMode stdout noNewlineTranslation
+  TextIO.hPutStr stdout prefix
+  hFlush stdout
+  TextIO.hPutStr stdout footer
+  hFlush stdout
+ where hexByte byte = let digits = showHex byte "" in if length digits == 1 then '0' : digits else digits
 
 tsvRows :: Text -> [[Text]]
 tsvRows contents = map (Text.splitOn "\t") (filter (not . Text.null) (Text.lines contents))
@@ -220,21 +371,21 @@ expectedLegacy =
   ]
 
 expectedDecisions :: [Text]
-expectedDecisions = ["DL-0001", "DL-0002", "DL-0003", "DL-0004", "DL-0005", "DL-0006", "DL-0007", "DL-0008", "DL-0009", "DL-0010", "DL-0011", "DL-0012", "DL-0013", "DL-0014", "DL-0015", "DL-0016", "DL-0017", "DL-0018", "DL-0019", "DL-0020", "DL-0021", "DL-0022", "DL-0023", "DL-0024", "DL-0025", "DL-0026", "DL-0027", "DL-0028", "DL-0029", "DL-0030", "DL-0031", "DL-0032", "DL-0033", "DL-0034", "DL-0035", "DL-0036"]
+expectedDecisions = ["DL-0001", "DL-0002", "DL-0003", "DL-0004", "DL-0005", "DL-0006", "DL-0007", "DL-0008", "DL-0009", "DL-0010", "DL-0011", "DL-0012", "DL-0013", "DL-0014", "DL-0015", "DL-0016", "DL-0017", "DL-0018", "DL-0019", "DL-0020", "DL-0021", "DL-0022", "DL-0023", "DL-0024", "DL-0025", "DL-0026", "DL-0027", "DL-0028", "DL-0029", "DL-0030", "DL-0031", "DL-0032", "DL-0033", "DL-0034", "DL-0035", "DL-0036", "DL-0037", "DL-0038", "DL-0039", "DL-0040", "DL-0041", "DL-0042"]
 
 expectedFrozenAmendments :: [(Text, Text)]
 expectedFrozenAmendments =
   [ ("AGENTS.md", "DL-0025")
-  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "DL-0035")
+  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "DL-0037")
   , ("DEVELOPMENT_PLAN/development_plan_phase_model.md", "DL-0026")
   , ("DEVELOPMENT_PLAN/development_plan_standards.md", "DL-0026")
-  , ("DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md", "DL-0036")
+  , ("DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md", "DL-0042")
   , ("documents/documentation_standards.md", "DL-0025")
   , ("documents/engineering/capability_extension_doctrine.md", "DL-0030")
   , ("documents/engineering/cluster_topology_doctrine.md", "DL-0032")
   , ("documents/engineering/dsl_doctrine.md", "DL-0033")
   , ("documents/engineering/extension_conformance_doctrine.md", "DL-0030")
-  , ("documents/engineering/gate_runner_doctrine.md", "DL-0036")
+  , ("documents/engineering/gate_runner_doctrine.md", "DL-0041")
   , ("documents/engineering/gateway_migration_model_doctrine.md", "DL-0027")
   , ("documents/engineering/generated_artifacts_doctrine.md", "DL-0020")
   , ("documents/engineering/image_build_doctrine.md", "DL-0033")
@@ -259,16 +410,16 @@ expectedFrozenAmendments =
 expectedFrozenAmendmentDigests :: [(Text, Text)]
 expectedFrozenAmendmentDigests =
   [ ("AGENTS.md", "7be90c67243b16190ea0e617001abffcbc1bfc2b4e964a009237a8a9ea497e4a")
-  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "ba79ad93b92b9f598830b36cccc400c766f2fe3023cf2b8abd5715a9254f1709")
+  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "0399ef282395ac29890123c00fb4c9c422d53a5b987527a57a7fbe1ecacf3cf2")
   , ("DEVELOPMENT_PLAN/development_plan_phase_model.md", "1136bf4ed4c58706bbf1b6b56be94fc53ac3f92c9ccdc0d23541818cb6029da4")
   , ("DEVELOPMENT_PLAN/development_plan_standards.md", "4c9e6cd0a1807fd567d016c957b4e1ab89a007a2dcd8e5fa8b9a25274da9d540")
-  , ("DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md", "667104f4613154482cc5b833131bea2dd6e2287adec1a6f0d72779dba1b92072")
+  , ("DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md", "d0ac8b12e284a73c6169e2f4b17c61dcc0a6af7e81bc910e70076bd04591fa13")
   , ("documents/documentation_standards.md", "a4106423d4b91b09e0c7d06ccd77e11ac3d803df225ef5f975d7aa34b77581f6")
   , ("documents/engineering/capability_extension_doctrine.md", "b49391608c652002512a1e96e16d8c851d3ea9c5ee74649184d55a8bc048cb4f")
   , ("documents/engineering/cluster_topology_doctrine.md", "8bd3a30192bb5c5a503d2d83810d76643e4d00b2e4499bf7e090b810165b3a76")
   , ("documents/engineering/dsl_doctrine.md", "04a07eb05059211cee20e41124b57a4d142a6c17d5f72ba1475680dee60ba897")
   , ("documents/engineering/extension_conformance_doctrine.md", "fff6ab90d9326aa71bf9a2132f1b45de1c573fe2975a9796b37cf000bd807980")
-  , ("documents/engineering/gate_runner_doctrine.md", "4fc1b68341f849fd59696c789eae9d56dc728e0ee53468d522867ca6c4760161")
+  , ("documents/engineering/gate_runner_doctrine.md", "f678fabdf99b0dc289ae1303c9eca80d45a5a14f4073ad13c57f7bdf4fd74771")
   , ("documents/engineering/gateway_migration_model_doctrine.md", "e631499a6a16cbf4e410ba0aa766163356fbc5fc922dca5a8d37f896e74489a6")
   , ("documents/engineering/generated_artifacts_doctrine.md", "5dfae009252ba074136652107c465097eb9ef06dbbaaf7b768f4fdd2109ee763")
   , ("documents/engineering/image_build_doctrine.md", "1fbdd374a3c78146aef8486ce31f4026356b3d8856c67e9281e072683bdc92ca")

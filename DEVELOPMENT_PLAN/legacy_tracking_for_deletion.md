@@ -40,8 +40,34 @@ Exactly one reader-facing legacy register is permitted, at this path. A second c
 superseded, archived, or completed-row ledger is prohibited. Git history retains deleted explanations.
 A row may be removed only after its typed transition, independently qualified reintroduction cases, and
 complete owning-phase gate pass under the accepted certification baseline. Remove closed explanations
-while retaining their Haskell identities and regression bindings
-([DL-0036](../documents/decision_log.md#dl-0036--phase-1-acceptance-retires-its-qualified-toolchain-bindings)).
+while retaining their Haskell identities and regression bindings. The repaired Phase-1 gate's separate
+acceptance on 2026-10-23 qualified its three owning bindings; DL-0038 removed exactly their three
+reader rows and preserves the identities, analyzers, source queries, canonical reintroductions and all
+inherited guards. Its same-context unmodified control had 135 complete green rows and retained raw process
+observations; the accepted bundle is linked from the [Phase-1 evidence](phase_01_toolchain_spike.md#phase-status).
+DL-0037's normative control rule remains in force. Those lifecycle and governance edits required numerical
+replay through Phase 1 before the successor integrated gate ([DL-0038](../documents/decision_log.md#dl-0038--a-qualified-repaired-toolchain-pass-retires-its-three-bindings)).
+
+The recursive same-worktree custody refusal reactivated exactly `LTD-VAL-003` under
+[DL-0039](../documents/decision_log.md#dl-0039--recursive-custody-preserves-accepted-completed-prefixes), followed by its receipt-bearing reset.
+The separate complete owning-phase acceptance linked from the [Phase-0 evidence](phase_00_documentation_suite.md#phase-status)
+qualified the reopened binding and its four canonical cases.
+[DL-0040](../documents/decision_log.md#dl-0040--qualified-recursive-custody-retires-its-reopened-binding) therefore restores Retired and removes exactly its single reader row.
+All forty-four Haskell identities, owners, analyzers, source queries, independent expectations, the four
+canonical cases and retained guards remain. This retirement does not itself prove successor recursive
+gate integration: its changed governance requires complete numerical replay of Phase 0, then fresh
+Phase-1 preview and separate acceptance before the Phase-2 preview and separate acceptance. No status or
+historical receipt is edited by this amendment.
+
+[DL-0041](../documents/decision_log.md#dl-0041--runner-authority-reopens-for-image-and-oracle-completion-witnesses) reopened `LTD-VAL-001` for absent rebuilt-image and normal-completion witnesses.
+The subsequent complete owning acceptance linked from the [Phase-0 evidence](phase_00_documentation_suite.md#phase-status)
+qualified the repaired boundary and its explicit extension while retaining the five canonical cases.
+[DL-0042](../documents/decision_log.md#dl-0042--qualified-image-and-completion-custody-retires-runner-authority)
+restores Retired and removes exactly that active reader row. All forty-four Haskell identities, owners,
+analyzers, source queries, independent expectations, canonical cases and retained guards remain.
+The lifecycle and governance amendment requires complete Phase-0 replay before fresh Phase-1 preview
+and separate acceptance, followed by Phase 2 in order. It edits no protected status or receipt field
+and supplies no successor gate pass.
 
 The canonical-file structural seam checks one regular, non-executable UTF-8 register and absence of the
 forbidden archive basename. Ordinary documentation checks may inspect metadata, headings, links, and the

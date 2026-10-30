@@ -387,7 +387,13 @@ phase's patch.
 
 ### Remaining Work
 
-The specification is registered and the front half is deleted. The complete gate is the remaining work; the `accept` ends this phase.
+The specification is registered and the front half is deleted. Complete the Haskell-owned wire declarations for all
+64 messages, 339 fields, and 15 enum types, generate their schemas and fresh Haskell bindings beneath `.build/proto/**`,
+and have the independent oracle judge the full schema and every message-constructor round trip, including the
+changed-field-number negative. Build the native client and all 17 maintained compatibility modules against the fresh
+bindings, and link and exercise their actual pure wire consumers through the shipped `amoebius` binary. These gaps
+remain alongside the complete existing spine gate; its controls must be preserved, and a separate successful `accept`
+is still required to end this phase.
 
 ## Documentation Requirements
 

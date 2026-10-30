@@ -34,7 +34,7 @@ sourceGraphChecks directory = do
   acquisition <- try (snapshot root []) :: IO (Either IOException Snapshot)
   baseline <- readValue (directory </> "source-graph-baseline.data") :: IO (Maybe (Snapshot,Snapshot))
   observed <- readValue (directory </> "source-graph.data") :: IO (Maybe [Observation])
-  whole <- readValue (directory </> "source-graph-whole.data") :: IO (Maybe ([Text],[Text]))
+  whole <- readValue (directory </> "source-graph-whole.data") :: IO (Maybe (Either (Text,Text) ([Text],[Text])))
   controls <- readValue (directory </> "source-graph-controls.data") :: IO (Maybe [(Text,[Text])])
   cleanup <- readValue (directory </> "source-graph-cleanup.data") :: IO (Maybe Bool)
   present <- doesPathExist (directory </> "source-graph-tree")
@@ -74,13 +74,14 @@ sourceGraphChecks directory = do
           ,("kind",["SourceSnapshotKindChanged\t" <> Text.pack path])]
         [] -> Nothing
       wholeValid = case whole of
-        Just ([],graphRows) -> [row | row <- graphRows,"graph-stage\t" `Text.isPrefixOf` row] == ["graph-stage\tresolved"]
+        Just (Right ([],graphRows)) -> [row | row <- graphRows,"graph-stage\t" `Text.isPrefixOf` row] == ["graph-stage\tresolved"]
           && sort [Text.unpack path | row <- graphRows,["graph-file",path,_] <- [Text.splitOn "\t" row]] == sort (filter ((== ".hs") . takeExtension) paths)
           && null [row | row <- graphRows,graphEvidence row,not ("graph-stage\t" `Text.isPrefixOf` row || "graph-file\t" `Text.isPrefixOf` row)]
         _ -> False
       check name green detail = ("source-graph." <> name,green,detail)
   pure (check "discovery" (complete && wholeValid && sort [(key,role) | (key,role,_,_,_,_,_) <- rows] == sort [(key,role) | key <- keys,role <- ["positive","negative"]])
-      (Text.pack (show (length paths, fmap (\(a,b) -> (length a,length b)) baseline, fmap (\(fs,rs) -> (fs,length rs)) whole)))
+      (Text.pack (show (length paths, fmap (\(a,b) -> (length a,length b)) baseline,
+        fmap (fmap (\(fs,rs) -> (fs,length rs))) whole)))
     : [check (key <> "." <> role) (validRow key role) (Text.pack (show [(length actual,fs,gfs,filter graphEvidence rs) | (name,control,_,actual,fs,gfs,rs) <- rows,name == key,control == role])) | key <- keys,role <- ["positive","negative"]]
     <> [check "control.inventory" (complete && controls == expectedControls) "empty, duplicate and changed-kind references are refused exactly"
        ,check "control.cleanup" (cleanup == Just True && not present) (Text.pack (show (cleanup,present)))])

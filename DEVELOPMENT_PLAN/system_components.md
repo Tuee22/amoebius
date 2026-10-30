@@ -65,10 +65,11 @@ that rule.
 
 **Target boundary** ([DL-0034](../documents/decision_log.md#dl-0034--phase-0-acceptance-qualifies-the-finite-seed-boundary)).
 
-Observed implementation: `Amoebius.Plan.Legacy` supplies the canonical identity, owner, scope and case
-bindings that the accepted seed joins to its forty-five source-bound reports and nine qualifications.
-Later-owned rows remain explicit forward deferrals, and the scoped bootstrap observation supplies no
-whole-snapshot retirement [GateSpec:documentation_suite].
+The closed Haskell inventory must supply canonical identity, owner, scope and case bindings for every
+legacy obligation. The finite [Phase-0 gate](phase_00_documentation_suite.md#gate-integrity) must join the
+complete source-bound report inventory with every required qualification. Later-owned rows must remain
+explicit forward deferrals. The captured-bootstrap qualification must retain its distinct scope and supply
+no whole-snapshot retirement; only the complete owning gate may authorize that transition.
 
 The component rows contain no present-tree audit, historical result, stale receipt or deletion checklist.
 The closed typed inventory must own divergence identities and obligations; the owning Haskell

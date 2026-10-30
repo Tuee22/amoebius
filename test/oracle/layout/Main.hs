@@ -11,14 +11,15 @@ import RuntimeIdentityOracle (runtimeIdentityChecks, runtimeIdentityExampleCheck
 import IgnoreContextOracle (ignoreContextChecks, ignoreContextExampleChecks, runIgnoreContextOracle)
 import SourceGraphOracle (sourceGraphChecks, sourceGraphExampleChecks, runSourceGraphOracle)
 import BootstrapSourceOracle (bootstrapSourceChecks, bootstrapSourceExampleChecks, runBootstrapSourceOracle, expectedBootstrapCalls, expectedBootstrapEffects)
+import ReportTransport (expandLayoutReport)
 
-import Control.Exception (SomeException, try)
-import Control.Monad (unless)
+import Control.Exception (IOException, SomeAsyncException, SomeException, evaluate, fromException, throwIO, try)
+import Control.Monad (forM, unless, when)
 import Crypto.Hash.SHA256 qualified as SHA256
 import Data.Aeson (Value, eitherDecodeStrict', withObject, (.:))
 import Data.Aeson.Types (Parser, parseEither)
 import Data.ByteString qualified as ByteString
-import Data.Char (intToDigit, isControl, isLower, isUpper)
+import Data.Char (intToDigit, isAlphaNum, isControl, isLower, isUpper)
 import Data.List (sort)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
@@ -28,17 +29,48 @@ import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 import Data.Text.Encoding.Error (lenientDecode)
 import Data.Text.IO qualified as TextIO
-import System.Directory (createDirectoryIfMissing)
+import Numeric.Natural (Natural)
+import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, getCurrentDirectory, listDirectory, makeAbsolute, pathIsSymbolicLink)
 import System.Environment (getArgs)
-import System.Exit (ExitCode (..), exitFailure, exitSuccess)
+import System.Exit (ExitCode (..), exitFailure, exitSuccess, exitWith)
 import System.FilePath (normalise, takeExtension, (</>))
+import System.IO (hFlush, hSetEncoding, hSetNewlineMode, noNewlineTranslation, stderr, stdout, utf8)
+import System.IO.Error (isDoesNotExistError)
 import System.Process (readProcessWithExitCode)
+import Text.Read (readMaybe)
 import SourceScan
+import StaticTextCaptureOracle (staticTextReference)
+import StaticTextCasesOracle (staticTextChecks, staticTextCaseNames, staticTextExampleChecks, runStaticTextOracle)
+import LexicalCasesOracle (lexicalCompatibilityChecks, lexicalCompatibilityNames, lexicalCompatibilityExampleChecks, runLexicalCompatibilityOracle)
+import StaticTextSurfaceOracle (surfaceChecks,surfaceNames,surfaceExampleChecks,runSurfaceOracle)
+import Codec.Compression.GZip qualified as GZip
+import Data.ByteString.Lazy qualified as LazyBytes
 
 main :: IO ()
 main = do
-  arguments <- getArgs
+  supplied <- getArgs
+  when (any (`elem` supplied) ["--oracle-invocation", "--oracle-inventory"]) $ do
+    hSetEncoding stderr utf8
+    hSetNewlineMode stderr noNewlineTranslation
+  (invocation, arguments) <- invocationArguments supplied
+  inventory <- inventoryRequest invocation arguments
+  case inventory of
+    Just (challenge, withBinary) -> do
+      names <- layoutInventoryNames withBinary
+      emitCompletion challenge (Text.unlines [name <> "\tgreen\tdeclared" | name <- names])
+        (foldr (const (+ 1)) 0 names) "all-green" "-"
+      exitWith ExitSuccess
+    Nothing -> case invocation of
+      Nothing -> legacyMain arguments
+      Just challenge -> runNormalInvocation challenge arguments
+
+-- Keep the specialized and unflagged diagnostics on their original routes.
+legacyMain :: [String] -> IO ()
+legacyMain arguments = do
   case arguments of
+    ["--static-text-surface", target] -> runSurfaceOracle target >> exitSuccess
+    ["--lexical-compatibility", target] -> runLexicalCompatibilityOracle target >> exitSuccess
+    ["--static-text", target] -> runStaticTextOracle expectedSinkTable target >> exitSuccess
     ["--bootstrap-source", target] -> runBootstrapSourceOracle target >> exitSuccess
     ["--source-graph", target] -> runSourceGraphOracle target >> exitSuccess
     ["--ignore-context", target] -> runIgnoreContextOracle target >> exitSuccess
@@ -51,7 +83,402 @@ main = do
   let directory = case arguments of
         [path] -> path
         _ -> ".build/runs/layout-suite"
-  expectedPaths <- map Text.unpack . Text.lines <$> TextIO.readFile (directory </> "paths.txt")
+  primary <- TextIO.readFile (directory </> "paths.txt")
+  checks <- layoutChecks directory primary
+  mapM_ (TextIO.putStrLn . renderCheck) checks
+  unless (all (\(_, green, _) -> green) checks) exitFailure
+
+-- A challenge is bookkeeping. Only the native runner can bind this output to
+-- the source copy, actual process return and exact selected executable images.
+invocationArguments :: [String] -> IO (Maybe Text, [String])
+invocationArguments arguments = case arguments of
+  "--oracle-invocation" : challenge : rest
+    | "--oracle-invocation" `elem` rest -> invocationFailure "InvocationRepeated"
+    | length challenge /= 64 || not (all lowerHex challenge) -> invocationFailure "InvocationMalformed"
+    | otherwise -> pure (Just (Text.pack challenge), rest)
+  ["--oracle-invocation"] -> invocationFailure "InvocationValueMissing"
+  _ | "--oracle-invocation" `elem` arguments -> invocationFailure "InvocationPosition"
+    | otherwise -> pure (Nothing, arguments)
+ where lowerHex character = ('0' <= character && character <= '9') || ('a' <= character && character <= 'f')
+
+inventoryRequest :: Maybe Text -> [String] -> IO (Maybe (Text, Bool))
+inventoryRequest invocation arguments
+  | "--oracle-inventory" `notElem` arguments = pure Nothing
+  | otherwise = case (invocation, arguments) of
+      (Just challenge, ["--oracle-inventory", "layout.full.v1"]) -> pure (Just (challenge, False))
+      (Just challenge, ["--oracle-inventory", "layout.gate.v1"]) -> pure (Just (challenge, True))
+      (Nothing, _) -> invocationFailure "InvocationRequired"
+      (Just _, ["--oracle-inventory", _]) -> invocationFailure "InventoryProfileUnknown"
+      _ -> invocationFailure "InventoryArguments"
+
+invocationFailure :: String -> IO a
+invocationFailure reason = do
+  TextIO.hPutStrLn stderr ("oracle-layout: " <> Text.pack reason)
+  exitWith (ExitFailure 2)
+
+runNormalInvocation :: Text -> [String] -> IO ()
+runNormalInvocation challenge arguments = do
+  (withBinary, supplied) <- case arguments of
+    [path] -> pure (True, path)
+    ["--oracle-profile", "layout.full.v1", path] -> pure (False, path)
+    ["--oracle-profile", "layout.gate.v1", path] -> pure (True, path)
+    _ -> invocationFailure "InvocationArguments"
+  directory <- makeAbsolute supplied
+  present <- doesDirectoryExist directory
+  unless present (invocationFailure "InvocationDirectoryRequired")
+  primary <- requiredRead challenge (directory </> "paths.txt")
+  original <- layoutChecks directory primary
+  binary <- if withBinary then layoutBinaryChecks directory else pure []
+  let checks = original <> binary
+      prefix = Text.unlines (map renderCheck checks)
+      count = foldr (const (+ 1)) 0 checks :: Natural
+      green = all (\(_, okay, _) -> okay) checks
+  emitCompletion challenge prefix count (if green then "all-green" else "some-red") "-"
+  exitWith (if green then ExitSuccess else ExitFailure 1)
+
+-- Only the actual primary read's missing IOException earns the probe marker.
+-- Report absence is a red semantic result; other I/O failures remain raw.
+requiredRead :: Text -> FilePath -> IO Text
+requiredRead challenge path = do
+  attempted <- try (strictRead path) :: IO (Either IOException Text)
+  case attempted of
+    Right contents -> pure contents
+    Left problem | isDoesNotExistError problem -> do
+      TextIO.hPutStrLn stderr (Text.pack (show problem))
+      hFlush stderr
+      emitCompletion challenge "" 0 "required-input-missing" (Text.pack (show (Text.pack path)))
+      exitWith (ExitFailure 1)
+    Left problem -> throwIO problem
+
+-- An interrupted compiler observation is never a completed red semantic row.
+trySynchronous :: IO value -> IO (Either SomeException value)
+trySynchronous action = do
+  result <- try action
+  case result of
+    Left problem -> case fromException problem :: Maybe SomeAsyncException of
+      Just _ -> throwIO problem
+      Nothing -> pure result
+    Right _ -> pure result
+
+strictRead :: FilePath -> IO Text
+strictRead path = TextIO.readFile path >>= \contents -> evaluate (Text.length contents) >> pure contents
+
+emitCompletion :: Text -> Text -> Natural -> Text -> Text -> IO ()
+emitCompletion challenge prefix count purpose locus = do
+  let footer = Text.intercalate "\t"
+        ["oracle.protocol.complete.v1", "green", "retained-text-utf8.v1", challenge,
+         Text.pack (show count), sha256Text (TextEncoding.encodeUtf8 prefix), purpose, locus] <> "\n"
+  _ <- evaluate (Text.length prefix)
+  _ <- evaluate (Text.length footer)
+  hSetEncoding stdout utf8
+  hSetNewlineMode stdout noNewlineTranslation
+  TextIO.hPutStr stdout prefix
+  hFlush stdout
+  TextIO.hPutStr stdout footer
+  hFlush stdout
+
+-- No suite output is read here. Per-path names come from a separate complete
+-- walk of the original source roots; all other names are oracle-owned values.
+layoutInventoryNames :: Bool -> IO [Text]
+layoutInventoryNames withBinary = do
+  paths <- independentLayoutPaths
+  pure (layoutFixedNames
+    <> ["package-imports." <> name <> ".source" | name <- packageNames]
+    <> ["package-imports.discovery"] <> ["package-imports." <> name | name <- packageNames]
+    <> concat [factoryNames prefix keys <> [prefix <> ".product-examples"]
+       | (prefix, keys) <-
+          [("test-source", ["tracked-test-script", "tracked-test-table", "tracked-expected-output", "tracked-patch", "tracked-mutant-body"])
+          ,("tool-source", ["tracked-python-gate", "renamed-tool-root"])
+          ,("pulumi-source", ["tracked-pulumi-yaml", "renamed-pulumi-program"])
+          ,("runtime-identity", ["stale-ordinal", "copied-ordinal", "phase-named-runtime"])
+          ,("ignore-context", ["retired-generated-root", "undeclared-state-root"])
+          ,("source-graph", ["path-omitted", "mode-changed", "bytes-changed", "foreign-behavior-disguised", "effect-unattributed"])
+          ,("bootstrap-source", ["bootstrap-byte-changed", "bootstrap-extra-role", "bootstrap-argv-rewritten"])]]
+    <> staticTextCaseNames <> ["static-text.product-examples","static-text.capture-examples"]
+    <> lexicalCompatibilityNames <> ["lexical.product-examples"]
+    <> surfaceNames <> ["opaque.product-examples"]
+    <> ["path:" <> Text.pack path | path <- paths]
+    <> ["case:" <> name | (name, _) <- expectedCases]
+    <> ["challenge-finding:" <> name | (name, _) <- expectedChallengeTags]
+    <> ["binary." <> name <> "." <> role | withBinary, name <- ["python", "dhall", "pulumi"], role <- ["input-contract", "finding"]])
+ where
+  packageNames = ["named", "wrong", "unlisted", "ambiguous", "unknown", "other-package", "mixed", "declarations", "reexport", "metadata-ambiguous", "plan-unlisted"]
+  factoryNames prefix keys = [prefix <> ".discovery"]
+    <> [prefix <> "." <> name <> "." <> role | name <- keys, role <- ["positive", "negative"]]
+    <> [prefix <> ".control.inventory", prefix <> ".control.cleanup"]
+
+independentLayoutPaths :: IO [FilePath]
+independentLayoutPaths = do
+  root <- getCurrentDirectory
+  found <- concat <$> mapM (walk root) ["src", "app", "test", "probe", "pb", "documents", "DEVELOPMENT_PLAN"]
+  pure (sort (metadata <> ["AGENTS.md", "CLAUDE.md", "README.md"] <> filter (`notElem` metadata) found))
+ where
+  walk root relative = do
+    entries <- sort <$> listDirectory (root </> relative)
+    concat <$> forM entries (\name -> do
+      let path = relative <> "/" <> name
+      linked <- pathIsSymbolicLink (root </> path)
+      unless (not linked) (fail "LayoutInventorySymlink")
+      directory <- doesDirectoryExist (root </> path)
+      if directory then walk root path else do
+        regular <- doesFileExist (root </> path)
+        unless regular (fail "LayoutInventoryNode")
+        pure [path])
+
+-- Independent literals for every existing fixed semantic judgment. Neither a
+-- product registry nor a subject-reported count supplies the namespace.
+layoutFixedNames :: [Text]
+layoutFixedNames =
+  [ "path-set"
+  , "finding-set"
+  , "fixture-graph-call-inventory"
+  , "fixture-graph-call-outcomes"
+  , "case:six-metadata-files"
+  , "challenge-set"
+  , "compiler-parsed-source-set"
+  , "compiler-import-control"
+  , "compiler-module-reexport-control"
+  , "compiler-declaration-control"
+  , "compiler-class-method-control"
+  , "compiler-class-declaration-control"
+  , "compiler-class-effect-type-seed-control"
+  , "compiler-instance-declaration-control"
+  , "compiler-instance-source-contract-control"
+  , "compiler-instance-external-contract-control"
+  , "compiler-class-call-dispatch-control"
+  , "compiler-class-method-body-route-control"
+  , "compiler-type-signature-control"
+  , "compiler-effect-type-seed-control"
+  , "compiler-effect-route-closure-control"
+  , "compiler-call-site-control"
+  , "compiler-call-site-coverage-control"
+  , "compiler-reference-site-control"
+  , "compiler-control-edge-control"
+  , "compiler-dynamic-load-control"
+  , "compiler-quotation-controls"
+  , "compiler-record-field-control"
+  , "compiler-foreign-boundary-control"
+  , "compiler-type-family-boundary-control"
+  , "compiler-derived-instance-control"
+  , "compiler-derived-class-head-control"
+  , "compiler-derived-class-member-control"
+  , "compiler-standalone-deriving-control"
+  , "compiler-standalone-deriving-member-control"
+  , "compiler-data-symbol-control"
+  , "compiler-data-declaration-gap-control"
+  , "compiler-local-call-candidate-control"
+  , "compiler-standalone-local-call-control"
+  , "compiler-standalone-lexical-call-control"
+  , "compiler-standalone-imported-call-control"
+  , "standalone-reexport-boundary"
+  , "compiler-standalone-source-denied-control"
+  , "compiler-rejected-source-call-control"
+  , "compiler-standalone-closed-export-refusal-control"
+  , "compiler-grant-rejection-control"
+  , "compiler-standalone-external-call-control"
+  , "compiler-standalone-registered-only-control"
+  , "compiler-standalone-external-member-control"
+  , "compiler-imported-call-candidate-control"
+  , "compiler-local-import-control"
+  , "compiler-dependency-import-control"
+  , "compiler-component-control"
+  , "compiler-cabal-dependency-control"
+  , "compiler-standalone-import-partition"
+  , "compiler-import-partition-control"
+  , "compiler-constructor-reexport-control"
+  , "compiler-constructor-reexport-pairs"
+  , "compiler-external-call-candidate-control"
+  , "compiler-external-member-call-control"
+  , "compiler-available-call-candidate-control"
+  , "compiler-available-member-call-control"
+  , "compiler-deferred-seed-call-control"
+  , "compiler-prelude-interface-control"
+  , "compiler-available-prelude-control"
+  , "compiler-standalone-prelude-control"
+  , "compiler-wired-cons-control"
+  , "compiler-standalone-wired-cons-control"
+  , "compiler-wired-tuple-control"
+  , "compiler-lexical-binding-control"
+  , "compiler-parameter-binder-control"
+  , "compiler-local-alias-control"
+  , "compiler-alias-external-control"
+  , "compiler-alias-imported-control"
+  , "compiler-external-interface-control"
+  , "compiler-interface-member-control"
+  , "compiler-forward-owned-import-control"
+  , "compiler-deferred-seed-import-control"
+  , "compiler-unselected-unit-candidate-control"
+  , "compiler-available-unit-control"
+  , "compiler-residual-ownership-control"
+  , "compiler-source-role-coverage"
+  , "compiler-standalone-role-coverage"
+  , "compiler-import-classification-control"
+  , "compiler-inaccessible-internal-control"
+  , "case:graph-qualified"
+  , "bootstrap-call-sites"
+  , "bootstrap-effect-sites"
+  , "forward-owned-generated-proto"
+  , "route-derived-coverage"
+  , "route-derived-rules"
+  , "route-standalone-coverage"
+  , "route-instance-coverage"
+  , "route-no-open-declaration"
+  , "fork-declared-packages"
+  , "sink-catalogue-recomputed"
+  , "sink-use-anchors"
+  , "sink-use-single-report"
+  , "consumer-rows"
+  , "consumer-text-read"
+  , "consumer-coverage"
+  , "fixture-routes"
+  , "fixture-routes-unresolved"
+  , "fixture-sinks"
+  , "fixture-stages"
+  , "fixture-forks"
+  , "fixture-findings"
+  ]
+
+-- Independently authored from the complete graph fixtures. Keep duplicate
+-- selections and loop expansions in their actual order: different ownership
+-- and package catalogs still require separate completed product invocations.
+type FixtureGraphCall = (Text, [FilePath], Either Text ())
+
+expectedFixtureGraphCalls :: [(Text, [FilePath])]
+expectedFixtureGraphCalls =
+  [ ("sourceGraph", ["QuoteControl.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseExternal.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseExternalMember.hs", "UseExternalWrongMember.hs"])
+  , ("sourceGraphWithPackageCatalog",
+      ["ExternalFacade.hs", "ExternalAbstract.hs", "ExternalHidden.hs", "ExternalNamed.hs",
+       "ExternalRelay.hs", "ExternalCycleA.hs", "ExternalCycleB.hs", "UseExternalFacades.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseExternalMember.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseExternalMember.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseExternalBroad.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseExternalOpen.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseExternalOpen.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseRegisteredOnly.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseExternalHiding.hs"])
+  , ("sourceGraphWithPackageCatalog", ["ImplicitPrelude.hs"])
+  , ("sourceGraphWithPackageCatalog", ["NoPrelude.hs"])
+  , ("sourceGraphWithPackageCatalog", ["ImplicitPrelude.hs"])
+  , ("sourceGraphWithPackageCatalog", ["NoPrelude.hs"])
+  , ("sourceGraphWithPackageCatalog", ["Calls.hs"])
+  , ("sourceGraphWithPackageCatalog", ["NoPreludeDerive.hs"])
+  , ("sourceGraphWithPackageCatalog", ["ExplicitPreludeDerive.hs"])
+  , ("sourceGraphWithPackageCatalog", ["Derive.hs"])
+  , ("sourceGraphWithPackageCatalog", ["NoPreludeStandaloneDerive.hs"])
+  , ("sourceGraphWithPackageCatalog", ["ExplicitPreludeStandaloneDerive.hs"])
+  , ("sourceGraphWithPackageCatalog", ["ImplicitPrelude.hs"])
+  , ("sourceGraphWithPackageCatalog", ["NoPrelude.hs"])
+  , ("sourceGraph", ["UseExternal.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseExternal.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseExternal.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseExternal.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseExternalOpen.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseFuture.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseFutureCall.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseFuture.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseJitFuture.hs"])
+  , ("sourceGraphWithPackageCatalog", ["UseJitFuture.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "Use.hs"])
+  , ("sourceGraph", ["ClassProvider.hs", "UseClass.hs", "UseClassHidden.hs", "UseClassInstance.hs", "UseClassInstanceHidden.hs"])
+  , ("sourceGraph", ["RecordProvider.hs", "UseDot.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "other/Duplicate.hs", "Use.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "other/Duplicate.hs", "Use.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "Use.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "Use.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "UsePackage.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "UseAlias.hs"])
+  , ("sourceGraph", ["EffectProvider.hs", "UseEffect.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "UseSelective.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "UseConstructorOnly.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "UseHidden.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "UseValue.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "Reexport.hs", "UseReexport.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "AliasReexport.hs", "UseAliasReexport.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "QualifiedReexport.hs", "UseQualifiedReexport.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "ExplicitReexport.hs", "UseExplicitReexport.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "ExplicitDataReexport.hs", "UseExplicitDataReexport.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "HiddenReexport.hs", "UseHiddenReexport.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "UseHiding.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "UseHidingType.hs"])
+  , ("sourceGraph", ["SpliceExpr.hs", "SpliceDecl.hs"])
+  , ("sourceGraph", ["Foreign.hs"])
+  , ("sourceGraph", ["Derive.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "UseFiltered.hs"])
+  , ("sourceGraph", ["Duplicate.hs"])
+  , ("sourceGraph", ["StandaloneLocal.hs"])
+  , ("sourceGraph", ["StandaloneProvider.hs", "StandaloneUse.hs"])
+  , ("sourceGraph", ["Duplicate.hs", "StandaloneFacade.hs", "StandaloneSelective.hs", "StandaloneReexport.hs", "StandaloneSelectiveUse.hs"])
+  , ("sourceGraph", ["Mismatched.hs"])
+  , ("sourceGraph", ["Calls.hs"])
+  , ("sourceGraph", ["PlainData.hs"])
+  , ("sourceGraphWithPackageCatalog", ["Routes.hs"])
+  , ("sourceGraphWithPackageCatalog", ["RoutesUnresolved.hs"])
+  , ("sourceGraph", ["Sinks.hs"])
+  , ("sourceGraph", ["StageClean.hs"])
+  , ("sourceGraph", ["StageImport.hs"])
+  , ("sourceGraph", ["StageStandalone.hs"])
+  , ("sourceGraph", ["StageOpaque.hs"])
+  , ("sourceGraph", ["StageExpression.hs"])
+  , ("sourceGraph", ["StageDeclaration.hs"])
+  , ("sourceGraphWithPackageCatalog", ["ForkUser.hs"])
+  , ("sourceGraphWithPackageCatalog", ["ForkUser.hs"])
+  ]
+
+readFixtureGraphCalls :: FilePath -> IO (Either Text [FixtureGraphCall])
+readFixtureGraphCalls path = do
+  input <- readReportText path
+  pure $ do
+    contents <- input
+    case readMaybe (Text.unpack contents) of
+      Just calls | Text.pack (show calls) == contents -> Right calls
+      _ -> Left "FixtureGraphCallRecordMalformed"
+
+-- Judge the public executable's actual planted inputs and reports, including
+-- their semantic diagnostics. A copied nonce alone cannot satisfy a finding.
+layoutBinaryChecks :: FilePath -> IO [(Text, Bool, Text)]
+layoutBinaryChecks directory = concat <$> forM specifications (\(index, name, prefix, suffix, tag) -> do
+  let root = directory </> "binary" </> index
+  input <- optionalRead (root </> "input/paths.txt")
+  output <- optionalRead (root </> "layout-report.tsv")
+  let planted = [path | Just contents <- [input], path <- Text.lines contents,
+          Just nonce <- [Text.stripPrefix prefix path >>= Text.stripSuffix suffix],
+          Text.length nonce == 32 && Text.all lowerHex nonce]
+      selected = case planted of [path] -> Just path; _ -> Nothing
+  bytes <- maybe (pure Nothing) (optionalRead . ((root </> "tree") </>) . Text.unpack) selected
+  expected <- independentLayoutPaths
+  semantic <- case (input,output) of
+    (Just supplied,Just contents) -> case parseStaticTextReport contents of
+      Right parsed -> staticTextSemanticExpectation (root </> "tree") (map Text.unpack (Text.lines supplied)) parsed
+      Left problem -> pure (Left problem)
+    _ -> pure (Left "BinaryStaticTextInputUnavailable")
+  let inputValid = case (input, selected) of
+        (Just contents, Just path) -> sort (Text.lines contents) == sort (map Text.pack expected <> [path]) && bytes == Just "challenge\n"
+        _ -> False
+      findingValid = case (selected, output) of
+        (Just path, Just contents) -> case parseStaticTextReport contents of
+          Right parsed -> semantic == Right ()
+            && filter ("finding\t" `Text.isPrefixOf`) (staticTextOldRows parsed) == ["finding\t" <> tag <> "\t" <> path]
+          Left _ -> False
+        _ -> False
+      check role green = ("binary." <> name <> "." <> role, green, if green then "ok" else "input/report contract differs or required semantic boundary is unavailable")
+  pure [check "input-contract" inputValid, check "finding" findingValid])
+ where
+  specifications = [("1", "python", "src/Challenge", ".py", "NonHaskellSource")
+    ,("2", "dhall", "dhall/Challenge", ".dhall", "ForeignSourceOwed")
+    ,("3", "pulumi", "pulumi/Pulumi", ".yaml", "TrackedPulumiProgram")]
+  lowerHex character = ('0' <= character && character <= '9') || ('a' <= character && character <= 'f')
+  optionalRead path = do
+    attempted <- try (strictRead path) :: IO (Either IOException Text)
+    case attempted of
+      Right contents -> pure (Just contents)
+      Left problem | isDoesNotExistError problem -> pure Nothing
+      Left problem -> throwIO problem
+
+layoutChecks :: FilePath -> Text -> IO [(Text, Bool, Text)]
+layoutChecks directory primary = do
+  let expectedPaths = map Text.unpack (Text.lines primary)
   packageChecks <- packageImportChecks directory
   testChecks <- testSourceChecks directory
   toolChecks <- toolSourceChecks directory
@@ -60,7 +487,15 @@ main = do
   ignoreChecks <- ignoreContextChecks directory
   sourceChecks <- sourceGraphChecks directory
   bootstrapChecks <- bootstrapSourceChecks directory
-  report <- Text.lines <$> TextIO.readFile (directory </> "layout.tsv")
+  staticChecks <- staticTextChecks expectedSinkTable directory
+  lexicalChecks <- lexicalCompatibilityChecks directory
+  opaqueChecks <- surfaceChecks directory
+  reportText <- readReportText (directory </> "layout.tsv")
+  fullReportOutcomeText <- TextIO.readFile (directory </> "layout-report-result.data")
+  fixtureGraphCalls <- readFixtureGraphCalls (directory </> "fixture-graph-calls.data")
+  graphlessReports <- mapM (\(name, path) -> (,) name . (>>= parseStaticTextReport) <$> readReportText (directory </> path))
+    [("report.nested-output", "nested/output/report.tsv"),
+     ("report.default-exit", "default.tsv"), ("report.shebang-exit", "shebang.tsv")]
   cases <- parsePairs <$> TextIO.readFile (directory </> "cases.tsv")
   (grantCompilerValid, grantCompilerDetail) <- observeGrantTwin directory
   (methodImportValid, methodImportDetail) <- observeMethodImportTwin directory
@@ -88,7 +523,17 @@ main = do
   constructorReexportRows <- Text.lines <$> TextIO.readFile (directory </> "fixture-constructor-reexports.tsv")
   challengePaths <- parseChallenges <$> TextIO.readFile (directory </> "challenge-paths.tsv")
   challengeFindings <- mapM (readChallengeFinding directory) challengePaths
-  let masked = maskNonce (challengeNonce challengePaths)
+  fullSemantic <- either (pure . Left) (staticTextSemanticExpectation "." expectedPaths) (reportText >>= parseStaticTextReport)
+  syntaxPaths <- map Text.unpack . Text.lines <$> strictRead (directory </> "challenge-syntax-paths.txt")
+  syntaxSemantic <- case [parsed | ("syntax",_,_,_,parsed) <- challengeFindings] of
+    [parsed] -> either (pure . Left) (staticTextSemanticExpectation (directory </> "challenge/syntax") syntaxPaths) parsed
+    _ -> pure (Left "SyntaxChallengeInventoryMismatch")
+  let parsedReport = reportText >>= parseStaticTextReport
+      report = either (const []) staticTextOldRows parsedReport
+      fullReportOutcome = readMaybe (Text.unpack fullReportOutcomeText) :: Maybe (Either Text (Either ExitCode ()))
+      graphlessByCase = Map.fromList (graphlessReports
+        <> [("report.no-graph", maybe (Left "MissingNestedReport") id (lookup "report.nested-output" graphlessReports))])
+      masked = maskNonce (challengeNonce challengePaths)
       observedPaths = Map.fromList
         [(Text.unpack path, className) | line <- report, ["path", path, className] <- [Text.splitOn "\t" line]]
       findings = [line | line <- report, "finding\t" `Text.isPrefixOf` line]
@@ -868,7 +1313,15 @@ main = do
         ]
       checks =
         [ ("path-set", pathSet == reportSet, Text.pack (show (Set.size reportSet)))
-        , ("finding-set", null findings, Text.pack (show findings))
+        , ("finding-set", null findings && fullReportOutcome == Just (Right (Right ()))
+             && fullSemantic == Right (),
+           Text.pack (show (findings, fullReportOutcome)) <> ";" <> staticTextDiagnostic parsedReport)
+        , ("fixture-graph-call-inventory",
+             fmap (map (\(kind, selected, _) -> (kind, selected))) fixtureGraphCalls == Right expectedFixtureGraphCalls,
+           Text.pack (show (fmap (map (\(kind, selected, _) -> (kind, selected))) fixtureGraphCalls)))
+        , ("fixture-graph-call-outcomes",
+             fixtureGraphCalls == Right [(kind, selected, Right ()) | (kind, selected) <- expectedFixtureGraphCalls],
+           Text.pack (show fixtureGraphCalls))
         , ("case:six-metadata-files", length (filter (`elem` metadata) expectedPaths) == 6, Text.pack (show (filter (`elem` metadata) expectedPaths)))
         , ("challenge-set", Set.fromList [(name, tag) | (name, _, tag) <- challengePaths] == Set.fromList expectedChallengeTags,
            Text.pack (show [(name, masked path, tag) | (name, path, tag) <- challengePaths]))
@@ -884,7 +1337,6 @@ main = do
               ("src/Amoebius/Substrate/Apple.hs", "Amoebius.Substrate.Lima"),
               ("src/extension-link/Amoebius/Extension/Linked.hs", "Graph"),
               ("src/manifest-render/Amoebius/Manifest/K8sObject.hs", "Amoebius.Manifest.Types"),
-              ("src/validation-kernel/Amoebius/Validation/StatusFrontier.hs", "Amoebius.Plan.StatusFrontier"),
               ("src/vendor/Pulsar.hs", "Pulsar.Types")],
            Text.pack (show graphModuleReexports))
         , ("compiler-declaration-control", Set.member ("src/Amoebius/Layout/Report.hs", "runLayoutReport") graphTopLevel,
@@ -965,7 +1417,16 @@ main = do
                   (Set.toList graphInstanceSourceContracts),
            Text.pack (show (Set.size graphInstanceSourceContracts)))
         , ("compiler-instance-external-contract-control",
-             Set.size graphInstanceExternalContracts == 294
+             Set.size graphInstanceExternalContracts == 297
+               && Set.fromList
+                    [(headText, className, method, imported, package, mode)
+                    | (path, headText, className, method, imported, package,
+                       unit, mode) <- Set.toList graphInstanceExternalContracts
+                    , path == "src/validation-kernel/Amoebius/Validation/Authority/Core.hs"
+                    , not (Text.null unit)]
+                    == Set.fromList
+                      [("Show " <> name, "Show", "show", "Prelude", "base", "implicit")
+                      | name <- ["RetainedPlanBytes", "NativeStopped", "NativeJournalUnclosed"]]
                && Set.fromList
                     [(headText, className, method, imported, package, mode)
                     | (path, headText, className, method, imported, package,
@@ -1857,19 +2318,29 @@ main = do
           <> sourceGraphExampleChecks report
           <> bootstrapChecks
           <> bootstrapSourceExampleChecks report
+          <> staticChecks
+          <> staticTextExampleChecks report
+          <> lexicalChecks
+          <> lexicalCompatibilityExampleChecks report
+          <> opaqueChecks
+          <> surfaceExampleChecks report
           <> [ ("path:" <> Text.pack path, Map.lookup path observedPaths == Just className, maybe "absent" id (Map.lookup path observedPaths))
              | path <- expectedPaths
              , let className = expectedClass path
              ]
-          <> [("case:" <> name, Map.lookup name cases == Just wanted, maybe "absent" id (Map.lookup name cases)) | (name, wanted) <- expectedCases]
+          <> [("case:" <> name, Map.lookup name cases == Just wanted
+                 && maybe True exactUnavailableStaticText (Map.lookup name graphlessByCase),
+               maybe "absent" id (Map.lookup name cases)
+                 <> maybe "" ((";" <>) . staticTextDiagnostic) (Map.lookup name graphlessByCase)) | (name, wanted) <- expectedCases]
           <> [("challenge-finding:" <> name,
                pathMatches name path && maybe False (\wanted -> sort found == sort
                  (["finding\t" <> wanted <> "\t" <> path <> (if name == "ordinal" then ":2" else "")]
-                   <> ["finding\tUnmappedHaskellSource\t" <> path | name == "ordinal"])) (lookup name expectedChallengeTags),
-               Text.intercalate "," (map masked found))
-             | (name, path, _, found) <- challengeFindings]
-  mapM_ (TextIO.putStrLn . renderCheck) checks
-  unless (all (\(_, green, _) -> green) checks) exitFailure
+                   <> ["finding\tUnmappedHaskellSource\t" <> path | name == "ordinal"])) (lookup name expectedChallengeTags)
+                 && (if name == "syntax" then syntaxSemantic == Right ()
+                     else exactUnavailableStaticText parsed),
+               Text.intercalate "," (map masked found) <> ";" <> masked (staticTextDiagnostic parsed))
+             | (name, path, _, found, parsed) <- challengeFindings]
+  pure checks
 
 data CompilerDiagnostic = CompilerDiagnostic Text Text Int FilePath Int Int [Text]
 
@@ -1923,7 +2394,7 @@ observeGrantTwin directory = do
  where
   legalPath = "test/negative/compile_fail/budget_calculus/grant_comes_from_the_issuer.hs"
   illegalPath = "test/negative/compile_fail/budget_calculus/grant_forged_unbounded.hs"
-  invoke args = try (readProcessWithExitCode "ghc" args "")
+  invoke args = trySynchronous (readProcessWithExitCode "ghc" args "")
     :: IO (Either SomeException (ExitCode, String, String))
   compile label source = do
     let outputDir = directory </> "compiler-negative" </> label
@@ -1966,7 +2437,7 @@ observeMethodImportTwin directory = do
  where
   compilerError (CompilerDiagnostic _ severity _ _ _ _ _) = severity == "Error"
   compile outputDir source =
-    try (readProcessWithExitCode "cabal"
+    trySynchronous (readProcessWithExitCode "cabal"
       ["exec", "--jobs=1", "--builddir=.build/dist-native", "--", "ghc", "-j1", "-fdiagnostics-as-json",
        "-fno-code", "-fforce-recomp", "-XGHC2024", "-outputdir", outputDir, source] "")
       :: IO (Either SomeException (ExitCode, String, String))
@@ -2018,11 +2489,11 @@ observeDeniedConstructor directory (path, owner, target, rootSite, line, column,
         "-fdiagnostics-as-json", "-fno-code", "-fforce-recomp", "-XGHC2024"]
         <> ["-i" <> sourceDir | sourceDir <- sourceDirs]
         <> ["-outputdir", outputDir, path]
-  before <- try (ByteString.readFile path) :: IO (Either SomeException ByteString.ByteString)
+  before <- trySynchronous (ByteString.readFile path) :: IO (Either SomeException ByteString.ByteString)
   createDirectoryIfMissing True outputDir
-  attempted <- try (readProcessWithExitCode "cabal" arguments "")
+  attempted <- trySynchronous (readProcessWithExitCode "cabal" arguments "")
     :: IO (Either SomeException (ExitCode, String, String))
-  after <- try (ByteString.readFile path) :: IO (Either SomeException ByteString.ByteString)
+  after <- trySynchronous (ByteString.readFile path) :: IO (Either SomeException ByteString.ByteString)
   let digest = either (const "") sha256Text before
       valid = case (before, attempted, after) of
         (Right first, Right (ExitFailure _, _, stderrText), Right lastBytes)
@@ -2082,11 +2553,11 @@ observeScopeRejection directory (path, owner, target, rootSite, line, column, co
         "-fdiagnostics-as-json", "-fno-code", "-fforce-recomp", "-XGHC2024"]
         <> ["-i" <> sourceDir | sourceDir <- sourceDirs]
         <> ["-outputdir", outputDir, path]
-  before <- try (ByteString.readFile path) :: IO (Either SomeException ByteString.ByteString)
+  before <- trySynchronous (ByteString.readFile path) :: IO (Either SomeException ByteString.ByteString)
   createDirectoryIfMissing True outputDir
-  attempted <- try (readProcessWithExitCode "cabal" arguments "")
+  attempted <- trySynchronous (readProcessWithExitCode "cabal" arguments "")
     :: IO (Either SomeException (ExitCode, String, String))
-  after <- try (ByteString.readFile path) :: IO (Either SomeException ByteString.ByteString)
+  after <- trySynchronous (ByteString.readFile path) :: IO (Either SomeException ByteString.ByteString)
   let digest = either (const "") sha256Text before
       valid = case (before, attempted, after) of
         (Right first, Right (ExitFailure _, _, stderrText), Right lastBytes)
@@ -2226,9 +2697,9 @@ expectedCases =
   , ("negative.ignore-root", "RetiredIgnoreRoot")
   , ("negative.ignore-source", "UnexpectedIgnorePattern")
   , ("report.bad-options", "exit-2")
-  , ("report.nested-output", "success")
+  , ("report.nested-output", "exit-1")
   , ("report.shebang-exit", "exit-1")
-  , ("report.default-exit", "success")
+  , ("report.default-exit", "exit-1")
   , ("report.paths-file-missing", "exit-2")
   , ("report.inventory-failure", "exit-2")
   , ("report.no-graph", "not-computed")
@@ -2405,10 +2876,109 @@ challengeNonce challenges = case [nonce | ("python", path, _) <- challenges, Jus
 maskNonce :: Text -> Text -> Text
 maskNonce nonce text = if Text.null nonce then text else Text.replace nonce "<nonce>" text
 
-readChallengeFinding :: FilePath -> (Text, Text, Text) -> IO (Text, Text, Text, [Text])
+readChallengeFinding :: FilePath -> (Text, Text, Text)
+  -> IO (Text, Text, Text, [Text], Either Text StaticTextReport)
 readChallengeFinding directory (name, path, tag) = do
-  rows <- Text.lines <$> TextIO.readFile (directory </> "challenge-" <> Text.unpack name <> ".tsv")
-  pure (name, path, tag, filter ("finding\t" `Text.isPrefixOf`) rows)
+  parsed <- (>>= parseStaticTextReport) <$> readReportText (directory </> "challenge-" <> Text.unpack name <> ".tsv")
+  pure (name, path, tag, either (const []) (filter ("finding\t" `Text.isPrefixOf`) . staticTextOldRows) parsed, parsed)
+
+-- The old prefix remains subject to every pre-existing discovery/finding rule.
+-- New records are complete ordered data, never qualified source/AST authority.
+data StaticTextReport = StaticTextReport [Text] [(Text, Text, Text)] [(Text, Text)]
+  deriving (Eq, Show)
+
+readReportText :: FilePath -> IO (Either Text Text)
+readReportText path = do
+  attempted <- try (ByteString.readFile path) :: IO (Either IOException ByteString.ByteString)
+  case attempted of
+    Right bytes -> pure (either (const (Left "StaticTextReportInvalidUtf8")) Right (TextEncoding.decodeUtf8' bytes))
+    Left problem | isDoesNotExistError problem -> pure (Left "StaticTextReportAbsent")
+    Left problem -> throwIO problem
+
+staticTextOldRows :: StaticTextReport -> [Text]
+staticTextOldRows (StaticTextReport rows _ _) = rows
+
+permanentStaticTextFinding :: (Text, Text, Text)
+permanentStaticTextFinding =
+  ("StaticTextBoundaryUnavailable", "layout-report",
+   "Complete source capture, closing recheck, native syntax/byte observation and independent qualification remain unavailable.")
+
+canonicalQuoted :: (Read value, Show value) => Text -> Either Text value
+canonicalQuoted input = case readMaybe (Text.unpack input) of
+  Just value | Text.pack (show value) == input -> Right value
+  _ -> Left "MalformedStaticTextQuotedField"
+
+parseStaticTextReport :: Text -> Either Text StaticTextReport
+parseStaticTextReport contents
+  | not ("\n" `Text.isSuffixOf` contents) = Left "StaticTextReportMissingFinalLF"
+  | otherwise = expandLayoutReport contents >>= parseExpandedStaticTextReport
+
+parseExpandedStaticTextReport :: Text -> Either Text StaticTextReport
+parseExpandedStaticTextReport contents = do
+      let rows = init (Text.splitOn "\n" contents)
+          (oldRows, suffix) = break ("static-text-check\t" `Text.isPrefixOf`) rows
+      unless (not (any (\row -> ("static-text-" `Text.isPrefixOf` row
+          && not (any (`Text.isPrefixOf` row) ["static-text-example\t","static-text-capture-example\t"]))
+          || "finding\t\"" `Text.isPrefixOf` row) oldRows)
+        && (null oldRows || not (Text.null (last oldRows)))) (Left "MisplacedStaticTextRecord")
+      afterCheck <- case suffix of
+        check : rest -> case Text.splitOn "\t" check of
+          ["static-text-check", encoded] -> do
+            name <- canonicalQuoted encoded
+            unless (name == ("layout-static-text" :: Text)) (Left "UnexpectedStaticTextCheckName")
+            pure rest
+          _ -> Left "MalformedStaticTextCheck"
+        [] -> Left "StaticTextCheckMissing"
+      let (findingRows, observationRows) = span ("finding\t" `Text.isPrefixOf`) afterCheck
+      newFindings <- traverse parseFinding findingRows
+      newObservations <- traverse parseObservation observationRows
+      pure (StaticTextReport oldRows newFindings newObservations)
+ where
+  parseFinding row = case Text.splitOn "\t" row of
+    ["finding", code, subject, detail] -> (,,) <$> canonicalQuoted code <*> canonicalQuoted subject <*> canonicalQuoted detail
+    _ -> Left "MalformedStaticTextFinding"
+  parseObservation row = case Text.splitOn "\t" row of
+    ["static-text-observation", encoded] -> canonicalQuoted encoded
+    _ -> Left "UnknownOrMisorderedStaticTextRow"
+
+exactUnavailableStaticText :: Either Text StaticTextReport -> Bool
+exactUnavailableStaticText parsed = case parsed of
+  Right (StaticTextReport rows findings observations) ->
+    findings == [permanentStaticTextFinding] && null observations
+      && "graph-stage\tnot-computed" `elem` rows
+      && not (any ("graph-file\t" `Text.isPrefixOf`) rows)
+  Left _ -> False
+
+-- The reference opens and rechecks the physical tree independently. Matching
+-- serialized observations alone cannot qualify a missing capture boundary.
+staticTextSemanticExpectation :: FilePath -> [FilePath] -> StaticTextReport -> IO (Either Text ())
+staticTextSemanticExpectation root paths (StaticTextReport _ findings observations) = do
+  expected <- staticTextReference expectedSinkTable root paths
+  pure $ do
+    (wantedFindings,wantedObservations) <- expected
+    unless (findings == wantedFindings) (Left "StaticTextFindingMismatch")
+    unless (observations == wantedObservations) (Left "StaticTextObservationMismatch")
+
+staticTextDiagnostic :: Either Text StaticTextReport -> Text
+staticTextDiagnostic parsed = case parsed of
+  Left problem -> problem
+  Right (StaticTextReport _ findings observations) ->
+    "static-text-payload.v1;" <> compactStaticTextDiagnostic (Text.pack (show (findings, observations)))
+
+-- Keep the complete diagnostic recoverable within the existing archive bound.
+-- This changes only its retained encoding, not any semantic judgment or input.
+compactStaticTextDiagnostic :: Text -> Text
+compactStaticTextDiagnostic contents
+  | ByteString.length encoded <= 1024 * 1024 = contents
+  | otherwise = "interned-gzip-utf8-hex.v1:" <> Text.pack (concatMap hexByte (ByteString.unpack compressed))
+ where
+  encoded = TextEncoding.encodeUtf8 contents
+  tokens = Text.groupBy (\left right -> isAlphaNum left == isAlphaNum right) contents
+  names = Set.toAscList (Set.fromList tokens)
+  dictionary = Map.fromList (zip names [0 :: Int ..])
+  retained = TextEncoding.encodeUtf8 (Text.pack (show (names,[dictionary Map.! token | token <- tokens])))
+  compressed = LazyBytes.toStrict (GZip.compress (LazyBytes.fromStrict retained))
+  hexByte byte = [intToDigit (fromIntegral byte `div` 16),intToDigit (fromIntegral byte `mod` 16)]
 
 renderCheck :: (Text, Bool, Text) -> Text
 renderCheck (name, green, observed) = Text.intercalate "\t" [name, if green then "green" else "red", observed]

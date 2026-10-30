@@ -9,6 +9,9 @@ import RuntimeIdentityCases (runRuntimeIdentityCases)
 import IgnoreContextCases (runIgnoreContextCases)
 import SourceGraphCases (runSourceGraphCases)
 import BootstrapSourceCases (runBootstrapSourceCases)
+import StaticTextCases (runStaticTextCases)
+import LexicalCases (runLexicalCases)
+import StaticTextSurfaceCases (runStaticTextSurfaceCases)
 
 import Amoebius.Layout.Classify
 import Amoebius.Layout.PackageMap
@@ -17,30 +20,36 @@ import Amoebius.Layout.PackageMap
   , packageCatalogWithModuleMembers, packageMapReport)
 import Amoebius.Layout.PbGrammar
 import Amoebius.Layout.Report (runLayoutReport)
-import Amoebius.Layout.SourceGraph (sourceGraph, sourceGraphWithPackageCatalog)
+import Amoebius.Layout.SourceGraph qualified as ProductGraph
 import Amoebius.Plan.Legacy (LegacyId (..), LegacyOwner (..), legacyOwner)
 import Amoebius.Plan.PhaseIdentity (lookupCapabilityOrdinal)
 import Amoebius.Toolchain.Provenance (forkModules)
-import Control.Exception (SomeException, fromException, try)
+import Control.Exception (IOException, SomeAsyncException, SomeException, displayException, evaluate, fromException, throwIO, try)
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Char8 qualified as ByteString8
 import Data.List (isPrefixOf, sort)
 import Data.Char (isAlphaNum)
 import Data.Map.Strict qualified as Map
+import Data.IORef (IORef, modifyIORef', newIORef, readIORef)
 import Data.Set qualified as Set
 import Data.Text qualified as Text
 import Data.Text.IO qualified as TextIO
+import Data.Text.Encoding qualified as TextEncoding
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import System.Directory (copyFile, createDirectoryIfMissing, doesDirectoryExist, getCurrentDirectory, listDirectory)
 import System.Environment (getArgs)
 import System.Exit (ExitCode (..), exitSuccess)
 import System.FilePath (takeDirectory, (</>))
+import System.IO.Error (isDoesNotExistError)
 import System.Process (readProcess)
 
 main :: IO ()
 main = do
   arguments <- getArgs
   case arguments of
+    ["--static-text-surface", target] -> runStaticTextSurfaceCases target >> exitSuccess
+    ["--lexical-compatibility", target] -> runLexicalCases target >> exitSuccess
+    ["--static-text", target] -> runStaticTextCases target >> exitSuccess
     ["--bootstrap-source", target] -> runBootstrapSourceCases target >> exitSuccess
     ["--source-graph", target] -> runSourceGraphCases target >> exitSuccess
     ["--ignore-context", target] -> runIgnoreContextCases target >> exitSuccess
@@ -62,6 +71,9 @@ main = do
   runIgnoreContextCases directory
   runSourceGraphCases directory
   runBootstrapSourceCases directory
+  runStaticTextCases directory
+  runLexicalCases directory
+  runStaticTextSurfaceCases directory
   root <- getCurrentDirectory
   discovered <- concat <$> mapM (walk root) sourceRoots
   let paths = sort (metadata <> filter (`notElem` metadata) discovered)
@@ -85,8 +97,15 @@ main = do
   defaultExit <- reportExit (runLayoutReport ["--no-graph", "--root", Text.unpack gitRoot, "--output", directory </> "default.tsv"])
   missingPathsExit <- reportExit (runLayoutReport ["--no-graph", "--root", miniature, "--paths-file", directory </> "no-such-paths.txt", "--output", directory </> "missing-paths.tsv"])
   inventoryExit <- reportExit (runLayoutReport ["--no-graph", "--root", directory </> "no-such-root", "--output", directory </> "no-such-root.tsv"])
-  noGraphRows <- Text.lines <$> TextIO.readFile (directory </> "nested" </> "output" </> "report.tsv")
+  noGraphRows <- observedReportRows (directory </> "nested" </> "output" </> "report.tsv")
+  fixtureGraphCalls <- newIORef []
   let graphRoot = directory </> "graph-challenge"
+      sourceGraph tree selected owners dependencies =
+        observeFixtureGraph fixtureGraphCalls "sourceGraph" selected
+          (ProductGraph.sourceGraph tree selected owners dependencies)
+      sourceGraphWithPackageCatalog tree selected owners dependencies catalog forwardOwned =
+        observeFixtureGraph fixtureGraphCalls "sourceGraphWithPackageCatalog" selected
+          (ProductGraph.sourceGraphWithPackageCatalog tree selected owners dependencies catalog forwardOwned)
   createDirectoryIfMissing True graphRoot
   createDirectoryIfMissing True (graphRoot </> "other")
   TextIO.writeFile (graphRoot </> "QuoteControl.hs") (Text.unlines
@@ -642,6 +661,8 @@ main = do
         ["src/Present/Module.hs", "probe/src/Probe/Module.hs"]
   forkDeclaredRows <- forkStandalone forkPins
   forkUndeclaredRows <- forkStandalone []
+  completedGraphCalls <- reverse <$> readIORef fixtureGraphCalls
+  TextIO.writeFile (directory </> "fixture-graph-calls.data") (Text.pack (show completedGraphCalls))
   -- The fixtures' rows are persisted for the oracle, which holds the expected
   -- rows as its own literals. The suite states no expectation for them.
   let fixtureRows kinds rows = Text.unlines
@@ -1336,7 +1357,8 @@ main = do
             then "matched" else "mismatch")
         ]
   TextIO.writeFile (directory </> "cases.tsv") (Text.unlines [name <> "\t" <> value | (name, value) <- cases])
-  runLayoutReport ["--root", root, "--paths-file", pathFile, "--output", directory </> "layout.tsv"]
+  reportResult <- observedReportOutcome (runLayoutReport ["--root", root, "--paths-file", pathFile, "--output", directory </> "layout.tsv"])
+  TextIO.writeFile (directory </> "layout-report-result.data") (Text.pack (show reportResult) <> "\n")
  where
   pathResult path = either findingCode renderPathClass (classifyPath path)
   bootstrapResult bytes = either (Text.takeWhile (/= ':') . renderBootstrapRefusal) (const "admitted") (admitBootstrap bytes)
@@ -1388,9 +1410,52 @@ copyInto root destination path = do
 reportExit :: IO () -> IO Text.Text
 reportExit action = do
   outcome <- try action :: IO (Either SomeException ())
-  pure $ case outcome of
-    Right () -> "success"
-    Left problem -> case fromException problem of
-      Just ExitSuccess -> "success"
-      Just (ExitFailure code) -> Text.pack ("exit-" <> show code)
-      Nothing -> "io-error"
+  case outcome of
+    Right () -> pure "success"
+    Left problem -> case fromException problem :: Maybe SomeAsyncException of
+      Just _ -> throwIO problem
+      Nothing -> pure $ case fromException problem of
+        Just ExitSuccess -> "success"
+        Just (ExitFailure code) -> Text.pack ("exit-" <> show code)
+        Nothing -> "io-error"
+
+-- A report refusal is observed separately from its absent or malformed output.
+-- Keep producing the other cases so the oracle can judge every fixed contract.
+observedReportRows :: FilePath -> IO [Text.Text]
+observedReportRows path = do
+  attempted <- try (ByteString.readFile path) :: IO (Either IOException ByteString.ByteString)
+  case attempted of
+    Right bytes -> pure (either (const []) Text.lines (TextEncoding.decodeUtf8' bytes))
+    Left problem | isDoesNotExistError problem -> pure []
+    Left problem -> throwIO problem
+
+observedReportOutcome :: IO () -> IO (Either Text.Text (Either ExitCode ()))
+observedReportOutcome action = do
+  attempted <- try (try action) :: IO (Either SomeException (Either ExitCode ()))
+  case attempted of
+    Right result -> pure (Right result)
+    Left problem -> case fromException problem :: Maybe SomeAsyncException of
+      Just _ -> throwIO problem
+      Nothing -> pure (Left (Text.pack (displayException problem)))
+
+-- Keep every actual fixture query observable even if a changed product throws
+-- while its lazy findings or rows are demanded. The independent oracle owns
+-- the complete ordered call inventory and requires successful completion.
+type FixtureGraphCall = (Text.Text, [FilePath], Either Text.Text ())
+
+observeFixtureGraph :: IORef [FixtureGraphCall] -> Text.Text -> [FilePath]
+  -> IO ([LayoutFinding], [Text.Text]) -> IO ([LayoutFinding], [Text.Text])
+observeFixtureGraph calls kind selected action = do
+  attempted <- try (do
+    value <- action
+    _ <- evaluate (ByteString.length (TextEncoding.encodeUtf8 (Text.pack (show value))))
+    pure value) :: IO (Either SomeException ([LayoutFinding], [Text.Text]))
+  result <- case attempted of
+    Right value -> pure (Right value)
+    Left problem -> case fromException problem :: Maybe SomeAsyncException of
+      Just _ -> throwIO problem
+      Nothing -> pure (Left (Text.pack (displayException problem)))
+  modifyIORef' calls ((kind, selected, () <$ result) :)
+  pure $ case result of
+    Right value -> value
+    Left _ -> ([LayoutFinding "TestGraphQueryUnavailable" (show selected)], [])

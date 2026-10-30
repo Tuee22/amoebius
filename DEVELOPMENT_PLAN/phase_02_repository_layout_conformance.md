@@ -37,6 +37,150 @@ from literals. Its predecessor is [Phase 1](phase_01_toolchain_spike.md).
 
 🔄 Active — NOT VALIDATED.
 
+**Predecessor checkpoint on 2026-10-28 — DL-0042.** The repaired Phase-0 replay and the
+separate complete Phase-1 preview and acceptance had finished. That numerical reproduction issued
+Phase-1 receipt `f553c8e9abcc4b3f8e8d6d303c4bfe496309a13a9e8a5315fa2b51896769aa9c` at
+2026-10-28 22:04:20.921435 UTC. Current predecessor evidence belongs to the verifier-owned
+[status projection](phase_01_toolchain_spike.md#phase-status).
+[DL-0042](../documents/decision_log.md#dl-0042--qualified-image-and-completion-custody-retires-runner-authority)
+retains the qualified runner boundary and every inherited guard. Source changes made for this phase require
+fresh numerical predecessor replay before its complete preview and separate acceptance. The earlier
+interrupted Phase-2 previews and component observations supply no current phase pass.
+
+The native layout component baseline on 2026-10-28 returned 1,437 unique independent judgments and
+revealed three failures: the unavailable static-text boundary, its absent full-payload expectation, and the
+external-method inventory's three additional contracts. The complete layout oracle now has separate
+source-tree inventories and challenged completion frames. Nineteen focused transport checks preserved
+every original judgment and its known red result. A separately parsed complete-module reference matched
+all 2,774 static-text observations across that retained baseline's 898 Haskell modules.
+
+The repaired native capture and independent oracle pass 170 focused checks. An earlier supplied-AST
+compatibility oracle passed 151 checks across native, shared helpful and unhelpful locations, and 38
+opaque-surface checks bind a successful getter client and eleven exact compiler refusals to the suite
+image and actual layout unit in its build plan. Those checks cover exact
+input bytes and modes, structural occurrence identities, complete query/dependency traces, repeated
+origins, shadowing, aliases, cycles, malformed syntax, invalid UTF-8, the configured position-pragma refusal,
+empty and incomplete inventories, extra files, symlinks, and actual mode/byte/add/remove/link edits between
+observation and closing acquisition. A matching control uses the same closing path. The external-method
+expectation now names the three additional `Show` contracts explicitly. A decoder correction admits only the two declared static-text example projection kinds while retaining
+reserved-record and ordering refusals; fourteen checks cover actual report decoding, malformed pairs and
+a lossless retained encoding. Source observations record paths, modes, byte lengths and content digests,
+while producer and oracle compare actual bytes; the complete diagnostic shrinks from 9,052,752 to 611,058
+bytes without losing its query traces or recorded observations.
+
+A subsequent source-bound native component returned 1,808 green independent judgments over its
+906-module Haskell inventory. Follow-up observations bound all seven actual process returns, three
+challenged completion frames, the independently declared namespaces, unchanged source and both actual
+executable images. Changing the recorded report outcome produced exactly `finding-set` red while
+retaining all ordinary rows and the complete red frame; restoring it returned every judgment to green.
+These observations precede the transport repair below and supply no current phase pass.
+
+The shipped-binary follow-up then refused `SourceByteLimit`: the complete graph report was
+154,483,478 bytes, above the runner's unchanged 16 MiB artifact read. Large graph and static-text
+observation groups now use lossless field-table, gzip and base64 row blocks. Path classification and
+findings remain visible. The independent `test/oracle/layout/ReportTransport.hs` reader reconstructs
+every ordered row before the existing semantic checks; counts, complete bytes and their digest must
+agree, and malformed, nested, trailing and oversized blocks refuse. Packing supplies no source
+authority and removes no graph or query observation. Thirty transport checks cover exact reconstruction
+of the retained native report, the packing threshold and its one-byte-over twin, malformed tables and
+streams, and the exact 512 MiB inflated limit and its one-byte-over twin.
+
+Fresh source-bound integration of the packed representation returned 1,809 green independent judgments
+over 907 Haskell modules. Twelve independent observation checks bind the complete ledger, both
+namespaces, all seven actual process returns, three challenged frames, unchanged source and both actual
+executable images. The main and syntax reports are respectively 11,228,000 and 11,226,426 bytes.
+The shipped binary's three foreign-path challenges then completed with their required refusals and
+recovered nonces, unchanged source and unchanged product bytes; all three reports fit the unchanged
+16 MiB read. The separate gate profile returned all 1,815 judgments green. Removing only the required
+Python finding made exactly `binary.python.finding` red while retaining every ordinary row and the
+complete red frame. Exact restoration returned all 1,815 judgments to green with the same complete
+prefix digest. All six independent binary-profile checks passed, including actual product and oracle
+byte stability.
+
+An independent review then found that a short field table could repeat one large dictionary field and
+allocate beyond the reconstructed-report limit before the postimage check. The reader now charges each
+field's strict UTF-8 byte length, every tab and every newline against the remaining declared byte count
+before joining a row; that count is already bounded by the report's remaining 512 MiB allowance. Sixteen
+focused controls pass under a 64 MiB heap limit, including a one-MiB field referenced 1,024 times, cumulative
+rows and blocks, multibyte characters, exact boundaries and malformed-index guards. The captured earlier
+reader exhausts that same heap before returning its first judgment. The repaired reader also passes all
+twenty-eight retained format controls, including exact reconstruction of the 154,483,478-byte native report.
+
+The changed production-subject matrix, all seven owning legacy qualifications in the numerical gate,
+fresh numerical predecessor replay, and the complete Phase-2 preview and separate acceptance remain
+required. These component observations mint no phase evidence and change no status.
+
+The subsequent complete native preview returned failure. Its mutation ratio met the threshold at
+25 kills among 35 viable mutants, with five compiler-refused mutants, but none of the six sampled
+Lexical mutants was killed. The Mutants, Qualification and Pass criterion rows were red; the other
+fifteen rows were green. Export also refused because at least one complete evidence record exceeded
+the existing 16 MiB bound. The preview cleaned its owned tree, so the oversized member, its byte count
+and the internal per-mutant completion joins are not retained by its terminal summary. This failed run
+issued no receipt. That failure prompted repairs to independent local-group ordering, complete
+observation of individual case refusals, and lossless evidence capacity. The later component observations
+below do not replace a fresh complete preview and separate acceptance.
+
+The expanded supplied-AST component now passes 205 independent judgments over 33 cases in the same
+three span modes, preserving its earlier semantic checks and adding explicit case outcomes and ordered
+empty-local-group facts and literal expectations for current-module-qualified declaration keys.
+Individual graph, static-text, ignore-policy and report refusals now retain
+explicit outcomes while the producer continues its remaining controls; independent success still requires
+the complete successful payload. The oracle separately declares all 77 fixture graph calls in order.
+The native targets build successfully. A separate retained-encoding diagnostic recovered all fourteen selected
+historical fields byte-for-byte, passed twelve threshold and Unicode vectors, and rejected thirty-seven
+malformed encodings. Base64 retains the two historical native envelopes' exact gzip bytes while reducing
+their combined representation by 4,417,620 bytes. Large legacy and matrix-control native-run snapshots use
+the same lossless encoding. These observations do not establish the next Phase-2 archive's size or its
+mutation results; the unchanged per-record limit and complete fresh gate remain mandatory.
+
+A serial diagnostic of the subsequent sampled Lexical changes completed all 202 then-current judgments
+for every compiling row: three changed subjects produced red judgments and two completed green. A sixth
+row exposed a generic mutator defect: field drop had selected a list-comprehension `let` qualifier and the
+compiler refused the following line. Eligibility now requires assignment immediately after the field
+identifier; exact compiler-refusal attribution remains unchanged. The fixed five operators, six subjects,
+eight-per-module sampling, forty-row cap and mutation threshold remain intact. The repaired inventory
+requires fresh sampling and complete gate qualification; those earlier diagnostics supply neither.
+
+Fresh sampling exposed a native graph API gap: structural-query failures could escape before callers
+recorded their observations. The product boundary now forces its complete result inside a synchronous
+refusal boundary, retains the actual error with an unavailable graph result, and performs its normal
+closing source acquisition. A private refused state keeps the unavailable finding even when the two
+physical acquisitions agree; asynchronous interruption propagates. The repaired native targets build,
+and seven actual-source checks distinguish list qualifiers from real record fields. The fresh native
+control on 2026-10-29 passed all 1,865 independent judgments and twelve custody and protocol checks:
+complete full/gate inventories, seven actual native runs, three challenged oracle responses, source-copy
+closure and executable readbacks. The actual sampled structural-field mutation subsequently produced a
+complete red ledger over the same 1,865 judgments. Twenty-seven checks bind that changed source and
+executable to both complete native protocols; thirty-seven further checks retain the actual query error,
+unavailable result and closing acquisitions across both unchanged controls and five physical edits,
+without fabricated graph facts. These are component observations, not a qualified matrix kill or phase
+pass; current numerical predecessor reproduction, the complete gate and a separate fresh acceptance
+remain required.
+
+**Session handoff on 2026-10-30.** Development stopped at the user's request. The ordered native
+`replay --through 1` published a complete green Phase-0 reproduction at 02:18:45 UTC, with all eighteen
+categories green; its receipt is recorded in [Phase 0](phase_00_documentation_suite.md#phase-status).
+After the required nested predecessor admission, its own Phase-1 run reached the twelfth materialized
+mutation before interruption. The verified process group received SIGINT and the controller exited 130;
+no process from that run remained. The interrupted run published no Phase-1 receipt or revocation marker
+in its generation. An empty buffered terminal log supplies no additional result. No repaired complete
+Phase-2 preview or separate acceptance has finished, and all seven owning legacy bindings remain open.
+
+Resume by checking the worktree and canonical receipts, rebuilding the source-bound native verifier if
+needed, and performing fresh numerical predecessor reproduction at the resumed source and governance.
+Then run this phase's complete preview, require every gate category and the full forty-mutant matrix,
+including complete viable-mutant observations and each named subject kill, and run a separate fresh
+acceptance only after that preview passes. Preserve the per-record archive bounds, independent oracles,
+source closure and serial compiler execution. The documentation edits at this handoff require fresh
+affected-closure validation; the interrupted candidate cannot be resumed or reused as a pass.
+
+Detailed commands, component logs and the interruption checkpoint are retained as disposable advisory
+notes in `.build/qualification-repair/layout-completion-20261028/session-handoff-20261030.txt` and
+`work-checkpoint.json` in that directory. They supply no validation authority. After actual acceptance,
+reconcile all six Remaining Work sections and the seven legacy bindings before continuing numerically
+with the complete Phase-3 contract. The later-phase backlog remains in scope; no successor implementation
+or live hardware work was undertaken during this wrap-up.
+
 The contract is reopened under [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) by
 [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice): the subject moves
 from the validator into product code and absorbs the source queries of the retired tool-generation phase.
@@ -46,13 +190,15 @@ supplied no authority. Earlier verifier runs recorded receipts and immutable obs
 [DL-0022](../documents/decision_log.md#dl-0022--phase-2-accepted-its-owed-by-paragraphs-become-observed-implementations)
 re-mooded the paragraphs that had named this phase as owing. A subsequent audit found the missing
 inherited legacy analyzer/evidence join. The verifier revoked the selected receipts and reopened the
-documentation gate; this phase now requires fresh numerical qualification.
+documentation gate; that reset checkpoint required fresh numerical qualification of this phase.
 
 The historical layout runs remain bounded source and mutation observations. They do not establish a
 current complete gate pass or discharge the inherited legacy obligations.
 
-The independent oracle requires all 294 external class-method contracts, including the exact
-`NFData Detected` and `NFData SubstrateProfile` contracts from `Control.DeepSeq`. Per-contract interface,
+The independent oracle requires all 297 external class-method contracts, including the exact
+`NFData Detected` and `NFData SubstrateProfile` contracts from `Control.DeepSeq` and the three
+`Show` contracts for `RetainedPlanBytes`, `NativeStopped` and `NativeJournalUnclosed` in the retained
+runner core. Their method is `show`, their provider is `Prelude` from `base`, and their import is implicit. Per-contract interface,
 package, import, and source-membership checks remain mandatory, with no uncontracted method admitted.
 Later closure changes require fresh replay under
 [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase).
@@ -63,6 +209,17 @@ Phase 2 closes the tracked source boundary. `Amoebius.Layout.Classify` assigns e
 class from the closed rule in the repository-layout doctrine; `Amoebius.Layout.PbGrammar` admits the bounded
 bootstrap through a deny-by-default syntax, import, call, and effect graph; `amoebius layout-report` prints the
 classification for the oracle to judge. No Markdown row, count, or tracker status is an input to any of them.
+
+The static-text observation owns complete physical source acquisition beneath the selected root, using
+the closed state/Git/archive exclusions already used by the source-snapshot boundary. The producer parses
+the captured strict UTF-8 Haskell bytes, retains every demanded occurrence, structural path, raw span,
+lookup, literal origin and issue, forces those observations, and reacquires every protected byte and mode.
+Only a complete manifest, a nonempty Haskell inventory and equal native acquisitions close the capture
+state. The skipped, incomplete or changed boundary retains an unavailable finding; an observed syntax or
+encoding refusal remains a finding. Serialized diagnostics supply observations only. The separate oracle
+reopens the physical tree and independently parses complete modules to derive the expected relations and
+query traces. Its scope is native syntax and compatibility-query facts; type checking, Haskell evaluation,
+continuous filesystem monitoring and arbitrary runtime effects remain outside this claim.
 
 The admitted non-Haskell tracked **metadata** set is exactly six files, named by class rather than by name:
 the package description and the project description, the two ignore files, the licence text, and one
@@ -89,14 +246,18 @@ are classified to their owners — Phase 3 for Dhall and Proto, Phase 8 for the 
 ```gate-spec
 capability: repository_layout_conformance
 role: ordinary
-claim: The shipped layout-report classifies every present source path, enforces the six admitted metadata paths and bounded bootstrap bytes, and resolves the compiler-backed whole-source graph; the independent oracle judges planted foreign inputs and typed legacy ownership. Archive custody remains verifier-owned.
-subjects: Amoebius.Layout.Classify, Amoebius.Layout.PackageMap, Amoebius.Layout.PbGrammar, Amoebius.Layout.Report, Amoebius.Layout.SourceGraph
+claim: The shipped layout-report classifies every present source path, enforces the six admitted metadata paths and bounded bootstrap bytes, and resolves the compiler-backed whole-source graph. Complete stable native source bytes and modes bind its static-text observations to one parsed forest; an independent full-module reference judges structural identities and complete query traces, supplied-AST compatibility and opaque compiler clients. Planted foreign inputs and typed legacy ownership are independently judged. Archive custody remains verifier-owned; runtime evaluation and hardware remain outside the claim.
+subjects: Amoebius.Layout.Classify, Amoebius.Layout.PackageMap, Amoebius.Layout.PbGrammar, Amoebius.Layout.Report, Amoebius.Layout.SourceGraph, Amoebius.Internal.SourceText.Lexical
 suite: layout-suite
 oracle: oracle-layout
 positive: case:positive.bootstrap | input=pb/__main__.py | expected=admitted
 positive: case:six-metadata-files | input=six metadata paths | expected=six classes
 positive: case:positive.archive | input=accepted bundle path | expected=historical-evidence
 positive: case:graph-qualified | input=whole source inventory | expected=resolved
+positive: static-text.discovery | input=shipped native text corpus | expected=complete independent inventory
+positive: static-text.closing-control.findings | input=stable native source | expected=no finding
+positive: lexical.discovery | input=supplied whole AST corpus | expected=complete independent inventory
+positive: opaque.getters.compiler | input=client of built layout unit | expected=exact compiler success
 negative: case:negative.python | input=src/example.py | tag=NonHaskellSource | stage=classify
 negative: case:negative.dhall | input=dhall/example.dhall | tag=ForeignSourceOwed | stage=classify
 negative: case:negative.pulumi | input=pulumi/Pulumi.yaml | tag=TrackedPulumiProgram | stage=classify
@@ -105,7 +266,15 @@ negative: case:negative.ignore-root | input=ui/output | tag=RetiredIgnoreRoot | 
 negative: case:negative.ordinal | input=src/Amoebius/Phase42Runtime.hs | tag=OrdinalRuntimeIdentity | stage=classify
 negative: case:graph.ambiguous-import | input=ambiguous import fixture | tag=AmbiguousSourceImport | stage=graph
 negative: case:graph.module-path-mismatch | input=misdeclared module fixture | tag=ModuleDeclarationPathMismatch | stage=graph
-mutants: stages=Amoebius.Layout.Classify,Amoebius.Layout.PackageMap,Amoebius.Layout.PbGrammar,Amoebius.Layout.Report,Amoebius.Layout.SourceGraph per-module=8 cap=40 kill-ratio=3/5
+negative: static-text.closing-bytes.findings | input=bytes changed before closing read | tag=StaticTextSourceChanged | stage=capture
+negative: static-text.closing-mode.findings | input=mode changed before closing read | tag=StaticTextSourceChanged | stage=capture
+negative: static-text.manifest-empty.findings | input=omitted native source | tag=StaticTextSourceInventoryMismatch | stage=capture
+negative: static-text.source-symlink.findings | input=symlink native input | tag=StaticTextCaptureUnavailable | stage=capture
+negative: static-text.invalid-utf8.findings | input=invalid UTF-8 source | tag=HaskellSourceEncodingInvalid | stage=parse
+negative: opaque.result-constructor.compiler | input=forged diagnostic carrier | tag=ConstructorNotExported | stage=compile
+negative: opaque.result-read.compiler | input=decoded diagnostic carrier | tag=NoReadInstance | stage=compile
+negative: opaque.result-generic.compiler | input=generic diagnostic carrier | tag=NoGenericInstance | stage=compile
+mutants: stages=Amoebius.Layout.Classify,Amoebius.Layout.PackageMap,Amoebius.Layout.PbGrammar,Amoebius.Layout.Report,Amoebius.Layout.SourceGraph,Amoebius.Internal.SourceText.Lexical per-module=8 cap=40 kill-ratio=3/5
 binary-fact: command=layout-report --root {tree} --paths-file {input} --output {run}/layout-report.tsv | input=paths.txt | perturbation=plant-foreign-paths(src/Challenge{nonce}.py=NonHaskellSource,dhall/Challenge{nonce}.dhall=ForeignSourceOwed,pulumi/Pulumi{nonce}.yaml=TrackedPulumiProgram) | outputs={run}/layout-report.tsv
 substrate: none
 ```
@@ -115,13 +284,13 @@ substrate: none
 **Contract check**: BOUND — the gate specification above is the compiled value the runner executes; the
 documentation checker refuses a block that differs from it. Execution evidence remains phase-local.
 
-**Current gap:** All seven owning bindings have component qualification. The whole-snapshot
+**Historical component checkpoint:** All seven owning bindings recorded component qualification. The whole-snapshot
 `bootstrap-source` factory passes nine focused oracle checks and all forty-three independent
 qualification-join checks. The captured-bootstrap regression passes all twenty-eight independent join
 checks, including refusal to borrow its proof for the whole-snapshot owner. The complete layout
 regression passes 1,424 independent checks and the runner regression passes 745; documentation checking
-reports zero findings. Fresh numerical predecessor replay, phase preview and phase acceptance remain
-required; these component results do not advance status. The source-bound `source-graph` factory passes thirteen focused oracle checks and all
+reports zero findings. These component results do not advance status. A complete phase preview and
+separate acceptance remain required. The source-bound `source-graph` factory passes thirteen focused oracle checks and all
 fifty-two independent qualification-join checks. The source-bound `ignore-context`
 factory passes seven focused oracle checks and forty-two independent qualification-join checks. The source-bound `runtime-identity`
 factory passes nine focused oracle checks and forty-seven independent qualification-join checks. The `pulumi-source`
@@ -130,10 +299,32 @@ factory passes seven focused oracle checks and thirty-two independent qualificat
 `test-source` factory passes thirteen focused checks and thirty-seven qualification-join checks, including
 exact original-tree discovery and four changed-production-source refusals. The complete phase
 still requires all seven canonical bindings in one numerical gate.
-The Phase-1 gate has passed; its three closed declarations are retired under
-[DL-0036](../documents/decision_log.md#dl-0036--phase-1-acceptance-retires-its-qualified-toolchain-bindings),
-with retained guards and fresh numerical replay before successor acceptance. Existing layout components
-and historical receipts cannot supply those missing qualifications.
+The repaired Phase-1 predecessor acceptance on 2026-10-23 recorded receipt
+`1d571c43452ba121ef5c3b17c29502dc1dc85ab6a9b20a767531580f02d96d20` with a green unmodified control and
+named kills in every shipped subject. Its three owning bindings retire under
+[DL-0038](../documents/decision_log.md#dl-0038--a-qualified-repaired-toolchain-pass-retires-its-three-bindings); all identities, queries and canonical guards remain.
+Numerical replay through Phase 1 then completed on 2026-10-23, publishing Phase-0
+[receipt `62e40f509f659bcf35b03708801d157fbdf6e0a4af18b87cc74ccb862d20f6b7`](../validation-records/generation-6352fd459f49b622/receipts/phase-00-62e40f509f659bcf35b03708801d157fbdf6e0a4af18b87cc74ccb862d20f6b7-a4d0d4d9bcf65a4fe1714f057d26b2cfd4479b38f73963d03c37ad7e526d345b/receipt.tsv) and Phase-1
+[receipt `c6d4a39786a4050aad934eaabdc8c6b55497e977e21a0714e117aefe16238d47`](../validation-records/generation-6352fd459f49b622/receipts/phase-01-c6d4a39786a4050aad934eaabdc8c6b55497e977e21a0714e117aefe16238d47-5095c6263590a45337f1d635637494f5708ce5f17ebcc33bda9c699b639fa81c/receipt.tsv) in the current worktree. The next
+Phase-2 preview exited 1 before executing its gate, with `PredecessorNotCommitted` and
+`PREDECESSOR-GATE-UNAVAILABLE`: recursive custody compared Phase 0's older whole-status postimage with
+the later Phase-1 surface. This refusal supplies no Phase-2 evidence. The publication and recursive-admission
+repair specified by [DL-0039](../documents/decision_log.md#dl-0039--recursive-custody-preserves-accepted-completed-prefixes)
+reopened the earliest owner through the [reset receipt](../validation-records/generation-d7ecfa4c132f6845/receipts/phase-00-35b097c8a6c5efe44b0d0e0966c92b1e04a3b333fa26fe67086e630733951e26-35c947452b34e28599086c516ec4b4fbc7bbbb34ccc038ef52643625495251b7/receipt.tsv), completed by the new source-bound verifier
+on 2026-10-23 at 17:41:25 UTC with product gap `LTD-VAL-003` and validator gap
+`recursive uncommitted predecessor postimage admission`. This nongate reset supplies no phase pass.
+Focused custody components recorded 67 green oracle rows and 52 green independent evidence-binding
+checks; all seven changed production subjects produced their exact expected red-row sets. The subsequent
+complete Phase-0 acceptance is recorded by [receipt `6d072c6371298209b4b1baaf77be7e6010a77e6ad84bdb17e71e137ec8bf02ee`](../validation-records/generation-d7ecfa4c132f6845/receipts/phase-00-6d072c6371298209b4b1baaf77be7e6010a77e6ad84bdb17e71e137ec8bf02ee-dd94cde77cf45d3cbe84a0cbf6b43c1623e00bb60dfa1dd6186a016d3b16f8e4/receipt.tsv), issued at
+2026-10-23 19:25:31.985079 UTC and completed at 2026-10-23 19:25:32 UTC.
+Its [bounded owning observations](phase_00_documentation_suite.md#phase-status) qualify the reopened binding;
+[DL-0040](../documents/decision_log.md#dl-0040--qualified-recursive-custody-retires-its-reopened-binding) retires exactly that binding. Complete numerical Phase-0 replay at the amended source and governance
+must precede a fresh complete Phase-1 preview and separate acceptance, and only then another complete
+Phase-2 preview and separate acceptance. Existing layout
+components and historical receipts cannot replace that authority. All seven Phase-2 owning bindings remain
+Active until this phase's own qualified pass. The
+whole-snapshot `bootstrap-source` qualification remains distinct from the finite predecessor's
+captured-bootstrap scope and Phase 50's runtime handoff.
 
 The first fresh layout baseline after Phase-1 acceptance produced 1,312 green independent oracle rows
 and two red rows: `compiler-residual-ownership-control` and `case:graph-qualified`. It left two imports
@@ -168,15 +359,15 @@ store are ignored. The graph claim is bounded by the limits in the `Residue` row
 | `Oracle` | `test/oracle/layout/Main.hs` restates the classification rule, the six metadata-file classes, the exact accepted-bundle and void-marker archive classes, the grammar's refused node families, and the expected finding per planted negative from literals; its own text scanner `test/oracle/layout/SourceScan.hs` recounts derivation clauses, standalone derivings, instance declarations, sink uses, and each use's consumer literals from raw source; it holds its own sink catalogue and expected fixture rows as literals and depends on no `amoebius` library. |
 | `Positive controls` | The tracked tree classifies with zero findings; the bootstrap admits through the grammar; the metadata set matches the oracle's six classes, exact accepted bundles and void markers classify as non-source evidence, the ordinal-identity query is zero, and the whole-source graph is `resolved` with both import partitions closed. |
 | `Paired negatives` | A seventh metadata file, an unexpected archive file, a tracked `.py` outside `pb/`, a tracked `.dhall`, a tracked Pulumi YAML, a tracked mutant body, a retired generated root re-admitted in an ignore file, an ordinal-bearing runtime identity, and one forbidden node per grammar family — each refused at its exact locus with the positive twin accepted. For the graph stage, one fixture per way it can stay open (an unresolved import, an unresolved standalone import, an unresolved derivation route, an opaque call site, an unscanned expression, an unscanned declaration) beside a clean twin that is `resolved`, and fork-registration fixtures for a missing, duplicated, wrong-version, and unrelated-version unit. The report's own refusals are fixtures too: an unreadable paths file and a failing Git inventory each exit 2, a bad option exits 2, a finding exits 1, and `--no-graph` states `graph-stage not-computed`; a declared module whose source is absent and is not the forward-owned generated Proto pair is a finding and is never recorded as owed. |
-| `Mutants` | Runner-generated from the fixed operator catalogue over the five stage modules, eight per module, at most forty per gate, kill ratio at least 0.6; a mutant in `Amoebius.Layout.Classify` that admits a foreign extension is killed by the planted negatives. No authored mutant seam exists in any subject. |
+| `Mutants` | Runner-generated from the fixed operator catalogue over the six product subjects, eight per module, at most forty per gate, kill ratio at least 0.6; a mutant in `Amoebius.Layout.Classify` that admits a foreign extension is killed by the planted negatives. No authored mutant seam exists in any subject. |
 | `Discovery` | The package description's stanza module map is compared two-way with the subjects; the report's path set equals the present cached-and-untracked Git source inventory, with deleted index paths bound separately by source-snapshot capture; empty discovery refuses. |
 | `Challenge` | After the run starts, the runner stages one file whose name carries a nonce into a run-local copy of the tracked tree — once as a `.py` outside `pb/`, once as `.dhall`, once as Pulumi YAML — and the report must refuse each by class with the nonce in the finding. |
 | `Observer` | `ProcessObserver` over the shipped binary; executable identity, argv, environment policy, exit, and complete output are runner-captured. No subject log is trusted. |
 | `Authority/bypass` | `SUBJECT-NOT-SHIPPED` refuses a subject outside the executable's closure; the oracle stanza's hygiene refuses a product dependency; `pb` is inadmissible as transport; no Markdown row, count, or tracker status reaches the classifier, checked by a compile-negative twin. |
 | `Freshness` | A unique run root; a fresh copy of the tracked tree per planted negative; the verifier digest equals the seed's; opening and closing source identities are equal. |
-| `Qualification` | The runner-generated mutant matrix over the five stage modules — eight per module, at most forty, kill ratio at least 0.6 — precedes the clean candidate in the same run. |
+| `Qualification` | The runner-generated mutant matrix over the six product subjects — eight per module, at most forty, kill ratio at least 0.6 — precedes the clean candidate in the same run. |
 | `Cleanroom` | Everything generated lives beneath `.build/runs/phase-02/**` and is absent afterward; the kernel ratchet is recorded. |
-| `Legacy closure` | `LTD-SRC-000`, `LTD-SRC-001`, `LTD-SRC-005`, `LTD-SRC-006`, `LTD-SRC-008`, `LTD-META-001`, and `LTD-NAME-001` close here through the compiled inventory. `LTD-SRC-002` and `LTD-SRC-003` are reported as owed by Phase 3 and `LTD-SRC-004` as owed by Phase 72; none is closed here. |
+| `Legacy closure` | `LTD-SRC-000`, `LTD-SRC-001`, `LTD-SRC-005`, `LTD-SRC-006`, `LTD-SRC-008`, `LTD-META-001`, and `LTD-NAME-001` close here through the compiled inventory. `LTD-SRC-002` and `LTD-SRC-003` are reported as owed by Phase 3, the UI language share under `LTD-SRC-004` by Phase 8, and the UI generated-artifact share under `LTD-UI-001` by Phase 72; none is closed here. |
 | `Predecessor` | The Phase-1 receipt in certification generation 2, chained by the digest of Phase 1's product closure plus the verifier and governance digests. |
 | `Residue` | The runtime handoff of the bootstrap remains Phase 50's claim; Phases 3 through 9 and every phase from 50 onward remain explicit limitations. The graph is a potential-route model over the resolved imports and compiler interfaces, and every attribution in it is at the level of names: a call, derivation, or import is attributed to a candidate that could supply it, never proven to be the one that runs. Runtime dispatch, higher-order flow, the internals of external packages (interfaces are digest-recorded, bodies and instance lists are not read), and the values of non-literal path expressions remain explicit `UNVERIFIED` limitations. A forward-owned, deferred-seed, or available-unit import records an absence or an ownership, not a resolution; a non-buildable component (`lib:infernix`, `lib:jitml`) and the maintained fork are accounted, not compiled. An `external-instance` derivation route records that the delegate's instance is presumed to come from the class's external provider, not that it was found; derived-instance delegation is recorded as routes without being folded into potential-effect reachability. The sink catalogue is a closed list of effect primitives (process, file, environment, network, dynamic-load, and unsafe entities) authored separately in the product and the oracle rather than derived from the libraries' interfaces, so an effect outside it, including ambient clock, randomness, and standard-stream use, is not a sink; a consumer is only a literal path fragment at a catalogued argument position read through path-preserving forms, and a fragment behind a non-literal operand is `dynamic-root`. The graph stage is judged on the report the suite produces from the same library the shipped binary links; the gate's shipped-binary runs plant foreign paths and judge their classification, and their own graph rows are computed but not judged. Native version-compatible tools and the declared dependency units are explicit inputs; the retired bootstrap archive set is not required. |
 | `Pass criterion` | `qualified-gate-pass` — every row succeeds in one serial run for the exact current source, and `accept` records it. |
@@ -218,6 +409,12 @@ mutant a runner-applied operator. Serialized forms exist only beneath `.build/te
 Classify the tree; plant each negative in a run-local copy; compare the findings with the oracle.
 
 ### Remaining Work
+
+The owner-0 runner boundary was qualified under [DL-0042](../documents/decision_log.md#dl-0042--qualified-image-and-completion-custody-retires-runner-authority).
+Retain this sprint's semantic deliverables and all prior guards. Resume from the dated handoff in
+[Phase Status](#phase-status): complete fresh numerical predecessor reproduction, then this phase's full
+preview and separate acceptance. The interrupted run and historical component observations below
+supply no current phase pass; no sprint status or legacy binding closes before actual acceptance.
 
 Retain the qualified `test-source` factory and its guards in the complete phase gate while implementation
 continues with Sprint 2.2. The shipped classifier exposes its complete test-tree query and
@@ -270,8 +467,14 @@ Classify the package description; plant each negative; compare with the oracle.
 
 ### Remaining Work
 
+The owner-0 runner boundary was qualified under [DL-0042](../documents/decision_log.md#dl-0042--qualified-image-and-completion-custody-retires-runner-authority).
+Retain this sprint's semantic deliverables and all prior guards. Resume from the dated handoff in
+[Phase Status](#phase-status): complete fresh numerical predecessor reproduction, then this phase's full
+preview and separate acceptance. The interrupted run and historical component observations below
+supply no current phase pass; no sprint status or legacy binding closes before actual acceptance.
+
 Retain the qualified `tool-source` factory for the tracked Python gate and renamed tool root in the complete
-phase gate while implementation continues with Sprint 2.3. The current complete layout regression passes
+phase gate while implementation continues with Sprint 2.3. At that component checkpoint, the complete layout regression passed
 all 1,365 independent oracle rows with a resolved graph and no layout findings; the runner regression passes
 all 745 oracle checks.
 Its five typed product examples cover Python in the original and renamed roots, Haskell in a renamed root,
@@ -351,6 +554,12 @@ Classify each foreign class; compare the owner with the oracle's table; refuse t
 
 ### Remaining Work
 
+The owner-0 runner boundary was qualified under [DL-0042](../documents/decision_log.md#dl-0042--qualified-image-and-completion-custody-retires-runner-authority).
+Retain this sprint's semantic deliverables and all prior guards. Resume from the dated handoff in
+[Phase Status](#phase-status): complete fresh numerical predecessor reproduction, then this phase's full
+preview and separate acceptance. The interrupted run and historical component observations below
+supply no current phase pass; no sprint status or legacy binding closes before actual acceptance.
+
 Retain the qualified `pulumi-source` factory for tracked YAML and renamed YAML, TypeScript and Python
 programs. Four typed product inputs feed the shared whole-source apparatus; the separate
 `test/oracle/layout/PulumiSourceOracle.hs` owns their expected paths, bytes, findings and discovery. The
@@ -362,8 +571,8 @@ each produce exactly their assigned negative refusal with the other six rows gre
 Pulumi root, admitting unknown renamed roots, and admitting Python outside `pb`. All thirty-two independent
 join checks pass, binding source witnesses and changed native images, refusing wrong source, owner,
 lifecycle, duplicate evidence and forged observations, and confirming removal of every copied source tree.
-The current complete layout regression passes all 1,374 independent oracle rows with a resolved graph
-and no layout findings, and the runner regression passes all 745 oracle checks. Implementation can
+At that component checkpoint, the complete layout regression passed all 1,374 independent oracle rows with a resolved graph
+and no layout findings, and the runner regression passed all 745 oracle checks. Implementation can
 continue with Sprint 2.4; the complete numerical phase gate remains required. Later-owned source findings
 remain explicit debt.
 
@@ -400,10 +609,16 @@ Run the ordinal query; plant an ordinal-bearing name; require the refusal at tha
 
 ### Remaining Work
 
+The owner-0 runner boundary was qualified under [DL-0042](../documents/decision_log.md#dl-0042--qualified-image-and-completion-custody-retires-runner-authority).
+Retain this sprint's semantic deliverables and all prior guards. Resume from the dated handoff in
+[Phase Status](#phase-status): complete fresh numerical predecessor reproduction, then this phase's full
+preview and separate acceptance. The interrupted run and historical component observations below
+supply no current phase pass; no sprint status or legacy binding closes before actual acceptance.
+
 Retain the qualified `runtime-identity` factory for stale, copied and phase-named runtime identities in the
-complete phase gate while implementation continues with Sprint 2.5. The current complete layout regression
-passes all 1,386 independent oracle rows with a resolved graph and no layout findings; the runner regression
-passes all 745 oracle checks.
+complete phase gate while implementation continues with Sprint 2.5. At that earlier component checkpoint, the complete layout regression
+passed all 1,386 independent oracle rows with a resolved graph and no layout findings; the runner regression
+passed all 745 oracle checks.
 Fifteen typed product inputs cover runtime text, copied paths with mixed-case and separator spellings,
 executable/library/benchmark/foreign-library names, empty disabled components and conditional source roots.
 The product parses Cabal component identities independently of module claims, so empty components remain
@@ -452,6 +667,12 @@ Classify both ignore files; plant each negative; compare with the oracle.
 
 ### Remaining Work
 
+The owner-0 runner boundary was qualified under [DL-0042](../documents/decision_log.md#dl-0042--qualified-image-and-completion-custody-retires-runner-authority).
+Retain this sprint's semantic deliverables and all prior guards. Resume from the dated handoff in
+[Phase Status](#phase-status): complete fresh numerical predecessor reproduction, then this phase's full
+preview and separate acceptance. The interrupted run and historical component observations below
+supply no current phase pass; no sprint status or legacy binding closes before actual acceptance.
+
 Retain the qualified `ignore-context` factory for retired generated roots and undeclared state roots
 in both ignore policies. Sixteen typed product edits cover all six retired roots in both files and
 undeclared source-adjacent and scratch roots. The shared original snapshot and each file's actual bytes
@@ -472,10 +693,10 @@ tree remains. These component results supply no phase evidence. The original pol
 ## Sprint 2.6: The layout report, the bounded bootstrap, and the six-file admitted set ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/Amoebius/Layout/PbGrammar.hs`, `src/Amoebius/Layout/Report.hs`, `app/amoebius/Main.hs`, `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs`, and `amoebius.cabal`
+**Implementation**: `src/Amoebius/Layout/PbGrammar.hs`, `src/Amoebius/Layout/Report.hs`, `src/Amoebius/Layout/SourceGraph.hs`, `src/internal-source-text/Amoebius/Internal/SourceText/Lexical.hs`, `test/layout/StaticTextCases.hs`, `test/layout/LexicalCases.hs`, `test/layout/StaticTextSurfaceCases.hs`, `app/amoebius/Main.hs`, `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs`, and `amoebius.cabal`
 **Blocked by**: Sprint 2.5
 **Independent Validation**: `amoebius layout-report` classifies every tracked path exactly once and reports the admitted non-Haskell set as exactly six files by class; `pb/__main__.py` admits through the deny-by-default grammar; one forbidden node per family and a seventh non-Haskell file are refused; the compiled specification equals the fenced block above.
-**Oracle**: `test/oracle/layout/Main.hs` and its source scanner `test/oracle/layout/SourceScan.hs` for the report and the grammar; `test/oracle/runner/Main.hs` for the specification digest.
+**Oracle**: `test/oracle/layout/Main.hs`, `test/oracle/layout/SourceScan.hs`, `test/oracle/layout/StaticTextExpected.hs`, `test/oracle/layout/StaticTextCaptureOracle.hs`, `test/oracle/layout/StaticTextCasesOracle.hs`, `test/oracle/layout/LexicalCasesOracle.hs`, `test/oracle/layout/StaticTextSurfaceOracle.hs`, and `test/oracle/layout/ReportTransport.hs` for the report, lossless transport, grammar, native text facts, supplied compiler values and opaque client surface; `test/oracle/runner/Main.hs` for the specification digest.
 **Legacy IDs**: `LTD-SRC-000`, `LTD-SRC-008`
 **Docs to update**: `DEVELOPMENT_PLAN/README.md` only through `accept`
 
@@ -498,8 +719,14 @@ phase's patch.
 
 ### Remaining Work
 
-Retain the qualified whole-snapshot `source-graph` binding and implement and independently qualify
-`bootstrap-source`. The source-graph comparator and independent oracle cover path omission, mode change,
+The owner-0 runner boundary was qualified under [DL-0042](../documents/decision_log.md#dl-0042--qualified-image-and-completion-custody-retires-runner-authority).
+Retain this sprint's semantic deliverables and all prior guards. Resume from the dated handoff in
+[Phase Status](#phase-status): complete fresh numerical predecessor reproduction, then this phase's full
+preview and separate acceptance. The interrupted run and historical component observations below
+supply no current phase pass; no sprint status or legacy binding closes before actual acceptance.
+
+Retain the qualified whole-snapshot `source-graph` and `bootstrap-source` bindings in the complete numerical
+phase gate. The source-graph comparator and independent oracle cover path omission, mode change,
 byte change, disguised foreign behavior and unattributed effects. All thirteen focused rows and fifty-two
 independent source-bound qualification-join checks pass over an exact 1,047-path original and copied
 inventory. Seven changed production builds produce exactly their assigned red rows; source witnesses,
@@ -523,15 +750,19 @@ Missing and extra bootstrap files and duplicate and empty input inventories refu
 verified. Five changed production builds produce exactly their assigned red rows, and all forty-three
 independent qualification-join rows pass, including the explicit snapshot-scope check. Source, binary and
 cleanup witnesses are verified, and no copied source tree remains. The captured-bootstrap scope regression passes all twenty-eight independent join checks;
-its scope swap and attempted proof borrowing remain refused. Complete layout and runner regressions
-pass all 1,424 and 745 independent checks respectively; documentation checking has zero findings. Fresh
-numerical predecessor replay, phase preview and phase acceptance remain required. Its typed scope is separate from the Phase-0 captured
+its scope swap and attempted proof borrowing remain refused. At that earlier component checkpoint,
+complete layout and runner regressions passed all 1,424 and 745 independent checks respectively;
+documentation checking reported zero findings. Those observations remain historical. The
+recorded earliest-owner reset and completed custody components supply no owning gate pass. The distinct
+new Phase-0 acceptance and separate retirement are recorded under Gate integrity; complete Phase-0 replay
+and fresh Phase-1 preview and separate acceptance remain required before this phase's complete preview
+and separate acceptance. Its typed scope is separate from the Phase-0 captured
 bootstrap; that earlier proof cannot qualify or retire the whole-snapshot binding. The protected source
 inventory, actual copied bytes, independently authored graph expectations, exact source joins, changed
 production subjects and cleanup remain required. Python is inspected statically and is not executed.
 Only the complete numerical gate may close these bindings.
 
-The shipped `layout-report`, its five named product stages, the layout suite, the separate
+The shipped `layout-report`, its six named product subjects, the layout suite, the separate
 oracle, and the compiled gate specification are present, and the report's graph stage is derived from its rows:
 it is `resolved` only when no import, standalone import, expression, declaration, route, or call site remains
 open, and each of those six conditions has a paired fixture. `layout-report --no-graph` skips the graph and states
@@ -580,10 +811,13 @@ potential-effect reachability, and the value of a non-literal path expression is
 
 Before running this gate, check native GHCup/GHC versions and restore the dependency inputs, including one registered unit each of `logging-3.0.6`, `managed-1.0.11`, and `unagi-chan-0.4.1.4` in the
 user-level store (for example `cabal install --lib` from Hackage). No toolchain byte pin, signature, fixed OS/CPU architecture, or physical substrate is required under DL-0025. The predecessor must have a current complete Phase-1 pass and an
-exact-readable accepted bundle; if its historical evidence is missing, run the source-bound verifier's
-`replay --through 1` to produce new receipts in numerical order. A diagnostic build or a digest alone cannot
-replace that replay. The complete `preview` and then `accept` remain required; only `accept` changes Phase-2 and
-sprint statuses ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)).
+exact-readable accepted bundle. The completed replay and subsequent refused preview are recorded under
+Gate integrity above. The [receipt-bearing Phase-0 reset](#gate-integrity) and focused custody components
+are recorded there under [DL-0039's recursive custody repair](../documents/decision_log.md#dl-0039--recursive-custody-preserves-accepted-completed-prefixes).
+The distinct new Phase-0 owning acceptance is recorded above. The separate qualified retirement under
+[DL-0040](../documents/decision_log.md#dl-0040--qualified-recursive-custody-retires-its-reopened-binding) requires complete numerical Phase-0 replay, followed by a fresh complete Phase-1 preview and separate
+acceptance before another complete Phase-2 preview. A diagnostic build, eligibility projection or digest alone cannot replace these ordered gates. The complete `preview` and then separate `accept` remain required; only `accept` changes Phase-2
+and sprint statuses ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)).
 
 ## Documentation Requirements
 
