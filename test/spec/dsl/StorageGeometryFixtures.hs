@@ -165,8 +165,10 @@ uniformFit = uniformResult 160
 
 uniformResult :: Natural -> Either Text ()
 uniformResult capacity = do
-  first <- volumeResultValue (volume "uniform-a" 60 (backing "uniform" capacity) (DirectGeometry 1) BlockPresentation)
-  second <- volumeResultValue (volume "uniform-b" 80 (backing "uniform" capacity) (DirectGeometry 1) BlockPresentation)
+  first <- volumeResultValue ((volume "uniform-a" 60 (backing "uniform" capacity) (DirectGeometry 1) BlockPresentation)
+    {volumeClaim = StatefulSetClaimSlot "uniform" "data" 0})
+  second <- volumeResultValue ((volume "uniform-b" 80 (backing "uniform" capacity) (DirectGeometry 1) BlockPresentation)
+    {volumeClaim = StatefulSetClaimSlot "uniform" "data" 1})
   resultUnit (uniformStatefulSetClaims [first, second])
 
 registryOver, registryFit :: RegistryStorageDemand

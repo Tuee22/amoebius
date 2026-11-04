@@ -16,6 +16,7 @@ import ipaddress
 import os
 import re
 import shlex
+import shutil
 import signal
 import subprocess
 import time
@@ -153,7 +154,10 @@ def _remove_added_iptables_rules(
 
 def restore_build_ownership(paths: list[Path]) -> None:
     """Make retained container-produced build evidence manageable by its invoking user."""
-    canonical = [containment.require_state_path(path, "build", actor="test") for path in paths]
+    validated = [containment.require_state_path(path, "build", actor="test") for path in paths]
+    # An early admission failure may precede creation of the context or products.
+    # Validate every destination first, then restore only output that was created.
+    canonical = [path for path in validated if path.exists()]
     if not canonical:
         return
     ownership = _run(
@@ -192,6 +196,7 @@ class ProjectContainerEngine:
     bridge_subnet: str
     client_config: Path
     iptables_baseline: tuple[tuple[str, str], ...]
+    ready: bool = False
 
     @property
     def environment(self) -> dict[str, str]:
@@ -220,14 +225,14 @@ class ProjectContainerEngine:
             raise EngineFailure(f"docker:{arguments[0] if arguments else 'command'}:{result.stdout}")
         return result
 
-    def verify_boundary(self) -> str:
-        observed = self.docker("info", "--format", "{{.DockerRootDir}}").stdout.strip()
+    def verify_boundary(self, *, timeout: int = 300) -> str:
+        observed = self.docker("info", "--format", "{{.DockerRootDir}}", timeout=timeout).stdout.strip()
         actual = Path(observed).resolve(strict=False)
         expected = self.data_root.resolve(strict=False)
         if actual != expected:
             raise EngineFailure(f"daemon-data-root:{actual}!={expected}")
         containment.require_state_path(actual, "test", actor="test")
-        driver_status = self.docker("info", "--format", "{{json .DriverStatus}}").stdout.strip()
+        driver_status = self.docker("info", "--format", "{{json .DriverStatus}}", timeout=timeout).stdout.strip()
         if "io.containerd.snapshotter.v1" in driver_status:
             raise EngineFailure("daemon-image-store:containerd-snapshotter-enabled")
         return str(actual)
@@ -235,65 +240,68 @@ class ProjectContainerEngine:
     def stop(self) -> None:
         """Stop first, then remove only this launcher's bridge and restore test-root ownership."""
         failures: list[str] = []
-        listed = self.docker("ps", "-aq", check=False, timeout=60)
-        container_ids = [
-            line.strip() for line in listed.stdout.splitlines()
-            if len(line.strip()) == 64 and all(character in "0123456789abcdef" for character in line.strip())
-        ]
-        if listed.returncode:
-            failures.append(f"container-list:{listed.stdout.strip()}")
-        elif container_ids:
-            removed = self.docker("rm", "--force", *container_ids, check=False, timeout=300)
-            if removed.returncode:
-                self.docker("stop", "--time", "60", *container_ids, check=False, timeout=120)
-                removed = self.docker("rm", "--force", *container_ids, check=False, timeout=300)
-                if removed.returncode:
-                    failures.append(f"container-remove:{removed.stdout.strip()}")
-        networks = self.docker(
-            "network", "ls", "--no-trunc", "--filter", "type=custom", "--format", "{{.ID}} {{.Name}}",
-            check=False,
-            timeout=60,
-        )
         owned_interfaces = {self.bridge}
         owned_networks = {ipaddress.ip_interface(self.bridge_subnet).network}
-        if networks.returncode:
-            failures.append(f"network-list:{networks.stdout.strip()}")
-        else:
-            network_ids: list[str] = []
-            for line in networks.stdout.splitlines():
-                identity, _, name = line.strip().partition(" ")
-                if not (
-                    len(identity) == 64
-                    and all(character in "0123456789abcdef" for character in identity)
-                    and name
-                ):
-                    failures.append(f"network-identity:{line.strip()}")
-                    continue
-                network_ids.append(identity)
-                owned_interfaces.add("br-" + identity[:12])
-                inspected = self.docker(
-                    "network", "inspect", identity,
-                    "--format", "{{range .IPAM.Config}}{{.Subnet}}{{println}}{{end}}",
-                    check=False,
-                    timeout=60,
-                )
-                if inspected.returncode:
-                    failures.append(f"network-inspect:{identity}:{inspected.stdout.strip()}")
-                else:
-                    for subnet in inspected.stdout.splitlines():
-                        if not subnet.strip():
-                            continue
-                        try:
-                            network = ipaddress.ip_network(subnet.strip())
-                        except ValueError:
-                            failures.append(f"network-subnet:{identity}:{subnet.strip()}")
-                            continue
-                        if isinstance(network, ipaddress.IPv4Network):
-                            owned_networks.add(network)
-            if network_ids:
-                removed = self.docker("network", "rm", *network_ids, check=False, timeout=300)
+        # No caller can create workloads before start returns a verified handle.
+        # Startup teardown therefore needs only the known process/network ids.
+        if self.ready:
+            listed = self.docker("ps", "-aq", check=False, timeout=60)
+            container_ids = [
+                line.strip() for line in listed.stdout.splitlines()
+                if len(line.strip()) == 64 and all(character in "0123456789abcdef" for character in line.strip())
+            ]
+            if listed.returncode:
+                failures.append(f"container-list:{listed.stdout.strip()}")
+            elif container_ids:
+                removed = self.docker("rm", "--force", *container_ids, check=False, timeout=300)
                 if removed.returncode:
-                    failures.append(f"network-remove:{removed.stdout.strip()}")
+                    self.docker("stop", "--time", "60", *container_ids, check=False, timeout=120)
+                    removed = self.docker("rm", "--force", *container_ids, check=False, timeout=300)
+                    if removed.returncode:
+                        failures.append(f"container-remove:{removed.stdout.strip()}")
+            networks = self.docker(
+                "network", "ls", "--no-trunc", "--filter", "type=custom", "--format", "{{.ID}} {{.Name}}",
+                check=False,
+                timeout=60,
+            )
+            if networks.returncode:
+                failures.append(f"network-list:{networks.stdout.strip()}")
+            else:
+                network_ids: list[str] = []
+                for line in networks.stdout.splitlines():
+                    identity, _, name = line.strip().partition(" ")
+                    if not (
+                        len(identity) == 64
+                        and all(character in "0123456789abcdef" for character in identity)
+                        and name
+                    ):
+                        failures.append(f"network-identity:{line.strip()}")
+                        continue
+                    network_ids.append(identity)
+                    owned_interfaces.add("br-" + identity[:12])
+                    inspected = self.docker(
+                        "network", "inspect", identity,
+                        "--format", "{{range .IPAM.Config}}{{.Subnet}}{{println}}{{end}}",
+                        check=False,
+                        timeout=60,
+                    )
+                    if inspected.returncode:
+                        failures.append(f"network-inspect:{identity}:{inspected.stdout.strip()}")
+                    else:
+                        for subnet in inspected.stdout.splitlines():
+                            if not subnet.strip():
+                                continue
+                            try:
+                                network = ipaddress.ip_network(subnet.strip())
+                            except ValueError:
+                                failures.append(f"network-subnet:{identity}:{subnet.strip()}")
+                                continue
+                            if isinstance(network, ipaddress.IPv4Network):
+                                owned_networks.add(network)
+                if network_ids:
+                    removed = self.docker("network", "rm", *network_ids, check=False, timeout=300)
+                    if removed.returncode:
+                        failures.append(f"network-remove:{removed.stdout.strip()}")
         pid_path = self.test_run.path / "r/docker.pid"
         if pid_path.is_file():
             try:
@@ -374,7 +382,7 @@ class ProjectContainerEngine:
 
 @dataclass
 class ProjectFilesystems:
-    """Finite build backings whose sparse disks are owned by one marked test run."""
+    """Finite build backings whose reserved disks are owned by one marked test run."""
 
     test_run: containment.TestRun
     entries: list[tuple[Path, str]]
@@ -412,6 +420,14 @@ def create_filesystems(
     for executable in (LOSETUP, MKFS_EXT4, MOUNT, UMOUNT):
         if not executable.is_file():
             raise EngineFailure(f"required-executable-absent:{executable}")
+    # All images live under this one directory, so distinct loop devices still
+    # debit the same parent filesystem. Sparse lengths cannot establish capacity.
+    required_bytes = sum(size_bytes for _mountpoint, size_bytes in provisions.values())
+    available_bytes = shutil.disk_usage(root).free
+    if required_bytes > available_bytes:
+        raise EngineFailure(
+            f"finite-build-backings-capacity:requested={required_bytes}:available={available_bytes}"
+        )
     disk_root = root / "disks"
     disk_root.mkdir(parents=True, exist_ok=True)
     entries: list[tuple[Path, str]] = []
@@ -421,7 +437,7 @@ def create_filesystems(
             mountpoint.mkdir(parents=True, exist_ok=True)
             image = disk_root / f"{name}.ext4"
             with image.open("wb") as handle:
-                handle.truncate(size_bytes)
+                os.posix_fallocate(handle.fileno(), 0, size_bytes)
             loop = _run(
                 [str(SUDO), "-n", str(LOSETUP), "--find", "--show", str(image)],
                 timeout=120,
@@ -429,11 +445,14 @@ def create_filesystems(
             if not loop.startswith("/dev/loop"):
                 raise EngineFailure(f"loop-allocation:{name}:{loop}")
             try:
-                _run([str(SUDO), "-n", str(MKFS_EXT4), "-F", "-m", "0", "-L", name, loop], timeout=300)
+                _run(
+                    [str(SUDO), "-n", str(MKFS_EXT4), "-F", "-m", "0", "-E", "nodiscard", "-L", name, loop],
+                    timeout=300,
+                )
                 _run(
                     [
                         str(SUDO), "-n", str(MOUNT),
-                        "-o", "nosuid,nodev", loop, str(mountpoint),
+                        "-o", "nosuid,nodev,nodiscard", loop, str(mountpoint),
                     ],
                     timeout=120,
                 )
@@ -522,18 +541,22 @@ def start(
         stderr=subprocess.STDOUT,
     )
     containerd_ready = False
-    for _ in range(240):
+    deadline = time.monotonic() + 60
+    while time.monotonic() < deadline:
         if containerd_process.poll() is not None:
             break
         if containerd_socket.exists():
-            probe = _run(
-                [str(SUDO), "-n", str(CTR), "--address", str(containerd_socket), "version"],
-                check=False,
-                timeout=5,
-            )
-            if probe.returncode == 0:
-                containerd_ready = True
-                break
+            try:
+                probe = _run(
+                    [str(SUDO), "-n", str(CTR), "--address", str(containerd_socket), "version"],
+                    check=False,
+                    timeout=5,
+                )
+                if probe.returncode == 0:
+                    containerd_ready = True
+                    break
+            except subprocess.TimeoutExpired:
+                pass
         time.sleep(0.25)
     if not containerd_ready:
         if containerd_process.poll() is None:
@@ -627,17 +650,22 @@ def start(
         iptables_baseline=iptables_baseline,
     )
     last = "daemon did not answer"
-    for _ in range(240):
-        if process.poll() is not None:
-            break
-        result = engine.docker("info", "--format", "{{.DockerRootDir}}", check=False, timeout=5)
-        if result.returncode == 0:
-            engine.verify_boundary()
-            return engine
-        last = result.stdout.strip() or last
-        time.sleep(0.25)
     try:
-        engine.stop()
-    except EngineFailure:
-        pass
-    raise EngineFailure(f"daemon-start:{last}")
+        deadline = time.monotonic() + 60
+        while time.monotonic() < deadline:
+            if process.poll() is not None:
+                break
+            try:
+                result = engine.docker("info", "--format", "{{.DockerRootDir}}", check=False, timeout=5)
+                if result.returncode == 0:
+                    engine.verify_boundary(timeout=5)
+                    engine.ready = True
+                    return engine
+                last = result.stdout.strip() or last
+            except subprocess.TimeoutExpired:
+                last = "daemon readiness probe timed out"
+            time.sleep(0.25)
+        raise EngineFailure(f"daemon-start:{last}")
+    finally:
+        if not engine.ready:
+            engine.stop()

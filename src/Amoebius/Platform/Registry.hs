@@ -3,15 +3,21 @@
 
 module Amoebius.Platform.Registry
   ( RegistryBackend (..)
-  , ProvisionedRegistryRehome (..)
+  , ProvisionedRegistryRehome
+  , registryOriginalDemand
+  , registryOriginalProvision
+  , registryOriginalPeak
+  , registryReplacementObjects
+  , registryMigration
+  , registryTargetBackend
   , provisionRegistryRehome
   , registryStorageConfiguration
   , cutoverRegistry
   , renderRegistryRehome
   ) where
 
-import Amoebius.Capacity.ServiceStorage
 import Amoebius.Capacity.StorageGeometry
+import Amoebius.Image.Registry
 import Amoebius.Platform.Types
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
@@ -26,6 +32,7 @@ data RegistryBackend
 
 data ProvisionedRegistryRehome = ProvisionedRegistryRehome
   { registryOriginalDemand :: RegistryStorageDemand
+  , registryOriginalProvision :: ProvisionedRegistryStorageDemand
   , registryOriginalPeak :: Natural
   , registryReplacementObjects :: Map Text Natural
   , registryMigration :: ProvisionedMigration
@@ -40,16 +47,25 @@ provisionRegistryRehome
   -> Text
   -> Either Text ProvisionedRegistryRehome
 provisionRegistryRehome demand migration endpoint bucket = do
-  original <- either (Left . Text.pack . show) Right (registryStoragePeak demand)
+  original <- either (Left . renderRegistryError) Right (provisionRegistryStorage demand)
+  let peak = provisionedRegistryPeakBytes original
+      objects = provisionedRegistryObjects original
+      buffer = min 65536 (maximum (0 : Map.elems objects))
+  if migrationOldBytes migration /= peak || migrationNewBytes migration /= peak
+    then Left "registry-migration-commitment-mismatch"
+    else Right ()
+  if migrationWorkspaceBytes migration < buffer || migrationExecutorBytes migration < buffer
+    then Left "registry-migration-stream-buffer-too-small"
+    else Right ()
   moved <- either (Left . Text.pack . show) Right (provisionRegistryBackendMigration migration)
-  let objects = Map.fromListWith max (registryObjects demand)
   if endpoint == "" || bucket == "" || Map.null objects
     then Left "registry-rehome-incomplete"
     else
       Right
         ProvisionedRegistryRehome
           { registryOriginalDemand = demand
-          , registryOriginalPeak = serviceStoragePeakBytes original
+          , registryOriginalProvision = original
+          , registryOriginalPeak = peak
           , registryReplacementObjects = objects
           , registryMigration = moved
           , registryTargetBackend = RegistryMinio endpoint bucket

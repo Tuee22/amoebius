@@ -1,0 +1,2485 @@
+{
+  "schema": "phase30-independent-zookeeper-capture-v1",
+  "scope": "Checked immutable serialization only; no permit, owning Request registry, interception, RPC, history adequacy or runtime-installation claim.",
+  "sourceCorporaSha256": {
+    "zookeeper-wire-corpus-v4.json": "20f299fee6edfe344581987c64d7ddd802b3f5521b99daaa4985de78bd87b341",
+    "zookeeper-optional-digest-corpus.json": "6f8318f7ad19a3ad73cc2e32a599b8e802281c986514346f6cad665f36673af1"
+  },
+  "sources": [
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/persistence/Util.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/Request.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-jute/src/main/java/org/apache/jute/BinaryOutputArchive.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-jute/src/main/resources/zookeeper.jute",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/DataTree.java"
+  ],
+  "rules": [
+    "Canonical bytes are exactly 32-byte TxnHeader then generated transaction bytes, with no framing or digest.",
+    "Nullable digest is absent or exactly int32 version2 plus int64 treeDigest; canonical identity must be identical under either digest choice.",
+    "Physical framing adds 8-byte Adler value, 4-byte payload length and one B terminator; maximum modern charge is canonicalBytes+25.",
+    "This selected modern profile rejects null transaction/header-only legacy close; no opaque bytes are a protocol permit.",
+    "Positive signed zxid is read from serialized header bytes12..19; zero/negative reject.",
+    "Every source record must be reconstructed from header+typed transaction operands, compared to literal bytes and SHA, and independently compared to Util.marshallTxnEntry.",
+    "Maximum canonical policy349159 is global349184 minus25; exact limit may still take the separate12-byte digest suffix.",
+    "Checked serializer exceptions propagate as the same IOException instance with no returned capture; never accept Request fallback zero32.",
+    "Captured arrays must remain unchanged under subsequent input mutation and returned-array mutation. Do not recapture after DataTree mutates Multi child types.",
+    "The bounded output sink limits copied output, not upstream Jute string temporary allocation or arbitrary serializer computation. Owning hooks must bound/control inputs and serialize capture before mutation."
+  ],
+  "wireCases": [
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-1-CreateSession",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-1-CreateSession",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 68323592
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 36,
+        "payloadBytes": 48,
+        "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "payloadSha256": "8b642a73dab54e34869eb91bcc90d1fc03106fdd530ffabac2029d0d39cedd2f",
+        "physicalFramedBytes": 61,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+        "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530000000020000000004128908"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-2-CreateContainer",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-2-CreateContainer",
+      "header": {
+        "clientId": 7,
+        "cxid": 2,
+        "zxid": 2,
+        "time": 2000,
+        "type": 19
+      },
+      "transaction": {
+        "kind": "CreateContainer",
+        "path": "/a",
+        "dataHex": "",
+        "acls": [
+          {
+            "perms": 31,
+            "scheme": "world",
+            "identity": "anyone"
+          }
+        ],
+        "parentCVersion": 1,
+        "dataNull": false
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 1991845852
+      },
+      "maximumCanonicalBytes": 73,
+      "expected": {
+        "admission": "accept",
+        "zxid": 2,
+        "canonicalBytes": 73,
+        "payloadBytes": 85,
+        "canonicalSha256": "b6532d38289c2aa88234d95d198620862cae8749a131b5c4ea524b5aaccf9b3f",
+        "payloadSha256": "b893021ab0f7658a7e95b29bbda9684a2f86169efd3996ae06dc271efd6c8572",
+        "physicalFramedBytes": 98,
+        "maximumModernFramedBytes": 98,
+        "canonicalHex": "000000000000000700000002000000000000000200000000000007d000000013000000022f6100000000000000010000001f00000005776f726c6400000006616e796f6e6500000001",
+        "payloadHex": "000000000000000700000002000000000000000200000000000007d000000013000000022f6100000000000000010000001f00000005776f726c6400000006616e796f6e6500000001000000020000000076b927dc"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-3-Create",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-3-Create",
+      "header": {
+        "clientId": 7,
+        "cxid": 3,
+        "zxid": 3,
+        "time": 3000,
+        "type": 1
+      },
+      "transaction": {
+        "kind": "Create",
+        "path": "/a/b",
+        "dataHex": "616263",
+        "acls": [
+          {
+            "perms": 31,
+            "scheme": "world",
+            "identity": "anyone"
+          }
+        ],
+        "ephemeral": false,
+        "parentCVersion": 1,
+        "dataNull": false
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 3989135012
+      },
+      "maximumCanonicalBytes": 79,
+      "expected": {
+        "admission": "accept",
+        "zxid": 3,
+        "canonicalBytes": 79,
+        "payloadBytes": 91,
+        "canonicalSha256": "8842fc38607af673eaaa9ffe941ba3215946dee8c4dbd4c64a10e0815da117dc",
+        "payloadSha256": "2704c4c6e936b22480a2c662af454765265998c1330ff6b5e3164e22bdd8988d",
+        "physicalFramedBytes": 104,
+        "maximumModernFramedBytes": 104,
+        "canonicalHex": "00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e650000000001",
+        "payloadHex": "00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e6500000000010000000200000000edc55ea4"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-4-Create",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-4-Create",
+      "header": {
+        "clientId": 7,
+        "cxid": 4,
+        "zxid": 4,
+        "time": 4000,
+        "type": 1
+      },
+      "transaction": {
+        "kind": "Create",
+        "path": "/a/e",
+        "dataHex": "65",
+        "acls": [
+          {
+            "perms": 31,
+            "scheme": "world",
+            "identity": "anyone"
+          }
+        ],
+        "ephemeral": true,
+        "parentCVersion": 2,
+        "dataNull": false
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 7310192961
+      },
+      "maximumCanonicalBytes": 77,
+      "expected": {
+        "admission": "accept",
+        "zxid": 4,
+        "canonicalBytes": 77,
+        "payloadBytes": 89,
+        "canonicalSha256": "cc5b519f852ede40b3f629b27d9f57e7a3e9f6f7d498f48442732113114db7dc",
+        "payloadSha256": "7de6d8d735f0f6917b25b5298b4f68fa3c31cf2bd7f9b682427fc7b53862354a",
+        "physicalFramedBytes": 102,
+        "maximumModernFramedBytes": 102,
+        "canonicalHex": "00000000000000070000000400000000000000040000000000000fa000000001000000042f612f650000000165000000010000001f00000005776f726c6400000006616e796f6e650100000002",
+        "payloadHex": "00000000000000070000000400000000000000040000000000000fa000000001000000042f612f650000000165000000010000001f00000005776f726c6400000006616e796f6e6501000000020000000200000001b3b8b141"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-5-SetData",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-5-SetData",
+      "header": {
+        "clientId": 7,
+        "cxid": 5,
+        "zxid": 5,
+        "time": 5000,
+        "type": 5
+      },
+      "transaction": {
+        "kind": "SetData",
+        "path": "/a/b",
+        "dataHex": "6e6577",
+        "version": 1,
+        "dataNull": false
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 4809105330
+      },
+      "maximumCanonicalBytes": 51,
+      "expected": {
+        "admission": "accept",
+        "zxid": 5,
+        "canonicalBytes": 51,
+        "payloadBytes": 63,
+        "canonicalSha256": "88a8207f3a40a83dfe8362d8e644fa3c713d1ec9e2f1be6005b87e4a36ec2fc7",
+        "payloadSha256": "28247a7da7613b4c503c6e869f18814bcea74ca3b0b8f5875e2149d2eac05e60",
+        "physicalFramedBytes": 76,
+        "maximumModernFramedBytes": 76,
+        "canonicalHex": "0000000000000007000000050000000000000005000000000000138800000005000000042f612f62000000036e657700000001",
+        "payloadHex": "0000000000000007000000050000000000000005000000000000138800000005000000042f612f62000000036e65770000000100000002000000011ea51fb2"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-6-Multi",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-6-Multi",
+      "header": {
+        "clientId": 7,
+        "cxid": 6,
+        "zxid": 6,
+        "time": 6000,
+        "type": 14
+      },
+      "transaction": {
+        "kind": "Multi",
+        "children": [
+          {
+            "kind": "CheckVersion",
+            "path": "/a/b",
+            "version": 2
+          }
+        ]
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 4809105330
+      },
+      "maximumCanonicalBytes": 56,
+      "expected": {
+        "admission": "accept",
+        "zxid": 6,
+        "canonicalBytes": 56,
+        "payloadBytes": 68,
+        "canonicalSha256": "8f4098f5d78db71618ff966f7ecc6a23ba91174bf07947ac2daf734cee750af7",
+        "payloadSha256": "560cb70c5c54fc7994581666b5dbefb32fc2b4d779e7942c64d5065eabd5d20c",
+        "physicalFramedBytes": 81,
+        "maximumModernFramedBytes": 81,
+        "canonicalHex": "000000000000000700000006000000000000000600000000000017700000000e000000010000000d0000000c000000042f612f6200000002",
+        "payloadHex": "000000000000000700000006000000000000000600000000000017700000000e000000010000000d0000000c000000042f612f620000000200000002000000011ea51fb2"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-7-Error",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-7-Error",
+      "header": {
+        "clientId": 7,
+        "cxid": 7,
+        "zxid": 7,
+        "time": 7000,
+        "type": -1
+      },
+      "transaction": {
+        "kind": "Error",
+        "error": -103
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 4809105330
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 7,
+        "canonicalBytes": 36,
+        "payloadBytes": 48,
+        "canonicalSha256": "a4dd37d602f5fa7bb01e32504655a6e74c69ea275aa9eff01957286f9c00c1dd",
+        "payloadSha256": "aac936660e6ce25a8609bb30f8d01043fd3c4635742687c3c6a11e9133567deb",
+        "physicalFramedBytes": 61,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "00000000000000070000000700000000000000070000000000001b58ffffffffffffff99",
+        "payloadHex": "00000000000000070000000700000000000000070000000000001b58ffffffffffffff9900000002000000011ea51fb2"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-8-Multi",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-8-Multi",
+      "header": {
+        "clientId": 7,
+        "cxid": 8,
+        "zxid": 8,
+        "time": 8000,
+        "type": 14
+      },
+      "transaction": {
+        "kind": "Multi",
+        "children": [
+          {
+            "kind": "Create",
+            "path": "/a/c",
+            "dataHex": "78797a",
+            "acls": [
+              {
+                "perms": 31,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ],
+            "ephemeral": false,
+            "parentCVersion": 3,
+            "dataNull": false
+          },
+          {
+            "kind": "SetData",
+            "path": "/a/b",
+            "dataHex": "646f6e65",
+            "version": 2,
+            "dataNull": false
+          }
+        ]
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 6781767475
+      },
+      "maximumCanonicalBytes": 119,
+      "expected": {
+        "admission": "accept",
+        "zxid": 8,
+        "canonicalBytes": 119,
+        "payloadBytes": 131,
+        "canonicalSha256": "81c59f3ade79d084e98b22163f972faeb6b2b87ec5ec183dc077bfd8661aa58f",
+        "payloadSha256": "62d905db664ceb99224c1e65719a32e86f1f016d512b22b4dd97b0312cf2dcc3",
+        "physicalFramedBytes": 144,
+        "maximumModernFramedBytes": 144,
+        "canonicalHex": "00000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002",
+        "payloadHex": "00000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002000000020000000194398f33"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-9-Delete",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-9-Delete",
+      "header": {
+        "clientId": 7,
+        "cxid": 9,
+        "zxid": 9,
+        "time": 9000,
+        "type": 2
+      },
+      "transaction": {
+        "kind": "Delete",
+        "path": "/a/c"
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 3283547908
+      },
+      "maximumCanonicalBytes": 40,
+      "expected": {
+        "admission": "accept",
+        "zxid": 9,
+        "canonicalBytes": 40,
+        "payloadBytes": 52,
+        "canonicalSha256": "b5728295adb0782c17fedbe4352300530239fd79f645a1165018b7416bdad212",
+        "payloadSha256": "3b11626ead0c8edf7a6f3a1d8fe0dc88f4e5de42ab984244e4e8e064c45d4ed3",
+        "physicalFramedBytes": 65,
+        "maximumModernFramedBytes": 65,
+        "canonicalHex": "0000000000000007000000090000000000000009000000000000232800000002000000042f612f63",
+        "payloadHex": "0000000000000007000000090000000000000009000000000000232800000002000000042f612f630000000200000000c3b6f704"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-10-CreateContainer",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-10-CreateContainer",
+      "header": {
+        "clientId": 7,
+        "cxid": 10,
+        "zxid": 10,
+        "time": 10000,
+        "type": 19
+      },
+      "transaction": {
+        "kind": "CreateContainer",
+        "path": "/a/g",
+        "dataHex": "",
+        "acls": [
+          {
+            "perms": 31,
+            "scheme": "world",
+            "identity": "anyone"
+          }
+        ],
+        "parentCVersion": 4,
+        "dataNull": false
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 5239770111
+      },
+      "maximumCanonicalBytes": 75,
+      "expected": {
+        "admission": "accept",
+        "zxid": 10,
+        "canonicalBytes": 75,
+        "payloadBytes": 87,
+        "canonicalSha256": "0afd8691ebc84830a89f8ab96bf15a0be0fb280af5c5d7857d611b184dbf158c",
+        "payloadSha256": "8ebddf752ad67f829229fe1cf44c54647fb43dc53010180dcaa066faed3a714f",
+        "physicalFramedBytes": 100,
+        "maximumModernFramedBytes": 100,
+        "canonicalHex": "00000000000000070000000a000000000000000a000000000000271000000013000000042f612f6700000000000000010000001f00000005776f726c6400000006616e796f6e6500000004",
+        "payloadHex": "00000000000000070000000a000000000000000a000000000000271000000013000000042f612f6700000000000000010000001f00000005776f726c6400000006616e796f6e6500000004000000020000000138508bff"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-11-DeleteContainer",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-11-DeleteContainer",
+      "header": {
+        "clientId": 7,
+        "cxid": 11,
+        "zxid": 11,
+        "time": 11000,
+        "type": 20
+      },
+      "transaction": {
+        "kind": "DeleteContainer",
+        "path": "/a/g"
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 6078932199
+      },
+      "maximumCanonicalBytes": 40,
+      "expected": {
+        "admission": "accept",
+        "zxid": 11,
+        "canonicalBytes": 40,
+        "payloadBytes": 52,
+        "canonicalSha256": "018defd0ac5948ffe98faff9c37655d9ed1c71b973435529321c8f9697e95dd9",
+        "payloadSha256": "dada66a0dfb2ea4efb018f4628e1d22f853655c28551852902af0be602a04496",
+        "physicalFramedBytes": 65,
+        "maximumModernFramedBytes": 65,
+        "canonicalHex": "00000000000000070000000b000000000000000b0000000000002af800000014000000042f612f67",
+        "payloadHex": "00000000000000070000000b000000000000000b0000000000002af800000014000000042f612f6700000002000000016a5524e7"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-12-SetACL",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-12-SetACL",
+      "header": {
+        "clientId": 7,
+        "cxid": 12,
+        "zxid": 12,
+        "time": 12000,
+        "type": 7
+      },
+      "transaction": {
+        "kind": "SetACL",
+        "path": "/a/b",
+        "acls": [
+          {
+            "perms": 1,
+            "scheme": "world",
+            "identity": "anyone"
+          }
+        ],
+        "version": 1
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 6390692138
+      },
+      "maximumCanonicalBytes": 71,
+      "expected": {
+        "admission": "accept",
+        "zxid": 12,
+        "canonicalBytes": 71,
+        "payloadBytes": 83,
+        "canonicalSha256": "a2d2be21ca01fd978115a2e6506987a3cb6824c583c9a1651fb0231b97bdd00f",
+        "payloadSha256": "22e2a86e3248dac3612d94a284a71bf6b7ed2031045abafc7f132c45c8180f2f",
+        "physicalFramedBytes": 96,
+        "maximumModernFramedBytes": 96,
+        "canonicalHex": "00000000000000070000000c000000000000000c0000000000002ee000000007000000042f612f62000000010000000100000005776f726c6400000006616e796f6e6500000001",
+        "payloadHex": "00000000000000070000000c000000000000000c0000000000002ee000000007000000042f612f62000000010000000100000005776f726c6400000006616e796f6e650000000100000002000000017cea392a"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-13-CreateSession",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-13-CreateSession",
+      "header": {
+        "clientId": 8,
+        "cxid": 13,
+        "zxid": 13,
+        "time": 13000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 20000
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 6390692138
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 13,
+        "canonicalBytes": 36,
+        "payloadBytes": 48,
+        "canonicalSha256": "35f61234e1c7290d9131853266aec160e57c00be4b139a009458eb415d2e8b88",
+        "payloadSha256": "8fd4168c3bf57a84b80d9233c1c241b10ce10e9e70c188e299101eae591069c6",
+        "physicalFramedBytes": 61,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "00000000000000080000000d000000000000000d00000000000032c8fffffff600004e20",
+        "payloadHex": "00000000000000080000000d000000000000000d00000000000032c8fffffff600004e2000000002000000017cea392a"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-14-Create",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-14-Create",
+      "header": {
+        "clientId": 8,
+        "cxid": 14,
+        "zxid": 14,
+        "time": 14000,
+        "type": 1
+      },
+      "transaction": {
+        "kind": "Create",
+        "path": "/a/f",
+        "dataHex": "46",
+        "acls": [
+          {
+            "perms": 31,
+            "scheme": "world",
+            "identity": "anyone"
+          }
+        ],
+        "ephemeral": true,
+        "parentCVersion": 5,
+        "dataNull": false
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 6335595548
+      },
+      "maximumCanonicalBytes": 77,
+      "expected": {
+        "admission": "accept",
+        "zxid": 14,
+        "canonicalBytes": 77,
+        "payloadBytes": 89,
+        "canonicalSha256": "8e2face65b962ebcf5a1ea260c7b7fe716cd2513e4b98b8dace49e3bfbb33ed4",
+        "payloadSha256": "461e8193cb467c1d810387b14323d84dbe622bc914d88e1a07904c709459c976",
+        "physicalFramedBytes": 102,
+        "maximumModernFramedBytes": 102,
+        "canonicalHex": "00000000000000080000000e000000000000000e00000000000036b000000001000000042f612f660000000146000000010000001f00000005776f726c6400000006616e796f6e650100000005",
+        "payloadHex": "00000000000000080000000e000000000000000e00000000000036b000000001000000042f612f660000000146000000010000001f00000005776f726c6400000006616e796f6e650100000005000000020000000179a1841c"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-15-Multi",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-15-Multi",
+      "header": {
+        "clientId": 7,
+        "cxid": 15,
+        "zxid": 15,
+        "time": 15000,
+        "type": 14
+      },
+      "transaction": {
+        "kind": "Multi",
+        "children": [
+          {
+            "kind": "Create",
+            "path": "/a/never",
+            "dataHex": "4e",
+            "acls": [
+              {
+                "perms": 31,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ],
+            "ephemeral": false,
+            "parentCVersion": 6,
+            "dataNull": false
+          },
+          {
+            "kind": "Error",
+            "error": -103
+          }
+        ]
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 6335595548
+      },
+      "maximumCanonicalBytes": 105,
+      "expected": {
+        "admission": "accept",
+        "zxid": 15,
+        "canonicalBytes": 105,
+        "payloadBytes": 117,
+        "canonicalSha256": "876abf7de8e61083faff9f1a2995919f85165acc0e94f177c8abffc1ba4b93fb",
+        "payloadSha256": "7dcf2a7bf6fa2ba2db5f52273ac206352a6943ff3bc9d9120d5fb647193f467e",
+        "physicalFramedBytes": 130,
+        "maximumModernFramedBytes": 130,
+        "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e000000020000000100000031000000082f612f6e65766572000000014e000000010000001f00000005776f726c6400000006616e796f6e650000000006ffffffff00000004ffffff99",
+        "payloadHex": "00000000000000070000000f000000000000000f0000000000003a980000000e000000020000000100000031000000082f612f6e65766572000000014e000000010000001f00000005776f726c6400000006616e796f6e650000000006ffffffff00000004ffffff99000000020000000179a1841c"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-16-CloseSession",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-16-CloseSession",
+      "header": {
+        "clientId": 7,
+        "cxid": 16,
+        "zxid": 16,
+        "time": 16000,
+        "type": -11
+      },
+      "transaction": {
+        "kind": "CloseSession",
+        "paths": [
+          "/a/e"
+        ]
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 4929206643
+      },
+      "maximumCanonicalBytes": 44,
+      "expected": {
+        "admission": "accept",
+        "zxid": 16,
+        "canonicalBytes": 44,
+        "payloadBytes": 56,
+        "canonicalSha256": "70c4e2a9aa5e746e66fdb2697b1ddd0d1408ea8a442ac78b01fad0a9f0d817b3",
+        "payloadSha256": "fd85f8e65be99218cb89645649e64f559e8bca87ba148b6d91fd5e61c4d9b199",
+        "physicalFramedBytes": 69,
+        "maximumModernFramedBytes": 69,
+        "canonicalHex": "00000000000000070000001000000000000000100000000000003e80fffffff500000001000000042f612f65",
+        "payloadHex": "00000000000000070000001000000000000000100000000000003e80fffffff500000001000000042f612f65000000020000000125cdb973"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-17-CloseSession",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-17-CloseSession",
+      "header": {
+        "clientId": 8,
+        "cxid": 17,
+        "zxid": 17,
+        "time": 17000,
+        "type": -11
+      },
+      "transaction": {
+        "kind": "CloseSession",
+        "paths": [
+          "/a/f"
+        ]
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 2532567941
+      },
+      "maximumCanonicalBytes": 44,
+      "expected": {
+        "admission": "accept",
+        "zxid": 17,
+        "canonicalBytes": 44,
+        "payloadBytes": 56,
+        "canonicalSha256": "b6b993e329c96a3d9ec83582e09e7f7e5d70764616f1e9019c974e008b4cd2ff",
+        "payloadSha256": "43593bb774f8e1da347b5f3f97145a92a3c4bffc1bf7f1dae3b75a00f49ea399",
+        "physicalFramedBytes": 69,
+        "maximumModernFramedBytes": 69,
+        "canonicalHex": "00000000000000080000001100000000000000110000000000004268fffffff500000001000000042f612f66",
+        "payloadHex": "00000000000000080000001100000000000000110000000000004268fffffff500000001000000042f612f66000000020000000096f3eb85"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-18-CreateSession",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-18-CreateSession",
+      "header": {
+        "clientId": 9,
+        "cxid": 18,
+        "zxid": 18,
+        "time": 18000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 2532567941
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 18,
+        "canonicalBytes": 36,
+        "payloadBytes": 48,
+        "canonicalSha256": "d2afdea5733ed19d18bf739b569e5b84206fb83d76eba8d10f9e2560c867e722",
+        "payloadSha256": "5662c46f828b3cf493f28b2641d22f0ace101f472d8cc3cbc6021f7ea7213339",
+        "physicalFramedBytes": 61,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "00000000000000090000001200000000000000120000000000004650fffffff600007530",
+        "payloadHex": "00000000000000090000001200000000000000120000000000004650fffffff600007530000000020000000096f3eb85"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-19-Create",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-19-Create",
+      "header": {
+        "clientId": 9,
+        "cxid": 19,
+        "zxid": 19,
+        "time": 19000,
+        "type": 1
+      },
+      "transaction": {
+        "kind": "Create",
+        "path": "/a/h",
+        "dataHex": "48",
+        "dataNull": false,
+        "acls": [
+          {
+            "perms": 17,
+            "scheme": "world",
+            "identity": "anyone"
+          }
+        ],
+        "ephemeral": false,
+        "parentCVersion": 6
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 4287448538
+      },
+      "maximumCanonicalBytes": 77,
+      "expected": {
+        "admission": "accept",
+        "zxid": 19,
+        "canonicalBytes": 77,
+        "payloadBytes": 89,
+        "canonicalSha256": "cc6d6469ebb6d7ddcc36a3b20554298ff53eb1e49034e300ab32c2846770a4ca",
+        "payloadSha256": "20c7a9a753d0b79a485bafb3baaa66b2d8ba73c36823481dd9a4cfcabd34c56d",
+        "physicalFramedBytes": 102,
+        "maximumModernFramedBytes": 102,
+        "canonicalHex": "00000000000000090000001300000000000000130000000000004a3800000001000000042f612f680000000148000000010000001100000005776f726c6400000006616e796f6e650000000006",
+        "payloadHex": "00000000000000090000001300000000000000130000000000004a3800000001000000042f612f680000000148000000010000001100000005776f726c6400000006616e796f6e6500000000060000000200000000ff8d45da"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-20-SetACL",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-20-SetACL",
+      "header": {
+        "clientId": 9,
+        "cxid": 20,
+        "zxid": 20,
+        "time": 20000,
+        "type": 7
+      },
+      "transaction": {
+        "kind": "SetACL",
+        "path": "/a/h",
+        "acls": [
+          {
+            "perms": 31,
+            "scheme": "world",
+            "identity": "anyone"
+          }
+        ],
+        "version": 1
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 4501025181
+      },
+      "maximumCanonicalBytes": 71,
+      "expected": {
+        "admission": "accept",
+        "zxid": 20,
+        "canonicalBytes": 71,
+        "payloadBytes": 83,
+        "canonicalSha256": "9ee8cf846bce1965053d3961539ad766847e8d744c20f1e399ad04164d371d1f",
+        "payloadSha256": "78dcd04485111b83f641481bfc637cea415397173eef17fad1ef097fffcc190d",
+        "physicalFramedBytes": 96,
+        "maximumModernFramedBytes": 96,
+        "canonicalHex": "00000000000000090000001400000000000000140000000000004e2000000007000000042f612f68000000010000001f00000005776f726c6400000006616e796f6e6500000001",
+        "payloadHex": "00000000000000090000001400000000000000140000000000004e2000000007000000042f612f68000000010000001f00000005776f726c6400000006616e796f6e650000000100000002000000010c48319d"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-21-Create",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-21-Create",
+      "header": {
+        "clientId": 9,
+        "cxid": 21,
+        "zxid": 21,
+        "time": 21000,
+        "type": 1
+      },
+      "transaction": {
+        "kind": "Create",
+        "path": "/a/j",
+        "dataHex": "4a",
+        "dataNull": false,
+        "acls": [
+          {
+            "perms": 17,
+            "scheme": "world",
+            "identity": "anyone"
+          }
+        ],
+        "ephemeral": false,
+        "parentCVersion": 7
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 5225882118
+      },
+      "maximumCanonicalBytes": 77,
+      "expected": {
+        "admission": "accept",
+        "zxid": 21,
+        "canonicalBytes": 77,
+        "payloadBytes": 89,
+        "canonicalSha256": "0246e66e2e5fe29f5e66de2b7bc50936a53688389a568a08f0e1c8bfb5cd01b2",
+        "payloadSha256": "ff206f2c1d09f029cb37cdff8aac7adf13a411a42a671fc939f97edc15b369ae",
+        "physicalFramedBytes": 102,
+        "maximumModernFramedBytes": 102,
+        "canonicalHex": "0000000000000009000000150000000000000015000000000000520800000001000000042f612f6a000000014a000000010000001100000005776f726c6400000006616e796f6e650000000007",
+        "payloadHex": "0000000000000009000000150000000000000015000000000000520800000001000000042f612f6a000000014a000000010000001100000005776f726c6400000006616e796f6e6500000000070000000200000001377ca206"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-22-Delete",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-22-Delete",
+      "header": {
+        "clientId": 9,
+        "cxid": 22,
+        "zxid": 22,
+        "time": 22000,
+        "type": 2
+      },
+      "transaction": {
+        "kind": "Delete",
+        "path": "/a/h"
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 1187126591
+      },
+      "maximumCanonicalBytes": 40,
+      "expected": {
+        "admission": "accept",
+        "zxid": 22,
+        "canonicalBytes": 40,
+        "payloadBytes": 52,
+        "canonicalSha256": "9de61401a9f9cb6b665be9cc1c49b700297111af7b80c36dbc70837295299ca4",
+        "payloadSha256": "7e7591c5209f531a1538b643b32870070d4a9ea13e532e5da6cba530cd9482af",
+        "physicalFramedBytes": 65,
+        "maximumModernFramedBytes": 65,
+        "canonicalHex": "000000000000000900000016000000000000001600000000000055f000000002000000042f612f68",
+        "payloadHex": "000000000000000900000016000000000000001600000000000055f000000002000000042f612f68000000020000000046c21d3f"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-23-Delete",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-23-Delete",
+      "header": {
+        "clientId": 9,
+        "cxid": 23,
+        "zxid": 23,
+        "time": 23000,
+        "type": 2
+      },
+      "transaction": {
+        "kind": "Delete",
+        "path": "/a/j"
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 3262259984
+      },
+      "maximumCanonicalBytes": 40,
+      "expected": {
+        "admission": "accept",
+        "zxid": 23,
+        "canonicalBytes": 40,
+        "payloadBytes": 52,
+        "canonicalSha256": "e272335f995a6b92b2c5c8ba787725dc3d48dbe3ad72d3283fa1890698e71765",
+        "payloadSha256": "8a192b41d70de48cac04d21c5adad7b41d4ed861aae34d83a91a850e8a6fbcdf",
+        "physicalFramedBytes": 65,
+        "maximumModernFramedBytes": 65,
+        "canonicalHex": "000000000000000900000017000000000000001700000000000059d800000002000000042f612f6a",
+        "payloadHex": "000000000000000900000017000000000000001700000000000059d800000002000000042f612f6a0000000200000000c2722310"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:txn-24-CloseSession",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "txn-24-CloseSession",
+      "header": {
+        "clientId": 9,
+        "cxid": 24,
+        "zxid": 24,
+        "time": 24000,
+        "type": -11
+      },
+      "transaction": {
+        "kind": "CloseSession",
+        "paths": []
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 3262259984
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 24,
+        "canonicalBytes": 36,
+        "payloadBytes": 48,
+        "canonicalSha256": "e5ebd46516571cf0a9661c7e186f6e5508e575519654285709f626ed134c3988",
+        "payloadSha256": "9b7bb6873d13f33b809d49a2a0531da5d2c766b9ff4a5f953b6931c8fd7c8085",
+        "physicalFramedBytes": 61,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "00000000000000090000001800000000000000180000000000005dc0fffffff500000000",
+        "payloadHex": "00000000000000090000001800000000000000180000000000005dc0fffffff5000000000000000200000000c2722310"
+      }
+    },
+    {
+      "id": "zookeeper-wire-corpus-v4.json:unit-plain-Create",
+      "sourceCorpus": "zookeeper-wire-corpus-v4.json",
+      "sourceRecord": "unit-plain-Create",
+      "header": {
+        "clientId": 7,
+        "cxid": 3,
+        "zxid": 3,
+        "time": 3000,
+        "type": 1
+      },
+      "transaction": {
+        "kind": "Create",
+        "path": "/a/b",
+        "dataHex": "616263",
+        "acls": [
+          {
+            "perms": 31,
+            "scheme": "world",
+            "identity": "anyone"
+          }
+        ],
+        "ephemeral": false,
+        "parentCVersion": 1,
+        "dataNull": false
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 79,
+      "expected": {
+        "admission": "accept",
+        "zxid": 3,
+        "canonicalBytes": 79,
+        "payloadBytes": 79,
+        "canonicalSha256": "8842fc38607af673eaaa9ffe941ba3215946dee8c4dbd4c64a10e0815da117dc",
+        "payloadSha256": "8842fc38607af673eaaa9ffe941ba3215946dee8c4dbd4c64a10e0815da117dc",
+        "physicalFramedBytes": 92,
+        "maximumModernFramedBytes": 104,
+        "canonicalHex": "00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e650000000001",
+        "payloadHex": "00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e650000000001"
+      }
+    },
+    {
+      "id": "zookeeper-optional-digest-corpus.json:optional-session-absent",
+      "sourceCorpus": "zookeeper-optional-digest-corpus.json",
+      "sourceRecord": "optional-session-absent",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 36,
+        "payloadBytes": 36,
+        "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "physicalFramedBytes": 49,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+        "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+      }
+    },
+    {
+      "id": "zookeeper-optional-digest-corpus.json:optional-container-present",
+      "sourceCorpus": "zookeeper-optional-digest-corpus.json",
+      "sourceRecord": "optional-container-present",
+      "header": {
+        "clientId": 7,
+        "cxid": 2,
+        "zxid": 2,
+        "time": 2000,
+        "type": 19
+      },
+      "transaction": {
+        "kind": "CreateContainer",
+        "path": "/a",
+        "dataHex": "",
+        "acls": [
+          {
+            "perms": 31,
+            "scheme": "world",
+            "identity": "anyone"
+          }
+        ],
+        "parentCVersion": 1,
+        "dataNull": false
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 1991845852
+      },
+      "maximumCanonicalBytes": 73,
+      "expected": {
+        "admission": "accept",
+        "zxid": 2,
+        "canonicalBytes": 73,
+        "payloadBytes": 85,
+        "canonicalSha256": "b6532d38289c2aa88234d95d198620862cae8749a131b5c4ea524b5aaccf9b3f",
+        "payloadSha256": "b893021ab0f7658a7e95b29bbda9684a2f86169efd3996ae06dc271efd6c8572",
+        "physicalFramedBytes": 98,
+        "maximumModernFramedBytes": 98,
+        "canonicalHex": "000000000000000700000002000000000000000200000000000007d000000013000000022f6100000000000000010000001f00000005776f726c6400000006616e796f6e6500000001",
+        "payloadHex": "000000000000000700000002000000000000000200000000000007d000000013000000022f6100000000000000010000001f00000005776f726c6400000006616e796f6e6500000001000000020000000076b927dc"
+      }
+    },
+    {
+      "id": "zookeeper-optional-digest-corpus.json:optional-create-absent",
+      "sourceCorpus": "zookeeper-optional-digest-corpus.json",
+      "sourceRecord": "optional-create-absent",
+      "header": {
+        "clientId": 7,
+        "cxid": 3,
+        "zxid": 3,
+        "time": 3000,
+        "type": 1
+      },
+      "transaction": {
+        "kind": "Create",
+        "path": "/a/b",
+        "dataHex": "616263",
+        "acls": [
+          {
+            "perms": 31,
+            "scheme": "world",
+            "identity": "anyone"
+          }
+        ],
+        "ephemeral": false,
+        "parentCVersion": 1,
+        "dataNull": false
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 79,
+      "expected": {
+        "admission": "accept",
+        "zxid": 3,
+        "canonicalBytes": 79,
+        "payloadBytes": 79,
+        "canonicalSha256": "8842fc38607af673eaaa9ffe941ba3215946dee8c4dbd4c64a10e0815da117dc",
+        "payloadSha256": "8842fc38607af673eaaa9ffe941ba3215946dee8c4dbd4c64a10e0815da117dc",
+        "physicalFramedBytes": 92,
+        "maximumModernFramedBytes": 104,
+        "canonicalHex": "00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e650000000001",
+        "payloadHex": "00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e650000000001"
+      }
+    },
+    {
+      "id": "zookeeper-optional-digest-corpus.json:optional-ephemeral-present",
+      "sourceCorpus": "zookeeper-optional-digest-corpus.json",
+      "sourceRecord": "optional-ephemeral-present",
+      "header": {
+        "clientId": 7,
+        "cxid": 4,
+        "zxid": 4,
+        "time": 4000,
+        "type": 1
+      },
+      "transaction": {
+        "kind": "Create",
+        "path": "/a/e",
+        "dataHex": "65",
+        "acls": [
+          {
+            "perms": 31,
+            "scheme": "world",
+            "identity": "anyone"
+          }
+        ],
+        "ephemeral": true,
+        "parentCVersion": 2,
+        "dataNull": false
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 7310192961
+      },
+      "maximumCanonicalBytes": 77,
+      "expected": {
+        "admission": "accept",
+        "zxid": 4,
+        "canonicalBytes": 77,
+        "payloadBytes": 89,
+        "canonicalSha256": "cc5b519f852ede40b3f629b27d9f57e7a3e9f6f7d498f48442732113114db7dc",
+        "payloadSha256": "7de6d8d735f0f6917b25b5298b4f68fa3c31cf2bd7f9b682427fc7b53862354a",
+        "physicalFramedBytes": 102,
+        "maximumModernFramedBytes": 102,
+        "canonicalHex": "00000000000000070000000400000000000000040000000000000fa000000001000000042f612f650000000165000000010000001f00000005776f726c6400000006616e796f6e650100000002",
+        "payloadHex": "00000000000000070000000400000000000000040000000000000fa000000001000000042f612f650000000165000000010000001f00000005776f726c6400000006616e796f6e6501000000020000000200000001b3b8b141"
+      }
+    },
+    {
+      "id": "zookeeper-optional-digest-corpus.json:optional-setdata-absent",
+      "sourceCorpus": "zookeeper-optional-digest-corpus.json",
+      "sourceRecord": "optional-setdata-absent",
+      "header": {
+        "clientId": 7,
+        "cxid": 5,
+        "zxid": 5,
+        "time": 5000,
+        "type": 5
+      },
+      "transaction": {
+        "kind": "SetData",
+        "path": "/a/b",
+        "dataHex": "6e6577",
+        "version": 1,
+        "dataNull": false
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 51,
+      "expected": {
+        "admission": "accept",
+        "zxid": 5,
+        "canonicalBytes": 51,
+        "payloadBytes": 51,
+        "canonicalSha256": "88a8207f3a40a83dfe8362d8e644fa3c713d1ec9e2f1be6005b87e4a36ec2fc7",
+        "payloadSha256": "88a8207f3a40a83dfe8362d8e644fa3c713d1ec9e2f1be6005b87e4a36ec2fc7",
+        "physicalFramedBytes": 64,
+        "maximumModernFramedBytes": 76,
+        "canonicalHex": "0000000000000007000000050000000000000005000000000000138800000005000000042f612f62000000036e657700000001",
+        "payloadHex": "0000000000000007000000050000000000000005000000000000138800000005000000042f612f62000000036e657700000001"
+      }
+    },
+    {
+      "id": "zookeeper-optional-digest-corpus.json:optional-error-absent",
+      "sourceCorpus": "zookeeper-optional-digest-corpus.json",
+      "sourceRecord": "optional-error-absent",
+      "header": {
+        "clientId": 7,
+        "cxid": 7,
+        "zxid": 7,
+        "time": 7000,
+        "type": -1
+      },
+      "transaction": {
+        "kind": "Error",
+        "error": -103
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 7,
+        "canonicalBytes": 36,
+        "payloadBytes": 36,
+        "canonicalSha256": "a4dd37d602f5fa7bb01e32504655a6e74c69ea275aa9eff01957286f9c00c1dd",
+        "payloadSha256": "a4dd37d602f5fa7bb01e32504655a6e74c69ea275aa9eff01957286f9c00c1dd",
+        "physicalFramedBytes": 49,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "00000000000000070000000700000000000000070000000000001b58ffffffffffffff99",
+        "payloadHex": "00000000000000070000000700000000000000070000000000001b58ffffffffffffff99"
+      }
+    },
+    {
+      "id": "zookeeper-optional-digest-corpus.json:optional-multi-absent",
+      "sourceCorpus": "zookeeper-optional-digest-corpus.json",
+      "sourceRecord": "optional-multi-absent",
+      "header": {
+        "clientId": 7,
+        "cxid": 8,
+        "zxid": 8,
+        "time": 8000,
+        "type": 14
+      },
+      "transaction": {
+        "kind": "Multi",
+        "children": [
+          {
+            "kind": "Create",
+            "path": "/a/c",
+            "dataHex": "78797a",
+            "acls": [
+              {
+                "perms": 31,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ],
+            "ephemeral": false,
+            "parentCVersion": 3,
+            "dataNull": false
+          },
+          {
+            "kind": "SetData",
+            "path": "/a/b",
+            "dataHex": "646f6e65",
+            "version": 2,
+            "dataNull": false
+          }
+        ]
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 119,
+      "expected": {
+        "admission": "accept",
+        "zxid": 8,
+        "canonicalBytes": 119,
+        "payloadBytes": 119,
+        "canonicalSha256": "81c59f3ade79d084e98b22163f972faeb6b2b87ec5ec183dc077bfd8661aa58f",
+        "payloadSha256": "81c59f3ade79d084e98b22163f972faeb6b2b87ec5ec183dc077bfd8661aa58f",
+        "physicalFramedBytes": 132,
+        "maximumModernFramedBytes": 144,
+        "canonicalHex": "00000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002",
+        "payloadHex": "00000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002"
+      }
+    },
+    {
+      "id": "zookeeper-optional-digest-corpus.json:optional-error-present",
+      "sourceCorpus": "zookeeper-optional-digest-corpus.json",
+      "sourceRecord": "optional-error-present",
+      "header": {
+        "clientId": 7,
+        "cxid": 7,
+        "zxid": 7,
+        "time": 7000,
+        "type": -1
+      },
+      "transaction": {
+        "kind": "Error",
+        "error": -103
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 4809105330
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 7,
+        "canonicalBytes": 36,
+        "payloadBytes": 48,
+        "canonicalSha256": "a4dd37d602f5fa7bb01e32504655a6e74c69ea275aa9eff01957286f9c00c1dd",
+        "payloadSha256": "aac936660e6ce25a8609bb30f8d01043fd3c4635742687c3c6a11e9133567deb",
+        "physicalFramedBytes": 61,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "00000000000000070000000700000000000000070000000000001b58ffffffffffffff99",
+        "payloadHex": "00000000000000070000000700000000000000070000000000001b58ffffffffffffff9900000002000000011ea51fb2"
+      }
+    },
+    {
+      "id": "zookeeper-optional-digest-corpus.json:optional-error-disabled-profile-absent",
+      "sourceCorpus": "zookeeper-optional-digest-corpus.json",
+      "sourceRecord": "optional-error-disabled-profile-absent",
+      "header": {
+        "clientId": 7,
+        "cxid": 7,
+        "zxid": 7,
+        "time": 7000,
+        "type": -1
+      },
+      "transaction": {
+        "kind": "Error",
+        "error": -103
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 7,
+        "canonicalBytes": 36,
+        "payloadBytes": 36,
+        "canonicalSha256": "a4dd37d602f5fa7bb01e32504655a6e74c69ea275aa9eff01957286f9c00c1dd",
+        "payloadSha256": "a4dd37d602f5fa7bb01e32504655a6e74c69ea275aa9eff01957286f9c00c1dd",
+        "physicalFramedBytes": 49,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "00000000000000070000000700000000000000070000000000001b58ffffffffffffff99",
+        "payloadHex": "00000000000000070000000700000000000000070000000000001b58ffffffffffffff99"
+      }
+    }
+  ],
+  "boundaryCases": [
+    {
+      "id": "minimum-36-no-digest",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 36,
+        "payloadBytes": 36,
+        "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "physicalFramedBytes": 49,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+        "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+      }
+    },
+    {
+      "id": "minimum-36-digest-has-independent-12-byte-suffix",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 68323592
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 36,
+        "payloadBytes": 48,
+        "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "payloadSha256": "8b642a73dab54e34869eb91bcc90d1fc03106fdd530ffabac2029d0d39cedd2f",
+        "physicalFramedBytes": 61,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+        "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530000000020000000004128908"
+      }
+    },
+    {
+      "id": "limit-one-above-canonical",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 37,
+      "expected": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 36,
+        "payloadBytes": 36,
+        "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "physicalFramedBytes": 49,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+        "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+      }
+    },
+    {
+      "id": "largest-safe-integer-limit-small-input",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 2147483622,
+      "expected": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 36,
+        "payloadBytes": 36,
+        "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "physicalFramedBytes": 49,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+        "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+      }
+    },
+    {
+      "id": "invalid-canonical-limit-35",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 35,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "input-invalid",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "invalid-canonical-limit-0",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 0,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "input-invalid",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "invalid-canonical-limit--1",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": -1,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "input-invalid",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "invalid-canonical-limit-2147483623",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 2147483623,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "input-invalid",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "invalid-canonical-limit-2147483647",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 2147483647,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "input-invalid",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "null-header",
+      "header": null,
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "input-invalid",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "null-transaction-selected-modern-profile",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": null,
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "input-invalid",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "nonpositive-zxid-0",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 0,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "canonical-zxid-invalid",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "nonpositive-zxid--1",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": -1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "canonical-zxid-invalid",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "nonpositive-zxid--9223372036854775808",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": -9223372036854775808,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "canonical-zxid-invalid",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "largest-positive-signed-zxid",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 9223372036854775807,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 68323592
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 9223372036854775807,
+        "canonicalBytes": 36,
+        "payloadBytes": 48,
+        "canonicalSha256": "9a705cf147eec357424c41199e7c0e234d060a5d48a3993d7ad5f80ce844a0fa",
+        "payloadSha256": "b6cf785f48cf249318dfbf1c7ec3a8384afb33c90f994767cb8d5437cd65b89f",
+        "physicalFramedBytes": 61,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "0000000000000007000000017fffffffffffffff00000000000003e8fffffff600007530",
+        "payloadHex": "0000000000000007000000017fffffffffffffff00000000000003e8fffffff600007530000000020000000004128908"
+      }
+    },
+    {
+      "id": "serialized-body-too-short-0",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "RawSerializer",
+        "bytesHex": ""
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "canonical-record-too-short",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "serialized-body-too-short-3",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "RawSerializer",
+        "bytesHex": "000000"
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "canonical-record-too-short",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "serialized-body-minimum-exact",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "RawSerializer",
+        "bytesHex": "00007530"
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 36,
+        "payloadBytes": 36,
+        "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "physicalFramedBytes": 49,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+        "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+      }
+    },
+    {
+      "id": "single-write-one-byte-over-limit",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "RawSerializer",
+        "bytesHex": "0000000000"
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "byte-limit",
+        "returnedCapture": false
+      },
+      "serializerWriteMode": "single-byte"
+    },
+    {
+      "id": "range-write-one-byte-over-limit",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "RawSerializer",
+        "bytesHex": "0000000000"
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "byte-limit",
+        "returnedCapture": false
+      },
+      "serializerWriteMode": "byte-range"
+    },
+    {
+      "id": "unsupported-digest-version--1",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "version": -1,
+        "treeDigest": 68323592
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "digest-profile-unsupported",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "unsupported-digest-version-0",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "version": 0,
+        "treeDigest": 68323592
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "digest-profile-unsupported",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "unsupported-digest-version-1",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "version": 1,
+        "treeDigest": 68323592
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "digest-profile-unsupported",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "unsupported-digest-version-3",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "version": 3,
+        "treeDigest": 68323592
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "digest-profile-unsupported",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "v2-digest-signed-long--9223372036854775808",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": -9223372036854775808
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 36,
+        "payloadBytes": 48,
+        "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "payloadSha256": "9113e0fc4b5d6273ed9bdd79554f08fd368427fc295763fbc2e79103ceb1a5b0",
+        "physicalFramedBytes": 61,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+        "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530000000028000000000000000"
+      }
+    },
+    {
+      "id": "v2-digest-signed-long-9223372036854775807",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 9223372036854775807
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 36,
+        "payloadBytes": 48,
+        "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "payloadSha256": "45105eed534abef9518db0934a3c0755109840099547b0407eb69e720384210f",
+        "physicalFramedBytes": 61,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+        "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530000000027fffffffffffffff"
+      }
+    },
+    {
+      "id": "short-digest-0",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "serializerBytesHex": ""
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "digest-profile-unsupported",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "short-digest-4",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "serializerBytesHex": "00000002"
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "digest-profile-unsupported",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "short-digest-11",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "serializerBytesHex": "0000000200000000000000"
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "digest-profile-unsupported",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "digest-thirteenth-byte-over-suffix-limit",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "serializerBytesHex": "00000002000000000000000000"
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "byte-limit",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "digest-thirteenth-byte-with-loose-limit-still-profile-denied",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "serializerBytesHex": "00000002000000000000000000"
+      },
+      "maximumCanonicalBytes": 64,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "digest-profile-unsupported",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "checked-serializer-exception-header-before-write",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "same-checked-IOException",
+        "returnedCapture": false
+      },
+      "serializerFault": {
+        "stage": "header-before-write",
+        "sentinelMessage": "independent-capture-checked-header-before-write",
+        "requireSameExceptionInstance": true
+      }
+    },
+    {
+      "id": "checked-serializer-exception-header-after-write",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "same-checked-IOException",
+        "returnedCapture": false
+      },
+      "serializerFault": {
+        "stage": "header-after-write",
+        "sentinelMessage": "independent-capture-checked-header-after-write",
+        "requireSameExceptionInstance": true
+      }
+    },
+    {
+      "id": "checked-serializer-exception-transaction-after-write",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "same-checked-IOException",
+        "returnedCapture": false
+      },
+      "serializerFault": {
+        "stage": "transaction-after-write",
+        "sentinelMessage": "independent-capture-checked-transaction-after-write",
+        "requireSameExceptionInstance": true
+      }
+    },
+    {
+      "id": "checked-serializer-exception-digest-after-write",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 68323592
+      },
+      "maximumCanonicalBytes": 36,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "same-checked-IOException",
+        "returnedCapture": false
+      },
+      "serializerFault": {
+        "stage": "digest-after-write",
+        "sentinelMessage": "independent-capture-checked-digest-after-write",
+        "requireSameExceptionInstance": true
+      }
+    },
+    {
+      "id": "native-policy-canonical-exact-349159-no-digest",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": 5
+      },
+      "transaction": {
+        "kind": "SetData",
+        "path": "/x",
+        "dataRepeat": {
+          "byte": 97,
+          "count": 349113
+        },
+        "dataNull": false,
+        "version": 1
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 349159,
+      "expected": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 349159,
+        "payloadBytes": 349159,
+        "canonicalSha256": "67712065111cbca7c7a5a66f392fc49c7afe8754bb4325ff0eba8699c5c7ae95",
+        "payloadSha256": "67712065111cbca7c7a5a66f392fc49c7afe8754bb4325ff0eba8699c5c7ae95",
+        "physicalFramedBytes": 349172,
+        "maximumModernFramedBytes": 349184
+      }
+    },
+    {
+      "id": "native-policy-canonical-exact-349159-v2-digest",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": 5
+      },
+      "transaction": {
+        "kind": "SetData",
+        "path": "/x",
+        "dataRepeat": {
+          "byte": 97,
+          "count": 349113
+        },
+        "dataNull": false,
+        "version": 1
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 68323592
+      },
+      "maximumCanonicalBytes": 349159,
+      "expected": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 349159,
+        "payloadBytes": 349171,
+        "canonicalSha256": "67712065111cbca7c7a5a66f392fc49c7afe8754bb4325ff0eba8699c5c7ae95",
+        "payloadSha256": "3afcecbec093551da4ea2553b7feaefc14addd97c65a8d9d25e157c7cd694013",
+        "physicalFramedBytes": 349184,
+        "maximumModernFramedBytes": 349184
+      }
+    },
+    {
+      "id": "native-policy-canonical-plus-one-absent",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": 5
+      },
+      "transaction": {
+        "kind": "SetData",
+        "path": "/x",
+        "dataRepeat": {
+          "byte": 97,
+          "count": 349114
+        },
+        "dataNull": false,
+        "version": 1
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 349159,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "byte-limit",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "native-policy-canonical-plus-one-v2",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": 5
+      },
+      "transaction": {
+        "kind": "SetData",
+        "path": "/x",
+        "dataRepeat": {
+          "byte": 97,
+          "count": 349114
+        },
+        "dataNull": false,
+        "version": 1
+      },
+      "digest": {
+        "version": 2,
+        "treeDigest": 68323592
+      },
+      "maximumCanonicalBytes": 349159,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "byte-limit",
+        "returnedCapture": false
+      }
+    },
+    {
+      "id": "jute-UTF16-pi",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": 5
+      },
+      "transaction": {
+        "kind": "SetData",
+        "path": "/\u03c0",
+        "dataHex": "ff00",
+        "dataNull": false,
+        "version": 1
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 49,
+      "expected": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 49,
+        "payloadBytes": 49,
+        "canonicalSha256": "0daeebaf105f271fc5f483831e2823628afb46e6cedac927f48a3edf5f36354c",
+        "payloadSha256": "0daeebaf105f271fc5f483831e2823628afb46e6cedac927f48a3edf5f36354c",
+        "physicalFramedBytes": 62,
+        "maximumModernFramedBytes": 74,
+        "canonicalHex": "000000000000000700000001000000000000000100000000000003e800000005000000032fcf8000000002ff0000000001",
+        "payloadHex": "000000000000000700000001000000000000000100000000000003e800000005000000032fcf8000000002ff0000000001"
+      }
+    },
+    {
+      "id": "jute-UTF16-supplementary-two-surrogates",
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": 5
+      },
+      "transaction": {
+        "kind": "SetData",
+        "path": "/\ud83d\ude00",
+        "dataHex": "ff00",
+        "dataNull": false,
+        "version": 1
+      },
+      "digest": null,
+      "maximumCanonicalBytes": 53,
+      "expected": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 53,
+        "payloadBytes": 53,
+        "canonicalSha256": "d14afd6007c98e673d70b8556aa684e59a9e4a2fe632808420acc9f445027cd3",
+        "payloadSha256": "d14afd6007c98e673d70b8556aa684e59a9e4a2fe632808420acc9f445027cd3",
+        "physicalFramedBytes": 66,
+        "maximumModernFramedBytes": 78,
+        "canonicalHex": "000000000000000700000001000000000000000100000000000003e800000005000000072feda0bdedb88000000002ff0000000001",
+        "payloadHex": "000000000000000700000001000000000000000100000000000003e800000005000000072feda0bdedb88000000002ff0000000001"
+      }
+    }
+  ],
+  "mutationCases": [
+    {
+      "id": "capture-isolation-txn-5-SetData",
+      "captureCase": "zookeeper-wire-corpus-v4.json:txn-5-SetData",
+      "afterCaptureActions": [
+        "set header.zxid=999999",
+        "set digest.version=3 and treeDigest=-1",
+        "overwrite original transaction data array in place with 00",
+        "replace transaction path and data using setters"
+      ],
+      "alsoMutateReturnedCopies": [
+        "canonicalCopy",
+        "payloadCopy"
+      ],
+      "expectedAfterMutation": {
+        "admission": "accept",
+        "zxid": 5,
+        "canonicalBytes": 51,
+        "payloadBytes": 63,
+        "canonicalSha256": "88a8207f3a40a83dfe8362d8e644fa3c713d1ec9e2f1be6005b87e4a36ec2fc7",
+        "payloadSha256": "28247a7da7613b4c503c6e869f18814bcea74ca3b0b8f5875e2149d2eac05e60",
+        "physicalFramedBytes": 76,
+        "maximumModernFramedBytes": 76,
+        "canonicalHex": "0000000000000007000000050000000000000005000000000000138800000005000000042f612f62000000036e657700000001",
+        "payloadHex": "0000000000000007000000050000000000000005000000000000138800000005000000042f612f62000000036e65770000000100000002000000011ea51fb2"
+      },
+      "requireFreshReturnedArrayEachCall": true
+    },
+    {
+      "id": "capture-isolation-txn-8-Multi",
+      "captureCase": "zookeeper-wire-corpus-v4.json:txn-8-Multi",
+      "afterCaptureActions": [
+        "overwrite original child buffer in place",
+        "set first child type=-1",
+        "clear original Multi child list",
+        "replace Multi child list"
+      ],
+      "alsoMutateReturnedCopies": [
+        "canonicalCopy",
+        "payloadCopy"
+      ],
+      "expectedAfterMutation": {
+        "admission": "accept",
+        "zxid": 8,
+        "canonicalBytes": 119,
+        "payloadBytes": 131,
+        "canonicalSha256": "81c59f3ade79d084e98b22163f972faeb6b2b87ec5ec183dc077bfd8661aa58f",
+        "payloadSha256": "62d905db664ceb99224c1e65719a32e86f1f016d512b22b4dd97b0312cf2dcc3",
+        "physicalFramedBytes": 144,
+        "maximumModernFramedBytes": 144,
+        "canonicalHex": "00000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002",
+        "payloadHex": "00000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002000000020000000194398f33"
+      },
+      "requireFreshReturnedArrayEachCall": true
+    },
+    {
+      "id": "capture-isolation-txn-15-Multi",
+      "captureCase": "zookeeper-wire-corpus-v4.json:txn-15-Multi",
+      "afterCaptureActions": [
+        "apply pinned DataTree failed-Multi mutation: first child type=-1",
+        "keep original child data buffer unchanged"
+      ],
+      "alsoMutateReturnedCopies": [
+        "canonicalCopy",
+        "payloadCopy"
+      ],
+      "expectedAfterMutation": {
+        "admission": "accept",
+        "zxid": 15,
+        "canonicalBytes": 105,
+        "payloadBytes": 117,
+        "canonicalSha256": "876abf7de8e61083faff9f1a2995919f85165acc0e94f177c8abffc1ba4b93fb",
+        "payloadSha256": "7dcf2a7bf6fa2ba2db5f52273ac206352a6943ff3bc9d9120d5fb647193f467e",
+        "physicalFramedBytes": 130,
+        "maximumModernFramedBytes": 130,
+        "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e000000020000000100000031000000082f612f6e65766572000000014e000000010000001f00000005776f726c6400000006616e796f6e650000000006ffffffff00000004ffffff99",
+        "payloadHex": "00000000000000070000000f000000000000000f0000000000003a980000000e000000020000000100000031000000082f612f6e65766572000000014e000000010000001f00000005776f726c6400000006616e796f6e650000000006ffffffff00000004ffffff99000000020000000179a1841c"
+      },
+      "requireFreshReturnedArrayEachCall": true
+    }
+  ],
+  "crossCaseAssertions": [
+    {
+      "id": "digest-independent-identity",
+      "left": "zookeeper-wire-corpus-v4.json:txn-7-Error",
+      "right": "zookeeper-optional-digest-corpus.json:optional-error-absent",
+      "equal": [
+        "zxid",
+        "canonicalBytes",
+        "canonicalHex",
+        "canonicalSha256",
+        "maximumModernFramedBytes"
+      ],
+      "leftPhysicalBytesMinusRight": 12
+    },
+    {
+      "id": "minimum-modern-framing",
+      "case": "minimum-36-digest-has-independent-12-byte-suffix",
+      "expectedCanonicalBytes": 36,
+      "expectedPayloadBytes": 48,
+      "expectedPhysicalFramedBytes": 61
+    },
+    {
+      "id": "native-maximum-charge",
+      "case": "native-policy-canonical-exact-349159-v2-digest",
+      "expectedCanonicalBytes": 349159,
+      "expectedPayloadBytes": 349171,
+      "expectedPhysicalFramedBytes": 349184
+    }
+  ]
+}

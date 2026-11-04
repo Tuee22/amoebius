@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
+from unittest import mock
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -82,9 +83,18 @@ def validate(dhall: str) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dhall", required=True, help="dynamically resolved Dhall executable")
+    parser.add_argument("--mutant", choices=("M-production-secret-read", "M-copy-secret"))
     arguments = parser.parse_args()
     try:
-        validate(arguments.dhall)
+        if arguments.mutant == "M-production-secret-read":
+            # Inject the seeded authorization defect without reading real material.
+            with mock.patch.object(containment, "require_secret_access", return_value=containment.TEST_SECRETS):
+                validate(arguments.dhall)
+        elif arguments.mutant == "M-copy-secret":
+            with mock.patch.object(containment, "require_secret_sink", return_value=None):
+                validate(arguments.dhall)
+        else:
+            validate(arguments.dhall)
         print("vault-secret-boundary: PASS (production rejection, prompt-only sink, narrow schema, no copies)")
         return 0
     except (BoundaryFailure, OSError, subprocess.TimeoutExpired) as problem:

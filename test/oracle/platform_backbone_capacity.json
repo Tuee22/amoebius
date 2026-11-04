@@ -1,0 +1,877 @@
+{
+  "schema": "phase30.independently-authored-review-corpus.v1",
+  "status": "proposed replacement; independent expectations, not a phase seal",
+  "provenance": "Authored by the independent review agent from the normative contract, primary sources and arithmetic. No subject output supplied expected values.",
+  "minio_model": {
+    "data_shards": 2,
+    "parity_shards": 2,
+    "shard_block_bytes": 4096,
+    "static_metadata_bytes_per_drive": 1024,
+    "metadata_bytes_per_object_per_drive": 1024,
+    "incoming_healing_workspace_bytes_per_target": 8192,
+    "faults_per_set": 1,
+    "concurrent_write_sets": 1,
+    "failed_write_sets": 1,
+    "maximum_write_extent_bytes": 8192,
+    "placement": "Every listed object has an explicit erasure-set index. All active slots reserve a full incoming shard generation and workspace as a conservative possible replacement target. Each set conservatively reserves the complete extra write population. Per-slot maxima are retained before any uniform claim debit.",
+    "caveat": "This is an explicit conservative capacity model. It does not establish a runtime filesystem bound or a deterministic mapping for the current live MinIO implementation."
+  },
+  "minio_cases": [
+    {
+      "id": "one-two-byte-object",
+      "sets": 1,
+      "objects": [
+        [
+          0,
+          "a",
+          2
+        ]
+      ],
+      "expected": {
+        "logical_bytes": 2,
+        "object_count": 1,
+        "payload": 16384,
+        "metadata": 8192,
+        "healing": 49152,
+        "write_peak": 32768,
+        "total": 106496,
+        "per_drive": [
+          26624,
+          26624,
+          26624,
+          26624
+        ],
+        "failure_count": 5
+      }
+    },
+    {
+      "id": "two-one-byte-objects",
+      "sets": 1,
+      "objects": [
+        [
+          0,
+          "a",
+          1
+        ],
+        [
+          0,
+          "b",
+          1
+        ]
+      ],
+      "expected": {
+        "logical_bytes": 2,
+        "object_count": 2,
+        "payload": 32768,
+        "metadata": 12288,
+        "healing": 65536,
+        "write_peak": 32768,
+        "total": 143360,
+        "per_drive": [
+          35840,
+          35840,
+          35840,
+          35840
+        ],
+        "failure_count": 5
+      }
+    },
+    {
+      "id": "stripe-exact-boundary",
+      "sets": 1,
+      "objects": [
+        [
+          0,
+          "a",
+          8192
+        ]
+      ],
+      "expected": {
+        "logical_bytes": 8192,
+        "object_count": 1,
+        "payload": 16384,
+        "metadata": 8192,
+        "healing": 49152,
+        "write_peak": 32768,
+        "total": 106496,
+        "per_drive": [
+          26624,
+          26624,
+          26624,
+          26624
+        ],
+        "failure_count": 5
+      }
+    },
+    {
+      "id": "stripe-one-byte-over",
+      "sets": 1,
+      "objects": [
+        [
+          0,
+          "a",
+          8193
+        ]
+      ],
+      "expected": {
+        "logical_bytes": 8193,
+        "object_count": 1,
+        "payload": 32768,
+        "metadata": 8192,
+        "healing": 65536,
+        "write_peak": 32768,
+        "total": 139264,
+        "per_drive": [
+          34816,
+          34816,
+          34816,
+          34816
+        ],
+        "failure_count": 5
+      }
+    },
+    {
+      "id": "concurrent-write-boundary",
+      "sets": 1,
+      "objects": [
+        [
+          0,
+          "a",
+          1
+        ],
+        [
+          0,
+          "b",
+          1
+        ]
+      ],
+      "overrides": {
+        "concurrent_write_sets": 2
+      },
+      "expected": {
+        "logical_bytes": 2,
+        "object_count": 2,
+        "payload": 32768,
+        "metadata": 12288,
+        "healing": 65536,
+        "write_peak": 49152,
+        "total": 159744,
+        "per_drive": [
+          39936,
+          39936,
+          39936,
+          39936
+        ],
+        "failure_count": 5
+      }
+    },
+    {
+      "id": "two-fault-boundary",
+      "sets": 1,
+      "objects": [
+        [
+          0,
+          "a",
+          8193
+        ]
+      ],
+      "overrides": {
+        "faults_per_set": 2
+      },
+      "expected": {
+        "logical_bytes": 8193,
+        "object_count": 1,
+        "payload": 32768,
+        "metadata": 8192,
+        "healing": 131072,
+        "write_peak": 32768,
+        "total": 204800,
+        "per_drive": [
+          51200,
+          51200,
+          51200,
+          51200
+        ],
+        "failure_count": 11
+      }
+    },
+    {
+      "id": "unequal-data-parity",
+      "sets": 1,
+      "objects": [
+        [
+          0,
+          "a",
+          12289
+        ]
+      ],
+      "overrides": {
+        "data_shards": 3,
+        "parity_shards": 1,
+        "maximum_write_extent_bytes": 12288
+      },
+      "expected": {
+        "logical_bytes": 12289,
+        "object_count": 1,
+        "payload": 32768,
+        "metadata": 8192,
+        "healing": 65536,
+        "write_peak": 32768,
+        "total": 139264,
+        "per_drive": [
+          34816,
+          34816,
+          34816,
+          34816
+        ],
+        "failure_count": 5
+      }
+    },
+    {
+      "id": "two-set-skew-retains-slot-maxima",
+      "sets": 2,
+      "objects": [
+        [
+          0,
+          "a",
+          1
+        ],
+        [
+          0,
+          "b",
+          1
+        ]
+      ],
+      "expected": {
+        "logical_bytes": 2,
+        "object_count": 2,
+        "payload": 32768,
+        "metadata": 16384,
+        "healing": 98304,
+        "write_peak": 65536,
+        "total": 212992,
+        "per_drive": [
+          35840,
+          35840,
+          35840,
+          35840,
+          17408,
+          17408,
+          17408,
+          17408
+        ],
+        "failure_count": 25
+      },
+      "required_failure_members": [
+        [],
+        [
+          0
+        ],
+        [
+          7
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "uniform_template_debit_if_all_eight_share_one_template": 286720
+    }
+  ],
+  "bookkeeper_model": {
+    "bookies": [
+      0,
+      1,
+      2
+    ],
+    "fault_bound": 1,
+    "journal_index_bytes_per_bookie": 2,
+    "placement": "The exact listed segment replica ids are inputs. Derive every failed-bookie subset, and every eligible replacement selection restoring the write quorum on survivors. Retain originals until observed cleanup, and take each slot's maximum. No replacement bookies exist outside the named three in these synthetic cases."
+  },
+  "bookkeeper_cases": [
+    {
+      "id": "unequal-segments-w2-a2",
+      "write_quorum": 2,
+      "ack_quorum": 2,
+      "segments": [
+        {
+          "bytes": 3,
+          "replicas": [
+            0,
+            1
+          ]
+        },
+        {
+          "bytes": 5,
+          "replicas": [
+            1,
+            2
+          ]
+        },
+        {
+          "bytes": 7,
+          "replicas": [
+            2,
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "logical_bytes": 15,
+        "steady_per_bookie": [
+          12,
+          10,
+          14
+        ],
+        "peak_per_bookie": [
+          17,
+          17,
+          17
+        ],
+        "failure_subsets": [
+          [],
+          [
+            0
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ]
+      }
+    },
+    {
+      "id": "ack-is-not-storage-multiplier",
+      "write_quorum": 2,
+      "ack_quorum": 1,
+      "segments": [
+        {
+          "bytes": 3,
+          "replicas": [
+            0,
+            1
+          ]
+        },
+        {
+          "bytes": 5,
+          "replicas": [
+            1,
+            2
+          ]
+        },
+        {
+          "bytes": 7,
+          "replicas": [
+            2,
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "logical_bytes": 15,
+        "steady_per_bookie": [
+          12,
+          10,
+          14
+        ],
+        "peak_per_bookie": [
+          17,
+          17,
+          17
+        ],
+        "failure_subsets": [
+          [],
+          [
+            0
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ]
+      }
+    },
+    {
+      "id": "unequal-segments-w1-a1",
+      "write_quorum": 1,
+      "ack_quorum": 1,
+      "segments": [
+        {
+          "bytes": 3,
+          "replicas": [
+            0
+          ]
+        },
+        {
+          "bytes": 5,
+          "replicas": [
+            1
+          ]
+        },
+        {
+          "bytes": 7,
+          "replicas": [
+            2
+          ]
+        }
+      ],
+      "expected": {
+        "logical_bytes": 15,
+        "steady_per_bookie": [
+          5,
+          7,
+          9
+        ],
+        "peak_per_bookie": [
+          12,
+          14,
+          14
+        ],
+        "failure_subsets": [
+          [],
+          [
+            0
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ]
+      }
+    }
+  ],
+  "boundaries": [
+    {
+      "id": "minio-slot-exact-fit",
+      "required": 35840,
+      "available": 35840,
+      "expected": "accept"
+    },
+    {
+      "id": "minio-slot-one-byte-short",
+      "required": 35840,
+      "available": 35839,
+      "expected": "reject",
+      "reason": "per-drive usable capacity"
+    },
+    {
+      "id": "logical-fit-erasure-physical-overflow",
+      "logical": 2,
+      "required": 35840,
+      "available": 2,
+      "expected": "reject",
+      "reason": "logical bytes cannot substitute for a drive witness"
+    },
+    {
+      "id": "bookkeeper-slot-exact-fit",
+      "required": 17,
+      "available": 17,
+      "expected": "accept"
+    },
+    {
+      "id": "bookkeeper-slot-one-byte-short",
+      "required": 17,
+      "available": 16,
+      "expected": "reject",
+      "reason": "per-bookie recovery maximum"
+    },
+    {
+      "id": "bookkeeper-recovery-only-overflow",
+      "steady_required": 14,
+      "required": 17,
+      "available": 14,
+      "expected": "reject",
+      "reason": "recovery overlap"
+    },
+    {
+      "id": "present-before-uniform-exact",
+      "usable_slots": [
+        1,
+        8,
+        9
+      ],
+      "filesystem_overhead_basis_points": 500,
+      "minimum_raw": 0,
+      "quantum": 8,
+      "expected_presented": [
+        2,
+        9,
+        10
+      ],
+      "expected_rounded": [
+        8,
+        16,
+        16
+      ],
+      "required": 48,
+      "available": 48,
+      "expected": "accept"
+    },
+    {
+      "id": "unequal-raw-sum-fits-uniform-does-not",
+      "usable_slots": [
+        1,
+        8,
+        9
+      ],
+      "filesystem_overhead_basis_points": 500,
+      "minimum_raw": 0,
+      "quantum": 8,
+      "expected_presented": [
+        2,
+        9,
+        10
+      ],
+      "expected_rounded": [
+        8,
+        16,
+        16
+      ],
+      "required": 48,
+      "available": 40,
+      "expected": "reject",
+      "reason": "max rounded slot times three; unequal raw sum is only 40"
+    },
+    {
+      "id": "one-raw-quantum-short",
+      "usable_slots": [
+        9
+      ],
+      "filesystem_overhead_basis_points": 500,
+      "minimum_raw": 0,
+      "quantum": 8,
+      "expected_presented": [
+        10
+      ],
+      "expected_rounded": [
+        16
+      ],
+      "required": 16,
+      "available": 8,
+      "expected": "reject",
+      "reason": "raw allocation quantum"
+    }
+  ],
+  "horizon_boundaries": [
+    {
+      "id": "orphan-horizon-just-before",
+      "horizon_seconds": 59,
+      "window_seconds": 30,
+      "failures_per_window": 2,
+      "maximum_bytes": 7,
+      "expected_object_count": 4,
+      "expected_bytes": 28
+    },
+    {
+      "id": "orphan-horizon-exact",
+      "horizon_seconds": 60,
+      "window_seconds": 30,
+      "failures_per_window": 2,
+      "maximum_bytes": 7,
+      "expected_object_count": 4,
+      "expected_bytes": 28
+    },
+    {
+      "id": "orphan-horizon-one-second-over",
+      "horizon_seconds": 61,
+      "window_seconds": 30,
+      "failures_per_window": 2,
+      "maximum_bytes": 7,
+      "expected_object_count": 6,
+      "expected_bytes": 42
+    },
+    {
+      "id": "pulsar-deletion-lag-exact-window",
+      "horizon_seconds": 60,
+      "window_seconds": 30,
+      "failures_per_window": 2,
+      "maximum_bytes": 8192,
+      "expected_object_count": 4,
+      "expected_bytes": 32768
+    },
+    {
+      "id": "pulsar-deletion-lag-next-window",
+      "horizon_seconds": 61,
+      "window_seconds": 30,
+      "failures_per_window": 2,
+      "maximum_bytes": 8192,
+      "expected_object_count": 6,
+      "expected_bytes": 49152
+    }
+  ],
+  "fixed_profiles": {
+    "bookkeeper_declared_amendment": {
+      "logical_all_history_bytes": 1048576,
+      "incoming_recovery_bytes": 1048576,
+      "journal_index_allowance_bytes": 50331648,
+      "required_usable_per_bookie": 52428800,
+      "filesystem_overhead_basis_points": 500,
+      "minimum_raw": 67108864,
+      "raw_quantum": 67108864,
+      "required_raw_per_bookie": 67108864,
+      "status": "arithmetic approved; runtime premises pending"
+    },
+    "bookkeeper_proposed_serialized_history_profile": {
+      "all_serialized_history_bytes": 4194304,
+      "incoming_recovery_bytes": 4194304,
+      "journal_generations": 2,
+      "maximum_journal_generation_bytes": 16777216,
+      "maximum_index_files": 512,
+      "maximum_index_file_allocation_bytes": 16384,
+      "entrylog_header_and_auxiliary_reserve_bytes": 8388608,
+      "fixed_allowance_bytes": 50331648,
+      "required_usable_per_bookie": 58720256,
+      "required_raw_per_bookie": 134217728,
+      "status": "Raw minimum128MiB independently approved in the filesystem amendment;56MiB usable operands unchanged. Serialized history and generation premises remain required.",
+      "minimum_raw": 134217728,
+      "raw_quantum": 67108864
+    },
+    "zookeeper_declared_amendment": {
+      "members": 3,
+      "paths_bytes_per_member": 1048576,
+      "log_bytes_per_member": 33554432,
+      "snapshot_bytes_per_member": 1048576,
+      "recovery_bytes_per_member": 33554432,
+      "required_usable_per_member": 69206016,
+      "required_raw_per_member": 134217728,
+      "status": "arithmetic approved; unqualified runtime sufficiency rejected because effective preallocation and generation counts are not modeled"
+    },
+    "zookeeper_proposed_explicit_profile": {
+      "jvm_property": "-Dzookeeper.preAllocSize=16380",
+      "preallocation_units": "KiB",
+      "steady_log_generations": 2,
+      "incoming_log_generations": 2,
+      "maximum_log_generation_bytes": 16777216,
+      "retained_snapshot_generations": 3,
+      "incoming_snapshot_generations": 1,
+      "maximum_snapshot_generation_bytes": 1048576,
+      "paths_and_metadata_bytes": 1048576,
+      "required_usable_per_member": 72351744,
+      "required_raw_per_member": 134217728,
+      "status": "independently derived proposal; finite generation/transaction/snapshot bounds still must be bound to the fixture"
+    }
+  },
+  "execution_roles": [
+    [
+      "metallb-controller",
+      1,
+      250,
+      128,
+      64
+    ],
+    [
+      "metallb-speaker",
+      1,
+      250,
+      128,
+      64
+    ],
+    [
+      "minio",
+      1,
+      500,
+      1536,
+      64
+    ],
+    [
+      "application-gateway",
+      1,
+      125,
+      96,
+      64
+    ],
+    [
+      "registry-source",
+      1,
+      250,
+      128,
+      64
+    ],
+    [
+      "registry-target",
+      1,
+      250,
+      128,
+      64
+    ],
+    [
+      "registry-transfer",
+      1,
+      250,
+      128,
+      64
+    ],
+    [
+      "registry-verify-mismatch",
+      1,
+      125,
+      128,
+      64
+    ],
+    [
+      "zookeeper",
+      3,
+      500,
+      256,
+      64
+    ],
+    [
+      "bookkeeper",
+      3,
+      500,
+      384,
+      64
+    ],
+    [
+      "broker",
+      2,
+      500,
+      768,
+      1024
+    ],
+    [
+      "pulsar-tool-including-observer",
+      1,
+      250,
+      640,
+      64
+    ],
+    [
+      "pulsar-metadata-job",
+      1,
+      250,
+      256,
+      64
+    ]
+  ],
+  "execution_expected": {
+    "role_count": 13,
+    "pod_slots": 18,
+    "cpu_millis": 6500,
+    "memory_mib": 6752,
+    "ephemeral_mib": 3072,
+    "broker_scratch_mib": 1016
+  },
+  "execution_paired_negatives": [
+    [
+      "cpu_millis",
+      6499
+    ],
+    [
+      "memory_bytes",
+      7079985151
+    ],
+    [
+      "ephemeral_bytes",
+      3221225471
+    ],
+    [
+      "pod_slots",
+      17
+    ]
+  ],
+  "unresolved_class_specific_cases": [
+    "Pulsar: derive data and index objects from exact retained ledger segments, finite offload rate window, lag and failed-offload horizon;1 MiB objects and128 pairs must follow a pinned object model rather than independent scalar choices.",
+    "Pulumi: pin canonical encoding of exact plaintext state fields, Vault/encryption-envelope model, retained old/new revisions and failed-checkpoint horizon before authoring exact ciphertext extents.",
+    "Control plane: enumerate InForceSpecSnapshot, ManagedResourceRegistry, ReconcileJournal, ValidationLedger and JobCompletion; pin canonical encoding/encryption and old/new CAS plus failed-write history before exact extents can be independently authored.",
+    "ZooKeeper: derive bounded znode paths, transactions, sessions, watches, serialized logs and snapshots; exercise each member's capacity and recovery separately.",
+    "Admission: each present producer requires a bound private writer admission, exact class quotas and zero-write negatives; a nonempty SourceKind label alone does not supply them."
+  ],
+  "three_raw_source_case": {
+    "arms": [
+      "ApplicationObjects",
+      "ContentObjects",
+      "RegistryObjects"
+    ],
+    "each_source": {
+      "store": "s",
+      "tenant": "t",
+      "bucket": "unique arm name",
+      "owner": "unique arm owner",
+      "budget_id": "unique arm budget",
+      "resident_full_key": "resident",
+      "resident_bytes": 2,
+      "future": {
+        "count": 1,
+        "maximum_bytes": 3
+      },
+      "concurrent": {
+        "count": 1,
+        "maximum_bytes": 5
+      },
+      "deletion_lag": {
+        "count": 1,
+        "maximum_bytes": 7,
+        "window_seconds": 30
+      },
+      "failed": {
+        "count": 2,
+        "maximum_bytes": 11,
+        "window_seconds": 60
+      },
+      "provider_quota_bytes": 39,
+      "provider_quota_objects": 6
+    },
+    "expected_each": {
+      "logical_bytes": 39,
+      "object_count": 6
+    },
+    "expected_union": {
+      "logical_bytes": 117,
+      "object_count": 18
+    },
+    "paired_negatives": [
+      {
+        "change": "quota bytes39 ->38",
+        "expected": "reject",
+        "reason": "byte quota"
+      },
+      {
+        "change": "quota objects6 ->5",
+        "expected": "reject",
+        "reason": "object-count quota"
+      },
+      {
+        "change": "remove ControlPlaneStateObjects while keeping expected producer ids",
+        "expected": "reject",
+        "reason": "source/producer set mismatch"
+      },
+      {
+        "change": "duplicate a producer id",
+        "expected": "reject",
+        "reason": "duplicate source id"
+      },
+      {
+        "change": "change resident bucket outside source scope",
+        "expected": "reject",
+        "reason": "object outside source scope"
+      },
+      {
+        "change": "same physical id gains conflicting byte metadata",
+        "expected": "reject",
+        "reason": "physical object byte conflict"
+      },
+      {
+        "change": "two sources share budget id but have different owners",
+        "expected": "reject",
+        "reason": "budget-owner conflict"
+      },
+      {
+        "change": "failed horizon60 ->0",
+        "expected": "reject",
+        "reason": "finite positive orphan horizon required"
+      }
+    ],
+    "coverage_limit": "Three raw application/content/registry capacity primitives. The closed structured arms are derived and joined through test/oracle/platform_backbone_source_inventory.json."
+  }
+}

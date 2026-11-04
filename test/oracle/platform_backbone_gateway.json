@@ -1,0 +1,86 @@
+{
+  "schema": "phase30.independent-gateway-capacity-amendment.v1",
+  "provenance": "Independently authored from Phase25 artifact/preflight/publication and the intended gateway operands. No Phase30 native output or live maximum supplies an expectation.",
+  "decision": "capacity arithmetic approved; gateway conformance and live/census evidence remain pending",
+  "public_key_limits": {
+    "canonical_registry": {
+      "object_count": 84,
+      "extent_and_digest": "exact Phase25 Distribution driver map"
+    },
+    "fresh_registry_blob": {
+      "object_count": 1,
+      "maximum_bytes": 65536
+    },
+    "fresh_registry_layer_link": {
+      "object_count": 1,
+      "exact_bytes": 71
+    },
+    "registry_driver_metadata": {
+      "object_count": 16,
+      "maximum_bytes": 4096
+    },
+    "offload_data": {
+      "object_count": 128,
+      "maximum_bytes": 1048576
+    },
+    "offload_index": {
+      "object_count": 128,
+      "maximum_bytes": 1048576
+    },
+    "application_canary": {
+      "object_count": 1,
+      "exact_bytes": 4096
+    },
+    "maximum_successful_resident_or_reserved_keys": 359,
+    "failed_generation_tokens": {
+      "RegistryWriter": 3,
+      "OffloadWriter": 2,
+      "ApplicationWriter": 1
+    },
+    "reclamation_rule": "Failed or interrupted generations retain their debt until observed cleanup; elapsed time alone releases no token. Successful temporary-key deletion is verified absent before its class slot is released."
+  },
+  "metadata_addition": {
+    "object_count": 16,
+    "maximum_bytes_each": 4096,
+    "logical_bytes": 65536,
+    "data_shards": 2,
+    "parity_shards": 2,
+    "shard_block_bytes": 4096,
+    "encoded_bytes_each": 16384,
+    "encoded_payload_bytes": 262144,
+    "metadata_bytes_per_object_per_drive": 8192,
+    "metadata_bytes": 524288,
+    "incoming_healing_bytes": 262144,
+    "total_physical_bytes": 1048576,
+    "additional_usable_per_drive": 262144
+  },
+  "gateway_retained_filesystem": {
+    "maximum_current_state_bytes": 1048576,
+    "maximum_candidate_state_bytes": 1048576,
+    "maximum_failed_state_bytes": 1048576,
+    "filesystem_and_control_reserve_bytes": 2097152,
+    "required_usable_bytes": 5242880,
+    "filesystem_overhead_basis_points": 500,
+    "minimum_raw_bytes": 67108864,
+    "raw_quantum_bytes": 67108864,
+    "required_raw_bytes": 67108864
+  },
+  "execution_union": {
+    "role_count": 13,
+    "pod_slots": 18,
+    "cpu_millis": 6500,
+    "memory_mib": 6752,
+    "ephemeral_mib": 3072,
+    "gateway_lifecycle": "one StatefulSet member, OnDelete; replaces the prior gateway executor"
+  },
+  "required_admission_boundaries": [
+    "All84 exact canonical identities fit; a changed extent or digest rejects before forwarding.",
+    "One65536-byte fresh blob fits;65537 bytes or a second distinct blob identity rejects.",
+    "One71-byte layer link fits; changed extent or a second distinct link identity rejects.",
+    "Sixteen4096-byte metadata keys fit;4097 bytes or a seventeenth simultaneous key rejects.",
+    "Data and index have independent128-key limits; each1048576-byte extent fits and1048577 rejects.",
+    "Failed and interrupted writes consume the same writer's durable3/2/1 token inventory. A restart must preserve both committed key reservations and failed debt.",
+    "Every mutating multipart stage requires a persisted reservation and an owned upload id, with one bounded part; unsupported extra parts or foreign copy sources reject before backend mutation.",
+    "A successful response or upload id is delivered only after durable state commit; deletion releases its slot only after backend absence is observed."
+  ]
+}

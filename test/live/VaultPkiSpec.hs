@@ -2,11 +2,12 @@
 
 module Main (main) where
 
-import Data.Aeson (FromJSON (parseJSON), eitherDecodeFileStrict', withObject, (.:))
+import Data.Aeson (FromJSON (parseJSON), Value, eitherDecodeFileStrict', withObject, (.:))
 import Data.Text (Text)
 import Data.Text qualified as Text
 import System.Environment (lookupEnv)
 import System.Exit (die)
+import VaultPkiObservation (verifyObservations)
 
 data Evidence = Evidence Int Text InitOnce Envelope Storage Rebuild Pki Client Manifest ArtifactSource Deferred Universal
 data InitOnce = InitOnce Bool Bool Bool Int Bool Bool Bool
@@ -67,6 +68,8 @@ instance FromJSON Pristine where
 main :: IO ()
 main = do
   path <- maybe (die "AMOEBIUS_VAULT_PKI_EVIDENCE is required") pure =<< lookupEnv "AMOEBIUS_VAULT_PKI_EVIDENCE"
+  raw <- eitherDecodeFileStrict' path :: IO (Either String Value)
+  either die (verifyObservations path) raw
   decoded <- eitherDecodeFileStrict' path
   either die verify decoded
   putStrLn "vault-pki-live-spec: PASS (retained init/unseal, PKI, direct Kubernetes-auth client, bounded storage)"

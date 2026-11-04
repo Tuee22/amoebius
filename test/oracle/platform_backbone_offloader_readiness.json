@@ -1,0 +1,57 @@
+{
+  "schema": "phase30.independent.offloader-readiness-inputs.v1",
+  "status": "conditional finite readiness cost; no live maxima as inputs; does not amend trigger/cap/paired workload",
+  "sources": [
+    "https://github.com/apache/pulsar/blob/v4.0.6/managed-ledger/src/main/java/org/apache/bookkeeper/mledger/impl/ManagedLedgerImpl.java",
+    "https://github.com/apache/pulsar/blob/v4.0.6/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/MessageDeduplication.java"
+  ],
+  "inputs": {
+    "messages": 11,
+    "payload_bytes_each": 4096,
+    "max_entries_per_ledger": 5,
+    "size_trigger_bytes": 32768,
+    "hot_cap_bytes": 65536,
+    "admitted_per_object_extent_quantum": 1048576,
+    "shared_retained_offload_pair_cap": 128,
+    "conservative_per_entry_serialized_overhead_budget_bytes": 1024
+  },
+  "expected_payload_bytes": 45056,
+  "conditional_serialized_message_envelope": {
+    "maximum_bytes": 56320,
+    "cap_slack_bytes": 9216,
+    "premise": "The1024B per-entry envelope must be independently justified/enforced for actual metadata. It is a design budget, not an observed35-byte header. BK journal/entrylog/control records are additional history."
+  },
+  "nominal_no_early_rollover_case": {
+    "ledger_nonempty_entry_counts": [
+      5,
+      5,
+      1
+    ],
+    "minimum_nonempty_ledgers": 3,
+    "maximum_nonempty_ledgers_under_extra_premise": 3,
+    "maximum_potential_offload_objects": 6,
+    "rounded_object_bytes": 6291456,
+    "extra_premise": "No early age/error/recovery close while publishing; this is not implied by maxEntries5 or the300s producer timeout."
+  },
+  "no_minimum_fill_case": {
+    "maximum_nonempty_ledgers": 11,
+    "maximum_potential_offload_objects": 22,
+    "rounded_object_bytes": 23068672,
+    "basis": "Each nonempty data ledger holds at least one of the11 unique admitted entries; failures/retries/duplicate successful writes require their separate budget."
+  },
+  "creation_history_rule": "ledgerClosed calls createLedgerAfterClosed; a partial tail can age-roll and allocate an empty successor. Reserve at least one empty successor beyond nonempty ledgers, and separately bound failed/reopened generations. Empty successors do not produce offload pairs but do create BK/ZK metadata and controls.",
+  "required_binding": [
+    "Actual automatic offload and independently observed BK deletion, not HTTP readiness alone; use at least one data ledger, not a demanded arbitrary count of all three.",
+    "Retain readiness-topic initial/continuous/final and completion trace, including publication interval and source key/count/extent join.",
+    "Bind the same broker pod UID/container ID/restartCount and unchanged namespace policy to the following positive stream; shared namespace1 bundle explains the intended owner equality but does not waive handoff checks.",
+    "Charge one extra topic MLInfo and namespace-dedup pulsar.dedup cursor plus its data/cursor ledger metadata and session/watch/history effects.",
+    "The100\u00d74096 positive/control payload/rate,32768 trigger and65536 hot cap remain the same.",
+    "An unload/read probe adds a real subscription cursor and can reopen/create more data/cursor ledgers; broker/gateway restarts add sessions/registration/history and retain old physical budgets."
+  ],
+  "unsupported_conclusions": [
+    "ceil(11/5)=3 is not an unconditional maximum ledger count.",
+    "An11-message cap proof does not derive from a live hot maximum or assume35 bytes metadata/entry.",
+    "6MiB or22MiB is an allocation within the existing shared128-pair population, not a new uncharged pool.",
+    "A current complete observed history within4MiB does not itself derive a pre-run bound on all control/retry/erased history."
+  ]
+}

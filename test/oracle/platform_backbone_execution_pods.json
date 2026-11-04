@@ -1,0 +1,735 @@
+{
+  "schema": "phase30.independent.execution-pod-invariant.v1",
+  "provenance": "Independently chosen tiny structural operands and controller counts, authored before core repair. No subject outputs and no CPU/memory/runtime adequacy claims.",
+  "rule": "Each actually emitted Kubernetes Deployment/StatefulSet/DaemonSet/Job instance reserves at least one pod slot. HostProcess may reserve0. Empty expansion may reserve0.",
+  "cases": [
+    {
+      "id": "deployment-zero-pod-denied",
+      "input": {
+        "transition": "FirstDeployment",
+        "units": [
+          {
+            "id": "test/deployment",
+            "revision": 1,
+            "body": {
+              "kind": "Deployment",
+              "replicas": 2,
+              "rollout": "Recreate"
+            },
+            "envelope": {
+              "requests": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "limits": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "headroom": {
+                "cpuMillis": 0,
+                "memoryBytes": 0,
+                "ephemeralBytes": 0,
+                "podSlots": 0
+              }
+            }
+          }
+        ],
+        "available": {
+          "cpuMillis": 2,
+          "memoryBytes": 2,
+          "ephemeralBytes": 2,
+          "podSlots": 2
+        }
+      },
+      "expected": "reject",
+      "expectedEmittedInstances": 2,
+      "expectedPeak": null,
+      "basis": "Every emitted Kubernetes instance is one real pod. Ample supply prevents a shortage from masking a malformed zero-charge declaration."
+    },
+    {
+      "id": "deployment-one-pod-per-instance-fits",
+      "input": {
+        "transition": "FirstDeployment",
+        "units": [
+          {
+            "id": "test/deployment",
+            "revision": 1,
+            "body": {
+              "kind": "Deployment",
+              "replicas": 2,
+              "rollout": "Recreate"
+            },
+            "envelope": {
+              "requests": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 1
+              },
+              "limits": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 1
+              },
+              "headroom": {
+                "cpuMillis": 0,
+                "memoryBytes": 0,
+                "ephemeralBytes": 0,
+                "podSlots": 0
+              }
+            }
+          }
+        ],
+        "available": {
+          "cpuMillis": 2,
+          "memoryBytes": 2,
+          "ephemeralBytes": 2,
+          "podSlots": 2
+        }
+      },
+      "expected": "accept",
+      "expectedEmittedInstances": 2,
+      "expectedPeak": {
+        "cpuMillis": 2,
+        "memoryBytes": 2,
+        "ephemeralBytes": 2,
+        "podSlots": 2
+      },
+      "basis": "Every emitted Kubernetes instance is one real pod. Ample supply prevents a shortage from masking a malformed zero-charge declaration."
+    },
+    {
+      "id": "deployment-zero-instances-zero-pod-legal",
+      "input": {
+        "transition": "FirstDeployment",
+        "units": [
+          {
+            "id": "test/deployment",
+            "revision": 1,
+            "body": {
+              "kind": "Deployment",
+              "replicas": 0,
+              "rollout": "Recreate"
+            },
+            "envelope": {
+              "requests": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "limits": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "headroom": {
+                "cpuMillis": 0,
+                "memoryBytes": 0,
+                "ephemeralBytes": 0,
+                "podSlots": 0
+              }
+            }
+          }
+        ],
+        "available": {
+          "cpuMillis": 0,
+          "memoryBytes": 0,
+          "ephemeralBytes": 0,
+          "podSlots": 0
+        }
+      },
+      "expected": "accept",
+      "expectedEmittedInstances": 0,
+      "expectedPeak": {
+        "cpuMillis": 0,
+        "memoryBytes": 0,
+        "ephemeralBytes": 0,
+        "podSlots": 0
+      },
+      "basis": "No Kubernetes pods are emitted; do not impose an unconditional envelope-wide nonzero-pod rule."
+    },
+    {
+      "id": "statefulset-zero-pod-denied",
+      "input": {
+        "transition": "FirstDeployment",
+        "units": [
+          {
+            "id": "test/statefulset",
+            "revision": 1,
+            "body": {
+              "kind": "StatefulSet",
+              "replicas": 3,
+              "rollout": "OnDelete"
+            },
+            "envelope": {
+              "requests": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "limits": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "headroom": {
+                "cpuMillis": 0,
+                "memoryBytes": 0,
+                "ephemeralBytes": 0,
+                "podSlots": 0
+              }
+            }
+          }
+        ],
+        "available": {
+          "cpuMillis": 3,
+          "memoryBytes": 3,
+          "ephemeralBytes": 3,
+          "podSlots": 3
+        }
+      },
+      "expected": "reject",
+      "expectedEmittedInstances": 3,
+      "expectedPeak": null,
+      "basis": "Every emitted Kubernetes instance is one real pod. Ample supply prevents a shortage from masking a malformed zero-charge declaration."
+    },
+    {
+      "id": "statefulset-one-pod-per-instance-fits",
+      "input": {
+        "transition": "FirstDeployment",
+        "units": [
+          {
+            "id": "test/statefulset",
+            "revision": 1,
+            "body": {
+              "kind": "StatefulSet",
+              "replicas": 3,
+              "rollout": "OnDelete"
+            },
+            "envelope": {
+              "requests": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 1
+              },
+              "limits": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 1
+              },
+              "headroom": {
+                "cpuMillis": 0,
+                "memoryBytes": 0,
+                "ephemeralBytes": 0,
+                "podSlots": 0
+              }
+            }
+          }
+        ],
+        "available": {
+          "cpuMillis": 3,
+          "memoryBytes": 3,
+          "ephemeralBytes": 3,
+          "podSlots": 3
+        }
+      },
+      "expected": "accept",
+      "expectedEmittedInstances": 3,
+      "expectedPeak": {
+        "cpuMillis": 3,
+        "memoryBytes": 3,
+        "ephemeralBytes": 3,
+        "podSlots": 3
+      },
+      "basis": "Every emitted Kubernetes instance is one real pod. Ample supply prevents a shortage from masking a malformed zero-charge declaration."
+    },
+    {
+      "id": "statefulset-zero-instances-zero-pod-legal",
+      "input": {
+        "transition": "FirstDeployment",
+        "units": [
+          {
+            "id": "test/statefulset",
+            "revision": 1,
+            "body": {
+              "kind": "StatefulSet",
+              "replicas": 0,
+              "rollout": "OnDelete"
+            },
+            "envelope": {
+              "requests": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "limits": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "headroom": {
+                "cpuMillis": 0,
+                "memoryBytes": 0,
+                "ephemeralBytes": 0,
+                "podSlots": 0
+              }
+            }
+          }
+        ],
+        "available": {
+          "cpuMillis": 0,
+          "memoryBytes": 0,
+          "ephemeralBytes": 0,
+          "podSlots": 0
+        }
+      },
+      "expected": "accept",
+      "expectedEmittedInstances": 0,
+      "expectedPeak": {
+        "cpuMillis": 0,
+        "memoryBytes": 0,
+        "ephemeralBytes": 0,
+        "podSlots": 0
+      },
+      "basis": "No Kubernetes pods are emitted; do not impose an unconditional envelope-wide nonzero-pod rule."
+    },
+    {
+      "id": "daemonset-zero-pod-denied",
+      "input": {
+        "transition": "FirstDeployment",
+        "units": [
+          {
+            "id": "test/daemonset",
+            "revision": 1,
+            "body": {
+              "kind": "DaemonSet",
+              "slots": [
+                "node-0",
+                "node-1"
+              ],
+              "rollout": "OnDelete"
+            },
+            "envelope": {
+              "requests": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "limits": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "headroom": {
+                "cpuMillis": 0,
+                "memoryBytes": 0,
+                "ephemeralBytes": 0,
+                "podSlots": 0
+              }
+            }
+          }
+        ],
+        "available": {
+          "cpuMillis": 2,
+          "memoryBytes": 2,
+          "ephemeralBytes": 2,
+          "podSlots": 2
+        }
+      },
+      "expected": "reject",
+      "expectedEmittedInstances": 2,
+      "expectedPeak": null,
+      "basis": "Every emitted Kubernetes instance is one real pod. Ample supply prevents a shortage from masking a malformed zero-charge declaration."
+    },
+    {
+      "id": "daemonset-one-pod-per-instance-fits",
+      "input": {
+        "transition": "FirstDeployment",
+        "units": [
+          {
+            "id": "test/daemonset",
+            "revision": 1,
+            "body": {
+              "kind": "DaemonSet",
+              "slots": [
+                "node-0",
+                "node-1"
+              ],
+              "rollout": "OnDelete"
+            },
+            "envelope": {
+              "requests": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 1
+              },
+              "limits": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 1
+              },
+              "headroom": {
+                "cpuMillis": 0,
+                "memoryBytes": 0,
+                "ephemeralBytes": 0,
+                "podSlots": 0
+              }
+            }
+          }
+        ],
+        "available": {
+          "cpuMillis": 2,
+          "memoryBytes": 2,
+          "ephemeralBytes": 2,
+          "podSlots": 2
+        }
+      },
+      "expected": "accept",
+      "expectedEmittedInstances": 2,
+      "expectedPeak": {
+        "cpuMillis": 2,
+        "memoryBytes": 2,
+        "ephemeralBytes": 2,
+        "podSlots": 2
+      },
+      "basis": "Every emitted Kubernetes instance is one real pod. Ample supply prevents a shortage from masking a malformed zero-charge declaration."
+    },
+    {
+      "id": "daemonset-zero-instances-zero-pod-legal",
+      "input": {
+        "transition": "FirstDeployment",
+        "units": [
+          {
+            "id": "test/daemonset",
+            "revision": 1,
+            "body": {
+              "kind": "DaemonSet",
+              "slots": [],
+              "rollout": "OnDelete"
+            },
+            "envelope": {
+              "requests": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "limits": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "headroom": {
+                "cpuMillis": 0,
+                "memoryBytes": 0,
+                "ephemeralBytes": 0,
+                "podSlots": 0
+              }
+            }
+          }
+        ],
+        "available": {
+          "cpuMillis": 0,
+          "memoryBytes": 0,
+          "ephemeralBytes": 0,
+          "podSlots": 0
+        }
+      },
+      "expected": "accept",
+      "expectedEmittedInstances": 0,
+      "expectedPeak": {
+        "cpuMillis": 0,
+        "memoryBytes": 0,
+        "ephemeralBytes": 0,
+        "podSlots": 0
+      },
+      "basis": "No Kubernetes pods are emitted; do not impose an unconditional envelope-wide nonzero-pod rule."
+    },
+    {
+      "id": "job-zero-pod-denied",
+      "input": {
+        "transition": "FirstDeployment",
+        "units": [
+          {
+            "id": "test/job",
+            "revision": 1,
+            "body": {
+              "kind": "Job",
+              "completions": 3,
+              "parallelism": 2,
+              "backoffLimit": 0,
+              "terminalRetentionSeconds": 60
+            },
+            "envelope": {
+              "requests": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "limits": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "headroom": {
+                "cpuMillis": 0,
+                "memoryBytes": 0,
+                "ephemeralBytes": 0,
+                "podSlots": 0
+              }
+            }
+          }
+        ],
+        "available": {
+          "cpuMillis": 2,
+          "memoryBytes": 2,
+          "ephemeralBytes": 2,
+          "podSlots": 2
+        }
+      },
+      "expected": "reject",
+      "expectedEmittedInstances": 2,
+      "expectedPeak": null,
+      "basis": "Every emitted Kubernetes instance is one real pod. Ample supply prevents a shortage from masking a malformed zero-charge declaration."
+    },
+    {
+      "id": "job-one-pod-per-instance-fits",
+      "input": {
+        "transition": "FirstDeployment",
+        "units": [
+          {
+            "id": "test/job",
+            "revision": 1,
+            "body": {
+              "kind": "Job",
+              "completions": 3,
+              "parallelism": 2,
+              "backoffLimit": 0,
+              "terminalRetentionSeconds": 60
+            },
+            "envelope": {
+              "requests": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 1
+              },
+              "limits": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 1
+              },
+              "headroom": {
+                "cpuMillis": 0,
+                "memoryBytes": 0,
+                "ephemeralBytes": 0,
+                "podSlots": 0
+              }
+            }
+          }
+        ],
+        "available": {
+          "cpuMillis": 2,
+          "memoryBytes": 2,
+          "ephemeralBytes": 2,
+          "podSlots": 2
+        }
+      },
+      "expected": "accept",
+      "expectedEmittedInstances": 2,
+      "expectedPeak": {
+        "cpuMillis": 2,
+        "memoryBytes": 2,
+        "ephemeralBytes": 2,
+        "podSlots": 2
+      },
+      "basis": "Every emitted Kubernetes instance is one real pod. Ample supply prevents a shortage from masking a malformed zero-charge declaration."
+    },
+    {
+      "id": "job-zero-instances-zero-pod-legal",
+      "input": {
+        "transition": "FirstDeployment",
+        "units": [
+          {
+            "id": "test/job",
+            "revision": 1,
+            "body": {
+              "kind": "Job",
+              "completions": 0,
+              "parallelism": 1,
+              "backoffLimit": 0,
+              "terminalRetentionSeconds": 60
+            },
+            "envelope": {
+              "requests": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "limits": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "headroom": {
+                "cpuMillis": 0,
+                "memoryBytes": 0,
+                "ephemeralBytes": 0,
+                "podSlots": 0
+              }
+            }
+          }
+        ],
+        "available": {
+          "cpuMillis": 0,
+          "memoryBytes": 0,
+          "ephemeralBytes": 0,
+          "podSlots": 0
+        }
+      },
+      "expected": "accept",
+      "expectedEmittedInstances": 0,
+      "expectedPeak": {
+        "cpuMillis": 0,
+        "memoryBytes": 0,
+        "ephemeralBytes": 0,
+        "podSlots": 0
+      },
+      "basis": "No Kubernetes pods are emitted; do not impose an unconditional envelope-wide nonzero-pod rule."
+    },
+    {
+      "id": "hostprocess-zero-pod-legal",
+      "input": {
+        "transition": "FirstDeployment",
+        "units": [
+          {
+            "id": "test/host",
+            "revision": 1,
+            "body": {
+              "kind": "HostProcess",
+              "slots": [
+                "host-0"
+              ],
+              "replacement": "stop-before-start"
+            },
+            "envelope": {
+              "requests": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "limits": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "headroom": {
+                "cpuMillis": 0,
+                "memoryBytes": 0,
+                "ephemeralBytes": 0,
+                "podSlots": 0
+              }
+            }
+          }
+        ],
+        "available": {
+          "cpuMillis": 1,
+          "memoryBytes": 1,
+          "ephemeralBytes": 1,
+          "podSlots": 0
+        }
+      },
+      "expected": "accept",
+      "expectedEmittedInstances": 1,
+      "expectedPeak": {
+        "cpuMillis": 1,
+        "memoryBytes": 1,
+        "ephemeralBytes": 1,
+        "podSlots": 0
+      },
+      "basis": "A native host process is not a Kubernetes pod."
+    },
+    {
+      "id": "kubernetes-reserved-pod-in-headroom-fits",
+      "input": {
+        "transition": "FirstDeployment",
+        "units": [
+          {
+            "id": "test/padded",
+            "revision": 1,
+            "body": {
+              "kind": "StatefulSet",
+              "replicas": 1,
+              "rollout": "OnDelete"
+            },
+            "envelope": {
+              "requests": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 0
+              },
+              "limits": {
+                "cpuMillis": 1,
+                "memoryBytes": 1,
+                "ephemeralBytes": 1,
+                "podSlots": 1
+              },
+              "headroom": {
+                "cpuMillis": 0,
+                "memoryBytes": 0,
+                "ephemeralBytes": 0,
+                "podSlots": 1
+              }
+            }
+          }
+        ],
+        "available": {
+          "cpuMillis": 1,
+          "memoryBytes": 1,
+          "ephemeralBytes": 1,
+          "podSlots": 1
+        }
+      },
+      "expected": "accept",
+      "expectedEmittedInstances": 1,
+      "expectedPeak": {
+        "cpuMillis": 1,
+        "memoryBytes": 1,
+        "ephemeralBytes": 1,
+        "podSlots": 1
+      },
+      "basis": "The structural invariant is reserved=requests+headroom>=1 per emitted Kubernetes instance; this case funds one."
+    }
+  ],
+  "adapterRules": [
+    "Call shared provisionExecutionEpochs with FirstDeployment and empty prior inventory; compare literal success/failure, emitted instance count and complete peak vector.",
+    "On each accepted Kubernetes case, inspect every expanded instance and require its reserved podSlots>=1.",
+    "Do not patch only aggregate arithmetic or treat HostProcess as a Kubernetes pod.",
+    "These are structural compatibility checks for current shared code, not a claim earlier phase full gates or seals reran."
+  ]
+}

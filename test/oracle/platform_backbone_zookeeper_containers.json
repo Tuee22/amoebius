@@ -1,0 +1,182 @@
+{
+  "schema": "phase30.independent.zookeeper-container-amendment.v1",
+  "sources": [
+    "https://github.com/apache/pulsar/blob/v4.0.6/pulsar-metadata/src/main/java/org/apache/pulsar/metadata/impl/ZKMetadataStore.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-jute/src/main/resources/zookeeper.jute",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/EphemeralType.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/PrepRequestProcessor.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/DataTree.java"
+  ],
+  "provenance": "Independently authored source/encoding operands. No runtime znode counts, observed maxima or subject output supplies expectations.",
+  "node_kinds": {
+    "Persistent": {
+      "stat_ephemeral_owner": 0
+    },
+    "Container": {
+      "stat_ephemeral_owner": -9223372036854775808
+    },
+    "SessionEphemeral": {
+      "owner_rule": "nonzero actual session ID resolving to declared session; distinguish by explicit kind, not sign alone"
+    }
+  },
+  "root_rule": "The empty serialized root is Persistent with ephemeralOwner0. DataTree new DataNode(data,-1L,new StatPersisted()) has ACL ID -1, not ephemeral owner -1. Container identity is not a session. Both persistent and container parents can have children.",
+  "acl": {
+    "id": 0,
+    "entries": [
+      {
+        "perms": 31,
+        "scheme": "world",
+        "identity": "anyone"
+      }
+    ],
+    "expected_entry_bytes": 23,
+    "expected_cache_bytes": 39
+  },
+  "node_cases": [
+    {
+      "id": "root",
+      "kind": "Persistent",
+      "serialized_path": "",
+      "data_bytes": 0,
+      "acl_id": -1,
+      "ephemeral_owner": 0,
+      "expected_wire_bytes": 76
+    },
+    {
+      "id": "container-parent",
+      "kind": "Container",
+      "serialized_path": "/a",
+      "data_bytes": 0,
+      "acl_id": 0,
+      "ephemeral_owner": -9223372036854775808,
+      "expected_wire_bytes": 78
+    },
+    {
+      "id": "persistent-child",
+      "kind": "Persistent",
+      "serialized_path": "/a/b",
+      "data_bytes": 3,
+      "acl_id": 0,
+      "ephemeral_owner": 0,
+      "expected_wire_bytes": 83
+    },
+    {
+      "id": "session-child",
+      "kind": "SessionEphemeral",
+      "serialized_path": "/a/e",
+      "data_bytes": 1,
+      "acl_id": 0,
+      "ephemeral_owner": 7,
+      "expected_wire_bytes": 81
+    }
+  ],
+  "snapshot_cases": [
+    {
+      "id": "container-can-own-persistent-child",
+      "nodes": [
+        "root",
+        "container-parent",
+        "persistent-child"
+      ],
+      "sessions": [],
+      "expected_base_bytes": 314,
+      "expected_digest_and_last_zxid_bytes": 368
+    },
+    {
+      "id": "container-can-own-session-child",
+      "nodes": [
+        "root",
+        "container-parent",
+        "persistent-child",
+        "session-child"
+      ],
+      "sessions": [
+        {
+          "id": 7,
+          "timeout": 30000
+        }
+      ],
+      "expected_base_bytes": 407,
+      "expected_digest_and_last_zxid_bytes": 461
+    }
+  ],
+  "transaction_cases": [
+    {
+      "id": "create-container-unit",
+      "operation": "CreateContainer",
+      "path": "/a",
+      "data_bytes": 3,
+      "acls": "world-anyone",
+      "expected_body_bytes": 44,
+      "expected_without_digest": 89,
+      "expected_with_digest": 101
+    },
+    {
+      "id": "create-empty-container-parent",
+      "operation": "CreateContainer",
+      "path": "/a",
+      "data_bytes": 0,
+      "acls": "world-anyone",
+      "expected_body_bytes": 41,
+      "expected_without_digest": 86,
+      "expected_with_digest": 98
+    },
+    {
+      "id": "delete-empty-container",
+      "operation": "DeleteContainer",
+      "path": "/a",
+      "expected_body_bytes": 6,
+      "expected_without_digest": 51,
+      "expected_with_digest": 63,
+      "encoding": "DeleteTxn body, distinct deleteContainer opcode"
+    },
+    {
+      "id": "close-session-only-true-ephemerals",
+      "operation": "CloseSessionWithPaths",
+      "paths": [
+        "/a/e"
+      ],
+      "expected_body_bytes": 12,
+      "expected_without_digest": 57,
+      "expected_with_digest": 69
+    }
+  ],
+  "rejections": [
+    {
+      "id": "container-masquerades-as-session",
+      "change": "Container kind with owner7",
+      "expected": "reject"
+    },
+    {
+      "id": "session-masquerades-as-container",
+      "change": "SessionEphemeral kind with ownerLong.MIN_VALUE and no real owning session",
+      "expected": "reject"
+    },
+    {
+      "id": "normal-ephemeral-has-child",
+      "change": "Parent /a kind SessionEphemeral owner7 with child /a/b",
+      "expected": "reject"
+    },
+    {
+      "id": "negative-root-owner-is-not-acl",
+      "change": "Root ephemeralOwner-1",
+      "expected": "reject"
+    },
+    {
+      "id": "container-root-is-not-standard-root",
+      "change": "Root kind Container ownerLong.MIN_VALUE",
+      "expected": "reject"
+    },
+    {
+      "id": "ttl-not-enabled-in-selected-profile",
+      "change": "TTL node/transaction",
+      "expected": "reject",
+      "basis": "No CreateOption TTL is emitted by selected Pulsar ZKMetadataStore; zookeeper.extendedTypesEnabled defaultsfalse and current manifest does not enable it."
+    }
+  ],
+  "reached_scope": {
+    "required": "Container create/owner and internal DeleteContainer are reached through real parent creation and ZooKeeper container cleanup. Preserve the ordinary Create/SetData/Delete/session/Error/Multi arms already approved.",
+    "not_established": "TTL, reconfig, or other future producer operations are not established as reached by this finite manifest. Do not silently accept a TTL owner as a session or charge a container as an ownerless ephemeral.",
+    "bounds_open": "Actual class paths, payloads, current counts, lifecycle/rate/history/generation and session/watch bounds remain separate required premises."
+  }
+}

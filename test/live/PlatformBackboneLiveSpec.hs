@@ -2,10 +2,12 @@
 
 module Main (main) where
 
-import Control.Monad (unless)
-import Data.Aeson (FromJSON, Result (Error, Success), Value (Object), eitherDecodeFileStrict', fromJSON)
+import Control.Monad (foldM, unless)
+import Data.Aeson (FromJSON, Result (Error, Success), Value (Object), eitherDecodeFileStrict', fromJSON, toJSON)
 import Data.Aeson.Key (Key)
+import Data.Aeson.Key qualified as Key
 import Data.Aeson.KeyMap qualified as KeyMap
+import Data.List (find, nub)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import System.Environment (lookupEnv)
@@ -32,6 +34,8 @@ verify expectedDigest evidence = do
   equal ["artifactSource", "publicPulls"] (0 :: Int)
   equal ["artifactSource", "pullEvents", "observer"] ("kind-node-containerd-log-window" :: Text)
   equal ["artifactSource", "pullEvents", "publicPullEventCount"] (0 :: Int)
+  equal ["artifactSource", "pullEvents", "logSource"] ("systemd-containerd-journal" :: Text)
+  positive ["artifactSource", "pullEvents", "windowMessageCount"]
   true ["loadBalancer", "externallyReachable"]
   atLeast ["loadBalancer", "stableReadyObservations"] 5
   equal ["metallb", "controller"] ("Ready" :: Text)
@@ -43,6 +47,9 @@ verify expectedDigest evidence = do
   equal ["registryRehome", "backend"] ("s3" :: Text)
   true ["registryRehome", "migration", "verified"]
   true ["registryRehome", "sourceHashStable"]
+  true ["registryRehome", "postCutoverByteIdentical"]
+  equal ["registryRehome", "postCutoverBytes"] (4096 :: Int)
+  verifyExtendedStorageEvidence expectedDigest evidence
   equal ["pulsar", "zookeeper", "replicas"] (3 :: Int)
   equal ["pulsar", "zookeeper", "readyPods"] (3 :: Int)
   equal ["pulsar", "bookkeeper", "replicas"] (3 :: Int)
@@ -68,7 +75,10 @@ verify expectedDigest evidence = do
   contains ["pulsar", "drill", "producerOutputMarker"] "100 messages successfully produced"
   false ["pulsar", "drill", "offload", "timeOnly"]
   true ["pulsar", "drill", "offload", "bounded"]
-  equal ["pulsar", "drill", "offload", "configuredSizeTriggerBytes"] (65536 :: Integer)
+  -- The committed cap includes the active ledger and asynchronous transition;
+  -- the intended size trigger reserves half of it as rollover headroom.
+  equal ["pulsar", "drill", "offload", "configuredSizeTriggerBytes"] (32768 :: Integer)
+  true ["pulsar", "drill", "offload", "freshPayloadObservedInS3"]
   positive ["pulsar", "drill", "offload", "objectCount"]
   cap <- get ["pulsar", "drill", "offload", "hotTierCapBytes"] evidence
   hot <- get ["pulsar", "drill", "offload", "hotTierBytes"] evidence
@@ -109,6 +119,55 @@ verify expectedDigest evidence = do
   contains path needle = do
     actual <- get path evidence
     unless (needle `Text.isInfixOf` (actual :: Text)) (Left (showPath path <> ": marker absent"))
+
+verifyExtendedStorageEvidence :: Text -> Value -> Either String ()
+verifyExtendedStorageEvidence expectedDigest evidence = do
+  expected <- get ["storageProvision", "registry", "objectSet"] evidence
+  objects <- case expected of Object values | KeyMap.size values >= 5 -> Right values; _ -> Left "complete image inventory missing"
+  check ["storageProvision", "registry", "indexDigest"] expectedDigest
+  mapM_ (\side -> do
+    rows <- get ["registryRehome", side, "objects"] evidence
+    actual <- foldM insertDigest KeyMap.empty (rows :: [Value])
+    unless (actual == objects) (Left "registry pull omitted or changed a Phase-25 object")
+    check ["registryRehome", side, "indexDigest"] expectedDigest) ["sourcePull", "targetPull"]
+  check ["registryRehome", "migration", "fullNativeRenderMatch"] True
+  check ["registryRehome", "migration", "streamBufferBytes"] (65536 :: Int)
+  check ["registryRehome", "verifyFailure", "reason"] ("transfer-target-digest-mismatch" :: Text)
+  check ["registryRehome", "verifyFailure", "sourceRoutePreserved"] True
+  check ["registryRehome", "verifyFailure", "partialTargetBytesRetained"] (71 :: Int)
+  check ["registryRehome", "verifyFailure", "fullNativeRenderMatch"] True
+  check ["registryRehome", "route", "atomicServiceSelectorUpdate"] True
+  check ["storageIndependentObservation", "independentArithmeticMatch"] True
+  check ["storageIndependentObservation", "physicalObservation", "distinctFilesystems"] (16 :: Int)
+  raw <- get ["storageIndependentObservation", "physicalObservation", "volumes"] evidence :: Either String [Value]
+  devices <- traverse (get ["filesystemDevice"]) raw :: Either String [Integer]
+  unless (length raw == 16 && length (nub devices) == 16) (Left "retained filesystems are incomplete or aliased")
+  claims <- get ["storageProvision", "volumes"] evidence :: Either String [Value]
+  mapM_ (checkClaim raw) claims
+  required <- get ["storageProvision", "physicalPoolRawBytes"] evidence :: Either String Integer
+  allocated <- get ["storageIndependentObservation", "physicalObservation", "physicalPoolAllocatedBytes"] evidence
+  unless (allocated >= required) (Left "parent pool is sparse or underallocated")
+  check ["executionAdmission", "oneUnitShortReasons"] (["CpuAxis", "MemoryAxis", "EphemeralStorageAxis", "PodSlotsAxis"] :: [Text])
+ where
+  check :: (Eq value, FromJSON value) => [Key] -> value -> Either String ()
+  check path expected = do
+    actual <- get path evidence
+    unless (actual == expected) (Left (showPath path <> ": extended provision mismatch"))
+  insertDigest found row = do
+    identity <- get ["digest"] row :: Either String Text
+    bytes <- get ["bytes"] row :: Either String Integer
+    unless (bytes > 0 && not (KeyMap.member (Key.fromText identity) found)) (Left "invalid or duplicate pulled object")
+    pure (KeyMap.insert (Key.fromText identity) (toJSON bytes) found)
+  checkClaim raw claim = do
+    name <- get ["name"] claim :: Either String Text
+    observed <- maybe (Left "retained claim observation missing") Right (find (\row -> get ["name"] row == Right name) raw)
+    requiredRaw <- get ["rawBytes"] claim :: Either String Integer
+    requiredUsable <- get ["requiredUsableBytes"] claim :: Either String Integer
+    actualRaw <- get ["rawBytes"] observed
+    allocated <- get ["allocatedBytes"] observed
+    usable <- get ["filesystemCapacityBytes"] observed
+    unless (actualRaw == requiredRaw && allocated >= requiredRaw && usable >= requiredUsable)
+      (Left "physical retained claim does not fit its uniform native provision")
 
 get :: FromJSON value => [Key] -> Value -> Either String value
 get path value = do

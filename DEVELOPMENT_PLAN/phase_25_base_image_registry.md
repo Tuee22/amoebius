@@ -31,9 +31,9 @@ All four sprints and the complete Phase-25 Register-3 gate are sealed.
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 25.1: Multi-arch base image bake — services + jit-build resolver/toolchain, not engine payloads ✅](#sprint-251-multi-arch-base-image-bake--services--jit-build-resolvertoolchain-not-engine-payloads-)
-- [Sprint 25.2: Node side-load + the single-binary `distribution` registry standup 🧪](#sprint-252-node-side-load--the-single-binary-distribution-registry-standup-)
-- [Sprint 25.3: Atomic multi-arch publication + immutable digest-pinned refs ⏸️](#sprint-253-atomic-multi-arch-publication--immutable-digest-pinned-refs-)
-- [Sprint 25.4: The no-public-registry-pull gate ⏸️](#sprint-254-the-no-public-registry-pull-gate-)
+- [Sprint 25.2: Node side-load + the single-binary `distribution` registry standup ✅](#sprint-252-node-side-load--the-single-binary-distribution-registry-standup-)
+- [Sprint 25.3: Atomic multi-arch publication + immutable digest-pinned refs ✅](#sprint-253-atomic-multi-arch-publication--immutable-digest-pinned-refs-)
+- [Sprint 25.4: The no-public-registry-pull gate ✅](#sprint-254-the-no-public-registry-pull-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,11 +41,21 @@ All four sprints and the complete Phase-25 Register-3 gate are sealed.
 
 ## Phase Status
 
-🧪 Live-proof pending — paused by request on 2026-08-16. The typed catalog now verifies Pulsar's companion archive, installs its NARs beneath `/pulsar/offloaders`, requires the jcloud NAR in both OCI children, and rejects the missing-payload mutant. The complete live gate has not sealed the amended successor handoff.
+✅ Done — resealed 2026-11-02 by `python3 tools/base_image_registry_gate.py --execute`, using its supported contained compiler-cache option. Run `20261102T205957Z` passes all 12 sides against 1,984 authored files, with all 15 mutants red, all 16 metrics equal, and all 42 surfaces joined. Attestation: `sha256:d03bd88db26edd973c3f437413471e527de22aabb3c606c3eceed2eead602522`.
 
-**Most complete diagnostic run:** `20260816T180210Z` built and probed both architectures, passed the OCI companion-file oracle and Sprint 25.1 gate, then side-loaded the exact artifact and stood the registry up. The Sprint 25.2 gate stopped before writing its receipt because documentation lint found the Phase Status section one prose line over budget. That standards defect is fixed, but Sprints 25.2–25.4 and the phase remain unsealed.
+**Acquisition amendment — 2026-11-02:** intended expectations preceded matching catalog changes and came from both-architecture publisher metadata. Ubuntu package pins were refreshed; MinIO keeps its version and official-artifact rung through the publisher's GitHub release. The user explicitly delegated evaluation and both decisions to the assistant, which accepted them against independent publisher indexes, downloaded checksums, and architecture probes. This records assistant review under that user direction; the reasons and provenance are beside the oracles.
 
-**Paused retry:** `20260816T191417Z` passed toolchain, oracle, static, and ladder checks before the requested pause interrupted warm build-product preparation. Its private daemon had already stopped, so cleanup removed the exact orphaned shim and marker-owned test run manually. Post-cleanup inventory found no external path, project firewall rule, loop device, mount, network link, container, or volume.
+**Live proof — 2026-11-02:** both architectures build and execute the complete inventory, including Pulsar's offloader NARs. All four sprints seal against one index. The 3,876,670,464-byte OCI handoff remains in the run bundle for numeric successors. Physical backings, private daemons, cluster, and captures were removed; `cleanup.left_resources=false`, the outside-host inventory is unchanged, and no authored path changed during the gate. Postflight free space is 125 GiB. Phase 26 may now revalidate; the requested cutoff remains before Phase 51.
+
+**Historical resumption checks — 2026-10-31:** the contained index, dependency build, Haskell specification with 13 mutants, and all 23 Python image tests passed. Shared-parent rejection, exact-fit allocation, missing output paths, readiness retries, and unreturned-engine cleanup were covered. Live 32 MiB backing and private-engine lifecycle probes passed with clean teardown; complete acceptance still awaited physical capacity at that point.
+
+**Resumption diagnostic — 2026-10-30:** the acceptance command passed toolchain and oracle checks, then failed because the fresh contained Cabal cache had no Hackage index. The gate now refreshes that index before solving. The 16 Python image tests and the 22-binary catalog reconciliation pass independently; the Haskell battery and all live checks remain UNVERIFIED in this checkout. The failed run's containment and authored-root write guard passed.
+
+**Capacity proven — 2026-11-02:** the gate physically reserved 40 GiB scratch and 22 GiB cache backing files for the catalog's 32 GiB and 20 GiB usable carves. The complete bake, ENOSPC controls, publication, and cleanup passed on those backings. Earlier interrupted retries retained only their contained compiler cache.
+
+**Historical diagnostic run:** `20260816T180210Z` built and probed both architectures and stood the registry up. Its Sprint 25.2 receipt was prevented by a documentation-line-budget defect, subsequently corrected; the 2026-11-02 run supplies the complete replacement proof.
+
+**Historical paused retry:** `20260816T191417Z` passed toolchain, oracle, static, and ladder checks before the requested pause interrupted build-product preparation. Exact-run cleanup left no external resource.
 
 **Superseded containment seal:** attestation `sha256:e6ff9163d299b66b8ce77c216d5114e13af6fe4beb7e299834ee390e9963816a`. `python3 tools/base_image_registry_gate.py --execute` passed all **12** recorded sides against the 1,970-file source snapshot `sha256:a674ea18bbdd8f8b66c87407a90938fcfddf1ce261a9bf9f9e241b0de8801434`. The run built and probed both architectures, retained the 3,278,246,912-byte successor handoff under its `.build/runs/phase_25/**` bundle, and published index `sha256:4d8891f619fc26276288b3bc7f3586750f81dbb59b9b40b93e3149f4c4666dcd`. All 14 mutants reddened, all 15 metrics matched, and all 40 surfaces joined. Build/cache/evidence bytes stayed under `.build/**`; the private daemon, containerd, cluster, finite backing filesystems, and captures stayed in one marker-owned `.test_data/**` run. Cleanup removed that run, and the immutable record reports every check `pass` with `cleanup.left_resources=false`; the outside-host inventory remained empty.
 
@@ -72,12 +82,9 @@ image was already resident, so "the cluster pulls only from itself" rested on an
 by hand. `phase25_registry_standup.py` imports this run's export by digest, inside the packet-capture window,
 and discards the archive's own wrapper index so exactly one digest-pinned name resolves.
 
-*Two more fixed paths were still deciding runs.* `tools/base_image_registry_bootstrap_preflight.py` and
-`tools/base_image_registry_publish.py` each named the OCI export as a module constant, so whichever archive was
-last left at that path would have been admitted and published no matter which one the run built; both are now
-caller-supplied. The preflight's "already resident" check named a `:phase25` tag **nothing in the flow ever
-creates** — a check that could not fire — and now names the digest-pinned reference the side-load creates and
-a Deployment carries.
+*Run-bound archive inputs.* Bootstrap preflight and publication now take the OCI export as an argument,
+replacing fixed module paths. The preflight checks the side-load's digest-pinned reference instead of the
+never-created `:phase25` tag, so its already-resident refusal can fire.
 
 *The standup named a binary the amendment had removed.* Its Deployment ran `/usr/bin/registry`, which is what
 the scavenged `registry:2` image installed; the archive's `docker-registry` package installs
@@ -108,11 +115,8 @@ never had a row for it, which was the correct expectation rather than a gap in t
 oracle now records why the absence is the answer. `g++` stays: it is in the archive on both arches, so it
 reaches rung 1 without a CUDA base.
 
-*Every rung was verified against the thing it acquires from, not recalled.* The seven apt rungs were installed
-at their exact pinned versions in a real `ubuntu:24.04` container on **both** arches and each binary run —
-`docker-registry` 2.8.2, `redis-server`/`redis-cli` 7.0.15, `postgres` 16.14, `patroni` 3.2.2, `java` 21.0.11,
-`g++` 13.3.0, identical on amd64 and arm64 — and all eighteen rung-2 asset and manifest URLs return 200 on
-both.
+*Historical acquisition checks.* The seven apt rungs were installed and executed in `ubuntu:24.04` on both
+architectures; all eighteen rung-2 asset and manifest URLs were reachable during that diagnostic run.
 
 *The oracle is re-authored around what a rung actually names.* `sourceImage`/`sourceDigest` could only describe
 the scavenge rung. They become `acquisition` and `integrity`: the exact archive package, the publisher's
@@ -292,11 +296,16 @@ in [Gate integrity](#gate-integrity). A self-emitted compliance trace cannot sat
 ### Repository-containment criteria
 
 The build uses a project-scoped container engine. Its data/exec roots, socket, containerd namespaces,
-volumes, finite sparse backing disks, and kubeconfig live below the gate's marker-owned
+volumes, finite physically reserved backing disks, and kubeconfig live below the gate's marker-owned
 `.test_data/runs/<run-id>/**` root; build cache, mounted scratch workspace, OCI export, packet capture, and
 evidence live below `.build/**`. The gate
 rejects the host-global daemon and proves no `/tmp`, `/var/tmp`, `/var/lib`, or user-home artifact, mount,
 loop device, container, volume, or cache exists after teardown.
+
+The backing files' combined demand must fit their shared parent filesystem before any disk or loop device
+is created. Each file reserves its physical blocks before attachment, and formatting/mounting disables
+discard so that the reservation survives. A shared-parent shortfall rejects with
+`finite-build-backings-capacity`; the paired exact-fit check observes allocated blocks before attachment.
 
 **Acquisition-arm criteria — added 2026-08-13.** The bake gate additionally proves, per baked binary, that its
 catalog step names the highest applicable rung: an `apt` package where one exists, otherwise an
@@ -526,17 +535,17 @@ flowchart LR
   s2 -->|"produces what the next consumes"| s3
   s3 -->|"the last seam the gate closes over"| gate
 ```
-*Orientation. The seams Phase 25 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Sprint 25.1 is sealed; the later sprints remain open at the requested pause.*
+*Orientation. The seams Phase 25 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. All four sprints resealed in the complete 2026-11-02 run.*
 
 ## Sprint 25.1: Multi-arch base image bake — services + jit-build resolver/toolchain, not engine payloads ✅
 
-**Status**: Done — diagnostic run `20260816T180210Z` completed the amended dual-architecture bake, executed the
-binary probes, proved the companion NAR in both OCI children, reddened the omission mutant, and retained the
-Sprint 25.1 receipt. The phase remains open because later sprint receipts were not completed.
+**Status**: Done — resealed 2026-11-02 in run `20261102T205957Z`; both architectures execute the inventory,
+the offloader payloads are present, and physical reservation, cgroup, ENOSPC, and mutation controls pass.
 **Implementation**: `dhall/amoebius/BakeCatalog.dhall`, `src/Amoebius/Image/BakeInventory.hs`,
 `src/Amoebius/Image/RenderDockerfile.hs`, `src/Amoebius/Image/Build.hs` plus `BuildAdmission.hs`,
 `BuildRuntime.hs`, `Artifact.hs`, and `Resolver.hs`, with the consolidated gate and its independent
-OCI/SBOM/execution/cgroup/ENOSPC/mutation probes under `tools/base_image_registry_*.py` — all built and validated.
+OCI/SBOM/execution/cgroup/ENOSPC/mutation probes under `tools/base_image_registry_*.py`.
+`tools/project_container_engine.py` reserves the backing files; `test/spec/image/` covers their capacity boundary.
 **Blocked by**: none; the amended Phase-24 gate is sealed.
 **Independent Validation**: `docker buildx imagetools inspect <tag>` lists both
 `linux/amd64` and `linux/arm64` under one manifest list; a bake-inventory lint asserts the image contains
@@ -675,18 +684,18 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
    monocontainer/base-image digest. The omit/version-skew/public-image mutants fail for their specific reasons.
 
 ### Remaining Work
-None. Sprint 25.2 consumes this sprint's audited OCI artifact when the full phase run resumes.
+None. The 2026-11-02 receipt seals the dual-architecture bake on physically reserved backings.
+Sprint 25.2 consumes that same run's audited OCI artifact.
 
-## Sprint 25.2: Node side-load + the single-binary `distribution` registry standup 🧪
+## Sprint 25.2: Node side-load + the single-binary `distribution` registry standup ✅
 
-**Status**: Live-proof pending — the amended artifact was side-loaded and its registry stood up in diagnostic
-run `20260816T180210Z`, but the sprint gate stopped at documentation lint before writing its receipt. The lint
-defect is fixed; a fresh uninterrupted phase run must repeat and seal this transition.
+**Status**: Done — resealed 2026-11-02 in run `20261102T205957Z`; the exact artifact is side-loaded and
+the registry starts with zero public-registry connections in the observed window.
 **Implementation**: `src/Amoebius/Image/{NodeLoad,Registry,BootstrapRegistry}.hs` (pure
 bootstrap provision, snapshot validation, and the typed side-load/object-initialize action); package-private
 `src/Amoebius/Manifest/Render.hs` supplies the same source serializer Phase 13 uses; live admission/import/
 standup and OS-boundary observation are implemented by `tools/base_image_registry_{bootstrap_preflight,standup}.py`.
-**Blocked by**: none; Sprint 25.1 and the amended Phase-24 gate are sealed.
+**Blocked by**: none; Sprint 25.1 is sealed against the physically backed bake.
 **Independent Validation**: a read-only snapshot preflight admits the whole import, registry, and
 mutation-proxy transition before anything is imported, mints one single-use `BootstrapRegistryAction` for the
 exact provisioned object domain, and leaves every one-field negative with zero imports and zero apiserver
@@ -793,19 +802,18 @@ whole-deployment spec and creates no public service-render boundary.
    registries), recorded for the Sprint 25.4 gate — never from a self-emitted compliance trace.
 
 ### Remaining Work
-Repeat the side-load and registry standup in the uninterrupted phase run, then pass the Sprint 25.2 gate and
-retain its receipt. Atomic publication remains exclusively Sprint 25.3 work. The MinIO-backed backend is
+None. Side-load, registry standup, and the Sprint 25.2 gate seal in the complete 2026-11-02 run.
+Atomic publication remains exclusively Sprint 25.3 work. The MinIO-backed backend is
 Phase 30's, and Phase 26 owns adoption of these objects through the one-time typed handoff.
 
-## Sprint 25.3: Atomic multi-arch publication + immutable digest-pinned refs ⏸️
+## Sprint 25.3: Atomic multi-arch publication + immutable digest-pinned refs ✅
 
-**Status**: Blocked by Sprint 25.2's amended standup; the prior capability record is historical. Previously the fault-injected
-one-arch push left the tag un-advertised at the registry API and the exact fit published once, recorded in
-`sprint-25.3-receipt.json` in that run's bundle.
+**Status**: Done — resealed 2026-11-02 in run `20261102T205957Z`; the one-architecture fault leaves the
+tag un-advertised, the full index publishes atomically, and its immediate rerun makes zero mutating requests.
 **Implementation**: `src/Amoebius/Image/Publish.hs`, `src/Amoebius/Image/Ref.hs` (the
 snapshot-bound single-advertisement publisher + immutable, source/content-derived ref scheme), with the live
 OCI protocol/fault/access-log harness in `tools/base_image_registry_publish.py`.
-**Blocked by**: none; Sprint 25.2 is sealed.
+**Blocked by**: none; Sprint 25.2 is sealed against the amended artifact.
 **Independent Validation**: publication is atomic at the registry boundary — a fault-injected one-arch push
 leaves the tag un-advertised in the registry's own HTTP API, an exact fit publishes once, and the second run
 makes zero mutating requests — and no rejection path touches storage. The numbered Validation list below
@@ -861,17 +869,16 @@ not capacity admission.
    manifest list lands — turns Validation 2 red (§M.2).
 
 ### Remaining Work
-Revalidate atomic publication of the amended handoff. Sprint 25.4 consumes this run's immutable digest reference and the standup/publication OS-boundary
-captures, and installs the enforcing deny boundary the paired canaries prove.
+None. Atomic publication of the amended handoff seals in the 2026-11-02 run. Sprint 25.4 consumes
+that run's immutable reference and boundary captures, then exercises the paired canaries under enforcement.
 
-## Sprint 25.4: The no-public-registry-pull gate ⏸️
+## Sprint 25.4: The no-public-registry-pull gate ✅
 
-**Status**: Blocked by Sprint 25.3's amended publication; the prior capability record is historical. Previously under the enforced
-node-level denial the canary failed `ImagePull` while the in-cluster pull succeeded, recorded in
-`sprint-25.4-receipt.json` in that run's bundle.
+**Status**: Done — resealed 2026-11-02 in run `20261102T205957Z`; the public canary fails under the enforced
+node boundary while the in-cluster pull succeeds, with firewall drops and the independent observer recorded.
 **Implementation**: `src/Amoebius/Image/Gate.hs`, `tools/base_image_registry_private_pull.py`, and
 `tools/base_image_registry_private_pull_gate.py`.
-**Blocked by**: none; Sprint 25.3 is sealed.
+**Blocked by**: none; Sprint 25.3 is sealed against the amended publication.
 **Independent Validation**: under one enforced node-level egress denial the whole flow stands up, publishes,
 and resolves both arches with zero public-registry requests read at the OS boundary, while the paired
 public-image canary fails `ImagePull` — the negative control that proves the denial is enforced rather than
@@ -916,7 +923,7 @@ later reconciler-owned rendering (Phase 26) and the MinIO-backed blob store (Pha
    Validation 2's negative-control assertion red (§M.2).
 
 ### Remaining Work
-Revalidate the no-public-pull boundary and seal the amended handoff. The receipt and the acceptance ledger are written into `.build/runs/phase_25/<run-id>/`, the bundle is
+None in this phase. The amended no-public-pull boundary seals in the 2026-11-02 run. Its receipt and acceptance ledger are retained under `.build/runs/phase_25/<run-id>/`; the bundle is
 externally attested against the run's source snapshot, and the gate ran after Phase 24 closed. The later
 reconciler-owned rendering correspondence and MinIO-backed registry storage correspondence remain
 `UNVERIFIED` and are owned by Phases 26 and 30 respectively.

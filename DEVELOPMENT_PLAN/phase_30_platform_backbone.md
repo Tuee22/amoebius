@@ -21,7 +21,7 @@ The complete gate passed on 2026-08-10.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/migration_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/migration_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -42,35 +42,150 @@ The complete gate passed on 2026-08-10.
 
 ## Phase Status
 
-⏸️ Blocked — Phase 30's 2026-08-16 live validation proved that the Phase-25 image omitted Pulsar's separately published S3 offloader bundle. Phase 25 is reopened; Phases 26–29 must be revalidated in numerical order before this phase resumes. The registry executable correction and private-fixture containment hardening remain implemented.
+🔄 Active — resumed 2026-11-03 after Phase29 resealed as
+`sha256:aa8cd69d910d376b74852e30608db5df3115d9bbba044c1bf31900824bdc53be`.
+Phases25–29 are sealed in numerical order. Phase31 stays blocked until the complete amended Phase30 gate
+passes. Earlier2026-08-10 completion claims were invalidated by artifact-hygiene and coverage gaps.
+No sprint closure or Phase30 seal is claimed.
 
-**Superseded active record:** opened 2026-08-16 after the amended Phase-29 Vault/PKI gate sealed as
-`sha256:4f029c9f8fe3fa35da3da2cd1a6b94cdc7f2d2a808a821540d290848d6130dcb`.
-The current work audits and migrates the backbone gate in sprint order, dynamically consumes the verified
-Phase-25 image handoff and exact Phase-29 predecessor, confines every generated/live byte to `.build/**` or
-the marker-owned `.test_data/**` run, and reruns the full Register-3 contract before Phase 31 opens.
+**2026-11-04 — durable metadata reservation:** the separate store passes32API/lock/alias cases, ten
+exception/process-exit checks, twelve malformed wires and four literal encodings. It requires exclusive fresh
+initialization and matching restart policy, and poisons its handle after an uncertain persistence error.
+Independent review and syscall tracing verify file/parent/directory sync and lifetime locking. All62backbone
+host checks pass. The private additive3MiB witness passes22storage boundaries and nine schema bounds.
+A coordinated parent understatement goes red before repair and passes afterward. Native StoragePlan now retains
+the complete privately derived parent/budget witness; independent real-handoff comparison and14reader
+corruptions pass at8MiB usable with unchanged64MiB raw and parent total. Sampled whole-filesystem growth is observed
+from an empty pre-writer baseline, including unlinked/control allocation. Independent integration review passes. The first8MiB diagnostic passes transfer and all three initial
+snapshots, then rejects the REST owner hostname because its reader expected a different service suffix.
+The reader now requires the actual rendered broker-headless name; both owners, body-preserving redirects
+and ten hostile redirects pass. Cleanup succeeds. The next8MiB run passes readiness and the250sample positive at61,965bytes against
+65,536, with the245sample time-only control reaching413,100. It stops at restart-debt validation because
+the gateway strips digits from the backend hash-mismatch code. The repaired bounded alphanumeric filter
+passes ten native code/fallback cases and the complete focused native suite; a fresh run is started. Raw
+census/file consistency is rechecked separately without independent device, current-state or complete-history
+credit. The preceding5MiB
+run exposed TCP readiness before snapshot.0. A bounded180-second pre-client wait preserves the742-byte
+parse/provenance contract; five startup checks and ten independent deadline/before/after cases pass.
 
-**Pre-containment status record (invalidated where it claims completion):**
+**2026-11-03 — current validation:** all33 independent Distribution DeleteObjects cases and the focused
+native suite pass. The exact packaged AWS SDK emits Quiet before or after its Object group; the parser now
+accepts either order once, preserving16keys/512key bytes/65,536body bytes and complete-document validation.
+Every extracted key is checked before one backend delete. The next fresh diagnostic adds a mixed
+owned/foreign bulk request, precise scope denial and independent own-object preservation/foreign absence.
+The preceding replacement run passes physical fit, Vault, application boundaries and all84 canonical
+transfers, then rejects this source-supported XML ordering. Cleanup completes without failures. An earlier
+host reboot interrupted preallocation; its exact marker-owned abandoned root was removed after verifying
+that no owned runner or mounts remained. The next diagnostic passes the complete registry transfer and post-cutover upload, then stops at66,096
+positive hot bytes against the unchanged65,536-byte cap after separate readiness completes. Its precreated
+empty positive ledger has aged past the one-minute maximum rollover time; the first message closes a
+one-entry ledger, and offloaded-but-present bytes remain charged. The census also rejects the source's
+16-byte header beyond its16MiB preallocation quantum. The independently reviewed fixes select16380KiB preallocation and create the positive topic only after
+readiness; first-write age must be observed below60seconds. All11padding cases and native rendering pass;
+no maximum is raised. The next run passes the smaller preallocation and captures all three source-derived initial snapshots.
+Its first-write guard correctly stops before publication after slow CLI setup consumes the freshness window.
+Source-backed bounded REST create/lookup and earlier policy checks now remove that setup delay; the deadline,
+stream, trigger and cap stay unchanged. The census also exposed nullable transaction digests: nine independent
+records, two mixed logs, nine strict negatives and prefix replay now pass. All38backbone host tests pass.
+Captured current log parsing succeeds, without complete-history credit. Cleanup completes without failures. The next diagnostic is prepared with these fixes; these runs supply no gate seal.
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
+The metadata-member constructor now joins each actual expanded executor, ordinal/pod, reserved resource
+vector, PVC/template, distinct backing and parent debit. All37 independent three/five-member cases pass,
+including complete4/16 fault maps, exact identity rows, coordinated zero-pod rejection and shortages with compensating neighbor surplus. Every manifest stage
+requires the private witness, which supplies ZooKeeper resources, raw claims and server ordinals. These
+are policy/admission checks; five-member coverage is pure, and runtime adequacy/history remain separate.
+The real handoff also passes the native CLI positive with exact identity rows,24per-member shortages
+and one parent shortage. The fresh harness enacts these checks before any backbone API write; its next
+accepted-source run still needs validation. The shared execution core now rejects emitted Kubernetes pods
+with zero reserved pod slots while allowing host processes and empty controllers. The independent14-case
+suite goes red before the repair and passes afterward, alongside focused accelerator, transition, reconciler
+and backbone compatibility suites. This does not claim an earlier phase gate rerun.
 
-**Observed artifact migration — 2026-08-11:** `test/fixtures/phase30/expected-base-digest.txt` duplicates the
-Phase-25 image observation. It must be removed. Image identity remains a live provenance check against the
-verified Phase-25 attestation and current in-cluster registry catalog, not a committed digest file.
+The independent census now saves bounded raw parsed files, binds stable source identity/allocated extent
+to the final trace sample, and recomputes final counters from those saved bytes. Full ZooKeeper snapshot
+and transaction decoding replaces outer-checksum-only snapshot acceptance. Checksum-valid unparsed trees,
+missing raw files, changed extents and forged counters reject. All38 backbone host tests pass. Individually
+captured current files do not establish atomic state, discarded history or pre-run structural bounds.
 
-**Invalidated historical record:**
+**2026-11-03 — source/runtime binding:** private structured constructors retain the original model through
+source admission, writer policy and merged peak. Runtime decoding reconstructs those private witnesses,
+rederives Pulsar residents/populations and checks owner/budget/scope, complete domains, quotas and funded
+whole-write/failure slots. Registry base/excess slices use one shared equal-count/equal-horizon grouping;
+separate physical charges remain. Coalesced/fragmented funding, coordinated edits, omitted residents,
+inconsistent horizons and one-unit quota shortages reject. The small canonical fixture admits the same
+fresh64KiB write through both paths. Native tests and independent review pass.
+Actual expanded registry/transfer, broker and gateway executors resolve to the same private writer policy;
+missing/extra/duplicate/wrong-owner/budget/scope/kind cases reject before manifest rendering.
 
-✅ Done. The complete Register-3 gate passed on 2026-08-10 on a fresh single-node `kind` cluster. Live
-evidence records an externally reachable stable MetalLB VIP, a four-drive distributed MinIO byte round-trip,
-registry migration and cutover to the MinIO S3 driver, three ZooKeeper members, three BookKeeper bookies,
-two Pulsar brokers, native-protocol CBOR/dedup exercise, and 19 observed offload objects while the hot tier
-remained below its committed cap. All 53 SSA-owned live objects matched their desired fields byte-for-byte,
-and the 11 execution-unit projections matched a freshly executed
-`Amoebius.Platform.Backbone.renderBackbone` result. Every runtime image ID matched the Phase-25 baked digest,
-zero public pull was observed, all six seeded mutants went red, and the honesty ledger is
-`dynamically-resolved`.
+**2026-11-03 — offload diagnostics:** the unchanged100×4KiB streams run at two messages/second. After the
+reviewed AWS chunk-signature translation, the positive has247samples and a61,965-byte maximum against the
+65,536-byte cap; its time-only control has242samples and reaches413,100bytes. Flags remain size32,768,
+age−1, deletion-lag0; the paired control uses size−1, age1h, lag0. Thirty independent signed-wire cases pass.
+The gateway verifies original header/chunk/zero-chunk MACs, forwards decoded bytes under their actual hash,
+preserves offloader user metadata and releases delete/abort reservations only after observed absence.
+A real scoped JClouds upload retry has zero failed debt. A separate gateway/both-broker restart and ledger
+unload recovers all100payloads from19 independently reclaimed ledger IDs through38 gateway object GETs;
+startup preserves153reservations and zero debt. The loaded-topic observer retry passes without relaxing
+its five-second HTTP bound or active sampling. Native CBOR dedup passes for7,7,8→2 deliveries.
+
+The first cold SDK upload still exceeds the positive cap, so a separately bounded eleven-message automatic
+offload/deletion readiness workload is explicit before the unchanged pair. It binds to the same broker and
+policy and retains separate traces/costs. Fresh combined readiness, cold-read, restart/debt and census
+validation remains open. No cap/threshold amendment is applied. Startup rejects unreserved backend
+residents/uploads or excessive extents; this does not establish hidden physical failure history.
+
+**2026-11-03 — storage and execution:** the native plan consumes the exact verified Phase25 handoff,
+retaining41 digest objects/3,876,636,517stored bytes and the original5,371,532,322-byte registry peak,
+then adds43 exact Distribution links. Diagnostics copy/read back all84objects, retain old source/route and
+corrupt partial target on failed verification, change one Service selector after success, and recover a
+fresh4KiB post-cutover blob from S3. Complete accepted-source field comparison remains required.
+Sixteen filesystems, including Vault's two, MinIO/BookKeeper spares and gateway state, preallocate before
+cluster creation. Parent raw demand is40,377,516,032bytes. Independent loop/file identity, allocation,
+usable fit and eleven reader corruptions pass. Bookie raw minimum128MiB exposes106,266,624usable bytes;
+the earlier64MiB/57,311,232usable profile correctly rejects56MiB demand. Five early composition tests pass.
+
+The whole execution union is6,500m CPU/6,752MiB memory/3,072MiB ephemeral/eighteen pods; exact fit and all
+four one-unit shortages pass. MinIO's two bounded requests use1,280MiB managed heap/1,536MiB ceiling;
+broker NAR scratch is1,016MiB within1GiB ephemeral. Native copy/verification Jobs have finite concurrency,
+zero retries and read-only sources. Complete Haskell rendering, eighteen earlier goldens and twelve renderer
+mutants pass compatibility checks. All six earlier native Phase30 mutants are red at intended assertions,
+with passing before/after baselines; final accepted-source mutant validation remains required.
+
+**Independent capacity review:** the authorized single reviewer approves the registry mapping, application
+populations, execution union, private source ownership, pinned offload model and placement/recovery/uniform
+corpora. All six source arms have populations and paired quota denials. Raw Pulsar data/index bounds are
+77,952/416bytes before positive1MiB quota rounding. The complete finite profile reserves128data/index pairs
+plus concurrent/failed pairs. Recovery retains old backing, two survivors and a distinct new BookieId;
+conditional epochs require old-controller retirement/process exit and grant no start permission.
+
+ZooKeeper's pure3.9.3 model covers Jute/node/ACL/session/watch/snapshot/transaction/generation arithmetic,
+including root aliases, Error/CheckVersion, container ownership and Multi identity resolution. Its independent
+wire corpus has five snapshots,25records, four logs,19negatives and24replay steps; ten wire/capture host tests pass.
+Checked replay refuses unsupported fuzzy/old/mismatched anchors. Node digests do not prove session state.
+The source-derived real bootstrap validator now passes eight valid and25rejected wire cases, including
+all six exact static-config orders and varying wallclock mtime. The new harness captures each fresh742-byte
+initial snapshot before metadata clients, binds its stable filesystem identity, and preserves raw bytes;
+the gate independently rechecks them. Fresh live capture, complete committed history and endpoint
+provenance remain required; bootstrap validation supplies no current-state or lifetime-history proof.
+
+The bookie profile remains conditional:4MiB all serialized history,4MiB incoming recovery and48MiB
+journal/index/auxiliary allowance per admitted placement. ZooKeeper remains69MiB/member, with two normal
+plus two incoming16MiB logs, three normal plus one incoming1MiB snapshots and1MiB other paths. Source
+review shows metadata retries/session churn are not lifetime-bounded by operation timeout, batching flags,
+roll thresholds or hourly purge. Actual producer/schema/history/file-generation enforcement, independent
+complete-current evidence, final resource/readback binding and the fresh complete gate remain open.
+The pure cumulative history-admission core is implemented in
+`src/Amoebius/Platform/ZooKeeperHistory.hs`: immutable canonical transaction identities are separate from
+physical attempts and retained generation debt. All40independently authored transition cases pass, including exact/one-byte limits, physical retry debt,
+original-reservation requirements and restart round trips. The complete original policy is now retained privately by each state; eight cross-policy cases and21restart
+cases pass after an independent pre-fix probe exposed unsafe quota relabeling. Checked immutable JVM capture passes689independent assertions against pinned Jute/Util. Per-attempt digest
+rebinding from retained original bytes passes2547more, including mutation, exact limits and checked failures.
+Fresh compilation records the complete class domain, including the byte-bound helper; the reader independently
+hashes those classes and all337saved jars. The local weak-alias/strong-original registry passes2137independent assertions across four constructor,
+32sequence and three concurrent cases, retaining debt after weak-alias collection. Native durable command
+transport and a bounded Java client are implemented pending independent protocol tests and installation.
+Actual coordinator/JVM interception remains uninstalled; no runtime history premise closes.
+The gate explicitly rejects unresolved class derivations. Phases31 onward remain blocked.
 
 ## Phase Summary
 
@@ -238,7 +353,7 @@ merely avoids a bare Pod.
 ### Registry rehoming (§M.3 independent oracle, §M.5 external observer, §M.2 committed mutant)
 
 The registry's storage backend is asserted to be the MinIO S3 driver against the committed independent
-oracle `test/fixtures/phase30/registry-storage-driver.golden` (the expected `distribution` storage stanza —
+oracle `test/fixture/platform_backbone/registry-storage-driver.golden` (the expected `distribution` storage stanza —
 S3 driver, MinIO endpoint, bucket — authored by hand, not read from the running config), and the rehoming is
 observed externally: every digest in a Phase-25 preexisting artifact is copied to its exact target object,
 independently verified, and remains pullable by the same digest after cutover; a newly pushed blob
@@ -259,7 +374,7 @@ cutover. The failure keeps the source route and all old/partial-new commitments.
 ### Pulsar offload bound (§M.5 external observer, §M.2 committed mutant, §M.7 concrete drill)
 
 The size-triggered offload is exercised, not merely configured: a named drill topic carries the hot-tier
-size cap committed in `test/fixtures/phase30/hot-tier-cap.golden`; sustained ingest past that cap MUST cause
+size cap committed in `test/fixture/platform_backbone/hot-tier-cap.golden`; sustained ingest past that cap MUST cause
 offloaded ledger objects to appear in MinIO (external observer on the object substrate) while
 BookKeeper/broker hot-tier occupancy (external observer on broker metrics, not an amoebius self-report)
 never exceeds the cap. The committed seeded mutant **`mutant/offload-time-only`** — a time-only offload
@@ -335,7 +450,9 @@ Phase 25) is present as a rehoming consumer of MinIO, not re-delivered here.
 **Status**: Active; prior capability footprint retained for migration and current validation
 **Implementation**: `src/Amoebius/Platform/LoadBalancer.hs`,
 `src/Amoebius/Platform/Minio.hs`, `src/Amoebius/Platform/Registry.hs`,
-`tools/phase30_backbone_live.py`
+`src/Amoebius/Platform/{StoragePlan,RegistryTransfer,RegistryMigration,Provision,Manifest,ServiceExec,ObjectGateway,ObjectGatewayPolicy}.hs`,
+`src/Amoebius/Capacity/ObjectStore.hs`, `tools/platform_backbone_live.py`,
+`tools/platform_backbone_storage_observer.py`
 **Blocked by**: Phase 29 gate.
 **Independent Validation**: the numbered Validation list below, which needs nothing from Sprints 30.2–30.3:
 MetalLB advertising an address, a MinIO put/get through the gateway, the registry serving from the S3 driver
@@ -368,7 +485,7 @@ MinIO S3 driver — closing the Phase-25 deferred gap.
   per drive; and the uniform `volumeClaimTemplate` plan
   (`max rounded provisionedBytes × ordinal count`) that debits the retained backing.
 - The `distribution` registry's blob store rehomed onto the MinIO S3 driver — the registry holds no PV of its
-  own, its bytes live in MinIO — asserted against the committed `test/fixtures/phase30/registry-storage-driver.golden`
+  own, its bytes live in MinIO — asserted against the committed `test/fixture/platform_backbone/registry-storage-driver.golden`
   storage-stanza oracle, with the committed `mutant/registry-fs-driver` seeded mutant (registry left on the
   interim filesystem driver) named as the mutant this rehoming assertion MUST turn red. The logical tenant
   extent supplied to MinIO is a private `ProvisionedRegistryStorageDemand` whose logical
@@ -448,12 +565,17 @@ MinIO S3 driver — closing the Phase-25 deferred gap.
    is what discriminates a baked bring-up from a side-loaded upstream image.
 
 ### Remaining Work
-None.
+Finish the exact-handoff transfer Job and failure/cutover drill, full native service/geometry readback,
+writer admission, and the numbered validations against the physically allocated complete inventory.
 
 ## Sprint 30.2: Pulsar native-protocol backbone + size-triggered S3 offload drill ⏸️
 
 **Status**: Blocked by Sprint 30.1; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Platform/Pulsar.hs`, `tools/phase30_backbone_live.py`
+**Implementation**: `src/Amoebius/Platform/{Pulsar,Provision,StoragePlan,Manifest,ZooKeeperHistory,ZooKeeperHistoryStore,HistoryStoreProvision,HistoryCoordinator}.hs`,
+`jvm/org/amoebius/history/{CapturedTransaction,CaptureRegistry,HistoryClient}.java`,
+`src/Amoebius/Capacity/ZooKeeper.hs`,
+`test/spec/platform/{ZooKeeperSpec,ZooKeeperMemberSpec,ZooKeeperHistorySpec,ZooKeeperHistoryStoreSpec}.hs`,
+`tools/platform_backbone_zookeeper_observer.py`, `tools/platform_backbone_live.py`
 **Blocked by**: Sprint 30.1.
 **Independent Validation**: the numbered Validation list below, which needs only the Sprint-30.1 MinIO
 substrate: an HA native-protocol bring-up that fails closed against a sealed Vault, a dedup round-trip
@@ -489,7 +611,7 @@ drill that the mandatory size-triggered MinIO offload actually bounds the BookKe
   member resource/volume fits and the ensemble is Ready. BookKeeper/offload bytes cannot fund this provision.
 - Bounded per-topic retention with a **size-triggered MinIO offload** (no unbounded storage, no time-only
   trigger), wired to the Sprint-30.1 MinIO substrate; the drill topic's hot-tier size cap committed in
-  `test/fixtures/phase30/hot-tier-cap.golden`, with the committed `mutant/offload-time-only` seeded mutant
+  `test/fixture/platform_backbone/hot-tier-cap.golden`, with the committed `mutant/offload-time-only` seeded mutant
   named as the mutant the offload drill MUST turn red.
 - A produce/consume round-trip demonstrating at-least-once delivery with broker-side dedup.
 
@@ -526,13 +648,14 @@ drill that the mandatory size-triggered MinIO offload actually bounds the BookKe
    plan and each mounted fsType/usable capacity matches its witness, not an ordinal-specific raw demand.
 
 ### Remaining Work
-None.
+Revalidate the native round-trip and dedup, observe the hot tier throughout sustained ingest and deletion,
+and close the independent storage/resource comparisons after Sprint 30.1.
 
 ## Sprint 30.3: The backbone HA bring-up gate ⏸️
 
 **Status**: Blocked by Sprint 30.2; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Platform/Backbone.hs`, `test/platform/Phase30BackboneSpec.hs`,
-`test/platform/Phase30BackboneLive.hs`, `tools/phase30_gate.py`
+**Implementation**: `src/Amoebius/Platform/Backbone.hs`, `test/spec/platform/PlatformBackboneSpec.hs`,
+`test/live/PlatformBackboneLiveSpec.hs`, `tools/platform_backbone_gate.py`
 **Blocked by**: Sprint 30.2.
 **Independent Validation**: the numbered Validation list below, run on a fresh single-node linux-cpu `kind`
 cluster: the whole set up, HA-shaped, and reachable in-cluster; both data planes round-tripping; the registry
@@ -565,11 +688,16 @@ and close the phase with the backbone HA gate on a fresh cluster.
   [§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering) hard edges
   and the `mutant/dag-drop-edge` mutant, is [Phase 31](phase_31_platform_services_2.md)'s.
 - The reviewed gate oracles reused here: the registry storage-stanza oracle
-  `test/fixtures/phase30/registry-storage-driver.golden` and the drill-topic hot-tier cap
-  `test/fixtures/phase30/hot-tier-cap.golden`, plus the independently computed
-  `test/fixtures/phase30/storage-geometry-boundaries.csv` covering BookKeeper/MinIO exact-fit, one-byte-over,
+  `test/fixture/platform_backbone/registry-storage-driver.golden` and the drill-topic hot-tier cap
+  `test/fixture/platform_backbone/hot-tier-cap.golden`, plus the independently computed
+  `test/oracle/platform_backbone_capacity.json` covering BookKeeper/MinIO exact-fit, one-byte-over,
   recovery/healing, orphan horizon, and uniform-ordinal rounding. The gate also reuses
-  `test/fixtures/phase25/registry_storage_demand.dhall` unchanged and pins the expected mapping from its private
+  `test/oracle/platform_backbone_zookeeper_members.json` for complete three/five-member fault maps and
+  per-member resource/claim/backing shortages, `test/oracle/platform_backbone_zookeeper_wire.json` for
+  independent full snapshot/transaction decoding and checked replay, and
+  `test/oracle/platform_backbone_delete_grammar.json` for the pinned SDK's complete bulk-delete grammar.
+  These small independent literals supplement the runtime handoff recomputation. It also reuses
+  `test/fixture/base_image_registry/registry_storage_demand.dhall` unchanged and pins the expected mapping from its private
   registry logical witness into the MinIO physical geometry. The committed seeded mutants
   `mutant/registry-fs-driver`, `mutant/offload-time-only`, `mutant/storage-logical-as-physical`,
   `mutant/storage-drop-required-fault-scenario`, `mutant/storage-sum-unequal-ordinals`, and
@@ -583,7 +711,7 @@ and close the phase with the backbone HA gate on a fresh cluster.
    rehoming holds (a pushed blob is a MinIO object) and the size-triggered offload holds the hot tier under the
    committed cap; assert the committed mutants `mutant/registry-fs-driver` and `mutant/offload-time-only` each
    turn their assertion red.
-3. Recompute `storage-geometry-boundaries.csv` with the independent checker and compare it with the opaque
+3. Execute `test/oracle/platform_backbone_capacity.json` against the native placement and admission paths, then recompute the actual handoff with the independent reader and compare it with the opaque
    storage provision. Assert every BookKeeper recovery and MinIO healing subset required by its finite fault
    policy is present; every logical extent has its replication/erasure/metadata/workspace amplification; the
    content peak includes concurrent and full-horizon failed writes; the registry tenant's private
@@ -613,8 +741,8 @@ and close the phase with the backbone HA gate on a fresh cluster.
    reconcile marked UNVERIFIED.
 
 ### Remaining Work
-Remove `test/fixtures/phase30/expected-base-digest.txt`, pass the verified Phase-25 digest into the run without
-copying it into Git, and rerun the gate under universal artifact hygiene.
+Finish the complete resource/render checks and all predecessor-backed live drills, then run and verify the
+whole gate and its cleanup under universal artifact hygiene before opening Phase 31.
 
 ## Documentation Requirements
 

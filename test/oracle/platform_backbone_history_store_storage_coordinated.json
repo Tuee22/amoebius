@@ -1,0 +1,73 @@
+{
+  "schema": "phase30.independent.history-store-storage-coordinated-boundaries.v1",
+  "baseAmendmentSha256": "2e82dfb999777eaa707abe5bf4d396ceb8f35e86e55256ca5a2e9a63905fc61e",
+  "operandsSource": "history-store-additive-storage-amendment-v2.json",
+  "cases": [
+    {
+      "id": "parent-local-child-raw-exact",
+      "parentRequiredRawBytes": 67108864,
+      "edits": {
+        "parentRawSupplyBytes": 67108864
+      },
+      "expectedAdmission": "allow",
+      "expectedLocus": null
+    },
+    {
+      "id": "parent-local-child-required-and-supply-one-byte-short",
+      "parentRequiredRawBytes": 67108863,
+      "edits": {
+        "parentRawSupplyBytes": 67108863
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "retained-parent"
+    },
+    {
+      "id": "parent-required-understatement-masked-by-fitting-supply",
+      "parentRequiredRawBytes": 67108863,
+      "edits": {
+        "parentRawSupplyBytes": 67108864
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "retained-parent"
+    },
+    {
+      "id": "parent-required-and-supply-coordinated-one",
+      "parentRequiredRawBytes": 1,
+      "edits": {
+        "parentRawSupplyBytes": 1
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "retained-parent"
+    },
+    {
+      "id": "all-metadata-slot-and-enforced-cap-understatements",
+      "parentRequiredRawBytes": 40377516032,
+      "edits": {
+        "historyEnforcedFileMaximumBytes": 790903,
+        "historyCurrentSlotBytes": 790903,
+        "historyCandidateSlotBytes": 790903,
+        "historyExtraReaderSlotBytes": 790903,
+        "historyDedicatedUsableBytes": 2372709,
+        "combinedFilesystemUsableSupplyBytes": 7615589
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "history-store-file-bound-mismatch"
+    },
+    {
+      "id": "reported-native-bound-lowered-with-all-slots",
+      "parentRequiredRawBytes": 40377516032,
+      "edits": {
+        "historyNativeEncodingUpperBoundBytes": 790902,
+        "historyEnforcedFileMaximumBytes": 790902,
+        "historyCurrentSlotBytes": 790902,
+        "historyCandidateSlotBytes": 790902,
+        "historyExtraReaderSlotBytes": 790902,
+        "historyDedicatedUsableBytes": 2372706,
+        "combinedFilesystemUsableSupplyBytes": 7615586
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "native-encoding-exceeds-enforced-bound"
+    }
+  ],
+  "scope": "Standalone component parentRequired must dominate its own raw child. This does not prove the full Phase30 parent aggregate: future owning StoragePlan must supply/retain its private complete physicalPoolBytes sum and actual identity, not a caller quota. Original16outcomes unchanged."
+}

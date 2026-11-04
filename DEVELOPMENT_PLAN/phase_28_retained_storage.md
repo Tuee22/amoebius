@@ -31,6 +31,7 @@ The gate passed 2026-08-10.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — physically reserved retained pool](#resource-provision--physically-reserved-retained-pool)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 28.1: The one inert `no-provisioner` StorageClass ✅](#sprint-281-the-one-inert-no-provisioner-storageclass-)
@@ -43,7 +44,21 @@ The gate passed 2026-08-10.
 
 ## Phase Status
 
-⏸️ Blocked — reopened 2026-08-16 behind the amended Phase-25 handoff and Phase-27 revalidation. Its prior capability record remains historical until the exact predecessor chain is resealed.
+✅ Done — resealed 2026-11-02 against the verified Phase-27 predecessor and exact Phase-25 OCI handoff. All eleven sides pass against 1,986 authored files; all three sprints seal, all twelve mutants are red, all twelve metrics match, and thirty surfaces join thirty items. Actual admission rejection, physically reserved backing, ENOSPC isolation, PVC rebind, and both witness readbacks across genuine delete/recreate pass. Cleanup removes the owned fixture and preserves outside-host inventory. Attestation `sha256:817c8bb69e19ac80e1453541ba6099be52d4d75a8a0973488497f13a03258348`. Phase 29 may now revalidate.
+
+**2026-11-02 backing correction (validated by the seal above):** inspection found sparse retained images and a reported over-budget
+rejection that never invoked admission. The harness now reserves and initializes new backing exclusively,
+preserves existing bytes, and admits the complete inventory before effects. Seven focused regressions and a
+real loop/ext4 probe pass: actual ENOSPC, unchanged sibling occupancy and parent allocation, preserved retry
+nonce, actual over-budget rejection without effects, and complete owned cleanup. The subsequent whole-phase gate passes with these checks included.
+
+**First fresh attempt:** the 2026-11-03 UTC gate passed static tests and predecessor verification, then
+correctly rejected a physical-allocation shortfall introduced by formatting the full-size regular file.
+Authored paths and outside-host inventory stayed unchanged, and cleanup removed the owned fixture. New
+images now format through an explicit loop block device with discard disabled and prezeroed inode tables,
+using only images fully initialized by the exclusive creator. The complete 512 MiB pool probe now passes
+with both full-size witnesses, unchanged physical allocation during ENOSPC, preserved retry bytes, actual
+over-budget rejection, and complete cleanup. The failed attempt is not completion evidence.
 
 **Superseded containment seal:** revalidated 2026-08-16. `python3 tools/retained_storage_gate.py --execute` passed all eleven
 sides against source snapshot `sha256:9959cb38b6acb85c5e752f5b09b836f4021c227d1a281c6835b2143e58437cd2`.
@@ -126,9 +141,9 @@ The live gate uses the Phase-24 single-node `kind` cluster; pure StorageClass/PV
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** durable **storage rebinds after a cluster delete + recreate with no data loss** — the Postgres row
-and MinIO object markers round-trip byte-for-byte across a real teardown, against the corpus, oracles,
-ceilings, observers, and seeded mutants of [Gate integrity](#gate-integrity).
+**Gate:** `python3 tools/retained_storage_gate.py --execute` proves both markers survive real cluster
+delete/recreate with byte-identical readback, enforced volume ceilings, honest cleanup, and every oracle and
+mutant in [Gate integrity](#gate-integrity).
 
 The gate is passed only when all of the following hold, checked against the oracle-pinned oracle corpus and
 seeded mutants named in [Gate integrity](#gate-integrity):
@@ -318,6 +333,19 @@ a green mutant fails the gate.
   `migration_verify_mismatch`, where a corrupt copy verifies green, and on the `migration_shrink_complete`
   byte-for-byte nonce readback (28.2 V1).
 
+## Resource provision — physically reserved retained pool
+
+The private fixture offers 512 MiB of durable backing in a separate ext4 pool. Its fully allocated 576 MiB
+raw image includes filesystem overhead; the observer verifies physical block reservation, loop identity,
+filesystem type, and at least 512 MiB of usable space. The complete retained inventory debits 256 MiB for
+Postgres and 128 MiB for MinIO before either child image or any API object is created. A temporary 16 MiB
+boundary image also fits the residual pool and is removed after its actual ENOSPC probe.
+
+Each child is exclusively created, fully reserved, initialized, and formatted through a loop block device without discard. Existing
+images are checked and remounted without formatting. A retry debits stable identities once; resizing an
+existing image or exceeding the pool rejects before allocation. Node and cache storage remain outside this
+owned filesystem. Only the marker-authorized elevated test harness removes these test bytes after the gate.
+
 ## Doctrine adopted
 
 This phase is the first live amoebius realization of the storage-lifecycle contract. Each bullet names the
@@ -370,9 +398,9 @@ section it implements; individual sprints cite the same sections where they adop
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
+> **Current receipt rule.** All three sprints below resealed in numeric order on 2026-11-02. Historical dates,
+> pass/seal claims, and repository-resident evidence paths remain provenance only; the current phase seal
+> above establishes completion against the amended contract. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
@@ -380,12 +408,10 @@ section it implements; individual sprints cite the same sections where they adop
 
 ## Sprint 28.1: The one inert `no-provisioner` StorageClass ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-`python3 tools/retained_storage_class_gate.py --evidence <run-bundle>`; receipt
-`dynamically-resolved`.
+**Status**: Done — resealed 2026-11-02 in the complete current phase gate.
 **Implementation**: `src/Amoebius/Storage/StorageClass.hs`, `test/spec/live/RetainedStorageClassSpec.hs`,
 `test/spec/live/RetainedStorageClassLiveSpec.hs`, and `tools/retained_storage_class_live.py`
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; Phase 27 is sealed.
 **Independent Validation**: after bring-up `kubectl get storageclass` shows **exactly one** class —
 `provisioner: kubernetes.io/no-provisioner`, `reclaimPolicy: Retain`, `volumeBindingMode:
 WaitForFirstConsumer` — and no other class and no `storageclass.kubernetes.io/is-default-class` annotation
@@ -417,18 +443,18 @@ only because amoebius placed them and nothing in the normal cluster lifecycle ca
    plus a default-class annotation, committed in this phase's oracle-pinning sprint) makes assertion 1 fail with the **specific reason `count != 1` / `default-class annotation present`**, distinguishing it from an unrelated golden mismatch.
 
 ### Remaining Work
-Generate the sprint receipt under `.build/runs/phase_28/` and retain it only through repository-local attestation.
+
+None within this sprint; its fresh receipt is bound into the current phase attestation.
 
 ## Sprint 28.2: Deterministic retained-PV generation + the explicit bind ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-`python3 tools/retained_storage_volume_gate.py --evidence <run-bundle> --image <digest-reference>`; receipt
-`dynamically-resolved`.
+**Status**: Done — resealed 2026-11-02 in the complete current phase gate.
 **Implementation**: `src/Amoebius/Storage/RetainedPV.hs`,
 `src/Amoebius/Storage/HostVolume.hs`, `src/Amoebius/Storage/RetainedScaling.hs` (retained-carve and
 verified-migration storage-scaling arms), `test/spec/live/RetainedStorageVolumeSpec.hs`,
-`test/spec/live/RetainedStorageVolumeLiveSpec.hs`, and `tools/retained_storage_volume_live.py`
-**Blocked by**: reopened numeric predecessor gates.
+`test/spec/live/RetainedStorageVolumeLiveSpec.hs`, `tools/retained_storage_volume_live.py`,
+`tools/retained_storage_backing.py`, and `test/spec/host/test_retained_storage_backing.py`
+**Blocked by**: none; Sprint 28.1 is sealed.
 **Independent Validation**: the pre-allocation durable-backing fold, the uniform `volumeClaimTemplate`
 projection, the deterministic bind against hand-authored `test/oracle/retained_storage/claimref_table.csv`, the
 host-side raw/usable/fs-type/`ENOSPC` observation, the delete-and-re-bind cycle, and the single-use
@@ -565,18 +591,15 @@ PVC creation path to exactly one shape.
    allocated extent. A provider-capacity action is rejected because this phase supplies no cloud capability.
 
 ### Remaining Work
-None; the live observation, external reader, ten red mutants, and receipt are retained under
-`.build/runs/phase_28/` for repository-local attestation, never an authored root.
+
+None within this sprint; its fresh receipt is bound into the current phase attestation.
 
 ## Sprint 28.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-`python3 tools/retained_storage_rebind_gate.py --evidence <run-bundle> --artifact <oci> --image-digest <digest>`; sprint receipt
-`external-run-reference` and phase ledger
-`dynamically-resolved`.
+**Status**: Done — resealed 2026-11-02 in the complete current phase gate.
 **Implementation**: `src/Amoebius/Storage/Rebind.hs`, `test/spec/live/RetainedStorageRebindLiveSpec.hs`,
 `test/spec/live/RetainedStorageRebindSpec.hs`, and `tools/retained_storage_rebind_live.py`
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; Sprint 28.2 is sealed.
 **Independent Validation**: a fresh per-run random nonce, written as a Postgres row and as a MinIO object,
 reads back byte-for-byte after a real `cluster delete` + `recreate` — asserted absent before the write, and
 with no witness write path executed afterwards. Validation 1 below states the observers and the ordering they
@@ -633,8 +656,8 @@ durable backing and no normal-operation path can.
    not treated as a vacuously-true pass.
 
 ### Remaining Work
-Migrate the two-service live evidence, audit observation, mutant results, receipt, and phase ledger to
-`.build/runs/phase_28/`; externally attest the bundle and rerun after Phase 27 closes.
+
+None within this sprint; its fresh receipt is bound into the current phase attestation.
 
 ## Documentation Requirements
 

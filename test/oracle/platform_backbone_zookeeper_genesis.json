@@ -1,0 +1,1578 @@
+{
+  "schema": "phase30.independent.zookeeper-real-genesis-wire.v1",
+  "provenance": "Independent source-bootstrap fields plus independent v4 Jute encoder; no subject parser/validator or observed run values generate expectations. Illustrative clock inputs0,1,1700000000000 are not actual runtime timestamp claims.",
+  "sourceInput": "zookeeper-real-genesis-inputs.json",
+  "expectedProfile": "Pulsar4.0.6 direct ZooKeeper3.9.3 QuorumPeerMain, exact static3participant input, reconfiguration disabled, no earlier DB or external session.",
+  "scope": "Wire/bootstrap validation only. Caller separately establishes fresh formatted filesystem provenance, selected effective config, complete committed lineage and endpoint. No capacity/history closure.",
+  "cases": [
+    {
+      "id": "static-config-permutation-0",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f56b9f8c000000012f000000000000000000000002000000000000000000000000d227a249000000012f0000000000000000000000004285a45d000000012f",
+      "expected": "accept",
+      "basis": "QuorumMaj HashMap permits this exact row order; content/domain unchanged.",
+      "wireBytes": 742,
+      "wireSha256": "c95283e68ba787605d9967a5d2f313dfead8f67f5588a7d67ade2b7149cd355d",
+      "expectedParsed": {
+        "header": {
+          "magic": "ZKSN",
+          "version": 2,
+          "dbid": -1
+        },
+        "state": {
+          "nodes": {
+            "": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/config": {
+              "dataBytes": 264,
+              "dataNull": false,
+              "dataSha256": "427c97363230b01b312a54f0cf1c6e03abd7d53da5e2b73ac809590f568f5b1d",
+              "dataHex": "7365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d30",
+              "aclId": 1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 1,
+                "version": -1,
+                "cversion": 0,
+                "aversion": -1,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/quota": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            }
+          },
+          "sessions": {},
+          "aclCache": {
+            "1": [
+              {
+                "perms": 1,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ]
+          },
+          "lastProcessedZxid": 0,
+          "treeDigest": 1371985504
+        },
+        "digest": {
+          "zxid": 0,
+          "version": 2,
+          "treeDigest": 0
+        },
+        "serializedLastZxid": 0,
+        "seals": [
+          {
+            "offset": 675,
+            "adler32": 4117471116
+          },
+          {
+            "offset": 708,
+            "adler32": 3525812809
+          },
+          {
+            "offset": 729,
+            "adler32": 1116054621
+          }
+        ],
+        "bytes": 742,
+        "componentBytes": {
+          "fileHeader": 16,
+          "sessions": 4,
+          "aclCache": 39,
+          "nodeRows": 611,
+          "treeEnd": 5,
+          "baseSeal": 13,
+          "digestAndSeal": 33,
+          "lastZxidAndSeal": 21
+        }
+      }
+    },
+    {
+      "id": "static-config-permutation-1",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f6159f8c000000012f000000000000000000000002000000000000000000000000c986a1f4000000012f000000000000000000000000418da508000000012f",
+      "expected": "accept",
+      "basis": "QuorumMaj HashMap permits this exact row order; content/domain unchanged.",
+      "wireBytes": 742,
+      "wireSha256": "c8ba06212d456e810aeeec7e9fc233c458f45c60c6a504b70c32c385bf555c18",
+      "expectedParsed": {
+        "header": {
+          "magic": "ZKSN",
+          "version": 2,
+          "dbid": -1
+        },
+        "state": {
+          "nodes": {
+            "": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/config": {
+              "dataBytes": 264,
+              "dataNull": false,
+              "dataSha256": "2f7e06b0fb28a4f2db2d21762a49b8aeca899b8421aba970733b451c85311cb7",
+              "dataHex": "7365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d30",
+              "aclId": 1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 1,
+                "version": -1,
+                "cversion": 0,
+                "aversion": -1,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/quota": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            }
+          },
+          "sessions": {},
+          "aclCache": {
+            "1": [
+              {
+                "perms": 1,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ]
+          },
+          "lastProcessedZxid": 0,
+          "treeDigest": 1371985504
+        },
+        "digest": {
+          "zxid": 0,
+          "version": 2,
+          "treeDigest": 0
+        },
+        "serializedLastZxid": 0,
+        "seals": [
+          {
+            "offset": 675,
+            "adler32": 4128612236
+          },
+          {
+            "offset": 708,
+            "adler32": 3381043700
+          },
+          {
+            "offset": 729,
+            "adler32": 1099801864
+          }
+        ],
+        "bytes": 742,
+        "componentBytes": {
+          "fileHeader": 16,
+          "sessions": 4,
+          "aclCache": 39,
+          "nodeRows": 611,
+          "treeEnd": 5,
+          "baseSeal": 13,
+          "digestAndSeal": 33,
+          "lastZxidAndSeal": 21
+        }
+      }
+    },
+    {
+      "id": "static-config-permutation-2",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f6159f8c000000012f000000000000000000000002000000000000000000000000c986a1f4000000012f000000000000000000000000418da508000000012f",
+      "expected": "accept",
+      "basis": "QuorumMaj HashMap permits this exact row order; content/domain unchanged.",
+      "wireBytes": 742,
+      "wireSha256": "fb11eeb5ea39f431327eef04e1feae3153b68de4cf0577ece89cebedb2b346c4",
+      "expectedParsed": {
+        "header": {
+          "magic": "ZKSN",
+          "version": 2,
+          "dbid": -1
+        },
+        "state": {
+          "nodes": {
+            "": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/config": {
+              "dataBytes": 264,
+              "dataNull": false,
+              "dataSha256": "36edb4a3a3fd8823c507f53dcf67693660d40aebb55fd50ea10634c0f7e1a70e",
+              "dataHex": "7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d30",
+              "aclId": 1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 1,
+                "version": -1,
+                "cversion": 0,
+                "aversion": -1,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/quota": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            }
+          },
+          "sessions": {},
+          "aclCache": {
+            "1": [
+              {
+                "perms": 1,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ]
+          },
+          "lastProcessedZxid": 0,
+          "treeDigest": 1371985504
+        },
+        "digest": {
+          "zxid": 0,
+          "version": 2,
+          "treeDigest": 0
+        },
+        "serializedLastZxid": 0,
+        "seals": [
+          {
+            "offset": 675,
+            "adler32": 4128612236
+          },
+          {
+            "offset": 708,
+            "adler32": 3381043700
+          },
+          {
+            "offset": 729,
+            "adler32": 1099801864
+          }
+        ],
+        "bytes": 742,
+        "componentBytes": {
+          "fileHeader": 16,
+          "sessions": 4,
+          "aclCache": 39,
+          "nodeRows": 611,
+          "treeEnd": 5,
+          "baseSeal": 13,
+          "digestAndSeal": 33,
+          "lastZxidAndSeal": 21
+        }
+      }
+    },
+    {
+      "id": "static-config-permutation-3",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f7699f8c000000012f000000000000000000000002000000000000000000000000d427a249000000012f00000000000000000000000044a7a45f000000012f",
+      "expected": "accept",
+      "basis": "QuorumMaj HashMap permits this exact row order; content/domain unchanged.",
+      "wireBytes": 742,
+      "wireSha256": "3501e691e21b46b35afecde72116a5fff75912e241462d64241039b270295ed5",
+      "expectedParsed": {
+        "header": {
+          "magic": "ZKSN",
+          "version": 2,
+          "dbid": -1
+        },
+        "state": {
+          "nodes": {
+            "": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/config": {
+              "dataBytes": 264,
+              "dataNull": false,
+              "dataSha256": "2e44a461cab88782a4c2de55ee6b084de096d9ebc28a7d9eb710f581565d3155",
+              "dataHex": "7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d30",
+              "aclId": 1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 1,
+                "version": -1,
+                "cversion": 0,
+                "aversion": -1,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/quota": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            }
+          },
+          "sessions": {},
+          "aclCache": {
+            "1": [
+              {
+                "perms": 1,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ]
+          },
+          "lastProcessedZxid": 0,
+          "treeDigest": 1371985504
+        },
+        "digest": {
+          "zxid": 0,
+          "version": 2,
+          "treeDigest": 0
+        },
+        "serializedLastZxid": 0,
+        "seals": [
+          {
+            "offset": 675,
+            "adler32": 4150894476
+          },
+          {
+            "offset": 708,
+            "adler32": 3559367241
+          },
+          {
+            "offset": 729,
+            "adler32": 1151837279
+          }
+        ],
+        "bytes": 742,
+        "componentBytes": {
+          "fileHeader": 16,
+          "sessions": 4,
+          "aclCache": 39,
+          "nodeRows": 611,
+          "treeEnd": 5,
+          "baseSeal": 13,
+          "digestAndSeal": 33,
+          "lastZxidAndSeal": 21
+        }
+      }
+    },
+    {
+      "id": "static-config-permutation-4",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f7699f8c000000012f000000000000000000000002000000000000000000000000d427a249000000012f00000000000000000000000044a7a45f000000012f",
+      "expected": "accept",
+      "basis": "QuorumMaj HashMap permits this exact row order; content/domain unchanged.",
+      "wireBytes": 742,
+      "wireSha256": "0d6f4d9399db5638c33ce81100369b394e28e59ad2366e4132ff1de9bc217174",
+      "expectedParsed": {
+        "header": {
+          "magic": "ZKSN",
+          "version": 2,
+          "dbid": -1
+        },
+        "state": {
+          "nodes": {
+            "": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/config": {
+              "dataBytes": 264,
+              "dataNull": false,
+              "dataSha256": "0ef31610bc2ffbf3655542c248617a34f74dc123d6c1114ac8fdb99e8dfdaf82",
+              "dataHex": "7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d30",
+              "aclId": 1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 1,
+                "version": -1,
+                "cversion": 0,
+                "aversion": -1,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/quota": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            }
+          },
+          "sessions": {},
+          "aclCache": {
+            "1": [
+              {
+                "perms": 1,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ]
+          },
+          "lastProcessedZxid": 0,
+          "treeDigest": 1371985504
+        },
+        "digest": {
+          "zxid": 0,
+          "version": 2,
+          "treeDigest": 0
+        },
+        "serializedLastZxid": 0,
+        "seals": [
+          {
+            "offset": 675,
+            "adler32": 4150894476
+          },
+          {
+            "offset": 708,
+            "adler32": 3559367241
+          },
+          {
+            "offset": 729,
+            "adler32": 1151837279
+          }
+        ],
+        "bytes": 742,
+        "componentBytes": {
+          "fileHeader": 16,
+          "sessions": 4,
+          "aclCache": 39,
+          "nodeRows": 611,
+          "treeEnd": 5,
+          "baseSeal": 13,
+          "digestAndSeal": 33,
+          "lastZxidAndSeal": 21
+        }
+      }
+    },
+    {
+      "id": "static-config-permutation-5",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f8139f8c000000012f000000000000000000000002000000000000000000000000cb86a1f4000000012f00000000000000000000000043afa50a000000012f",
+      "expected": "accept",
+      "basis": "QuorumMaj HashMap permits this exact row order; content/domain unchanged.",
+      "wireBytes": 742,
+      "wireSha256": "71bf038e49db7241f27e5ff6bf931dc0d517dd0ff5e9075fe708ca94e44ad9e5",
+      "expectedParsed": {
+        "header": {
+          "magic": "ZKSN",
+          "version": 2,
+          "dbid": -1
+        },
+        "state": {
+          "nodes": {
+            "": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/config": {
+              "dataBytes": 264,
+              "dataNull": false,
+              "dataSha256": "2a1ef1e8db1ddc74827963adf9156915aba24b679aff9e5e4901921688ea949e",
+              "dataHex": "7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d30",
+              "aclId": 1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 1,
+                "version": -1,
+                "cversion": 0,
+                "aversion": -1,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/quota": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            }
+          },
+          "sessions": {},
+          "aclCache": {
+            "1": [
+              {
+                "perms": 1,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ]
+          },
+          "lastProcessedZxid": 0,
+          "treeDigest": 1371985504
+        },
+        "digest": {
+          "zxid": 0,
+          "version": 2,
+          "treeDigest": 0
+        },
+        "serializedLastZxid": 0,
+        "seals": [
+          {
+            "offset": 675,
+            "adler32": 4162035596
+          },
+          {
+            "offset": 708,
+            "adler32": 3414598132
+          },
+          {
+            "offset": 729,
+            "adler32": 1135584522
+          }
+        ],
+        "bytes": 742,
+        "componentBytes": {
+          "fileHeader": 16,
+          "sessions": 4,
+          "aclCache": 39,
+          "nodeRows": 611,
+          "treeEnd": 5,
+          "baseSeal": 13,
+          "digestAndSeal": 33,
+          "lastZxidAndSeal": 21
+        }
+      }
+    },
+    {
+      "id": "source-wallclock-mtime-0",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000000ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f4ed9f8b000000012f000000000000000000000002000000000000000000000000df89a2c8000000012f0000000000000000000000006841a5ca000000012f",
+      "expected": "accept",
+      "basis": "Only config mtime varies with direct source Time.currentWallTime; this is a small explicit clock input, not a runtime timestamp expectation.",
+      "wireBytes": 742,
+      "wireSha256": "445c9bfec280d46a5f0536aba1ef51dd92f370a0241078d743050ad92fff39f6",
+      "expectedParsed": {
+        "header": {
+          "magic": "ZKSN",
+          "version": 2,
+          "dbid": -1
+        },
+        "state": {
+          "nodes": {
+            "": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/config": {
+              "dataBytes": 264,
+              "dataNull": false,
+              "dataSha256": "427c97363230b01b312a54f0cf1c6e03abd7d53da5e2b73ac809590f568f5b1d",
+              "dataHex": "7365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d30",
+              "aclId": 1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": -1,
+                "cversion": 0,
+                "aversion": -1,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/quota": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            }
+          },
+          "sessions": {},
+          "aclCache": {
+            "1": [
+              {
+                "perms": 1,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ]
+          },
+          "lastProcessedZxid": 0,
+          "treeDigest": 1371985504
+        },
+        "digest": {
+          "zxid": 0,
+          "version": 2,
+          "treeDigest": 0
+        },
+        "serializedLastZxid": 0,
+        "seals": [
+          {
+            "offset": 675,
+            "adler32": 4109213579
+          },
+          {
+            "offset": 708,
+            "adler32": 3750339272
+          },
+          {
+            "offset": 729,
+            "adler32": 1749132746
+          }
+        ],
+        "bytes": 742,
+        "componentBytes": {
+          "fileHeader": 16,
+          "sessions": 4,
+          "aclCache": 39,
+          "nodeRows": 611,
+          "treeEnd": 5,
+          "baseSeal": 13,
+          "digestAndSeal": 33,
+          "lastZxidAndSeal": 21
+        }
+      }
+    },
+    {
+      "id": "source-wallclock-mtime-1700000000000",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000018bcfe56800ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f000000004a8ba233000000012f0000000000000000000000020000000000000000000000006636a40f000000012f000000000000000000000000f279a58e000000012f",
+      "expected": "accept",
+      "basis": "Only config mtime varies with direct source Time.currentWallTime; this is a small explicit clock input, not a runtime timestamp expectation.",
+      "wireBytes": 742,
+      "wireSha256": "7422b71281dbd4332cdf01a8e24a18722922d76eef323b185130ff43c779417a",
+      "expectedParsed": {
+        "header": {
+          "magic": "ZKSN",
+          "version": 2,
+          "dbid": -1
+        },
+        "state": {
+          "nodes": {
+            "": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/config": {
+              "dataBytes": 264,
+              "dataNull": false,
+              "dataSha256": "427c97363230b01b312a54f0cf1c6e03abd7d53da5e2b73ac809590f568f5b1d",
+              "dataHex": "7365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d30",
+              "aclId": 1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 1700000000000,
+                "version": -1,
+                "cversion": 0,
+                "aversion": -1,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            },
+            "/zookeeper/quota": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            }
+          },
+          "sessions": {},
+          "aclCache": {
+            "1": [
+              {
+                "perms": 1,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ]
+          },
+          "lastProcessedZxid": 0,
+          "treeDigest": 1371985504
+        },
+        "digest": {
+          "zxid": 0,
+          "version": 2,
+          "treeDigest": 0
+        },
+        "serializedLastZxid": 0,
+        "seals": [
+          {
+            "offset": 675,
+            "adler32": 1250665011
+          },
+          {
+            "offset": 708,
+            "adler32": 1714856975
+          },
+          {
+            "offset": 729,
+            "adler32": 4068058510
+          }
+        ],
+        "bytes": 742,
+        "componentBytes": {
+          "fileHeader": 16,
+          "sessions": 4,
+          "aclCache": 39,
+          "nodeRows": 611,
+          "treeEnd": 5,
+          "baseSeal": 13,
+          "digestAndSeal": 33,
+          "lastZxidAndSeal": 21
+        }
+      }
+    },
+    {
+      "id": "missing-quota-node",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000012f000000008a9c9128000000012f00000000000000000000000200000000000000000000000079f19339000000012f000000000000000000000000b2d7959f000000012f",
+      "expected": "reject",
+      "basis": "Exact builtins domain required.",
+      "wireBytes": 650,
+      "wireSha256": "ad3e25bdfe05eb436aa72a5c45e195c5391e617caf749c9f09850cb336e54049"
+    },
+    {
+      "id": "extra-unknown-node",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b2f756e657870656374656400000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f41cabf3000000012f0000000000000000000000020000000000000000000000006d36aed3000000012f000000000000000000000000e761b127000000012f",
+      "expected": "reject",
+      "basis": "No external metadata class exists before the admitted initial boundary.",
+      "wireBytes": 829,
+      "wireSha256": "c456d6f643899bc04a0a6d31a6877282fa3d11ba4aea0e0b80a10c18236c01df"
+    },
+    {
+      "id": "unexpected-session",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000001000000000000000700007530000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f000000002091a039000000012f000000000000000000000002000000000000000000000000f73fa1f5000000012f0000000000000000000000006e07a4f1000000012f",
+      "expected": "reject",
+      "basis": "Source constructors do not create a ZooKeeper session.",
+      "wireBytes": 754,
+      "wireSha256": "f449342667b46d2e47050d3b52a39c9d6c5e0143ae51b2e98184d0ebe21a75d9"
+    },
+    {
+      "id": "config-uncached-acl",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d30ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000fc0ca783000000012f000000000000000000000002000000000000000000000000d603a9e7000000012f000000000000000000000000ed68ac80000000012f",
+      "expected": "reject",
+      "basis": "Config requires cached READ_ACL_UNSAFE, not open sentinel.",
+      "wireBytes": 742,
+      "wireSha256": "3a204140755f29270ba844ad34082de36c5c435907272845ffca562fef528f73"
+    },
+    {
+      "id": "config-wrong-acl-list",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000001f00000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f0000000040029faa000000012f00000000000000000000000200000000000000000000000003aba167000000012f0000000000000000000000005d86a34d000000012f",
+      "expected": "reject",
+      "basis": "READ1 is source-derived; OPEN31 is wrong.",
+      "wireBytes": 742,
+      "wireSha256": "131b3db865c33f4846bda00f0408376019e41fa4b1d25103f1acfc693af4b833"
+    },
+    {
+      "id": "config-wrong-fresh-acl-id",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000002000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000020000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f88d9f8e000000012f000000000000000000000002000000000000000000000000d9cea272000000012f0000000000000000000000005aaea55d000000012f",
+      "expected": "reject",
+      "basis": "First newly cached ACL is1, not2.",
+      "wireBytes": 742,
+      "wireSha256": "19be40e97359c6ca9f8656b5c58057ea7ca7fd8d7c2485a6870d99ce723c13c2"
+    },
+    {
+      "id": "extra-cached-acl",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000020000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000002000000010000001f00000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000c40fa46c000000012f0000000000000000000000020000000000000000000000002f64a681000000012f000000000000000000000000f494a86b000000012f",
+      "expected": "reject",
+      "basis": "Exact initial cache domain excludes an unexplained second list.",
+      "wireBytes": 777,
+      "wireSha256": "baa2c9b686465468f2d66bc3843e6d65b13c73c761e1e1844538dca46fec4d19"
+    },
+    {
+      "id": "config-wrong-host",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d782e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f0000000068ca9fd4000000012f0000000000000000000000020000000000000000000000005089a2ab000000012f000000000000000000000000cbbca501000000012f",
+      "expected": "reject",
+      "basis": "Same-length unknown membership must reject.",
+      "wireBytes": 742,
+      "wireSha256": "376091d6bb0f1358ecb5b43051f2adc9af1d5b98740796a562991df50cee503b"
+    },
+    {
+      "id": "config-wrong-version-text",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3100000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f6119f8d000000012f000000000000000000000002000000000000000000000000c94da1f2000000012f0000000000000000000000003d7ea4cb000000012f",
+      "expected": "reject",
+      "basis": "Exact static verifier version0 required.",
+      "wireBytes": 742,
+      "wireSha256": "c68d195f78d58ffa0b6233b595dc5e9954660bf035e208c2664b884924a86e80"
+    },
+    {
+      "id": "config-missing-server",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000000b37365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f0000000063828146000000012f00000000000000000000000200000000000000000000000040b08324000000012f0000000000000000000000001ddf84eb000000012f",
+      "expected": "reject",
+      "basis": "No missing participant may hide behind an unchanged node tree.",
+      "wireBytes": 657,
+      "wireSha256": "02cce2f2b6022d441be392710dc130bd6976513a47a31f27570e1f82572b9c65"
+    },
+    {
+      "id": "root-nonempty-payload",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e65000000000000000158ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000d7369fe5000000012f000000000000000000000002000000000000000000000000bf43a2a8000000012f0000000000000000000000003d1ba524000000012f",
+      "expected": "reject",
+      "basis": "Root data is initially empty.",
+      "wireBytes": 743,
+      "wireSha256": "efa0490c1fc4c5f48363fb0168bde58909e65594dad3a3da87522b5261ab6080"
+    },
+    {
+      "id": "wrong-root-cversion",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f79c9f8d000000012f000000000000000000000002000000000000000000000000da29a27e000000012f000000000000000000000000526ea4d1000000012f",
+      "expected": "reject",
+      "basis": "A source-fixed persisted stat field changed; only config mtime is variable.",
+      "wireBytes": 742,
+      "wireSha256": "fe8936aadac5de21dd6cf5107db496c5cdcfb75a6d9942ccd459623df3853601"
+    },
+    {
+      "id": "wrong-proc-mtime",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f74e9f8d000000012f000000000000000000000002000000000000000000000000d153a230000000012f00000000000000000000000040f5a456000000012f",
+      "expected": "reject",
+      "basis": "A source-fixed persisted stat field changed; only config mtime is variable.",
+      "wireBytes": 742,
+      "wireSha256": "00708f8778ce878f0a703a9afa9af45161c8573bd8b66eb1af4ac70b8e33c86c"
+    },
+    {
+      "id": "wrong-quota-aversion",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffff00000000000000000000000000000000000000012f00000000531ca388000000012f000000000000000000000002000000000000000000000000985aa554000000012f00000000000000000000000048bca76f000000012f",
+      "expected": "reject",
+      "basis": "A source-fixed persisted stat field changed; only config mtime is variable.",
+      "wireBytes": 742,
+      "wireSha256": "475bd58fdcb7512277d9599fbd04f5244a666d8f810df6d006c7e898b4ede41e"
+    },
+    {
+      "id": "wrong-config-version",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d30000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000094a9b90000000012f000000000000000000000002000000000000000000000000441f9d40000000012f0000000000000000000000003ffa9eb0000000012f",
+      "expected": "reject",
+      "basis": "A source-fixed persisted stat field changed; only config mtime is variable.",
+      "wireBytes": 742,
+      "wireSha256": "b68125f502613aa44d532b31410e339465be5e5549c202b6e0f2702f5fecc86c"
+    },
+    {
+      "id": "wrong-config-aversion",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff000000000000000000000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000292a9b90000000012f000000000000000000000002000000000000000000000000641f9d40000000012f000000000000000000000000621a9ed0000000012f",
+      "expected": "reject",
+      "basis": "A source-fixed persisted stat field changed; only config mtime is variable.",
+      "wireBytes": 742,
+      "wireSha256": "9cdc8c105104ded2b552b104374efc053438e917b8b8585b22be2b2ffa734b56"
+    },
+    {
+      "id": "wrong-config-mzxid",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000100000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f5f99f8d000000012f000000000000000000000002000000000000000000000000e278a2d9000000012f0000000000000000000000006ca6a5de000000012f",
+      "expected": "reject",
+      "basis": "A source-fixed persisted stat field changed; only config mtime is variable.",
+      "wireBytes": 742,
+      "wireSha256": "0c954e9d8b06c7deba462f13433ebcbaa0aa96288e23f2b011035b2bc77f0b82"
+    },
+    {
+      "id": "wrong-config-czxid",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000001000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f6019f8d000000012f000000000000000000000002000000000000000000000000c77da1e2000000012f0000000000000000000000003c5ca4d9000000012f",
+      "expected": "reject",
+      "basis": "A source-fixed persisted stat field changed; only config mtime is variable.",
+      "wireBytes": 742,
+      "wireSha256": "0a72c4a153279aa3d502cebf4c3f1f0b1f4d9ab0a4008271225df3216fa38a39"
+    },
+    {
+      "id": "wrong-config-pzxid",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000001000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f5cd9f8d000000012f000000000000000000000002000000000000000000000000dd7ca2ad000000012f0000000000000000000000006191a585000000012f",
+      "expected": "reject",
+      "basis": "A source-fixed persisted stat field changed; only config mtime is variable.",
+      "wireBytes": 742,
+      "wireSha256": "c927ba42c39b6a8e905cd5632c0ecbaefbfe02f64848efe0761d2c2476fbf3c5"
+    },
+    {
+      "id": "wrong-config-cversion",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000001ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f5e19f8d000000012f000000000000000000000002000000000000000000000000dfc0a2c1000000012f0000000000000000000000006af3a5f3000000012f",
+      "expected": "reject",
+      "basis": "A source-fixed persisted stat field changed; only config mtime is variable.",
+      "wireBytes": 742,
+      "wireSha256": "bb37a802d4fa0413ad8770d8bf3911826afea25e847cdcbba958f3a1f9fe65e5"
+    },
+    {
+      "id": "wrong-config-owner",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff80000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f000000002dfaa00c000000012f000000000000000000000002000000000000000000000000074da211000000012f00000000000000000000000064d9a348000000012f",
+      "expected": "reject",
+      "basis": "A source-fixed persisted stat field changed; only config mtime is variable.",
+      "wireBytes": 742,
+      "wireSha256": "445e0f7abd84a2b2dbf8237419c73b790ffa6f135e80981cab9e62e1fd35d33b"
+    },
+    {
+      "id": "wrong-filename-zxid",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 1,
+      "fileName": "snapshot.1",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f56b9f8c000000012f000000000000000000000002000000000000000000000000d227a249000000012f0000000000000000000000004285a45d000000012f",
+      "expected": "reject",
+      "basis": "Filename is separate evidence and must identify initial0snapshot.",
+      "wireBytes": 742,
+      "wireSha256": "c95283e68ba787605d9967a5d2f313dfead8f67f5588a7d67ade2b7149cd355d"
+    },
+    {
+      "id": "wrong-serialized-last-zxid",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f56b9f8c000000012f000000000000000000000002000000000000000000000000d227a249000000012f0000000000000001000000004286a45e000000012f",
+      "expected": "reject",
+      "basis": "Initial snapshot state iszxid0.",
+      "wireBytes": 742,
+      "wireSha256": "321453cce858dafc75b4ac570fa2d8963b893fbe69b945a47d1ff3b35e212fbd"
+    },
+    {
+      "id": "unexpected-nonempty-digest-at-zero",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000f56b9f8c000000012f0000000000000000000000020000000051c6d66000000000d7c9a496000000012f0000000000000000000000008741a7a0000000012f",
+      "expected": "reject",
+      "basis": "Fresh pretransaction source has null lastProcessedZxidDigest and writes the empty marker, not a fabricated recorded digest.",
+      "wireBytes": 742,
+      "wireSha256": "f044f8d3b1859666235bd3b6a251e32925b0de596925bad19072dac77a5f4013"
+    },
+    {
+      "id": "wrong-snapshot-db-id",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "snapshotFileZxid": 0,
+      "fileName": "snapshot.0",
+      "wireHex": "5a4b534e00000002000000000000000000000000000000010000000000000001000000010000000100000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a2f7a6f6f6b656570657200000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000112f7a6f6f6b65657065722f636f6e666967000001087365727665722e313d7a6f6f6b65657065722d302e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e323d7a6f6f6b65657065722d312e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a7365727665722e333d7a6f6f6b65657065722d322e7a6f6f6b65657065722e70756c7361722d73797374656d2e7376632e636c75737465722e6c6f63616c3a323838383a333838383a7061727469636970616e740a76657273696f6e3d3000000000000000010000000000000000000000000000000000000000000000000000000000000001ffffffff00000000ffffffff00000000000000000000000000000000000000102f7a6f6f6b65657065722f71756f746100000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f000000004cfb9794000000012f0000000000000000000000020000000000000000000000001f439a38000000012f000000000000000000000000da959b9c000000012f",
+      "expected": "reject",
+      "basis": "Pinned FileSnap header dbid is\u22121.",
+      "wireBytes": 742,
+      "wireSha256": "c03bb942956aa0b9eedca904319ac26aca65a6365191998444e895040cc80b8a"
+    }
+  ]
+}

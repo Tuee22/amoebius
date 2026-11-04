@@ -1,0 +1,134 @@
+{
+  "schema": "phase30-independent-registry-matcher-amendment-v1",
+  "scope": "Only source-family/non-null exceptional alias relation; initial opaque capture grants no semantic execution permission.",
+  "parentCorpusSha256": "d9687941054ff1d205003ae05e1628a37ba3080704b31f80a3a5294a1dfecba7",
+  "source": "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/DataTree.java",
+  "cases": [
+    {
+      "id": "unsupported-SetACL-child",
+      "policy": {
+        "uniqueFramedByteLimit": 512,
+        "maxAliasEntries": 1
+      },
+      "header": {
+        "clientId": 7,
+        "cxid": 15,
+        "zxid": 15,
+        "time": 15000,
+        "type": 14
+      },
+      "children": [
+        {
+          "type": 7,
+          "serializedBodyHex": "000000022f78000000010000001f00000005776f726c6400000006616e796f6e6500000001"
+        },
+        {
+          "type": -1,
+          "serializedBodyHex": "ffffff99"
+        }
+      ],
+      "expectedOriginal": {
+        "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e000000020000000700000025000000022f78000000010000001f00000005776f726c6400000006616e796f6e6500000001ffffffff00000004ffffff99",
+        "canonicalBytes": 93,
+        "canonicalSha256": "c45d3b93dbcf34bc05ae5d70dbdc77da3cd49a794d72441431cfeeccfff73a76",
+        "uniqueFramedBytes": 118
+      },
+      "mutation": {
+        "childIndex": 0,
+        "type": -1,
+        "expectedCurrentCanonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000002ffffffff00000025000000022f78000000010000001f00000005776f726c6400000006616e796f6e6500000001ffffffff00000004ffffff99"
+      },
+      "expectedAfterMutation": {
+        "admission": "deny",
+        "reasonCategory": "alias-mutation-denied",
+        "uniqueFramedBytes": 118,
+        "uniqueTransactions": 1,
+        "aliasEntries": 1
+      }
+    },
+    {
+      "id": "unknown-child-opcode",
+      "policy": {
+        "uniqueFramedByteLimit": 512,
+        "maxAliasEntries": 1
+      },
+      "header": {
+        "clientId": 7,
+        "cxid": 15,
+        "zxid": 15,
+        "time": 15000,
+        "type": 14
+      },
+      "children": [
+        {
+          "type": 999,
+          "serializedBodyHex": "00000000"
+        },
+        {
+          "type": -1,
+          "serializedBodyHex": "ffffff99"
+        }
+      ],
+      "expectedOriginal": {
+        "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000002000003e70000000400000000ffffffff00000004ffffff99",
+        "canonicalBytes": 60,
+        "canonicalSha256": "c5b74f1748d17f5a0eb1c9c18794f83ae57d9e3bfb38037804ad66a1e66f9b84",
+        "uniqueFramedBytes": 85
+      },
+      "mutation": {
+        "childIndex": 0,
+        "type": -1,
+        "expectedCurrentCanonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000002ffffffff0000000400000000ffffffff00000004ffffff99"
+      },
+      "expectedAfterMutation": {
+        "admission": "deny",
+        "reasonCategory": "alias-mutation-denied",
+        "uniqueFramedBytes": 85,
+        "uniqueTransactions": 1,
+        "aliasEntries": 1
+      }
+    },
+    {
+      "id": "null-child-buffer",
+      "policy": {
+        "uniqueFramedByteLimit": 512,
+        "maxAliasEntries": 1
+      },
+      "header": {
+        "clientId": 7,
+        "cxid": 15,
+        "zxid": 15,
+        "time": 15000,
+        "type": 14
+      },
+      "children": [
+        {
+          "type": 5,
+          "serializedBodyHex": null
+        },
+        {
+          "type": -1,
+          "serializedBodyHex": "ffffff99"
+        }
+      ],
+      "expectedOriginal": {
+        "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e0000000200000005ffffffffffffffff00000004ffffff99",
+        "canonicalBytes": 56,
+        "canonicalSha256": "751f5910fbdb9d2d3bc14a88e49b5f6e8fd9921a6ff74592bd140ffc5d2d62c3",
+        "uniqueFramedBytes": 81
+      },
+      "mutation": {
+        "childIndex": 0,
+        "type": -1,
+        "expectedCurrentCanonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000002ffffffffffffffffffffffff00000004ffffff99"
+      },
+      "expectedAfterMutation": {
+        "admission": "deny",
+        "reasonCategory": "alias-mutation-denied",
+        "uniqueFramedBytes": 81,
+        "uniqueTransactions": 1,
+        "aliasEntries": 1
+      }
+    }
+  ]
+}

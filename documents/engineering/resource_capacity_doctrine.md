@@ -252,8 +252,13 @@ are carried by
 Phase 29 validated the bounded Vault source-population fold and its live projection. The declared resident
 population was 425,984 bytes, the derived usable Raft peak was 2,023,424 bytes, and the provisioned fixed raw
 backing was 134,217,728 bytes; rotated audit required at least 4,194,304 usable bytes and received a 67,108,864
-byte raw backing. One-byte-under cases rejected in the pure contract, while forced snapshot/history and audit
-rotation stayed inside the observed ext4 usable capacities. The proof used the universal `linux-cpu` lane;
+byte raw backing. Accepted/rejected CLI pairs change exactly one storage operand and leave allocation/API
+state unchanged. The enclosing private service seal covers execution epochs, all six request/limit fields,
+bounded scratch/writable/log allowances, and both durable presentations; applied readback matches it.
+The backing inventory is physically reserved before use. An external filesystem observer measures snapshot
+old/new overlap, compaction/recovery, and automatic audit rotation/retention. Its tested Vault/audit peaks are
+1,105,920 and 3,158,016 bytes, below their modeled usable peaks and observed ext4 capacities. Current
+validation ownership is [Phase 29](../../DEVELOPMENT_PLAN/phase_29_vault_pki.md). The lane is universal `linux-cpu`;
 pristine Linux routes through Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ### Phase-31 service-capacity validation
@@ -340,15 +345,14 @@ post-rounding debit and verified-migration high-water/cleanup boundaries. The bo
 available on every hardware substrate; use Incus on native Linux/Linux-CUDA, Lima on Apple, or WSL2 on
 Windows when a pristine Linux host is required.
 
-Phase 30 closed the linux-cpu backbone capacity slice. The pure corpus covered six-arm MinIO producer
-geometry, erasure healing, failed-write orphans, uniform four-drive claim debit, BookKeeper quorum/recovery,
-and exact-fit/one-byte-over boundaries. Live readback then matched complete CPU, memory, and ephemeral-storage
-fields plus retained volumes for every execution unit; 53 SSA object projections and 11 Haskell renderer
-projections were exact. Offload produced 19 MinIO objects while observed hot-tier bytes remained under the
-65,536-byte cap. The Register-3 ledger is
-`dynamically-resolved`. Every hardware substrate can
-always run this `linux-cpu` lane; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on
-Windows.
+The Phase-30 backbone slice requires six-arm class-specific producer derivations, per-drive erasure and
+healing maps, separately charged replacement capacity, BookKeeper quorum/recovery, bounded ZooKeeper
+metadata history, and exact-fit/one-byte-over denials. Earlier 53-object/eleven-field projections and the
+nineteen-object offload observation were invalidated as closure evidence. Current diagnostics exercise the
+canonical Phase-25 registry inventory and complete native manifests; they do not establish the remaining
+capacity premises or a fresh Register-3 seal. The [Phase-30 plan](../../DEVELOPMENT_PLAN/phase_30_platform_backbone.md)
+owns current progress and validation. This `linux-cpu` lane runs on every hardware substrate; pristine Linux
+uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 Phase 44 adds the scoped provider-planning capacity instance. `PulumiExecutionDemand` accounts both live
 executors at a `BoundedParallel 2` peak, including CPU, memory, pod-ephemeral, plugin-cache, and workspace

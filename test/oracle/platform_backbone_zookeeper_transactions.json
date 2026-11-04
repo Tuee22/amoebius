@@ -1,0 +1,31 @@
+{
+  "schema":"phase30.independent-zookeeper-transaction-root-amendment.v1",
+  "provenance":"Independent additions from ZooKeeper3.9.3 zookeeper.jute, MultiOperationRecord and PrepRequestProcessor. No subject output, live tree or production schema supplies an expectation.",
+  "transaction_cases":[
+    {"id":"error-bad-version","operation":"Error","code":-103,"expected_body_bytes":4,"expected_without_digest":49,"expected_with_digest":61},
+    {"id":"error-runtime-inconsistency","operation":"Error","code":-2,"expected_body_bytes":4,"expected_without_digest":49,"expected_with_digest":61},
+    {"id":"check-version","operation":"CheckVersion","path":"/a","version":0,"expected_body_bytes":10,"expected_without_digest":55,"expected_with_digest":67},
+    {"id":"check-and-set-data-multi","operation":"Multi","children":[{"operation":"CheckVersion","path":"/a","version":0},{"operation":"SetData","path":"/a","data_bytes":3,"version":0}],"expected_body_bytes":47,"expected_without_digest":92,"expected_with_digest":104},
+    {"id":"aborted-multi-error-children","operation":"Multi","children":[{"operation":"Error","code":-103},{"operation":"Error","code":-2}],"expected_body_bytes":28,"expected_without_digest":73,"expected_with_digest":85},
+    {"id":"root-set-data","operation":"SetData","path":"/","data_bytes":3,"version":0,"expected_body_bytes":16,"expected_without_digest":61,"expected_with_digest":73},
+    {"id":"root-check-version","operation":"CheckVersion","path":"/","version":0,"expected_body_bytes":9,"expected_without_digest":54,"expected_with_digest":66}
+  ],
+  "root_watch_case":{
+    "nodes":[{"serialized_path":"","data_bytes":0,"acl_id":-1,"ephemeral_owner":0}],
+    "sessions":[{"id":1,"timeout":30000}],"acl_cache":[],
+    "watches":[{"session":1,"path":"/","type":"Children"}],
+    "expected_set_watches_bytes":25,"expected_set_watches2_bytes":33,
+    "expected_base_snapshot_bytes":130,
+    "rule":"Serialize the snapshot root as empty path. Accept slash as the legal operation/watch path, normalize it only for node lookup, and retain slash for its5-byte Jute wire string. Empty operation/watch paths reject."
+  },
+  "format_rejections":[
+    {"id":"empty-operation-path","operation":"SetData","path":"","data_bytes":3,"expected":"reject"},
+    {"id":"empty-watch-path","session":1,"path":"","type":"Children","expected":"reject"},
+    {"id":"snapshot-slash-alias-is-not-a-second-root","change":"serialized snapshot tree contains both empty root and slash root","expected":"reject"},
+    {"id":"set-acl-is-not-a-multi-request-child","operation":"Multi","children":[{"operation":"SetACL","path":"/a","acl":"open-world"}],"expected":"reject","scope":"Standalone SetACL remains supported. This finite multi subset follows real mutation requests; persisted Error children have their explicit history arm."},
+    {"id":"node-buffer-length-overflow","data_bytes":2147483648,"expected":"reject","reason":"Jute signed-int32 buffer length cannot encode this bound."},
+    {"id":"txn-buffer-length-overflow","operation":"SetData","path":"/a","data_bytes":2147483648,"expected":"reject"},
+    {"id":"txn-payload-prefix-overflow","operation":"SetData","path":"/a","data_bytes":2147483602,"digest":false,"expected":"reject","reason":"The data buffer fits int32, but32-byte TxnHeader plus operation body is2147483648; the enclosing transaction buffer length overflows."}
+  ],
+  "history_rule":"ErrorTxn is a persisted4-byte body for failed write operations; aborted MultiTxn records may carry Error children. Their counts belong in the finite complete history. Supporting these codecs does not prove actual error/rate/history counts or a production znode schema."
+}

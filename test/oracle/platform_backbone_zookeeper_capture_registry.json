@@ -1,0 +1,3512 @@
+{
+  "schema": "phase30-independent-capture-registry-v1",
+  "scope": "In-memory original identity/debt and weak alias metadata only; no durable/global permit, physical-attempt charge, interception, RPC or heap adequacy claim.",
+  "sourceCaptureCorpusSha256": "93ef7637c51a978419bb723ceed739083dabe0a8dd86534fdb43498f7f438c19",
+  "sources": [
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/persistence/Util.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/Request.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-jute/src/main/java/org/apache/jute/BinaryOutputArchive.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-jute/src/main/resources/zookeeper.jute",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/DataTree.java"
+  ],
+  "rules": [
+    "Constructor policy is immutable and positive; a positive limit below61 is valid empty policy but cannot fund a minimum row.",
+    "Unique debt is original canonicalBytes+25 per zxid, including nullable-digest cases; no refunds, eviction or reset.",
+    "A new identity pair with exact original bytes may add an alias without adding unique debt; conflicting new-object same-zxid bytes reject.",
+    "Aliases are weak identity pairs, never equals-based keys; collecting either endpoint frees that alias metadata only.",
+    "Dead-alias queue cleanup may occur before a denied command. After that housekeeping, denial changes neither debt nor live aliases.",
+    "Every call freshly serializes/checks current input. An alias hit is not a cached permission to skip checked serialization.",
+    "Application returns the retained original with no digest. Append returns original.withDigest(current supplied digest), with no physical permission.",
+    "Only ORIGINAL Multi containing an Error child admits the pinned failed view: exact header/count/order/all child data, original Error types unchanged, other original child types unchanged or Error.",
+    "Each comparison is against the original, so exact original bytes remain valid even after a previously observed failed view; no monotonic observed-view state is invented.",
+    "New-object mutated Multi does not inherit the same-pair exception. Header/data/count/order/other opcode changes reject.",
+    "Digest/serializer/quota/alias validation precedes any new debt/alias commit. All state transitions are synchronized.",
+    "GC test actions explicitly clear/enqueue only saved private weak references; they are test-only queue simulation, not a production remove/reset API or GC timing guarantee.",
+    "A stale second endpoint queue event must not remove a later unrelated alias or decrement alias count twice.",
+    "Weak aliases may conservatively deny while old objects remain live or GC has not delivered queue events."
+  ],
+  "records": {
+    "session1": {
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "expectedOriginal": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 36,
+        "payloadBytes": 36,
+        "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+        "physicalFramedBytes": 49,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+        "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+      }
+    },
+    "session1-conflict": {
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30001
+      },
+      "expectedOriginal": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 36,
+        "payloadBytes": 36,
+        "canonicalSha256": "606a1c9c6c1b21f5653b0a1c2b241d07d57a7f67ded75b902a286ada3be99d01",
+        "payloadSha256": "606a1c9c6c1b21f5653b0a1c2b241d07d57a7f67ded75b902a286ada3be99d01",
+        "physicalFramedBytes": 49,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007531",
+        "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007531"
+      }
+    },
+    "session2": {
+      "header": {
+        "clientId": 7,
+        "cxid": 2,
+        "zxid": 2,
+        "time": 2000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "expectedOriginal": {
+        "admission": "accept",
+        "zxid": 2,
+        "canonicalBytes": 36,
+        "payloadBytes": 36,
+        "canonicalSha256": "182df70af951bae94a74ec086f6bf80c9fe6f3acaf0cc89026588054bc88a46b",
+        "payloadSha256": "182df70af951bae94a74ec086f6bf80c9fe6f3acaf0cc89026588054bc88a46b",
+        "physicalFramedBytes": 49,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "000000000000000700000002000000000000000200000000000007d0fffffff600007530",
+        "payloadHex": "000000000000000700000002000000000000000200000000000007d0fffffff600007530"
+      }
+    },
+    "session3": {
+      "header": {
+        "clientId": 7,
+        "cxid": 3,
+        "zxid": 3,
+        "time": 3000,
+        "type": -10
+      },
+      "transaction": {
+        "kind": "CreateSession",
+        "timeout": 30000
+      },
+      "expectedOriginal": {
+        "admission": "accept",
+        "zxid": 3,
+        "canonicalBytes": 36,
+        "payloadBytes": 36,
+        "canonicalSha256": "534f9c00994d98d4ab22ca7b5e4001d5d628634db1d12920b3babd82d803e3c5",
+        "payloadSha256": "534f9c00994d98d4ab22ca7b5e4001d5d628634db1d12920b3babd82d803e3c5",
+        "physicalFramedBytes": 49,
+        "maximumModernFramedBytes": 61,
+        "canonicalHex": "00000000000000070000000300000000000000030000000000000bb8fffffff600007530",
+        "payloadHex": "00000000000000070000000300000000000000030000000000000bb8fffffff600007530"
+      }
+    },
+    "successful-multi": {
+      "header": {
+        "clientId": 7,
+        "cxid": 8,
+        "zxid": 8,
+        "time": 8000,
+        "type": 14
+      },
+      "transaction": {
+        "kind": "Multi",
+        "children": [
+          {
+            "kind": "Create",
+            "path": "/a/c",
+            "dataHex": "78797a",
+            "acls": [
+              {
+                "perms": 31,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ],
+            "ephemeral": false,
+            "parentCVersion": 3,
+            "dataNull": false
+          },
+          {
+            "kind": "SetData",
+            "path": "/a/b",
+            "dataHex": "646f6e65",
+            "version": 2,
+            "dataNull": false
+          }
+        ]
+      },
+      "expectedOriginal": {
+        "admission": "accept",
+        "zxid": 8,
+        "canonicalBytes": 119,
+        "payloadBytes": 119,
+        "canonicalSha256": "81c59f3ade79d084e98b22163f972faeb6b2b87ec5ec183dc077bfd8661aa58f",
+        "payloadSha256": "81c59f3ade79d084e98b22163f972faeb6b2b87ec5ec183dc077bfd8661aa58f",
+        "physicalFramedBytes": 132,
+        "maximumModernFramedBytes": 144,
+        "canonicalHex": "00000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002",
+        "payloadHex": "00000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002"
+      }
+    },
+    "failed-multi-three-children": {
+      "header": {
+        "clientId": 7,
+        "cxid": 15,
+        "zxid": 15,
+        "time": 15000,
+        "type": 14
+      },
+      "transaction": {
+        "kind": "Multi",
+        "children": [
+          {
+            "kind": "SetData",
+            "path": "/x",
+            "dataHex": "61",
+            "dataNull": false,
+            "version": 1
+          },
+          {
+            "kind": "Error",
+            "error": -103
+          },
+          {
+            "kind": "SetData",
+            "path": "/y",
+            "dataHex": "62",
+            "dataNull": false,
+            "version": 1
+          }
+        ]
+      },
+      "expectedOriginal": {
+        "admission": "accept",
+        "zxid": 15,
+        "canonicalBytes": 94,
+        "payloadBytes": 94,
+        "canonicalSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+        "payloadSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+        "physicalFramedBytes": 107,
+        "maximumModernFramedBytes": 119,
+        "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001",
+        "payloadHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001"
+      }
+    },
+    "native-maximum": {
+      "header": {
+        "clientId": 7,
+        "cxid": 1,
+        "zxid": 1,
+        "time": 1000,
+        "type": 5
+      },
+      "transaction": {
+        "kind": "SetData",
+        "path": "/x",
+        "dataRepeat": {
+          "byte": 97,
+          "count": 349113
+        },
+        "dataNull": false,
+        "version": 1
+      },
+      "expectedOriginal": {
+        "admission": "accept",
+        "zxid": 1,
+        "canonicalBytes": 349159,
+        "payloadBytes": 349159,
+        "canonicalSha256": "67712065111cbca7c7a5a66f392fc49c7afe8754bb4325ff0eba8699c5c7ae95",
+        "payloadSha256": "67712065111cbca7c7a5a66f392fc49c7afe8754bb4325ff0eba8699c5c7ae95",
+        "physicalFramedBytes": 349172,
+        "maximumModernFramedBytes": 349184
+      }
+    }
+  },
+  "constructorCases": [
+    {
+      "id": "invalid-policy-0-1",
+      "uniqueFramedByteLimit": 0,
+      "maxAliasEntries": 1,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "policy-invalid"
+      }
+    },
+    {
+      "id": "invalid-policy--1-1",
+      "uniqueFramedByteLimit": -1,
+      "maxAliasEntries": 1,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "policy-invalid"
+      }
+    },
+    {
+      "id": "invalid-policy-61-0",
+      "uniqueFramedByteLimit": 61,
+      "maxAliasEntries": 0,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "policy-invalid"
+      }
+    },
+    {
+      "id": "invalid-policy-61--1",
+      "uniqueFramedByteLimit": 61,
+      "maxAliasEntries": -1,
+      "expected": {
+        "admission": "deny",
+        "reasonCategory": "policy-invalid"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "minimum-row-exact-and-repeat",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "minimum-row-one-byte-short",
+      "policy": {
+        "uniqueFramedByteLimit": 60,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 60,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "unique-byte-limit",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 60,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 0,
+              "uniqueRecordCount": 0,
+              "aliasEntryCount": 0,
+              "retainedOriginals": {},
+              "liveAliasPairs": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "two-unique-records-exact",
+      "policy": {
+        "uniqueFramedByteLimit": 122,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        },
+        {
+          "pair": "B",
+          "record": "session2",
+          "headerIdentity": "h-B",
+          "transactionIdentity": "t-B"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 122,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 122,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "B",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 2,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "182df70af951bae94a74ec086f6bf80c9fe6f3acaf0cc89026588054bc88a46b",
+              "payloadSha256": "182df70af951bae94a74ec086f6bf80c9fe6f3acaf0cc89026588054bc88a46b",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000002000000000000000200000000000007d0fffffff600007530",
+              "payloadHex": "000000000000000700000002000000000000000200000000000007d0fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 122,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 122,
+              "uniqueRecordCount": 2,
+              "aliasEntryCount": 2,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+                "2": "182df70af951bae94a74ec086f6bf80c9fe6f3acaf0cc89026588054bc88a46b"
+              },
+              "liveAliasPairs": [
+                "A",
+                "B"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "second-unique-one-byte-short-no-alias-insertion",
+      "policy": {
+        "uniqueFramedByteLimit": 121,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        },
+        {
+          "pair": "B",
+          "record": "session2",
+          "headerIdentity": "h-B",
+          "transactionIdentity": "t-B"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 121,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 121,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "B",
+          "before": [],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "unique-byte-limit",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 121,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "new-object-same-bytes-no-unique-recharge",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        },
+        {
+          "pair": "B",
+          "record": "session1",
+          "headerIdentity": "h-B",
+          "transactionIdentity": "t-B"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "B",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 2,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A",
+                "B"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "identity-pair-distinguishes-shared-header",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        },
+        {
+          "pair": "B",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-B"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "B",
+          "before": [],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "alias-entry-limit",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "identity-pair-distinguishes-shared-transaction",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        },
+        {
+          "pair": "B",
+          "record": "session1",
+          "headerIdentity": "h-B",
+          "transactionIdentity": "t-A"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "B",
+          "before": [],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "alias-entry-limit",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "alias-full-new-unique-denial-does-not-charge",
+      "policy": {
+        "uniqueFramedByteLimit": 122,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        },
+        {
+          "pair": "B",
+          "record": "session2",
+          "headerIdentity": "h-B",
+          "transactionIdentity": "t-B"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 122,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 122,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "B",
+          "before": [],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "alias-entry-limit",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 122,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 122,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "new-object-same-zxid-conflict",
+      "policy": {
+        "uniqueFramedByteLimit": 122,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        },
+        {
+          "pair": "B",
+          "record": "session1-conflict",
+          "headerIdentity": "h-B",
+          "transactionIdentity": "t-B"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 122,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 122,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "B",
+          "before": [],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "canonical-conflict",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 122,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "same-alias-rejects-zxid",
+      "policy": {
+        "uniqueFramedByteLimit": 122,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 122,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 122,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [
+            {
+              "mutatePair": "A",
+              "kind": "setHeaderField",
+              "field": "zxid",
+              "value": 2
+            }
+          ],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "alias-mutation-denied",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 122,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "same-alias-rejects-time",
+      "policy": {
+        "uniqueFramedByteLimit": 122,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 122,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 122,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [
+            {
+              "mutatePair": "A",
+              "kind": "setHeaderField",
+              "field": "time",
+              "value": 1001
+            }
+          ],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "alias-mutation-denied",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 122,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "same-alias-rejects-timeout",
+      "policy": {
+        "uniqueFramedByteLimit": 122,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 122,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 122,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [
+            {
+              "mutatePair": "A",
+              "kind": "setTransactionField",
+              "field": "timeout",
+              "value": 30001
+            }
+          ],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "alias-mutation-denied",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 122,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "invalid-first-append-digest-has-zero-state-effect",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "append",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "digest-profile-unsupported",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 0,
+              "uniqueRecordCount": 0,
+              "aliasEntryCount": 0,
+              "retainedOriginals": {},
+              "liveAliasPairs": []
+            }
+          },
+          "digest": {
+            "version": 3,
+            "treeDigest": 1
+          }
+        },
+        {
+          "operation": "append",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 48,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "8b642a73dab54e34869eb91bcc90d1fc03106fdd530ffabac2029d0d39cedd2f",
+              "physicalFramedBytes": 61,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530000000020000000004128908"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          },
+          "digest": {
+            "version": 2,
+            "treeDigest": 68323592
+          }
+        }
+      ]
+    },
+    {
+      "id": "append-application-materialize-distinct-payloads",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "append",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 48,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "8b642a73dab54e34869eb91bcc90d1fc03106fdd530ffabac2029d0d39cedd2f",
+              "physicalFramedBytes": 61,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530000000020000000004128908"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          },
+          "digest": {
+            "version": 2,
+            "treeDigest": 68323592
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "append",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 48,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "9113e0fc4b5d6273ed9bdd79554f08fd368427fc295763fbc2e79103ceb1a5b0",
+              "physicalFramedBytes": 61,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530000000028000000000000000"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          },
+          "digest": {
+            "version": 2,
+            "treeDigest": -9223372036854775808
+          }
+        },
+        {
+          "operation": "append",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          },
+          "digest": null
+        }
+      ]
+    },
+    {
+      "id": "invalid-duplicate-append-digest-preserves-state",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        },
+        {
+          "pair": "B",
+          "record": "session1",
+          "headerIdentity": "h-B",
+          "transactionIdentity": "t-B"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "append",
+          "pair": "B",
+          "before": [],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "digest-profile-unsupported",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          },
+          "digest": {
+            "version": 1,
+            "treeDigest": 1
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "B",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 2,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A",
+                "B"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "weak-alias-cleanup-does-not-refund-strong-debt",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        },
+        {
+          "pair": "B",
+          "record": "session1",
+          "headerIdentity": "h-B",
+          "transactionIdentity": "t-B"
+        },
+        {
+          "pair": "C",
+          "record": "session2",
+          "headerIdentity": "h-C",
+          "transactionIdentity": "t-C"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "B",
+          "before": [
+            {
+              "enqueueAliasEndpoint": "A",
+              "endpoint": "header"
+            }
+          ],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "B"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "C",
+          "before": [],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "unique-byte-limit",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "B"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "housekeeping-may-remove-dead-alias-on-denial",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        },
+        {
+          "pair": "B",
+          "record": "session1-conflict",
+          "headerIdentity": "h-B",
+          "transactionIdentity": "t-B"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "B",
+          "before": [
+            {
+              "enqueueAliasEndpoint": "A",
+              "endpoint": "transaction"
+            }
+          ],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "canonical-conflict",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 0,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "late-second-endpoint-queue-is-idempotent",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        },
+        {
+          "pair": "B",
+          "record": "session1",
+          "headerIdentity": "h-B",
+          "transactionIdentity": "t-B"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "B",
+          "before": [
+            {
+              "enqueueAliasEndpoint": "A",
+              "endpoint": "header"
+            }
+          ],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "B"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "B",
+          "before": [
+            {
+              "enqueueAliasEndpoint": "A",
+              "endpoint": "transaction"
+            }
+          ],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "B"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "uncollected-live-alias-conservatively-denies",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        },
+        {
+          "pair": "B",
+          "record": "session1",
+          "headerIdentity": "h-B",
+          "transactionIdentity": "t-B"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "B",
+          "before": [],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "alias-entry-limit",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "original-failed-Multi-views-return-original",
+      "policy": {
+        "uniqueFramedByteLimit": 119,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "F",
+          "record": "failed-multi-three-children",
+          "headerIdentity": "h-F",
+          "transactionIdentity": "t-F"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 119,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 15,
+              "canonicalBytes": 94,
+              "payloadBytes": 94,
+              "canonicalSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "payloadSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "physicalFramedBytes": 107,
+              "maximumModernFramedBytes": 119,
+              "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001",
+              "payloadHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 119,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [
+            {
+              "mutatePair": "F",
+              "kind": "setMultiChildType",
+              "index": 0,
+              "type": -1
+            }
+          ],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 15,
+              "canonicalBytes": 94,
+              "payloadBytes": 94,
+              "canonicalSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "payloadSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "physicalFramedBytes": 107,
+              "maximumModernFramedBytes": 119,
+              "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001",
+              "payloadHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 119,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "append",
+          "pair": "F",
+          "before": [
+            {
+              "mutatePair": "F",
+              "kind": "setMultiChildType",
+              "index": 2,
+              "type": -1
+            }
+          ],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 15,
+              "canonicalBytes": 94,
+              "payloadBytes": 106,
+              "canonicalSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "payloadSha256": "0c9a8fd5e39ef903e8f2d746105cea4568507ed05cb788dbca7162a61cb26ed4",
+              "physicalFramedBytes": 119,
+              "maximumModernFramedBytes": 119,
+              "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001",
+              "payloadHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001000000020000000004128908"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 119,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          },
+          "digest": {
+            "version": 2,
+            "treeDigest": 68323592
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [
+            {
+              "mutatePair": "F",
+              "kind": "restoreOriginalFields"
+            }
+          ],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 15,
+              "canonicalBytes": 94,
+              "payloadBytes": 94,
+              "canonicalSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "payloadSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "physicalFramedBytes": 107,
+              "maximumModernFramedBytes": 119,
+              "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001",
+              "payloadHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 119,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "successful-Multi-type-to-Error-is-not-pinned-failed-view",
+      "policy": {
+        "uniqueFramedByteLimit": 144,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "G",
+          "record": "successful-multi",
+          "headerIdentity": "h-G",
+          "transactionIdentity": "t-G"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 144,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "G",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 8,
+              "canonicalBytes": 119,
+              "payloadBytes": 119,
+              "canonicalSha256": "81c59f3ade79d084e98b22163f972faeb6b2b87ec5ec183dc077bfd8661aa58f",
+              "payloadSha256": "81c59f3ade79d084e98b22163f972faeb6b2b87ec5ec183dc077bfd8661aa58f",
+              "physicalFramedBytes": 132,
+              "maximumModernFramedBytes": 144,
+              "canonicalHex": "00000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002",
+              "payloadHex": "00000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 144,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 144,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "8": "81c59f3ade79d084e98b22163f972faeb6b2b87ec5ec183dc077bfd8661aa58f"
+              },
+              "liveAliasPairs": [
+                "G"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "G",
+          "before": [
+            {
+              "mutatePair": "G",
+              "kind": "setMultiChildType",
+              "index": 0,
+              "type": -1
+            }
+          ],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "alias-mutation-denied",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 144,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 144,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "8": "81c59f3ade79d084e98b22163f972faeb6b2b87ec5ec183dc077bfd8661aa58f"
+              },
+              "liveAliasPairs": [
+                "G"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "new-object-mutated-failed-Multi-is-conflict",
+      "policy": {
+        "uniqueFramedByteLimit": 238,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "F",
+          "record": "failed-multi-three-children",
+          "headerIdentity": "h-F",
+          "transactionIdentity": "t-F"
+        },
+        {
+          "pair": "N",
+          "record": "failed-multi-three-children",
+          "headerIdentity": "h-N",
+          "transactionIdentity": "t-N"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 238,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 15,
+              "canonicalBytes": 94,
+              "payloadBytes": 94,
+              "canonicalSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "payloadSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "physicalFramedBytes": 107,
+              "maximumModernFramedBytes": 119,
+              "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001",
+              "payloadHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 238,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "N",
+          "before": [
+            {
+              "mutatePair": "N",
+              "kind": "setMultiChildType",
+              "index": 0,
+              "type": -1
+            }
+          ],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "canonical-conflict",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 238,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "failed-Multi-rejects-header",
+      "policy": {
+        "uniqueFramedByteLimit": 238,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "F",
+          "record": "failed-multi-three-children",
+          "headerIdentity": "h-F",
+          "transactionIdentity": "t-F"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 238,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 15,
+              "canonicalBytes": 94,
+              "payloadBytes": 94,
+              "canonicalSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "payloadSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "physicalFramedBytes": 107,
+              "maximumModernFramedBytes": 119,
+              "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001",
+              "payloadHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 238,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [
+            {
+              "mutatePair": "F",
+              "kind": "setHeaderField",
+              "field": "cxid",
+              "value": 16
+            }
+          ],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "alias-mutation-denied",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 238,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "failed-Multi-rejects-changed-buffer",
+      "policy": {
+        "uniqueFramedByteLimit": 238,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "F",
+          "record": "failed-multi-three-children",
+          "headerIdentity": "h-F",
+          "transactionIdentity": "t-F"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 238,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 15,
+              "canonicalBytes": 94,
+              "payloadBytes": 94,
+              "canonicalSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "payloadSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "physicalFramedBytes": 107,
+              "maximumModernFramedBytes": 119,
+              "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001",
+              "payloadHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 238,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [
+            {
+              "mutatePair": "F",
+              "kind": "xorMultiChildDataByte",
+              "index": 0,
+              "byteOffset": 0,
+              "xor": 1
+            }
+          ],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "alias-mutation-denied",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 238,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "failed-Multi-rejects-changed-count",
+      "policy": {
+        "uniqueFramedByteLimit": 238,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "F",
+          "record": "failed-multi-three-children",
+          "headerIdentity": "h-F",
+          "transactionIdentity": "t-F"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 238,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 15,
+              "canonicalBytes": 94,
+              "payloadBytes": 94,
+              "canonicalSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "payloadSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "physicalFramedBytes": 107,
+              "maximumModernFramedBytes": 119,
+              "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001",
+              "payloadHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 238,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [
+            {
+              "mutatePair": "F",
+              "kind": "removeMultiChild",
+              "index": 2
+            }
+          ],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "alias-mutation-denied",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 238,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "failed-Multi-rejects-changed-order",
+      "policy": {
+        "uniqueFramedByteLimit": 238,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "F",
+          "record": "failed-multi-three-children",
+          "headerIdentity": "h-F",
+          "transactionIdentity": "t-F"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 238,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 15,
+              "canonicalBytes": 94,
+              "payloadBytes": 94,
+              "canonicalSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "payloadSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "physicalFramedBytes": 107,
+              "maximumModernFramedBytes": 119,
+              "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001",
+              "payloadHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 238,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [
+            {
+              "mutatePair": "F",
+              "kind": "swapMultiChildren",
+              "left": 0,
+              "right": 2
+            }
+          ],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "alias-mutation-denied",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 238,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "failed-Multi-rejects-original-Error-to-other-type",
+      "policy": {
+        "uniqueFramedByteLimit": 238,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "F",
+          "record": "failed-multi-three-children",
+          "headerIdentity": "h-F",
+          "transactionIdentity": "t-F"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 238,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 15,
+              "canonicalBytes": 94,
+              "payloadBytes": 94,
+              "canonicalSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "payloadSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "physicalFramedBytes": 107,
+              "maximumModernFramedBytes": 119,
+              "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001",
+              "payloadHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 238,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [
+            {
+              "mutatePair": "F",
+              "kind": "setMultiChildType",
+              "index": 1,
+              "type": 5
+            }
+          ],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "alias-mutation-denied",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 238,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "failed-Multi-rejects-other-non-Error-type",
+      "policy": {
+        "uniqueFramedByteLimit": 238,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "F",
+          "record": "failed-multi-three-children",
+          "headerIdentity": "h-F",
+          "transactionIdentity": "t-F"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 238,
+        "maxAliasEntries": 2,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 15,
+              "canonicalBytes": 94,
+              "payloadBytes": 94,
+              "canonicalSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "payloadSha256": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9",
+              "physicalFramedBytes": 107,
+              "maximumModernFramedBytes": 119,
+              "canonicalHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001",
+              "payloadHex": "00000000000000070000000f000000000000000f0000000000003a980000000e00000003000000050000000f000000022f78000000016100000001ffffffff00000004ffffff99000000050000000f000000022f79000000016200000001"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 238,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "F",
+          "before": [
+            {
+              "mutatePair": "F",
+              "kind": "setMultiChildType",
+              "index": 0,
+              "type": 2
+            }
+          ],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "alias-mutation-denied",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 238,
+              "maxAliasEntries": 2,
+              "uniqueFramedBytes": 119,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "15": "6fd5804e7fb72ba345ea157b842a89644a20c5e4dfab026dcb115336213b9bd9"
+              },
+              "liveAliasPairs": [
+                "F"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "checked-first-serializer-failure-has-no-debt",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "same-checked-IOException",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 0,
+              "uniqueRecordCount": 0,
+              "aliasEntryCount": 0,
+              "retainedOriginals": {},
+              "liveAliasPairs": []
+            }
+          },
+          "serializerFault": {
+            "stage": "transaction-after-write",
+            "requireSameExceptionInstance": true
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "checked-alias-serializer-failure-does-not-use-cached-permit",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "same-checked-IOException",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          },
+          "serializerFault": {
+            "stage": "transaction-after-write",
+            "requireSameExceptionInstance": true
+          }
+        },
+        {
+          "operation": "application",
+          "pair": "A",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 36,
+              "payloadBytes": 36,
+              "canonicalSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "payloadSha256": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f",
+              "physicalFramedBytes": 49,
+              "maximumModernFramedBytes": 61,
+              "canonicalHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530",
+              "payloadHex": "000000000000000700000001000000000000000100000000000003e8fffffff600007530"
+            },
+            "state": {
+              "uniqueFramedByteLimit": 61,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 61,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "ce56dc50c5195c028db30b91c2b0b4c0b4d3c6513aa23aa3b741c762112a202f"
+              },
+              "liveAliasPairs": [
+                "A"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "native-unique-exact",
+      "policy": {
+        "uniqueFramedByteLimit": 349184,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "L",
+          "record": "native-maximum",
+          "headerIdentity": "h-L",
+          "transactionIdentity": "t-L"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 349184,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "L",
+          "before": [],
+          "expected": {
+            "admission": "accept",
+            "capture": {
+              "admission": "accept",
+              "zxid": 1,
+              "canonicalBytes": 349159,
+              "payloadBytes": 349159,
+              "canonicalSha256": "67712065111cbca7c7a5a66f392fc49c7afe8754bb4325ff0eba8699c5c7ae95",
+              "payloadSha256": "67712065111cbca7c7a5a66f392fc49c7afe8754bb4325ff0eba8699c5c7ae95",
+              "physicalFramedBytes": 349172,
+              "maximumModernFramedBytes": 349184
+            },
+            "state": {
+              "uniqueFramedByteLimit": 349184,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 349184,
+              "uniqueRecordCount": 1,
+              "aliasEntryCount": 1,
+              "retainedOriginals": {
+                "1": "67712065111cbca7c7a5a66f392fc49c7afe8754bb4325ff0eba8699c5c7ae95"
+              },
+              "liveAliasPairs": [
+                "L"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "native-unique-one-byte-short",
+      "policy": {
+        "uniqueFramedByteLimit": 349183,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "L",
+          "record": "native-maximum",
+          "headerIdentity": "h-L",
+          "transactionIdentity": "t-L"
+        }
+      ],
+      "expectedInitial": {
+        "uniqueFramedByteLimit": 349183,
+        "maxAliasEntries": 1,
+        "uniqueFramedBytes": 0,
+        "uniqueRecordCount": 0,
+        "aliasEntryCount": 0,
+        "retainedOriginals": {},
+        "liveAliasPairs": []
+      },
+      "steps": [
+        {
+          "operation": "application",
+          "pair": "L",
+          "before": [],
+          "expected": {
+            "admission": "deny",
+            "reasonCategory": "unique-byte-limit",
+            "returnedCapture": false,
+            "state": {
+              "uniqueFramedByteLimit": 349183,
+              "maxAliasEntries": 1,
+              "uniqueFramedBytes": 0,
+              "uniqueRecordCount": 0,
+              "aliasEntryCount": 0,
+              "retainedOriginals": {},
+              "liveAliasPairs": []
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "concurrencyCases": [
+    {
+      "id": "two-unique-requests-compete-for-last-byte-slot",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 2
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        },
+        {
+          "pair": "B",
+          "record": "session2",
+          "headerIdentity": "h-B",
+          "transactionIdentity": "t-B"
+        }
+      ],
+      "concurrentApplications": [
+        "A",
+        "B"
+      ],
+      "expected": {
+        "acceptedCalls": 1,
+        "deniedCalls": 1,
+        "denialReason": "unique-byte-limit",
+        "uniqueFramedBytes": 61,
+        "uniqueRecordCount": 1,
+        "aliasEntryCount": 1,
+        "permittedRetainedZxidSets": [
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ]
+      }
+    },
+    {
+      "id": "two-equal-new-pairs-compete-for-last-alias-slot",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        },
+        {
+          "pair": "B",
+          "record": "session1",
+          "headerIdentity": "h-B",
+          "transactionIdentity": "t-B"
+        }
+      ],
+      "concurrentApplications": [
+        "A",
+        "B"
+      ],
+      "expected": {
+        "acceptedCalls": 1,
+        "deniedCalls": 1,
+        "denialReason": "alias-entry-limit",
+        "uniqueFramedBytes": 61,
+        "uniqueRecordCount": 1,
+        "aliasEntryCount": 1,
+        "permittedRetainedZxidSets": [
+          [
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "id": "same-identity-pair-concurrent-repeat-idempotent",
+      "policy": {
+        "uniqueFramedByteLimit": 61,
+        "maxAliasEntries": 1
+      },
+      "pairs": [
+        {
+          "pair": "A",
+          "record": "session1",
+          "headerIdentity": "h-A",
+          "transactionIdentity": "t-A"
+        }
+      ],
+      "concurrentApplications": [
+        "A",
+        "A"
+      ],
+      "expected": {
+        "acceptedCalls": 2,
+        "deniedCalls": 0,
+        "uniqueFramedBytes": 61,
+        "uniqueRecordCount": 1,
+        "aliasEntryCount": 1,
+        "permittedRetainedZxidSets": [
+          [
+            1
+          ]
+        ]
+      }
+    }
+  ]
+}

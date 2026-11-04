@@ -345,7 +345,21 @@ def host_inventory() -> HostInventory:
     """Capture the declared outside-host surfaces without mutating any of them."""
     containers, container_error = _docker(["ps", "-a", "--format", "{{json .}}"])
     volumes, volume_error = _docker(["volume", "ls", "--format", "{{json .}}"])
-    cache, cache_error = _docker(["builder", "du"])
+    cache, cache_error = _docker(["builder", "du", "--format=json"])
+    normalized_cache: list[str] = []
+    for row in cache:
+        try:
+            value = json.loads(row)
+        except json.JSONDecodeError:
+            normalized_cache.append(row)
+            continue
+        if isinstance(value, dict):
+            # Buildx renders this as an age ("15 minutes ago"), so passage of
+            # time alone changes it. Preserve all identity/size/usage metadata.
+            value.pop("LastUsedAt", None)
+            normalized_cache.append(json.dumps(value, sort_keys=True, separators=(",", ":")))
+        else:
+            normalized_cache.append(row)
     daemon, daemon_error = _docker(["info", "--format", "{{json .DockerRootDir}}"])
     firewall, firewall_error = _amoebius_firewall_rules()
     errors = tuple(sorted({e for e in (container_error, volume_error, cache_error, daemon_error, firewall_error) if e}))
@@ -359,7 +373,7 @@ def host_inventory() -> HostInventory:
         amoebius_firewall_rules=firewall,
         docker_containers=tuple(row for row in containers if "amoebius" in row.lower()),
         docker_volumes=tuple(row for row in volumes if "amoebius" in row.lower()),
-        docker_build_cache=cache,
+        docker_build_cache=tuple(sorted(normalized_cache)),
         docker_daemon_roots=daemon,
         observation_errors=errors,
     )

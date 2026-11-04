@@ -331,11 +331,11 @@ in  { architectureConcurrency = 2
         "sha256:561618e2c15bf2397621dd04f96926663a3b5616c189cf7e38db7e82f5c538ea"
     , acquisitionTools =
           [ { package = "ca-certificates"
-            , packageVersion = "20260601~24.04.1"
+            , packageVersion = "20260816ubuntu0.24.04.1"
             , archiveSuite = nobleUpdatesMain
             }
           , { package = "curl"
-            , packageVersion = "8.5.0-2ubuntu10.11"
+            , packageVersion = "8.5.0-2ubuntu10.16"
             , archiveSuite = nobleUpdatesMain
             }
           , { package = "unzip"
@@ -384,7 +384,7 @@ in  { architectureConcurrency = 2
               [ apt
                   "redis-server"
                   "redis-server"
-                  "5:7.0.15-1ubuntu0.24.04.4"
+                  "5:7.0.15-1ubuntu0.24.04.5"
                   nobleUpdatesUniverse
                   "/usr/bin/redis-server"
                   [ "--version" ]
@@ -393,7 +393,7 @@ in  { architectureConcurrency = 2
               , apt
                   "redis-cli"
                   "redis-tools"
-                  "5:7.0.15-1ubuntu0.24.04.4"
+                  "5:7.0.15-1ubuntu0.24.04.5"
                   nobleUpdatesUniverse
                   "/usr/bin/redis-cli"
                   [ "--version" ]
@@ -402,11 +402,11 @@ in  { architectureConcurrency = 2
               , apt
                   "postgres"
                   "postgresql-16"
-                  "16.14-0ubuntu0.24.04.1"
+                  "16.15-0ubuntu0.24.04.1"
                   nobleUpdatesMain
                   "/usr/lib/postgresql/16/bin/postgres"
                   [ "--version" ]
-                  "16.14"
+                  "16.15"
                   BinaryKind.Elf
               , apt
                   "patroni"
@@ -420,11 +420,11 @@ in  { architectureConcurrency = 2
               , apt
                   "temurin"
                   "openjdk-21-jre-headless"
-                  "21.0.11+10-1~24.04.2"
+                  "21.0.12.1+1-1~24.04.4"
                   nobleUpdatesMain
                   "/usr/bin/java"
                   [ "--version" ]
-                  "21.0.11"
+                  "21.0.12.1"
                   BinaryKind.Elf
               , apt
                   "g++"
@@ -452,14 +452,14 @@ in  { architectureConcurrency = 2
           { head =
               perAssetArtifact
                 "minio"
-                "dl.min.io"
+                "github.com/minio/minio"
                 "RELEASE.2025-07-23T15-54-02Z"
-                "https://dl.min.io/server/minio/release/linux-amd64/archive/minio.RELEASE.2025-07-23T15-54-02Z"
-                "https://dl.min.io/server/minio/release/linux-amd64/archive/minio.RELEASE.2025-07-23T15-54-02Z.sha256sum"
-                "https://dl.min.io/server/minio/release/linux-arm64/archive/minio.RELEASE.2025-07-23T15-54-02Z"
-                "https://dl.min.io/server/minio/release/linux-arm64/archive/minio.RELEASE.2025-07-23T15-54-02Z.sha256sum"
+                "https://github.com/minio/minio/releases/download/RELEASE.2025-07-23T15-54-02Z/minio.linux-amd64.RELEASE.2025-07-23T15-54-02Z"
+                "https://github.com/minio/minio/releases/download/RELEASE.2025-07-23T15-54-02Z/minio.linux-amd64.RELEASE.2025-07-23T15-54-02Z.sha256sum"
+                "https://github.com/minio/minio/releases/download/RELEASE.2025-07-23T15-54-02Z/minio.linux-arm64.RELEASE.2025-07-23T15-54-02Z"
+                "https://github.com/minio/minio/releases/download/RELEASE.2025-07-23T15-54-02Z/minio.linux-arm64.RELEASE.2025-07-23T15-54-02Z.sha256sum"
                 ChecksumAlgorithm.Sha256
-                ChecksumShape.DigestNamed
+                ChecksumShape.DigestOnly
                 ArchiveFormat.Bare
                 ""
                 "/usr/bin/minio"

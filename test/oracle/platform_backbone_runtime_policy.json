@@ -1,0 +1,149 @@
+{
+  "schema": "phase30.independent.runtime-policy-binding-cases.v1",
+  "basis": "Independent capacity/admission expectations; no subject execution supplies an expected result.",
+  "funding_cases": [
+    {
+      "id": "offload-two-failures-two-full-slots",
+      "claims_bytes": [
+        1048576,
+        1048576
+      ],
+      "declared_slots": [
+        {
+          "count": 2,
+          "maximumBytes": 1048576
+        }
+      ],
+      "expected_slot_fit": true
+    },
+    {
+      "id": "offload-two-failures-one-coalesced-slot",
+      "claims_bytes": [
+        1048576,
+        1048576
+      ],
+      "declared_slots": [
+        {
+          "count": 1,
+          "maximumBytes": 2097152
+        }
+      ],
+      "expected_slot_fit": false,
+      "same_logical_bytes_as_previous": true,
+      "reason": "Two failed object identities require two slots and two metadata/header extents; coalescing equal bytes into one object removes a per-object charge."
+    },
+    {
+      "id": "concurrent-larger-object-fragmented-small-slots",
+      "claims_bytes": [
+        1048576
+      ],
+      "declared_slots": [
+        {
+          "count": 2,
+          "maximumBytes": 524288
+        }
+      ],
+      "expected_slot_fit": false,
+      "reason": "Generic private admission uses injective extent-slot dominance, not total-byte recombination."
+    },
+    {
+      "id": "small-registry-raw-slices-do-not-fit-generic-slot-seam",
+      "claims_bytes": [
+        65536
+      ],
+      "declared_slots": [
+        {
+          "count": 3,
+          "maximumBytes": 4096
+        },
+        {
+          "count": 3,
+          "maximumBytes": 61440
+        }
+      ],
+      "expected_slot_fit": false
+    },
+    {
+      "id": "small-registry-explicit-approved-grouped-failures",
+      "claims_bytes": [
+        65536,
+        65536,
+        65536
+      ],
+      "declared_slots": [
+        {
+          "count": 3,
+          "maximumBytes": 65536
+        }
+      ],
+      "expected_slot_fit": true,
+      "authorized_group_input": {
+        "base_name": "registry-failed-upload-window",
+        "base_count": 3,
+        "base_bytes": 4096,
+        "excess_name": "registry-future-write-failed-excess",
+        "excess_count": 3,
+        "excess_bytes": 61440
+      },
+      "premise": "If grouping is implemented, both public/private admission must consume this same validated grouping. Retain original+excess physical charges; Phase30 uses one erasure set, so no cross-set resource transfer is implied."
+    }
+  ],
+  "paired_projection_rejections": [
+    {
+      "id": "coalesced-failure-objects",
+      "edits": [
+        "replace offload FailedOrphanObjects pair in writerAdmissions with one1\u00d72097152 row",
+        "make the corresponding merged populations edit so its multiset still agrees"
+      ],
+      "expected": "reject",
+      "must_reach": "per-object failed funding rather than merely local/global row mismatch"
+    },
+    {
+      "id": "missing-merged-physical-resident",
+      "edits": [
+        "remove one objectStorePeak.residents row while retaining registry.driverObjects and writerAdmissions.registry.residentObjects"
+      ],
+      "expected": "reject",
+      "must_reach": "complete scoped merged resident union"
+    },
+    {
+      "id": "conflicting-merged-resident-bytes",
+      "edits": [
+        "increase one objectStorePeak.residents bytes field by1; all owned resident/driver rows unchanged"
+      ],
+      "expected": "reject"
+    },
+    {
+      "id": "unsupported-model-mirrored",
+      "edits": [
+        "replace writerAdmissions.pulsar-offload.model with an unsupported string or model tag",
+        "set objectStorePeak.sourceModels[pulsar-offload] equal to that unsupported value"
+      ],
+      "expected": "reject",
+      "must_reach": "closed model/profile decoding, not JSON equality"
+    },
+    {
+      "id": "changed-future-class-on-both-sides",
+      "edits": [
+        "decrease offload FutureObjects maximumBytes1048576\u21921048575 in writer admission",
+        "make identical matching merged row edit"
+      ],
+      "expected": "reject",
+      "must_reach": "runtime class extent compatibility rather than only merged equality"
+    },
+    {
+      "id": "model-populations-disagree",
+      "edits": [
+        "change retained original Pulsar model retention/failure/count/quantum input consistently at model and sourceModels copies",
+        "retain original populated classes so original-model derivation differs"
+      ],
+      "expected": "reject",
+      "must_reach": "decode/derive original input or explicitly restrict the entire selected model"
+    },
+    {
+      "id": "small-registry-maxfuture-private-success",
+      "input": "Use native small canonical fixture, select the1\u00d765536 post-cutover-blob future population at one valid fresh digest path. Initial writer state, no pending/failures.",
+      "expected_after_coherent_grouping": "private reserve succeeds and matches public beginWrite authorization; no projection-only sum substitution"
+    }
+  ]
+}

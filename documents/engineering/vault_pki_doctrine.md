@@ -649,6 +649,10 @@ prodbox `vault_doctrine.md §12`); the inventory table there is the evidence, no
   no-environment-variables / no-`PATH` contract ([substrate_doctrine.md](./substrate_doctrine.md)):
   the only inputs a workload reads are its typed config (names, [§3](#3-the-secretref-contract-a-name-never-a-value)) and the Vault objects its policy
   allows.
+- **Projected file sources only.** The native read, readiness, Transit, and prompt-write entry points accept only
+  the projected service-account JWT source. The server supervisor accepts only its projected config and audit
+  directory. The shared runtime-path guard runs before file reads, prompt input, filesystem writes, or child
+  processes. An ordinary file path cannot turn these entry points into another credential source.
 - **Generated once, never derived.** A secret a chart needs is minted once into Vault (KV) or issued
   by Vault (PKI) at install and persisted on the durable PV ([§2](#2-vault-is-the-fail-closed-secrets-root), [§4](#4-init-follows-readiness-fail-closed-vault-init)); no chart template generates or
   stores a secret value, and there is no seed to derive from.
@@ -724,17 +728,37 @@ the verification surface owned by [chaos_failover_doctrine.md](./chaos_failover_
 
 ---
 
-### Phase-29 validated root boundary
+### Root boundary and observation
 
-Phase 29 validated the root-only portion of this doctrine on the universal `linux-cpu` lane. A pristine
-single-node cluster initialized a Shamir-sealed Vault exactly once on fixed ext4 retained backings; the unlock
-material used pinned Argon2id v1.3 parameters and ChaCha20-Poly1305-IETF in a mode-0600 host envelope, while
-the human password was never persisted. After the real cluster and API objects were deleted, a fresh cluster
-mounted the same bytes, observed an initialized/sealed Vault, unsealed it without re-init, recovered the same
-Vault cluster id and self-signed PKI root, and read the canary through the built-in Haskell client using a fresh
-Kubernetes-auth login. The live pod had no Vault Agent and no plaintext Secret mount; role deletion denied the
-same read, sealed issuance failed, Raft/audit high-water stayed within the provision, and nine mutants went red.
-Parent/child unseal, parent secret injection, and cross-cluster intermediate CAs remain UNVERIFIED.
+The root runtime uses fixed ext4 retained backing and a password-encrypted unlock envelope. Init operates
+only on an empty Vault; recreation must find the same initialized Vault and unseal it. A fresh client
+challenge, cluster identity, and PKI identity distinguish retained recovery from a reseeded workload.
+
+Presence admission uses the KV-v2 subkeys endpoint at shallow depth. Vault returns field names with null
+leaves, so admission neither retrieves secret values nor trusts caller-written custom metadata. Prompt
+writes merge one field, with CAS-protected creation preventing a concurrent creator's fields from being
+replaced. The scoped writer needs only the corresponding data-path write capabilities. A consumer's native
+presence probe remains unready while its reference is missing or Vault is sealed.
+
+The private service provision combines resource envelopes, execution epochs, and Vault storage demands.
+Rendering consumes that result, and the live readback compares every resource axis and named volume. The
+server and native audit writer share one container's checked envelope. Vault's file audit device writes a
+FIFO; the native writer caps file bytes, backup count, and retention. Writer failure terminates Vault.
+The private kind node enforces two CPUs and four GiB; admission clamps kubelet's advertised CPU/memory
+supply to those read-back parent limits.
+
+The observation boundary reads filesystem allocation and Raft log indexes outside both workloads. The
+independent Haskell reader checks raw trace peaks, compacted log prefixes, recovery checkpoints, and the
+service projection after each recreation. An elevated password scanner reads owned host state, pod files,
+environment, arguments, and run output without emitting matching content. Kernel namespace handles have
+no readable payload: the scanner recognizes their open descriptor's `nsfs` type and counts them separately.
+Other unreadable content fails the scan. Snapshot restore checks the pinned BoltSnapshotStore's incoming
+database beside its active FSM and the subsequent atomic replacement. Process scans count kernel-confirmed
+zombie/dead and vanished descendants separately; required node/pod processes must remain live and owned,
+and unreadable live process state fails the observation. Parent/child unseal, secret
+injection, and intermediate CAs are separate capabilities. Current validation status belongs to
+[Phase 29](../../DEVELOPMENT_PLAN/phase_29_vault_pki.md); the historical scoped instances below do not
+establish a current phase seal.
 
 Every hardware substrate can always run this `linux-cpu` lane. When a pristine Linux host is needed, the
 canonical VM is Incus on Linux/Linux-CUDA, Lima on Apple, and WSL2 on Windows.

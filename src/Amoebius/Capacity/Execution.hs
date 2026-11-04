@@ -20,6 +20,7 @@ module Amoebius.Capacity.Execution
   , ProvisionedExecutionEpochs (..)
   , ExecutionError (..)
   , provisionExecutionEpochs
+  , provisionRetainedExecutionEpochs
   , resourcePeak
   ) where
 
@@ -168,6 +169,23 @@ provisionExecutionEpochs priorCatalog available inventory = do
       , provisionedExecutionPeak = resourcePeak (fmap executionEpochResources epochs)
       }
 
+-- | Keep the exact retained reservation rows while materializing new units.
+-- The caller supplies the referenced after-exit capacity snapshot; this pure
+-- fold does not observe or authorize retirement of a live process/controller.
+provisionRetainedExecutionEpochs
+  :: Text -> ResourceVector -> Map Text MaterializedExecutionInstance
+  -> [BoundExecutionUnit] -> Either ExecutionError ProvisionedExecutionEpochs
+provisionRetainedExecutionEpochs reference available retained incoming = do
+  if Text.null reference then Left (InvalidExecutionPolicy "retained execution reference is empty") else Right ()
+  mapM_ validatePriorRow (Map.toList retained)
+  fresh <- provisionExecutionEpochs Map.empty available (BoundExecutionInventory FirstDeployment incoming)
+  combined <- uniqueInstances (Map.elems retained <> Map.elems (provisionedDesiredSteady fresh))
+  maps <- traverse (\epoch -> uniqueInstances (Map.elems retained <> Map.elems (executionEpochInstances epoch))) (provisionedEpochs fresh)
+  let epochs = zipWith mkEpoch (ordinals (fromIntegral (length maps + 1))) (retained : maps)
+  mapM_ (ensureEpochFits available) epochs
+  pure (ProvisionedExecutionEpochs (UpdateFrom reference) retained combined epochs
+    (resourcePeak (fmap executionEpochResources epochs)))
+
 resolvePrior
   :: Map Text PriorExecutionProvision
   -> ExecutionTransitionSource
@@ -263,12 +281,24 @@ indexed :: BoundExecutionUnit -> Text -> Natural -> Either ExecutionError [Mater
 indexed unit kind count = indexedFrom unit kind 0 count
 
 indexedFrom :: BoundExecutionUnit -> Text -> Natural -> Natural -> Either ExecutionError [MaterializedExecutionInstance]
-indexedFrom unit kind start count = Right (fmap (instanceFor unit kind) (fmap (+ start) (ordinals count)))
+indexedFrom unit kind start count = do
+  ensurePodReservation unit kind count
+  pure (fmap (instanceFor unit kind) (fmap (+ start) (ordinals count)))
 
 slotted :: BoundExecutionUnit -> Text -> [Text] -> Either ExecutionError [MaterializedExecutionInstance]
 slotted unit kind slots
   | length slots /= Set.size (Set.fromList slots) = Left (ExecutionIdentityMismatch (executionUnitId unit <> ":duplicate-slot"))
-  | otherwise = Right (zipWith (instanceForSlot unit kind) (ordinals (fromIntegral (length slots))) slots)
+  | otherwise = do
+      ensurePodReservation unit kind (fromIntegral (length slots))
+      pure (zipWith (instanceForSlot unit kind) (ordinals (fromIntegral (length slots))) slots)
+
+-- Each emitted Kubernetes instance is a real pod. Native host processes and
+-- controllers emitting no instances can legitimately reserve zero pod slots.
+-- This seam also covers the additional instances created during rollout.
+ensurePodReservation :: BoundExecutionUnit -> Text -> Natural -> Either ExecutionError ()
+ensurePodReservation unit kind count
+  | kind == "host" || count == 0 || resourcePodSlots (reserved (executionResource unit)) >= 1 = Right ()
+  | otherwise = Left (InvalidExecutionPolicy (executionUnitId unit <> ": emitted Kubernetes pod has no pod reservation"))
 
 instanceFor :: BoundExecutionUnit -> Text -> Natural -> MaterializedExecutionInstance
 instanceFor unit kind ordinal = instanceForSlot unit kind ordinal (Text.pack (show ordinal))

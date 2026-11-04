@@ -47,7 +47,11 @@ Sprints 26.1–26.5 and the complete phase gate have passed.
 
 ## Phase Status
 
-⏸️ Blocked — reopened 2026-08-16 because Phase 25's successor OCI handoff is being amended to include Pulsar's S3 offloader bundle. Revalidate this phase against the amended exact handoff before Phase 27 proceeds.
+✅ Done — resealed 2026-11-02 by `python3 tools/object_reconciler_gate.py --execute`, run `20261103T000649Z`. All 11 sides pass against 1,984 authored files. All five sprints seal, all 11 mutants are red, all 13 metrics match, and 31 surfaces join to 30 enumerated items. Attestation: `sha256:b1a89d94960494807ffafc0dcbe47d6e9c1bbb102d0174f13a6a3228f626d75b`.
+
+**Live proof — 2026-11-02:** the exact amended Phase-25 handoff boots a fresh private cluster and registry. Lease CAS, scoped SSA, ordered distinct-UID replacement, terminal Job retention, child-envelope conformance, the quota race, and the external byte-stable no-op check pass. The real action modules pass 2,048 deterministic schedules. Modeled-apiserver fidelity remains assumed at Register 2.5. Cleanup removes the exact test root with unchanged outside-host inventory and no authored-root writes; postflight free space is 124 GiB. Phase 27 may now revalidate.
+
+**Historical resumption diagnostic — 2026-11-03 UTC:** run `20261102T235354Z` stopped when Sprint 26.1 reran the pure renderer gate inside the parent's live fixture. Its legitimate mounts and firewall rules violated the pure gate's quiescent-host postcondition. The driver now completes Sprint 26.1 before fixture creation, preserving the full renderer gate and strict inventory checks. The complete retry validates that ordering and all five receipts; both attempts clean up correctly.
 
 **Superseded containment seal:** resealed 2026-08-16 under the repository-containment amendment, attestation
 `sha256:85cf27abdea88522d4b4e5d3941d22d11fe68c6ed53fd6ec43bab1305643f9f1`.
@@ -429,10 +433,7 @@ every mutation surface.
 
 ## Sprint 26.1: Deployment-global desired state + authenticated live inventory + typed action plan ✅
 
-**Status**: Done — resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; the corpus, its
-independently authored action table, and the read-only preflight boundary all held, and
-`sprint-26.1-receipt.json` records fingerprint
-`sha256:80bebfeb5b649416fa923f4ac811fa3097d5025d10448143d9dfadf2b6916312`.
+**Status**: Done — resealed 2026-11-02 in run `20261103T000649Z`; the pure renderer, action fixtures, and preflight checks finish before live fixture creation.
 **Implementation**:
 `src/Amoebius/Manifest/{Preflight,Reconcile,Diff,Actions,Authority}.hs`,
 `src/Amoebius/Execution/{Observe,Normalize,RuntimeStorage}.hs`, and `src/Amoebius/Storage/ScalingAction.hs`
@@ -524,15 +525,12 @@ into the plan tree. Sprint 26.2 consumes the typed action/authority boundary.
 
 ## Sprint 26.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch ✅
 
-**Status**: Done — resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; the Lease CAS, scoped
-managed fields, stable no-op, and clean postflight were observed live, and `sprint-26.2-receipt.json` in
-that run's bundle records fingerprint
-`sha256:1d406509991c0942996918564d6cc03a7756b053513e15fb02c3a6bd0e319459`.
+**Status**: Done — resealed 2026-11-02 in run `20261103T000649Z`; Lease CAS, scoped managed fields, stable no-op, and clean postflight hold live.
 **Implementation**: `src/Amoebius/Manifest/{Apply,Enact,Authority}.hs` and
 `src/Amoebius/Storage/ScalingAction.hs`, plus `tools/object_reconciler_authority_live.py`. The `amoebius-capacity` scheduler
 (`src/Amoebius/Scheduler/*.hs`) and execution-identity admission
 (`src/Amoebius/Admission/ExecutionIdentity.hs`) are layered on this dispatcher in Phase 27.
-**Blocked by**: none; Sprint 26.1 is sealed.
+**Blocked by**: none; Sprint 26.1 is sealed against the amended handoff.
 **Independent Validation**: the host holds the mandatory reconciler `Lease` (via the typed
 `Absent → BootstrapHeld` action) before any non-authority mutation; ordinary object actions retain correct
 SSA field ownership; storage-scaling actions dispatch only their transition-indexed capability and never
@@ -599,14 +597,11 @@ None. The live receipt records the Lease CAS, scoped managed fields, stable no-o
 
 ## Sprint 26.3: Staged execution transitions, Job terminal protocol, and authenticated deletion ✅
 
-**Status**: Done — resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; both ordered
-replacements, the retained terminal Pod, and the authenticated delete were observed live, and
-`sprint-26.3-receipt.json` records fingerprint
-`sha256:b17161985d4653dde53726be7b85516db998eea93d4b6fc833cfd879c29faeee`.
+**Status**: Done — resealed 2026-11-02 in run `20261103T000649Z`; both ordered distinct-UID replacements, terminal retention, and authenticated deletion pass.
 **Implementation**:
 `src/Amoebius/Execution/{SerialOnDelete,HostTransition,AcceleratorRelease,JobTerminal}.hs` and
 `src/Amoebius/Manifest/Delete.hs`, plus `tools/object_reconciler_execution_live.py`.
-**Blocked by**: none; Sprint 26.2 is sealed.
+**Blocked by**: none; Sprint 26.2 is sealed against the amended handoff.
 **Independent Validation**: no stage can use evidence from the prior snapshot, no second serial Pod is deleted before the
 expected replacement is Bound+Ready, no CUDA/Metal/host replacement starts before its resource-indexed
 release, the abstract Job protocol cannot clean a terminal Pod before durable completion, and the live
@@ -673,14 +668,12 @@ None. Sprint 26.4 composes these actions into the full convergence/no-op corpus.
 
 ## Sprint 26.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) ✅
 
-**Status**: Done — resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; the corpus converged
-and re-ran byte-stable with zero mutations, with all four red controls red, and `sprint-26.4-receipt.json`
-records fingerprint `sha256:ef271e8922c15f89ea77931620810130df2ad59ba9c63ada158a7f9301202a7d`.
+**Status**: Done — resealed 2026-11-02 in run `20261103T000649Z`; external byte stability, readiness, the quota race, and all four red controls pass.
 **Implementation**: `src/Amoebius/Manifest/Wait.hs`,
 `test/live/ReconcileConvergeSpec.hs`, `test/live/SerialOnDeleteSpec.hs`,
 `test/live/JobTerminalRetentionSpec.hs`, and `tools/object_reconciler_live.py` — built and validated. (The
 `test/live/SchedulerReservationSpec.hs` live scheduler suite is Phase 27.)
-**Blocked by**: none; Sprint 26.3 is sealed.
+**Blocked by**: none; Sprint 26.3 is sealed against the amended handoff.
 **Independent Validation**: the representative corpus reconciles a non-instantaneous
 Deployment, a serial replacement Bound+Ready between deletions, CR health plus child conformance on
 amoebius's own in-phase capacity/reservation CRD, and terminal Job retention without a gateway. The
@@ -748,14 +741,11 @@ and are carried UNVERIFIED, never green.
 
 ## Sprint 26.5: Register-2.5 reconciler + staged-execution convergence under simulated faults ✅
 
-**Status**: Done — resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; 2,048 deterministic
-schedules ran against the real action modules with all seven mutants red, and `sprint-26.5-receipt.json` in
-that run's bundle records fingerprint
-`sha256:7aca66fa137adc421efd00da590e6731612781c065cc2bf1f3271d28afadc05e`.
+**Status**: Done — resealed 2026-11-02 in run `20261103T000649Z`; 2,048 deterministic schedules and all seven simulation mutants pass.
 **Implementation**: `test/spec/sim/{ReconcileSim,ExecutionTransitionSim,ObjectReconcilerSimCommon}.hs`, driving the
 real Manifest/Execution modules above on the Phase-14 `io-classes` `Env` — built and validated. (The
 `test/spec/sim/SchedulerSim.hs` schedule battery is Phase 27.)
-**Blocked by**: none; Sprint 26.4 is sealed.
+**Blocked by**: none; Sprint 26.4 is sealed against the amended handoff.
 **Independent Validation**: `IOSimPOR` interleaves object
 resourceVersion conflicts, bootstrap-`Lease` acquire/renew ambiguity, serial stage changes,
 host/device-release ordering, completion-write failure, and external mutation inside critical sections.

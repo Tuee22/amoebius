@@ -33,6 +33,9 @@ MUTANTS = (
     ("M-raw-sha256-seal", "vault-pki-raw-sha256-seal-mutant", "envelope has pinned magic"),
     ("M-delete-storage-term", "vault-pki-delete-storage-term-mutant", "resident bytes"),
     ("M-unbounded-audit", "vault-pki-unbounded-audit-mutant", "audit raw minimum"),
+    ("M-bypass-audit-ceiling", "vault-pki-audit-ceiling-mutant", "audit byte ceiling"),
+    ("M-drop-resource-axis", "vault-pki-drop-resource-axis-mutant", "Vault complete resource projection"),
+    ("M-production-secret-read", "vault-pki-untrusted-runtime-path-mutant", "Vault rejects untrusted runtime source"),
     ("M-sealed-issuance", "vault-pki-sealed-issuance-mutant", "sealed issuance fails"),
     ("M-unrelated-leaf-key", "vault-pki-unrelated-leaf-mutant", "leaf chains to root"),
     ("M-preminted-token", "vault-pki-preminted-token-mutant", "client performs auth/kubernetes/login"),
@@ -40,7 +43,7 @@ MUTANTS = (
     ("M-stale-read", "vault-pki-stale-read-mutant", "sealed cannot start"),
     ("M-first-missing", "vault-pki-first-missing-mutant", "presence reports every missing reference"),
 )
-STATIC_MUTANTS = ("M-production-secret-read", "M-copy-secret")
+STATIC_MUTANTS = ("M-copy-secret",)
 EXPECTED_MUTANTS = {name for name, _flag, _marker in MUTANTS} | set(STATIC_MUTANTS)
 
 CHECKS = {
@@ -129,6 +132,11 @@ def reject_mutant(
         *(f"-f-{other_flag}" for _other_name, other_flag, _other_marker in MUTANTS if other_flag != flag),
         f"-f{flag}", "--test-show-details=direct", "-j1",
     )
+    if name == "M-bypass-audit-ceiling":
+        arguments = (
+            sys.executable, "tools/vault_audit_spec.py", "--cabal", cabal,
+            "--ghc", compiler, "--mutant-flag", flag,
+        )
     result = subprocess.run(
         list(arguments), cwd=ROOT, env=dict(environment), text=True,
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False, timeout=2400,
@@ -234,6 +242,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("\nstatic side — prompt-only secret boundary and pure Vault/PKI contracts\n")
         run((sys.executable, "tools/vault_secret_boundary.py", "--dhall", resolved["dhall"]["path"]), environment=environment)
         check_results["prompt-only-secret-boundary"] = True
+        run((sys.executable, "tools/vault_audit_spec.py", "--cabal", cabal, "--ghc", compiler), environment=environment)
+        run((sys.executable, "-m", "unittest", "discover", "-s", "test/spec/host", "-p", "test_vault_*observer.py"), environment=environment)
         run(cabal_command(cabal, compiler, "test", "vault-pki-spec", *baseline_flags(), "--test-show-details=direct", "-j1"), environment=environment)
         check_results["pure-vault-contract"] = True
         results["static"] = True
@@ -283,8 +293,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         for name, flag, marker in MUTANTS:
             outcomes[name] = reject_mutant(cabal, compiler, name, flag, marker, environment)
             print(f"  ok    {name:<34} red")
-        # The secret-boundary check just exercised both independently authored negative controls.
         for name in STATIC_MUTANTS:
+            mutant = subprocess.run(
+                (sys.executable, "tools/vault_secret_boundary.py", "--dhall", resolved["dhall"]["path"], "--mutant", name),
+                cwd=ROOT, env=dict(environment), text=True, stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT, check=False, timeout=300,
+            )
+            marker = "secret-sink-admitted:environment"
+            if mutant.returncode == 0 or marker not in mutant.stdout:
+                raise GateFailure(f"{name}:wrong-red-reason")
             outcomes[name] = "red"
             print(f"  ok    {name:<34} red")
         results["mutant"] = all(outcomes.get(name) == "red" for name in EXPECTED_MUTANTS)

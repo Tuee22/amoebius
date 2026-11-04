@@ -383,7 +383,26 @@ def materialize(url: str, destination: Path) -> Path:
 def resolve_github_release(name: str, spec: dict[str, Any]) -> dict[str, Any]:
     release, asset = select_release(name, spec)
     archive = materialize(asset["browser_download_url"], DOWNLOADS / asset["name"])
-    member = spec.get("archive_member")
+    checksum_observation = None
+    if spec.get("checksum_asset"):
+        checksum_name = spec["checksum_asset"].replace("{asset}", asset["name"])
+        matches = [item for item in release.get("assets", []) if item.get("name") == checksum_name]
+        if len(matches) != 1:
+            raise ResolutionError(f"{name}: publisher checksum asset is missing or ambiguous")
+        checksum_url = matches[0]["browser_download_url"]
+        checksum_body = fetch(checksum_url)
+        expected = []
+        for row in checksum_body.decode("ascii").splitlines():
+            fields = row.split()
+            if (fields and re.fullmatch(r"[0-9a-fA-F]{64}", fields[0])
+                and (len(fields) == 1 or fields[-1].lstrip("*") == asset["name"])):
+                expected.append(fields[0].lower())
+        actual = observe(archive)["sha256"]
+        if expected != [actual]:
+            raise ResolutionError(f"{name}: downloaded archive does not match the publisher checksum")
+        checksum_observation = {"url": checksum_url, "sha256": actual,
+                                "checksumDocumentSha256": hashlib.sha256(checksum_body).hexdigest()}
+    member = spec.get("archive_member_map", {}).get(host_platform(), spec.get("archive_member"))
 
     if member is None:
         target_dir = TOOL_RUNTIME / spec["install_dir"] if spec.get("install_dir") else TOOL_BIN
@@ -428,6 +447,8 @@ def resolve_github_release(name: str, spec: dict[str, Any]) -> dict[str, Any]:
         "requirement": spec["requirement"],
         "observed": observe(archive),
     }
+    if checksum_observation:
+        record["publisherChecksum"] = checksum_observation
     if spec.get("version_argv"):
         argv = [str(target), *spec["version_argv"]]
         reported = run_version(argv)

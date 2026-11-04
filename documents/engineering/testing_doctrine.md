@@ -649,7 +649,13 @@ To keep the SSoT boundaries crisp:
 
 ---
 
-The Phase-29 Register-3 ledger combines a pristine real delete/recreate cycle, an independent Haskell reader, Kubernetes-auth/audit provenance, storage high-water observations, and nine red mutants; its Register-2.5 companion explores 500 deterministic seeds per fault family plus the combined sequence, with modeled fidelity discharged only by the live gate and the three federation surfaces left UNVERIFIED. The gate uses `linux-cpu`, always available on every hardware substrate; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+The [Phase-29](../../DEVELOPMENT_PLAN/phase_29_vault_pki.md) Register-3 ledger combines a real private-cluster
+delete/recreate, an independent Haskell reader, Kubernetes-auth/audit provenance, raw storage/index traces,
+paired effectless admission checks, complete service readback, and an out-of-process password scan. All
+fourteen seeded mutants fail their own assertions and the baselines restore. Its Register-2.5 companion
+explores 500 deterministic seeds per fault family plus the combined sequence; modeled fidelity remains
+assumed outside the named live boundaries, and federation surfaces remain UNVERIFIED. Substrate setup and
+the current acceptance decision belong to the linked phase contract.
 
 The Phase-33 Register-3 instance validates the Lease-held singleton with an exact seven-object first pass and zero-write rediscovery rerun; 26 pinned Gate-1/Gate-2 negatives; the complete admin reach matrix and four paired capability-admission cases; byte-identical durable state after replacement; password non-persistence; and five committed mutants red for their pinned causes. Full tenant admin, parent→child use, provider materialization, and cross-cluster gateway correspondence remain UNVERIFIED. Ledger `external-run-reference`.
 

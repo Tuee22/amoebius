@@ -415,6 +415,11 @@ capability and enforces that writer's physical object identity, count/size class
 concurrency, and bucket aggregate quota. Direct S3 PUT
 credentials/routes are denied; a mutation outside the gateway cannot silently invalidate the peak.
 
+Registry upload workspace can retain separately named base and excess physical charges while admitting
+one whole-write slot. Only the explicit base/excess pairs with equal counts and horizons form such a slot;
+unrelated or fragmented populations cannot be pooled to fund one write. Both private admission and the
+installed gateway retain the original separate physical populations and use the same grouping rule.
+
 #### The MinIO producer inventory is closed
 
 Binding walks the expanded deployment and emits one
@@ -437,6 +442,18 @@ writes, and orphan exposure from its pinned model. “Every other byte” is not
 another persistent control-plane record requires extending the closed union and its capacity tests.
 Each arm produces a `ProvisionedObjectStoreLogicalPeak`; only then are all exact physical ids and structured
 future/transient extents merged and sent to per-object MinIO geometry.
+
+The bounded capacity encoders in `src/Amoebius/Capacity/ObjectSourceModels.hs` select closed model versions.
+`checkpoint-json-dek-transit-v1` counts compact sorted UTF-8 JSON containing the exact stack, resource and
+field maps; a Secret value adds its explicit `{"secret":...}` wrapper. The entire document is encrypted
+with a 32-byte AES-GCM data key, twelve-byte nonce and sixteen-byte tag. A default-template,
+nonconvergent Vault Transit v1 key wraps the data key; the exact three-field envelope costs
+`142 + 4 × ceil((canonicalBytes + 16) / 3)` bytes. `control-transit-v1` instead selects one raw Transit
+ciphertext per exact canonical record, costing `9 + 4 × ceil((canonicalBytes + 28) / 3)` bytes.
+These encoding choices require matching runtime serializers and key profiles; a capacity witness alone
+does not implement encryption or CAS. `pulsar-4.0.6-single-block-v1` retains separate data/index extents,
+full bounded BookKeeper protobuf metadata and explicit ledger-rate horizons; unsupported multi-block
+inputs reject. Independent boundary operands live in `test/oracle/platform_backbone_source_models.json`.
 
 #### Derived tenant policy state is a required persistence input
 
@@ -800,6 +817,13 @@ Those two topic-data ceilings do not pay for Pulsar's metadata service. The v1 p
 transaction/session/watch bounds, every member's complete pod envelope, retained log/snapshot volumes, and
 failure recovery overlap. That independent provision must succeed before brokers start. A deployment whose
 BookKeeper and offload budgets fit but whose ZooKeeper ensemble does not is still undeployable.
+
+Metadata admission joins each expanded executor and server ordinal to its own reserved resource vector,
+PVC/template, retained backing and parent-pool debit. The same generation policy produces every declared
+unavailable-member case before the shared uniform-template fold chooses raw claims. A neighbor's surplus
+cannot fund a member short of CPU, memory, ephemeral storage, pod slots, usable overlap or raw backing.
+These policy reservations do not establish the finite producer/history premises or runtime service rate;
+those require their own source derivation, enforcement and independent observations.
 
 So every topic folds against **two** ceilings (the topic-lifecycle *policy* is owned by
 [pulsar_client_doctrine.md §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra); this doc owns

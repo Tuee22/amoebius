@@ -1,5 +1,5 @@
 module Amoebius.Manifest.RenderAll
-  ( renderAll
+  ( RenderProvisioned (renderAll)
   ) where
 
 import Amoebius.Capacity.Provision (ProvisionedSpec, provisionedRenderSources)
@@ -10,5 +10,8 @@ import Data.Map.Strict qualified as Map
 
 -- | Pure total mapping of the sole identity-keyed source inventory. Map order
 -- fixes deterministic identity order; no renderer re-derives ownership.
-renderAll :: ProvisionedSpec -> [K8sObject]
-renderAll = fmap renderSourcePrivate . Map.elems . provisionedRenderSourceMap . provisionedRenderSources
+class RenderProvisioned provision where
+  renderAll :: provision -> [K8sObject]
+
+instance RenderProvisioned ProvisionedSpec where
+  renderAll = fmap renderSourcePrivate . Map.elems . provisionedRenderSourceMap . provisionedRenderSources

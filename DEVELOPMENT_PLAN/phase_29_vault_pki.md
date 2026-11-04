@@ -7,14 +7,14 @@
 
 Phase 29 delivers the root Vault + PKI + built-in Haskell Vault client; its design is owned by [vault_pki_doctrine.md](../documents/engineering/vault_pki_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-The amended gate passed 2026-08-16.
+The complete amended gate passed 2026-11-03.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -23,6 +23,7 @@ The amended gate passed 2026-08-16.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — Vault service and independent observers](#resource-provision--vault-service-and-independent-observers)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 29.1: Root single-node password-encrypted Vault — init-once / unseal-on-rebuild ✅](#sprint-291-root-single-node-password-encrypted-vault--init-once--unseal-on-rebuild-)
@@ -36,65 +37,90 @@ The amended gate passed 2026-08-16.
 
 ## Phase Status
 
-⏸️ Blocked — reopened 2026-08-16 behind the amended Phase-25 handoff and Phase-28 revalidation. Its prior capability record remains historical until the exact predecessor chain is resealed.
+✅ Done — resealed 2026-11-03 by `python3 tools/vault_pki_gate.py --execute`, run `20261103T140624Z`.
+All twelve sides pass, all four sprint receipts seal, all fourteen mutants are red, all ten metrics match,
+and 37 authored surfaces join to 35 enumerated items. Immutable attestation: `sha256:aa8cd69d910d376b74852e30608db5df3115d9bbba044c1bf31900824bdc53be`.
+The source snapshot is `sha256:e6a49222a3086e05f682414d753e22f84078d84a77c0c01303208de8f11ffca9`
+(1,999 authored files). The exact Phase-28 seal and Phase-25 OCI handoff are verified. Owned cleanup removes
+the private fixture, retained backings, daemon, kubeconfig, and mounts with unchanged outside-host inventory.
+Phase 30 may now resume.
 
-**Superseded containment seal:** the amended gate sealed 2026-08-16 as
-`sha256:4f029c9f8fe3fa35da3da2cd1a6b94cdc7f2d2a808a821540d290848d6130dcb`.
-`python3 tools/vault_pki_gate.py --execute` verified the exact Phase-28 predecessor and Phase-25 image
-handoff, initialized Vault once, genuinely deleted and recreated its private cluster, unsealed the retained
-Vault, preserved its cluster and PKI identities, and passed the independent Haskell reader. All 12 mutants
-were red, all 10 metrics matched, and all 35 authored surfaces joined to 33 run-time items. The private
-fixture, retained test state, kubeconfig, daemon, and loop mounts were removed; generated evidence remained
-beneath `.build/**`, `test-secrets.dhall` was rejected by production and copied nowhere, and the outside-host
-inventory remained empty.
+**2026-11-03 closure evidence:** real snapshot installation observes two distinct allocated FSM databases;
+raw filesystem peaks are 1,105,920 Vault bytes and 3,158,016 audit bytes, within their provision. The expanded
+password scan finds zero matches across 10,034,113,222 owned-host bytes, both pod filesystems, run output,
+and process state. The independent Haskell reader accepts the exact restore-index gap and the raw trace,
+paired effectless storage checks, complete applied service seals, and retained KV/PKI recovery. All baseline
+checks restore after mutation. Register-2.5 modeled-Vault fidelity remains an assumption; the named live
+boundaries are tested on the local linux-cpu lane. Federation remains outside this phase's scope.
+The [legacy register](legacy_tracking_for_deletion.md) records the reopened implementation gaps.
 
-**Pre-containment status record (invalidated where it claims completion):**
+**2026-11-03 implementation:** physical reserved backing, a private complete resource/storage seal,
+full applied-object readback, a native bounded FIFO audit writer, fresh post-start KV/Transit challenges,
+scoped stdin prompt writes, and presence-only readiness are implemented. Native file consumers validate
+their projected sources. Presence uses authoritative KV-v2 subkeys; writes preserve sibling fields through
+merge patches and CAS-protected creation. Native HTTP/FIFO tests and 24 observer regressions pass. The
+private node enforces two CPUs/four GiB, and admission clamps advertised supply to those parent limits.
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
+**Earlier failed attempt — 2026-11-03:** run `20261103T134716Z` completed the real snapshot restore,
+compactions, audit rotation/retention, readiness transitions, cluster recreation, retained KV/PKI recovery,
+and expanded password scan. The scan found zero matches across 10,034,098,682 owned-host bytes plus both
+pod filesystems, run output, and live process state. The external Haskell reader then rejected a Raft
+checkpoint. Failed seal: `sha256:929ab64c557fc56e2b72e2829e2babb3154fcc75ef7464ed59a81615cbe2e658`.
+Owned cleanup, outside-host containment, and source integrity passed; this is not closure evidence.
 
-**Superseded scope amendment — 2026-08-13.** This phase was initially assigned the `SecretRef` type itself. Reviewing the
-sibling hostbootstrap secrets policy established that
-[`vault_pki_doctrine.md` §3](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)
-names four constructors and a production-mode validator, while `src/Amoebius/Vault/SecretRef.hs` implements
-two and no validator, and no `SecretRef` exists under `dhall/amoebius/**`. The type lands here rather than in
-the sealed Gate-1/Gate-2 phases because this is where the Vault root that resolves the names lands: Phases 4
-and 5 sealed against the surfaces they actually name, and adding a type they never carried does not reopen
-them ([§N](development_plan_standards.md#n-reopening-and-amending-a-phase)). The corresponding divergence rows
-are recorded in [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md).
+The checkpoint correction follows the pinned publisher rather than relaxing general contiguity:
+[Vault 1.20.2 pins Raft 1.7.3](https://github.com/hashicorp/vault/blob/v1.20.2/go.mod), whose
+[restore implementation](https://github.com/hashicorp/raft/blob/v1.7.3/raft.go) intentionally burns one log
+index when installing a user snapshot. The observer now emits every structural index; the reader permits
+only the exact burned index independently recovered from the raw incoming-snapshot filenames. Other gaps,
+duplicates, wrong indexes, and pre-restore gaps remain failures. Raw snapshot paths must match the external
+summary. The snapshot file layout follows Vault's
+[backend](https://github.com/hashicorp/vault/blob/v1.20.2/physical/raft/raft.go),
+[snapshot store](https://github.com/hashicorp/vault/blob/v1.20.2/physical/raft/snapshot.go), and
+[FSM restore](https://github.com/hashicorp/vault/blob/v1.20.2/physical/raft/fsm.go).
 
-**Scope amendment — 2026-08-13 (secrets reach a workload only from Vault).** This phase additionally owns:
+**Paired pre-allocation checks:** the CLI now first accepts the existing native fixture's conservative
+execution supply, then changes exactly one storage operand for each of the four exact rejections. Both
+positive and negative calls must leave backing and API state unchanged; the positive projection must equal
+the later live service seal. This replaces the former zero-execution-supply negative setup under §M.8.
+The fresh complete run above passes these pairs, all mutants, and the expanded independent reader.
+The accepted native CLI baseline and all four exact single-dimension rejections pass in focused execution.
+The reader builds, passes its six checkpoint-policy cases, and rejects the earlier incomplete evidence.
+Documentation lint passes after condensing this status history.
 
-- the `Prompt` arm and the **prompt-to-Vault write path** — a CLI subcommand that reads elevated material
-  with echo disabled and writes it straight into Vault, never to disk, an environment variable, or a process
-  argument;
-- `writeKvField` and a **presence-only** `kvFieldExists` on `VaultTransport`, which today carries a read and
-  a transit decrypt and so cannot express either half of this contract;
-- `assertSecretsPresent`, the admission API of
-  [vault_pki_doctrine.md §3.4](../documents/engineering/vault_pki_doctrine.md#34-admission-proves-the-named-secret-exists-before-any-effect):
-  it ranges over the `SecretRef`s a spec names, reads existence rather than value, and reports **every**
-  missing reference at once rather than the first;
-- deletion of the `PHASE29_OPERATOR_PASSWORD` / `PHASE29_DEVELOPMENT_PASSWORD` environment path in this
-  phase's live runner, which is the exact pattern §3.3 forbids;
-- the tracked `test-secrets-types.dhall` shape — field names and types, no values — narrowed to what an
-  amoebius phase actually reads.
+**Focused scanner validation:** kernel namespace handles are recognized by the open descriptor's `nsfs`
+type and counted separately. A private fixture with an intentionally unreaped node-owned child records
+one zombie and scans 32 live processes, 3,085,247,647 owned-host bytes, pod files, and run output with zero
+matches. Cleanup passes. Kernel-confirmed exited descendants are counted; required node/pod processes must
+remain live and owned. Unreadable live processes still fail closed. Real argument/environment leak cases
+are detected, and terminal failures retain sanitized codes/errno without paths, content, or needle bytes.
 
-The `SecretRef` *type* is not here: it is Gate-1/Gate-2 surface and belongs to Phases 4 and 5, which are
-reopened for it. This phase consumes that type; it does not define it.
+**Earlier expanded attempts — 2026-11-03, newest first:**
 
-**Invalidated historical record:**
+- `20261103T132822Z`: final process snapshot unavailable after ten retries; a real zombie reproduces the
+  underlying unreadable-environment case. Failed seal
+  `sha256:da7f96c5706b8dc8078bb8aa39e2b2afe8b37e06dc3fe7660d1055b2c5a117e2`.
+- `20261103T131744Z`: live recovery and the expanded password scan passed, but the new snapshot matcher
+  omitted the Raft state subdirectory. Raw data captured eight old/new database overlap samples over
+  about 101 ms. Failed seal `sha256:2e47a95dd887d5540c57f33a85d43f49dc8ca5565f4299b9e878a73a3787be3e`.
+- `20261103T124549Z`: prompt writes, readiness, compaction, and recreation passed; the scanner failed on
+  an unreadable kernel namespace handle. Failed seal
+  `sha256:9d5eba444e216de4e21bb4cec92d299a4f194a24857c50be0c700111d9c2196b`.
+- `20261103T121502Z`: the legitimate prompt write exposed an unnecessary custom-metadata write without
+  permission. Failed seal `sha256:1b601a97848a402cf6376df6a49b217d9c87700759209b7860665b61ba289a06`.
 
-✅ Done. All four sprints and the whole-phase gate are implemented and validated. The Register-3 live proof used
-a single-node `kind` cluster on the **linux-cpu** lane, exact Phase-25 OCI archive, and Phase-28 retained ext4
-backings; the Register-2.5 proof explored 500 deterministic schedules per fault family plus the combined
-sequence. The pristine live cycle initialized Vault exactly once, deleted and recreated the real cluster, then
-unsealed the retained Vault and recovered the same PKI root and canary bytes. The independent reader and all
-nine committed mutants passed their intended green/red obligations. The live command was
-`python3 tools/phase29_vault_live.py`, followed immediately by
-`python3 tools/phase29_gate.py --seal-existing-live` on 2026-08-10. The sealed
-ledger is `external-run-reference`; the phase receipt is
-`dynamically-resolved`.
+All four attempts removed their owned fixtures and passed containment/source integrity. None seals a sprint.
+
+**2026-11-02 reopening inspection:** sparse backing, a fixed canary, one-point storage sampling, manual audit
+renaming, incomplete execution readback, and narrow password scanning reopened this phase. The corrections
+above address those gaps. The physical pool probe also passes retry-byte preservation, real over-budget
+rejection, and cleanup. Native audit/source-boundary/resource-axis mutants execute their actual defects,
+fail for their own assertions, and restore their baselines in focused checks.
+
+**Superseded containment seal:** `sha256:4f029c9f8fe3fa35da3da2cd1a6b94cdc7f2d2a808a821540d290848d6130dcb`
+was issued on 2026-08-16. It retains historical capability evidence, including genuine delete/recreate with
+stable Vault/PKI identity, but does not satisfy the reopened contract. The pre-containment 2026-08-10 result
+and 2026-08-11 amendment records likewise supply history, not current acceptance.
 
 ## Phase Summary
 
@@ -181,7 +207,8 @@ The gate's oracles are **pinned in this phase's oracle-pinning sprint, ahead of 
 `src/Amoebius/Vault/*.hs`**
 ([§M.1](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)):
 - (a) a canary KV fixture `test/golden/vault/canary.json` — `SecretRef.Vault { mount="secret",
-  path="amoebius/canary", field="token" }` with a fixed 32-byte value
+  path="amoebius/canary", field="token" }` with a 32-byte pure reference value. The live harness uses a fresh
+  unpredictable 32-byte challenge after subject startup and verifies absence before its write (§M.9).
 - (b) the pinned unlock-material envelope format spec `test/golden/vault/unlock-envelope.spec` (magic bytes,
   Argon2id parameters `m/t/p`, AEAD algorithm identifier, and field layout), hand-authored independently of
   `Seal.hs` (§M.3)
@@ -198,6 +225,36 @@ The **representative set (§M.7)** is exactly: this one KV `SecretRef.Vault`, on
 self-signed root CA plus one internal leaf, the six typed error tags, and the one bounded storage-population
 fixture with its exact-fit/one-byte-under variants — no other shapes are in gate scope. **External-observer traces (§M.5)** are read from a Vault **audit device** (file backend) and an argv/exec observer on the
 consumer pod, never from any log the client emits about itself. Each sprint below names **>=1 committed seeded mutant** (§M.2) that MUST turn the gate red, committed and re-run.
+
+The additional **M-bypass-audit-ceiling** mutant removes the native writer's split at the declared file
+ceiling. It must fail the real-filesystem `vault-audit-spec` ceiling check. This extends coverage of the
+existing independent audit-rotation oracle; its one-MiB file bound and three-backup expectation are unchanged.
+
+The additional **M-drop-resource-axis** mutant omits `ephemeral-storage` from the private service
+projection. The complete resource projection assertion must reject it; checking only container count or
+field presence cannot discharge this surface.
+
+## Resource provision — Vault service and independent observers
+
+A separate physically reserved 320 MiB raw filesystem offers a 256 MiB retained pool. Its full inventory
+admits the 128 MiB Vault and 64 MiB audit child filesystems, plus a bounded 4 KiB encrypted bootstrap envelope,
+before allocation. Four real CLI negatives reject raw capacities one quantum short and mounted usable
+capacities one byte short while the retained root and cluster are absent.
+
+The Vault controller owns one pod. Its shared container accounts for the server, init exec, and native audit
+writer: requests are 100 millicores, 128 MiB memory, and 32 MiB ephemeral storage; limits are 500 millicores,
+512 MiB, and 64 MiB. The canonical execution fold also admits the transition peak. A bounded 16 MiB `/tmp`,
+8 MiB writable allowance, and 4 MiB log allowance nest within the ephemeral request. The root filesystem is
+read-only; cache and accelerator arms are explicitly `None`. Effective kubelet logs use 1 MiB files with
+three total files. The native audit writer separately enforces 1 MiB files and three retained backups.
+
+A marker-authorized elevated observer samples both child filesystems throughout the live workload and
+records raw file metadata beneath `.build/**`. A separate reader verifies bbolt checksums and log indexes
+before/after compaction and recovery. The external Haskell gate independently checks the raw sampling trace
+against the recorded high-water summary. Retention uses an explicitly aged history fixture and crosses its
+24-hour timestamp cutoff on the real clock; it does not claim 24 hours of wall-clock execution. A separate
+read-only observer receives the unpredictable password through stdin and scans owned host files, raw backing,
+pod filesystems, process environment/arguments, and run output without emitting matching content.
 
 ## Doctrine adopted
 
@@ -240,11 +297,14 @@ consumer pod, never from any log the client emits about itself. Each sprint belo
 
 ## Sprint 29.1: Root single-node password-encrypted Vault — init-once / unseal-on-rebuild ✅
 
-**Status**: Done
+**Status**: Done — validated 2026-11-03 by the complete fresh gate; the 2026-08-16 receipt remains historical.
 **Implementation**: `src/Amoebius/Vault/Init.hs`, `src/Amoebius/Vault/Unseal.hs`,
 `src/Amoebius/Vault/Seal.hs` (the Argon2id-KDF → ChaCha20-Poly1305-IETF password-sealed unlock-material
-envelope), `tools/vault_pki_live.py`, and `test/fixture/vault_pki/kind.yaml` — built and validated.
-**Blocked by**: Phase 28 gate.
+envelope), `tools/vault_pki_live.py`, `src/Amoebius/Vault/Audit.hs`, `test/spec/vault/{VaultAuditSpec,VaultHttpSpec}.hs`,
+`tools/vault_audit_spec.py`, `src/Amoebius/Vault/{Provision,RuntimePath}.hs`, `tools/vault_storage_observer.py`,
+`tools/vault_raft_observer.py`, `tools/vault_secret_observer.py`, `test/live/VaultPkiObservation.hs`,
+and `test/fixture/vault_pki/kind.yaml` — built and validated by the complete fresh gate.
+**Blocked by**: none; Phase 28 is sealed.
 **Independent Validation**: `vault init` runs exactly once on an empty PV, a cluster rebuild brings the same
 Vault up by unseal only, a secret-dependent workload against a sealed Vault fails its readiness gate closed,
 and the derived Raft and rotated-audit boundaries hold live. The numbered `### Validation` list below carries
@@ -351,11 +411,12 @@ retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoe
    the named mount. The storage-term-deletion and unbounded-audit mutants must turn these live checks red.
 
 ### Remaining Work
+
 None.
 
 ## Sprint 29.2: The self-signed PKI trust anchor issues ✅
 
-**Status**: Done
+**Status**: Done — validated 2026-11-03 by the complete fresh gate; the 2026-08-16 receipt remains historical.
 **Implementation**: `src/Amoebius/Vault/Pki.hs` (the `pki/` root-CA mount + internal
 leaf issuance) plus the OpenSSL-independent evidence reader — built and validated.
 **Blocked by**: Sprint 29.1.
@@ -389,11 +450,12 @@ make the root Vault's `pki/` engine the one self-signed trust anchor for the for
    the run differing only in seal state from item 2's successful unsealed issuance (§M.8).
 
 ### Remaining Work
+
 None.
 
 ## Sprint 29.3: Built-in Haskell Vault client (no agent sidecar) reads a `SecretRef` by name — the gate ✅
 
-**Status**: Done
+**Status**: Done — validated 2026-11-03 by the complete fresh gate; the 2026-08-16 receipt remains historical.
 **Implementation**: `src/Amoebius/Vault/Client.hs`, `src/Amoebius/Vault/SecretRef.hs`,
 `src/Amoebius/Vault/Error.hs`, `app/amoebius/Main.hs`, `tools/vault_pki_gate.py`,
 `tools/vault_secret_boundary.py`, `test/spec/vault/VaultPkiSpec.hs`, `test/live/VaultPkiSpec.hs`,
@@ -453,11 +515,12 @@ through the **built-in** client, with a typed, no-leak error model. The `Prodbox
 3. Emit the Register-3 ledger; assert the deferred federation surfaces are recorded UNVERIFIED, not green.
 
 ### Remaining Work
+
 None.
 
 ## Sprint 29.4: Register-2.5 fail-closed Vault unseal under simulated faults ✅
 
-**Status**: Done
+**Status**: Done — validated 2026-11-03 by the complete fresh gate; the 2026-08-16 receipt remains historical.
 **Implementation**: `test/spec/vault/UnsealFailClosedSpec.hs` (the
 `IOSim`/`IOSimPOR` driver that runs the **real** `src/Amoebius/Vault/{Init,Unseal,Seal,Client}.hs` against
 the modeled Vault) — built and validated.
@@ -514,6 +577,7 @@ Register-3 live gate — not a substitute for it.
    simulation.
 
 ### Remaining Work
+
 None.
 
 ## Documentation Requirements

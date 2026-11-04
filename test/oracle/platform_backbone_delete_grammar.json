@@ -1,0 +1,383 @@
+{
+  "schema": "phase30.independent.distribution-delete-grammar.v1",
+  "provenance": "Literal small inputs derived from pinned Distribution and AWS SDK serializer; no subject XML output or live maxima used. This grammar corpus does not grant writer scope.",
+  "nativePackage": {
+    "package": "docker-registry",
+    "version": "2.8.2+ds1-1ubuntu0.24.04.3",
+    "architecture": "amd64",
+    "debSha256": "49deb4da50703fce4fd5721277208f3478d2f893c0a434e40e9dcca5a12deaeb",
+    "builtUsingAWS": "golang-github-aws-aws-sdk-go (= 1.49.0-2)"
+  },
+  "sources": [
+    "https://sources.debian.org/src/golang-github-aws-aws-sdk-go/1.49.0-2/private/protocol/xml/xmlutil/build.go/",
+    "https://sources.debian.org/src/golang-github-aws-aws-sdk-go/1.49.0-2/private/protocol/xml/xmlutil/xml_to_struct.go/",
+    "https://github.com/distribution/distribution/blob/v2.8.2/registry/storage/driver/s3-aws/s3.go"
+  ],
+  "limits": {
+    "encodedBytes": 65536,
+    "objects": 16,
+    "keyBytes": 512
+  },
+  "rules": [
+    "BuildXML selects sorted=false; root child groups are a Go map; quiet may be first or last. Objects remain one ordered slice.",
+    "At most one optional Quiet; no ignored elements/attributes/namespaces/entities; consume whole document.",
+    "Extract and scope-check all keys before any backend request. Grammar acceptance of foreign/key is not authorization.",
+    "Both body limits include leading whitespace; adapter builds leadingSpaceBytes copies of ASCII space followed by bodyUtf8."
+  ],
+  "cases": [
+    {
+      "id": "sdk-quiet-false-first",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Quiet>false</Quiet><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 190,
+      "sha256": "4c9514443419818377ccc7e8bdd32123ef3c6620f531358db2ae3491c609a046",
+      "expected": "accept",
+      "basis": "Pinned packaged AWS SDK iterates map child groups without sorting; Quiet can precede or follow Object.",
+      "expectedKeys": [
+        "docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat"
+      ]
+    },
+    {
+      "id": "sdk-quiet-false-last",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object><Quiet>false</Quiet></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 190,
+      "sha256": "3aaaf905d66aa5fba493ca6f6fa21fd93b063962a66bba9f89bc5bb0e959e48e",
+      "expected": "accept",
+      "basis": "Pinned packaged AWS SDK iterates map child groups without sorting; Quiet can precede or follow Object.",
+      "expectedKeys": [
+        "docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat"
+      ]
+    },
+    {
+      "id": "bounded-quiet-true-first",
+      "bodyUtf8": "<Delete><Quiet>true</Quiet><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 141,
+      "sha256": "8e04c4c330a3b46669684456f0fa60726c0573940e9f7efed58047ecc262682b",
+      "expected": "accept",
+      "basis": "Existing finite unnamespaced compatibility form; true/false are exact boolean literals.",
+      "expectedKeys": [
+        "docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat"
+      ]
+    },
+    {
+      "id": "bounded-quiet-true-last",
+      "bodyUtf8": "<Delete><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object><Quiet>true</Quiet></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 141,
+      "sha256": "3146a12f577cd36bc8e83cba8aebe6bc8caf0ee89e8940f08175b40b7d440003",
+      "expected": "accept",
+      "basis": "Existing finite unnamespaced compatibility form; true/false are exact boolean literals.",
+      "expectedKeys": [
+        "docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat"
+      ]
+    },
+    {
+      "id": "quiet-absent",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 170,
+      "sha256": "6a06dd6258065896578164b42ff7029b52f4ecc348b6065045feb7db895be0ec",
+      "expected": "accept",
+      "basis": "Optional Quiet nil produces no element.",
+      "expectedKeys": [
+        "docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat"
+      ]
+    },
+    {
+      "id": "declaration-space-first",
+      "bodyUtf8": " \n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n<Quiet>false</Quiet>\n\t<Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object>\n</Delete>\t\r\n",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 239,
+      "sha256": "cd33e4d89d08f2e2d7e537945d7eecb3800f9df9c3158a982a45023e75e49b68",
+      "expected": "accept",
+      "basis": "Existing exact XML declaration/ASCII interelement whitespace compatibility; key bytes unchanged.",
+      "expectedKeys": [
+        "docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat"
+      ]
+    },
+    {
+      "id": "declaration-space-last",
+      "bodyUtf8": " \n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n<Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object>\r\n<Quiet>false</Quiet>\n</Delete>\t\r\n",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 239,
+      "sha256": "a0d075c45ac4d9920e50f1a0373b9cf95348d08947bc97959fbac0ef3334196b",
+      "expected": "accept",
+      "basis": "Existing exact XML declaration/ASCII interelement whitespace compatibility; key bytes unchanged.",
+      "expectedKeys": [
+        "docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat"
+      ]
+    },
+    {
+      "id": "sdk-two-objects-quiet-first",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Quiet>false</Quiet><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/hashstates/sha256/4096</Key></Object><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 308,
+      "sha256": "38e78872c23bf6daea578ec31c35e5606c4cda290b94d4d52aa09fba16be3eb0",
+      "expected": "accept",
+      "basis": "Object group is one slice, preserving supplied order while map ordering moves Quiet.",
+      "expectedKeys": [
+        "docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/hashstates/sha256/4096",
+        "docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat"
+      ]
+    },
+    {
+      "id": "sdk-two-objects-quiet-last",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/hashstates/sha256/4096</Key></Object><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object><Quiet>false</Quiet></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 308,
+      "sha256": "147b86e8f789ae1417a461b7213452efc169020a3db80ea3e37dcfb8afdd1c86",
+      "expected": "accept",
+      "basis": "Object group is one slice, preserving supplied order while map ordering moves Quiet.",
+      "expectedKeys": [
+        "docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/hashstates/sha256/4096",
+        "docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat"
+      ]
+    },
+    {
+      "id": "sixteen-object-boundary",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Quiet>false</Quiet><Object><Key>key-0</Key></Object><Object><Key>key-1</Key></Object><Object><Key>key-2</Key></Object><Object><Key>key-3</Key></Object><Object><Key>key-4</Key></Object><Object><Key>key-5</Key></Object><Object><Key>key-6</Key></Object><Object><Key>key-7</Key></Object><Object><Key>key-8</Key></Object><Object><Key>key-9</Key></Object><Object><Key>key-10</Key></Object><Object><Key>key-11</Key></Object><Object><Key>key-12</Key></Object><Object><Key>key-13</Key></Object><Object><Key>key-14</Key></Object><Object><Key>key-15</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 619,
+      "sha256": "3c3513250775a09e33092522036f4c23fa8ee4dd53948fb1054de525bfcb123c",
+      "expected": "accept",
+      "basis": "Finite gateway bound admits16 keys; SDK service maximum1000 does not override gateway budget.",
+      "expectedKeys": [
+        "key-0",
+        "key-1",
+        "key-2",
+        "key-3",
+        "key-4",
+        "key-5",
+        "key-6",
+        "key-7",
+        "key-8",
+        "key-9",
+        "key-10",
+        "key-11",
+        "key-12",
+        "key-13",
+        "key-14",
+        "key-15"
+      ]
+    },
+    {
+      "id": "key-512-byte-boundary",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 605,
+      "sha256": "80a73f2bc4caae03e8f5e8f8a239eb12ca679d190e8eb1d31748c2b310a14fa0",
+      "expected": "accept",
+      "basis": "Selected ASCII key extent boundary; later scope admission is separate.",
+      "expectedKeys": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+    },
+    {
+      "id": "body-65536-byte-boundary",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>a</Key></Object></Delete>",
+      "leadingSpaceBytes": 65442,
+      "encodedBytes": 65536,
+      "sha256": "18b672a76838b9d86012f77806271b16b0d22f23eea91a02694d732d274d04d3",
+      "expected": "accept",
+      "basis": "Encoded bound includes ignored leading whitespace.",
+      "expectedKeys": [
+        "a"
+      ]
+    },
+    {
+      "id": "mixed-scope-keys-extracted",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Quiet>false</Quiet><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object><Object><Key>foreign/key</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 229,
+      "sha256": "10f1ed2f68eaebd0970382f2d1dc8f8d8a407ae38c8d5bc773c75962ff0e50b0",
+      "expected": "accept",
+      "basis": "Grammar must expose every key. The following writer-specific scope transition must reject foreign/key before any backend mutation.",
+      "expectedKeys": [
+        "docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat",
+        "foreign/key"
+      ]
+    },
+    {
+      "id": "duplicate-quiet-same",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Quiet>false</Quiet><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object><Quiet>false</Quiet></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 210,
+      "sha256": "0507d1d2f7ff1f4fd3f305c0feea4bf5eb58d2536731d1ca1c284e33de655e87",
+      "expected": "reject",
+      "basis": "At most one Quiet element."
+    },
+    {
+      "id": "duplicate-quiet-conflicting",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Quiet>true</Quiet><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object><Quiet>false</Quiet></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 209,
+      "sha256": "32d986d9582f7b578176df5922440f103ec9b58fe9f8a245309df8ffe4964521",
+      "expected": "reject",
+      "basis": "No conflicting duplicate Quiet."
+    },
+    {
+      "id": "duplicate-quiet-adjacent",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Quiet>false</Quiet><Quiet>false</Quiet><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 210,
+      "sha256": "8dc3e02273656302c8b4397ce602e0216f6e3eeb1e7f579d7f0ce956454af128",
+      "expected": "reject",
+      "basis": "No duplicate Quiet before Object."
+    },
+    {
+      "id": "object-after-document",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object></Delete><Object><Key>foreign/key</Key></Object>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 209,
+      "sha256": "4b0408583cd2beec2286266f034ca6f7f18b74821831ef0e78348ce9ec856a38",
+      "expected": "reject",
+      "basis": "Entire document must be consumed."
+    },
+    {
+      "id": "object-before-document",
+      "bodyUtf8": "<Object><Key>foreign/key</Key></Object><Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 209,
+      "sha256": "5b839a31fdea6ed967956ac5a004d5acdf294010ffd3c3ed9d3c5e70a4771c4e",
+      "expected": "reject",
+      "basis": "No independent Object outside Delete."
+    },
+    {
+      "id": "second-delete-document",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object></Delete><Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>foreign/key</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 274,
+      "sha256": "cfb51c9f6d4d528db3b9e3bf391531e1a523bd8d6661ef18d85abe15846249e7",
+      "expected": "reject",
+      "basis": "Exactly one root document."
+    },
+    {
+      "id": "foreign-root-namespace",
+      "bodyUtf8": "<Delete xmlns=\"urn:foreign\"><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 142,
+      "sha256": "5ad6faa92e941fd349d9b7508315306c88fe5bad28bc08405ccefd5ea0581eff",
+      "expected": "reject",
+      "basis": "Only absent or exact selected S3 namespace is allowed."
+    },
+    {
+      "id": "foreign-object-namespace",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object xmlns=\"urn:foreign\"><Key>foreign/key</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 124,
+      "sha256": "f32fc74e8f336398f9458a07622cf63008dbcad86e9c7d6900ac0ef1cc80b88f",
+      "expected": "reject",
+      "basis": "No alternate namespace interpretation for Object."
+    },
+    {
+      "id": "foreign-prefixed-key",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><x:Key xmlns:x=\"urn:foreign\">foreign/key</x:Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 130,
+      "sha256": "bf315cec2949318b127c668866f39fc81bb3dcccf30b42fcdb3195a21cae21df",
+      "expected": "reject",
+      "basis": "No prefixed alternate Key."
+    },
+    {
+      "id": "numeric-entity-key",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>allowed&#47;foreign</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 112,
+      "sha256": "6781ab947ee773aaa328213f0941a56aafb83979b841e4564d28bab472119098",
+      "expected": "reject",
+      "basis": "Selected key alphabet excludes entities; avoid decoded/raw scope mismatch."
+    },
+    {
+      "id": "named-entity-key",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>allowed&amp;foreign</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 112,
+      "sha256": "27c638cd9868a81fd9c559f2f492d157d9a182c14338461d574a1892327cc77b",
+      "expected": "reject",
+      "basis": "Selected ASCII key alphabet excludes all entity spellings."
+    },
+    {
+      "id": "duplicate-key-in-object",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>allowed</Key><Key>foreign</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 118,
+      "sha256": "51ac9dea2ca2c7e966ee5123ecd9fb2a58b47cfab426d98d56086dbff81a8491",
+      "expected": "reject",
+      "basis": "Exactly one Key per Object."
+    },
+    {
+      "id": "versioned-object",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>allowed</Key><VersionId>foreign</VersionId></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 130,
+      "sha256": "2c20229996f06389a231b21833f3f93a8f31f4e1961a39de4c185f336b4d5d76",
+      "expected": "reject",
+      "basis": "Selected contract is unversioned; no ignored VersionId."
+    },
+    {
+      "id": "unknown-delete-child",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object><Other>foreign</Other></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 192,
+      "sha256": "cfedb00fbdd5a8f9037fcfa78b7304693fc3443c389cd26a83af43cef988e452",
+      "expected": "reject",
+      "basis": "Unknown children reject."
+    },
+    {
+      "id": "empty-delete",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 65,
+      "sha256": "04c19aaf4b22bca26f48623d2099b8ff2bbd8ddd3ad21145faea1df7a76b420d",
+      "expected": "reject",
+      "basis": "At least one Object required."
+    },
+    {
+      "id": "quiet-only",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Quiet>false</Quiet></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 85,
+      "sha256": "f60e0c59cb1e6849ba2a04e5c6ad5278a8d6f9a1f0cca4432078ef3ff0aa5865",
+      "expected": "reject",
+      "basis": "Quiet does not replace the required Object domain."
+    },
+    {
+      "id": "quiet-wrong-case",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Quiet>False</Quiet><Object><Key>docker/registry/v2/repositories/amoebius/phase30-new/_uploads/nonce/startedat</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 190,
+      "sha256": "97e07cc539dae03b5a490af5d953b5c210bc2945e8c2081ad576fb9f95a36198",
+      "expected": "reject",
+      "basis": "Only exact lowercase boolean literals selected."
+    },
+    {
+      "id": "seventeen-object-boundary",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>key-0</Key></Object><Object><Key>key-1</Key></Object><Object><Key>key-2</Key></Object><Object><Key>key-3</Key></Object><Object><Key>key-4</Key></Object><Object><Key>key-5</Key></Object><Object><Key>key-6</Key></Object><Object><Key>key-7</Key></Object><Object><Key>key-8</Key></Object><Object><Key>key-9</Key></Object><Object><Key>key-10</Key></Object><Object><Key>key-11</Key></Object><Object><Key>key-12</Key></Object><Object><Key>key-13</Key></Object><Object><Key>key-14</Key></Object><Object><Key>key-15</Key></Object><Object><Key>key-16</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 633,
+      "sha256": "7b373152f0e5b1cbe35e1441db811a4bc3adb2f10b5b5793bae47e9b837e2b59",
+      "expected": "reject",
+      "basis": "One beyond16 must reject."
+    },
+    {
+      "id": "key-513-byte-boundary",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</Key></Object></Delete>",
+      "leadingSpaceBytes": 0,
+      "encodedBytes": 606,
+      "sha256": "427ea4629838205ea9468a5f04d686f09d211d56d1ec14df53d0a42bbbee6c8f",
+      "expected": "reject",
+      "basis": "One beyond512-byte key cap must reject."
+    },
+    {
+      "id": "body-65537-byte-boundary",
+      "bodyUtf8": "<Delete xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Object><Key>a</Key></Object></Delete>",
+      "leadingSpaceBytes": 65443,
+      "encodedBytes": 65537,
+      "sha256": "c62221c86f373794d606d3bf1cb15e8eb753f1fa341fceb469c9be760e34524a",
+      "expected": "reject",
+      "basis": "One beyond65536-byte encoded body cap must reject."
+    }
+  ]
+}

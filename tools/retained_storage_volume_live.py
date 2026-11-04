@@ -15,6 +15,7 @@ import sys
 from pathlib import Path
 from typing import Any, Sequence
 
+import retained_storage_backing as backing
 
 ROOT = Path(__file__).resolve().parents[1]
 KUBECONFIG = Path(os.environ.get("AMOEBIUS_KUBECONFIG", ROOT / ".build/tmp/retained-storage/unconfigured-kubeconfig"))
@@ -88,18 +89,21 @@ def ensure_unmounted(path: Path) -> None:
 
 
 def make_ext4_image(path: Path, mountpoint: Path, raw_bytes: int) -> dict[str, Any]:
+    pool = backing.observe_pool(RETAINED_ROOT)
+    if int(pool["postReconcileDebitBytes"]) + raw_bytes > int(pool["capacityBytes"]):
+        raise LiveFailure("durable-workspace-exceeds-backing")
     path.parent.mkdir(parents=True, exist_ok=True)
     mountpoint.mkdir(parents=True, exist_ok=True)
     ensure_unmounted(mountpoint)
     if path.exists():
         path.unlink()
-    run(("/usr/bin/truncate", "-s", str(raw_bytes), str(path)))
-    sudo("/usr/sbin/mkfs.ext4", "-q", "-F", "-m", "0", str(path))
-    sudo("/usr/bin/mount", "-o", "loop", str(path), str(mountpoint))
+    backing.create_image(path, raw_bytes)
+    backing.format_and_mount_new_image(path, mountpoint, raw_bytes)
+    allocated = backing.reserved_bytes(path, raw_bytes)
     raw = path.stat().st_size
     fs_type = run(("/usr/bin/findmnt", "-n", "-o", "FSTYPE", "--target", str(mountpoint))).stdout.strip()
     available = int(run(("/usr/bin/df", "--block-size=1", "--output=avail", str(mountpoint))).stdout.splitlines()[-1].strip())
-    return {"rawBytes": raw, "filesystemType": fs_type, "usableBytes": available}
+    return {"rawBytes": raw, "allocatedBytes": allocated, "filesystemType": fs_type, "usableBytes": available}
 
 
 def observe_existing_ext4_image(path: Path, mountpoint: Path, raw_bytes: int) -> dict[str, Any]:
@@ -110,19 +114,28 @@ def observe_existing_ext4_image(path: Path, mountpoint: Path, raw_bytes: int) ->
         raise LiveFailure(f"retained-image-not-mounted:{mountpoint}")
     fs_type = run(("/usr/bin/findmnt", "-n", "-o", "FSTYPE", "--target", str(mountpoint))).stdout.strip()
     available = int(run(("/usr/bin/df", "--block-size=1", "--output=avail", str(mountpoint))).stdout.splitlines()[-1].strip())
-    return {"rawBytes": path.stat().st_size, "filesystemType": fs_type, "usableBytes": available}
+    return {"rawBytes": path.stat().st_size, "allocatedBytes": backing.reserved_bytes(path, raw_bytes), "filesystemType": fs_type, "usableBytes": available}
 
 
 def observe_hard_ceiling(raw_bytes: int) -> dict[str, Any]:
     sibling_before = SIBLING.stat().st_size
-    ephemeral_before = shutil.disk_usage(TEST_ROOT).used
+    sibling_allocated_before = backing.reserved_bytes(SIBLING, sibling_before)
+    sibling_mount = RETAINED_ROOT / "mounts/minio-witness"
+    sibling_used_before = shutil.disk_usage(sibling_mount).used
     boundary = make_ext4_image(BOUNDARY_IMAGE, BOUNDARY_MOUNT, 16 * 1024 * 1024)
+    pool = backing.observe_pool(RETAINED_ROOT)
+    pool_image = Path(str(pool["poolImage"]))
+    pool_allocated_before = pool_image.stat().st_blocks * 512
+    ephemeral_before = shutil.disk_usage(TEST_ROOT).used
     fill = BOUNDARY_MOUNT / "fill"
     available = int(run(("/usr/bin/df", "--block-size=1", "--output=avail", str(BOUNDARY_MOUNT))).stdout.splitlines()[-1].strip())
     sudo("/usr/bin/fallocate", "-l", str(available), str(fill))
-    overflow = sudo("/usr/bin/dd", "if=/dev/zero", f"of={fill}", "bs=1", "count=1", "oflag=append", "conv=notrunc", check=False)
+    overflow = sudo("/usr/bin/env", "LC_ALL=C", "/usr/bin/dd", "if=/dev/zero", f"of={fill}", "bs=1", "count=1", "oflag=append", "conv=notrunc", check=False)
     raw_after = BOUNDARY_IMAGE.stat().st_size
     sibling_after = SIBLING.stat().st_size
+    sibling_allocated_after = backing.reserved_bytes(SIBLING, sibling_after)
+    sibling_used_after = shutil.disk_usage(sibling_mount).used
+    pool_allocated_after = pool_image.stat().st_blocks * 512
     ephemeral_after = shutil.disk_usage(TEST_ROOT).used
     ensure_unmounted(BOUNDARY_MOUNT)
     BOUNDARY_IMAGE.unlink(missing_ok=True)
@@ -130,7 +143,9 @@ def observe_hard_ceiling(raw_bytes: int) -> dict[str, Any]:
         BOUNDARY_MOUNT.rmdir()
     except OSError:
         pass
-    if overflow.returncode == 0 or raw_after != 16 * 1024 * 1024 or sibling_before != sibling_after:
+    spill_sibling = (sibling_before, sibling_allocated_before, sibling_used_before) != (sibling_after, sibling_allocated_after, sibling_used_after)
+    spill_parent = pool_allocated_before != pool_allocated_after
+    if overflow.returncode == 0 or "No space left on device" not in overflow.stdout or raw_after != 16 * 1024 * 1024 or spill_sibling or spill_parent:
         raise LiveFailure(f"hard-ceiling:{overflow.returncode}:{raw_after}:{sibling_before}:{sibling_after}")
     return {
         "fillBytes": available,
@@ -140,10 +155,16 @@ def observe_hard_ceiling(raw_bytes: int) -> dict[str, Any]:
         "rawBytesAfter": raw_after,
         "siblingRawBytesBefore": sibling_before,
         "siblingRawBytesAfter": sibling_after,
-        "nodeEphemeralObservedBefore": ephemeral_before,
-        "nodeEphemeralObservedAfter": ephemeral_after,
-        "spillToSibling": False,
-        "spillToSharedParent": False,
+        "siblingAllocatedBytesBefore": sibling_allocated_before,
+        "siblingAllocatedBytesAfter": sibling_allocated_after,
+        "siblingUsedBytesBefore": sibling_used_before,
+        "siblingUsedBytesAfter": sibling_used_after,
+        "poolAllocatedBytesBefore": pool_allocated_before,
+        "poolAllocatedBytesAfter": pool_allocated_after,
+        "hostFilesystemUsedBytesBefore": ephemeral_before,
+        "hostFilesystemUsedBytesAfter": ephemeral_after,
+        "spillToSibling": spill_sibling,
+        "spillToSharedParent": spill_parent,
         "filesystemType": boundary["filesystemType"],
     }
 
@@ -209,15 +230,31 @@ def execute() -> dict[str, Any]:
     row = read_claim_oracle()
     raw_bytes = int(row["provisioned_bytes"])
     required = int(row["required_usable_bytes"])
-    durable = 536870912
-    full_debit = sum(int(item["provisioned_bytes"]) for item in csv.DictReader((ORACLE_ROOT / "claimref_table.csv").open(encoding="utf-8", newline="")))
-    if full_debit > durable:
-        raise LiveFailure("durable-demand-exceeds-backing")
+    pool = backing.observe_pool(RETAINED_ROOT)
+    durable = int(pool["capacityBytes"])
+    full_debit = int(pool["postReconcileDebitBytes"])
 
-    before_negative = {"images": len(list((RETAINED_ROOT / "images").glob("*"))) if (RETAINED_ROOT / "images").exists() else 0,
-                       "pvs": len(json.loads(kubectl("get", "pv", "-o", "json").stdout).get("items", []))}
+    def boundary_snapshot() -> dict[str, Any]:
+        images = backing.existing_inventory(RETAINED_ROOT)
+        pvs = json.loads(kubectl("get", "pv", "-o", "json").stdout).get("items", [])
+        return {
+            "images": len(images), "pvs": len(pvs),
+            "allocations": {name: [size, backing.reserved_bytes(RETAINED_ROOT / "images" / f"{name}.ext4", size)] for name, size in images.items()},
+            "pvVersions": {item["metadata"]["name"]: item["metadata"]["resourceVersion"] for item in pvs},
+        }
+
+    before_negative = boundary_snapshot()
+    try:
+        backing.prepare_pool(RETAINED_ROOT, durable, {"over-budget-probe": durable - full_debit + 1})
+    except backing.BackingError as error:
+        if str(error) != "durable-demand-exceeds-backing":
+            raise LiveFailure(f"wrong-capacity-rejection:{error}") from error
+    else:
+        raise LiveFailure("over-budget-retained-inventory-admitted")
+    after_negative = boundary_snapshot()
+    if before_negative != after_negative:
+        raise LiveFailure("over-budget-retained-inventory-wrote-state")
     rejected = {"reason": "durable-demand-exceeds-backing", "storageWrites": 0, "apiWrites": 0}
-    after_negative = dict(before_negative)
 
     retained = observe_existing_ext4_image(IMAGE, MOUNT, raw_bytes)
     if retained["rawBytes"] != raw_bytes or retained["usableBytes"] < required or retained["filesystemType"] != "ext4":
@@ -265,7 +302,7 @@ def execute() -> dict[str, Any]:
         raise LiveFailure(f"cleanup:{cleanup}")
     return {
         "schema": "amoebius.retained-storage.volume-live.v1", "register": 3, "substrate": "linux-cpu",
-        "inventory": {"observedBackingBytes": durable, "postReconcileDebitBytes": full_debit, "deduplicatedStableIdentities": ["retained-witness/pg-witness/pv_0", "retained-witness/minio-witness/pv_0"], "cacheExcluded": True, "nodeEphemeralExcluded": True},
+        "inventory": {"observedBackingBytes": durable, "postReconcileDebitBytes": full_debit, "physicalPool": pool, "deduplicatedStableIdentities": ["retained-witness/pg-witness/pv_0", "retained-witness/minio-witness/pv_0"], "cacheExcluded": True, "nodeEphemeralExcluded": True},
         "negativeBoundary": {"before": before_negative, "after": after_negative, **rejected},
         "hostVolume": {**retained, "requiredUsableBytes": required, "rawOneByteShort": one_short, "rawOneByteShortReason": "raw capacity below witness", "wrongFilesystemType": wrong_fs, "wrongFilesystemReason": "observed fsType != presentation", "fixedRawImage": True},
         "hardCeiling": hard_ceiling,

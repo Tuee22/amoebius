@@ -98,6 +98,7 @@ AUTHORED_ROOTS = (
     "documents",
     "app",
     "src",
+    "jvm",
     "dhall",
     "pb",
     "ui",
@@ -122,7 +123,6 @@ AUTHORED_ROOTS = (
     "tools",
     "vendor",
     "patches",
-    "docker",
 )
 
 # Directories a tree walk never descends into: VCS metadata plus the two present-day

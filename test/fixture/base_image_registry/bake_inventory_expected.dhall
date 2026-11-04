@@ -1,5 +1,15 @@
 -- Phase-25 independent oracle.  This file deliberately imports neither
 -- BakeCatalog.dhall nor generated image metadata.
+-- 2026-11-02 intended-version amendment: Ubuntu removed the old exact package
+-- revisions. Redis remains 7.0.15; PostgreSQL becomes 16.15 and Java 21.0.12.1.
+-- These expectations come from noble-updates/{main,universe}/binary-{amd64,arm64}
+-- Packages.xz on archive.ubuntu.com/ubuntu and ports.ubuntu.com/ubuntu-ports,
+-- checked before changing the catalog. On 2026-11-02 the user delegated review
+-- and the decision to the assistant, which accepted these publisher-derived
+-- expectations. This records assistant review at the user's explicit direction;
+-- the previous oracle's chronology does not establish this amendment's review.
+-- MinIO's retired dl.min.io host is replaced by the same publisher's GitHub
+-- release, preserving RELEASE.2025-07-23T15-54-02Z on both architectures.
 --
 -- `acquisition` and `integrity` replace the pre-amendment `sourceImage` and
 -- `sourceDigest`.  Those two fields could only describe the scavenge rung, and
@@ -48,7 +58,7 @@ in    [ { catalogName = "distribution"
         , arguments = [ "--version" ]
         , version = "RELEASE.2025-07-23T15-54-02Z"
         , kind = ProbeKind.Elf
-        , acquisition = "dl.min.io@RELEASE.2025-07-23T15-54-02Z"
+        , acquisition = "github.com/minio/minio@RELEASE.2025-07-23T15-54-02Z"
         , integrity = fromPublisher
         }
       , { catalogName = "vault"
@@ -77,7 +87,7 @@ in    [ { catalogName = "distribution"
         , arguments = [ "--version" ]
         , version = "7.0.15"
         , kind = ProbeKind.Elf
-        , acquisition = "apt:redis-server=5:7.0.15-1ubuntu0.24.04.4"
+        , acquisition = "apt:redis-server=5:7.0.15-1ubuntu0.24.04.5"
         , integrity = fromArchive
         }
       , { catalogName = "redis-cli"
@@ -86,7 +96,7 @@ in    [ { catalogName = "distribution"
         , arguments = [ "--version" ]
         , version = "7.0.15"
         , kind = ProbeKind.Elf
-        , acquisition = "apt:redis-tools=5:7.0.15-1ubuntu0.24.04.4"
+        , acquisition = "apt:redis-tools=5:7.0.15-1ubuntu0.24.04.5"
         , integrity = fromArchive
         }
       , { catalogName = "prometheus"
@@ -132,9 +142,9 @@ in    [ { catalogName = "distribution"
         , canonicalService = "Percona/Patroni Postgres + pgAdmin"
         , binary = "/usr/lib/postgresql/16/bin/postgres"
         , arguments = [ "--version" ]
-        , version = "16.14"
+        , version = "16.15"
         , kind = ProbeKind.Elf
-        , acquisition = "apt:postgresql-16=16.14-0ubuntu0.24.04.1"
+        , acquisition = "apt:postgresql-16=16.15-0ubuntu0.24.04.1"
         , integrity = fromArchive
         }
       , { catalogName = "patroni"
@@ -222,9 +232,9 @@ in    [ { catalogName = "distribution"
         , canonicalService = "JVM service runtime"
         , binary = "/usr/bin/java"
         , arguments = [ "--version" ]
-        , version = "21.0.11"
+        , version = "21.0.12.1"
         , kind = ProbeKind.Elf
-        , acquisition = "apt:openjdk-21-jre-headless=21.0.11+10-1~24.04.2"
+        , acquisition = "apt:openjdk-21-jre-headless=21.0.12.1+1-1~24.04.4"
         , integrity = fromArchive
         }
       , -- No `nvcc` row, and that is the answer rather than an omission: the

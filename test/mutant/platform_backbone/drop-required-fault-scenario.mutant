@@ -1,2 +1,2 @@
 mutation=retain only the healthy MinIO scenario
-expected_red=MinIO fault scenarios complete
+expected_red=native MinIO required fault family

@@ -79,6 +79,7 @@ amoebius/
 ├── DEVELOPMENT_PLAN/**                   authored plan suite: rulebook, tracker, one contract per phase
 ├── documents/**                          authored doctrine suite and illegal-state catalog
 ├── src/**                                authored Haskell library source; one module tree, read by GHC
+├── jvm/**                                authored JVM runtime adapters; read by javac/java, outputs below .build/jvm/
 ├── app/<executable>/**                   authored executable main modules; one directory per executable
 ├── dhall/**                              authored schemas, examples, and catalogs; read by the Dhall interpreter
 ├── proto/**                              authored protobuf schemas; bindings render to .build/proto/
@@ -141,7 +142,11 @@ the cycle it breaks. A `build-type: Custom` `Setup.hs` is likewise not a ground 
 
 The same reasoning names the roots by their reader rather than their owner: `dhall/` is read by the Dhall
 interpreter, `proto/` by protoc, `pb/` by CPython, `ui/` by purs, `pulumi/` by the Pulumi engine, and
-`src/`/`app/` by GHC. Where a subject has both a program the third-party engine executes and Haskell that
+`src/`/`app/` by GHC, and `jvm/` by javac/java. The JVM root owns adapters that must execute inside an
+upstream service process to intercept its storage effects; Haskell owns their policy and provisioning.
+It introduces no separately resolved package: compilation consumes the exact jars already delivered by the
+verified base-image handoff, and emits classes/archives below `.build/jvm/`.
+Where a subject has both a program the third-party engine executes and Haskell that
 decides what to ask it, the program lives in the reader's root and the Haskell lives in `src/`.
 
 Per-substrate host code is a module tree, not a root. `src/Amoebius/Substrate/**` and
@@ -241,6 +246,7 @@ patterns in §3.2. A generator requiring a new output class must amend this inve
 
 ```text
 .build/
+├── jvm/**                                compiled own JVM classes/archives and their build provenance
 ├── tla/**/*.tla                          emitted TLA+ modules
 ├── tla/**/*.cfg                          emitted TLC configurations
 ├── manifests/**/*.{yaml,yml,json}        rendered Kubernetes and provider objects

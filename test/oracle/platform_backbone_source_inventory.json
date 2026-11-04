@@ -1,0 +1,103 @@
+{
+  "schema":"phase30.independent-six-arm-structured-union.v1",
+  "decision":"Approve the replacement pure source-union inputs and literal3960-byte/60-object expectation. The original six identical generic inputs no longer represent the accepted three structured source arms.",
+  "provenance":"Independent arithmetic from the three unchanged generic39-byte fixtures and the previously authored source-model-corpus.json checkpoint/control/Pulsar inputs. No subject output or Phase30 measurement supplies an expectation.",
+  "scope_rule":"Each source id is also its owner, budget id and unique bucket name. All sources use store s, tenant t and a ProviderObjectQuota in s. The union has six independent exact-fit quotas, not one caller-supplied replacement quota.",
+  "raw_sources":[
+    {"source_id":"app","kind":"ApplicationObjects"},
+    {"source_id":"content","kind":"ContentObjects"},
+    {"source_id":"registry","kind":"RegistryObjects"}
+  ],
+  "raw_source_common_input":{
+    "resident":{"full_key":"resident","bytes":2},
+    "future":{"name":"future","count":1,"maximum_bytes":3,"horizon_seconds":0},
+    "concurrent":{"name":"concurrent","count":1,"maximum_bytes":5,"horizon_seconds":0},
+    "deletion_lag":{"name":"lag","count":1,"maximum_bytes":7,"horizon_seconds":30},
+    "failed_orphan":{"name":"failed","count":2,"maximum_bytes":11,"horizon_seconds":60},
+    "provider_quota_bytes":39,"provider_quota_objects":6,
+    "expected_logical_bytes":39,"expected_object_count":6
+  },
+  "checkpoint_source":{
+    "source_id":"checkpoint","kind":"PulumiCheckpointObjects","model":"checkpoint-json-dek-transit-v1",
+    "stack":"s",
+    "entries":{"r":{"a":{"secrecy":"Plain","maximum_canonical_bytes":4},"b":{"secrecy":"Secret","maximum_canonical_bytes":5}}},
+    "retained_revisions":2,"failed_sets_per_window":1,"failure_window_seconds":30,"orphan_horizon_seconds":61,
+    "expected_plaintext_bytes":61,"expected_stored_extent_bytes":246,
+    "expected_future":{"object_count":2,"logical_bytes":492},
+    "expected_concurrent":{"object_count":1,"logical_bytes":246},
+    "expected_failed_orphan":{"object_count":3,"logical_bytes":738},
+    "provider_quota_bytes":1476,"provider_quota_objects":6,
+    "expected_logical_bytes":1476,"expected_object_count":6
+  },
+  "control_source":{
+    "source_id":"control","kind":"ControlPlaneStateObjects","model":"control-transit-v1",
+    "entries":[
+      {"identity":"inforce","kind":"InForceSpecSnapshot","maximum_canonical_bytes":4,"expected_stored_bytes":53},
+      {"identity":"registry","kind":"ManagedResourceRegistry","maximum_canonical_bytes":5,"expected_stored_bytes":53},
+      {"identity":"journal","kind":"ReconcileJournal","maximum_canonical_bytes":2,"expected_stored_bytes":49},
+      {"identity":"validation","kind":"ValidationLedger","maximum_canonical_bytes":3,"expected_stored_bytes":53},
+      {"identity":"job","kind":"JobCompletion","maximum_canonical_bytes":6,"expected_stored_bytes":57}
+    ],
+    "retained_versions":2,"failed_sets_per_window":1,"failure_window_seconds":30,"orphan_horizon_seconds":61,
+    "expected_one_generation_bytes":265,
+    "expected_future":{"object_count":10,"logical_bytes":530},
+    "expected_concurrent":{"object_count":5,"logical_bytes":265},
+    "expected_failed_orphan":{"object_count":15,"logical_bytes":795},
+    "provider_quota_bytes":1590,"provider_quota_objects":30,
+    "expected_logical_bytes":1590,"expected_object_count":30
+  },
+  "pulsar_source":{
+    "source_id":"offload","kind":"PulsarOffloadObjects","model":"pulsar-4.0.6-single-block-v1","topic":"topic",
+    "fixture_reference":"source-model-corpus.json pulsar_nonstreaming_v1 case two-small-entries",
+    "retained_ledgers":[],
+    "future_ledger":{
+      "payload_bytes":8,"entry_count":2,"maximum_block_bytes":5242880,
+      "ensemble_size":3,"write_quorum":2,"ack_quorum":2,"maximum_creation_time":0,
+      "ensemble_history":[{"first_entry_id":0,"members":["b0:3181","b1:3181","b2:3181"]}],
+      "custom_metadata":[]
+    },
+    "maximum_segments_per_window":1,"offload_window_seconds":30,"retention_horizon_seconds":30,
+    "maximum_concurrent_segments":1,"deletion_lag_seconds":0,
+    "failed_sets_per_window":1,"failure_window_seconds":30,"orphan_horizon_seconds":30,
+    "admission_extent_quantum":1,
+    "expected_metadata_bytes":47,"expected_data_extent_bytes":160,"expected_index_extent_bytes":99,
+    "expected_future":{"object_count":2,"logical_bytes":259},
+    "expected_concurrent":{"object_count":2,"logical_bytes":259},
+    "expected_failed_orphan":{"object_count":2,"logical_bytes":259},
+    "provider_quota_bytes":777,"provider_quota_objects":6,
+    "expected_logical_bytes":777,"expected_object_count":6,
+    "coverage_limit":"This is a synthetic V1 wire/derivation fixture with an empty custom map; it is not the ordinary live ManagedLedgerImpl default metadata profile."
+  },
+  "expected_union":{
+    "source_ids":["app","content","registry","checkpoint","control","offload"],
+    "kind_by_source_id":{"app":"ApplicationObjects","content":"ContentObjects","registry":"RegistryObjects","checkpoint":"PulumiCheckpointObjects","control":"ControlPlaneStateObjects","offload":"PulsarOffloadObjects"},
+    "logical_bytes":3960,"object_count":60,
+    "resident":{"logical_bytes":6,"object_count":3},
+    "future":{"logical_bytes":1290,"object_count":17},
+    "concurrent":{"logical_bytes":785,"object_count":11},
+    "deletion_lag":{"logical_bytes":21,"object_count":3},
+    "failed_orphan":{"logical_bytes":1858,"object_count":26},
+    "budget_witness_count":6,"writer_admission_count":6,
+    "structured_original_input_sources":["checkpoint","control","offload"]
+  },
+  "optional_existing_minio_policy_projection":{
+    "policy":{"erasure_sets":1,"data_shards":2,"parity_shards":2,"shard_block_bytes":4096,"metadata_static_and_per_object_per_drive":1024,"incoming_workspace_per_drive":8192,"faults_per_set":1,"concurrent_write_sets":1,"failed_write_sets":1,"maximum_write_extent_bytes":8192},
+    "expected_payload_bytes":983040,"expected_metadata_bytes":249856,"expected_healing_bytes":1015808,"expected_extra_write_bytes":32768,
+    "expected_total_physical_bytes":2281472,"expected_usable_per_drive":570368,
+    "reason":"All60 retained or structural extents are positive and no larger than one8192-byte data stripe; each therefore needs its own4096-byte shard on all4drives."
+  },
+  "required_boundary_checks":[
+    {"source_ids":["app","content","registry"],"exact_byte_quota":39,"one_byte_short":38,"exact_object_quota":6,"one_object_short":5},
+    {"source_ids":["checkpoint"],"exact_byte_quota":1476,"one_byte_short":1475,"exact_object_quota":6,"one_object_short":5},
+    {"source_ids":["control"],"exact_byte_quota":1590,"one_byte_short":1589,"exact_object_quota":30,"one_object_short":29},
+    {"source_ids":["offload"],"exact_byte_quota":777,"one_byte_short":776,"exact_object_quota":6,"one_object_short":5}
+  ],
+  "binding_checks":[
+    "Compare complete source-id to kind mapping, exact resident identities, temporal byte/count axes and aggregate3960/60 subject results.",
+    "Retain exactly six resolved budget witnesses and six private writer admissions with matching source/scope/owner identities.",
+    "Each of checkpoint/control/offload retains its original structured input in the private source, merged provision and writer admission; the public API exposes no raw constructor for those arms.",
+    "Removing control while preserving expected source ids, duplicating an id, conflicting owners for one budget, foreign resident scope or conflicting metadata still rejects before effects.",
+    "The old39-byte raw-arm writer loop applies only to app/content/registry. Structured admission tests use each derived source's actual class extents and revision counts, rather than assuming a shared3-byte/one-object policy."
+  ],
+  "proposed_progress_text":"The six-arm union now combines three39-byte raw application/content/registry primitives with the independently reviewed checkpoint, five-kind control and Pulsar V1 derivations. Its exact3960-byte/60-object fold and per-source budgets/admissions are tested from real derived sources. Generic writer-loop negatives cover the three raw primitives; structured class boundaries and original-input retention are checked separately. These pure results do not prove runtime control CAS, checkpoint encryption execution, broker history bounds or installed gateway persistence."
+}

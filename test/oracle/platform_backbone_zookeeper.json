@@ -1,0 +1,103 @@
+{
+  "schema":"phase30.independent-zookeeper-encoding-corpus.v1",
+  "provenance":"Independently authored from pinned ZooKeeper3.9.3 Jute/DataNode/DataTree/ACL-cache/FileSnap/FileTxnLog formats. These synthetic unit trees and histories are not a production Pulsar znode inventory, a current-state observation or a snapshot taken from subject output.",
+  "decision":"Approve the literal encoding arithmetic and finite policy examples; real class inventory/current/replay/history/runtime premises remain separate.",
+  "primitives":{"int_bytes":4,"long_bytes":8,"boolean_bytes":1,"length_prefix_bytes":4,"vector_prefix_bytes":4,"stat_persisted_bytes":60,"txn_header_bytes":32,"txn_digest_bytes":12,"log_record_framing_bytes":13,"log_file_header_bytes":16,"snapshot_file_header_bytes":16,"session_table_prefix_bytes":4,"session_entry_bytes":12,"acl_cache_prefix_bytes":4,"acl_cache_id_bytes":8,"snapshot_digest_bytes":20,"snapshot_last_zxid_bytes":8,"seal_bytes":13,"tree_end_bytes":5},
+  "jute_string_cases":[
+    {"id":"empty-root-path","value":"","encoded_bytes":0,"wire_bytes":4,"ascii_path_profile":"accept-special-root"},
+    {"id":"ascii-path","value":"/a","encoded_bytes":2,"wire_bytes":6,"ascii_path_profile":"accept"},
+    {"id":"greek-pi","value":"π","encoded_bytes":2,"wire_bytes":6,"ascii_path_profile":"reject"},
+    {"id":"supplementary","value":"😀","encoded_bytes":6,"wire_bytes":10,"ascii_path_profile":"reject"},
+    {"id":"null-string","value":null,"encoded_bytes":0,"wire_bytes":4,"ascii_path_profile":"reject"}
+  ],
+  "string_rule":"Jute3.9.3 encodes each Java UTF16 code unit separately:1/2/3bytes by code-unit value. A supplementary pair costs6. Generic standard UTF8 length is not this rule. The ASCII-only path profile rejects non-ASCII; pure Jute string arithmetic remains as shown. Null is a distinct length-minus-one arm, not a valid node path.",
+  "node_cases":[
+    {"id":"root-empty","serialized_path":"","data_bytes":0,"acl_id":-1,"ephemeral_owner":0,"expected_wire_bytes":76},
+    {"id":"child-three-bytes","serialized_path":"/a","data_bytes":3,"acl_id":1,"ephemeral_owner":1,"expected_wire_bytes":81},
+    {"id":"child-one-byte-more","serialized_path":"/a","data_bytes":4,"acl_id":1,"ephemeral_owner":1,"expected_wire_bytes":82}
+  ],
+  "acl_cases":[
+    {"id":"open-world","perms":31,"scheme":"world","identity":"anyone","expected_wire_bytes":23},
+    {"id":"digest-user","perms":31,"scheme":"digest","identity":"u:x","expected_wire_bytes":21}
+  ],
+  "tree_fixtures":{
+    "root_only":{"nodes":["root-empty"],"sessions":[],"acl_cache":[]},
+    "root_child_session":{"nodes":["root-empty","child-three-bytes"],"sessions":[{"id":1,"timeout":30000}],"acl_cache":[{"id":1,"acls":["digest-user"]}]}
+  },
+  "snapshot_cases":[
+    {"id":"root-base","tree":"root_only","digest":false,"last_processed_zxid":false,"expected_bytes":118},
+    {"id":"root-modern","tree":"root_only","digest":true,"last_processed_zxid":true,"expected_bytes":172},
+    {"id":"root-child-base","tree":"root_child_session","digest":false,"last_processed_zxid":false,"expected_bytes":244},
+    {"id":"root-child-digest","tree":"root_child_session","digest":true,"last_processed_zxid":false,"expected_bytes":277},
+    {"id":"root-child-modern","tree":"root_child_session","digest":true,"last_processed_zxid":true,"expected_bytes":298}
+  ],
+  "snapshot_component_expectations":{
+    "root_child_session":{"header":16,"session_table":16,"acl_cache":37,"node_rows":157,"tree_end":5,"base_seal":13,"base_total":244,"digest_and_seal":33,"last_zxid_and_seal":21}
+  },
+  "transaction_common":{"path":"/a","data_bytes":3,"acls":["open-world"],"ephemeral":true,"parent_cversion":0,"version":0,"session_timeout":30000,"closed_session_paths":["/a"]},
+  "transaction_cases":[
+    {"id":"create","operation":"Create","expected_body_bytes":45,"expected_without_digest":90,"expected_with_digest":102},
+    {"id":"set-data","operation":"SetData","expected_body_bytes":17,"expected_without_digest":62,"expected_with_digest":74},
+    {"id":"delete","operation":"Delete","expected_body_bytes":6,"expected_without_digest":51,"expected_with_digest":63},
+    {"id":"create-session","operation":"CreateSession","expected_body_bytes":4,"expected_without_digest":49,"expected_with_digest":61},
+    {"id":"close-session","operation":"CloseSessionWithPaths","expected_body_bytes":10,"expected_without_digest":55,"expected_with_digest":67},
+    {"id":"set-acl","operation":"SetACL","expected_body_bytes":37,"expected_without_digest":82,"expected_with_digest":94},
+    {"id":"multi","operation":"Multi","children":["create","set-data"],"expected_body_bytes":82,"expected_without_digest":127,"expected_with_digest":139}
+  ],
+  "transaction_profile":"Modern CreateTxn includes parentCVersion. CloseSession case explicitly includes a vector of paths; an old empty-body mode is a separate encoding profile. Multi children contain type4+buffer4+child operation bytes, without child TxnHeaders/digests. Unsupported V0/TTL/container/error variants must be explicitly added or rejected.",
+  "history_case":{"transaction_ids":["create-session","create","set-data","delete"],"counts":[1,1,1,1],"digest":true,"expected_record_bytes":300,"log_generations":1,"expected_log_header_bytes":16,"expected_serialized_history_bytes":316},
+  "watch_cases":{
+    "sessions":[1],"watches":[{"session":1,"path":"/a","type":"Data"},{"session":1,"path":"/a","type":"Children"}],
+    "expected_watch_count":2,"expected_set_watches_bytes":32,"expected_set_watches2_bytes":40,
+    "scope":"These are protocol-vector bytes, not persisted tree bytes or a Java heap-cost model. Watches require an owned session and a bounded legal path/type; an Exists watch can refer to a path not currently created."
+  },
+  "finite_generation_policy":{
+    "members":[0,1,2],"maximum_unavailable_members":1,
+    "normal_log_generations":2,"incoming_log_generations":2,"maximum_log_extent_bytes":16777216,
+    "normal_snapshot_generations":3,"incoming_snapshot_generations":1,"maximum_snapshot_extent_bytes":1048576,
+    "other_paths_allowance_bytes":1048576,
+    "expected_steady_bytes_per_member":37748736,"expected_incoming_bytes_per_recovering_member":34603008,"expected_peak_bytes_per_member":72351744,
+    "expected_failure_family":[[],[0],[1],[2]],
+    "expected_case_slot_bytes":[
+      {"failed_members":[],"slot_bytes":{"0":37748736,"1":37748736,"2":37748736}},
+      {"failed_members":[0],"slot_bytes":{"0":72351744,"1":37748736,"2":37748736}},
+      {"failed_members":[1],"slot_bytes":{"0":37748736,"1":72351744,"2":37748736}},
+      {"failed_members":[2],"slot_bytes":{"0":37748736,"1":37748736,"2":72351744}}
+    ],
+    "expected_case_aggregate_peak_bytes":147849216,"expected_uniform_usable_debit_bytes":217055232,
+    "selected_raw_minimum_bytes":134217728,"selected_raw_quantum_bytes":67108864,"expected_raw_bytes_per_member":134217728,"expected_three_member_raw_debit_bytes":402653184,
+    "premise":"Normal and incoming generation counts/extents are bounded inputs requiring a finite-source/current-state proof and independent validation.16MiB preallocation alone is not a hard file-size limit. Intact-volume process catch-up reuses its named retained backing; a new disk would require separately debited old+new storage."
+  },
+  "one_unit_boundaries":[
+    {"id":"snapshot-exact","axis":"snapshot_bytes","required":244,"available":244,"expected":"accept"},
+    {"id":"snapshot-one-byte-short","axis":"snapshot_bytes","required":244,"available":243,"expected":"reject"},
+    {"id":"history-exact","axis":"serialized_history_bytes","required":316,"available":316,"expected":"accept"},
+    {"id":"history-one-byte-short","axis":"serialized_history_bytes","required":316,"available":315,"expected":"reject"},
+    {"id":"create-with-digest-exact","axis":"transaction_record_bytes","required":102,"available":102,"expected":"accept"},
+    {"id":"create-with-digest-one-byte-short","axis":"transaction_record_bytes","required":102,"available":101,"expected":"reject"},
+    {"id":"sessions-exact","axis":"session_count","required":1,"available":1,"expected":"accept"},
+    {"id":"sessions-one-short","axis":"session_count","required":1,"available":0,"expected":"reject"},
+    {"id":"watches-exact","axis":"watch_count","required":2,"available":2,"expected":"accept"},
+    {"id":"watches-one-short","axis":"watch_count","required":2,"available":1,"expected":"reject"},
+    {"id":"member-usable-exact","axis":"member_usable_bytes","required":72351744,"available":72351744,"expected":"accept"},
+    {"id":"member-usable-one-byte-short","axis":"member_usable_bytes","required":72351744,"available":72351743,"expected":"reject"},
+    {"id":"three-raw-claims-exact","axis":"named_backing_bytes","required":402653184,"available":402653184,"expected":"accept"},
+    {"id":"three-raw-claims-one-byte-short","axis":"named_backing_bytes","required":402653184,"available":402653183,"expected":"reject"}
+  ],
+  "required_structural_rejections":[
+    {"id":"duplicate-node-path","change":"root_child_session adds a second/a node","expected":"reject"},
+    {"id":"duplicate-session-id","change":"session1 repeated","expected":"reject"},
+    {"id":"duplicate-acl-cache-id","change":"ACL cache id1 repeated","expected":"reject"},
+    {"id":"missing-ephemeral-owner","change":"child/a ephemeral_owner2 but sessions only1","expected":"reject"},
+    {"id":"missing-acl-cache-entry","change":"child/a acl_id2 but cache only1","expected":"reject"},
+    {"id":"missing-watch-session-owner","change":"Data watch owned by2 but sessions only1","expected":"reject"},
+    {"id":"duplicate-watch-identity","change":"same(session,path,type) repeated","expected":"reject"},
+    {"id":"missing-root","change":"tree omits unique serialized empty-root path","expected":"reject"},
+    {"id":"missing-parent","change":"tree includes/a/b without/a","expected":"reject"},
+    {"id":"non-ascii-path-in-ascii-profile","change":"path/π or/😀 with ASCII-only profile","expected":"reject"},
+    {"id":"unknown-encoding-profile-or-operation","expected":"reject"},
+    {"id":"missing-required-member-fault-case","change":"omit[1] from required derived family","expected":"reject"},
+    {"id":"steady-files-spend-incoming-generations","change":"count four16MiB logs as ordinary steady while claiming two incoming logs free","expected":"reject"}
+  ],
+  "coverage_limit":"These literal encodings and policy cases close only pure models once bound to subject results. They do not invent the actual Pulsar znode schema, prove the current/fuzzy tree/session state, establish all-history/rollover bounds or derive member heap/CPU from wire bytes."
+}

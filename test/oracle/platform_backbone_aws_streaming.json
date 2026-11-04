@@ -1,0 +1,1116 @@
+{
+  "schema": "phase30.independent.aws-sigv4-streaming.v1",
+  "source_url": "https://docs.aws.amazon.com/AmazonS3/latest/developerguide/sigv4-streaming.html",
+  "source_kind": "Published AWS test credentials and four exact signatures; all other literals independently calculated with standard SHA256/HMAC and framing arithmetic. No subject output or live maxima.",
+  "example_credentials": {
+    "access_key": "AKIAIOSFODNN7EXAMPLE",
+    "secret_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "classification": "Public AWS documentation example only; not a live secret"
+  },
+  "signing": {
+    "method": "PUT",
+    "target": "/examplebucket/chunkObject.txt",
+    "timestamp": "20130524T000000Z",
+    "scope": "20130524/us-east-1/s3/aws4_request",
+    "signed_headers": [
+      "content-encoding",
+      "content-length",
+      "host",
+      "x-amz-content-sha256",
+      "x-amz-date",
+      "x-amz-decoded-content-length",
+      "x-amz-storage-class"
+    ]
+  },
+  "published_anchors": {
+    "canonical_request_sha256": "cee3fed04b70f867d036f722359b0b1f2f0e5dc0efadbc082b76c4c60e316455",
+    "seed_signature": "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9",
+    "chunk_signatures": [
+      "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a288648",
+      "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503ef5497",
+      "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d449df9"
+    ],
+    "decoded_bytes": 66560,
+    "encoded_bytes": 66824
+  },
+  "production_profile": {
+    "encoded_bytes": 2097152,
+    "decoded_bytes": 1048576,
+    "frames_including_zero": 1024
+  },
+  "payload_profiles": {
+    "published": {
+      "repeat_byte": 97,
+      "chunk_data_bytes": [
+        65536,
+        1024
+      ]
+    },
+    "one-byte": {
+      "repeat_byte": 97,
+      "chunk_data_bytes": [
+        1
+      ]
+    },
+    "one-mib": {
+      "repeat_byte": 97,
+      "chunk_data_bytes": [
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536
+      ]
+    },
+    "one-mib-plus-one": {
+      "repeat_byte": 97,
+      "chunk_data_bytes": [
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        65536,
+        1
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "published-aws-vector",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9",
+      "chunk_signatures": [
+        "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a288648",
+        "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503ef5497",
+        "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d449df9"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "accept",
+      "basis": "Exact AWS published non-trailer example",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "86ba876e2a8457dbc4bfe805f155e5d0560d8328ce92b64e0c42d3e973fcfa62",
+      "expected_decoded_bytes": 66560,
+      "expected_decoded_sha256": "cd69d3887c6af9264b100d7b7602331335d9aa7e3bd7c30cdc6d6f4bfbb3c888"
+    },
+    {
+      "id": "single-one-byte-data-chunk",
+      "payload_profile": "one-byte",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "173",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "1",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "aa9771708d662c67f302ca00108bf6ab4bbf81c7b1ffe3fed74b51d80eec2a79",
+      "chunk_signatures": [
+        "04538ffd59f5c2e63035f88f49e414808c392372f23e2ce63bae82335c7f8b86",
+        "14ee180f1d551dbb014a2069fb88cf3e6e2f5a2f3220c3df0e10d02c69dd538f"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "accept",
+      "basis": "AWS permits a single data chunk smaller than8192",
+      "materialized_encoded_bytes": 173,
+      "materialized_encoded_sha256": "ba5dd688ab4b88ccc6b443b3a763219713edc5eed741198d3d1e011815dbdf50",
+      "expected_decoded_bytes": 1,
+      "expected_decoded_sha256": "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"
+    },
+    {
+      "id": "tampered-first-data-byte",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9",
+      "chunk_signatures": [
+        "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a288648",
+        "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503ef5497",
+        "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d449df9"
+      ],
+      "wire_mutations": [
+        {
+          "kind": "data-byte",
+          "frame": 0,
+          "offset": 0,
+          "value": 98
+        }
+      ],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "First chunk MAC no longer commits its data",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "91954c1ec5cb1accd8976bc32614fd120b56469d72fb2edff824130f68f5ad1e"
+    },
+    {
+      "id": "tampered-second-data-byte",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9",
+      "chunk_signatures": [
+        "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a288648",
+        "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503ef5497",
+        "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d449df9"
+      ],
+      "wire_mutations": [
+        {
+          "kind": "data-byte",
+          "frame": 1,
+          "offset": 0,
+          "value": 98
+        }
+      ],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Second MAC independently checked",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "de5f360aa913b7020dcd1fdf4ebd3fd843ad100fe648f327258ee5435a2c3afb"
+    },
+    {
+      "id": "tampered-first-chunk-signature",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9",
+      "chunk_signatures": [
+        "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a288648",
+        "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503ef5497",
+        "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d449df9"
+      ],
+      "wire_mutations": [
+        {
+          "kind": "signature-byte",
+          "frame": 0,
+          "offset": 0,
+          "value": "0"
+        }
+      ],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Original writer chunk MAC must match",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "d6651e7d930474f9827fdb620f93734ef1410dbd0907e1205f842cb4d6bcb854"
+    },
+    {
+      "id": "tampered-zero-signature",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9",
+      "chunk_signatures": [
+        "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a288648",
+        "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503ef5497",
+        "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d449df9"
+      ],
+      "wire_mutations": [
+        {
+          "kind": "signature-byte",
+          "frame": 2,
+          "offset": 0,
+          "value": "0"
+        }
+      ],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Terminal MAC must also match",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "7d71f7a97d3bc0d3d1ea94b5e127f58fd0d91ef26a74bf66132496a42778f894"
+    },
+    {
+      "id": "wrong-first-size",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9",
+      "chunk_signatures": [
+        "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a288648",
+        "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503ef5497",
+        "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d449df9"
+      ],
+      "wire_mutations": [
+        {
+          "kind": "size-text",
+          "frame": 0,
+          "value": "10001"
+        }
+      ],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Framed size must match data and CRLF",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "216be5c841dde825092add9aef701addc50e704634438ba40a92de27e0ae1a6a"
+    },
+    {
+      "id": "negative-size",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66821",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "cd75616845a176e7bc4eb773fb58ac782377ce988bc050bc51e7eff0e8fc9371",
+      "chunk_signatures": [
+        "673a105a094b3b5b2cef2631147505da57920eb9df2fabaccc8cad466e855ec1",
+        "5ce9e4b65125853b2dfbda462dea683e4b70a77d5b405a8427f280f91310b814",
+        "7f81fd0a418cdddb1c22f8e64765e4a85b962e47fcd8dfdf418004c2a812d6a4"
+      ],
+      "wire_mutations": [
+        {
+          "kind": "size-text",
+          "frame": 0,
+          "value": "-1"
+        }
+      ],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Chunk size grammar is unsigned hexadecimal",
+      "materialized_encoded_bytes": 66821,
+      "materialized_encoded_sha256": "c29d795ad77afeb11393857e0133ef1d50e109a84e33856c12a354802f193045"
+    },
+    {
+      "id": "extra-chunk-extension",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66832",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "39ea216584c642e89ea4c2b931596aecdc6392abf3f4ba5f110b0c6a6b80a9bd",
+      "chunk_signatures": [
+        "50bfb2a4241cfb20f903895e095d78699bea3c478d643ae1db27915cdf156e04",
+        "8f11d3a05d79122ddd95f0d6e6f77c84c25bcf85e8f3bf757c9cb4d268590388",
+        "924b7cb5147e986b14f128a5ee424e256c16abdb73e1909e111de64454eee320"
+      ],
+      "wire_mutations": [
+        {
+          "kind": "size-text",
+          "frame": 0,
+          "value": "10000;other=x"
+        }
+      ],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Only the selected chunk-signature extension is accepted",
+      "materialized_encoded_bytes": 66832,
+      "materialized_encoded_sha256": "44edbe3adb57adc5e8d940505801507c037e671d653affaa4d54f87675de7b23"
+    },
+    {
+      "id": "missing-final-zero",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66738",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "04f76989ff0a10d8b61eb10336e7fefa560f1bc9fadade8a7de06c78aa17759b",
+      "chunk_signatures": [
+        "2376205e2174d5dbd907f23b67526909716647312c644d9893a1133a3c779843",
+        "822f8b6fe11b2841900a396de645ddd4dbb30eb94b6e66b42e003133386443ba",
+        "28e9f851c2dd7ed11a115dff2ceeb24b69161513587736423260ae2c854384e0"
+      ],
+      "wire_mutations": [
+        {
+          "kind": "omit-final"
+        }
+      ],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Mandatory authenticated zero frame missing",
+      "materialized_encoded_bytes": 66738,
+      "materialized_encoded_sha256": "26576cee694852b7dceb188bc0090daf570c3dc51bbcb7571eb7974f4e02ac51"
+    },
+    {
+      "id": "truncated-final-crlf",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66823",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "ad72e55e290f0e1d5c90d43f4250153734e3648efb1fbb4b7461271b321e3c66",
+      "chunk_signatures": [
+        "ad6c32e55e9ffffb5e8c227897543ab492ef9c50d2c7b97c12718cfd0aa4e921",
+        "930bf6491f77ab50b85d40ebed020a7368644787859c0f6169ba4f634e7a8e02",
+        "2c9001761ea01bdd6698d9b7576047812266c68ae8a56d7389de0559cccb226a"
+      ],
+      "wire_mutations": [
+        {
+          "kind": "drop-tail",
+          "bytes": 1
+        }
+      ],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Final zero chunk still requires its complete CRLF framing",
+      "materialized_encoded_bytes": 66823,
+      "materialized_encoded_sha256": "c8a69c9c4e0a69f8f745882ceb5ba2ac4447083a0e100acc63be1f3dd69ef98f"
+    },
+    {
+      "id": "reordered-data-frames",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9",
+      "chunk_signatures": [
+        "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a288648",
+        "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503ef5497",
+        "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d449df9"
+      ],
+      "wire_mutations": [
+        {
+          "kind": "order",
+          "frames": [
+            1,
+            0,
+            2
+          ]
+        }
+      ],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Signature chain commits frame order",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "16230b691ae06a4eeccf4644d4d4fe08b1fc7c3f57d432f8d1788fd23f850a61"
+    },
+    {
+      "id": "declared-decoded-one-short",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66559",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "97fe34964f8a3295262f2716d4ed9db834d18ede309f8a5af528f57f45bf43b4",
+      "chunk_signatures": [
+        "d166245e4bb6883b1db9f6c705c165e8b8976e4809fbdb7073bed52e0f1f01f7",
+        "95df4d60cf82eb66a611092fec696e76af51db303f1021ed8be665272c8d1715",
+        "3bfa07ac1afdcb8567d2a71eb585fbde7f99c5f53784b55fdabd80a8866fd048"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Request and all MACs re-signed for wrong declared decoded length; actual data remains66560",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "b1623222ce87eb326cfb80ffd6a9cc1a654f9ed8388b292da6b8c3c4a4bc092e"
+    },
+    {
+      "id": "declared-decoded-one-long",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66561",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "27194711b91ea91a26f76356026b2eae3ce4c839207060e128029543c1fe4fc5",
+      "chunk_signatures": [
+        "e445d34a0fc16812ee767ee1d377c038c622e12ad09e94852937bacc87a47d80",
+        "eecdc692d544a88648cb8fdbb0fcb036d752f7b5ca1907384f02efc03d524f6a",
+        "81a2ee6a0cb42723c167a14398ec7cb39240b12320c5095c699f039f9f506388"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "All data/MACs valid but actual decoded length is below declared",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "bd944277fbeec41d3426bc07c61ac7baa5c2d0b9304fd0a2d2ab41fe5cb32755"
+    },
+    {
+      "id": "declared-encoded-one-short",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66823",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "ad72e55e290f0e1d5c90d43f4250153734e3648efb1fbb4b7461271b321e3c66",
+      "chunk_signatures": [
+        "ad6c32e55e9ffffb5e8c227897543ab492ef9c50d2c7b97c12718cfd0aa4e921",
+        "930bf6491f77ab50b85d40ebed020a7368644787859c0f6169ba4f634e7a8e02",
+        "2c9001761ea01bdd6698d9b7576047812266c68ae8a56d7389de0559cccb226a"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Authenticated header length must equal complete encoded body",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "591164eee33105c4bdf0be0ffa9e05a946e9c5f6532ac35a54a60d140c419340"
+    },
+    {
+      "id": "declared-encoded-one-long",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66825",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "eca739a9adc42e3242ab899f958e825141ebf1ae70f0d3348f6d86686d59ee53",
+      "chunk_signatures": [
+        "8103431df755bd0743550d642432e97fb311e6887b23e397fa3b618e404a6867",
+        "164427d4469ca461a07beb741ecc79fbf07b44f8e12f0246ad1863090b6187e0",
+        "08e7ec09394c63402ac7945ec04ac2220d9b3f5e622af7f4e4ef63e8a87fbd4b"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Authenticated header length must equal complete encoded body",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "6e8e23c18ff48b9ddbcc1d2d517401197f03a53ce151a9facd3e7f2aaaabf43e"
+    },
+    {
+      "id": "trailing-byte-after-zero",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66825",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "eca739a9adc42e3242ab899f958e825141ebf1ae70f0d3348f6d86686d59ee53",
+      "chunk_signatures": [
+        "8103431df755bd0743550d642432e97fb311e6887b23e397fa3b618e404a6867",
+        "164427d4469ca461a07beb741ecc79fbf07b44f8e12f0246ad1863090b6187e0",
+        "08e7ec09394c63402ac7945ec04ac2220d9b3f5e622af7f4e4ef63e8a87fbd4b"
+      ],
+      "wire_mutations": [
+        {
+          "kind": "append",
+          "hex": "78"
+        }
+      ],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Exact body length and MACs valid; selected no-trailer grammar ends at zero frame",
+      "materialized_encoded_bytes": 66825,
+      "materialized_encoded_sha256": "a8711e49f92f6b21870da67a7bc845fe3e15481b6df92d9ad553cbb7fb67832e"
+    },
+    {
+      "id": "undeclared-trailer-after-zero",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66858",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "c625e487abe0cc416385eb33dad8d1a1dbf7dd50f411738e886842e93cc8ba0e",
+      "chunk_signatures": [
+        "e9cd4d74221c66e5ab47ad4ab3d2dc8475f516edf7744c5544dacb2443fdf0bd",
+        "b185d902a2d6a29a055aba801d7d6df1585b6e376335ea637c1612f3c2ac8a85",
+        "bf00ef963d831412be2758196bbb09534152aaf4372f50803888077486c4ace3"
+      ],
+      "wire_mutations": [
+        {
+          "kind": "append",
+          "hex": "782d616d7a2d636865636b73756d2d6372633332633a734f4f382f513d3d0d0a0d0a"
+        }
+      ],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Trailer bytes cannot follow a no-trailer stream",
+      "materialized_encoded_bytes": 66858,
+      "materialized_encoded_sha256": "3b5caafa74086ea86ee7e93c1a96a5ad70d9bbf0664a5340e20ebf607264e70c"
+    },
+    {
+      "id": "trailer-marker-unsupported",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD-TRAILER",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY",
+        "x-amz-trailer": "x-amz-checksum-crc32c"
+      },
+      "seed_signature": "264620668aeac03a2183589955f9c84512976c3eea7fa19f1b3d11bc0421e45d",
+      "chunk_signatures": [
+        "90dd28bc3461b0b69231bdaf44151fcc9e9957f343ff63c3540c12b3755c88ac",
+        "5f6be76f210953255dc0a159260fc0ecf61f2e7b037a1cdf29176dba401ecd7b",
+        "aeb7e146202694e94c7d6ad702a10ebe99285945ec28a90689306e9cc80fd771"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Trailer signing is a different AWS profile intentionally excluded",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "2dfcfb9b66cfe1c9ca89ed22f1e70cb62d4688e5656bdacc68bd7d3f0c425ca0"
+    },
+    {
+      "id": "encoded-exact-bound",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9",
+      "chunk_signatures": [
+        "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a288648",
+        "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503ef5497",
+        "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d449df9"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 66824,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "accept",
+      "basis": "Exact encoded input budget fits",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "86ba876e2a8457dbc4bfe805f155e5d0560d8328ce92b64e0c42d3e973fcfa62",
+      "expected_decoded_bytes": 66560,
+      "expected_decoded_sha256": "cd69d3887c6af9264b100d7b7602331335d9aa7e3bd7c30cdc6d6f4bfbb3c888"
+    },
+    {
+      "id": "encoded-one-over-bound",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9",
+      "chunk_signatures": [
+        "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a288648",
+        "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503ef5497",
+        "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d449df9"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 66823,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "One byte beyond encoded budget rejects",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "86ba876e2a8457dbc4bfe805f155e5d0560d8328ce92b64e0c42d3e973fcfa62"
+    },
+    {
+      "id": "decoded-exact-bound",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9",
+      "chunk_signatures": [
+        "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a288648",
+        "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503ef5497",
+        "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d449df9"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 66560,
+        "frames_including_zero": 1024
+      },
+      "expected": "accept",
+      "basis": "Exact decoded object budget fits",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "86ba876e2a8457dbc4bfe805f155e5d0560d8328ce92b64e0c42d3e973fcfa62",
+      "expected_decoded_bytes": 66560,
+      "expected_decoded_sha256": "cd69d3887c6af9264b100d7b7602331335d9aa7e3bd7c30cdc6d6f4bfbb3c888"
+    },
+    {
+      "id": "decoded-one-over-bound",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9",
+      "chunk_signatures": [
+        "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a288648",
+        "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503ef5497",
+        "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d449df9"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 66559,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "One byte beyond decoded budget rejects",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "86ba876e2a8457dbc4bfe805f155e5d0560d8328ce92b64e0c42d3e973fcfa62"
+    },
+    {
+      "id": "frame-count-exact-bound",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9",
+      "chunk_signatures": [
+        "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a288648",
+        "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503ef5497",
+        "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d449df9"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 3
+      },
+      "expected": "accept",
+      "basis": "Both data frames and final zero frame count",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "86ba876e2a8457dbc4bfe805f155e5d0560d8328ce92b64e0c42d3e973fcfa62",
+      "expected_decoded_bytes": 66560,
+      "expected_decoded_sha256": "cd69d3887c6af9264b100d7b7602331335d9aa7e3bd7c30cdc6d6f4bfbb3c888"
+    },
+    {
+      "id": "frame-count-one-over-bound",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66824",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9",
+      "chunk_signatures": [
+        "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a288648",
+        "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503ef5497",
+        "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d449df9"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 2
+      },
+      "expected": "reject",
+      "basis": "Zero frame cannot escape the parser count bound",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "86ba876e2a8457dbc4bfe805f155e5d0560d8328ce92b64e0c42d3e973fcfa62"
+    },
+    {
+      "id": "decoded-one-mib-exact",
+      "payload_profile": "one-mib",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "1050102",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "1048576",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "1e33b3b36985922976813371b2d6bb99434be551631c4133a1aa7dab7b857c63",
+      "chunk_signatures": [
+        "5519052f234377be88bdc737106e8fb217669245bb65c5715f28b470d2f9f2d9",
+        "1d5ac114dfbc86bf3b5169e458878e8a25198e867129dfa36af17c7e66584f69",
+        "54fbf601130c768e632a467c72e0d80360377668c6a2c33d2bc6a9fc60013fa4",
+        "3c068fa7ec91af5843c87ab82962b99ca87dd6367a3136527c35830dae2bb7b7",
+        "b3f3fb62d0db7c92537b5fd9c5739a0c6ac04931b3edc0a1899f3882a98635dd",
+        "0face4f0f28183d5d5bc07f84c502bcffdef8d5b630ab765f4ed9c23f9138f2e",
+        "aaf81b1e8cf057f19fa15c0bafc67fa530acdac76102c376de7dd191730aebac",
+        "fa23dc54ca8d3e11964794bce145ceb811d203e37a9d8a86cea1d1b4f976c851",
+        "5df75cdc7fd0de5789b42573f2726e177de1be7353ab8a798ebdd06873227f68",
+        "7477bfbcc6f05463f1914d36809912846039cb584ae3b51f65371ee120252288",
+        "a43c7acad990b22fdbe7bdc136f2648936ddf26257815c388dd63cd36f57878f",
+        "12f7badb40f2e068da8701773505887d620cb63f74536b2a6ca6792be4dcdbbe",
+        "e1a7bc01eb3bbab9cea079f2cd273cab0eb1ad6d71df4be85e1d765321915b10",
+        "8d709004f748ddd3c3a3cd58c81591f7da52f1b0cb83c62dee69d321b24fd093",
+        "10843341b88df33d761359c5c32b2f81dcee00dfe372e54ab675d78099edfa41",
+        "114d6d99c25fad94230e1fc4fbc5a5dcc95f3828721ee5e178c0264855fc8047",
+        "4126fcbce0f23149fd17941942cc3e87cc67f5affbc53798b83c632acdb30bc2"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "accept",
+      "basis": "Exact proposed production decoded maximum;16 full data frames plus zero",
+      "materialized_encoded_bytes": 1050102,
+      "materialized_encoded_sha256": "08ec84400ff608024b25f996f7c31ed56d9e9512bc1e0fef63cf370e67571820",
+      "expected_decoded_bytes": 1048576,
+      "expected_decoded_sha256": "9bc1b2a288b26af7257a36277ae3816a7d4f16e89c1e7e77d0a5c48bad62b360"
+    },
+    {
+      "id": "decoded-one-mib-plus-one",
+      "payload_profile": "one-mib-plus-one",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "1050189",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "1048577",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "73700f21f38b5a85e4cb21750e5c8b36a0b3eaf6602cdc33f261a25ff996c012",
+      "chunk_signatures": [
+        "e46a244d959ff1b1efa5ea4c40fdb5db6d99f9b7e395b268e01ef611dc0ee4ca",
+        "13f1f33440a931708251ad7c7098e05d824a29d2162f221c4a8f85852b7ac6af",
+        "93fb7748c8822f42862331765ce835dbc331de9912f210620dd0d7ceba99810b",
+        "572406ff8a0fb21aecea0833fc01ca134af06ee54a54d989dc1ba438397ff52e",
+        "0bb344abe09ca48619149951b5cdedfc6f34c543f92510f3bd78b6e65ab1a89b",
+        "eeaba33ff6fe66001fbf5a982f1385f355ab81341dcf62144d98e533b1e0f0ea",
+        "19f2df9890333dbcc453bbbb990f5b3af8aab9ced004250b6a5eeef0029303b9",
+        "6be487b8823cfc4c3cea83b16d3fba4e4d064f635af2b0eccb1e71927369e0d7",
+        "e6c68e985317dad9e39b1c54cf6c78d1567b3a15f581e819a4ca1f7d527b7fbc",
+        "3e1881c22cdeb636487d171e83d902c46308010d20dd31d11e9174350ea301b0",
+        "e79929a47aefe19042e408bc6898532b749dce04c7f9577f361b6e4b8a554a1a",
+        "d8536f4995f779d3206d3c309fbd42dc32c99ff9b646f0768acacaf7990b6e2a",
+        "347c0d16cb9c0d9b7ef4f82de656c5279d49a503af2ed60de3c7072224a5506e",
+        "18dcfae3d93ae16d4a90876b467a3e9e1aa5861a04acf50947a1d7b0fea73f96",
+        "8b445695ec8755f11af34189e0391e8df451ad87aedd262429a0807eae6f8974",
+        "b3ae0b8a8dd34f994edb3edb1f8e0da3cf8d61f63467ae677ca5da02f0004b1b",
+        "f49f8f741d3eb77a327d32e66d5bf97e3c9e51f83ca509767250485a70e7ed22",
+        "7395aa612a646b3285a5e9cb2310125174189f02c4303b956f612e4f402f5cf4"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Valid MACs and AWS chunk sizes exceed proposed production decoded maximum by1",
+      "materialized_encoded_bytes": 1050189,
+      "materialized_encoded_sha256": "486c4191a17e9ce13447ced0a47ef557d83bbc4560fdc69678e35721acfeead5"
+    },
+    {
+      "id": "decoded-body-one-over-authenticated-limit",
+      "payload_profile": "one-mib-plus-one",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "1050189",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "1048576",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "fa783764f57518069b99484c4e77992498bf5877e7f8bda7ce093c17102bb9f2",
+      "chunk_signatures": [
+        "26f0648b0e42afe95613ea310f9d41979ad594babf4286270a9a5716b4a15c13",
+        "b649eb5a82b7b1d1092f69b2350075f875cd21e5fe9040657424a3f272ffc7d6",
+        "147cdfa449054b0a9bb374ed62178d93b4bf5a4f0bd22ac1dfe14d49958e199e",
+        "38e838f0ae13e37c36ef996a15dbef071e871f8708a4f261b0879ee0313c0a5a",
+        "2e5a6835d422519a09537b0f4f689203e013fb107585a7b6de792aafd69ce008",
+        "a1bead77f6c3a5f5474401e95955a8d331725c954a334faa7b9ab3b62b3e03d0",
+        "cbb4dee6cc921fbff355da0b39276893a22a31c3942bc3ec25f2424cb1cf5b52",
+        "1f893844beadce521f9801f9297ffa7ea6be72cdae8445ebe1bf9d564aee21be",
+        "70e0e193f654d678b71f648713c77fe779644dea003281c494c8629f998ac1b3",
+        "ac5b6bf5d7d253e9f10fad2e8ddc2dc084ffa7f95c268695f3c1912959a6cff2",
+        "3eb577643ee08be738b000b9fb529afbc3a1f8c9ebc26e9650cfbd072bc787cf",
+        "44ea0bc77fe2f9ba1058f305328e959f4991c36cbedf1c2b7db1c6d7e230fcdf",
+        "683b9c4cf8509b02b1f0664150d0776ff9f83b093b9e4ba7b82db8b1af895a81",
+        "a4434c1dc214e067c2c7527fcac7433111689aab4e46ffc47d66f54768df7562",
+        "27ae68186b7cf425882233be4f14156d43138d8bafb5e4725ed65b00a9900af9",
+        "0cd384f97f3e888c6145cabe785072d685227bd02c838ef51a9db1041b7b464c",
+        "4c534eca378cddb1204da93f6ee0c38db0b654e23193584b29065ddfa5f5a73e",
+        "595a5ddfe50dd1acf7f8fe335a92eae8d812638730bcf80e5c5d768493baa330"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Declared length is within the limit but authenticated body adds1 beyond it; cumulative decode must reject",
+      "materialized_encoded_bytes": 1050189,
+      "materialized_encoded_sha256": "5f229034381d54ab5afbe9ac2743f47dd10f1b169434192bbb01af4be329e026"
+    },
+    {
+      "id": "chunk-size-one-over-production-limit",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "66825",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "eca739a9adc42e3242ab899f958e825141ebf1ae70f0d3348f6d86686d59ee53",
+      "chunk_signatures": [
+        "8103431df755bd0743550d642432e97fb311e6887b23e397fa3b618e404a6867",
+        "164427d4469ca461a07beb741ecc79fbf07b44f8e12f0246ad1863090b6187e0",
+        "08e7ec09394c63402ac7945ec04ac2220d9b3f5e622af7f4e4ef63e8a87fbd4b"
+      ],
+      "wire_mutations": [
+        {
+          "kind": "size-text",
+          "frame": 0,
+          "value": "100001"
+        }
+      ],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Parsed chunk length exceeds decoded budget; reject before reading/allocating its body",
+      "materialized_encoded_bytes": 66825,
+      "materialized_encoded_sha256": "df6f96f4fd592113c3db6184f5c358eaaa82a2455ab3e81b689018ed6730a2b5"
+    },
+    {
+      "id": "encoded-production-one-over-header",
+      "payload_profile": "published",
+      "headers": {
+        "content-encoding": "aws-chunked",
+        "content-length": "2097153",
+        "host": "s3.amazonaws.com",
+        "x-amz-content-sha256": "STREAMING-AWS4-HMAC-SHA256-PAYLOAD",
+        "x-amz-date": "20130524T000000Z",
+        "x-amz-decoded-content-length": "66560",
+        "x-amz-storage-class": "REDUCED_REDUNDANCY"
+      },
+      "seed_signature": "040077e7c5448d00724143c535a89a618476238148ad58caacbf7b7dabd10d21",
+      "chunk_signatures": [
+        "2fbcafe92118f9c12eaa98b2d8255c9480bb1706f6669eca197935387364c061",
+        "f7826f3ae3253490e0b8519b91dba217e624b0e7cca5f5c85439f23395ec8e90",
+        "dd1034d61379da269977389f07cdd91228f1173ec5160452833b5735183e0130"
+      ],
+      "wire_mutations": [],
+      "limits": {
+        "encoded_bytes": 2097152,
+        "decoded_bytes": 1048576,
+        "frames_including_zero": 1024
+      },
+      "expected": "reject",
+      "basis": "Authenticated encoded declaration exceeds proposed2MiB limit; reject before body admission",
+      "materialized_encoded_bytes": 66824,
+      "materialized_encoded_sha256": "38fc63bef5953510f95f63e4b59e1559f10ab36eccbfdee03b4ef01d11f57f95"
+    }
+  ],
+  "adapter_contract": [
+    "Construct request fields from literals, not a subject-generated signature. Compare returned decoded bytes/hash and accept/reject with these literal expectations.",
+    "For each case, use literal seed_signature/chunk_signatures and payload profile, then apply wire_mutations without re-signing. Header variants already have independently re-signed literal signatures.",
+    "Verify original writer header seed plus every data and zero MAC before forwarding an ordinary body signed with backend credentials and actual SHA256. Decoded quotas apply before backend mutation.",
+    "Bound encoded bytes before read/allocation, decoded bytes before append, and all frames including zero. Exact length and end-of-stream prevent accepting a prefix.",
+    "The model is non-trailer aws-chunked only. Unsupported trailers, additional chunk extensions and encodings reject explicitly.",
+    "AWS minimum8192 for nonfinal data chunks makes1024 frames a defensive ceiling under1MiB; test its comparison with the valid3/2-frame boundary rather than invent tiny nonfinal chunks.",
+    "Runtime authorizer must use actual request clock/credentials; tests evaluate the published2013 request at its own timestamp, without weakening freshness in runtime."
+  ]
+}

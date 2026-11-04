@@ -6,7 +6,12 @@ import Amoebius.Exec.Boundary (mkBoundaryTools, runBoundaryCorpus)
 import Amoebius.Ui.Server.Main (runServeUi)
 import Amoebius.Image.Resolver (runResolverCommand)
 import Amoebius.Image.Build (runAdmittedBuildxOci, runBakeInventory, runRenderBakeDockerfile)
-import Amoebius.Vault.Client (runVaultPromptWriteCommand, runVaultReadCommand, runVaultTransitCommand)
+import Amoebius.Vault.Client (runVaultPromptWriteCommand, runVaultReadCommand, runVaultReadyCommand, runVaultTransitCommand)
+import Amoebius.Vault.Audit (runVaultAuditSupervisor)
+import Amoebius.Vault.Provision (runVaultServiceProjectionCommand)
+import Amoebius.Platform.RegistryTransfer (runRegistryTransferCommand)
+import Amoebius.Platform.ServiceExec (runPlatformServiceExec)
+import Amoebius.Platform.S3Gateway (runObjectGateway)
 import Amoebius.Vault.Seal (openUnlockMaterial, sealUnlockMaterialIO)
 import Data.ByteString.Base64 qualified as Base64
 import Data.ByteString.Char8 qualified as StrictByteString
@@ -24,10 +29,16 @@ main = do
     "bake-inventory" : options -> runBakeInventory options
     "admitted-buildx-oci" : options -> runAdmittedBuildxOci options
     "vault-read" : options -> runVaultReadCommand options
+    "vault-ready" : options -> runVaultReadyCommand options
     "vault-transit-decrypt" : options -> runVaultTransitCommand options
     "vault-prompt-write" : options -> runVaultPromptWriteCommand options
     ["vault-seal-unlock"] -> runSealUnlock
     ["vault-open-unlock"] -> runOpenUnlock
+    ["vault-audit-supervise", configuration, auditRoot] -> runVaultAuditSupervisor configuration auditRoot
+    "vault-service-projection" : options -> runVaultServiceProjectionCommand options
+    "registry-transfer" : options -> runRegistryTransferCommand options
+    "platform-service-exec" : options -> runPlatformServiceExec options
+    "object-gateway" : options -> runObjectGateway options
     ["dev", "boundary-fixture", kubectl, docker, helm, pulumi, manifestPath] -> do
       tools <- either (fail . show) pure (mkBoundaryTools kubectl docker helm pulumi)
       manifestBytes <- ByteString.readFile manifestPath

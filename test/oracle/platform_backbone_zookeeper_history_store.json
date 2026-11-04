@@ -1,0 +1,678 @@
+{
+  "schema": "phase30.independent.zookeeper-history-store.v1",
+  "status": "Durable-store contract/encoding expectations only. No installed JVM interception, coordinator allocation, production horizon or actual source/current/history sufficiency is approved.",
+  "originalHistoryCorpusSha256": "b10f9ef7a316b71b343d0585768525b51aebe70a52d11ec976ffc807f7b3e078",
+  "policy": {
+    "members": [
+      0,
+      1,
+      2
+    ],
+    "snapshotBytes": 1048576,
+    "bootstrapBytes": 1024,
+    "growthFactor": 3,
+    "uniqueFramedBytes": 349184,
+    "physicalBytesPerMember": 349184,
+    "logGenerationsPerMember": 2,
+    "snapshotGenerationsPerMember": 3
+  },
+  "storeMaximumBytes": 1048576,
+  "encoding": {
+    "magicAscii": "AHST1\n",
+    "checksum": "SHA256 over the exact raw payload;64lowercase ASCII hex",
+    "separatorAscii": "\n",
+    "fixedEnvelopeBytes": 71,
+    "payload": "compact UTF8 JSON, recursively ascending object keys; no whitespace/newline; schema array order is preserved"
+  },
+  "states": {
+    "empty": {
+      "value": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [],
+        "physical": [],
+        "logs": [],
+        "snapshots": []
+      },
+      "payloadUtf8": "{\"logs\":[],\"physical\":[],\"policy\":{\"bootstrapBytes\":1024,\"growthFactor\":3,\"logGenerationsPerMember\":2,\"members\":[0,1,2],\"physicalBytesPerMember\":349184,\"snapshotBytes\":1048576,\"snapshotGenerationsPerMember\":3,\"uniqueFramedBytes\":349184},\"records\":[],\"schema\":\"amoebius.zookeeper-history-state.v1\",\"snapshots\":[]}",
+      "payloadBytes": 312,
+      "payloadSha256": "d2dcadd04f0e1f4250e8c282742d4d9e6b0cb8594671841cd9ed130508365459",
+      "wireHex": "41485354310a643264636164643034663065316634323530653863323832373432643464396536623063623835393436373138343163643965643133303530383336353435390a7b226c6f6773223a5b5d2c22706879736963616c223a5b5d2c22706f6c696379223a7b22626f6f7473747261704279746573223a313032342c2267726f777468466163746f72223a332c226c6f6747656e65726174696f6e735065724d656d626572223a322c226d656d62657273223a5b302c312c325d2c22706879736963616c42797465735065724d656d626572223a3334393138342c22736e617073686f744279746573223a313034383537362c22736e617073686f7447656e65726174696f6e735065724d656d626572223a332c22756e697175654672616d65644279746573223a3334393138347d2c227265636f726473223a5b5d2c22736368656d61223a22616d6f65626975732e7a6f6f6b65657065722d686973746f72792d73746174652e7631222c22736e617073686f7473223a5b5d7d",
+      "wireBytes": 383,
+      "expectedGlobalUniqueFramedBytes": 0,
+      "expectedPhysicalFramedBytesMember0": 0
+    },
+    "reserved": {
+      "value": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [],
+        "logs": [],
+        "snapshots": []
+      },
+      "payloadUtf8": "{\"logs\":[],\"physical\":[],\"policy\":{\"bootstrapBytes\":1024,\"growthFactor\":3,\"logGenerationsPerMember\":2,\"members\":[0,1,2],\"physicalBytesPerMember\":349184,\"snapshotBytes\":1048576,\"snapshotGenerationsPerMember\":3,\"uniqueFramedBytes\":349184},\"records\":[{\"canonicalBytes\":36,\"canonicalSha256\":\"40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707\",\"zxid\":1}],\"schema\":\"amoebius.zookeeper-history-state.v1\",\"snapshots\":[]}",
+      "payloadBytes": 427,
+      "payloadSha256": "0885233bc82cbd4449041bd466c2e2c98957c52f428a4bc78830fa2850c474a7",
+      "wireHex": "41485354310a303838353233336263383263626434343439303431626434363663326532633938393537633532663432386134626337383833306661323835306334373461370a7b226c6f6773223a5b5d2c22706879736963616c223a5b5d2c22706f6c696379223a7b22626f6f7473747261704279746573223a313032342c2267726f777468466163746f72223a332c226c6f6747656e65726174696f6e735065724d656d626572223a322c226d656d62657273223a5b302c312c325d2c22706879736963616c42797465735065724d656d626572223a3334393138342c22736e617073686f744279746573223a313034383537362c22736e617073686f7447656e65726174696f6e735065724d656d626572223a332c22756e697175654672616d65644279746573223a3334393138347d2c227265636f726473223a5b7b2263616e6f6e6963616c4279746573223a33362c2263616e6f6e6963616c536861323536223a2234306635396633393961616663653232373337643963313765393563356239343134353431376166306665653162386630316461373433666130623266373037222c227a786964223a317d5d2c22736368656d61223a22616d6f65626975732e7a6f6f6b65657065722d686973746f72792d73746174652e7631222c22736e617073686f7473223a5b5d7d",
+      "wireBytes": 498,
+      "expectedGlobalUniqueFramedBytes": 61,
+      "expectedPhysicalFramedBytesMember0": 0
+    },
+    "acknowledged": {
+      "value": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [],
+        "snapshots": []
+      },
+      "payloadUtf8": "{\"logs\":[],\"physical\":[{\"bytes\":61,\"member\":0}],\"policy\":{\"bootstrapBytes\":1024,\"growthFactor\":3,\"logGenerationsPerMember\":2,\"members\":[0,1,2],\"physicalBytesPerMember\":349184,\"snapshotBytes\":1048576,\"snapshotGenerationsPerMember\":3,\"uniqueFramedBytes\":349184},\"records\":[{\"canonicalBytes\":36,\"canonicalSha256\":\"40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707\",\"zxid\":1}],\"schema\":\"amoebius.zookeeper-history-state.v1\",\"snapshots\":[]}",
+      "payloadBytes": 450,
+      "payloadSha256": "fd704ba02417c88deae162cf85e457010e3a9dce0c7e51a44a7cbece4edaf051",
+      "wireHex": "41485354310a666437303462613032343137633838646561653136326366383565343537303130653361396463653063376535316134346137636265636534656461663035310a7b226c6f6773223a5b5d2c22706879736963616c223a5b7b226279746573223a36312c226d656d626572223a307d5d2c22706f6c696379223a7b22626f6f7473747261704279746573223a313032342c2267726f777468466163746f72223a332c226c6f6747656e65726174696f6e735065724d656d626572223a322c226d656d62657273223a5b302c312c325d2c22706879736963616c42797465735065724d656d626572223a3334393138342c22736e617073686f744279746573223a313034383537362c22736e617073686f7447656e65726174696f6e735065724d656d626572223a332c22756e697175654672616d65644279746573223a3334393138347d2c227265636f726473223a5b7b2263616e6f6e6963616c4279746573223a33362c2263616e6f6e6963616c536861323536223a2234306635396633393961616663653232373337643963313765393563356239343134353431376166306665653162386630316461373433666130623266373037222c227a786964223a317d5d2c22736368656d61223a22616d6f65626975732e7a6f6f6b65657065722d686973746f72792d73746174652e7631222c22736e617073686f7473223a5b5d7d",
+      "wireBytes": 521,
+      "expectedGlobalUniqueFramedBytes": 61,
+      "expectedPhysicalFramedBytesMember0": 61
+    },
+    "next-unacknowledged": {
+      "value": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 122
+          }
+        ],
+        "logs": [],
+        "snapshots": []
+      },
+      "payloadUtf8": "{\"logs\":[],\"physical\":[{\"bytes\":122,\"member\":0}],\"policy\":{\"bootstrapBytes\":1024,\"growthFactor\":3,\"logGenerationsPerMember\":2,\"members\":[0,1,2],\"physicalBytesPerMember\":349184,\"snapshotBytes\":1048576,\"snapshotGenerationsPerMember\":3,\"uniqueFramedBytes\":349184},\"records\":[{\"canonicalBytes\":36,\"canonicalSha256\":\"40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707\",\"zxid\":1}],\"schema\":\"amoebius.zookeeper-history-state.v1\",\"snapshots\":[]}",
+      "payloadBytes": 451,
+      "payloadSha256": "a262e2b90166643b1af1a76818488311d213f599dca279c7d35f79d743d60f01",
+      "wireHex": "41485354310a613236326532623930313636363433623161663161373638313834383833313164323133663539396463613237396337643335663739643734336436306630310a7b226c6f6773223a5b5d2c22706879736963616c223a5b7b226279746573223a3132322c226d656d626572223a307d5d2c22706f6c696379223a7b22626f6f7473747261704279746573223a313032342c2267726f777468466163746f72223a332c226c6f6747656e65726174696f6e735065724d656d626572223a322c226d656d62657273223a5b302c312c325d2c22706879736963616c42797465735065724d656d626572223a3334393138342c22736e617073686f744279746573223a313034383537362c22736e617073686f7447656e65726174696f6e735065724d656d626572223a332c22756e697175654672616d65644279746573223a3334393138347d2c227265636f726473223a5b7b2263616e6f6e6963616c4279746573223a33362c2263616e6f6e6963616c536861323536223a2234306635396633393961616663653232373337643963313765393563356239343134353431376166306665653162386630316461373433666130623266373037222c227a786964223a317d5d2c22736368656d61223a22616d6f65626975732e7a6f6f6b65657065722d686973746f72792d73746174652e7631222c22736e617073686f7473223a5b5d7d",
+      "wireBytes": 522,
+      "expectedGlobalUniqueFramedBytes": 61,
+      "expectedPhysicalFramedBytesMember0": 122
+    }
+  },
+  "commands": {
+    "append-session-present-digest": {
+      "operation": "append_attempt",
+      "member": 0,
+      "mutation": {
+        "zxid": 1,
+        "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+        "canonicalBytes": 36
+      },
+      "digest": "000000020000000000000000"
+    },
+    "reserve-session-conflict": {
+      "operation": "reserve",
+      "member": 0,
+      "mutation": {
+        "zxid": 1,
+        "canonicalSha256": "3733e2eb35cea6f94347b104b93664e8ceecc61966ef49b5badc7b07e15f144e",
+        "canonicalBytes": 36
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "initialize-new-private-directory",
+      "operation": "initialize",
+      "expectedAdmission": "allow",
+      "root": "missing",
+      "expectedState": "empty",
+      "expectedDirectoryMode": "0700",
+      "expectedFileMode": "0600",
+      "expectedFiles": [
+        "owner.lock",
+        "state"
+      ],
+      "requiredSyncs": [
+        "owner.lock",
+        "candidate",
+        "store-directory",
+        "parent-directory"
+      ]
+    },
+    {
+      "id": "initialize-existing-empty-directory-denied",
+      "operation": "initialize",
+      "expectedAdmission": "deny",
+      "root": "existing-empty-directory",
+      "expectedExistingBytesUnchanged": true
+    },
+    {
+      "id": "initialize-existing-initialized-directory-denied",
+      "operation": "initialize",
+      "expectedAdmission": "deny",
+      "root": "existing-initialized-directory",
+      "expectedExistingBytesUnchanged": true
+    },
+    {
+      "id": "initialize-existing-file-denied",
+      "operation": "initialize",
+      "expectedAdmission": "deny",
+      "root": "existing-file",
+      "expectedExistingBytesUnchanged": true
+    },
+    {
+      "id": "initialize-symlink-root-denied",
+      "operation": "initialize",
+      "expectedAdmission": "deny",
+      "root": "symlink-root",
+      "expectedExistingBytesUnchanged": true
+    },
+    {
+      "id": "resume-missing-root-no-initialization",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "root": "missing",
+      "expectedRootStillMissing": true
+    },
+    {
+      "id": "resume-valid-acknowledged",
+      "operation": "resume",
+      "expectedAdmission": "allow",
+      "current": "acknowledged",
+      "expectedState": "acknowledged"
+    },
+    {
+      "id": "resume-wrong-policy",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "current": "acknowledged",
+      "policyEdits": {
+        "physicalBytesPerMember": 349185
+      },
+      "expectedExistingBytesUnchanged": true
+    },
+    {
+      "id": "resume-missing-current-valid-candidate-no-fallback",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "current": null,
+      "candidate": "next-unacknowledged",
+      "expectedCandidatePreserved": true
+    },
+    {
+      "id": "resume-bad-current-valid-candidate-no-fallback",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "current": "bad-checksum",
+      "candidate": "next-unacknowledged",
+      "expectedCandidatePreserved": true
+    },
+    {
+      "id": "resume-valid-current-stale-newer-candidate",
+      "operation": "resume",
+      "expectedAdmission": "allow",
+      "current": "acknowledged",
+      "candidate": "next-unacknowledged",
+      "expectedState": "acknowledged",
+      "expectedCandidateRemoved": true
+    },
+    {
+      "id": "resume-valid-current-garbage-candidate",
+      "operation": "resume",
+      "expectedAdmission": "allow",
+      "current": "acknowledged",
+      "candidateRawHex": "aabbcc",
+      "expectedState": "acknowledged",
+      "expectedCandidateRemoved": true
+    },
+    {
+      "id": "resume-valid-current-oversized-candidate-denied",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "current": "acknowledged",
+      "candidateRepeat": {
+        "byte": 0,
+        "count": 1048577
+      },
+      "expectedCandidatePreserved": true
+    },
+    {
+      "id": "resume-unexpected-file-denied",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "current": "acknowledged",
+      "extraFiles": [
+        "unexpected"
+      ],
+      "expectedExistingBytesUnchanged": true
+    },
+    {
+      "id": "real-child-process-lock-denied",
+      "operation": "lock-child",
+      "expectedAdmission": "deny",
+      "current": "acknowledged",
+      "expectedNonblocking": true,
+      "expectedOwnerStateUnchanged": true
+    },
+    {
+      "id": "second-handle-same-process-lock-denied",
+      "operation": "lock-same-process",
+      "expectedAdmission": "deny",
+      "current": "acknowledged",
+      "expectedNonblocking": true,
+      "expectedOwnerStateUnchanged": true
+    },
+    {
+      "id": "lock-released-after-owner-process-exit",
+      "operation": "lock-after-exit",
+      "expectedAdmission": "allow",
+      "current": "acknowledged",
+      "childMustExecOrCloseInheritedDescriptors": true,
+      "expectedState": "acknowledged"
+    },
+    {
+      "id": "accepted-command-persist-before-grant",
+      "operation": "submit",
+      "expectedAdmission": "allow",
+      "setup": "acknowledged",
+      "command": "append-session-present-digest",
+      "expectedState": "next-unacknowledged",
+      "expectedStageOrder": [
+        "BeforeCandidateWrite",
+        "AfterCandidateWrite",
+        "AfterCandidateSync",
+        "AfterStateRename",
+        "AfterDirectorySync"
+      ],
+      "expectedGrantAfterLastStage": true,
+      "expectedMaximumDataFiles": 2
+    },
+    {
+      "id": "pure-conflict-refusal-does-not-write-or-poison",
+      "operation": "submit",
+      "expectedAdmission": "deny",
+      "setup": "acknowledged",
+      "command": "reserve-session-conflict",
+      "expectedState": "acknowledged",
+      "expectedPersistenceStages": [],
+      "expectedReadStillAvailable": true,
+      "expectedExistingBytesUnchanged": true
+    },
+    {
+      "id": "two-concurrent-appends-serialized",
+      "operation": "concurrent-submit",
+      "expectedAdmission": "allow",
+      "setup": "acknowledged",
+      "commands": [
+        "append-session-present-digest",
+        "append-session-present-digest"
+      ],
+      "expectedReturnedPhysicalDebitsUnordered": [
+        122,
+        183
+      ],
+      "expectedFinalPhysicalFramedBytesMember0": 183,
+      "expectedGlobalUniqueFramedBytes": 61
+    },
+    {
+      "id": "closed-handle-denies-read-and-command",
+      "operation": "closed-handle",
+      "expectedAdmission": "deny",
+      "setup": "acknowledged",
+      "expectedReadDenied": true,
+      "expectedCommandDenied": true
+    },
+    {
+      "id": "alias-or-identity-current-symlink",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "setup": "acknowledged",
+      "mutation": "current-symlink",
+      "target": "state",
+      "expectedExternalAliasTargetUnchanged": true
+    },
+    {
+      "id": "alias-or-identity-candidate-symlink",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "setup": "acknowledged",
+      "mutation": "candidate-symlink",
+      "target": "state.next",
+      "expectedExternalAliasTargetUnchanged": true
+    },
+    {
+      "id": "alias-or-identity-lock-symlink",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "setup": "acknowledged",
+      "mutation": "lock-symlink",
+      "target": "owner.lock",
+      "expectedExternalAliasTargetUnchanged": true
+    },
+    {
+      "id": "alias-or-identity-current-hardlink",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "setup": "acknowledged",
+      "mutation": "current-hardlink",
+      "target": "state",
+      "expectedExternalAliasTargetUnchanged": true
+    },
+    {
+      "id": "alias-or-identity-candidate-hardlink-current",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "setup": "acknowledged",
+      "mutation": "candidate-hardlink-current",
+      "target": "state.next",
+      "expectedExternalAliasTargetUnchanged": true
+    },
+    {
+      "id": "alias-or-identity-lock-hardlink",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "setup": "acknowledged",
+      "mutation": "lock-hardlink",
+      "target": "owner.lock",
+      "expectedExternalAliasTargetUnchanged": true
+    },
+    {
+      "id": "alias-or-identity-current-directory",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "setup": "acknowledged",
+      "mutation": "current-directory",
+      "target": "state",
+      "expectedExternalAliasTargetUnchanged": true
+    },
+    {
+      "id": "alias-or-identity-candidate-fifo",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "setup": "acknowledged",
+      "mutation": "candidate-fifo",
+      "target": "state.next",
+      "expectedExternalAliasTargetUnchanged": true
+    },
+    {
+      "id": "alias-or-identity-shared-root-mode",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "setup": "acknowledged",
+      "mutation": "shared-root-mode",
+      "target": "root",
+      "expectedExternalAliasTargetUnchanged": true
+    },
+    {
+      "id": "alias-or-identity-shared-file-mode",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "setup": "acknowledged",
+      "mutation": "shared-file-mode",
+      "target": "state",
+      "expectedExternalAliasTargetUnchanged": true
+    },
+    {
+      "id": "alias-or-identity-nonempty-owner-lock",
+      "operation": "resume",
+      "expectedAdmission": "deny",
+      "setup": "acknowledged",
+      "mutation": "nonempty-owner-lock",
+      "target": "owner.lock",
+      "expectedExternalAliasTargetUnchanged": true
+    }
+  ],
+  "faultCases": [
+    {
+      "id": "throw-BeforeCandidateWrite",
+      "stage": "BeforeCandidateWrite",
+      "setup": "acknowledged",
+      "command": "append-session-present-digest",
+      "expectedCommandAcknowledged": false,
+      "expectedThrows": true,
+      "expectedSameHandleReadDenied": true,
+      "expectedSameHandleCommandDenied": true,
+      "expectedVisibleStateOnProcessReopen": "acknowledged",
+      "expectedReopenPhysicalFramedBytesMember0": 61,
+      "expectedGlobalUniqueFramedBytes": 61,
+      "expectedCandidateAbsentAfterReopen": true
+    },
+    {
+      "id": "throw-AfterCandidateWrite",
+      "stage": "AfterCandidateWrite",
+      "setup": "acknowledged",
+      "command": "append-session-present-digest",
+      "expectedCommandAcknowledged": false,
+      "expectedThrows": true,
+      "expectedSameHandleReadDenied": true,
+      "expectedSameHandleCommandDenied": true,
+      "expectedVisibleStateOnProcessReopen": "acknowledged",
+      "expectedReopenPhysicalFramedBytesMember0": 61,
+      "expectedGlobalUniqueFramedBytes": 61,
+      "expectedCandidateAbsentAfterReopen": true
+    },
+    {
+      "id": "throw-AfterCandidateSync",
+      "stage": "AfterCandidateSync",
+      "setup": "acknowledged",
+      "command": "append-session-present-digest",
+      "expectedCommandAcknowledged": false,
+      "expectedThrows": true,
+      "expectedSameHandleReadDenied": true,
+      "expectedSameHandleCommandDenied": true,
+      "expectedVisibleStateOnProcessReopen": "acknowledged",
+      "expectedReopenPhysicalFramedBytesMember0": 61,
+      "expectedGlobalUniqueFramedBytes": 61,
+      "expectedCandidateAbsentAfterReopen": true
+    },
+    {
+      "id": "throw-AfterStateRename",
+      "stage": "AfterStateRename",
+      "setup": "acknowledged",
+      "command": "append-session-present-digest",
+      "expectedCommandAcknowledged": false,
+      "expectedThrows": true,
+      "expectedSameHandleReadDenied": true,
+      "expectedSameHandleCommandDenied": true,
+      "expectedVisibleStateOnProcessReopen": "next-unacknowledged",
+      "expectedReopenPhysicalFramedBytesMember0": 122,
+      "expectedGlobalUniqueFramedBytes": 61,
+      "expectedCandidateAbsentAfterReopen": true
+    },
+    {
+      "id": "throw-AfterDirectorySync",
+      "stage": "AfterDirectorySync",
+      "setup": "acknowledged",
+      "command": "append-session-present-digest",
+      "expectedCommandAcknowledged": false,
+      "expectedThrows": true,
+      "expectedSameHandleReadDenied": true,
+      "expectedSameHandleCommandDenied": true,
+      "expectedVisibleStateOnProcessReopen": "next-unacknowledged",
+      "expectedReopenPhysicalFramedBytesMember0": 122,
+      "expectedGlobalUniqueFramedBytes": 61,
+      "expectedCandidateAbsentAfterReopen": true
+    }
+  ],
+  "invalidWireCases": [
+    {
+      "id": "wrong-magic",
+      "expectedAdmission": "deny",
+      "wireHex": "42485354310a666437303462613032343137633838646561653136326366383565343537303130653361396463653063376535316134346137636265636534656461663035310a7b226c6f6773223a5b5d2c22706879736963616c223a5b7b226279746573223a36312c226d656d626572223a307d5d2c22706f6c696379223a7b22626f6f7473747261704279746573223a313032342c2267726f777468466163746f72223a332c226c6f6747656e65726174696f6e735065724d656d626572223a322c226d656d62657273223a5b302c312c325d2c22706879736963616c42797465735065724d656d626572223a3334393138342c22736e617073686f744279746573223a313034383537362c22736e617073686f7447656e65726174696f6e735065724d656d626572223a332c22756e697175654672616d65644279746573223a3334393138347d2c227265636f726473223a5b7b2263616e6f6e6963616c4279746573223a33362c2263616e6f6e6963616c536861323536223a2234306635396633393961616663653232373337643963313765393563356239343134353431376166306665653162386630316461373433666130623266373037222c227a786964223a317d5d2c22736368656d61223a22616d6f65626975732e7a6f6f6b65657065722d686973746f72792d73746174652e7631222c22736e617073686f7473223a5b5d7d"
+    },
+    {
+      "id": "wrong-checksum",
+      "expectedAdmission": "deny",
+      "wireHex": "41485354310a303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030300a7b226c6f6773223a5b5d2c22706879736963616c223a5b7b226279746573223a36312c226d656d626572223a307d5d2c22706f6c696379223a7b22626f6f7473747261704279746573223a313032342c2267726f777468466163746f72223a332c226c6f6747656e65726174696f6e735065724d656d626572223a322c226d656d62657273223a5b302c312c325d2c22706879736963616c42797465735065724d656d626572223a3334393138342c22736e617073686f744279746573223a313034383537362c22736e617073686f7447656e65726174696f6e735065724d656d626572223a332c22756e697175654672616d65644279746573223a3334393138347d2c227265636f726473223a5b7b2263616e6f6e6963616c4279746573223a33362c2263616e6f6e6963616c536861323536223a2234306635396633393961616663653232373337643963313765393563356239343134353431376166306665653162386630316461373433666130623266373037222c227a786964223a317d5d2c22736368656d61223a22616d6f65626975732e7a6f6f6b65657065722d686973746f72792d73746174652e7631222c22736e617073686f7473223a5b5d7d"
+    },
+    {
+      "id": "missing-envelope-newline",
+      "expectedAdmission": "deny",
+      "wireHex": "41485354310a666437303462613032343137633838646561653136326366383565343537303130653361396463653063376535316134346137636265636534656461663035317b226c6f6773223a5b5d2c22706879736963616c223a5b7b226279746573223a36312c226d656d626572223a307d5d2c22706f6c696379223a7b22626f6f7473747261704279746573223a313032342c2267726f777468466163746f72223a332c226c6f6747656e65726174696f6e735065724d656d626572223a322c226d656d62657273223a5b302c312c325d2c22706879736963616c42797465735065724d656d626572223a3334393138342c22736e617073686f744279746573223a313034383537362c22736e617073686f7447656e65726174696f6e735065724d656d626572223a332c22756e697175654672616d65644279746573223a3334393138347d2c227265636f726473223a5b7b2263616e6f6e6963616c4279746573223a33362c2263616e6f6e6963616c536861323536223a2234306635396633393961616663653232373337643963313765393563356239343134353431376166306665653162386630316461373433666130623266373037222c227a786964223a317d5d2c22736368656d61223a22616d6f65626975732e7a6f6f6b65657065722d686973746f72792d73746174652e7631222c22736e617073686f7473223a5b5d7d"
+    },
+    {
+      "id": "short-state-read",
+      "expectedAdmission": "deny",
+      "wireHex": "41485354310a666437303462613032343137633838646561653136326366383565343537303130653361396463653063376535316134346137636265636534656461663035310a7b226c6f6773223a5b5d2c22706879736963616c223a5b7b226279746573223a36312c226d656d626572223a307d5d2c22706f6c696379223a7b22626f6f7473747261704279746573223a313032342c2267726f777468466163746f72223a332c226c6f6747656e65726174696f6e735065724d656d626572223a322c226d656d62657273223a5b302c312c325d2c22706879736963616c42797465735065724d656d626572223a3334393138342c22736e617073686f744279746573223a313034383537362c22736e617073686f7447656e65726174696f6e735065724d656d626572223a332c22756e697175654672616d65644279746573223a3334393138347d2c227265636f726473223a5b7b2263616e6f6e6963616c4279746573223a33362c2263616e6f6e6963616c536861323536223a2234306635396633393961616663653232373337643963313765393563356239343134353431376166306665653162386630316461373433666130623266373037222c227a786964223a317d5d2c22736368656d61223a22616d6f65626975732e7a6f6f6b65657065722d686973746f72792d73746174652e7631222c22736e617073686f7473223a5b5d"
+    },
+    {
+      "id": "checksummed-invalid-json",
+      "expectedAdmission": "deny",
+      "wireHex": "41485354310a303231666235393664623831653664303262663364323538366565333938316665353139663237356330616339636137366262636632656262343039376439360a7b"
+    },
+    {
+      "id": "checksummed-trailing-whitespace-noncanonical",
+      "expectedAdmission": "deny",
+      "wireHex": "41485354310a383534343437343731616330363531633365343138633032653932653134366435363835336338643532353261306536356237633161303737386333383063640a7b226c6f6773223a5b5d2c22706879736963616c223a5b7b226279746573223a36312c226d656d626572223a307d5d2c22706f6c696379223a7b22626f6f7473747261704279746573223a313032342c2267726f777468466163746f72223a332c226c6f6747656e65726174696f6e735065724d656d626572223a322c226d656d62657273223a5b302c312c325d2c22706879736963616c42797465735065724d656d626572223a3334393138342c22736e617073686f744279746573223a313034383537362c22736e617073686f7447656e65726174696f6e735065724d656d626572223a332c22756e697175654672616d65644279746573223a3334393138347d2c227265636f726473223a5b7b2263616e6f6e6963616c4279746573223a33362c2263616e6f6e6963616c536861323536223a2234306635396633393961616663653232373337643963313765393563356239343134353431376166306665653162386630316461373433666130623266373037222c227a786964223a317d5d2c22736368656d61223a22616d6f65626975732e7a6f6f6b65657065722d686973746f72792d73746174652e7631222c22736e617073686f7473223a5b5d7d20"
+    },
+    {
+      "id": "checksummed-extra-field-noncanonical",
+      "expectedAdmission": "deny",
+      "wireHex": "41485354310a613639373539336632376564346639333436353239363162323037323534653432653033376165353538396466356238353661636631653965363565623764640a7b226578747261223a302c226c6f6773223a5b5d2c22706879736963616c223a5b7b226279746573223a36312c226d656d626572223a307d5d2c22706f6c696379223a7b22626f6f7473747261704279746573223a313032342c2267726f777468466163746f72223a332c226c6f6747656e65726174696f6e735065724d656d626572223a322c226d656d62657273223a5b302c312c325d2c22706879736963616c42797465735065724d656d626572223a3334393138342c22736e617073686f744279746573223a313034383537362c22736e617073686f7447656e65726174696f6e735065724d656d626572223a332c22756e697175654672616d65644279746573223a3334393138347d2c227265636f726473223a5b7b2263616e6f6e6963616c4279746573223a33362c2263616e6f6e6963616c536861323536223a2234306635396633393961616663653232373337643963313765393563356239343134353431376166306665653162386630316461373433666130623266373037222c227a786964223a317d5d2c22736368656d61223a22616d6f65626975732e7a6f6f6b65657065722d686973746f72792d73746174652e7631222c22736e617073686f7473223a5b5d7d"
+    },
+    {
+      "id": "checksummed-duplicate-json-key",
+      "expectedAdmission": "deny",
+      "wireHex": "41485354310a613838386430393935663766323130643461613536363930356432633361393933623333323038383763666261663130323261346232323032623030626136610a7b22736368656d61223a22616d6f65626975732e7a6f6f6b65657065722d686973746f72792d73746174652e7631222c226c6f6773223a5b5d2c22706879736963616c223a5b7b226279746573223a36312c226d656d626572223a307d5d2c22706f6c696379223a7b22626f6f7473747261704279746573223a313032342c2267726f777468466163746f72223a332c226c6f6747656e65726174696f6e735065724d656d626572223a322c226d656d62657273223a5b302c312c325d2c22706879736963616c42797465735065724d656d626572223a3334393138342c22736e617073686f744279746573223a313034383537362c22736e617073686f7447656e65726174696f6e735065724d656d626572223a332c22756e697175654672616d65644279746573223a3334393138347d2c227265636f726473223a5b7b2263616e6f6e6963616c4279746573223a33362c2263616e6f6e6963616c536861323536223a2234306635396633393961616663653232373337643963313765393563356239343134353431376166306665653162386630316461373433666130623266373037222c227a786964223a317d5d2c22736368656d61223a22616d6f65626975732e7a6f6f6b65657065722d686973746f72792d73746174652e7631222c22736e617073686f7473223a5b5d7d"
+    },
+    {
+      "id": "checksummed-wrong-policy",
+      "expectedAdmission": "deny",
+      "wireHex": "41485354310a393131373330363561613333353235636261303138353931666564363832363466343436353232633331623136333566356139303961356564646461356638310a7b226c6f6773223a5b5d2c22706879736963616c223a5b7b226279746573223a36312c226d656d626572223a307d5d2c22706f6c696379223a7b22626f6f7473747261704279746573223a313032342c2267726f777468466163746f72223a332c226c6f6747656e65726174696f6e735065724d656d626572223a322c226d656d62657273223a5b302c312c325d2c22706879736963616c42797465735065724d656d626572223a3334393138352c22736e617073686f744279746573223a313034383537362c22736e617073686f7447656e65726174696f6e735065724d656d626572223a332c22756e697175654672616d65644279746573223a3334393138347d2c227265636f726473223a5b7b2263616e6f6e6963616c4279746573223a33362c2263616e6f6e6963616c536861323536223a2234306635396633393961616663653232373337643963313765393563356239343134353431376166306665653162386630316461373433666130623266373037222c227a786964223a317d5d2c22736368656d61223a22616d6f65626975732e7a6f6f6b65657065722d686973746f72792d73746174652e7631222c22736e617073686f7473223a5b5d7d"
+    },
+    {
+      "id": "checksummed-duplicate-record",
+      "expectedAdmission": "deny",
+      "wireHex": "41485354310a353236316361323964633162363631343438653563643363393932613038373432653439656430336431316231373834663563393235663538326530306639630a7b226c6f6773223a5b5d2c22706879736963616c223a5b7b226279746573223a36312c226d656d626572223a307d5d2c22706f6c696379223a7b22626f6f7473747261704279746573223a313032342c2267726f777468466163746f72223a332c226c6f6747656e65726174696f6e735065724d656d626572223a322c226d656d62657273223a5b302c312c325d2c22706879736963616c42797465735065724d656d626572223a3334393138342c22736e617073686f744279746573223a313034383537362c22736e617073686f7447656e65726174696f6e735065724d656d626572223a332c22756e697175654672616d65644279746573223a3334393138347d2c227265636f726473223a5b7b2263616e6f6e6963616c4279746573223a33362c2263616e6f6e6963616c536861323536223a2234306635396633393961616663653232373337643963313765393563356239343134353431376166306665653162386630316461373433666130623266373037222c227a786964223a317d2c7b2263616e6f6e6963616c4279746573223a33362c2263616e6f6e6963616c536861323536223a2234306635396633393961616663653232373337643963313765393563356239343134353431376166306665653162386630316461373433666130623266373037222c227a786964223a317d5d2c22736368656d61223a22616d6f65626975732e7a6f6f6b65657065722d686973746f72792d73746174652e7631222c22736e617073686f7473223a5b5d7d"
+    },
+    {
+      "id": "one-byte-over-total-extent",
+      "expectedAdmission": "deny",
+      "repeat": {
+        "byte": 0,
+        "count": 1048577
+      },
+      "expectedRejectBeforeJson": true
+    },
+    {
+      "id": "exact-total-extent-garbage-not-a-valid-state",
+      "expectedAdmission": "deny",
+      "repeat": {
+        "byte": 0,
+        "count": 1048576
+      },
+      "expectedRejectBecause": "envelope-or-json-not-extent-alone"
+    }
+  ],
+  "nativeEncodingUpperBound": {
+    "maximumDistinctRecords": 5724,
+    "maximumCanonicalBytesDigits": 6,
+    "maximumZxidDigits": 19,
+    "maximumRecordJsonBytes": 137,
+    "maximumRecordSeparatingCommas": 5723,
+    "maximumFixedStateJsonBytesWithEmptyRecordArray": 921,
+    "maximumRawPayloadBytes": 790832,
+    "maximumEnvelopeBytes": 71,
+    "maximumTotalStateBytes": 790903,
+    "slackBelow1MiB": 257673,
+    "scope": "Conservative upper bound for exact native policy only; deliberately combines individually worst widths even though they cannot all coexist. No subject serialization sizes supply these literals."
+  },
+  "powerLossScope": {
+    "beforeCandidateRenameAllowedStates": [
+      "acknowledged"
+    ],
+    "afterRenameBeforeDirectorySyncAllowedStates": [
+      "acknowledged",
+      "next-unacknowledged"
+    ],
+    "afterDirectorySyncAllowedStates": [
+      "next-unacknowledged"
+    ],
+    "afterAcknowledgedReturnMustRetainState": "next-unacknowledged",
+    "warning": "Process exceptions/SIGKILL test visible process-restart behavior, not an actual host/device power cut. The faultCases use deterministic visible old/new states after a completed stage; only this separate durability argument permits both states at an uncertain power-loss rename boundary."
+  },
+  "requiredIntegrationPremises": [
+    "Exclusive initialization durably publishes the new subdirectory by syncing its parent; no resume/init fallback or state reset.",
+    "Lifetime owner.lock is never unlinked/replaced during ownership; separate open file descriptions use flock/OFD exclusion, including same-process second handles. Lock inheritance in child tests is explicit.",
+    "Only a validated matching current can authorize stale candidate cleanup. Never load a candidate as current fallback. No symlink/hardlink/FIFO/directory alias may be truncated or used.",
+    "Native encoding bound depends on exact native policy and fixed schema; larger policies still fail closed at the total-file limit. No expectation that arbitrary1MiB bytes constitute valid state.",
+    "Checksums detect corruption; they do not authenticate replay of an older well-formed prefix or authorize importing/resetting an old backing. Durable grants/no rollback and trusted filesystem lineage remain required.",
+    "Store files/current+candidate, lock/directory blocks, journals/control reserve and incoming/failed generations still need concrete capacity/execution allocation."
+  ]
+}

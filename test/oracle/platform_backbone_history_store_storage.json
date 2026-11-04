@@ -1,0 +1,188 @@
+{
+  "schema": "phase30.independent.history-store-additive-storage-amendment.v2",
+  "decision": "Conditional arithmetic and private component/join approval after source lifecycle and existing bindings review; no installed coordinator/JVM/RPC/execution/current/history adequacy claim.",
+  "originalGatewayOracleSha256": "28bda71e607a6e44d828e8f04063add25404c1e02305b0758b38690aa4c244ff",
+  "bookkeeperMin128ReferenceSha256": "95bfdf5e9fb69f46eca3d3c86befc73b60644b278c95e46ce5a69a4f733bbe00",
+  "historyStoreCorpusSha256": "806c20f1cfb37431f783768eb53f34e203751acf2d60b5f615f5d4f5ddf89fb4",
+  "operands": {
+    "gatewayCurrentBytes": 1048576,
+    "gatewayCandidateBytes": 1048576,
+    "gatewayFailedBytes": 1048576,
+    "gatewayControlReserveBytes": 2097152,
+    "gatewayDedicatedUsableBytes": 5242880,
+    "historyCurrentSlotBytes": 1048576,
+    "historyCandidateSlotBytes": 1048576,
+    "historyExtraReaderSlotBytes": 1048576,
+    "historyMaximumExtraReaders": 1,
+    "historyEnforcedFileMaximumBytes": 1048576,
+    "historyNativeEncodingUpperBoundBytes": 790903,
+    "historyDedicatedUsableBytes": 3145728,
+    "combinedFilesystemUsableSupplyBytes": 8388608,
+    "rawFilesystemSupplyBytes": 67108864,
+    "filesystemOverheadBasisPoints": 500,
+    "minimumRawBytes": 67108864,
+    "rawQuantumBytes": 67108864,
+    "parentRawSupplyBytes": 40377516032
+  },
+  "expected": {
+    "unchangedOriginalGatewayUsableBytes": 5242880,
+    "additionalHistoryStoreUsableBytes": 3145728,
+    "combinedGatewayFilesystemUsableBytes": 8388608,
+    "presentedBytesAfter500BasisPoints": 8808039,
+    "rawFilesystemBytes": 67108864,
+    "unchangedRawTotals": {
+      "backbone_child_filesystems": 14,
+      "total_filesystems_including_vault": 16,
+      "backbone_child_raw_debit_bytes": 38252052480,
+      "pool_capacity_bytes": 38454427648,
+      "pool_metadata_allowance_bytes": 1923088384,
+      "pool_raw_bytes": 40377516032
+    }
+  },
+  "boundaries": [
+    {
+      "id": "exact-original5-plus-dedicated3-join8",
+      "edits": {},
+      "expectedAdmission": "allow",
+      "expectedLocus": null
+    },
+    {
+      "id": "original-gateway-component-one-byte-short",
+      "edits": {
+        "gatewayDedicatedUsableBytes": 5242879
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "original-gateway-component"
+    },
+    {
+      "id": "history-component-one-byte-short",
+      "edits": {
+        "historyDedicatedUsableBytes": 3145727
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "history-component"
+    },
+    {
+      "id": "history-short-masked-by-gateway-surplus",
+      "edits": {
+        "historyDedicatedUsableBytes": 3145727,
+        "gatewayDedicatedUsableBytes": 5242881
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "history-component"
+    },
+    {
+      "id": "gateway-short-masked-by-history-surplus",
+      "edits": {
+        "gatewayDedicatedUsableBytes": 5242879,
+        "historyDedicatedUsableBytes": 3145729
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "original-gateway-component"
+    },
+    {
+      "id": "combined-usable-one-byte-short",
+      "edits": {
+        "combinedFilesystemUsableSupplyBytes": 8388607
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "combined-filesystem-usable"
+    },
+    {
+      "id": "current-slot-one-byte-short",
+      "edits": {
+        "historyCurrentSlotBytes": 1048575
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "history-current-slot"
+    },
+    {
+      "id": "candidate-slot-one-byte-short",
+      "edits": {
+        "historyCandidateSlotBytes": 1048575
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "history-candidate-slot"
+    },
+    {
+      "id": "retained-reader-slot-one-byte-short",
+      "edits": {
+        "historyExtraReaderSlotBytes": 1048575
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "history-reader-slot"
+    },
+    {
+      "id": "short-current-slot-masked-by-candidate-surplus",
+      "edits": {
+        "historyCurrentSlotBytes": 1048575,
+        "historyCandidateSlotBytes": 1048577
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "history-current-slot"
+    },
+    {
+      "id": "second-extra-reader-not-admitted",
+      "edits": {
+        "historyMaximumExtraReaders": 2
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "history-reader-count"
+    },
+    {
+      "id": "declared-store-bound-below-proven-encoding",
+      "edits": {
+        "historyEnforcedFileMaximumBytes": 790902
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "native-encoding-exceeds-enforced-bound"
+    },
+    {
+      "id": "proven-encoding-beyond-enforced-maximum",
+      "edits": {
+        "historyNativeEncodingUpperBoundBytes": 1048577
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "native-encoding-exceeds-enforced-bound"
+    },
+    {
+      "id": "enforced-file-maximum-exceeds-current-slot",
+      "edits": {
+        "historyEnforcedFileMaximumBytes": 1048577
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "history-current-slot"
+    },
+    {
+      "id": "raw-filesystem-one-byte-short",
+      "edits": {
+        "rawFilesystemSupplyBytes": 67108863
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "gateway-raw-filesystem"
+    },
+    {
+      "id": "parent-raw-one-byte-short",
+      "edits": {
+        "parentRawSupplyBytes": 40377516031
+      },
+      "expectedAdmission": "deny",
+      "expectedLocus": "retained-parent"
+    }
+  ],
+  "requiredOwningBindings": [
+    "A private typed history budget witness retains enforced store1MiB maximum, independently derived790903B native encoding bound, each current/candidate/extra-reader slot, and max1extra reader including failure/restart overlap.",
+    "Each named slot/component independently fits before joining to actual phase30-gateway-state usable8MiB supply; neighbor surplus cannot hide a short slot or component. Retain the original gateway current/candidate/failed1MiB each and2MiB control reserve without double-spending it.",
+    "The concrete HistoryStore uses its own private subdirectory and one lifetime persistence owner; gateway state and history-store namespaces cannot alias. No current/candidate recovery fallback is admitted.",
+    "No more than1extra retained old reader/generation beyond current+candidate may remain across failure/restart. Owned API summary reads are in-memory, and resume closes current descriptor before it exposes a writable store. External readers must participate in this bound.",
+    "Directory/lock/inode and ordinary filesystem/control allocation remain charged in the separately retained control/presentation budget; verify the whole retained filesystem, not only named serialized files.",
+    "Update the owning StoragePlan projection, native independent literal adapter, Python independent storage observer and pre-effect formatted-usable admission together. The old gateway oracle remains preserved; do not infer larger usable demand merely from spare raw bytes.",
+    "Execution CPU/memory/ephemeral/pods, RPC authentication/authority and interception/import coverage remain separately open. Storage policy admission does not fund them."
+  ],
+  "supersedes": {
+    "path": "history-store-additive-storage-amendment.json",
+    "sha256": "39297c527bdb0ba72c3a23d10656d8c965a572353e9d3a75719dbc5676c0d277",
+    "reason": "Bind the exact previously approved versioned gateway subset consumed by NativeSpec. All common contract sections are identical; the ignored original contains two additional primary-Phase25 total/boundary sections intentionally absent from the versioned subset. No16case outcome or numeric operand changes."
+  },
+  "originalGatewayReviewReferenceSha256": "22c992796e55da73059339736a0f7d6cd2946d5043a7d9c416c0b2941f68214b"
+}

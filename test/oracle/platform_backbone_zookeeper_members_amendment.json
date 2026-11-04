@@ -1,0 +1,397 @@
+{
+  "schema": "phase30.independent.zookeeper-member-admission-amendment.v1",
+  "baseCorpusSha256": "d2c720739a00149a36fbb41995f9ab56830eec1cfbd4fc683a1d8b618a07a0aa",
+  "cases": [
+    {
+      "id": "three-coordinated-zero-pod-charge",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "perMemberRequests",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "perMemberLimits",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "executors",
+            0,
+            "resources",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            0,
+            "available",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "executors",
+            1,
+            "resources",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            1,
+            "available",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "executors",
+            2,
+            "resources",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            2,
+            "available",
+            "podSlots"
+          ],
+          "value": 0
+        }
+      ],
+      "expected": "reject",
+      "reason": "The real StatefulSet still expands3pods, requiring at least3pod slots; matching zero-charge declarations do not make those pods free. All other resource and durable operands remain unchanged."
+    },
+    {
+      "id": "five-coordinated-zero-pod-charge",
+      "base": "five",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "perMemberRequests",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "perMemberLimits",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "executors",
+            0,
+            "resources",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            0,
+            "available",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "executors",
+            1,
+            "resources",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            1,
+            "available",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "executors",
+            2,
+            "resources",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            2,
+            "available",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "executors",
+            3,
+            "resources",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            3,
+            "available",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "executors",
+            4,
+            "resources",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            4,
+            "available",
+            "podSlots"
+          ],
+          "value": 0
+        }
+      ],
+      "expected": "reject",
+      "reason": "The real StatefulSet still expands5pods, requiring at least5pod slots; matching zero-charge declarations do not make those pods free. All other resource and durable operands remain unchanged."
+    }
+  ],
+  "expectedIdentityRows": {
+    "three": [
+      {
+        "ordinal": 0,
+        "serverId": 1,
+        "source": "pulsar-system/zookeeper",
+        "revision": 1,
+        "instanceId": "pulsar-system/zookeeper:1:statefulset:0",
+        "podName": "zookeeper-0",
+        "namespace": "pulsar-system",
+        "statefulSet": "zookeeper",
+        "claimTemplate": "data",
+        "claimId": "data-zookeeper-0",
+        "backingId": "phase30-zookeeper-0",
+        "parentBackingId": "zookeeper-parent",
+        "reserved": {
+          "cpuMillis": 500,
+          "memoryBytes": 268435456,
+          "ephemeralBytes": 67108864,
+          "podSlots": 1
+        },
+        "requiredUsableBytes": 72351744,
+        "requiredRawBytes": 134217728
+      },
+      {
+        "ordinal": 1,
+        "serverId": 2,
+        "source": "pulsar-system/zookeeper",
+        "revision": 1,
+        "instanceId": "pulsar-system/zookeeper:1:statefulset:1",
+        "podName": "zookeeper-1",
+        "namespace": "pulsar-system",
+        "statefulSet": "zookeeper",
+        "claimTemplate": "data",
+        "claimId": "data-zookeeper-1",
+        "backingId": "phase30-zookeeper-1",
+        "parentBackingId": "zookeeper-parent",
+        "reserved": {
+          "cpuMillis": 500,
+          "memoryBytes": 268435456,
+          "ephemeralBytes": 67108864,
+          "podSlots": 1
+        },
+        "requiredUsableBytes": 72351744,
+        "requiredRawBytes": 134217728
+      },
+      {
+        "ordinal": 2,
+        "serverId": 3,
+        "source": "pulsar-system/zookeeper",
+        "revision": 1,
+        "instanceId": "pulsar-system/zookeeper:1:statefulset:2",
+        "podName": "zookeeper-2",
+        "namespace": "pulsar-system",
+        "statefulSet": "zookeeper",
+        "claimTemplate": "data",
+        "claimId": "data-zookeeper-2",
+        "backingId": "phase30-zookeeper-2",
+        "parentBackingId": "zookeeper-parent",
+        "reserved": {
+          "cpuMillis": 500,
+          "memoryBytes": 268435456,
+          "ephemeralBytes": 67108864,
+          "podSlots": 1
+        },
+        "requiredUsableBytes": 72351744,
+        "requiredRawBytes": 134217728
+      }
+    ],
+    "five": [
+      {
+        "ordinal": 0,
+        "serverId": 1,
+        "source": "pulsar-system/zookeeper",
+        "revision": 1,
+        "instanceId": "pulsar-system/zookeeper:1:statefulset:0",
+        "podName": "zookeeper-0",
+        "namespace": "pulsar-system",
+        "statefulSet": "zookeeper",
+        "claimTemplate": "data",
+        "claimId": "data-zookeeper-0",
+        "backingId": "phase30-zookeeper-0",
+        "parentBackingId": "zookeeper-parent",
+        "reserved": {
+          "cpuMillis": 500,
+          "memoryBytes": 268435456,
+          "ephemeralBytes": 67108864,
+          "podSlots": 1
+        },
+        "requiredUsableBytes": 72351744,
+        "requiredRawBytes": 134217728
+      },
+      {
+        "ordinal": 1,
+        "serverId": 2,
+        "source": "pulsar-system/zookeeper",
+        "revision": 1,
+        "instanceId": "pulsar-system/zookeeper:1:statefulset:1",
+        "podName": "zookeeper-1",
+        "namespace": "pulsar-system",
+        "statefulSet": "zookeeper",
+        "claimTemplate": "data",
+        "claimId": "data-zookeeper-1",
+        "backingId": "phase30-zookeeper-1",
+        "parentBackingId": "zookeeper-parent",
+        "reserved": {
+          "cpuMillis": 500,
+          "memoryBytes": 268435456,
+          "ephemeralBytes": 67108864,
+          "podSlots": 1
+        },
+        "requiredUsableBytes": 72351744,
+        "requiredRawBytes": 134217728
+      },
+      {
+        "ordinal": 2,
+        "serverId": 3,
+        "source": "pulsar-system/zookeeper",
+        "revision": 1,
+        "instanceId": "pulsar-system/zookeeper:1:statefulset:2",
+        "podName": "zookeeper-2",
+        "namespace": "pulsar-system",
+        "statefulSet": "zookeeper",
+        "claimTemplate": "data",
+        "claimId": "data-zookeeper-2",
+        "backingId": "phase30-zookeeper-2",
+        "parentBackingId": "zookeeper-parent",
+        "reserved": {
+          "cpuMillis": 500,
+          "memoryBytes": 268435456,
+          "ephemeralBytes": 67108864,
+          "podSlots": 1
+        },
+        "requiredUsableBytes": 72351744,
+        "requiredRawBytes": 134217728
+      },
+      {
+        "ordinal": 3,
+        "serverId": 4,
+        "source": "pulsar-system/zookeeper",
+        "revision": 1,
+        "instanceId": "pulsar-system/zookeeper:1:statefulset:3",
+        "podName": "zookeeper-3",
+        "namespace": "pulsar-system",
+        "statefulSet": "zookeeper",
+        "claimTemplate": "data",
+        "claimId": "data-zookeeper-3",
+        "backingId": "phase30-zookeeper-3",
+        "parentBackingId": "zookeeper-parent",
+        "reserved": {
+          "cpuMillis": 500,
+          "memoryBytes": 268435456,
+          "ephemeralBytes": 67108864,
+          "podSlots": 1
+        },
+        "requiredUsableBytes": 72351744,
+        "requiredRawBytes": 134217728
+      },
+      {
+        "ordinal": 4,
+        "serverId": 5,
+        "source": "pulsar-system/zookeeper",
+        "revision": 1,
+        "instanceId": "pulsar-system/zookeeper:1:statefulset:4",
+        "podName": "zookeeper-4",
+        "namespace": "pulsar-system",
+        "statefulSet": "zookeeper",
+        "claimTemplate": "data",
+        "claimId": "data-zookeeper-4",
+        "backingId": "phase30-zookeeper-4",
+        "parentBackingId": "zookeeper-parent",
+        "reserved": {
+          "cpuMillis": 500,
+          "memoryBytes": 268435456,
+          "ephemeralBytes": 67108864,
+          "podSlots": 1
+        },
+        "requiredUsableBytes": 72351744,
+        "requiredRawBytes": 134217728
+      }
+    ]
+  },
+  "scope": "Supplement to frozen35case corpus. A separate identity projection may expose these fields without changing original aggregate expectations. Native parent name is retained-parent instead of this isolated fixture zookeeper-parent. Runtime adequacy/history remain unclaimed."
+}

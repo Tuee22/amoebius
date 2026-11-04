@@ -403,6 +403,15 @@ def containment_side(before, after, contained_paths):
     """Prove closed-root selection and equality of every outside-host observation."""
     print("\ncontainment side — closed roots and outside-host inventory\n")
     ok = True
+    cache_spec = subprocess.run(
+        [sys.executable, "-m", "unittest", "discover", "-s", "test/spec/host", "-p", "test_containment_inventory.py"],
+        cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False, timeout=60,
+    )
+    if cache_spec.returncode:
+        print(f"  FAIL  cache inventory regression checks\n{cache_spec.stdout}")
+        ok = False
+    else:
+        print("  ok    cache ages normalize; identity/size/usage changes remain observed")
     for path in contained_paths:
         try:
             containment.require_state_path(path, "build", actor="production")

@@ -6,23 +6,32 @@ import Amoebius.Vault.Client
 import Amoebius.Vault.Error
 import Amoebius.Vault.Init
 import Amoebius.Vault.Pki
+import Amoebius.Vault.Provision
+import Amoebius.Vault.RuntimePath
+import Amoebius.Capacity.Types (ResourceVector (..))
 import Amoebius.Vault.Seal
 import Amoebius.Vault.SecretRef
 import Amoebius.Vault.Unseal
 import Data.ByteString qualified as ByteString
+import Data.Aeson (Value, object, withObject, (.:), (.=))
+import Data.Aeson.Types (parseMaybe)
 import Data.IORef
 import Data.Text qualified as Text
 import Data.Text.IO qualified as TextIO
 import System.Exit (die)
+import VaultHttpSpec (verifyVaultHttpBoundary)
 
 main :: IO ()
 main = do
   verifyInitAndStorage
+  verifyServiceProjection
+  verifyRuntimeSources
   verifyEnvelope
   verifyPki
   verifyErrors
   verifyClient
   verifyFailClosedFreshness
+  verifyVaultHttpBoundary
   putStrLn "vault-pki-spec: PASS (init-once, Argon2id-AEAD, bounded storage, PKI, direct client, typed failures)"
 
 verifyInitAndStorage :: IO ()
@@ -45,6 +54,42 @@ verifyInitAndStorage = do
     "one-byte-under audit is effectless rejection"
     (Left (AuditBackingTooSmall 67108864 67108863))
     (provisionVaultStorage 134217728 67108863 standardVaultStorageDemand standardVaultAuditDemand)
+
+verifyServiceProjection :: IO ()
+verifyServiceProjection = do
+  let mib = 1048576 :: Integer
+      supply = ResourceVector 1000 1073741824 134217728 2
+      accept = provisionVaultService supply (128 * mib) (64 * mib) 2023424 4194304
+      demand = standardVaultExecutionDemand
+  sealed <- requireRight (accept demand)
+  let expectedResources = object
+        [ "requests" .= object ["cpu" .= ("100m" :: Text.Text), "memory" .= ("134217728" :: Text.Text), "ephemeral-storage" .= ("33554432" :: Text.Text)]
+        , "limits" .= object ["cpu" .= ("500m" :: Text.Text), "memory" .= ("536870912" :: Text.Text), "ephemeral-storage" .= ("67108864" :: Text.Text)]
+        ]
+  assertEqual "Vault complete resource projection" (Just expectedResources) (projectionResources (vaultServiceProjection sealed))
+  assertEqual "Vault mounted durable one-byte short" (Left (VaultDurableUsableTooSmall 2023424 2023423))
+    (provisionVaultService supply (128 * mib) (64 * mib) 2023423 4194304 demand)
+  assertEqual "Vault mounted audit one-byte short" (Left (VaultAuditUsableTooSmall 4194304 4194303))
+    (provisionVaultService supply (128 * mib) (64 * mib) 2023424 4194303 demand)
+  assertBool "Vault whole execution overcommit rejects" (isLeft (provisionVaultService (supply {resourceCpu = 999}) (128 * mib) (64 * mib) 2023424 4194304 demand))
+  assertEqual "Vault local volumes nest in ephemeral request" (Left (VaultEphemeralNestingViolation 54525952 33554432))
+    (accept (demand {vaultScratchBytes = 41943040}))
+  assertEqual "Vault one Pod cannot author zero slots" (Left VaultPodSlotMismatch)
+    (accept (demand {vaultAppRequests = (vaultAppRequests demand) {resourcePodSlots = 0}}))
+  assertEqual "Vault log allowance cannot undercut its producer" (Left VaultExecutionProfileTooSmall)
+    (accept (demand {vaultLogBytes = 0}))
+
+projectionResources :: Value -> Maybe Value
+projectionResources = parseMaybe (withObject "Vault projection" (\fields -> fields .: "resources"))
+
+verifyRuntimeSources :: IO ()
+verifyRuntimeSources = do
+  assertBool "Vault accepts its projected JWT source" (not (isLeft (vaultRuntimePath ProjectedJwt "/var/run/secrets/kubernetes.io/serviceaccount/token")))
+  assertBool "Vault accepts its projected server config" (not (isLeft (vaultRuntimePath ServerConfiguration "/vault/config/server.hcl")))
+  assertBool "Vault accepts its declared audit directory" (not (isLeft (vaultRuntimePath AuditDirectory "/vault/audit")))
+  mapM_ (\purpose -> mapM_ (\path -> assertBool "Vault rejects untrusted runtime source" (isLeft (vaultRuntimePath purpose path)))
+    ["test-secrets.dhall", "./test-secrets.dhall", "/arbitrary/credentials", "/vault/audit/../config/other.hcl"])
+    [ProjectedJwt, ServerConfiguration, AuditDirectory]
 
 verifyEnvelope :: IO ()
 verifyEnvelope = do

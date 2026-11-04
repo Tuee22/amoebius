@@ -1,0 +1,91 @@
+{
+  "schema":"phase30.independent-uniform-template-ownership-cases.v1",
+  "provenance":"Literal arithmetic from the adopted per-(StatefulSet,template) uniformity and separately named backing debit rules; no subject output supplies an expectation.",
+  "cases":[
+    {
+      "id":"one-template-two-backings-one-short",
+      "presentation":"Block","minimum_raw_bytes":0,"quantum_bytes":1,
+      "slots":[
+        {"statefulset":"m","template":"data","ordinal":0,"required_usable_bytes":1,"backing":"A","backing_capacity_bytes":1},
+        {"statefulset":"m","template":"data","ordinal":1,"required_usable_bytes":2,"backing":"B","backing_capacity_bytes":2}
+      ],
+      "expected_template_raw_bytes":2,
+      "expected_per_backing_debit":{"A":2,"B":2},
+      "expected":"reject","reason":"Backing A cannot fund its slot's uniform two-byte claim."
+    },
+    {
+      "id":"two-templates-one-backing-exact",
+      "presentation":"Block","minimum_raw_bytes":0,"quantum_bytes":1,
+      "slots":[
+        {"statefulset":"m","template":"small","ordinal":0,"required_usable_bytes":1,"backing":"A","backing_capacity_bytes":3},
+        {"statefulset":"m","template":"large","ordinal":0,"required_usable_bytes":2,"backing":"A","backing_capacity_bytes":3}
+      ],
+      "expected_template_raw_bytes":{"m/small":1,"m/large":2},
+      "expected_per_backing_debit":{"A":3},
+      "expected":"accept","reason":"Different templates retain their own maxima before debits add on their shared backing."
+    }
+  ],
+  "required_rejections":[
+    {
+      "id":"duplicate-full-claim-slot",
+      "backing":"A","backing_capacity_bytes":8,
+      "slots":[
+        {"name":"first","statefulset":"m","template":"data","ordinal":0,"required_usable_bytes":1,"minimum_raw_bytes":0,"quantum_bytes":1},
+        {"name":"second","statefulset":"m","template":"data","ordinal":0,"required_usable_bytes":1,"minimum_raw_bytes":0,"quantum_bytes":1}
+      ],
+      "expected":"reject","reason":"Two volume demands cannot own the same full claim slot."
+    },
+    {
+      "id":"duplicate-volume-demand-name",
+      "backing":"A","backing_capacity_bytes":8,
+      "slots":[
+        {"name":"duplicate","statefulset":"m","template":"data","ordinal":0,"required_usable_bytes":1,"minimum_raw_bytes":0,"quantum_bytes":1},
+        {"name":"duplicate","statefulset":"m","template":"data","ordinal":1,"required_usable_bytes":1,"minimum_raw_bytes":0,"quantum_bytes":1}
+      ],
+      "expected":"reject","reason":"Volume demand identity must be injective independently of claim-slot identity."
+    },
+    {
+      "id":"mixed-allocation-policy-one-template",
+      "backing":"A","backing_capacity_bytes":8,
+      "slots":[
+        {"name":"first","statefulset":"m","template":"data","ordinal":0,"required_usable_bytes":1,"minimum_raw_bytes":0,"quantum_bytes":1},
+        {"name":"second","statefulset":"m","template":"data","ordinal":1,"required_usable_bytes":3,"minimum_raw_bytes":0,"quantum_bytes":2}
+      ],
+      "expected":"reject","reason":"This conservative profile requires the same allocation policy within one template, even though eight raw bytes would fund the four-byte maximum twice."
+    },
+    {
+      "id":"mixed-allocation-policy-one-backing-across-templates",
+      "backing":"A","backing_capacity_bytes":8,
+      "slots":[
+        {"name":"first","statefulset":"m","template":"small","ordinal":0,"required_usable_bytes":1,"minimum_raw_bytes":0,"quantum_bytes":1},
+        {"name":"second","statefulset":"m","template":"large","ordinal":0,"required_usable_bytes":1,"minimum_raw_bytes":0,"quantum_bytes":2}
+      ],
+      "expected":"reject","reason":"A single named backing cannot select two different allocation policies merely because its claims use different templates. Each template is internally uniform and three raw bytes would fit, so this rejection tests supply identity consistency."
+    },
+    {
+      "id":"conflicting-capacity-one-backing-identity",
+      "slots":[
+        {"name":"first","statefulset":"m","template":"data","ordinal":0,"required_usable_bytes":1,"backing":"A","backing_capacity_bytes":3},
+        {"name":"second","statefulset":"m","template":"data","ordinal":1,"required_usable_bytes":2,"backing":"A","backing_capacity_bytes":4}
+      ],
+      "expected":"reject","reason":"A named physical backing has one capacity; independently fitting each inconsistent declaration does not resolve it."
+    },
+    {
+      "id":"mixed-presentation-one-template",
+      "backing":"A","backing_capacity_bytes":8,
+      "slots":[
+        {"name":"first","statefulset":"m","template":"data","ordinal":0,"required_usable_bytes":1,"presentation":"Block"},
+        {"name":"second","statefulset":"m","template":"data","ordinal":1,"required_usable_bytes":1,"presentation":"Filesystem","filesystem_model":"ext4-v1","overhead_basis_points":500}
+      ],
+      "expected":"reject","reason":"The adopted join requires a compatible explicit presentation/model for all members of one uniform template."
+    }
+  ],
+  "corrected_legacy_fixture":{
+    "volume_names":["uniform-a","uniform-b"],
+    "claim_statefulset":"uniform","claim_template":"data","ordinals":[0,1],
+    "required_usable_bytes":[60,80],"presentation":"Block","minimum_raw_bytes":0,"quantum_bytes":1,
+    "required_uniform_raw_bytes_per_slot":80,"required_backing_debit_bytes":160,
+    "boundaries":[{"backing_capacity_bytes":150,"expected":"reject"},{"backing_capacity_bytes":160,"expected":"accept"}],
+    "decision":"Approve changing the fixture's claim operands to one actual template. Keeping different StatefulSet names would instead require a140-byte debit and would not test uniformity."
+  }
+}

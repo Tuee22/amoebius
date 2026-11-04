@@ -701,6 +701,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         results["oracle"] = True
 
         print("\nstatic side — the pure oracles the live sprints stand on\n")
+        run((cabal, "--ignore-project", "update"), timeout=600)
+        print("  ok    project-local Hackage index refreshed")
         run((cabal, f"--with-compiler={compiler}", "test", "base-image-registry-spec", "--test-show-details=direct", "-j1"))
         print("  ok    haskell-image-spec")
         run((sys.executable, "-m", "unittest", "discover", "-s", "test/spec/image", "-p", "test_base_image_registry*.py"))
@@ -719,26 +721,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             if production_root.is_dir() and any(production_root.iterdir()):
                 raise GateFailure("test-safety-refusal:production-state-is-present")
             test_run = containment.create_test_run(f"bir-{gate.run_dir.name}")
-            engine = project_container_engine.start(
-                test_run,
-                log_path=gate.run_dir / "project-engine.log",
-                base_environment=RUN_ENV,
-            )
-            engine_root = engine.verify_boundary()
             kubeconfig = test_run.path / "cluster/kubeconfig"
             kubeconfig.parent.mkdir(parents=True, exist_ok=True)
-            RUN_ENV.update(
-                {
-                    "DOCKER_HOST": f"unix://{engine.socket}",
-                    "DOCKER_CONFIG": str(engine.client_config),
-                    "DOCKER_BUILDKIT": "1",
-                    "AMOEBIUS_KUBECONFIG": str(kubeconfig),
-                    "AMOEBIUS_KUBECTL": resolved["kubectl"]["path"],
-                    "AMOEBIUS_KIND": kind,
-                    "AMOEBIUS_TEST_ROOT": str(test_run.path),
-                    "AMOEBIUS_RUN_TMP": str(gate.run_dir / "tmp"),
-                }
-            )
             evidence = gate.run_dir / "capability"
             context = arguments.context or ROOT / ".build/docker/base-image-registry" / gate.run_dir.name
             build_products_work = arguments.build_products_work or gate.run_dir / "build-products"
@@ -766,6 +750,24 @@ def main(argv: Sequence[str] | None = None) -> int:
                     "base-image-registry-cache": (cache.parent, 22 * 1024**3),
                     "base-image-registry-scratch": (scratch, 40 * 1024**3),
                 },
+            )
+            engine = project_container_engine.start(
+                test_run,
+                log_path=gate.run_dir / "project-engine.log",
+                base_environment=RUN_ENV,
+            )
+            engine_root = engine.verify_boundary()
+            RUN_ENV.update(
+                {
+                    "DOCKER_HOST": f"unix://{engine.socket}",
+                    "DOCKER_CONFIG": str(engine.client_config),
+                    "DOCKER_BUILDKIT": "1",
+                    "AMOEBIUS_KUBECONFIG": str(kubeconfig),
+                    "AMOEBIUS_KUBECTL": resolved["kubectl"]["path"],
+                    "AMOEBIUS_KIND": kind,
+                    "AMOEBIUS_TEST_ROOT": str(test_run.path),
+                    "AMOEBIUS_RUN_TMP": str(gate.run_dir / "tmp"),
+                }
             )
             for path in (context, cache, artifact.parent, docker_config):
                 path.mkdir(parents=True, exist_ok=True)
@@ -879,7 +881,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if test_run is not None and not cleanup_problems:
             try:
                 containment.cleanup_test_run(test_run)
-            except containment.ContainmentError as problem:
+            except (containment.ContainmentError, OSError) as problem:
                 cleanup_problems.append(f"test-root-cleanup:{problem}")
         if cleanup_problems:
             results["live"] = False

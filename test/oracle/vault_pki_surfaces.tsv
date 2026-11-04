@@ -13,6 +13,8 @@ rebuild-does-not-reinitialize	items	M-reinit-existing
 unlock-envelope-uses-real-kdf-and-aead	items	M-raw-sha256-seal
 complete-raft-population-is-sized	items	M-delete-storage-term
 audit-storage-is-bounded	items	M-unbounded-audit
+audit-writer-enforces-file-ceiling	items	M-bypass-audit-ceiling
+complete-vault-resource-projection	items	M-drop-resource-axis
 sealed-vault-cannot-issue	items	M-sealed-issuance
 leaf-chains-to-the-root	items	M-unrelated-leaf-key
 client-authenticates-itself	items	M-preminted-token

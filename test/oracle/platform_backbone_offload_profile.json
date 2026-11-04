@@ -1,0 +1,38 @@
+{
+  "schema":"phase30.independent-native-offload-profile.v1",
+  "decision":"Approve these finite design inputs and arithmetic; validate internal broker premises separately. No actual offload output or Phase25 aggregate total is an expectation here.",
+  "source_context":{"source":"pulsar-offload","owner":"pulsar","kind":"PulsarOffloadObjects","scope":{"store":"root-minio","tenant":"platform","bucket":"pulsar-offload"},"budget":"pulsar-offload","provider_quota_bytes":536870912,"provider_quota_objects":512},
+  "expected_model_input_projection":{
+    "model":"pulsar-4.0.6-single-block-v1","topic":"phase30/drill","retainedLedgers":{},
+    "futureLedger":{"payloadBytes":65536,"entryCount":1024,"maximumBlockBytes":5242880,"ensembleSize":3,"writeQuorum":2,"ackQuorum":2,"maximumCreationTime":9223372036854775807,
+      "ensembles":[{"firstEntry":0,"members":["bookkeeper-0.bookkeeper.pulsar-system.svc.cluster.local:3181","bookkeeper-1.bookkeeper.pulsar-system.svc.cluster.local:3181","bookkeeper-2.bookkeeper.pulsar-system.svc.cluster.local:3181"]}],
+      "customMetadata":{"application":6,"component":14,"pulsar/managed-ledger":67}},
+    "maximumSegmentsPerWindow":128,"windowSeconds":3600,"retentionHorizonSeconds":3600,"deletionLagSeconds":0,"concurrentSegments":1,
+    "failure":{"setsPerWindow":1,"windowSeconds":3600,"horizonSeconds":3600},"admissionExtentQuantum":1048576
+  },
+  "expected_raw_wire_bounds":{"scalar_metadata_bytes":27,"ensemble_metadata_bytes":191,"custom_metadata_bytes":146,"total_metadata_bytes":364,"data_object_bytes":77952,"index_object_bytes":416},
+  "expected_admitted_extent_bytes":{"data":1048576,"index":1048576},
+  "expected_populations":[
+    {"kind":"FutureObjects","name":"phase30/drill/data","count":128,"maximumBytes":1048576,"windowSeconds":3600},
+    {"kind":"FutureObjects","name":"phase30/drill/index","count":128,"maximumBytes":1048576,"windowSeconds":3600},
+    {"kind":"ConcurrentObjects","name":"phase30/drill/data","count":1,"maximumBytes":1048576,"windowSeconds":0},
+    {"kind":"ConcurrentObjects","name":"phase30/drill/index","count":1,"maximumBytes":1048576,"windowSeconds":0},
+    {"kind":"FailedOrphanObjects","name":"phase30/drill/data","count":1,"maximumBytes":1048576,"windowSeconds":3600},
+    {"kind":"FailedOrphanObjects","name":"phase30/drill/index","count":1,"maximumBytes":1048576,"windowSeconds":3600}
+  ],
+  "expected_source_peak":{"logical_bytes":272629760,"object_count":260,"ledger_pairs":130,"resident_object_count":0,"deletion_lag_object_count":0},
+  "expected_installed_source_join":{
+    "registry":{"kind":"RegistryObjects","owner":"registry","budget":"registry","scope":{"store":"root-minio","tenant":"platform","bucket":"registry"}},
+    "pulsar-offload":{"kind":"PulsarOffloadObjects","owner":"pulsar","budget":"pulsar-offload","scope":{"store":"root-minio","tenant":"platform","bucket":"pulsar-offload"}},
+    "application-canary":{"kind":"ApplicationObjects","owner":"phase30-application","budget":"application-canary","scope":{"store":"root-minio","tenant":"platform","bucket":"phase30-canary"}}
+  },
+  "expected_structured_model_source_ids":["pulsar-offload"],
+  "premises":[
+    "The source context joins the actual installed Pulsar producer, owning budget and sole gateway writer; the model input persists unchanged through the private source/admission/projection.",
+    "Payload means serialized ledger-entry bodies, bounded65536 bytes per future ledger; entry count is bounded1024, and the nonnegative creation-time domain is explicit.",
+    "The ordinary data-ledger custom map has the exact3base keys. The current finite ASCII topic-name program bounds the persistence name at67 bytes; strict affinity is false and no namespace affinity group adds placement metadata.",
+    "The selected model has one initial ensemble. Another retained ensemble, custom key, topic encoding, negative ctime or unsupported block/format needs a new bound or rejection.",
+    "The finite rate/retention inputs and enforced gateway128resident keys per data/index class plus1MiB extent caps are validated independently; a passing output does not select these values.",
+    "The rounded quota can dominate larger actual framed extents within1MiB; that capacity dominance does not prove every internal broker assumption or implement a production segment-rate admission protocol."
+  ]
+}

@@ -75,7 +75,7 @@ renderDockerfile catalog = do
     , "    && rm -f /tmp/asset /tmp/asset.sums"
     ]
   -- The publisher decides both halves of this, and the nine differ. `DigestOnly`
-  -- manifests carry no name to match, so the digest is compared directly;
+  -- manifests have one digest to compare, without matching an optional name;
   -- `DigestNamed` manifests may name the asset bare, `./`-prefixed, or by the
   -- publisher's own build path, so the match is on the trailing basename. Either
   -- way the value is fetched now and never authored.

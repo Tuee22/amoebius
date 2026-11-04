@@ -1,0 +1,4502 @@
+{
+  "schema": "phase30.independent.zookeeper-full-wire.v4",
+  "supersedes": "Preserve v1/v2/v3 for provenance. v1 has aliased stat projections and incorrect initial ACL allocation; v2 fixes those but includes unsupported standalone opcode13. v3 uses Multi(CheckVersion), rejects standalone13 and tests monotone ACL allocation; v4 corrects its stored CheckVersionTxn version to current+1, as pinned PrepRequestProcessor actually produces. Tree states/digests and byte lengths are unchanged by that correction.",
+  "source_version": "Apache ZooKeeper3.9.3",
+  "provenance": "Independently authored Jute bytes/stat/replay/checksum inputs from pinned sources; no subject executable, parser or live maximum supplies an expectation.",
+  "sources": [
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-jute/src/main/resources/zookeeper.jute",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/DataTree.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/DataNode.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/DigestCalculator.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/persistence/FileSnap.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/persistence/FileTxnLog.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/persistence/SnapStream.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/util/SerializeUtils.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/ReferenceCountedACLCache.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/PrepRequestProcessor.java"
+  ],
+  "actual_default_profile": {
+    "stream_mode": "checked",
+    "snapshot_digest": true,
+    "snapshot_last_zxid": true,
+    "transaction_digest": true,
+    "close_session_paths": true
+  },
+  "actual_default_properties": {
+    "zookeeper.digest.enabled": true,
+    "zookeeper.serializeLastProcessedZxid.enabled": true,
+    "zookeeper.closeSessionTxn.enabled": true,
+    "zookeeper.snapshot.compression.method": ""
+  },
+  "stat_field_order": [
+    "czxid",
+    "mzxid",
+    "ctime",
+    "mtime",
+    "version",
+    "cversion",
+    "aversion",
+    "ephemeralOwner",
+    "pzxid"
+  ],
+  "container_owner": -9223372036854775808,
+  "syntheticGenesis": {
+    "nodes": {
+      "": {
+        "dataBytes": 0,
+        "dataNull": false,
+        "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "dataHex": "",
+        "aclId": -1,
+        "stat": {
+          "czxid": 0,
+          "mzxid": 0,
+          "ctime": 0,
+          "mtime": 0,
+          "version": 0,
+          "cversion": 0,
+          "aversion": 0,
+          "ephemeralOwner": 0,
+          "pzxid": 0
+        }
+      }
+    },
+    "sessions": {},
+    "aclCache": {},
+    "lastProcessedZxid": 0,
+    "treeDigest": 68323592
+  },
+  "scope_warning": "Synthetic root-only genesis/frozen unit tree deliberately omits real server /zookeeper builtins/config and is not a production startup/current-state oracle. Fixed wire sizes agree with prior container corpus407/461. Actual writer/history/class bounds remain open.",
+  "snapshots": [
+    {
+      "id": "container-session-00",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": false,
+        "snapshot_last_zxid": false,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "fileName": "snapshot.4",
+      "snapshotFileZxid": 4,
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000001000000000000000700007530000000010000000000000001000000010000001f00000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000002000000022f610000000000000000000000010000000000000002000000000000000200000000000007d000000000000007d000000000000000020000000080000000000000000000000000000004000000042f612f62000000036162630000000000000001000000000000000300000000000000030000000000000bb80000000000000bb800000000000000000000000000000000000000000000000000000003000000042f612f6500000001650000000000000001000000000000000400000000000000040000000000000fa00000000000000fa000000000000000000000000000000000000000070000000000000004000000012f00000000f90f20a1000000012f",
+      "expected": {
+        "header": {
+          "magic": "ZKSN",
+          "version": 2,
+          "dbid": -1
+        },
+        "state": {
+          "nodes": {
+            "": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 1,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 2
+              }
+            },
+            "/a": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": 1,
+              "stat": {
+                "czxid": 2,
+                "mzxid": 2,
+                "ctime": 2000,
+                "mtime": 2000,
+                "version": 0,
+                "cversion": 2,
+                "aversion": 0,
+                "ephemeralOwner": -9223372036854775808,
+                "pzxid": 4
+              }
+            },
+            "/a/b": {
+              "dataBytes": 3,
+              "dataNull": false,
+              "dataSha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+              "dataHex": "616263",
+              "aclId": 1,
+              "stat": {
+                "czxid": 3,
+                "mzxid": 3,
+                "ctime": 3000,
+                "mtime": 3000,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 3
+              }
+            },
+            "/a/e": {
+              "dataBytes": 1,
+              "dataNull": false,
+              "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+              "dataHex": "65",
+              "aclId": 1,
+              "stat": {
+                "czxid": 4,
+                "mzxid": 4,
+                "ctime": 4000,
+                "mtime": 4000,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 7,
+                "pzxid": 4
+              }
+            }
+          },
+          "sessions": {
+            "7": 30000
+          },
+          "aclCache": {
+            "1": [
+              {
+                "perms": 31,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ]
+          },
+          "lastProcessedZxid": null,
+          "treeDigest": 7310192961
+        },
+        "digest": null,
+        "serializedLastZxid": null,
+        "seals": [
+          {
+            "offset": 394,
+            "adler32": 4178518177
+          }
+        ],
+        "bytes": 407,
+        "componentBytes": {
+          "fileHeader": 16,
+          "sessions": 16,
+          "aclCache": 39,
+          "nodeRows": 318,
+          "treeEnd": 5,
+          "baseSeal": 13,
+          "digestAndSeal": 0,
+          "lastZxidAndSeal": 0
+        }
+      },
+      "nonFuzzySyntheticFixture": true
+    },
+    {
+      "id": "container-session-10",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": false,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "fileName": "snapshot.4",
+      "snapshotFileZxid": 4,
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000001000000000000000700007530000000010000000000000001000000010000001f00000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000002000000022f610000000000000000000000010000000000000002000000000000000200000000000007d000000000000007d000000000000000020000000080000000000000000000000000000004000000042f612f62000000036162630000000000000001000000000000000300000000000000030000000000000bb80000000000000bb800000000000000000000000000000000000000000000000000000003000000042f612f6500000001650000000000000001000000000000000400000000000000040000000000000fa00000000000000fa000000000000000000000000000000000000000070000000000000004000000012f00000000f90f20a1000000012f00000000000000040000000200000001b3b8b141000000006a8124fe000000012f",
+      "expected": {
+        "header": {
+          "magic": "ZKSN",
+          "version": 2,
+          "dbid": -1
+        },
+        "state": {
+          "nodes": {
+            "": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 1,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 2
+              }
+            },
+            "/a": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": 1,
+              "stat": {
+                "czxid": 2,
+                "mzxid": 2,
+                "ctime": 2000,
+                "mtime": 2000,
+                "version": 0,
+                "cversion": 2,
+                "aversion": 0,
+                "ephemeralOwner": -9223372036854775808,
+                "pzxid": 4
+              }
+            },
+            "/a/b": {
+              "dataBytes": 3,
+              "dataNull": false,
+              "dataSha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+              "dataHex": "616263",
+              "aclId": 1,
+              "stat": {
+                "czxid": 3,
+                "mzxid": 3,
+                "ctime": 3000,
+                "mtime": 3000,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 3
+              }
+            },
+            "/a/e": {
+              "dataBytes": 1,
+              "dataNull": false,
+              "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+              "dataHex": "65",
+              "aclId": 1,
+              "stat": {
+                "czxid": 4,
+                "mzxid": 4,
+                "ctime": 4000,
+                "mtime": 4000,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 7,
+                "pzxid": 4
+              }
+            }
+          },
+          "sessions": {
+            "7": 30000
+          },
+          "aclCache": {
+            "1": [
+              {
+                "perms": 31,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ]
+          },
+          "lastProcessedZxid": null,
+          "treeDigest": 7310192961
+        },
+        "digest": {
+          "zxid": 4,
+          "version": 2,
+          "treeDigest": 7310192961
+        },
+        "serializedLastZxid": null,
+        "seals": [
+          {
+            "offset": 394,
+            "adler32": 4178518177
+          },
+          {
+            "offset": 427,
+            "adler32": 1786848510
+          }
+        ],
+        "bytes": 440,
+        "componentBytes": {
+          "fileHeader": 16,
+          "sessions": 16,
+          "aclCache": 39,
+          "nodeRows": 318,
+          "treeEnd": 5,
+          "baseSeal": 13,
+          "digestAndSeal": 33,
+          "lastZxidAndSeal": 0
+        }
+      },
+      "nonFuzzySyntheticFixture": true
+    },
+    {
+      "id": "container-session-01",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": false,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "fileName": "snapshot.4",
+      "snapshotFileZxid": 4,
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000001000000000000000700007530000000010000000000000001000000010000001f00000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000002000000022f610000000000000000000000010000000000000002000000000000000200000000000007d000000000000007d000000000000000020000000080000000000000000000000000000004000000042f612f62000000036162630000000000000001000000000000000300000000000000030000000000000bb80000000000000bb800000000000000000000000000000000000000000000000000000003000000042f612f6500000001650000000000000001000000000000000400000000000000040000000000000fa00000000000000fa000000000000000000000000000000000000000070000000000000004000000012f00000000f90f20a1000000012f000000000000000400000000c44d229e000000012f",
+      "expected": {
+        "header": {
+          "magic": "ZKSN",
+          "version": 2,
+          "dbid": -1
+        },
+        "state": {
+          "nodes": {
+            "": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 1,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 2
+              }
+            },
+            "/a": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": 1,
+              "stat": {
+                "czxid": 2,
+                "mzxid": 2,
+                "ctime": 2000,
+                "mtime": 2000,
+                "version": 0,
+                "cversion": 2,
+                "aversion": 0,
+                "ephemeralOwner": -9223372036854775808,
+                "pzxid": 4
+              }
+            },
+            "/a/b": {
+              "dataBytes": 3,
+              "dataNull": false,
+              "dataSha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+              "dataHex": "616263",
+              "aclId": 1,
+              "stat": {
+                "czxid": 3,
+                "mzxid": 3,
+                "ctime": 3000,
+                "mtime": 3000,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 3
+              }
+            },
+            "/a/e": {
+              "dataBytes": 1,
+              "dataNull": false,
+              "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+              "dataHex": "65",
+              "aclId": 1,
+              "stat": {
+                "czxid": 4,
+                "mzxid": 4,
+                "ctime": 4000,
+                "mtime": 4000,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 7,
+                "pzxid": 4
+              }
+            }
+          },
+          "sessions": {
+            "7": 30000
+          },
+          "aclCache": {
+            "1": [
+              {
+                "perms": 31,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ]
+          },
+          "lastProcessedZxid": 4,
+          "treeDigest": 7310192961
+        },
+        "digest": null,
+        "serializedLastZxid": 4,
+        "seals": [
+          {
+            "offset": 394,
+            "adler32": 4178518177
+          },
+          {
+            "offset": 415,
+            "adler32": 3293389470
+          }
+        ],
+        "bytes": 428,
+        "componentBytes": {
+          "fileHeader": 16,
+          "sessions": 16,
+          "aclCache": 39,
+          "nodeRows": 318,
+          "treeEnd": 5,
+          "baseSeal": 13,
+          "digestAndSeal": 0,
+          "lastZxidAndSeal": 21
+        }
+      },
+      "nonFuzzySyntheticFixture": true
+    },
+    {
+      "id": "container-session-11",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "fileName": "snapshot.4",
+      "snapshotFileZxid": 4,
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000001000000000000000700007530000000010000000000000001000000010000001f00000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000002000000022f610000000000000000000000010000000000000002000000000000000200000000000007d000000000000007d000000000000000020000000080000000000000000000000000000004000000042f612f62000000036162630000000000000001000000000000000300000000000000030000000000000bb80000000000000bb800000000000000000000000000000000000000000000000000000003000000042f612f6500000001650000000000000001000000000000000400000000000000040000000000000fa00000000000000fa000000000000000000000000000000000000000070000000000000004000000012f00000000f90f20a1000000012f00000000000000040000000200000001b3b8b141000000006a8124fe000000012f0000000000000004000000009453273f000000012f",
+      "expected": {
+        "header": {
+          "magic": "ZKSN",
+          "version": 2,
+          "dbid": -1
+        },
+        "state": {
+          "nodes": {
+            "": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 1,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 2
+              }
+            },
+            "/a": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": 1,
+              "stat": {
+                "czxid": 2,
+                "mzxid": 2,
+                "ctime": 2000,
+                "mtime": 2000,
+                "version": 0,
+                "cversion": 2,
+                "aversion": 0,
+                "ephemeralOwner": -9223372036854775808,
+                "pzxid": 4
+              }
+            },
+            "/a/b": {
+              "dataBytes": 3,
+              "dataNull": false,
+              "dataSha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+              "dataHex": "616263",
+              "aclId": 1,
+              "stat": {
+                "czxid": 3,
+                "mzxid": 3,
+                "ctime": 3000,
+                "mtime": 3000,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 3
+              }
+            },
+            "/a/e": {
+              "dataBytes": 1,
+              "dataNull": false,
+              "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+              "dataHex": "65",
+              "aclId": 1,
+              "stat": {
+                "czxid": 4,
+                "mzxid": 4,
+                "ctime": 4000,
+                "mtime": 4000,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 7,
+                "pzxid": 4
+              }
+            }
+          },
+          "sessions": {
+            "7": 30000
+          },
+          "aclCache": {
+            "1": [
+              {
+                "perms": 31,
+                "scheme": "world",
+                "identity": "anyone"
+              }
+            ]
+          },
+          "lastProcessedZxid": 4,
+          "treeDigest": 7310192961
+        },
+        "digest": {
+          "zxid": 4,
+          "version": 2,
+          "treeDigest": 7310192961
+        },
+        "serializedLastZxid": 4,
+        "seals": [
+          {
+            "offset": 394,
+            "adler32": 4178518177
+          },
+          {
+            "offset": 427,
+            "adler32": 1786848510
+          },
+          {
+            "offset": 448,
+            "adler32": 2488477503
+          }
+        ],
+        "bytes": 461,
+        "componentBytes": {
+          "fileHeader": 16,
+          "sessions": 16,
+          "aclCache": 39,
+          "nodeRows": 318,
+          "treeEnd": 5,
+          "baseSeal": 13,
+          "digestAndSeal": 33,
+          "lastZxidAndSeal": 21
+        }
+      },
+      "nonFuzzySyntheticFixture": true
+    },
+    {
+      "id": "synthetic-genesis-empty-digest-marker",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "fileName": "snapshot.0",
+      "snapshotFileZxid": 0,
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000000000000000000000000000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012f00000000986c1169000000012f00000000000000000000000200000000000000000000000004a21319000000012f000000000000000000000000a44e141b000000012f",
+      "expected": {
+        "header": {
+          "magic": "ZKSN",
+          "version": 2,
+          "dbid": -1
+        },
+        "state": {
+          "nodes": {
+            "": {
+              "dataBytes": 0,
+              "dataNull": false,
+              "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dataHex": "",
+              "aclId": -1,
+              "stat": {
+                "czxid": 0,
+                "mzxid": 0,
+                "ctime": 0,
+                "mtime": 0,
+                "version": 0,
+                "cversion": 0,
+                "aversion": 0,
+                "ephemeralOwner": 0,
+                "pzxid": 0
+              }
+            }
+          },
+          "sessions": {},
+          "aclCache": {},
+          "lastProcessedZxid": 0,
+          "treeDigest": 68323592
+        },
+        "digest": {
+          "zxid": 0,
+          "version": 2,
+          "treeDigest": 0
+        },
+        "serializedLastZxid": 0,
+        "seals": [
+          {
+            "offset": 105,
+            "adler32": 2557219177
+          },
+          {
+            "offset": 138,
+            "adler32": 77730585
+          },
+          {
+            "offset": 159,
+            "adler32": 2756580379
+          }
+        ],
+        "bytes": 172,
+        "componentBytes": {
+          "fileHeader": 16,
+          "sessions": 4,
+          "aclCache": 4,
+          "nodeRows": 76,
+          "treeEnd": 5,
+          "baseSeal": 13,
+          "digestAndSeal": 33,
+          "lastZxidAndSeal": 21
+        }
+      },
+      "nonFuzzySyntheticFixture": true,
+      "emptyDigestMarker": true,
+      "markerRule": "DataTree.serializeZxidDigest emits ZxidDigest(0,2,0) when lastProcessedZxidDigest is null. This is not a matching semantic digest and does not itself certify fresh genesis."
+    }
+  ],
+  "records": [
+    {
+      "id": "txn-1-CreateSession",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000006840063600000030000000000000000700000001000000000000000100000000000003e8fffffff60000753000000002000000000412890842",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 1,
+          "zxid": 1,
+          "time": 1000,
+          "type": -10
+        },
+        "operation": {
+          "kind": "CreateSession",
+          "timeout": 30000
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 68323592
+        },
+        "bodyBytes": 4,
+        "payloadBytes": 48,
+        "framedBytes": 61,
+        "adler32": 1749026358
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 0
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000
+        },
+        "aclCache": {},
+        "lastProcessedZxid": 1,
+        "treeDigest": 68323592
+      }
+    },
+    {
+      "id": "txn-2-CreateContainer",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000cf0a089a00000055000000000000000700000002000000000000000200000000000007d000000013000000022f6100000000000000010000001f00000005776f726c6400000006616e796f6e6500000001000000020000000076b927dc42",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 2,
+          "zxid": 2,
+          "time": 2000,
+          "type": 19
+        },
+        "operation": {
+          "kind": "CreateContainer",
+          "path": "/a",
+          "dataHex": "",
+          "acls": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "parentCVersion": 1,
+          "dataNull": false
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 1991845852
+        },
+        "bodyBytes": 41,
+        "payloadBytes": 85,
+        "framedBytes": 98,
+        "adler32": 3473541274
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 2
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 2,
+        "treeDigest": 1991845852
+      }
+    },
+    {
+      "id": "txn-3-Create",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000002a350ab40000005b00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e6500000000010000000200000000edc55ea442",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 3,
+          "zxid": 3,
+          "time": 3000,
+          "type": 1
+        },
+        "operation": {
+          "kind": "Create",
+          "path": "/a/b",
+          "dataHex": "616263",
+          "acls": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "ephemeral": false,
+          "parentCVersion": 1,
+          "dataNull": false
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 3989135012
+        },
+        "bodyBytes": 47,
+        "payloadBytes": 91,
+        "framedBytes": 104,
+        "adler32": 708119220
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 3
+            }
+          },
+          "/a/b": {
+            "dataBytes": 3,
+            "dataNull": false,
+            "dataSha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            "dataHex": "616263",
+            "aclId": 1,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 3,
+              "ctime": 3000,
+              "mtime": 3000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 3,
+        "treeDigest": 3989135012
+      }
+    },
+    {
+      "id": "txn-4-Create",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000fe72098e0000005900000000000000070000000400000000000000040000000000000fa000000001000000042f612f650000000165000000010000001f00000005776f726c6400000006616e796f6e6501000000020000000200000001b3b8b14142",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 4,
+          "zxid": 4,
+          "time": 4000,
+          "type": 1
+        },
+        "operation": {
+          "kind": "Create",
+          "path": "/a/e",
+          "dataHex": "65",
+          "acls": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "ephemeral": true,
+          "parentCVersion": 2,
+          "dataNull": false
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 7310192961
+        },
+        "bodyBytes": 45,
+        "payloadBytes": 89,
+        "framedBytes": 102,
+        "adler32": 4268886414
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 2,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 4
+            }
+          },
+          "/a/b": {
+            "dataBytes": 3,
+            "dataNull": false,
+            "dataSha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            "dataHex": "616263",
+            "aclId": 1,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 3,
+              "ctime": 3000,
+              "mtime": 3000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/e": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+            "dataHex": "65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 4,
+              "mzxid": 4,
+              "ctime": 4000,
+              "mtime": 4000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 7,
+              "pzxid": 4
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 4,
+        "treeDigest": 7310192961
+      }
+    },
+    {
+      "id": "txn-5-SetData",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000520e04bc0000003f0000000000000007000000050000000000000005000000000000138800000005000000042f612f62000000036e65770000000100000002000000011ea51fb242",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 5,
+          "zxid": 5,
+          "time": 5000,
+          "type": 5
+        },
+        "operation": {
+          "kind": "SetData",
+          "path": "/a/b",
+          "dataHex": "6e6577",
+          "version": 1,
+          "dataNull": false
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 4809105330
+        },
+        "bodyBytes": 19,
+        "payloadBytes": 63,
+        "framedBytes": 76,
+        "adler32": 1376650428
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 2,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 4
+            }
+          },
+          "/a/b": {
+            "dataBytes": 3,
+            "dataNull": false,
+            "dataSha256": "11507a0e2f5e69d5dfa40a62a1bd7b6ee57e6bcd85c67c9b8431b36fff21c437",
+            "dataHex": "6e6577",
+            "aclId": 1,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 5,
+              "ctime": 3000,
+              "mtime": 5000,
+              "version": 1,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/e": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+            "dataHex": "65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 4,
+              "mzxid": 4,
+              "ctime": 4000,
+              "mtime": 4000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 7,
+              "pzxid": 4
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 5,
+        "treeDigest": 4809105330
+      }
+    },
+    {
+      "id": "txn-6-Multi",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000003778038100000044000000000000000700000006000000000000000600000000000017700000000e000000010000000d0000000c000000042f612f620000000200000002000000011ea51fb242",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 6,
+          "zxid": 6,
+          "time": 6000,
+          "type": 14
+        },
+        "operation": {
+          "kind": "Multi",
+          "children": [
+            {
+              "kind": "CheckVersion",
+              "path": "/a/b",
+              "version": 2
+            }
+          ]
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 4809105330
+        },
+        "bodyBytes": 24,
+        "payloadBytes": 68,
+        "framedBytes": 81,
+        "adler32": 930612097
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 2,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 4
+            }
+          },
+          "/a/b": {
+            "dataBytes": 3,
+            "dataNull": false,
+            "dataSha256": "11507a0e2f5e69d5dfa40a62a1bd7b6ee57e6bcd85c67c9b8431b36fff21c437",
+            "dataHex": "6e6577",
+            "aclId": 1,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 5,
+              "ctime": 3000,
+              "mtime": 5000,
+              "version": 1,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/e": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+            "dataHex": "65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 4,
+              "mzxid": 4,
+              "ctime": 4000,
+              "mtime": 4000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 7,
+              "pzxid": 4
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 6,
+        "treeDigest": 4809105330
+      }
+    },
+    {
+      "id": "txn-7-Error",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000008e6309b20000003000000000000000070000000700000000000000070000000000001b58ffffffffffffff9900000002000000011ea51fb242",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 7,
+          "zxid": 7,
+          "time": 7000,
+          "type": -1
+        },
+        "operation": {
+          "kind": "Error",
+          "error": -103
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 4809105330
+        },
+        "bodyBytes": 4,
+        "payloadBytes": 48,
+        "framedBytes": 61,
+        "adler32": 2388855218
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 2,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 4
+            }
+          },
+          "/a/b": {
+            "dataBytes": 3,
+            "dataNull": false,
+            "dataSha256": "11507a0e2f5e69d5dfa40a62a1bd7b6ee57e6bcd85c67c9b8431b36fff21c437",
+            "dataHex": "6e6577",
+            "aclId": 1,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 5,
+              "ctime": 3000,
+              "mtime": 5000,
+              "version": 1,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/e": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+            "dataHex": "65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 4,
+              "mzxid": 4,
+              "ctime": 4000,
+              "mtime": 4000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 7,
+              "pzxid": 4
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 7,
+        "treeDigest": 4809105330
+      }
+    },
+    {
+      "id": "txn-8-Multi",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000581e0ca70000008300000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002000000020000000194398f3342",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 8,
+          "zxid": 8,
+          "time": 8000,
+          "type": 14
+        },
+        "operation": {
+          "kind": "Multi",
+          "children": [
+            {
+              "kind": "Create",
+              "path": "/a/c",
+              "dataHex": "78797a",
+              "acls": [
+                {
+                  "perms": 31,
+                  "scheme": "world",
+                  "identity": "anyone"
+                }
+              ],
+              "ephemeral": false,
+              "parentCVersion": 3,
+              "dataNull": false
+            },
+            {
+              "kind": "SetData",
+              "path": "/a/b",
+              "dataHex": "646f6e65",
+              "version": 2,
+              "dataNull": false
+            }
+          ]
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 6781767475
+        },
+        "bodyBytes": 87,
+        "payloadBytes": 131,
+        "framedBytes": 144,
+        "adler32": 1478364327
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 3,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 8
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/c": {
+            "dataBytes": 3,
+            "dataNull": false,
+            "dataSha256": "3608bca1e44ea6c4d268eb6db02260269892c0b42b86bbf1e77a6fa16c3c9282",
+            "dataHex": "78797a",
+            "aclId": 1,
+            "stat": {
+              "czxid": 8,
+              "mzxid": 8,
+              "ctime": 8000,
+              "mtime": 8000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 8
+            }
+          },
+          "/a/e": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+            "dataHex": "65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 4,
+              "mzxid": 4,
+              "ctime": 4000,
+              "mtime": 4000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 7,
+              "pzxid": 4
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 8,
+        "treeDigest": 6781767475
+      }
+    },
+    {
+      "id": "txn-9-Delete",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "0000000023570403000000340000000000000007000000090000000000000009000000000000232800000002000000042f612f630000000200000000c3b6f70442",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 9,
+          "zxid": 9,
+          "time": 9000,
+          "type": 2
+        },
+        "operation": {
+          "kind": "Delete",
+          "path": "/a/c"
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 3283547908
+        },
+        "bodyBytes": 8,
+        "payloadBytes": 52,
+        "framedBytes": 65,
+        "adler32": 592905219
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 3,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 9
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/e": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+            "dataHex": "65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 4,
+              "mzxid": 4,
+              "ctime": 4000,
+              "mtime": 4000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 7,
+              "pzxid": 4
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 9,
+        "treeDigest": 3283547908
+      }
+    },
+    {
+      "id": "txn-10-CreateContainer",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000ccd508860000005700000000000000070000000a000000000000000a000000000000271000000013000000042f612f6700000000000000010000001f00000005776f726c6400000006616e796f6e6500000004000000020000000138508bff42",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 10,
+          "zxid": 10,
+          "time": 10000,
+          "type": 19
+        },
+        "operation": {
+          "kind": "CreateContainer",
+          "path": "/a/g",
+          "dataHex": "",
+          "acls": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "parentCVersion": 4,
+          "dataNull": false
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 5239770111
+        },
+        "bodyBytes": 43,
+        "payloadBytes": 87,
+        "framedBytes": 100,
+        "adler32": 3436513414
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 4,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 10
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/e": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+            "dataHex": "65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 4,
+              "mzxid": 4,
+              "ctime": 4000,
+              "mtime": 4000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 7,
+              "pzxid": 4
+            }
+          },
+          "/a/g": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 10,
+              "mzxid": 10,
+              "ctime": 10000,
+              "mtime": 10000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 10
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 10,
+        "treeDigest": 5239770111
+      }
+    },
+    {
+      "id": "txn-11-DeleteContainer",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000375a044b0000003400000000000000070000000b000000000000000b0000000000002af800000014000000042f612f6700000002000000016a5524e742",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 11,
+          "zxid": 11,
+          "time": 11000,
+          "type": 20
+        },
+        "operation": {
+          "kind": "DeleteContainer",
+          "path": "/a/g"
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 6078932199
+        },
+        "bodyBytes": 8,
+        "payloadBytes": 52,
+        "framedBytes": 65,
+        "adler32": 928646219
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 4,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 11
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/e": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+            "dataHex": "65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 4,
+              "mzxid": 4,
+              "ctime": 4000,
+              "mtime": 4000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 7,
+              "pzxid": 4
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 11,
+        "treeDigest": 6078932199
+      }
+    },
+    {
+      "id": "txn-12-SetACL",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000f06e08e60000005300000000000000070000000c000000000000000c0000000000002ee000000007000000042f612f62000000010000000100000005776f726c6400000006616e796f6e650000000100000002000000017cea392a42",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 12,
+          "zxid": 12,
+          "time": 12000,
+          "type": 7
+        },
+        "operation": {
+          "kind": "SetACL",
+          "path": "/a/b",
+          "acls": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "version": 1
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 6390692138
+        },
+        "bodyBytes": 39,
+        "payloadBytes": 83,
+        "framedBytes": 96,
+        "adler32": 4033743078
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 4,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 11
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/e": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+            "dataHex": "65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 4,
+              "mzxid": 4,
+              "ctime": 4000,
+              "mtime": 4000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 7,
+              "pzxid": 4
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 12,
+        "treeDigest": 6390692138
+      }
+    },
+    {
+      "id": "txn-13-CreateSession",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000006de8074a0000003000000000000000080000000d000000000000000d00000000000032c8fffffff600004e2000000002000000017cea392a42",
+      "expected": {
+        "header": {
+          "clientId": 8,
+          "cxid": 13,
+          "zxid": 13,
+          "time": 13000,
+          "type": -10
+        },
+        "operation": {
+          "kind": "CreateSession",
+          "timeout": 20000
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 6390692138
+        },
+        "bodyBytes": 4,
+        "payloadBytes": 48,
+        "framedBytes": 61,
+        "adler32": 1843922762
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 4,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 11
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/e": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+            "dataHex": "65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 4,
+              "mzxid": 4,
+              "ctime": 4000,
+              "mtime": 4000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 7,
+              "pzxid": 4
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000,
+          "8": 20000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 13,
+        "treeDigest": 6390692138
+      }
+    },
+    {
+      "id": "txn-14-Create",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000000b4e091c0000005900000000000000080000000e000000000000000e00000000000036b000000001000000042f612f660000000146000000010000001f00000005776f726c6400000006616e796f6e650100000005000000020000000179a1841c42",
+      "expected": {
+        "header": {
+          "clientId": 8,
+          "cxid": 14,
+          "zxid": 14,
+          "time": 14000,
+          "type": 1
+        },
+        "operation": {
+          "kind": "Create",
+          "path": "/a/f",
+          "dataHex": "46",
+          "acls": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "ephemeral": true,
+          "parentCVersion": 5,
+          "dataNull": false
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 6335595548
+        },
+        "bodyBytes": 45,
+        "payloadBytes": 89,
+        "framedBytes": 102,
+        "adler32": 189663516
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 5,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 14
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/e": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+            "dataHex": "65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 4,
+              "mzxid": 4,
+              "ctime": 4000,
+              "mtime": 4000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 7,
+              "pzxid": 4
+            }
+          },
+          "/a/f": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "f67ab10ad4e4c53121b6a5fe4da9c10ddee905b978d3788d2723d7bfacbe28a9",
+            "dataHex": "46",
+            "aclId": 1,
+            "stat": {
+              "czxid": 14,
+              "mzxid": 14,
+              "ctime": 14000,
+              "mtime": 14000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 8,
+              "pzxid": 14
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000,
+          "8": 20000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 14,
+        "treeDigest": 6335595548
+      }
+    },
+    {
+      "id": "txn-15-Multi",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000851312a60000007500000000000000070000000f000000000000000f0000000000003a980000000e000000020000000100000031000000082f612f6e65766572000000014e000000010000001f00000005776f726c6400000006616e796f6e650000000006ffffffff00000004ffffff99000000020000000179a1841c42",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 15,
+          "zxid": 15,
+          "time": 15000,
+          "type": 14
+        },
+        "operation": {
+          "kind": "Multi",
+          "children": [
+            {
+              "kind": "Create",
+              "path": "/a/never",
+              "dataHex": "4e",
+              "acls": [
+                {
+                  "perms": 31,
+                  "scheme": "world",
+                  "identity": "anyone"
+                }
+              ],
+              "ephemeral": false,
+              "parentCVersion": 6,
+              "dataNull": false
+            },
+            {
+              "kind": "Error",
+              "error": -103
+            }
+          ]
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 6335595548
+        },
+        "bodyBytes": 73,
+        "payloadBytes": 117,
+        "framedBytes": 130,
+        "adler32": 2232619686
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 5,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 14
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/e": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+            "dataHex": "65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 4,
+              "mzxid": 4,
+              "ctime": 4000,
+              "mtime": 4000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 7,
+              "pzxid": 4
+            }
+          },
+          "/a/f": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "f67ab10ad4e4c53121b6a5fe4da9c10ddee905b978d3788d2723d7bfacbe28a9",
+            "dataHex": "46",
+            "aclId": 1,
+            "stat": {
+              "czxid": 14,
+              "mzxid": 14,
+              "ctime": 14000,
+              "mtime": 14000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 8,
+              "pzxid": 14
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000,
+          "8": 20000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 15,
+        "treeDigest": 6335595548
+      }
+    },
+    {
+      "id": "txn-16-CloseSession",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000009ab108220000003800000000000000070000001000000000000000100000000000003e80fffffff500000001000000042f612f65000000020000000125cdb97342",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 16,
+          "zxid": 16,
+          "time": 16000,
+          "type": -11
+        },
+        "operation": {
+          "kind": "CloseSession",
+          "paths": [
+            "/a/e"
+          ]
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 4929206643
+        },
+        "bodyBytes": 12,
+        "payloadBytes": 56,
+        "framedBytes": 69,
+        "adler32": 2595293218
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 5,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 16
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/f": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "f67ab10ad4e4c53121b6a5fe4da9c10ddee905b978d3788d2723d7bfacbe28a9",
+            "dataHex": "46",
+            "aclId": 1,
+            "stat": {
+              "czxid": 14,
+              "mzxid": 14,
+              "ctime": 14000,
+              "mtime": 14000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 8,
+              "pzxid": 14
+            }
+          }
+        },
+        "sessions": {
+          "8": 20000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 16,
+        "treeDigest": 4929206643
+      }
+    },
+    {
+      "id": "txn-17-CloseSession",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000009ba808ec0000003800000000000000080000001100000000000000110000000000004268fffffff500000001000000042f612f66000000020000000096f3eb8542",
+      "expected": {
+        "header": {
+          "clientId": 8,
+          "cxid": 17,
+          "zxid": 17,
+          "time": 17000,
+          "type": -11
+        },
+        "operation": {
+          "kind": "CloseSession",
+          "paths": [
+            "/a/f"
+          ]
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 2532567941
+        },
+        "bodyBytes": 12,
+        "payloadBytes": 56,
+        "framedBytes": 69,
+        "adler32": 2611480812
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 5,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 17
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          }
+        },
+        "sessions": {},
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 17,
+        "treeDigest": 2532567941
+      }
+    },
+    {
+      "id": "txn-18-CreateSession",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000006c6a08570000003000000000000000090000001200000000000000120000000000004650fffffff600007530000000020000000096f3eb8542",
+      "expected": {
+        "header": {
+          "clientId": 9,
+          "cxid": 18,
+          "zxid": 18,
+          "time": 18000,
+          "type": -10
+        },
+        "operation": {
+          "kind": "CreateSession",
+          "timeout": 30000
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 2532567941
+        },
+        "bodyBytes": 4,
+        "payloadBytes": 48,
+        "framedBytes": 61,
+        "adler32": 1818888279
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 5,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 17
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          }
+        },
+        "sessions": {
+          "9": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 18,
+        "treeDigest": 2532567941
+      }
+    },
+    {
+      "id": "txn-19-Create",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000f71c09a90000005900000000000000090000001300000000000000130000000000004a3800000001000000042f612f680000000148000000010000001100000005776f726c6400000006616e796f6e6500000000060000000200000000ff8d45da42",
+      "expected": {
+        "header": {
+          "clientId": 9,
+          "cxid": 19,
+          "zxid": 19,
+          "time": 19000,
+          "type": 1
+        },
+        "operation": {
+          "kind": "Create",
+          "path": "/a/h",
+          "dataHex": "48",
+          "dataNull": false,
+          "acls": [
+            {
+              "perms": 17,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "ephemeral": false,
+          "parentCVersion": 6
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 4287448538
+        },
+        "bodyBytes": 45,
+        "payloadBytes": 89,
+        "framedBytes": 102,
+        "adler32": 4145809833
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 6,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 19
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/h": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "44bd7ae60f478fae1061e11a7739f4b94d1daf917982d33b6fc8a01a63f89c21",
+            "dataHex": "48",
+            "aclId": 3,
+            "stat": {
+              "czxid": 19,
+              "mzxid": 19,
+              "ctime": 19000,
+              "mtime": 19000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 19
+            }
+          }
+        },
+        "sessions": {
+          "9": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "3": [
+            {
+              "perms": 17,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 19,
+        "treeDigest": 4287448538
+      }
+    },
+    {
+      "id": "txn-20-SetACL",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000d46307d50000005300000000000000090000001400000000000000140000000000004e2000000007000000042f612f68000000010000001f00000005776f726c6400000006616e796f6e650000000100000002000000010c48319d42",
+      "expected": {
+        "header": {
+          "clientId": 9,
+          "cxid": 20,
+          "zxid": 20,
+          "time": 20000,
+          "type": 7
+        },
+        "operation": {
+          "kind": "SetACL",
+          "path": "/a/h",
+          "acls": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "version": 1
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 4501025181
+        },
+        "bodyBytes": 39,
+        "payloadBytes": 83,
+        "framedBytes": 96,
+        "adler32": 3563259861
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 6,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 19
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/h": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "44bd7ae60f478fae1061e11a7739f4b94d1daf917982d33b6fc8a01a63f89c21",
+            "dataHex": "48",
+            "aclId": 1,
+            "stat": {
+              "czxid": 19,
+              "mzxid": 19,
+              "ctime": 19000,
+              "mtime": 19000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 19
+            }
+          }
+        },
+        "sessions": {
+          "9": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 20,
+        "treeDigest": 4501025181
+      }
+    },
+    {
+      "id": "txn-21-Create",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000ebff083b000000590000000000000009000000150000000000000015000000000000520800000001000000042f612f6a000000014a000000010000001100000005776f726c6400000006616e796f6e6500000000070000000200000001377ca20642",
+      "expected": {
+        "header": {
+          "clientId": 9,
+          "cxid": 21,
+          "zxid": 21,
+          "time": 21000,
+          "type": 1
+        },
+        "operation": {
+          "kind": "Create",
+          "path": "/a/j",
+          "dataHex": "4a",
+          "dataNull": false,
+          "acls": [
+            {
+              "perms": 17,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "ephemeral": false,
+          "parentCVersion": 7
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 5225882118
+        },
+        "bodyBytes": 45,
+        "payloadBytes": 89,
+        "framedBytes": 102,
+        "adler32": 3959359547
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 7,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 21
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/h": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "44bd7ae60f478fae1061e11a7739f4b94d1daf917982d33b6fc8a01a63f89c21",
+            "dataHex": "48",
+            "aclId": 1,
+            "stat": {
+              "czxid": 19,
+              "mzxid": 19,
+              "ctime": 19000,
+              "mtime": 19000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 19
+            }
+          },
+          "/a/j": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "6da43b944e494e885e69af021f93c6d9331c78aa228084711429160a5bbd15b5",
+            "dataHex": "4a",
+            "aclId": 4,
+            "stat": {
+              "czxid": 21,
+              "mzxid": 21,
+              "ctime": 21000,
+              "mtime": 21000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 21
+            }
+          }
+        },
+        "sessions": {
+          "9": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "4": [
+            {
+              "perms": 17,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 21,
+        "treeDigest": 5225882118
+      }
+    },
+    {
+      "id": "txn-22-Delete",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000003d07040e00000034000000000000000900000016000000000000001600000000000055f000000002000000042f612f68000000020000000046c21d3f42",
+      "expected": {
+        "header": {
+          "clientId": 9,
+          "cxid": 22,
+          "zxid": 22,
+          "time": 22000,
+          "type": 2
+        },
+        "operation": {
+          "kind": "Delete",
+          "path": "/a/h"
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 1187126591
+        },
+        "bodyBytes": 8,
+        "payloadBytes": 52,
+        "framedBytes": 65,
+        "adler32": 1023869966
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 7,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 22
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/j": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "6da43b944e494e885e69af021f93c6d9331c78aa228084711429160a5bbd15b5",
+            "dataHex": "4a",
+            "aclId": 4,
+            "stat": {
+              "czxid": 21,
+              "mzxid": 21,
+              "ctime": 21000,
+              "mtime": 21000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 21
+            }
+          }
+        },
+        "sessions": {
+          "9": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "4": [
+            {
+              "perms": 17,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 22,
+        "treeDigest": 1187126591
+      }
+    },
+    {
+      "id": "txn-23-Delete",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000003c58040100000034000000000000000900000017000000000000001700000000000059d800000002000000042f612f6a0000000200000000c272231042",
+      "expected": {
+        "header": {
+          "clientId": 9,
+          "cxid": 23,
+          "zxid": 23,
+          "time": 23000,
+          "type": 2
+        },
+        "operation": {
+          "kind": "Delete",
+          "path": "/a/j"
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 3262259984
+        },
+        "bodyBytes": 8,
+        "payloadBytes": 52,
+        "framedBytes": 65,
+        "adler32": 1012401153
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 7,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 23
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          }
+        },
+        "sessions": {
+          "9": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 23,
+        "treeDigest": 3262259984
+      }
+    },
+    {
+      "id": "txn-24-CloseSession",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000006d6106b20000003000000000000000090000001800000000000000180000000000005dc0fffffff5000000000000000200000000c272231042",
+      "expected": {
+        "header": {
+          "clientId": 9,
+          "cxid": 24,
+          "zxid": 24,
+          "time": 24000,
+          "type": -11
+        },
+        "operation": {
+          "kind": "CloseSession",
+          "paths": []
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 3262259984
+        },
+        "bodyBytes": 4,
+        "payloadBytes": 48,
+        "framedBytes": 61,
+        "adler32": 1835075250
+      },
+      "expectedStateAfter": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 7,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 23
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          }
+        },
+        "sessions": {},
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 24,
+        "treeDigest": 3262259984
+      }
+    },
+    {
+      "id": "unit-plain-Create",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": false,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000c2c907fe0000004f00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e65000000000142",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 3,
+          "zxid": 3,
+          "time": 3000,
+          "type": 1
+        },
+        "operation": {
+          "kind": "Create",
+          "path": "/a/b",
+          "dataHex": "616263",
+          "acls": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "ephemeral": false,
+          "parentCVersion": 1,
+          "dataNull": false
+        },
+        "digest": null,
+        "bodyBytes": 47,
+        "payloadBytes": 79,
+        "framedBytes": 92,
+        "adler32": 3267954686
+      }
+    }
+  ],
+  "logs": [
+    {
+      "id": "synthetic-genesis-through24",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b4c47000000020000000000000000000000006840063600000030000000000000000700000001000000000000000100000000000003e8fffffff6000075300000000200000000041289084200000000cf0a089a00000055000000000000000700000002000000000000000200000000000007d000000013000000022f6100000000000000010000001f00000005776f726c6400000006616e796f6e6500000001000000020000000076b927dc42000000002a350ab40000005b00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e6500000000010000000200000000edc55ea44200000000fe72098e0000005900000000000000070000000400000000000000040000000000000fa000000001000000042f612f650000000165000000010000001f00000005776f726c6400000006616e796f6e6501000000020000000200000001b3b8b1414200000000520e04bc0000003f0000000000000007000000050000000000000005000000000000138800000005000000042f612f62000000036e65770000000100000002000000011ea51fb242000000003778038100000044000000000000000700000006000000000000000600000000000017700000000e000000010000000d0000000c000000042f612f620000000200000002000000011ea51fb242000000008e6309b20000003000000000000000070000000700000000000000070000000000001b58ffffffffffffff9900000002000000011ea51fb24200000000581e0ca70000008300000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002000000020000000194398f33420000000023570403000000340000000000000007000000090000000000000009000000000000232800000002000000042f612f630000000200000000c3b6f7044200000000ccd508860000005700000000000000070000000a000000000000000a000000000000271000000013000000042f612f6700000000000000010000001f00000005776f726c6400000006616e796f6e6500000004000000020000000138508bff4200000000375a044b0000003400000000000000070000000b000000000000000b0000000000002af800000014000000042f612f6700000002000000016a5524e74200000000f06e08e60000005300000000000000070000000c000000000000000c0000000000002ee000000007000000042f612f62000000010000000100000005776f726c6400000006616e796f6e650000000100000002000000017cea392a42000000006de8074a0000003000000000000000080000000d000000000000000d00000000000032c8fffffff600004e2000000002000000017cea392a42000000000b4e091c0000005900000000000000080000000e000000000000000e00000000000036b000000001000000042f612f660000000146000000010000001f00000005776f726c6400000006616e796f6e650100000005000000020000000179a1841c4200000000851312a60000007500000000000000070000000f000000000000000f0000000000003a980000000e000000020000000100000031000000082f612f6e65766572000000014e000000010000001f00000005776f726c6400000006616e796f6e650000000006ffffffff00000004ffffff99000000020000000179a1841c42000000009ab108220000003800000000000000070000001000000000000000100000000000003e80fffffff500000001000000042f612f65000000020000000125cdb97342000000009ba808ec0000003800000000000000080000001100000000000000110000000000004268fffffff500000001000000042f612f66000000020000000096f3eb8542000000006c6a08570000003000000000000000090000001200000000000000120000000000004650fffffff600007530000000020000000096f3eb854200000000f71c09a90000005900000000000000090000001300000000000000130000000000004a3800000001000000042f612f680000000148000000010000001100000005776f726c6400000006616e796f6e6500000000060000000200000000ff8d45da4200000000d46307d50000005300000000000000090000001400000000000000140000000000004e2000000007000000042f612f68000000010000001f00000005776f726c6400000006616e796f6e650000000100000002000000010c48319d4200000000ebff083b000000590000000000000009000000150000000000000015000000000000520800000001000000042f612f6a000000014a000000010000001100000005776f726c6400000006616e796f6e6500000000070000000200000001377ca20642000000003d07040e00000034000000000000000900000016000000000000001600000000000055f000000002000000042f612f68000000020000000046c21d3f42000000003c58040100000034000000000000000900000017000000000000001700000000000059d800000002000000042f612f6a0000000200000000c272231042000000006d6106b20000003000000000000000090000001800000000000000180000000000005dc0fffffff5000000000000000200000000c272231042",
+      "recordIds": [
+        "txn-1-CreateSession",
+        "txn-2-CreateContainer",
+        "txn-3-Create",
+        "txn-4-Create",
+        "txn-5-SetData",
+        "txn-6-Multi",
+        "txn-7-Error",
+        "txn-8-Multi",
+        "txn-9-Delete",
+        "txn-10-CreateContainer",
+        "txn-11-DeleteContainer",
+        "txn-12-SetACL",
+        "txn-13-CreateSession",
+        "txn-14-Create",
+        "txn-15-Multi",
+        "txn-16-CloseSession",
+        "txn-17-CloseSession",
+        "txn-18-CreateSession",
+        "txn-19-Create",
+        "txn-20-SetACL",
+        "txn-21-Create",
+        "txn-22-Delete",
+        "txn-23-Delete",
+        "txn-24-CloseSession"
+      ],
+      "expectedSerializedBytes": 2052,
+      "expectedPaddingBytes": 0
+    },
+    {
+      "id": "synthetic-genesis-through24-with-zero-padding",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b4c47000000020000000000000000000000006840063600000030000000000000000700000001000000000000000100000000000003e8fffffff6000075300000000200000000041289084200000000cf0a089a00000055000000000000000700000002000000000000000200000000000007d000000013000000022f6100000000000000010000001f00000005776f726c6400000006616e796f6e6500000001000000020000000076b927dc42000000002a350ab40000005b00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e6500000000010000000200000000edc55ea44200000000fe72098e0000005900000000000000070000000400000000000000040000000000000fa000000001000000042f612f650000000165000000010000001f00000005776f726c6400000006616e796f6e6501000000020000000200000001b3b8b1414200000000520e04bc0000003f0000000000000007000000050000000000000005000000000000138800000005000000042f612f62000000036e65770000000100000002000000011ea51fb242000000003778038100000044000000000000000700000006000000000000000600000000000017700000000e000000010000000d0000000c000000042f612f620000000200000002000000011ea51fb242000000008e6309b20000003000000000000000070000000700000000000000070000000000001b58ffffffffffffff9900000002000000011ea51fb24200000000581e0ca70000008300000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002000000020000000194398f33420000000023570403000000340000000000000007000000090000000000000009000000000000232800000002000000042f612f630000000200000000c3b6f7044200000000ccd508860000005700000000000000070000000a000000000000000a000000000000271000000013000000042f612f6700000000000000010000001f00000005776f726c6400000006616e796f6e6500000004000000020000000138508bff4200000000375a044b0000003400000000000000070000000b000000000000000b0000000000002af800000014000000042f612f6700000002000000016a5524e74200000000f06e08e60000005300000000000000070000000c000000000000000c0000000000002ee000000007000000042f612f62000000010000000100000005776f726c6400000006616e796f6e650000000100000002000000017cea392a42000000006de8074a0000003000000000000000080000000d000000000000000d00000000000032c8fffffff600004e2000000002000000017cea392a42000000000b4e091c0000005900000000000000080000000e000000000000000e00000000000036b000000001000000042f612f660000000146000000010000001f00000005776f726c6400000006616e796f6e650100000005000000020000000179a1841c4200000000851312a60000007500000000000000070000000f000000000000000f0000000000003a980000000e000000020000000100000031000000082f612f6e65766572000000014e000000010000001f00000005776f726c6400000006616e796f6e650000000006ffffffff00000004ffffff99000000020000000179a1841c42000000009ab108220000003800000000000000070000001000000000000000100000000000003e80fffffff500000001000000042f612f65000000020000000125cdb97342000000009ba808ec0000003800000000000000080000001100000000000000110000000000004268fffffff500000001000000042f612f66000000020000000096f3eb8542000000006c6a08570000003000000000000000090000001200000000000000120000000000004650fffffff600007530000000020000000096f3eb854200000000f71c09a90000005900000000000000090000001300000000000000130000000000004a3800000001000000042f612f680000000148000000010000001100000005776f726c6400000006616e796f6e6500000000060000000200000000ff8d45da4200000000d46307d50000005300000000000000090000001400000000000000140000000000004e2000000007000000042f612f68000000010000001f00000005776f726c6400000006616e796f6e650000000100000002000000010c48319d4200000000ebff083b000000590000000000000009000000150000000000000015000000000000520800000001000000042f612f6a000000014a000000010000001100000005776f726c6400000006616e796f6e6500000000070000000200000001377ca20642000000003d07040e00000034000000000000000900000016000000000000001600000000000055f000000002000000042f612f68000000020000000046c21d3f42000000003c58040100000034000000000000000900000017000000000000001700000000000059d800000002000000042f612f6a0000000200000000c272231042000000006d6106b20000003000000000000000090000001800000000000000180000000000005dc0fffffff5000000000000000200000000c27223104200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "recordIds": [
+        "txn-1-CreateSession",
+        "txn-2-CreateContainer",
+        "txn-3-Create",
+        "txn-4-Create",
+        "txn-5-SetData",
+        "txn-6-Multi",
+        "txn-7-Error",
+        "txn-8-Multi",
+        "txn-9-Delete",
+        "txn-10-CreateContainer",
+        "txn-11-DeleteContainer",
+        "txn-12-SetACL",
+        "txn-13-CreateSession",
+        "txn-14-Create",
+        "txn-15-Multi",
+        "txn-16-CloseSession",
+        "txn-17-CloseSession",
+        "txn-18-CreateSession",
+        "txn-19-Create",
+        "txn-20-SetACL",
+        "txn-21-Create",
+        "txn-22-Delete",
+        "txn-23-Delete",
+        "txn-24-CloseSession"
+      ],
+      "expectedSerializedBytes": 2052,
+      "expectedPaddingBytes": 64
+    },
+    {
+      "id": "synthetic-prefix-through4",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b4c47000000020000000000000000000000006840063600000030000000000000000700000001000000000000000100000000000003e8fffffff6000075300000000200000000041289084200000000cf0a089a00000055000000000000000700000002000000000000000200000000000007d000000013000000022f6100000000000000010000001f00000005776f726c6400000006616e796f6e6500000001000000020000000076b927dc42000000002a350ab40000005b00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e6500000000010000000200000000edc55ea44200000000fe72098e0000005900000000000000070000000400000000000000040000000000000fa000000001000000042f612f650000000165000000010000001f00000005776f726c6400000006616e796f6e6501000000020000000200000001b3b8b14142",
+      "recordIds": [
+        "txn-1-CreateSession",
+        "txn-2-CreateContainer",
+        "txn-3-Create",
+        "txn-4-Create"
+      ],
+      "expectedSerializedBytes": 381,
+      "expectedPaddingBytes": 0
+    },
+    {
+      "id": "synthetic-suffix5-through24",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b4c4700000002000000000000000000000000520e04bc0000003f0000000000000007000000050000000000000005000000000000138800000005000000042f612f62000000036e65770000000100000002000000011ea51fb242000000003778038100000044000000000000000700000006000000000000000600000000000017700000000e000000010000000d0000000c000000042f612f620000000200000002000000011ea51fb242000000008e6309b20000003000000000000000070000000700000000000000070000000000001b58ffffffffffffff9900000002000000011ea51fb24200000000581e0ca70000008300000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002000000020000000194398f33420000000023570403000000340000000000000007000000090000000000000009000000000000232800000002000000042f612f630000000200000000c3b6f7044200000000ccd508860000005700000000000000070000000a000000000000000a000000000000271000000013000000042f612f6700000000000000010000001f00000005776f726c6400000006616e796f6e6500000004000000020000000138508bff4200000000375a044b0000003400000000000000070000000b000000000000000b0000000000002af800000014000000042f612f6700000002000000016a5524e74200000000f06e08e60000005300000000000000070000000c000000000000000c0000000000002ee000000007000000042f612f62000000010000000100000005776f726c6400000006616e796f6e650000000100000002000000017cea392a42000000006de8074a0000003000000000000000080000000d000000000000000d00000000000032c8fffffff600004e2000000002000000017cea392a42000000000b4e091c0000005900000000000000080000000e000000000000000e00000000000036b000000001000000042f612f660000000146000000010000001f00000005776f726c6400000006616e796f6e650100000005000000020000000179a1841c4200000000851312a60000007500000000000000070000000f000000000000000f0000000000003a980000000e000000020000000100000031000000082f612f6e65766572000000014e000000010000001f00000005776f726c6400000006616e796f6e650000000006ffffffff00000004ffffff99000000020000000179a1841c42000000009ab108220000003800000000000000070000001000000000000000100000000000003e80fffffff500000001000000042f612f65000000020000000125cdb97342000000009ba808ec0000003800000000000000080000001100000000000000110000000000004268fffffff500000001000000042f612f66000000020000000096f3eb8542000000006c6a08570000003000000000000000090000001200000000000000120000000000004650fffffff600007530000000020000000096f3eb854200000000f71c09a90000005900000000000000090000001300000000000000130000000000004a3800000001000000042f612f680000000148000000010000001100000005776f726c6400000006616e796f6e6500000000060000000200000000ff8d45da4200000000d46307d50000005300000000000000090000001400000000000000140000000000004e2000000007000000042f612f68000000010000001f00000005776f726c6400000006616e796f6e650000000100000002000000010c48319d4200000000ebff083b000000590000000000000009000000150000000000000015000000000000520800000001000000042f612f6a000000014a000000010000001100000005776f726c6400000006616e796f6e6500000000070000000200000001377ca20642000000003d07040e00000034000000000000000900000016000000000000001600000000000055f000000002000000042f612f68000000020000000046c21d3f42000000003c58040100000034000000000000000900000017000000000000001700000000000059d800000002000000042f612f6a0000000200000000c272231042000000006d6106b20000003000000000000000090000001800000000000000180000000000005dc0fffffff5000000000000000200000000c272231042",
+      "recordIds": [
+        "txn-5-SetData",
+        "txn-6-Multi",
+        "txn-7-Error",
+        "txn-8-Multi",
+        "txn-9-Delete",
+        "txn-10-CreateContainer",
+        "txn-11-DeleteContainer",
+        "txn-12-SetACL",
+        "txn-13-CreateSession",
+        "txn-14-Create",
+        "txn-15-Multi",
+        "txn-16-CloseSession",
+        "txn-17-CloseSession",
+        "txn-18-CreateSession",
+        "txn-19-Create",
+        "txn-20-SetACL",
+        "txn-21-Create",
+        "txn-22-Delete",
+        "txn-23-Delete",
+        "txn-24-CloseSession"
+      ],
+      "expectedSerializedBytes": 1687,
+      "expectedPaddingBytes": 0
+    }
+  ],
+  "negativeCases": [
+    {
+      "id": "snapshot-node-payload-checksum-tamper",
+      "kind": "snapshot",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000001000000000000000700007530000000010000000000000001000000010000001f00000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000002000000022f610000000000000000000000010000000000000002000000000000000200000000000007d000000000000007d000000000000000020000000080000000000000000000000000000004000000042f612f62000000036062630000000000000001000000000000000300000000000000030000000000000bb80000000000000bb800000000000000000000000000000000000000000000000000000003000000042f612f6500000001650000000000000001000000000000000400000000000000040000000000000fa00000000000000fa000000000000000000000000000000000000000070000000000000004000000012f00000000f90f20a1000000012f00000000000000040000000200000001b3b8b141000000006a8124fe000000012f0000000000000004000000009453273f000000012f",
+      "expected": "reject",
+      "basis": "Data bytes changed without cumulative seals."
+    },
+    {
+      "id": "snapshot-final-seal-checksum-tamper",
+      "kind": "snapshot",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000001000000000000000700007530000000010000000000000001000000010000001f00000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000002000000022f610000000000000000000000010000000000000002000000000000000200000000000007d000000000000007d000000000000000020000000080000000000000000000000000000004000000042f612f62000000036162630000000000000001000000000000000300000000000000030000000000000bb80000000000000bb800000000000000000000000000000000000000000000000000000003000000042f612f6500000001650000000000000001000000000000000400000000000000040000000000000fa00000000000000fa000000000000000000000000000000000000000070000000000000004000000012f00000000f90f20a1000000012f00000000000000040000000200000001b3b8b141000000006a8124fe000000012f0000000000000004000000009453273e000000012f",
+      "expected": "reject",
+      "basis": "Final cumulative Adler32 is independently checked."
+    },
+    {
+      "id": "snapshot-final-seal-truncated",
+      "kind": "snapshot",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000001000000000000000700007530000000010000000000000001000000010000001f00000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000002000000022f610000000000000000000000010000000000000002000000000000000200000000000007d000000000000007d000000000000000020000000080000000000000000000000000000004000000042f612f62000000036162630000000000000001000000000000000300000000000000030000000000000bb80000000000000bb800000000000000000000000000000000000000000000000000000003000000042f612f6500000001650000000000000001000000000000000400000000000000040000000000000fa00000000000000fa000000000000000000000000000000000000000070000000000000004000000012f00000000f90f20a1000000012f00000000000000040000000200000001b3b8b141000000006a8124fe000000012f0000000000000004000000009453273f00000001",
+      "expected": "reject",
+      "basis": "Last Jute slash string is incomplete."
+    },
+    {
+      "id": "snapshot-body-truncated",
+      "kind": "snapshot",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000001000000000000000700007530000000010000000000000001000000010000001f00000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000002000000022f610000000000000000000000010000000000000002000000000000000200000000000007d000000000000007d000000000000000020000000080000000000000000000000000000004000000042f612f620000000361",
+      "expected": "reject",
+      "basis": "Node data buffer/stat is incomplete."
+    },
+    {
+      "id": "snapshot-modern-sections-missing-under-modern-profile",
+      "kind": "snapshot",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000001000000000000000700007530000000010000000000000001000000010000001f00000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000002000000022f610000000000000000000000010000000000000002000000000000000200000000000007d000000000000007d000000000000000020000000080000000000000000000000000000004000000042f612f62000000036162630000000000000001000000000000000300000000000000030000000000000bb80000000000000bb800000000000000000000000000000000000000000000000000000003000000042f612f6500000001650000000000000001000000000000000400000000000000040000000000000fa00000000000000fa000000000000000000000000000000000000000070000000000000004000000012f00000000f90f20a1000000012f",
+      "expected": "reject",
+      "basis": "Explicit modern flags require both optional sections and all seals."
+    },
+    {
+      "id": "snapshot-version3-unsupported",
+      "kind": "snapshot",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b534e00000003ffffffffffffffff00000001000000000000000700007530000000010000000000000001000000010000001f00000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000002000000022f610000000000000000000000010000000000000002000000000000000200000000000007d000000000000007d000000000000000020000000080000000000000000000000000000004000000042f612f62000000036162630000000000000001000000000000000300000000000000030000000000000bb80000000000000bb800000000000000000000000000000000000000000000000000000003000000042f612f6500000001650000000000000001000000000000000400000000000000040000000000000fa00000000000000fa000000000000000000000000000000000000000070000000000000004000000012f00000000fa9220a2000000012f00000000000000040000000200000001b3b8b141000000007ab02584000000012f000000000000000400000000ace3278b000000012f",
+      "expected": "reject",
+      "basis": "Valid seals do not authorize an unselected header version."
+    },
+    {
+      "id": "snapshot-gzip-unsupported",
+      "kind": "snapshot",
+      "profile": {
+        "stream_mode": "gz",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "1f8b08000000000002038bf20ef663606060fa0f054036230304b03330941a20f119a1581e8859cbf38b7252800cb6c4bccafcbc54a81206246388018c58c49840583f118b2a26549afd022a0d116f40358d0584f513f5938034736252329a91cca834f70e541a2b60861a09f234632a9a812ca834ff02541a05b023a965d407b17ef22b2c8473a032205f316edeb1d1112490d5a8f20f5d01c39460757bb02000420ac3a2cd010000",
+      "expected": "reject",
+      "basis": "Only CHECKED/plain selected; no inferred decompression."
+    },
+    {
+      "id": "snapshot-noncumulative-final-seal",
+      "kind": "snapshot",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b534e00000002ffffffffffffffff00000001000000000000000700007530000000010000000000000001000000010000001f00000005776f726c6400000006616e796f6e650000000000000000ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000002000000022f610000000000000000000000010000000000000002000000000000000200000000000007d000000000000007d000000000000000020000000080000000000000000000000000000004000000042f612f62000000036162630000000000000001000000000000000300000000000000030000000000000bb80000000000000bb800000000000000000000000000000000000000000000000000000003000000042f612f6500000001650000000000000001000000000000000400000000000000040000000000000fa00000000000000fa000000000000000000000000000000000000000070000000000000004000000012f00000000f90f20a1000000012f00000000000000040000000200000001b3b8b141000000006a8124fe000000012f000000000000000400000000000c0005000000012f",
+      "expected": "reject",
+      "basis": "Last checksum must cover every preceding byte, including previous seals, not only last zxid."
+    },
+    {
+      "id": "txn-payload-checksum-tamper",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000002a350ab40000005b00000000000000070000000300000000000000030000000000000bb800000001000100042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e6500000000010000000200000000edc55ea442",
+      "expected": "reject",
+      "basis": "Checksum commits entire header/body/digest payload."
+    },
+    {
+      "id": "txn-end-marker-invalid",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000002a350ab40000005b00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e6500000000010000000200000000edc55ea458",
+      "expected": "reject",
+      "basis": "Record end marker must be B."
+    },
+    {
+      "id": "txn-final-byte-truncated",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000002a350ab40000005b00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e6500000000010000000200000000edc55ea4",
+      "expected": "reject",
+      "basis": "Record end marker absent."
+    },
+    {
+      "id": "txn-buffer-truncated",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000002a350ab40000005b00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e650000000001000000",
+      "expected": "reject",
+      "basis": "Declared transaction buffer does not fit actual bytes."
+    },
+    {
+      "id": "txn-ttl-opcode-unsupported",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000002ee50ac80000005b00000000000000070000000300000000000000030000000000000bb800000015000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e6500000000010000000200000000edc55ea442",
+      "expected": "reject",
+      "basis": "Checksum-valid TTL opcode is outside selected reached codec."
+    },
+    {
+      "id": "txn-standalone-check-opcode-unsupported",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000002cad036600000038000000000000000700000006000000000000000600000000000017700000000d000000042f612f620000000200000002000000011ea51fb242",
+      "expected": "reject",
+      "basis": "Pinned SerializeUtils.deserializeTxn has no standalone opcode13 case; CheckVersionTxn remains supported as a Multi child."
+    },
+    {
+      "id": "txn-close-session-legacy-body-unsupported",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000583d06b20000002c00000000000000090000001800000000000000180000000000005dc0fffffff50000000200000000c272231042",
+      "expected": "reject",
+      "basis": "Modern profile requires a paths vector before optional TxnDigest."
+    },
+    {
+      "id": "txn-close-session-legacy-profile-unsupported",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": false
+      },
+      "wireHex": "00000000583d06b20000002c00000000000000090000001800000000000000180000000000005dc0fffffff50000000200000000c272231042",
+      "expected": "reject",
+      "basis": "Legacy CloseSession profile deliberately unsupported."
+    },
+    {
+      "id": "log-record-truncated",
+      "kind": "log",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b4c47000000020000000000000000000000006840063600000030000000000000000700000001000000000000000100000000000003e8fffffff6000075300000000200000000041289084200000000cf0a089a00000055000000000000000700000002000000000000000200000000000007d000000013000000022f6100000000000000010000001f00000005776f726c6400000006616e796f6e6500000001000000020000000076b927dc42000000002a350ab40000005b00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e6500000000010000000200000000edc55ea44200000000fe72098e0000005900000000000000070000000400000000000000040000000000000fa000000001000000042f612f650000000165000000010000001f00000005776f726c6400000006616e796f6e6501000000020000000200000001b3b8b1414200000000520e04bc0000003f0000000000000007000000050000000000000005000000000000138800000005000000042f612f62000000036e65770000000100000002000000011ea51fb242000000003778038100000044000000000000000700000006000000000000000600000000000017700000000e000000010000000d0000000c000000042f612f620000000200000002000000011ea51fb242000000008e6309b20000003000000000000000070000000700000000000000070000000000001b58ffffffffffffff9900000002000000011ea51fb24200000000581e0ca70000008300000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002000000020000000194398f33420000000023570403000000340000000000000007000000090000000000000009000000000000232800000002000000042f612f630000000200000000c3b6f7044200000000ccd508860000005700000000000000070000000a000000000000000a000000000000271000000013000000042f612f6700000000000000010000001f00000005776f726c6400000006616e796f6e6500000004000000020000000138508bff4200000000375a044b0000003400000000000000070000000b000000000000000b0000000000002af800000014000000042f612f6700000002000000016a5524e74200000000f06e08e60000005300000000000000070000000c000000000000000c0000000000002ee000000007000000042f612f62000000010000000100000005776f726c6400000006616e796f6e650000000100000002000000017cea392a42000000006de8074a0000003000000000000000080000000d000000000000000d00000000000032c8fffffff600004e2000000002000000017cea392a42000000000b4e091c0000005900000000000000080000000e000000000000000e00000000000036b000000001000000042f612f660000000146000000010000001f00000005776f726c6400000006616e796f6e650100000005000000020000000179a1841c4200000000851312a60000007500000000000000070000000f000000000000000f0000000000003a980000000e000000020000000100000031000000082f612f6e65766572000000014e000000010000001f00000005776f726c6400000006616e796f6e650000000006ffffffff00000004ffffff99000000020000000179a1841c42000000009ab108220000003800000000000000070000001000000000000000100000000000003e80fffffff500000001000000042f612f65000000020000000125cdb97342000000009ba808ec0000003800000000000000080000001100000000000000110000000000004268fffffff500000001000000042f612f66000000020000000096f3eb8542000000006c6a08570000003000000000000000090000001200000000000000120000000000004650fffffff600007530000000020000000096f3eb854200000000f71c09a90000005900000000000000090000001300000000000000130000000000004a3800000001000000042f612f680000000148000000010000001100000005776f726c6400000006616e796f6e6500000000060000000200000000ff8d45da4200000000d46307d50000005300000000000000090000001400000000000000140000000000004e2000000007000000042f612f68000000010000001f00000005776f726c6400000006616e796f6e650000000100000002000000010c48319d4200000000ebff083b000000590000000000000009000000150000000000000015000000000000520800000001000000042f612f6a000000014a000000010000001100000005776f726c6400000006616e796f6e6500000000070000000200000001377ca20642000000003d07040e00000034000000000000000900000016000000000000001600000000000055f000000002000000042f612f68000000020000000046c21d3f42000000003c58040100000034000000000000000900000017000000000000001700000000000059d800000002000000042f612f6a0000000200000000c272231042000000006d6106b20000003000000000000000090000001800000000000000180000000000005dc0fffffff5000000000000000200000000c2722310",
+      "expected": "reject",
+      "basis": "Final declared record must be complete; no silent current-tail credit."
+    },
+    {
+      "id": "log-nonzero-byte-after-zero-padding",
+      "kind": "log",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b4c47000000020000000000000000000000006840063600000030000000000000000700000001000000000000000100000000000003e8fffffff6000075300000000200000000041289084200000000cf0a089a00000055000000000000000700000002000000000000000200000000000007d000000013000000022f6100000000000000010000001f00000005776f726c6400000006616e796f6e6500000001000000020000000076b927dc42000000002a350ab40000005b00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e6500000000010000000200000000edc55ea44200000000fe72098e0000005900000000000000070000000400000000000000040000000000000fa000000001000000042f612f650000000165000000010000001f00000005776f726c6400000006616e796f6e6501000000020000000200000001b3b8b1414200000000520e04bc0000003f0000000000000007000000050000000000000005000000000000138800000005000000042f612f62000000036e65770000000100000002000000011ea51fb242000000003778038100000044000000000000000700000006000000000000000600000000000017700000000e000000010000000d0000000c000000042f612f620000000200000002000000011ea51fb242000000008e6309b20000003000000000000000070000000700000000000000070000000000001b58ffffffffffffff9900000002000000011ea51fb24200000000581e0ca70000008300000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e6500000002000000020000000194398f33420000000023570403000000340000000000000007000000090000000000000009000000000000232800000002000000042f612f630000000200000000c3b6f7044200000000ccd508860000005700000000000000070000000a000000000000000a000000000000271000000013000000042f612f6700000000000000010000001f00000005776f726c6400000006616e796f6e6500000004000000020000000138508bff4200000000375a044b0000003400000000000000070000000b000000000000000b0000000000002af800000014000000042f612f6700000002000000016a5524e74200000000f06e08e60000005300000000000000070000000c000000000000000c0000000000002ee000000007000000042f612f62000000010000000100000005776f726c6400000006616e796f6e650000000100000002000000017cea392a42000000006de8074a0000003000000000000000080000000d000000000000000d00000000000032c8fffffff600004e2000000002000000017cea392a42000000000b4e091c0000005900000000000000080000000e000000000000000e00000000000036b000000001000000042f612f660000000146000000010000001f00000005776f726c6400000006616e796f6e650100000005000000020000000179a1841c4200000000851312a60000007500000000000000070000000f000000000000000f0000000000003a980000000e000000020000000100000031000000082f612f6e65766572000000014e000000010000001f00000005776f726c6400000006616e796f6e650000000006ffffffff00000004ffffff99000000020000000179a1841c42000000009ab108220000003800000000000000070000001000000000000000100000000000003e80fffffff500000001000000042f612f65000000020000000125cdb97342000000009ba808ec0000003800000000000000080000001100000000000000110000000000004268fffffff500000001000000042f612f66000000020000000096f3eb8542000000006c6a08570000003000000000000000090000001200000000000000120000000000004650fffffff600007530000000020000000096f3eb854200000000f71c09a90000005900000000000000090000001300000000000000130000000000004a3800000001000000042f612f680000000148000000010000001100000005776f726c6400000006616e796f6e6500000000060000000200000000ff8d45da4200000000d46307d50000005300000000000000090000001400000000000000140000000000004e2000000007000000042f612f68000000010000001f00000005776f726c6400000006616e796f6e650000000100000002000000010c48319d4200000000ebff083b000000590000000000000009000000150000000000000015000000000000520800000001000000042f612f6a000000014a000000010000001100000005776f726c6400000006616e796f6e6500000000070000000200000001377ca20642000000003d07040e00000034000000000000000900000016000000000000001600000000000055f000000002000000042f612f68000000020000000046c21d3f42000000003c58040100000034000000000000000900000017000000000000001700000000000059d800000002000000042f612f6a0000000200000000c272231042000000006d6106b20000003000000000000000090000001800000000000000180000000000005dc0fffffff5000000000000000200000000c2722310420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000058",
+      "expected": "reject",
+      "basis": "Only an entirely zero preallocated tail is admitted after the last record."
+    },
+    {
+      "id": "log-reordered-zxids",
+      "kind": "log",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b4c4700000002000000000000000000000000cf0a089a00000055000000000000000700000002000000000000000200000000000007d000000013000000022f6100000000000000010000001f00000005776f726c6400000006616e796f6e6500000001000000020000000076b927dc42000000006840063600000030000000000000000700000001000000000000000100000000000003e8fffffff60000753000000002000000000412890842",
+      "expected": "reject",
+      "basis": "Selected replay history must be ordered by zxid."
+    }
+  ],
+  "replayCases": [
+    {
+      "id": "synthetic-genesis-full-history",
+      "genesis": "syntheticGenesis",
+      "log": "synthetic-genesis-through24",
+      "expected": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 7,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 23
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          }
+        },
+        "sessions": {},
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 24,
+        "treeDigest": 3262259984
+      }
+    },
+    {
+      "id": "nonfuzzy-snapshot4-and-suffix",
+      "snapshot": "container-session-11",
+      "log": "synthetic-suffix5-through24",
+      "expected": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 7,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 23
+            }
+          },
+          "/a/b": {
+            "dataBytes": 4,
+            "dataNull": false,
+            "dataSha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+            "dataHex": "646f6e65",
+            "aclId": 2,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 8,
+              "ctime": 3000,
+              "mtime": 8000,
+              "version": 2,
+              "cversion": 0,
+              "aversion": 1,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          }
+        },
+        "sessions": {},
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "2": [
+            {
+              "perms": 1,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 24,
+        "treeDigest": 3262259984
+      }
+    },
+    {
+      "id": "prefix4-equals-frozen-container-tree",
+      "genesis": "syntheticGenesis",
+      "log": "synthetic-prefix-through4",
+      "expected": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 2,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 4
+            }
+          },
+          "/a/b": {
+            "dataBytes": 3,
+            "dataNull": false,
+            "dataSha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            "dataHex": "616263",
+            "aclId": 1,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 3,
+              "ctime": 3000,
+              "mtime": 3000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/e": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+            "dataHex": "65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 4,
+              "mzxid": 4,
+              "ctime": 4000,
+              "mtime": 4000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 7,
+              "pzxid": 4
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 4,
+        "treeDigest": 7310192961
+      }
+    }
+  ],
+  "reader_rules": [
+    "Compare literal expected headers, raw node payload lengths/null/hash, ACL IDs, all nine persisted stat fields, sessions and ACL cache; do not replace them with API stat values.",
+    "Persisted cversion counts creates; delete updates pzxid, while API cversion is2*persisted_cversion\u2212childCount.",
+    "Snapshot seal Adler32 is cumulative through all preceding bytes, including prior seals; transaction Adler32 covers only its length-delimited payload, not framing.",
+    "CRC32 node digest packs czxid,mzxid,pzxid,ctime,mtime,version,cversion,aversion,ephemeralOwner; this order differs from Jute StatPersisted. Tree digest sums node digests; /zookeeper/ descendants are excluded.",
+    "PrepRequestProcessor.checkAndIncVersion stores current+1 in CheckVersionTxn even though DataTree replay does not change/check the data version. Here /a/b remains version1 while txn6 stores2.",
+    "Standalone opcode13 is rejected by pinned SerializeUtils; a CheckVersion Multi child and Error do not mutate replayed node state. A Multi with any Error suppresses all mutation children, including an earlier Create payload.",
+    "Session close removes owned paths/session, and container nodes are not sessions. Serialized root uses empty path with ACL ID\u22121 and ephemeralOwner0.",
+    "Explicit profile flags determine optional sections. An absent serialized last-zxid is None; it cannot be inferred from a digest or observed byte length. Snapshot filename zxid is separate provenance.",
+    "Normal OPEN31 creates allocate cached ACL ID1; null ACL alone maps to\u22121. SetACL releases the old reference before converting the new list. Live ACL allocation remains monotone through eviction: ID3 is removed, then equivalent ACL reintroduction allocates ID4. A freshly deserialized snapshot initializes its counter from retained IDs; the allocation counter itself is not serialized.",
+    "These exact fixtures are nonfuzzy; general raw snapshot parsing must not declare fuzzy tree/current digest equality without the required replay range. The reference exposes computed and stored digests separately.",
+    "Positive zero padding is not serialized history; truncated/nonzero final tails must not silently certify a complete history."
+  ]
+}

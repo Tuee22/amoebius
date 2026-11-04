@@ -25,6 +25,13 @@
     "in the same run; none is retained here."
   ],
   "tools": {
+    "strace": {
+      "source": "host",
+      "commands": ["strace"],
+      "version_argv": ["--version"],
+      "requirement": ">=6.8 <7",
+      "reason": "Linux Phase-30 external observer for durable metadata reservation syscalls; required only by that gate"
+    },
     "ghc": {
       "source": "host",
       "commands": [
@@ -211,6 +218,27 @@
       "install_name": "tla2tools.jar",
       "requirement": ">=1.7",
       "reason": "the TLC model checker the formal-model phases drive"
+    },
+    "javac": {
+      "source": "github-release",
+      "project": "adoptium/temurin21-binaries",
+      "asset_pattern": "^OpenJDK21U-jdk_{platform}_hotspot_[0-9._]+\\.tar\\.gz$",
+      "platform_map": {
+        "linux-x86_64": "x64_linux",
+        "linux-aarch64": "aarch64_linux",
+        "darwin-arm64": "aarch64_mac"
+      },
+      "checksum_asset": "{asset}.sha256.txt",
+      "install_dir": "jdk21",
+      "archive_member": "bin/javac",
+      "archive_member_map": {
+        "darwin-arm64": "Contents/Home/bin/javac"
+      },
+      "version_argv": [
+        "--version"
+      ],
+      "requirement": ">=21 <22",
+      "reason": "compile the independent Phase-30 observer and own JVM history adapter on the host; workloads use their baked Java 21 JRE"
     }
   }
 }

@@ -1,0 +1,1527 @@
+{
+  "schema": "phase30.independent.zookeeper-member-admission.v1",
+  "basis": "Explicit approved policy inputs and independent arithmetic, never subject results. Existing native ZK execution profile and reviewed conditional36+33MiB generation envelope. This does not establish actual producer/history bounds or runtime failover.",
+  "variants": {
+    "three": {
+      "memberOrdinals": [
+        0,
+        1,
+        2
+      ],
+      "maximumUnavailable": 1,
+      "controller": {
+        "source": "pulsar-system/zookeeper",
+        "revision": 1,
+        "kind": "StatefulSet",
+        "replicas": 3,
+        "rollout": "OnDelete"
+      },
+      "perMemberRequests": {
+        "cpuMillis": 50,
+        "memoryBytes": 100663296,
+        "ephemeralBytes": 16777216,
+        "podSlots": 1
+      },
+      "perMemberHeadroom": {
+        "cpuMillis": 450,
+        "memoryBytes": 167772160,
+        "ephemeralBytes": 50331648,
+        "podSlots": 0
+      },
+      "perMemberLimits": {
+        "cpuMillis": 500,
+        "memoryBytes": 268435456,
+        "ephemeralBytes": 67108864,
+        "podSlots": 1
+      },
+      "generationPolicy": {
+        "normalLogGenerations": 2,
+        "incomingLogGenerations": 2,
+        "maximumLogExtent": 16777216,
+        "normalSnapshotGenerations": 3,
+        "incomingSnapshotGenerations": 1,
+        "maximumSnapshotExtent": 1048576,
+        "otherPathsAllowance": 1048576
+      },
+      "presentation": {
+        "overheadBasisPoints": 500,
+        "allocationMinimumBytes": 67108864,
+        "allocationQuantumBytes": 67108864
+      },
+      "executors": [
+        {
+          "ordinal": 0,
+          "source": "pulsar-system/zookeeper",
+          "revision": 1,
+          "instanceId": "pulsar-system/zookeeper:1:statefulset:0",
+          "podName": "zookeeper-0",
+          "resources": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        },
+        {
+          "ordinal": 1,
+          "source": "pulsar-system/zookeeper",
+          "revision": 1,
+          "instanceId": "pulsar-system/zookeeper:1:statefulset:1",
+          "podName": "zookeeper-1",
+          "resources": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        },
+        {
+          "ordinal": 2,
+          "source": "pulsar-system/zookeeper",
+          "revision": 1,
+          "instanceId": "pulsar-system/zookeeper:1:statefulset:2",
+          "podName": "zookeeper-2",
+          "resources": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        }
+      ],
+      "memberSupplies": [
+        {
+          "ordinal": 0,
+          "available": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        },
+        {
+          "ordinal": 1,
+          "available": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        },
+        {
+          "ordinal": 2,
+          "available": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        }
+      ],
+      "claims": [
+        {
+          "ordinal": 0,
+          "statefulSet": "zookeeper",
+          "namespace": "pulsar-system",
+          "template": "data",
+          "claimId": "data-zookeeper-0",
+          "backingId": "phase30-zookeeper-0",
+          "availableUsableBytes": 72351744,
+          "availableRawBytes": 134217728
+        },
+        {
+          "ordinal": 1,
+          "statefulSet": "zookeeper",
+          "namespace": "pulsar-system",
+          "template": "data",
+          "claimId": "data-zookeeper-1",
+          "backingId": "phase30-zookeeper-1",
+          "availableUsableBytes": 72351744,
+          "availableRawBytes": 134217728
+        },
+        {
+          "ordinal": 2,
+          "statefulSet": "zookeeper",
+          "namespace": "pulsar-system",
+          "template": "data",
+          "claimId": "data-zookeeper-2",
+          "backingId": "phase30-zookeeper-2",
+          "availableUsableBytes": 72351744,
+          "availableRawBytes": 134217728
+        }
+      ],
+      "backings": [
+        {
+          "id": "phase30-zookeeper-0",
+          "parent": "zookeeper-parent",
+          "availableRawBytes": 134217728
+        },
+        {
+          "id": "phase30-zookeeper-1",
+          "parent": "zookeeper-parent",
+          "availableRawBytes": 134217728
+        },
+        {
+          "id": "phase30-zookeeper-2",
+          "parent": "zookeeper-parent",
+          "availableRawBytes": 134217728
+        }
+      ],
+      "parentBacking": {
+        "id": "zookeeper-parent",
+        "availableRawBytes": 402653184
+      },
+      "otherPulsarComponentsFit": true
+    },
+    "five": {
+      "memberOrdinals": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "maximumUnavailable": 2,
+      "controller": {
+        "source": "pulsar-system/zookeeper",
+        "revision": 1,
+        "kind": "StatefulSet",
+        "replicas": 5,
+        "rollout": "OnDelete"
+      },
+      "perMemberRequests": {
+        "cpuMillis": 50,
+        "memoryBytes": 100663296,
+        "ephemeralBytes": 16777216,
+        "podSlots": 1
+      },
+      "perMemberHeadroom": {
+        "cpuMillis": 450,
+        "memoryBytes": 167772160,
+        "ephemeralBytes": 50331648,
+        "podSlots": 0
+      },
+      "perMemberLimits": {
+        "cpuMillis": 500,
+        "memoryBytes": 268435456,
+        "ephemeralBytes": 67108864,
+        "podSlots": 1
+      },
+      "generationPolicy": {
+        "normalLogGenerations": 2,
+        "incomingLogGenerations": 2,
+        "maximumLogExtent": 16777216,
+        "normalSnapshotGenerations": 3,
+        "incomingSnapshotGenerations": 1,
+        "maximumSnapshotExtent": 1048576,
+        "otherPathsAllowance": 1048576
+      },
+      "presentation": {
+        "overheadBasisPoints": 500,
+        "allocationMinimumBytes": 67108864,
+        "allocationQuantumBytes": 67108864
+      },
+      "executors": [
+        {
+          "ordinal": 0,
+          "source": "pulsar-system/zookeeper",
+          "revision": 1,
+          "instanceId": "pulsar-system/zookeeper:1:statefulset:0",
+          "podName": "zookeeper-0",
+          "resources": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        },
+        {
+          "ordinal": 1,
+          "source": "pulsar-system/zookeeper",
+          "revision": 1,
+          "instanceId": "pulsar-system/zookeeper:1:statefulset:1",
+          "podName": "zookeeper-1",
+          "resources": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        },
+        {
+          "ordinal": 2,
+          "source": "pulsar-system/zookeeper",
+          "revision": 1,
+          "instanceId": "pulsar-system/zookeeper:1:statefulset:2",
+          "podName": "zookeeper-2",
+          "resources": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        },
+        {
+          "ordinal": 3,
+          "source": "pulsar-system/zookeeper",
+          "revision": 1,
+          "instanceId": "pulsar-system/zookeeper:1:statefulset:3",
+          "podName": "zookeeper-3",
+          "resources": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        },
+        {
+          "ordinal": 4,
+          "source": "pulsar-system/zookeeper",
+          "revision": 1,
+          "instanceId": "pulsar-system/zookeeper:1:statefulset:4",
+          "podName": "zookeeper-4",
+          "resources": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        }
+      ],
+      "memberSupplies": [
+        {
+          "ordinal": 0,
+          "available": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        },
+        {
+          "ordinal": 1,
+          "available": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        },
+        {
+          "ordinal": 2,
+          "available": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        },
+        {
+          "ordinal": 3,
+          "available": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        },
+        {
+          "ordinal": 4,
+          "available": {
+            "cpuMillis": 500,
+            "memoryBytes": 268435456,
+            "ephemeralBytes": 67108864,
+            "podSlots": 1
+          }
+        }
+      ],
+      "claims": [
+        {
+          "ordinal": 0,
+          "statefulSet": "zookeeper",
+          "namespace": "pulsar-system",
+          "template": "data",
+          "claimId": "data-zookeeper-0",
+          "backingId": "phase30-zookeeper-0",
+          "availableUsableBytes": 72351744,
+          "availableRawBytes": 134217728
+        },
+        {
+          "ordinal": 1,
+          "statefulSet": "zookeeper",
+          "namespace": "pulsar-system",
+          "template": "data",
+          "claimId": "data-zookeeper-1",
+          "backingId": "phase30-zookeeper-1",
+          "availableUsableBytes": 72351744,
+          "availableRawBytes": 134217728
+        },
+        {
+          "ordinal": 2,
+          "statefulSet": "zookeeper",
+          "namespace": "pulsar-system",
+          "template": "data",
+          "claimId": "data-zookeeper-2",
+          "backingId": "phase30-zookeeper-2",
+          "availableUsableBytes": 72351744,
+          "availableRawBytes": 134217728
+        },
+        {
+          "ordinal": 3,
+          "statefulSet": "zookeeper",
+          "namespace": "pulsar-system",
+          "template": "data",
+          "claimId": "data-zookeeper-3",
+          "backingId": "phase30-zookeeper-3",
+          "availableUsableBytes": 72351744,
+          "availableRawBytes": 134217728
+        },
+        {
+          "ordinal": 4,
+          "statefulSet": "zookeeper",
+          "namespace": "pulsar-system",
+          "template": "data",
+          "claimId": "data-zookeeper-4",
+          "backingId": "phase30-zookeeper-4",
+          "availableUsableBytes": 72351744,
+          "availableRawBytes": 134217728
+        }
+      ],
+      "backings": [
+        {
+          "id": "phase30-zookeeper-0",
+          "parent": "zookeeper-parent",
+          "availableRawBytes": 134217728
+        },
+        {
+          "id": "phase30-zookeeper-1",
+          "parent": "zookeeper-parent",
+          "availableRawBytes": 134217728
+        },
+        {
+          "id": "phase30-zookeeper-2",
+          "parent": "zookeeper-parent",
+          "availableRawBytes": 134217728
+        },
+        {
+          "id": "phase30-zookeeper-3",
+          "parent": "zookeeper-parent",
+          "availableRawBytes": 134217728
+        },
+        {
+          "id": "phase30-zookeeper-4",
+          "parent": "zookeeper-parent",
+          "availableRawBytes": 134217728
+        }
+      ],
+      "parentBacking": {
+        "id": "zookeeper-parent",
+        "availableRawBytes": 671088640
+      },
+      "otherPulsarComponentsFit": true
+    }
+  },
+  "cases": [
+    {
+      "id": "three-exact-complete",
+      "base": "three",
+      "edits": [],
+      "expected": "accept",
+      "required": {
+        "quorum": 2,
+        "requiredPerMember": {
+          "cpuMillis": 500,
+          "memoryBytes": 268435456,
+          "ephemeralBytes": 67108864,
+          "podSlots": 1
+        },
+        "steadyBytesPerMember": 37748736,
+        "incomingBytesPerMember": 34603008,
+        "peakUsableBytesPerMember": 72351744,
+        "presentedBytesPerMember": 75969332,
+        "uniformRawClaimBytes": 134217728,
+        "executionTotal": {
+          "cpuMillis": 1500,
+          "memoryBytes": 805306368,
+          "ephemeralBytes": 201326592,
+          "podSlots": 3
+        },
+        "uniformRawDebitBytes": 402653184,
+        "uniformUsableReservationBytes": 217055232,
+        "steadyAggregateBytes": 113246208,
+        "largestFaultCaseAggregateBytes": 147849216,
+        "faultFamily": [
+          [],
+          [
+            0
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ],
+        "faultCases": [
+          {
+            "unavailable": [],
+            "memberUsableBytes": {
+              "0": 37748736,
+              "1": 37748736,
+              "2": 37748736
+            }
+          },
+          {
+            "unavailable": [
+              0
+            ],
+            "memberUsableBytes": {
+              "0": 72351744,
+              "1": 37748736,
+              "2": 37748736
+            }
+          },
+          {
+            "unavailable": [
+              1
+            ],
+            "memberUsableBytes": {
+              "0": 37748736,
+              "1": 72351744,
+              "2": 37748736
+            }
+          },
+          {
+            "unavailable": [
+              2
+            ],
+            "memberUsableBytes": {
+              "0": 37748736,
+              "1": 37748736,
+              "2": 72351744
+            }
+          }
+        ],
+        "zeroRuntimeFailoverClaim": true
+      }
+    },
+    {
+      "id": "three-member-cpuMillis-one-short-total-fits",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            2,
+            "available",
+            "cpuMillis"
+          ],
+          "value": 499
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            0,
+            "available",
+            "cpuMillis"
+          ],
+          "value": 501
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "cpuMillis",
+      "reason": "One member is short while sum of all member supplies remains exact."
+    },
+    {
+      "id": "three-member-memoryBytes-one-short-total-fits",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            2,
+            "available",
+            "memoryBytes"
+          ],
+          "value": 268435455
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            0,
+            "available",
+            "memoryBytes"
+          ],
+          "value": 268435457
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "memoryBytes",
+      "reason": "One member is short while sum of all member supplies remains exact."
+    },
+    {
+      "id": "three-member-ephemeralBytes-one-short-total-fits",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            2,
+            "available",
+            "ephemeralBytes"
+          ],
+          "value": 67108863
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            0,
+            "available",
+            "ephemeralBytes"
+          ],
+          "value": 67108865
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "ephemeralBytes",
+      "reason": "One member is short while sum of all member supplies remains exact."
+    },
+    {
+      "id": "three-member-podSlots-one-short-total-fits",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            2,
+            "available",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            0,
+            "available",
+            "podSlots"
+          ],
+          "value": 2
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "podSlots",
+      "reason": "One member is short while sum of all member supplies remains exact."
+    },
+    {
+      "id": "three-member-claim-usable-one-short-total-fits",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            2,
+            "availableUsableBytes"
+          ],
+          "value": 72351743
+        },
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            0,
+            "availableUsableBytes"
+          ],
+          "value": 72351745
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "claim-usable",
+      "reason": "Other members and aggregate totals cannot fund the short ordinal."
+    },
+    {
+      "id": "three-member-claim-raw-one-short-total-fits",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            2,
+            "availableRawBytes"
+          ],
+          "value": 134217727
+        },
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            0,
+            "availableRawBytes"
+          ],
+          "value": 134217729
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "claim-raw",
+      "reason": "Other members and aggregate totals cannot fund the short ordinal."
+    },
+    {
+      "id": "three-member-backing-one-short-total-fits",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "backings",
+            2,
+            "availableRawBytes"
+          ],
+          "value": 134217727
+        },
+        {
+          "operation": "set",
+          "path": [
+            "backings",
+            0,
+            "availableRawBytes"
+          ],
+          "value": 134217729
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "backing-raw"
+    },
+    {
+      "id": "three-parent-pool-one-short",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "parentBacking",
+            "availableRawBytes"
+          ],
+          "value": 402653183
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "parent-pool"
+    },
+    {
+      "id": "three-incoming-member-underfunded-total-fits",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            2,
+            "availableUsableBytes"
+          ],
+          "value": 37748736
+        },
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            0,
+            "availableUsableBytes"
+          ],
+          "value": 106954752
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "incoming-overlap",
+      "reason": "Steady-only target fits36MiB; another member surplus33MiB preserves total, but target must fund its own69MiB case."
+    },
+    {
+      "id": "five-exact-complete",
+      "base": "five",
+      "edits": [],
+      "expected": "accept",
+      "required": {
+        "quorum": 3,
+        "requiredPerMember": {
+          "cpuMillis": 500,
+          "memoryBytes": 268435456,
+          "ephemeralBytes": 67108864,
+          "podSlots": 1
+        },
+        "steadyBytesPerMember": 37748736,
+        "incomingBytesPerMember": 34603008,
+        "peakUsableBytesPerMember": 72351744,
+        "presentedBytesPerMember": 75969332,
+        "uniformRawClaimBytes": 134217728,
+        "executionTotal": {
+          "cpuMillis": 2500,
+          "memoryBytes": 1342177280,
+          "ephemeralBytes": 335544320,
+          "podSlots": 5
+        },
+        "uniformRawDebitBytes": 671088640,
+        "uniformUsableReservationBytes": 361758720,
+        "steadyAggregateBytes": 188743680,
+        "largestFaultCaseAggregateBytes": 257949696,
+        "faultFamily": [
+          [],
+          [
+            0
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ],
+          [
+            4
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "faultCases": [
+          {
+            "unavailable": [],
+            "memberUsableBytes": {
+              "0": 37748736,
+              "1": 37748736,
+              "2": 37748736,
+              "3": 37748736,
+              "4": 37748736
+            }
+          },
+          {
+            "unavailable": [
+              0
+            ],
+            "memberUsableBytes": {
+              "0": 72351744,
+              "1": 37748736,
+              "2": 37748736,
+              "3": 37748736,
+              "4": 37748736
+            }
+          },
+          {
+            "unavailable": [
+              1
+            ],
+            "memberUsableBytes": {
+              "0": 37748736,
+              "1": 72351744,
+              "2": 37748736,
+              "3": 37748736,
+              "4": 37748736
+            }
+          },
+          {
+            "unavailable": [
+              2
+            ],
+            "memberUsableBytes": {
+              "0": 37748736,
+              "1": 37748736,
+              "2": 72351744,
+              "3": 37748736,
+              "4": 37748736
+            }
+          },
+          {
+            "unavailable": [
+              3
+            ],
+            "memberUsableBytes": {
+              "0": 37748736,
+              "1": 37748736,
+              "2": 37748736,
+              "3": 72351744,
+              "4": 37748736
+            }
+          },
+          {
+            "unavailable": [
+              4
+            ],
+            "memberUsableBytes": {
+              "0": 37748736,
+              "1": 37748736,
+              "2": 37748736,
+              "3": 37748736,
+              "4": 72351744
+            }
+          },
+          {
+            "unavailable": [
+              0,
+              1
+            ],
+            "memberUsableBytes": {
+              "0": 72351744,
+              "1": 72351744,
+              "2": 37748736,
+              "3": 37748736,
+              "4": 37748736
+            }
+          },
+          {
+            "unavailable": [
+              0,
+              2
+            ],
+            "memberUsableBytes": {
+              "0": 72351744,
+              "1": 37748736,
+              "2": 72351744,
+              "3": 37748736,
+              "4": 37748736
+            }
+          },
+          {
+            "unavailable": [
+              0,
+              3
+            ],
+            "memberUsableBytes": {
+              "0": 72351744,
+              "1": 37748736,
+              "2": 37748736,
+              "3": 72351744,
+              "4": 37748736
+            }
+          },
+          {
+            "unavailable": [
+              0,
+              4
+            ],
+            "memberUsableBytes": {
+              "0": 72351744,
+              "1": 37748736,
+              "2": 37748736,
+              "3": 37748736,
+              "4": 72351744
+            }
+          },
+          {
+            "unavailable": [
+              1,
+              2
+            ],
+            "memberUsableBytes": {
+              "0": 37748736,
+              "1": 72351744,
+              "2": 72351744,
+              "3": 37748736,
+              "4": 37748736
+            }
+          },
+          {
+            "unavailable": [
+              1,
+              3
+            ],
+            "memberUsableBytes": {
+              "0": 37748736,
+              "1": 72351744,
+              "2": 37748736,
+              "3": 72351744,
+              "4": 37748736
+            }
+          },
+          {
+            "unavailable": [
+              1,
+              4
+            ],
+            "memberUsableBytes": {
+              "0": 37748736,
+              "1": 72351744,
+              "2": 37748736,
+              "3": 37748736,
+              "4": 72351744
+            }
+          },
+          {
+            "unavailable": [
+              2,
+              3
+            ],
+            "memberUsableBytes": {
+              "0": 37748736,
+              "1": 37748736,
+              "2": 72351744,
+              "3": 72351744,
+              "4": 37748736
+            }
+          },
+          {
+            "unavailable": [
+              2,
+              4
+            ],
+            "memberUsableBytes": {
+              "0": 37748736,
+              "1": 37748736,
+              "2": 72351744,
+              "3": 37748736,
+              "4": 72351744
+            }
+          },
+          {
+            "unavailable": [
+              3,
+              4
+            ],
+            "memberUsableBytes": {
+              "0": 37748736,
+              "1": 37748736,
+              "2": 37748736,
+              "3": 72351744,
+              "4": 72351744
+            }
+          }
+        ],
+        "zeroRuntimeFailoverClaim": true
+      }
+    },
+    {
+      "id": "five-member-cpuMillis-one-short-total-fits",
+      "base": "five",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            4,
+            "available",
+            "cpuMillis"
+          ],
+          "value": 499
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            0,
+            "available",
+            "cpuMillis"
+          ],
+          "value": 501
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "cpuMillis",
+      "reason": "One member is short while sum of all member supplies remains exact."
+    },
+    {
+      "id": "five-member-memoryBytes-one-short-total-fits",
+      "base": "five",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            4,
+            "available",
+            "memoryBytes"
+          ],
+          "value": 268435455
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            0,
+            "available",
+            "memoryBytes"
+          ],
+          "value": 268435457
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "memoryBytes",
+      "reason": "One member is short while sum of all member supplies remains exact."
+    },
+    {
+      "id": "five-member-ephemeralBytes-one-short-total-fits",
+      "base": "five",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            4,
+            "available",
+            "ephemeralBytes"
+          ],
+          "value": 67108863
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            0,
+            "available",
+            "ephemeralBytes"
+          ],
+          "value": 67108865
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "ephemeralBytes",
+      "reason": "One member is short while sum of all member supplies remains exact."
+    },
+    {
+      "id": "five-member-podSlots-one-short-total-fits",
+      "base": "five",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            4,
+            "available",
+            "podSlots"
+          ],
+          "value": 0
+        },
+        {
+          "operation": "set",
+          "path": [
+            "memberSupplies",
+            0,
+            "available",
+            "podSlots"
+          ],
+          "value": 2
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "podSlots",
+      "reason": "One member is short while sum of all member supplies remains exact."
+    },
+    {
+      "id": "five-member-claim-usable-one-short-total-fits",
+      "base": "five",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            4,
+            "availableUsableBytes"
+          ],
+          "value": 72351743
+        },
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            0,
+            "availableUsableBytes"
+          ],
+          "value": 72351745
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "claim-usable",
+      "reason": "Other members and aggregate totals cannot fund the short ordinal."
+    },
+    {
+      "id": "five-member-claim-raw-one-short-total-fits",
+      "base": "five",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            4,
+            "availableRawBytes"
+          ],
+          "value": 134217727
+        },
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            0,
+            "availableRawBytes"
+          ],
+          "value": 134217729
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "claim-raw",
+      "reason": "Other members and aggregate totals cannot fund the short ordinal."
+    },
+    {
+      "id": "five-member-backing-one-short-total-fits",
+      "base": "five",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "backings",
+            4,
+            "availableRawBytes"
+          ],
+          "value": 134217727
+        },
+        {
+          "operation": "set",
+          "path": [
+            "backings",
+            0,
+            "availableRawBytes"
+          ],
+          "value": 134217729
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "backing-raw"
+    },
+    {
+      "id": "five-parent-pool-one-short",
+      "base": "five",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "parentBacking",
+            "availableRawBytes"
+          ],
+          "value": 671088639
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "parent-pool"
+    },
+    {
+      "id": "five-incoming-member-underfunded-total-fits",
+      "base": "five",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            4,
+            "availableUsableBytes"
+          ],
+          "value": 37748736
+        },
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            0,
+            "availableUsableBytes"
+          ],
+          "value": 106954752
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "incoming-overlap",
+      "reason": "Steady-only target fits36MiB; another member surplus33MiB preserves total, but target must fund its own69MiB case."
+    },
+    {
+      "id": "three-missing-executor",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "remove",
+          "path": [
+            "executors",
+            2
+          ]
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "missing-executor"
+    },
+    {
+      "id": "three-missing-member-supply",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "remove",
+          "path": [
+            "memberSupplies",
+            2
+          ]
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "missing-member-supply"
+    },
+    {
+      "id": "three-missing-claim",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "remove",
+          "path": [
+            "claims",
+            2
+          ]
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "missing-claim"
+    },
+    {
+      "id": "three-missing-backing",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "remove",
+          "path": [
+            "backings",
+            2
+          ]
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "missing-backing"
+    },
+    {
+      "id": "three-duplicate-member-id",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "memberOrdinals",
+            2
+          ],
+          "value": 1
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "duplicate-member-id"
+    },
+    {
+      "id": "three-duplicate-executor",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "executors",
+            2,
+            "instanceId"
+          ],
+          "value": "pulsar-system/zookeeper:1:statefulset:0"
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "duplicate-executor"
+    },
+    {
+      "id": "three-wrong-executor-owner",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "executors",
+            2,
+            "source"
+          ],
+          "value": "pulsar-system/broker"
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "wrong-executor-owner"
+    },
+    {
+      "id": "three-wrong-executor-ordinal",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "executors",
+            2,
+            "ordinal"
+          ],
+          "value": 1
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "wrong-executor-ordinal"
+    },
+    {
+      "id": "three-duplicate-claim",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            2,
+            "claimId"
+          ],
+          "value": "data-zookeeper-0"
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "duplicate-claim"
+    },
+    {
+      "id": "three-backing-alias",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            2,
+            "backingId"
+          ],
+          "value": "phase30-zookeeper-0"
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "backing-alias"
+    },
+    {
+      "id": "three-wrong-template",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "claims",
+            2,
+            "template"
+          ],
+          "value": "other"
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "wrong-template"
+    },
+    {
+      "id": "three-wrong-backing-parent",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "backings",
+            2,
+            "parent"
+          ],
+          "value": "offload-parent"
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "wrong-backing-parent"
+    },
+    {
+      "id": "three-controller-expands-wrong-count",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "controller",
+            "replicas"
+          ],
+          "value": 5
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "controller-topology"
+    },
+    {
+      "id": "three-unsupported-two-unavailable",
+      "base": "three",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "maximumUnavailable"
+          ],
+          "value": 2
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "quorum"
+    },
+    {
+      "id": "five-unsupported-three-unavailable",
+      "base": "five",
+      "edits": [
+        {
+          "operation": "set",
+          "path": [
+            "maximumUnavailable"
+          ],
+          "value": 3
+        }
+      ],
+      "expected": "reject",
+      "failureAxis": "quorum"
+    }
+  ],
+  "adapterRules": [
+    "Exercise the owning topology/member constructor used before Manifest/API effects; do not test a duplicate validation helper.",
+    "Use actual derived execution instances and actual claim/backing joins; preserve per-member identities and compare complete4/16 fault families and every per-case map.",
+    "Every rejection must have zero Pulsar/storage/API effects, with all non-ZooKeeper components fitting.",
+    "A neighbor surplus preserves aggregate totals in the one-short cases. No division of whole-service total or borrowed broker/bookie/offload capacity may satisfy a short member.",
+    "Five-member variant is pure admission coverage, not a request to run a new5-member live fixture.",
+    "Incoming cases use existing intact member claims/backings; this capacity plan grants no repair/start authority or additional runtime failover claim."
+  ]
+}

@@ -1,2 +1,2 @@
-mutation=copy logical MinIO bytes directly into the physical witness
-expected_red=MinIO physical geometry amplifies logical bytes
+mutation=divide logical object bytes across native drive slots without per-object erasure/block amplification
+expected_red=native MinIO per-object physical geometry

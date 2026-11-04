@@ -1,0 +1,8 @@
+{
+  "schema": "phase30.independent.zookeeper-capture-classpath.v1",
+  "scope": "Exact reviewed core JARs; other dependencies must come from the same verified image classpath, which the live harness authenticates before invoking the capture probe. No runtime effect authority.",
+  "coreJars": {
+    "org.apache.zookeeper-zookeeper-3.9.3.jar": "ad6570105768d18382a762325b4460368b7089a5a77c053e682b17942e0e72b5",
+    "org.apache.zookeeper-zookeeper-jute-3.9.3.jar": "be72e2c9099413a9878ce830b65bb22e0be755dc2a22b290550ab9e03b5b4cfa"
+  }
+}

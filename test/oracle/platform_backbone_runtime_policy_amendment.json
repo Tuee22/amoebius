@@ -1,0 +1,257 @@
+{
+  "schema": "phase30.independent.runtime-policy-binding-amendment.v1",
+  "basis": "Independent follow-up to frozen runtime-policy-binding-cases.json. Source-supported selected native fixture operands; no subject output used as an expectation.",
+  "base_fixture": {
+    "description": "Native small BackboneStorageDemand used by PlatformBackboneSpec.verifyStoragePlan, before any edit",
+    "canonical_digests": "sha256:a\u2026a throughf\u2026f (each4096B)",
+    "registry_failed_base": {
+      "name": "registry-failed-upload-window",
+      "count": 3,
+      "maximumBytes": 4096,
+      "windowSeconds": 3600
+    },
+    "registry_failed_excess": {
+      "name": "registry-future-write-failed-excess",
+      "count": 3,
+      "maximumBytes": 61440,
+      "windowSeconds": 3600
+    },
+    "application_quota": {
+      "kind": "ProviderObjectQuota",
+      "provider": "root-minio",
+      "bytes": 12288,
+      "objects": 3
+    },
+    "application_populations": {
+      "future": {
+        "name": "admitted-canary",
+        "count": 1,
+        "maximumBytes": 4096
+      },
+      "concurrent": {
+        "name": "canary-inflight",
+        "count": 1,
+        "maximumBytes": 4096
+      },
+      "failed": {
+        "name": "canary-failed-window",
+        "count": 1,
+        "maximumBytes": 4096
+      }
+    }
+  },
+  "positive_control": {
+    "id": "small-registry-private-public-maxfuture-fresh-success",
+    "fresh_key": "docker/registry/v2/blobs/sha256/11/1111111111111111111111111111111111111111111111111111111111111111/data",
+    "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "maximumBytes": 65536,
+    "private_selection": {
+      "kind": "FutureObjects",
+      "name": "post-cutover-blob"
+    },
+    "public_path": "/registry/docker/registry/v2/blobs/sha256/11/1111111111111111111111111111111111111111111111111111111111111111/data",
+    "expected": "accept",
+    "reason": "Fresh1 digest is outside the native fixture canonicalabcdef map; test must not accidentally select an immutable canonical4096B object."
+  },
+  "cases": [
+    {
+      "id": "mirrored-retained-model-omits-derived-residents",
+      "edits": [
+        {
+          "operation": "copy_value_to_map_entry",
+          "from_path": [
+            "objectStorePeak",
+            "writerAdmissions",
+            "pulsar-offload",
+            "model",
+            "futureLedger"
+          ],
+          "map_path": [
+            "objectStorePeak",
+            "writerAdmissions",
+            "pulsar-offload",
+            "model",
+            "retainedLedgers"
+          ],
+          "key": "00000000-0000-0000-0000-000000000000-ledger-1"
+        },
+        {
+          "operation": "copy_value",
+          "from_path": [
+            "objectStorePeak",
+            "writerAdmissions",
+            "pulsar-offload",
+            "model"
+          ],
+          "to_path": [
+            "objectStorePeak",
+            "sourceModels",
+            "pulsar-offload"
+          ]
+        }
+      ],
+      "fields_intentionally_unchanged": [
+        "writerAdmissions.pulsar-offload.residentObjects=[]",
+        "objectStorePeak.residents=canonical registry residents only",
+        "all claimed local and merged populations",
+        "quota root-minio512MiB/512objects"
+      ],
+      "expected": "reject",
+      "reason": "The valid original model derives retained data77952 and index416 at actual distinct keys; neither is present in claimed owned/merged residents. Budget and populated future classes still fit."
+    },
+    {
+      "id": "application-fragmented-concurrent-on-both-sides",
+      "edits": [
+        {
+          "operation": "replace_population_fields",
+          "local_path": [
+            "objectStorePeak",
+            "writerAdmissions",
+            "application-canary",
+            "populations"
+          ],
+          "local_selector": {
+            "kind": "ConcurrentObjects",
+            "name": "canary-inflight"
+          },
+          "merged_path": [
+            "objectStorePeak",
+            "populations"
+          ],
+          "merged_selector": {
+            "source": "application-canary",
+            "kind": "ConcurrentObjects",
+            "name": "canary-inflight"
+          },
+          "fields": {
+            "count": 2,
+            "maximumBytes": 2048
+          },
+          "require_exactly_one_local_and_merged_match": true
+        },
+        {
+          "operation": "set_value",
+          "path": [
+            "objectStorePeak",
+            "writerAdmissions",
+            "application-canary",
+            "quota",
+            "objects"
+          ],
+          "value": 4
+        }
+      ],
+      "expected": "reject",
+      "reason": "Quota is deliberately raised to4objects, preserving12KiB bytes, so reconstructed source/count fit does not mask the slot check. Two2048 slots cannot admit one4096 object; total bytes alone would incorrectly pass."
+    },
+    {
+      "id": "registry-excess-count-mismatch",
+      "edits": [
+        {
+          "operation": "replace_population_fields",
+          "local_path": [
+            "objectStorePeak",
+            "writerAdmissions",
+            "registry",
+            "populations"
+          ],
+          "local_selector": {
+            "kind": "FailedOrphanObjects",
+            "name": "registry-future-write-failed-excess"
+          },
+          "merged_path": [
+            "objectStorePeak",
+            "populations"
+          ],
+          "merged_selector": {
+            "source": "registry",
+            "kind": "FailedOrphanObjects",
+            "name": "registry-future-write-failed-excess"
+          },
+          "fields": {
+            "count": 2
+          },
+          "require_exactly_one_local_and_merged_match": true
+        }
+      ],
+      "expected": "reject",
+      "reason": "Base3/extra2 cannot use the selected equal-count grouping. Both projections agree, and the unchanged quota remains sufficient for the reduced amount."
+    },
+    {
+      "id": "registry-excess-horizon-mismatch",
+      "edits": [
+        {
+          "operation": "replace_population_fields",
+          "local_path": [
+            "objectStorePeak",
+            "writerAdmissions",
+            "registry",
+            "populations"
+          ],
+          "local_selector": {
+            "kind": "FailedOrphanObjects",
+            "name": "registry-future-write-failed-excess"
+          },
+          "merged_path": [
+            "objectStorePeak",
+            "populations"
+          ],
+          "merged_selector": {
+            "source": "registry",
+            "kind": "FailedOrphanObjects",
+            "name": "registry-future-write-failed-excess"
+          },
+          "fields": {
+            "windowSeconds": 3599
+          },
+          "require_exactly_one_local_and_merged_match": true
+        }
+      ],
+      "expected": "reject",
+      "reason": "Base horizon3600 and extra3599 cannot combine into one complete failure slot; byte and object amounts remain unchanged."
+    },
+    {
+      "id": "application-quota-one-object-short",
+      "edits": [
+        {
+          "operation": "set_value",
+          "path": [
+            "objectStorePeak",
+            "writerAdmissions",
+            "application-canary",
+            "quota",
+            "objects"
+          ],
+          "value": 2
+        }
+      ],
+      "expected": "reject",
+      "reason": "Exact future+concurrent+failed demand is3objects; all populations remain unchanged."
+    },
+    {
+      "id": "application-quota-one-byte-short",
+      "edits": [
+        {
+          "operation": "set_value",
+          "path": [
+            "objectStorePeak",
+            "writerAdmissions",
+            "application-canary",
+            "quota",
+            "bytes"
+          ],
+          "value": 12287
+        }
+      ],
+      "expected": "reject",
+      "reason": "Exact future+concurrent+failed demand is3\u00d74096=12288 bytes; all populations remain unchanged."
+    }
+  ],
+  "adapter_rules": [
+    "Require the base fixture matches the stated inputs before applying each isolated case. Start fresh from the same base for every case.",
+    "Apply all edits in each row, including mirrored local/merged changes and the deliberate App quota adjustment.",
+    "Assert each mutation selected its intended existing field/row, changed the projection and reaches gatewayPolicyFromStorage rejection.",
+    "The mirrored retained model keeps valid ledger encoding but omits its derived residents deliberately. Copy the existing independently reviewed futureLedger input; do not synthesize an invalid ledger that could hide the resident comparison.",
+    "These cases test static policy reconstruction; they do not infer persisted current backend state, physical old-generation absence or runtime ZK history completeness."
+  ]
+}

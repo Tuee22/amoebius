@@ -334,7 +334,9 @@ build, on-host MSL compilation, not the container image.)
   not admission evidence. There is no editable aggregate capable of hiding one expensive stage.
   `scratchBacking` resolves exactly once to a physical `HostStoragePool` tagged `BuildScratch`; the cache
   resolves exactly once to a `HostCachePool`. If their carves share a physical disk, their peaks are debited
-  together under that disk's single parent. A retained cache consumes its observed resident bytes until an
+  together under that disk's single parent. Loop-backed test carves reserve their backing files' physical
+  allocation before attachment; formatting and mounts retain that reservation rather than discarding it.
+  A retained cache consumes its observed resident bytes until an
   observed GC removes them; the fold never assumes a cache hit, eviction, or reclaim.
 - **Build admission is snapshot-bound and precedes `buildx`.** Immediately before the first builder process,
   amoebius observes host/engine-VM residual CPU, memory, backing allocations, current build-cache residents,

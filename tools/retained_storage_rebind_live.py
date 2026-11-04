@@ -30,6 +30,7 @@ import yaml
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import toolchain  # noqa: E402
+import retained_storage_backing as backing  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -106,26 +107,35 @@ def mountpoint(path: Path) -> bool:
 
 
 def prepare_volume(name: str, raw_bytes: int) -> dict[str, Any]:
+    pool = backing.observe_pool(RETAINED_ROOT)
+    backing.inventory_plan(int(pool["capacityBytes"]), backing.existing_inventory(RETAINED_ROOT), {name: raw_bytes})
     image = RETAINED_ROOT / f"images/{name}.ext4"
     target = RETAINED_ROOT / f"mounts/{name}"
     image.parent.mkdir(parents=True, exist_ok=True)
     target.mkdir(parents=True, exist_ok=True)
     if not image.exists():
-        run(("/usr/bin/truncate", "-s", str(raw_bytes), str(image)))
-        sudo("/usr/sbin/mkfs.ext4", "-q", "-F", "-m", "0", str(image))
+        backing.create_image(image, raw_bytes)
+        backing.format_and_mount_new_image(image, target, raw_bytes)
     if image.stat().st_size != raw_bytes:
         raise RebindFailure(f"raw-image-size:{name}:{image.stat().st_size}:{raw_bytes}")
+    allocated = backing.reserved_bytes(image, raw_bytes)
     if not mountpoint(target):
-        sudo("/usr/bin/mount", "-o", "loop", str(image), str(target))
+        sudo("/usr/bin/mount", "-o", "loop,nodiscard", str(image), str(target))
     sudo("/usr/bin/mkdir", "-p", str(target / "data"))
     sudo("/usr/bin/chown", "-R", "1000:1000", str(target / "data"))
     fs_type = run(("/usr/bin/findmnt", "-n", "-o", "FSTYPE", "--target", str(target))).stdout.strip()
     usable = int(run(("/usr/bin/df", "--block-size=1", "--output=avail", str(target))).stdout.splitlines()[-1])
-    return {"name": name, "image": str(image), "mount": str(target), "rawBytes": image.stat().st_size, "usableBytes": usable, "filesystemType": fs_type}
+    return {"name": name, "image": str(image), "mount": str(target), "rawBytes": image.stat().st_size, "allocatedBytes": allocated, "usableBytes": usable, "filesystemType": fs_type}
 
 
 def prepare_volumes(rows: dict[str, dict[str, str]]) -> dict[str, dict[str, Any]]:
     """Mount the retained filesystems only after any predecessor node is gone."""
+    # The pool owns physical space independently of node/cache storage. Its
+    # complete existing/proposed inventory must fit before any image is created.
+    backing.prepare_pool(
+        RETAINED_ROOT, 512 * 1024**2,
+        {name: int(row["provisioned_bytes"]) for name, row in rows.items()},
+    )
     volumes = {
         name: prepare_volume(name, int(row["provisioned_bytes"]))
         for name, row in rows.items()

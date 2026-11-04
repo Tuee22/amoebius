@@ -233,9 +233,11 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         print("\nstatic side — pure retained-storage algebra and no normal delete path\n")
         run(("tools/no_retained_delete_check.sh",), environment=run_environment)
+        run((sys.executable, "-m", "unittest", "discover", "-s", "test/spec/host", "-p", "test_retained_storage_backing.py"), environment=run_environment)
         cabal, compiler = resolved["cabal"]["path"], resolved["ghc"]["path"]
         run(cabal_command(cabal, compiler, "retained-storage-class-spec", "retained-storage-volume-spec", "retained-storage-rebind-spec"), timeout=7200, environment=run_environment)
         print("  ok    no-retained-delete-in-source")
+        print("  ok    physical-backing-regressions")
         print("  ok    pure-retained-storage-algebra")
         results["static"] = True
 

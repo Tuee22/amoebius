@@ -133,15 +133,16 @@ A phase is Done only when all of the following are true:
     never copied or emitted, and is rejected by all production entry points.
 
 Markdown never embeds the generated ledger, receipt, hash, transcript, or dependency resolution. A human
-status decision may link the content-addressed run reference. A prior seal cannot satisfy Done, and neither can a run whose
-source snapshot no longer matches the tree. **When the operator commits is their own affair and never a gate
+status decision may link the content-addressed run reference. A superseded seal cannot satisfy Done; a run must
+close against the source tree it validated. Its digest remains provenance after unrelated or status-only edits
+([source-snapshot rule](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate)). **When the operator commits is their own affair and never a gate
 condition** ([development_plan_standards.md §S](development_plan_standards.md#s-commit-timing)).
 
 ## Reopened numeric sequence
 
 The **2026-08-15 repository-containment amendment** reopens every previously sealed phase without
-renumbering. Phases 0–24 are Done under the amended gate, Phase 25 is live-proof pending at the requested
-development pause, and Phases 26–64 are Blocked; each returns to work only in numerical order after its
+renumbering. Phases 0–29 are Done under the amended gate, Phase 30 is Active against the resealed predecessor
+chain, and Phases 31–64 are Blocked; each returns to work only in numerical order after its
 predecessor validates. A previous capability result remains useful historical evidence, but no prior seal
 satisfies the amended gate because the old contract admitted `.build/`'s predecessor, system temporary roots,
 user-home state, and host-global container-engine data.
@@ -235,12 +236,24 @@ so a spec naming none needs no Vault — which is what keeps Phases 25–28 free
 
 ## Current implementation audit
 
-**Current conclusion — 2026-08-16:** Phases 0–24 are **Policy-conformant**. Phase 25 is implemented with its
-live proof incomplete at the requested pause, and Phases 26–64 remain blocked under the amended contract.
+**Current conclusion — 2026-11-03:** Phase 0 is resealed after normalizing relative cache ages; both observer
+regressions and all ten verifier sides pass. Phases 1–24 retain their recorded seals. Phase 25 is resealed:
+all 12 sides pass, all 15 mutants are red, all 16 metrics match, and all 42 surfaces join.
+Both architectures execute the amended inventory, and all four sprints agree on one retained OCI handoff.
+The user delegated review of the publisher-derived acquisition amendments to the assistant, which accepted
+them after independent publisher checks. Cleanup removed the private fixture and physical backings,
+preserved the outside-host inventory, and restored 125 GiB free. Phase 26 also reseals against that exact
+handoff: all 11 sides pass, all five sprints seal, and all 11 mutants and 13 metrics agree.
+The pure-first sequencing repair passes without weakening containment. Phase 27 also reseals: all 11 sides
+pass, all five sprints seal, and all 14 mutants and 11 metrics agree. Phase 28 also reseals:
+all 11 sides and three sprints pass, all 12 mutants are red, all 12 metrics match, and both retained witnesses
+survive genuine delete/recreate on physically reserved backing. Phase 29 is resealed, Phase 30 is Active, and
+Phases 31–64 remain blocked. The current requested scope ends at Phase 50,
+before Phase 51's CUDA gate; portable validation of hardware-specific DSL types remains in scope.
 The existing later-phase implementation still
 uses legacy repository roots, system temp and data directories, user-home state, and host-global Docker
-resources. The detailed pre-containment rows below are retained as historical capability observations; every
-`Policy-conformant` label in them is invalidated for current status by the containment amendment.
+resources. Rows whose observations predate the containment amendment remain historical. Newly dated seals below
+establish current status only through their complete amended gate.
 
 The governed documentation lint and full Phase-0 verifier are sealed. The gate reports every remaining
 containment migration as a shrink-only, owner-attributed deferral and writes all of its own state beneath
@@ -254,7 +267,7 @@ policy-conformant. Exact counts, paths, historical findings, and actionable mism
 
 | Phase(s) | Progress | Observed state | Required next boundary |
 |---|---|---|---|
-| 0 | **Policy-conformant** | Refreshed 2026-08-15. The ten-sided gate passes with 17 clean, mutation-proven artifact rules; all Phase-0 state and attestation are beneath `.build/**`; the outside-host inventory is unchanged; and every remaining migration finding has a nonzero owner phase | None. Phase 0 is sealed under the containment amendment |
+| 0 | **Policy-conformant** | Refreshed 2026-10-31. Stable JSON cache observations exclude relative ages while retaining identity, size, usage, and reclaimability changes. Both observer regressions and all ten verifier sides pass, including source-snapshot closure, policy mutants, containment, and the authored-root guard. | None. Phase 0 is resealed |
 | 1 | **Policy-conformant** | Refreshed 2026-08-15. Dynamic tools, npm dependencies, Cabal metadata/store/build roots, temp/cache homes, run evidence, and attestation are project-contained; the 225-package graph resolves twice and from the snapshot; probes and mutants pass; the host inventory is unchanged | None. Phase 1 is sealed and has no owner deferral |
 | 2 | **Policy-conformant** | Refreshed 2026-08-15. The complete nine-sided gate passes: 31 authored metrics match, all model and renderer mutants are caught, 608 emitted `.tla`/`.cfg` files stay beneath `.build/**` and outside the source snapshot, 14 surfaces join to 39 run-time items, and the outside-host inventory is unchanged | None. Phase 2 is sealed and has no owner deferral |
 | 3 | **Policy-conformant** | Refreshed 2026-08-15. The complete nine-sided gate passes: all 12 authored results match, every per-invariant, mechanical, fairness, cutoff, and shared-resource mutant reddens, 34 emitted `.tla`/`.cfg` files remain beneath `.build/**`, 15 surfaces join to 17 run-time items, and the outside-host inventory is unchanged | None. Phase 3 is sealed and has no owner deferral |
@@ -279,12 +292,12 @@ policy-conformant. Exact counts, paths, historical findings, and actionable mism
 | 22 | **Policy-conformant** | Refreshed 2026-08-15. The complete thirteen-sided gate passes: seven HTTP rows, five access rows, five sanitized audit rows, five handler-effect rows, five startup rows, five public assets, five private probes, seven WebSocket rows, loopback-only OS observation, all nine mutants, and all nineteen metrics pass; 77 surfaces join to 94 run-time items; build/test scratch and host state remain contained | None. Phase 22 is sealed and has no owner deferral |
 | 23 | **Policy-conformant** | Refreshed 2026-08-15. The complete thirteen-sided gate passes in resolved Chrome: two Dhall applications, five interactions, four exact visible states, four ordered effects, three access rows, five zero-leak denials, loopback-only OS observation, all five mutants, and all seventeen metrics pass; 58 surfaces join to 71 run-time items; the legacy `tests/` root is gone and all generated, build, browser, and host state remains contained | None. Phase 23 is sealed and has no owner deferral |
 | 24 | **Policy-conformant** | Refreshed 2026-08-15. `python3 tools/bootstrap_coordinator_gate.py --execute` passes all eleven sides against a newly materialized pristine Incus guest. All six mutants are independently red, all sixteen metrics match, and 28 surfaces join to 30 run-time items. Tool acquisition, Cabal state, guest transport, build/evidence, production state, and marker-owned test state are repository-contained; the outside-host inventory is unchanged and the guest is destroyed. Attestation `sha256:cf31b7eb39b7419bc51375e18cc24e56aac1b697150029f52257be751dce4b66`, source `sha256:7503a6e8d86c0f95…` | None. Phase 24 is sealed and has no owner deferral |
-| 25 | **Known partial** | The companion-payload implementation, pure/static/ladder checks, dual-architecture bake, OCI file oracle, Sprint-25.1 receipt, and Sprint-25.2 side-load transition have been observed. Run `20260816T180210Z` stopped before the Sprint-25.2 receipt because documentation lint failed; that lint defect is fixed. The requested pause interrupted diagnostic retry `20260816T191417Z` during warm build-product preparation, and its exact test root was cleaned. | Resume the complete live gate from a fresh run; seal Sprints 25.2–25.4 and the phase before Phase 26 reopens |
-| 26 | **Observed footprint** | The prior capability remains historical, but its exact Phase-25 handoff is superseded by the open image amendment. | Revalidate against the amended Phase-25 seal |
-| 27 | **Observed footprint** | The prior capability remains historical pending the amended Phase-26 predecessor chain. | Revalidate after Phase 26 |
-| 28 | **Observed footprint** | The prior capability remains historical pending the amended Phase-27 predecessor chain. | Revalidate after Phase 27 |
-| 29 | **Observed footprint** | The prior capability remains historical pending the amended Phase-28 predecessor and Phase-25 handoff. | Revalidate after Phase 28 |
-| 30–43 | **Known partial** | Phase 30's live run found the Phase-25 offloader defect; its registry correction and containment changes remain implemented. Phases 30–43 are blocked behind the open predecessor chain, and no current policy-conformant result exists for the range. | Resume Phase 30 only after Phases 25–29 reseal, then validate each later phase in numeric order |
+| 25 | **Policy-conformant** | Resealed 2026-11-02: all 12 sides pass against 1,984 authored files; all 15 mutants are red, all 16 metrics match, and all 42 surfaces join. Both architectures execute the full inventory and all four sprints seal. The retained handoff is verified against attestation `sha256:d03bd88db26edd973c3f437413471e527de22aabb3c606c3eceed2eead602522`; private state and physical backings are removed with unchanged outside-host inventory. Publisher-derived oracle amendments received assistant review at the user's explicit direction. | None. Phase 26 now consumes the amended exact handoff |
+| 26 | **Policy-conformant** | Resealed 2026-11-02: all 11 sides pass against 1,984 authored files; all five sprints seal, all 11 mutants are red, all 13 metrics match, and 31 surfaces join to 30 items. The live checks and 2,048-schedule battery pass against the amended exact handoff. Pure Sprint 26.1 completes before fixture creation. Cleanup removes the fixture with unchanged host inventory. Attestation `sha256:b1a89d94960494807ffafc0dcbe47d6e9c1bbb102d0174f13a6a3228f626d75b`. Modeled-apiserver fidelity remains assumed at Register 2.5. | None within the declared gate scope. Phase 27 may now revalidate |
+| 27 | **Policy-conformant** | Resealed 2026-11-02: all 11 sides pass against 1,984 authored files; all five sprints seal, all 14 mutants are red, all 11 metrics match, and 33 surfaces join to 30 items. Ordered live cutover and 1,792 deterministic schedules pass against the amended exact predecessor chain. Cleanup removes the private fixture with unchanged host inventory. Attestation `sha256:cb615b6b7f7cdb498cf0f0067eb99441a2720348ee347e97c96694df829d90f7`. | None within the declared scope. Phase 28 may now revalidate |
+| 28 | **Policy-conformant** | Resealed 2026-11-02: all 11 sides pass against 1,986 authored files; all three sprints seal, all 12 mutants are red, all 12 metrics match, and 30 surfaces join 30 items. Physically reserved backing, actual over-budget rejection, ENOSPC isolation, live PVC rebind, and both markers across genuine delete/recreate pass. Owned cleanup and unchanged host inventory verify. Attestation `sha256:817c8bb69e19ac80e1453541ba6099be52d4d75a8a0973488497f13a03258348`. | None within the declared scope. Phase 29 may now revalidate |
+| 29 | **Policy-conformant** | Resealed 2026-11-03: all 12 sides pass against 1,999 authored files; all four sprints seal, all 14 mutants are red, all 10 metrics match, and 37 surfaces join to 35 items. Physical backing, complete service readback, real snapshot/compaction/recovery, bounded audit writing, paired CLI boundaries, readiness, and the expanded secret scan pass. The independent reader accepts the raw observations. Cleanup and unchanged host inventory verify. Attestation `sha256:aa8cd69d910d376b74852e30608db5df3115d9bbba044c1bf31900824bdc53be`. | None within the declared scope. Phase 30 may now resume |
+| 30–43 | **Known partial** | Phase 30 is active after Phases 25–29 resealed. Native canonical storage/execution, transfer rendering, private structured sources, offload input/writer ownership, recovery and uniform claims pass focused tests. Sixteen filesystems fit before cluster creation; eleven independent reader corruptions reject. ZooKeeper literal encoding/generation tests and all thirty signed-upload cases pass. The corrected live run passes application boundaries and canonical transfer. The reviewed signed-upload fix passes a real SDK offload/control pair with zero failed debt; the positive peaks at61,965 bytes and its control at413,100. Retained-state startup and a broker-restarted/unloaded cold read pass, preserving153 reservations and0debt; cleanup succeeds. The new bounded readiness path still needs a fresh run. All six earlier native mutant diagnostics are red with restored baselines. All37 independently authored metadata-member cases now pass through the constructor required by every manifest stage; the same witness supplies rendered resources/claims/server ordinals. The census saves parsed raw files and recomputes final counters, with38backbone host tests passing. The cumulative history core passes69independent cases; durable persistence passes its API/crash/wire cases under syscall tracing, and22private storage boundaries/nine schema bounds pass; native8MiB StoragePlan and independent14corruption reader checks pass. Immutable JVM capture and digest rebinding pass689+2547assertions; the registry passes2137independent assertions; native/JVM transport awaits protocol validation. Fresh live/coordinator/JVM installation remains open. Current-state/lifetime history and fresh accepted-source live/mutant validation remain open. Phases 31–43 remain blocked in numerical order. | Revalidate Phase 30 against the exact predecessor chain, then each later phase in order |
 | 44–47 | **Known partial** | Provider/AWS gate footprints exist, while the phase contracts explicitly record missing authenticated provider materialization, EBS/IAM behavior, node provisioning, audit, and leak-freedom | Complete the provider seams after predecessors close and run the live provider gates |
 | 48 | **Observed footprint** | Pure and live/cache footprints exist; the prior `linux-cpu` result is invalidated by the artifact-policy amendment | Migrate and rerun the current Phase-48 gate |
 | 49–58 | **Known partial** | Gate and test footprints exist. Phase 49 retains frozen sibling-source hashes and Phase 53 commits reference-program output; the range also retains scoped capability gaps in sibling lift, native transport, production topology, hardware, cleanup, or multi-zone behavior | Remove derived/hash expectations in their owning phases, close each capability gap, and rerun in numeric order on the required lane |
@@ -304,7 +317,7 @@ inherits the universal postcondition above.
 
 | Phase | Name | Substrate | Register | Status | Validation contract |
 |---|---|---|---|---|---|
-| 0 | Documentation suite + the final repository layout | none | — | ✅ Done — containment gate resealed 2026-08-15; `sha256:01134ab7c7f2c70ec769116123c1bee9f528dc4e7d351eadd3ba1a7716114ca6` | [phase_00](phase_00_documentation_suite.md) |
+| 0 | Documentation suite + the final repository layout | none | — | ✅ Done — resealed 2026-10-31 after stable-observer repair; `sha256:a39c8e8c9248e6f491136519f338ddb6203c014d00076d481b16cf9da1d4cfd2` | [phase_00](phase_00_documentation_suite.md) |
 | 1 | Toolchain spike | none | 1 | ✅ Done — resealed 2026-08-15; `sha256:915a26a7b76634ac544f9a3c81296b0699ad26193b76b5548d3f6a5d6133438f` | [phase_01](phase_01_toolchain_spike.md) |
 | 2 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | none | 1 | ✅ Done — resealed 2026-08-15; `sha256:fae2ea35bd57b40dd1a054a362ba53a63bc4fbab0833672a08687b1406ab7d0f` | [phase_02](phase_02_formal_model_kernel.md) |
 | 3 | Gateway-migration model (both branches) | none | 1 | ✅ Done — resealed 2026-08-15; `sha256:25c7f79b9a5007e6ee9cf0a0a45886242884a6359f92cf37eae4e610051bd7dd` | [phase_03](phase_03_gateway_migration_model.md) |
@@ -329,12 +342,12 @@ inherits the universal postcondition above.
 | 22 | UI-server boundary | none | 2 | ✅ Done — resealed 2026-08-15; `sha256:eb3b77ef745fb93f5b3c423f1e2e37b19f1fd4de2f61eade51f9c5e63ce3ec80` | [phase_22](phase_22_ui_server_boundary.md) |
 | 23 | Local UI composition | none | 2 | ✅ Done — resealed 2026-08-15; `sha256:ce0760e84c49139141af398ca54f1b85beeb6407440c2f068650bda4ac37feee` | [phase_23](phase_23_ui_local_composition.md) |
 | 24 | Python bootstrap coordinator + substrate detect + single kind cluster | linux-cpu | 3 | ✅ Done — resealed 2026-08-15; `sha256:cf31b7eb39b7419bc51375e18cc24e56aac1b697150029f52257be751dce4b66` | [phase_24](phase_24_bootstrap_coordinator_kind.md) |
-| 25 | Typed bake catalog + multi-arch base image + jit-build resolver + distribution registry | linux-cpu | 3 | 🧪 Live-proof pending — paused after partial amended run | [phase_25](phase_25_base_image_registry.md) |
-| 26 | Typed renderer + object reconciler | linux-cpu | 3 | ⏸️ Blocked pending amended Phase-25 seal | [phase_26](phase_26_object_reconciler.md) |
-| 27 | amoebius-capacity scheduler + bootstrap cutover | linux-cpu | 3 | ⏸️ Blocked pending Phase-26 revalidation | [phase_27](phase_27_capacity_scheduler.md) |
-| 28 | No-provisioner retained storage + lossless rebind | linux-cpu | 3 | ⏸️ Blocked pending Phase-27 revalidation | [phase_28](phase_28_retained_storage.md) |
-| 29 | Root Vault + PKI + built-in Haskell Vault client | linux-cpu | 3 | ⏸️ Blocked pending Phase-28 revalidation | [phase_29](phase_29_vault_pki.md) |
-| 30 | Platform backbone (MetalLB + MinIO + Pulsar HA) | linux-cpu | 3 | ⏸️ Blocked pending amended Phase-29/Phase-25 seals | [phase_30](phase_30_platform_backbone.md) |
+| 25 | Typed bake catalog + multi-arch base image + jit-build resolver + distribution registry | linux-cpu | 3 | ✅ Done — resealed 2026-11-02; attestation `sha256:d03bd88db26edd973c3f437413471e527de22aabb3c606c3eceed2eead602522` | [phase_25](phase_25_base_image_registry.md) |
+| 26 | Typed renderer + object reconciler | linux-cpu | 3 | ✅ Done — resealed 2026-11-02; attestation `sha256:b1a89d94960494807ffafc0dcbe47d6e9c1bbb102d0174f13a6a3228f626d75b` | [phase_26](phase_26_object_reconciler.md) |
+| 27 | amoebius-capacity scheduler + bootstrap cutover | linux-cpu | 3 | ✅ Done — resealed 2026-11-02; attestation `sha256:cb615b6b7f7cdb498cf0f0067eb99441a2720348ee347e97c96694df829d90f7` | [phase_27](phase_27_capacity_scheduler.md) |
+| 28 | No-provisioner retained storage + lossless rebind | linux-cpu | 3 | ✅ Done — 2026-11-02 amended gate; `sha256:817c8bb69e19ac80e1453541ba6099be52d4d75a8a0973488497f13a03258348` | [phase_28](phase_28_retained_storage.md) |
+| 29 | Root Vault + PKI + built-in Haskell Vault client | linux-cpu | 3 | ✅ Done — resealed 2026-11-03; attestation `sha256:aa8cd69d910d376b74852e30608db5df3115d9bbba044c1bf31900824bdc53be` | [phase_29](phase_29_vault_pki.md) |
+| 30 | Platform backbone (MetalLB + MinIO + Pulsar HA) | linux-cpu | 3 | 🔄 Active — revalidating against the amended Phase-29 seal and Phase-25 image | [phase_30](phase_30_platform_backbone.md) |
 | 31 | Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG) | linux-cpu | 3 | ⏸️ Blocked pending predecessor revalidation | [phase_31](phase_31_platform_services_2.md) |
 | 32 | Keycloak-owned ingress | linux-cpu | 3 | ⏸️ Blocked pending predecessor revalidation | [phase_32](phase_32_keycloak_ingress.md) |
 | 33 | Live DSL deploy via the replicas=1 singleton | linux-cpu | 3 | ⏸️ Blocked pending predecessor revalidation | [phase_33](phase_33_live_dsl_singleton.md) |

@@ -1,0 +1,1784 @@
+{
+  "schema": "phase30.independent.zookeeper-history-transitions.v1",
+  "status": "Pure policy transition expectations only; no installed guard, producer adequacy, current-state or complete-history credit.",
+  "policy": {
+    "members": [
+      0,
+      1,
+      2
+    ],
+    "snapshotExtentMaximum": 1048576,
+    "bootstrapAllowance": 1024,
+    "factor": 3,
+    "globalUniqueMaximumFramedBytes": 349184,
+    "perMemberLifetimePhysicalMaximumFramedBytes": 349184,
+    "lifetimeDistinctLogNamesPerMember": 2,
+    "lifetimeDistinctSnapshotNamesPerMember": 3,
+    "canonicalBodyIncludesHeader": true,
+    "uniqueChargeExtraBytes": 25,
+    "physicalFrameExtraBytes": 13,
+    "optionalDigestBytes": 12
+  },
+  "digests": {
+    "v2-zero": "000000020000000000000000",
+    "invalid11": "0000000000000000000000"
+  },
+  "records": {
+    "session": {
+      "input": {
+        "header": {
+          "clientId": 1,
+          "cxid": 1,
+          "zxid": 1,
+          "time": 0,
+          "type": -10
+        },
+        "operation": {
+          "kind": "CreateSession",
+          "timeout": 1000
+        }
+      },
+      "canonicalBytes": 36,
+      "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+      "maximumModernFramedBytes": 61,
+      "canonicalHex": "00000000000000010000000100000000000000010000000000000000fffffff6000003e8"
+    },
+    "session-conflict": {
+      "input": {
+        "header": {
+          "clientId": 1,
+          "cxid": 1,
+          "zxid": 1,
+          "time": 0,
+          "type": -10
+        },
+        "operation": {
+          "kind": "CreateSession",
+          "timeout": 1001
+        }
+      },
+      "canonicalBytes": 36,
+      "canonicalSha256": "3733e2eb35cea6f94347b104b93664e8ceecc61966ef49b5badc7b07e15f144e",
+      "maximumModernFramedBytes": 61,
+      "canonicalHex": "00000000000000010000000100000000000000010000000000000000fffffff6000003e9"
+    },
+    "root-empty": {
+      "input": {
+        "header": {
+          "clientId": 1,
+          "cxid": 2,
+          "zxid": 2,
+          "time": 0,
+          "type": 5
+        },
+        "operation": {
+          "kind": "SetData",
+          "path": "/",
+          "data": {
+            "repeatByte": 97,
+            "count": 0
+          },
+          "version": 0
+        }
+      },
+      "canonicalBytes": 45,
+      "canonicalSha256": "eb9d99de461af3ea6359d0225451f17ef35ed2871b5844c7812321296b3e4921",
+      "maximumModernFramedBytes": 70,
+      "canonicalHex": "0000000000000001000000020000000000000002000000000000000000000005000000012f0000000000000000"
+    },
+    "global-exact": {
+      "input": {
+        "header": {
+          "clientId": 1,
+          "cxid": 3,
+          "zxid": 3,
+          "time": 0,
+          "type": 5
+        },
+        "operation": {
+          "kind": "SetData",
+          "path": "/",
+          "data": {
+            "repeatByte": 97,
+            "count": 349114
+          },
+          "version": 0
+        }
+      },
+      "canonicalBytes": 349159,
+      "canonicalSha256": "9ee836b47b9f67552995eacd9dd6badc788d7063819ab5843cda81c6f4a6dff1",
+      "maximumModernFramedBytes": 349184
+    },
+    "global-over-one": {
+      "input": {
+        "header": {
+          "clientId": 1,
+          "cxid": 3,
+          "zxid": 3,
+          "time": 0,
+          "type": 5
+        },
+        "operation": {
+          "kind": "SetData",
+          "path": "/",
+          "data": {
+            "repeatByte": 97,
+            "count": 349115
+          },
+          "version": 0
+        }
+      },
+      "canonicalBytes": 349160,
+      "canonicalSha256": "7be2fedaf290e3c9a3bbabbd2a9b1e0d4e4e6fba6eea019192ed3ec47b500ca2",
+      "maximumModernFramedBytes": 349185
+    }
+  },
+  "cases": [
+    {
+      "id": "fresh-three-member-policy",
+      "actions": [],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "first-unique-canonical-charge",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "same-zxid-body-across-three-members",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "reserve",
+          "member": 1,
+          "record": "session"
+        },
+        {
+          "operation": "reserve",
+          "member": 2,
+          "record": "session"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "same-zxid-different-body-conflicts",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session-conflict",
+          "expect": "deny",
+          "reason": "canonical-conflict"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "same-hash-different-size-conflicts",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session",
+          "canonicalBytesOverride": 37,
+          "expect": "deny",
+          "reason": "canonical-conflict"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "global-exact349184",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "global-exact"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 349184,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "global-one-byte-over349185",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "global-over-one",
+          "expect": "deny",
+          "reason": "global-byte-limit"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "no-new-record-after-global-full",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "global-exact"
+        },
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session",
+          "expect": "deny",
+          "reason": "global-byte-limit"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 349184,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "replica-apply-append-share-global-charge",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero"
+        },
+        {
+          "operation": "apply",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "apply",
+          "member": 1,
+          "record": "session"
+        },
+        {
+          "operation": "apply",
+          "member": 2,
+          "record": "session"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 1,
+          "record": "session",
+          "digest": "v2-zero"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 2,
+          "record": "session",
+          "digest": "v2-zero"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 61,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 61,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 61,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "application-before-this-members-local-append",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 1,
+          "record": "session"
+        },
+        {
+          "operation": "apply",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 61,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "physical-retry-debt-is-not-global-duplicate-debt",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 122,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "optional-digest-does-not-change-canonical-charge",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": null
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 110,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "physical-exact-limit-then-retry-reject",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "root-empty"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero",
+          "repeat": 5714
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "root-empty",
+          "digest": "v2-zero",
+          "repeat": 9
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero",
+          "expect": "deny",
+          "reason": "physical-byte-limit"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 131,
+        "recordCount": 2,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 349184,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "physical-one-byte-over-via-retries",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "root-empty"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero",
+          "repeat": 5674
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "root-empty",
+          "digest": "v2-zero",
+          "repeat": 43
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero",
+          "expect": "deny",
+          "reason": "physical-byte-limit",
+          "expectedAttemptedPhysicalBytes": 349185
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 131,
+        "recordCount": 2,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 349124,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "physical-policy-per-member-not-shared",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero",
+          "repeat": 5724
+        },
+        {
+          "operation": "append_attempt",
+          "member": 1,
+          "record": "session",
+          "digest": "v2-zero"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 2,
+          "record": "session",
+          "digest": "v2-zero"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero",
+          "expect": "deny",
+          "reason": "physical-byte-limit"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 349164,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 61,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 61,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "append-requires-original-reservation",
+      "actions": [
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero",
+          "expect": "deny",
+          "reason": "missing-reservation"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "apply-requires-original-reservation",
+      "actions": [
+        {
+          "operation": "apply",
+          "member": 0,
+          "record": "session",
+          "expect": "deny",
+          "reason": "missing-reservation"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "restart-preserves-global-physical-and-generations",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero"
+        },
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "log.1"
+        },
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "snapshot.0"
+        },
+        {
+          "operation": "restart_roundtrip",
+          "member": 0
+        },
+        {
+          "operation": "reserve",
+          "member": 2,
+          "record": "session"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero"
+        },
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "log.1"
+        },
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "snapshot.0"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 122,
+            "logs": [
+              "log.1"
+            ],
+            "snapshots": [
+              "snapshot.0"
+            ]
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "two-logs-exact",
+      "actions": [
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "log.1"
+        },
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "log.2"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [
+              "log.1",
+              "log.2"
+            ],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "third-log-reject",
+      "actions": [
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "log.1"
+        },
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "log.2"
+        },
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "log.3",
+          "expect": "deny",
+          "reason": "log-generation-limit"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [
+              "log.1",
+              "log.2"
+            ],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "three-snapshots-exact",
+      "actions": [
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "snapshot.0"
+        },
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "snapshot.1"
+        },
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "snapshot.2"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": [
+              "snapshot.0",
+              "snapshot.1",
+              "snapshot.2"
+            ]
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "fourth-snapshot-reject",
+      "actions": [
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "snapshot.0"
+        },
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "snapshot.1"
+        },
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "snapshot.2"
+        },
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "snapshot.3",
+          "expect": "deny",
+          "reason": "snapshot-generation-limit"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": [
+              "snapshot.0",
+              "snapshot.1",
+              "snapshot.2"
+            ]
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "duplicate-filename-no-extra-slot-per-member",
+      "actions": [
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "log.1",
+          "repeat": 3
+        },
+        {
+          "operation": "open_generation",
+          "member": 1,
+          "name": "log.1"
+        },
+        {
+          "operation": "open_generation",
+          "member": 2,
+          "name": "log.1"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [
+              "log.1"
+            ],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [
+              "log.1"
+            ],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [
+              "log.1"
+            ],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "unknown-member-reserve-reject",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 3,
+          "record": "session",
+          "expect": "deny",
+          "reason": "unknown-member"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "unknown-member-append-reject",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 3,
+          "record": "session",
+          "digest": "v2-zero",
+          "expect": "deny",
+          "reason": "unknown-member"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "unknown-member-apply-reject",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "apply",
+          "member": 3,
+          "record": "session",
+          "expect": "deny",
+          "reason": "unknown-member"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "unknown-member-generation-reject",
+      "actions": [
+        {
+          "operation": "open_generation",
+          "member": 3,
+          "name": "log.1",
+          "expect": "deny",
+          "reason": "unknown-member"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "global-union-distinct-bodies-across-members",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "reserve",
+          "member": 1,
+          "record": "root-empty"
+        },
+        {
+          "operation": "reserve",
+          "member": 2,
+          "record": "session"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 131,
+        "recordCount": 2,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "apply-conflicting-body-reject",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "apply",
+          "member": 0,
+          "record": "session-conflict",
+          "expect": "deny",
+          "reason": "canonical-conflict"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "append-conflicting-body-reject",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session-conflict",
+          "digest": "v2-zero",
+          "expect": "deny",
+          "reason": "canonical-conflict"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "malformed-11byte-digest-reject",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "invalid11",
+          "expect": "deny",
+          "reason": "unsupported-digest-profile"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "direct-quota-stat-mutation-has-no-permit",
+      "actions": [
+        {
+          "operation": "direct_mutation",
+          "member": 0,
+          "kind": "quota-stat",
+          "expect": "deny",
+          "reason": "unsupported-direct-mutation"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "direct-dynamic-config-mutation-has-no-permit",
+      "actions": [
+        {
+          "operation": "direct_mutation",
+          "member": 0,
+          "kind": "dynamic-config",
+          "expect": "deny",
+          "reason": "unsupported-direct-mutation"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "failed-append-debit-cannot-be-refunded",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero"
+        },
+        {
+          "operation": "refund",
+          "member": 0,
+          "bytes": 61,
+          "expect": "deny",
+          "reason": "no-refund"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 61,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "restart-cannot-reset-counters",
+      "actions": [
+        {
+          "operation": "reserve",
+          "member": 0,
+          "record": "session"
+        },
+        {
+          "operation": "append_attempt",
+          "member": 0,
+          "record": "session",
+          "digest": "v2-zero"
+        },
+        {
+          "operation": "restart_roundtrip",
+          "member": 0
+        },
+        {
+          "operation": "reset",
+          "member": 0,
+          "expect": "deny",
+          "reason": "no-reset"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 61,
+        "recordCount": 1,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 61,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "unknown-generation-name-35",
+      "actions": [
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "other.1",
+          "expect": "deny",
+          "reason": "unsupported-generation-name"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "unknown-generation-name-36",
+      "actions": [
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "../log.1",
+          "expect": "deny",
+          "reason": "unsupported-generation-name"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "unknown-generation-name-37",
+      "actions": [
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "log.G",
+          "expect": "deny",
+          "reason": "unsupported-generation-name"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "unknown-generation-name-38",
+      "actions": [
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "snapshot.",
+          "expect": "deny",
+          "reason": "unsupported-generation-name"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    },
+    {
+      "id": "unknown-generation-name-39",
+      "actions": [
+        {
+          "operation": "open_generation",
+          "member": 0,
+          "name": "snapshot.1.gz",
+          "expect": "deny",
+          "reason": "unsupported-generation-name"
+        }
+      ],
+      "expectedFinal": {
+        "globalUniqueFramedBytes": 0,
+        "recordCount": 0,
+        "members": {
+          "0": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "1": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          },
+          "2": {
+            "physicalFramedBytes": 0,
+            "logs": [],
+            "snapshots": []
+          }
+        }
+      }
+    }
+  ],
+  "adapter_rules": [
+    "All cases start from the declared fresh three-member policy. reserve is a durable unique canonical reservation; apply/append_attempt require that original reservation. A runtime hook must perform these steps together before effects, not offer an unreserved bypass.",
+    "repeat expands the indicated exact action count. Every repeated append_attempt charges its actual canonical bytes+13+(12 if digest present), even a later failed I/O; failure cannot refund. A denied pure transition leaves state unchanged.",
+    "canonicalBytesOverride tests stored-map size conflict; original checked canonical witness bytes/hash remain those of the referenced record. No substitute quota is accepted.",
+    "restart_roundtrip means persist/reload equivalent complete state, not a new lease. No serialized coordinator storage format is selected by this corpus.",
+    "Generation deduplication is per (member,exact filename). It does not authorize concurrent physical reincarnations/old unlinked-inode overlap or replace file-extent admission.",
+    "Semantic record decoding, exact resolved operands, immutable-byte tokens, trusted bootstrap/import lineage, atomic coordinator durability and source hook coverage are separate required integration premises. Root SetData wire inputs here are small/large arithmetic fixtures, not a native producer schema."
+  ]
+}

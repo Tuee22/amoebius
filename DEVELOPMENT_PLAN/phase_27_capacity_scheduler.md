@@ -46,7 +46,9 @@ Sprints 27.1–27.5 and the phase-level acceptance gate have passed.
 
 ## Phase Status
 
-⏸️ Blocked — reopened 2026-08-16 behind the amended Phase-25 handoff and Phase-26 revalidation. Its prior capability record remains historical until the exact predecessor chain is resealed.
+✅ Done — resealed 2026-11-02 by `python3 tools/capacity_scheduler_gate.py --execute`, run `20261103T003236Z`. All 11 sides pass against 1,984 authored files. All five sprints seal, all 14 mutants are red, all 11 metrics match, and 33 surfaces join to 30 items. Attestation: `sha256:cb615b6b7f7cdb498cf0f0067eb99441a2720348ee347e97c96694df829d90f7`.
+
+**Live proof — 2026-11-02:** the gate verifies the resealed Phase-26 record and exact Phase-25 handoff. The ordered bootstrap/cutover witnesses, reservation CAS/Binding protocol, exclusive guarded-Pod binding, and byte-stable zero-Binding rerun pass live. The fault battery covers 1,792 deterministic schedules. The private fixture is removed with unchanged outside-host inventory, no authored-root writes, and 124 GiB free after cleanup. Phase 28 may now revalidate; modeled-apiserver fidelity remains assumed at Register 2.5.
 
 **Superseded containment seal:** resealed 2026-08-16 under the repository-containment amendment, attestation
 `sha256:ca6f2898297e06d97f37feee4d78cea528a9f19cb4089d67d8d880b32155e8e8`.
@@ -61,7 +63,7 @@ mutants reddened; all 11 metrics matched; and all 33 surfaces joined to 30 run-t
 and the five sprint receipts stayed beneath `.build/**`; the immutable record reports every check `pass` with
 `cleanup.left_resources=false`, and the outside-host inventory remained empty.
 
-Current sprint receipt fingerprints are 27.1
+Superseded sprint receipt fingerprints are 27.1
 `sha256:76b75435746f61684035e80aaca664ca49abb5b6602a0c7926723c77e7fa6857`, 27.2
 `sha256:9f7e8603d3fcee5de898a40eeca31cd824bf53ab99628fb0633574cea14cb450`, 27.3
 `sha256:8a9556502204beed912605d711ac20fd474ea953db983c6923787b992f03ba79`, 27.4
@@ -240,9 +242,8 @@ flowchart LR
 ```
 *Orientation for the ordered scheduler delivery owned by the [Phase 27 plan](phase_27_capacity_scheduler.md).*
 
-**Gate:** `cabal test scheduler-reservation scheduler-bootstrap-cutover` is green on the live `kind` corpus:
-the two readiness witnesses and the controller cutover occur in order, then every guarded Pod binds
-exclusively through the reservation CAS, under the fixtures, observer, and mutants of
+**Gate:** `python3 tools/capacity_scheduler_gate.py --execute` validates ordered live cutover, exclusive
+CAS-backed Binding, the no-op rerun, deterministic schedules, and every fixture, oracle, and mutant in
 [Gate integrity](#gate-integrity).
 
 ## Gate integrity
@@ -398,13 +399,11 @@ planner — not regenerated from the scheduler's own output.
 
 ## Sprint 27.1: State-indexed reservation ledger + normalization + absent-Pod recovery arms ✅
 
-**Status**: Done — sealed 2026-08-14 inside `python3 tools/capacity_scheduler_gate.py --execute`; the five-state
-ledger, its normalization, and the absent-Pod recovery arms passed their pure spec, and
-`sprint-27.1-receipt.json` in that run's bundle records it.
+**Status**: Done — resealed 2026-11-02 in run `20261103T003236Z`; whole-ledger normalization and recovery arms pass.
 **Implementation**: `src/Amoebius/Scheduler/Ledger.hs` — the state-indexed reservation
 ledger join and normalization that extends Phase 26's `src/Amoebius/Execution/Normalize.hs` observed
 snapshot with the scheduler dimension; built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; Phase 26 is sealed against the amended chain.
 **Independent Validation**: a fresh snapshot over the pinned corpus normalizes each reservation state exactly once and
 produces the independently authored expected scheduler-state slice of
 `test/live/fixtures/reconcile-corpus/expected-actions.json`, authored before this module. Every ledger
@@ -477,16 +476,14 @@ None. The receipt and phase results are written into this run's bundle under `.b
 
 ## Sprint 27.2: Scheduler bootstrap authority + two-stage taint/RBAC cutover + readiness witnesses ✅
 
-**Status**: Done — sealed 2026-08-14 inside `python3 tools/capacity_scheduler_gate.py --execute`; the bootstrap
-authority, two-stage cutover, and both readiness witnesses held with all three mutants red, and
-`sprint-27.2-receipt.json` in that run's bundle records it.
+**Status**: Done — resealed 2026-11-02 in run `20261103T003236Z`; distinct readiness witnesses and all bootstrap red controls pass.
 **Implementation**: `src/Amoebius/Scheduler/Readiness.hs`, the scheduler-authority slice
 of `src/Amoebius/Manifest/Authority.hs` (`CapacitySchedulerSystemDemand` admission and the
 scheduler-system-only token; the cold-start `Lease` authority itself is Phase 26), and
 `src/Amoebius/Admission/ExecutionIdentity.hs` (the managed-taint/admission install) — target paths, not yet
 built. The scheduler role is an entry point of the existing amoebius binary/image, not a second
 implementation or a kube-scheduler plugin; built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; Sprint 27.1 is sealed against the amended chain.
 **Independent Validation**: `BootstrapCapacitySchedulerReady` precedes the finite
 bootstrap-controller cutover; every old default-scheduled UID is absent/released and every replacement is
 reservation-joined before `ManagedCapacityReady`; only the latter precedes any general guarded controller
@@ -560,14 +557,12 @@ None. The receipt and mutation results are written into this run's bundle under 
 
 ## Sprint 27.3: Scheduler loop + `Reserved`→`BindingInFlight`→Binding→`Bound` CAS + placement + recovery ✅
 
-**Status**: Done — sealed 2026-08-14 inside `python3 tools/capacity_scheduler_gate.py --execute`; the reservation CAS,
-placement refold, and recovery arms held with all four mutants red, and `sprint-27.3-receipt.json` in that
-run's bundle records it.
+**Status**: Done — resealed 2026-11-02 in run `20261103T003236Z`; reservation CAS, placement, recovery, and Binding controls pass.
 **Implementation**:
 `src/Amoebius/Scheduler/{Loop,Placement,Reservation,Binding,Recovery}.hs` and the authentication path of
 `src/Amoebius/Admission/ExecutionIdentity.hs`, built and validated by
 `test/spec/live/CapacitySchedulerReservationSpec.hs` and `tools/capacity_scheduler_reservation_gate.py`.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; Sprint 27.2 is sealed against the amended chain.
 **Independent Validation**: two concurrent candidates cannot reserve the same residual; crash-after-reserve,
 restart, and Binding failure recover idempotently; the external observer proves no Binding precedes a
 successful reservation CAS and every UID is debited once.
@@ -631,14 +626,12 @@ None. The receipt and mutation results are written into this run's bundle under 
 
 ## Sprint 27.4: Live scheduler binding + bootstrap→steady cutover gate ✅
 
-**Status**: Done — sealed 2026-08-14 inside `python3 tools/capacity_scheduler_gate.py --execute`; the six cutover
-events were observed in order and the re-run issued zero new Binding requests, and
-`sprint-27.4-receipt.json` in that run's bundle records it.
+**Status**: Done — resealed 2026-11-02 in run `20261103T003236Z`; the live cutover, independent readers, all seven mutants, and restored baseline pass.
 **Implementation**: `test/live/SchedulerReservationSpec.hs` and
 `test/live/SchedulerBootstrapCutoverSpec.hs`, driving the Sprint 27.1–27.3 `Scheduler/*` and
 `Admission/ExecutionIdentity` modules against the live Phase-24 `kind` cluster and the converged Phase-26
 reconciler through `tools/capacity_scheduler_live.py`, sealed by `tools/capacity_scheduler_cutover_gate.py`.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; Sprint 27.3 is sealed against the amended chain.
 **Independent Validation**: the
 representative corpus observes `BootstrapCapacitySchedulerReady`, complete bootstrap-controller cutover, and
 `ManagedCapacityReady` **before** any guarded Pod; the guarded Deployment binds exclusively through the CAS
@@ -707,14 +700,12 @@ this run's bundle under `.build/runs/`.
 
 ## Sprint 27.5: Register-2.5 scheduler convergence under simulated faults ✅
 
-**Status**: Done — sealed 2026-08-14 inside `python3 tools/capacity_scheduler_gate.py --execute`; 1,792 deterministic
-schedules ran across seven fault classes with all seven mutants red, and `sprint-27.5-receipt.json` in that
-run's bundle records it.
+**Status**: Done — resealed 2026-11-02 in run `20261103T003236Z`; 1,792 deterministic schedules and all seven simulated fault classes pass.
 **Implementation**: `test/spec/sim/SchedulerSim.hs`, driving the real `Scheduler/*` and
 `Admission/ExecutionIdentity` modules through `test/spec/sim/CapacitySchedulerSimCommon.hs` on the Phase-14
 `io-classes` `Env` / modeled apiserver. This is the scheduler slice of the deterministic-simulation battery; Phase 26 owns the
 object-reconciler slice of the same environment.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; Sprint 27.4 is sealed against the amended chain.
 **Independent Validation**: `IOSimPOR` interleaves reservation-ledger CAS races, bootstrap-`Lease` acquire/renew
 ambiguity, crashes/watch gaps across **both** scheduler-readiness stages, crash-after-reserve, Binding
 failure, and restarts. Every schedule either converges to a typed scheduler no-op or fails closed without an

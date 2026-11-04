@@ -1,0 +1,1299 @@
+{
+  "schema": "phase30.independent.zookeeper-history-policy-binding-amendment.v1",
+  "baseCorpusSha256": "b10f9ef7a316b71b343d0585768525b51aebe70a52d11ec976ffc807f7b3e078",
+  "decision": "Retained state must bind its originating complete policy. These are owning API/codec inputs, not installed JVM enforcement or durability/authenticity evidence.",
+  "policies": {
+    "native": {
+      "members": [
+        0,
+        1,
+        2
+      ],
+      "snapshotBytes": 1048576,
+      "bootstrapBytes": 1024,
+      "growthFactor": 3,
+      "uniqueFramedBytes": 349184,
+      "physicalBytesPerMember": 349184,
+      "logGenerationsPerMember": 2,
+      "snapshotGenerationsPerMember": 3
+    },
+    "native-equivalent": {
+      "members": [
+        0,
+        1,
+        2
+      ],
+      "snapshotBytes": 1048576,
+      "bootstrapBytes": 1024,
+      "growthFactor": 3,
+      "uniqueFramedBytes": 349184,
+      "physicalBytesPerMember": 349184,
+      "logGenerationsPerMember": 2,
+      "snapshotGenerationsPerMember": 3
+    },
+    "wide": {
+      "members": [
+        0,
+        1,
+        2
+      ],
+      "snapshotBytes": 2097152,
+      "bootstrapBytes": 1024,
+      "growthFactor": 3,
+      "uniqueFramedBytes": 698709,
+      "physicalBytesPerMember": 349184,
+      "logGenerationsPerMember": 2,
+      "snapshotGenerationsPerMember": 3
+    },
+    "different-physical": {
+      "members": [
+        0,
+        1,
+        2
+      ],
+      "snapshotBytes": 1048576,
+      "bootstrapBytes": 1024,
+      "growthFactor": 3,
+      "uniqueFramedBytes": 349184,
+      "physicalBytesPerMember": 349185,
+      "logGenerationsPerMember": 2,
+      "snapshotGenerationsPerMember": 3
+    },
+    "different-generations": {
+      "members": [
+        0,
+        1,
+        2
+      ],
+      "snapshotBytes": 1048576,
+      "bootstrapBytes": 1024,
+      "growthFactor": 3,
+      "uniqueFramedBytes": 349184,
+      "physicalBytesPerMember": 349184,
+      "logGenerationsPerMember": 3,
+      "snapshotGenerationsPerMember": 3
+    },
+    "different-members": {
+      "members": [
+        0,
+        1
+      ],
+      "snapshotBytes": 1048576,
+      "bootstrapBytes": 1024,
+      "growthFactor": 3,
+      "uniqueFramedBytes": 349184,
+      "physicalBytesPerMember": 349184,
+      "logGenerationsPerMember": 2,
+      "snapshotGenerationsPerMember": 3
+    }
+  },
+  "recordSource": {
+    "path": "zookeeper-history-transition-corpus.json",
+    "sha256": "b10f9ef7a316b71b343d0585768525b51aebe70a52d11ec976ffc807f7b3e078",
+    "requiredRecords": [
+      "session",
+      "global-exact",
+      "global-over-one"
+    ]
+  },
+  "cross_policy_cases": [
+    {
+      "id": "same-policy-value-reconstruction-allows",
+      "originPolicy": "native",
+      "seedReservations": [
+        "session"
+      ],
+      "member": 0,
+      "operation": "apply",
+      "underPolicy": "native-equivalent",
+      "mutation": "session",
+      "expectedAdmission": "allow",
+      "expectedReason": null,
+      "expectedGlobalUniqueFramedBytesUnchanged": 61
+    },
+    {
+      "id": "wide-unique-state-cannot-apply-under-native",
+      "originPolicy": "wide",
+      "seedReservations": [
+        "global-exact",
+        "session"
+      ],
+      "member": 0,
+      "operation": "apply",
+      "underPolicy": "native",
+      "mutation": "session",
+      "expectedAdmission": "deny",
+      "expectedReason": "retained-policy-mismatch",
+      "expectedGlobalUniqueFramedBytesUnchanged": 349245
+    },
+    {
+      "id": "wide-unique-state-cannot-append-under-native",
+      "originPolicy": "wide",
+      "seedReservations": [
+        "global-exact",
+        "session"
+      ],
+      "member": 0,
+      "operation": "append_attempt",
+      "underPolicy": "native",
+      "mutation": "session",
+      "expectedAdmission": "deny",
+      "expectedReason": "retained-policy-mismatch",
+      "expectedGlobalUniqueFramedBytesUnchanged": 349245
+    },
+    {
+      "id": "native-state-cannot-reserve-under-wide",
+      "originPolicy": "native",
+      "seedReservations": [
+        "session"
+      ],
+      "member": 0,
+      "operation": "reserve",
+      "underPolicy": "wide",
+      "mutation": "session",
+      "expectedAdmission": "deny",
+      "expectedReason": "retained-policy-mismatch",
+      "expectedGlobalUniqueFramedBytesUnchanged": 61
+    },
+    {
+      "id": "native-state-cannot-use-different-physical-policy",
+      "originPolicy": "native",
+      "seedReservations": [
+        "session"
+      ],
+      "member": 0,
+      "operation": "apply",
+      "underPolicy": "different-physical",
+      "mutation": "session",
+      "expectedAdmission": "deny",
+      "expectedReason": "retained-policy-mismatch",
+      "expectedGlobalUniqueFramedBytesUnchanged": 61
+    },
+    {
+      "id": "native-state-cannot-upgrade-generation-policy",
+      "originPolicy": "native",
+      "seedReservations": [
+        "session"
+      ],
+      "member": 0,
+      "operation": "open_generation",
+      "underPolicy": "different-generations",
+      "mutation": "session",
+      "expectedAdmission": "deny",
+      "expectedReason": "retained-policy-mismatch",
+      "expectedGlobalUniqueFramedBytesUnchanged": 61,
+      "name": "log.1"
+    },
+    {
+      "id": "native-state-cannot-substitute-member-domain",
+      "originPolicy": "native",
+      "seedReservations": [
+        "session"
+      ],
+      "member": 0,
+      "operation": "apply",
+      "underPolicy": "different-members",
+      "mutation": "session",
+      "expectedAdmission": "deny",
+      "expectedReason": "retained-policy-mismatch",
+      "expectedGlobalUniqueFramedBytesUnchanged": 61
+    },
+    {
+      "id": "state-serialization-cannot-relabel-origin-policy",
+      "originPolicy": "wide",
+      "seedReservations": [
+        "global-exact",
+        "session"
+      ],
+      "operation": "serialize-then-decode",
+      "serializePolicy": "native",
+      "decodePolicy": "native",
+      "expectedAdmission": "deny",
+      "expectedReason": "retained-policy-mismatch",
+      "permittedBehavior": "Either serialization explicitly rejects the mismatched supplied policy, or it serializes the retained wide policy so native decode rejects. It must not silently label the saved state native."
+    }
+  ],
+  "restart_positive": {
+    "serializedState": {
+      "schema": "amoebius.zookeeper-history-state.v1",
+      "policy": {
+        "members": [
+          0,
+          1,
+          2
+        ],
+        "snapshotBytes": 1048576,
+        "bootstrapBytes": 1024,
+        "growthFactor": 3,
+        "uniqueFramedBytes": 349184,
+        "physicalBytesPerMember": 349184,
+        "logGenerationsPerMember": 2,
+        "snapshotGenerationsPerMember": 3
+      },
+      "records": [
+        {
+          "zxid": 1,
+          "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+          "canonicalBytes": 36
+        }
+      ],
+      "physical": [
+        {
+          "member": 0,
+          "bytes": 61
+        }
+      ],
+      "logs": [
+        {
+          "member": 0,
+          "names": [
+            "log.1"
+          ]
+        }
+      ],
+      "snapshots": [
+        {
+          "member": 0,
+          "names": [
+            "snapshot.0"
+          ]
+        }
+      ]
+    },
+    "expectedAdmission": "allow",
+    "expectedGlobalUniqueFramedBytes": 61,
+    "expectedPhysicalFramedBytesMember0": 61,
+    "expectedLogsMember0": [
+      "log.1"
+    ],
+    "expectedSnapshotsMember0": [
+      "snapshot.0"
+    ]
+  },
+  "restart_rejection_cases": [
+    {
+      "id": "restart-wrong-schema",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v2",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-policy-physical-one-byte-different",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349185,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-policy-member-domain-different",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-duplicate-record",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          },
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-zxid-zero",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 0,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-canonical-too-short",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 35
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-invalid-hash-length",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "111111111111111111111111111111111111111111111111111111111111111",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-global-one-byte-over",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 3,
+            "canonicalSha256": "7be2fedaf290e3c9a3bbabbd2a9b1e0d4e4e6fba6eea019192ed3ec47b500ca2",
+            "canonicalBytes": 349160
+          }
+        ],
+        "physical": [],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-unknown-physical-member",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 3,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-duplicate-physical-member",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          },
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-physical-one-byte-over",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 349185
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-duplicate-log-member",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          },
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-duplicate-log-name",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1",
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-third-log",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1",
+              "log.2",
+              "log.3"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-fourth-snapshot",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0",
+              "snapshot.1",
+              "snapshot.2",
+              "snapshot.3"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-unknown-member-empty-generation-list",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          },
+          {
+            "member": 3,
+            "names": []
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-noncanonical-generation-leading-zero",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.01"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-generation-zxid-wider-than-long",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.10000000000000000"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-unknown-generation-kind-in-log-map",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.0"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    },
+    {
+      "id": "restart-compressed-generation-unsupported",
+      "serializedState": {
+        "schema": "amoebius.zookeeper-history-state.v1",
+        "policy": {
+          "members": [
+            0,
+            1,
+            2
+          ],
+          "snapshotBytes": 1048576,
+          "bootstrapBytes": 1024,
+          "growthFactor": 3,
+          "uniqueFramedBytes": 349184,
+          "physicalBytesPerMember": 349184,
+          "logGenerationsPerMember": 2,
+          "snapshotGenerationsPerMember": 3
+        },
+        "records": [
+          {
+            "zxid": 1,
+            "canonicalSha256": "40f59f399aafce22737d9c17e95c5b94145417af0fee1b8f01da743fa0b2f707",
+            "canonicalBytes": 36
+          }
+        ],
+        "physical": [
+          {
+            "member": 0,
+            "bytes": 61
+          }
+        ],
+        "logs": [
+          {
+            "member": 0,
+            "names": [
+              "log.1"
+            ]
+          }
+        ],
+        "snapshots": [
+          {
+            "member": 0,
+            "names": [
+              "snapshot.1.gz"
+            ]
+          }
+        ]
+      },
+      "expectedAdmission": "deny"
+    }
+  ],
+  "limits": [
+    "The wide snapshot policy independently derives floor((2097152-1024)/3)=698709. Its two seed reservations cost349184+61=349245, so they fit wide but exceed native349184.",
+    "Exact same policy values are compatible regardless of reconstruction/object identity. A different capacity/member/generation policy requires an explicit future migration design rather than reusing an old witness silently.",
+    "Codec rejection of malformed state is not authentication of an arbitrary well-formed older prefix. Coordinator persistence still needs atomic durable grants, no rollback/reset/new lease over old state, and trusted import lineage. No selected observations supply expectations."
+  ]
+}

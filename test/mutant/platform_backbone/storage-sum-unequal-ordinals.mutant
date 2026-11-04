@@ -1,2 +1,2 @@
-mutation=debit an ordinal sum instead of max rounded bytes times count
-expected_red=uniform MinIO drive debit
+mutation=debit individual raw ordinal sizes instead of each claim template's maximum on the named slot backings
+expected_red=native uniform maximum-slot debit

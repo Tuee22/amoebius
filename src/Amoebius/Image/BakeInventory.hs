@@ -132,8 +132,9 @@ data ChecksumAlgorithm = Sha1 | Sha256 | Sha512
   deriving stock (Bounded, Enum, Eq, Generic, Ord, Show)
   deriving anyclass (Dhall.FromDhall, NFData)
 
--- | `DigestOnly` is a manifest whose entire body is the digest — Grafana and
--- Keycloak publish one file per asset that way. `DigestNamed` is a line-oriented
+-- | `DigestOnly` compares the sole digest in a per-asset manifest. Grafana and
+-- Keycloak omit filenames; MinIO retains an old filename after renaming its
+-- GitHub download. `DigestNamed` selects by filename in a line-oriented
 -- manifest naming what each digest covers; the name may be bare, `./`-prefixed, or
 -- the publisher's own build path, so verification matches the trailing basename
 -- rather than the whole field.

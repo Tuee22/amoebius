@@ -12,12 +12,14 @@ module Amoebius.Vault.Client
   , HttpVaultAddress (..)
   , mkHttpVaultTransport
   , runVaultReadCommand
+  , runVaultReadyCommand
   , runVaultTransitCommand
   , runVaultPromptWriteCommand
   ) where
 
 import Amoebius.Vault.Error
 import Amoebius.Vault.SecretRef
+import Amoebius.Vault.RuntimePath (VaultRuntimeUse (ProjectedJwt), runtimePath, vaultRuntimePath)
 import Control.Exception (IOException, finally, try)
 import Control.Monad (when)
 import Data.Aeson (Value (..), eitherDecodeStrict', encode, object, withObject, (.:), (.=))
@@ -183,26 +185,32 @@ httpReadKv address token mount path field = do
 httpWriteKv :: HttpVaultAddress -> VaultToken -> Text -> Text -> Text -> ByteString -> IO (Either VaultError ())
 httpWriteKv address token mount path field value = do
   let requestPath = "/v1/" <> TextEncoding.encodeUtf8 mount <> "/data/" <> TextEncoding.encodeUtf8 path
-      metadataPath = "/v1/" <> TextEncoding.encodeUtf8 mount <> "/metadata/" <> TextEncoding.encodeUtf8 path
       fieldValue = String (TextEncoding.decodeUtf8 value)
       body = LazyByteString.toStrict (encode (object ["data" .= Object (KeyMap.singleton (Key.fromText field) fieldValue)]))
-      metadata = LazyByteString.toStrict (encode (object ["custom_metadata" .= object ["amoebius-fields" .= field]]))
-  written <- httpJson address "POST" requestPath (Just token) body
-  case written of
-    Left failure -> pure (Left failure)
-    Right (status, payload)
-      | status == 200 || status == 204 -> do
-          marked <- httpJson address "POST" metadataPath (Just token) metadata
-          pure $ case marked of
-            Left failure -> Left failure
-            Right (metadataStatus, metadataPayload)
-              | metadataStatus == 200 || metadataStatus == 204 -> Right ()
-              | otherwise -> Left (readFailure metadataStatus metadataPayload)
-      | otherwise -> pure (Left (readFailure status payload))
+      createBody = LazyByteString.toStrict (encode (object
+        ["data" .= Object (KeyMap.singleton (Key.fromText field) fieldValue), "options" .= object ["cas" .= (0 :: Int)]]))
+      attempt retries = do
+        patched <- httpJson address "PATCH" requestPath (Just token) body
+        case patched of
+          Left failure -> pure (Left failure)
+          Right (status, payload)
+            | status == 200 || status == 204 -> pure (Right ())
+            | status == 404 -> do
+                created <- httpJson address "POST" requestPath (Just token) createBody
+                case created of
+                  Left failure -> pure (Left failure)
+                  Right (createdStatus, createdPayload)
+                    | createdStatus == 200 || createdStatus == 204 -> pure (Right ())
+                    | createdStatus == 400 && retries > 0 -> attempt (retries - 1)
+                    | otherwise -> pure (Left (readFailure createdStatus createdPayload))
+            | otherwise -> pure (Left (readFailure status payload))
+  -- PATCH preserves unrelated fields. CAS=0 prevents a concurrent creator's
+  -- fields being overwritten between a missing PATCH and initial creation.
+  attempt (2 :: Int)
 
 httpKvFieldExists :: HttpVaultAddress -> VaultToken -> Text -> Text -> Text -> IO (Either VaultError Bool)
 httpKvFieldExists address token mount path field = do
-  let requestPath = "/v1/" <> TextEncoding.encodeUtf8 mount <> "/metadata/" <> TextEncoding.encodeUtf8 path
+  let requestPath = "/v1/" <> TextEncoding.encodeUtf8 mount <> "/subkeys/" <> TextEncoding.encodeUtf8 path <> "?depth=1"
   response <- httpJson address "GET" requestPath (Just token) ByteString.empty
   pure $ do
     (status, payload) <- response
@@ -251,13 +259,14 @@ parseKvField field = withObject "kv-response" $ \root -> do
       _ -> fail "secret-field-missing") innerData) outerData
 
 parseKvPresence :: Text -> Value -> Parser Bool
-parseKvPresence field = withObject "kv-metadata-response" $ \root -> do
-  metadata <- root .: "data"
-  withObject "kv-metadata" (\fields -> do
-    custom <- fields .: "custom_metadata"
-    withObject "kv-custom-metadata" (\values -> case KeyMap.lookup "amoebius-fields" values of
-      Just (String names) -> pure (field `elem` Text.splitOn "," names)
-      _ -> pure False) custom) metadata
+parseKvPresence field = withObject "kv-subkeys-response" $ \root -> do
+  body <- root .: "data"
+  withObject "kv-subkeys-data" (\fields -> do
+    subkeys <- fields .: "subkeys"
+    case subkeys of
+      Null -> pure False
+      Object values -> pure (KeyMap.member (Key.fromText field) values)
+      _ -> fail "invalid-secret-subkeys") body
 
 parseTransitPlaintext :: Value -> Parser ByteString
 parseTransitPlaintext = withObject "transit-response" $ \root -> do
@@ -303,10 +312,11 @@ requestBytes address method path token body = do
       let tokenHeader = case token of
             Nothing -> ByteString.empty
             Just (VaultToken value) -> "X-Vault-Token: " <> value <> "\r\n"
+          contentType = if method == "PATCH" then "application/merge-patch+json" else "application/json"
           request =
             method <> " " <> path <> " HTTP/1.1\r\n"
               <> "Host: " <> ByteString8.pack (vaultHost address) <> "\r\n"
-              <> "Accept: application/json\r\nContent-Type: application/json\r\nConnection: close\r\n"
+              <> "Accept: application/json\r\nContent-Type: " <> contentType <> "\r\nConnection: close\r\n"
               <> tokenHeader
               <> "Content-Length: " <> ByteString8.pack (show (ByteString.length body)) <> "\r\n\r\n"
               <> body
@@ -345,10 +355,15 @@ readInt value = case reads (ByteString8.unpack value) of
   [(number, "")] -> Just number
   _ -> Nothing
 
+readProjectedJwt :: FilePath -> IO ByteString
+readProjectedJwt input = do
+  source <- either fail pure (vaultRuntimePath ProjectedJwt input)
+  ByteString8.strip <$> ByteString.readFile (runtimePath source)
+
 runVaultReadCommand :: [String] -> IO ()
 runVaultReadCommand arguments = case arguments of
   [host, port, role, namespace, serviceAccount, mount, path, field, jwtPath] -> do
-    jwt <- ByteString8.strip <$> ByteString.readFile jwtPath
+    jwt <- readProjectedJwt jwtPath
     reference <- either (fail . Text.unpack) pure (vaultSecretRef (Text.pack mount) (Text.pack path) (Text.pack field))
     let identity = KubernetesIdentity (Text.pack namespace) (Text.pack serviceAccount) (Text.pack role)
     result <- resolveSecret (mkHttpVaultTransport (HttpVaultAddress host port)) identity jwt reference Nothing
@@ -357,10 +372,27 @@ runVaultReadCommand arguments = case arguments of
       Right value -> ByteString8.putStrLn value
   _ -> fail "usage: vault-read HOST PORT ROLE NAMESPACE SERVICEACCOUNT MOUNT PATH FIELD JWT_PATH"
 
+runVaultReadyCommand :: [String] -> IO ()
+runVaultReadyCommand arguments = case arguments of
+  [host, port, role, namespace, serviceAccount, mount, path, field, jwtPath] -> do
+    jwt <- readProjectedJwt jwtPath
+    reference <- either (fail . Text.unpack) pure (vaultSecretRef (Text.pack mount) (Text.pack path) (Text.pack field))
+    let identity = KubernetesIdentity (Text.pack namespace) (Text.pack serviceAccount) (Text.pack role)
+    result <- assertSecretsPresent (mkHttpVaultTransport (HttpVaultAddress host port)) identity jwt [reference]
+    case result of
+      Right () -> pure ()
+      Left failure -> do
+        let cause = case failure of
+              SecretPresenceBackend backend -> backend
+              MissingSecrets _ -> VaultSecretMissing
+        hPutStrLn stderr (Text.unpack (redactedErrorLog cause))
+        exitFailure
+  _ -> fail "usage: vault-ready HOST PORT ROLE NAMESPACE SERVICEACCOUNT MOUNT PATH FIELD JWT_PATH"
+
 runVaultTransitCommand :: [String] -> IO ()
 runVaultTransitCommand arguments = case arguments of
   [host, port, role, namespace, serviceAccount, key, ciphertext, jwtPath] -> do
-    jwt <- ByteString8.strip <$> ByteString.readFile jwtPath
+    jwt <- readProjectedJwt jwtPath
     reference <- either (fail . Text.unpack) pure (transitKeyRef (Text.pack key))
     let identity = KubernetesIdentity (Text.pack namespace) (Text.pack serviceAccount) (Text.pack role)
     result <- resolveSecret (mkHttpVaultTransport (HttpVaultAddress host port)) identity jwt reference (Just (ByteString8.pack ciphertext))
@@ -372,7 +404,7 @@ runVaultTransitCommand arguments = case arguments of
 runVaultPromptWriteCommand :: [String] -> IO ()
 runVaultPromptWriteCommand arguments = case arguments of
   [host, port, role, namespace, serviceAccount, mount, path, field, jwtPath, name, purpose] -> do
-    jwt <- ByteString8.strip <$> ByteString.readFile jwtPath
+    jwt <- readProjectedJwt jwtPath
     reference <- either (fail . Text.unpack) pure (promptRef (Text.pack name) (Text.pack purpose))
     value <- readSecretPrompt (Text.pack name) (Text.pack purpose)
     let identity = KubernetesIdentity (Text.pack namespace) (Text.pack serviceAccount) (Text.pack role)

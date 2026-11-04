@@ -1,0 +1,118 @@
+{
+  "schema": "phase30.independent-source-model-corpus.v1",
+  "provenance": "Independent synthetic design inputs and literals. Pulsar framing follows v4.0.6 non-streaming V1 and BookKeeper4.17.2 protobuf. Encryption primitives follow the pinned nonconvergent Vault Transit AES256-GCM96 profile. Checkpoint and control wire choices are explicitly proposed capacity models, not evidence about existing Phase42/44 runtimes.",
+  "checkpoint_model": {
+    "id": "checkpoint-json-dek-transit-v1",
+    "plaintext_format": "compact sorted UTF8 JSON, no LF: {\"entries\":{resource:{path:value or {\"secret\":value}}},\"stack\":stack}",
+    "field_bound_includes": "the complete canonical JSON value bytes, including string quotes/escapes; excludes its field name and the optional Secret wrapper",
+    "secret_wrapper_bytes": 11,
+    "encryption": {"algorithm":"AES-256-GCM","dek_bytes":32,"nonce_bytes":12,"tag_bytes":16,"vault_key_type":"aes256-gcm96","vault_version":1,"vault_convergent":false,"vault_version_template":"vault:v{{version}}:"},
+    "outer_format": "compact sorted JSON: {\"ciphertext\":\"BASE64(ciphertext||tag)\",\"key\":\"Transit-wrapped-DEK\",\"nonce\":\"BASE64(nonce)\"}",
+    "outer_json_framing_bytes": 37,
+    "wrapped_dek_ascii_bytes": 89,
+    "encoded_nonce_bytes": 16,
+    "stored_extent_formula": "142 + 4*ceil((plaintext_bytes+16)/3)",
+    "retention_semantics": "R counts retained committed whole-checkpoint generations including current; one serial candidate is additional; failures are ceil(horizon/window)*rate additional full checkpoint generations",
+    "cases": [
+      {"id":"plain-and-secret","stack":"s","entries":{"r":{"a":{"secrecy":"Plain","maximum_canonical_bytes":4,"example_value":null},"b":{"secrecy":"Secret","maximum_canonical_bytes":5,"example_value":false}}},"expected_plaintext_bytes":61,"expected_stored_bytes":246},
+      {"id":"utf8-and-json-escaping","stack":"π","entries":{"r\n\"":{"é\\x":{"secrecy":"Plain","maximum_canonical_bytes":2,"example_value":[]},"😀":{"secrecy":"Secret","maximum_canonical_bytes":4,"example_value":null}}},"expected_plaintext_bytes":70,"expected_stored_bytes":258},
+      {"id":"base64-before-boundary","stack":"s","entries":{"r":{"a":{"secrecy":"Plain","maximum_canonical_bytes":4,"example_value":null}}},"expected_plaintext_bytes":40,"expected_stored_bytes":218},
+      {"id":"base64-exact-boundary","stack":"s","entries":{"r":{"a":{"secrecy":"Plain","maximum_canonical_bytes":5,"example_value":false}}},"expected_plaintext_bytes":41,"expected_stored_bytes":218},
+      {"id":"base64-one-byte-over","stack":"s","entries":{"r":{"a":{"secrecy":"Plain","maximum_canonical_bytes":6,"example_value":"abcd"}}},"expected_plaintext_bytes":42,"expected_stored_bytes":222}
+    ],
+    "string_encoding_cases": [
+      {"value":"π","json_utf8_bytes":4},
+      {"value":"r\n\"","json_utf8_bytes":7},
+      {"value":"é\\x","json_utf8_bytes":7},
+      {"value":"😀","json_utf8_bytes":6}
+    ],
+    "revision_horizon_cases": [
+      {"id":"one-retained","retained_revisions":1,"failure_window_seconds":30,"failed_sets_per_window":1,"orphan_horizon_seconds":61,"failed_generations":3,"object_count":5,"logical_bytes":1230},
+      {"id":"two-retained","retained_revisions":2,"failure_window_seconds":30,"failed_sets_per_window":1,"orphan_horizon_seconds":61,"failed_generations":3,"object_count":6,"logical_bytes":1476},
+      {"id":"three-retained","retained_revisions":3,"failure_window_seconds":30,"failed_sets_per_window":1,"orphan_horizon_seconds":61,"failed_generations":3,"object_count":7,"logical_bytes":1722},
+      {"id":"horizon-29","retained_revisions":2,"failure_window_seconds":30,"failed_sets_per_window":1,"orphan_horizon_seconds":29,"failed_generations":1,"object_count":4,"logical_bytes":984},
+      {"id":"horizon-30","retained_revisions":2,"failure_window_seconds":30,"failed_sets_per_window":1,"orphan_horizon_seconds":30,"failed_generations":1,"object_count":4,"logical_bytes":984},
+      {"id":"horizon-31","retained_revisions":2,"failure_window_seconds":30,"failed_sets_per_window":1,"orphan_horizon_seconds":31,"failed_generations":2,"object_count":5,"logical_bytes":1230},
+      {"id":"horizon-60","retained_revisions":2,"failure_window_seconds":30,"failed_sets_per_window":1,"orphan_horizon_seconds":60,"failed_generations":2,"object_count":5,"logical_bytes":1230},
+      {"id":"two-failures-per-window","retained_revisions":2,"failure_window_seconds":30,"failed_sets_per_window":2,"orphan_horizon_seconds":61,"failed_generations":6,"object_count":9,"logical_bytes":2214}
+    ],
+    "quota_boundaries": [
+      {"id":"exact","bytes":1476,"objects":6,"expected":"accept"},
+      {"id":"one-byte-short","bytes":1475,"objects":6,"expected":"reject"},
+      {"id":"one-object-short","bytes":1476,"objects":5,"expected":"reject"}
+    ]
+  },
+  "control_model": {
+    "id":"control-transit-v1",
+    "format":"one raw ASCII Transit ciphertext per exact canonical record; no JSON quotes, envelope object or newline around it",
+    "stored_extent_formula":"9 + 4*ceil((maximum_canonical_bytes+28)/3)",
+    "profile":{"key_type":"aes256-gcm96","version":1,"convergent":false,"version_template":"vault:v{{version}}:"},
+    "entries":[
+      {"identity":"inforce","kind":"InForceSpecSnapshot","example_value":null,"maximum_canonical_bytes":4,"expected_stored_bytes":53},
+      {"identity":"registry","kind":"ManagedResourceRegistry","example_value":false,"maximum_canonical_bytes":5,"expected_stored_bytes":53},
+      {"identity":"journal","kind":"ReconcileJournal","example_value":[],"maximum_canonical_bytes":2,"expected_stored_bytes":49},
+      {"identity":"validation","kind":"ValidationLedger","example_value":123,"maximum_canonical_bytes":3,"expected_stored_bytes":53},
+      {"identity":"job","kind":"JobCompletion","example_value":"abcd","maximum_canonical_bytes":6,"expected_stored_bytes":57}
+    ],
+    "example_semantics":"The example JSON values test encoding arithmetic only. They do not claim to be valid production payload schemas for these five record kinds.",
+    "retained_versions":2,
+    "failure_window_seconds":30,"failed_sets_per_window":1,"orphan_horizon_seconds":61,
+    "expected_failed_generations_per_entry":3,
+    "expected_total_object_count":30,"expected_total_logical_bytes":1590,
+    "quota_boundaries":[
+      {"id":"exact","bytes":1590,"objects":30,"expected":"accept"},
+      {"id":"one-byte-short","bytes":1589,"objects":30,"expected":"reject"},
+      {"id":"one-object-short","bytes":1590,"objects":29,"expected":"reject"}
+    ]
+  },
+  "pulsar_nonstreaming_v1": {
+    "pulsar_version":"4.0.6","bookkeeper_metadata_version":"4.17.2",
+    "data_block_header_bytes":128,"per_entry_header_bytes":12,
+    "index_fixed_header_bytes":32,"index_bytes_per_uploaded_block":20,
+    "data_key":"<UUID>-ledger-<ledgerId>","index_key":"<UUID>-ledger-<ledgerId>-index",
+    "metadata_profile":{"ensemble_size":3,"write_quorum":2,"ack_quorum":2,"state":"CLOSED","digest_type":"CRC32C","ctime":0,"ensemble_history":[{"first_entry_id":0,"members":["b0:3181","b1:3181","b2:3181"]}],"custom_metadata":[]},
+    "cases":[
+      {"id":"one-tiny-entry","entry_body_bytes":[1],"maximum_block_bytes":5242880,"metadata_bytes":47,"block_lengths":[141],"data_bytes":141,"index_bytes":99,"expected_current_gateway_admission":"accept"},
+      {"id":"two-small-entries","entry_body_bytes":[3,5],"maximum_block_bytes":5242880,"metadata_bytes":47,"block_lengths":[160],"data_bytes":160,"index_bytes":99,"expected_current_gateway_admission":"accept"},
+      {"id":"metadata-varint-before","entry_body_bytes":[127],"maximum_block_bytes":5242880,"metadata_bytes":47,"block_lengths":[267],"data_bytes":267,"index_bytes":99,"expected_current_gateway_admission":"accept"},
+      {"id":"metadata-varint-after","entry_body_bytes":[128],"maximum_block_bytes":5242880,"metadata_bytes":48,"block_lengths":[268],"data_bytes":268,"index_bytes":100,"expected_current_gateway_admission":"accept"},
+      {"id":"two-4096-byte-ledger-entries","entry_body_bytes":[4096,4096],"maximum_block_bytes":5242880,"metadata_bytes":48,"block_lengths":[8344],"data_bytes":8344,"index_bytes":100,"expected_current_gateway_admission":"accept"},
+      {"id":"custom-metadata-is-not-free","entry_body_bytes":[3,5],"maximum_block_bytes":5242880,"custom_metadata":[{"key":"k","value_utf8":"v"}],"metadata_bytes":55,"block_lengths":[160],"data_bytes":160,"index_bytes":107,"expected_current_gateway_admission":"accept"},
+      {"id":"custom-metadata-utf8-key","entry_body_bytes":[3,5],"maximum_block_bytes":5242880,"custom_metadata":[{"key":"π","value_utf8":"v"}],"metadata_bytes":56,"block_lengths":[160],"data_bytes":160,"index_bytes":108,"expected_current_gateway_admission":"accept"},
+      {"id":"retained-second-ensemble","entry_body_bytes":[3,5],"maximum_block_bytes":5242880,"ensemble_history":[{"first_entry_id":0,"members":["b0:3181","b1:3181","b2:3181"]},{"first_entry_id":1,"members":["b0:3181","b1:3181","b3:3181"]}],"metadata_bytes":78,"block_lengths":[160],"data_bytes":160,"index_bytes":130,"expected_current_gateway_admission":"accept"},
+      {"id":"whole-entry-padding-multiple-blocks","entry_body_bytes":[3145728,3145728],"maximum_block_bytes":5242880,"metadata_bytes":50,"block_lengths":[5242880,3145868],"data_bytes":8388748,"index_bytes":122,"expected_current_gateway_admission":"reject"}
+    ],
+    "explicit_retained_population_case":{
+      "object_case":"two-small-entries",
+      "known_retained_ledgers":2,
+      "retained_data_keys":["00000000-0000-0000-0000-000000000000-ledger-1","00000000-0000-0000-0000-000000000000-ledger-2"],
+      "retention_horizon_seconds":61,
+      "maximum_concurrent_offloads":1,
+      "maximum_segments_per_offload_window":2,"offload_window_seconds":30,"deletion_lag_seconds":61,
+      "maximum_failed_sets_per_window":1,"failure_window_seconds":30,"orphan_horizon_seconds":61,
+      "expected_future_ledgers":6,"expected_deletion_lag_ledgers":6,"expected_failed_ledgers":3,
+      "admission_extent_quantum":1,
+      "expected_total_ledger_pairs":18,"expected_total_object_count":36,"expected_total_logical_bytes":4662,
+      "rounded_alternative":{"admission_extent_quantum":256,"future_data_extent_bytes":256,"future_index_extent_bytes":256,"retained_pair_extent_bytes":259,"expected_total_object_count":36,"expected_total_logical_bytes":8710},
+      "premise":"The two retained ledger identities/count are explicit synthetic inputs. Their count is not inferred by dividing retained bytes by a maximum segment size."
+    }
+  },
+  "required_rejections":[
+    {"id":"unsupported-checkpoint-model","model":"checkpoint-json-dek-transit-v2","expected":"reject"},
+    {"id":"unsupported-control-model","model":"control-transit-v10","expected":"reject"},
+    {"id":"unsupported-transit-key-version","version":10,"expected":"reject or use a separately versioned recomputed model"},
+    {"id":"unsupported-convergent-profile","convergent":true,"expected":"reject"},
+    {"id":"unsupported-version-template","version_template":"custom:{{version}}:","expected":"reject"},
+    {"id":"empty-checkpoint-entry-domain","expected":"reject"},
+    {"id":"empty-checkpoint-field-domain","expected":"reject"},
+    {"id":"duplicate-raw-resource-or-field-identities-before-map-construction","expected":"reject"},
+    {"id":"empty-control-domain","expected":"reject"},
+    {"id":"unrecognized-control-record-kind","kind":"OtherBytes","expected":"reject"},
+    {"id":"zero-canonical-bound","expected":"reject"},
+    {"id":"zero-retained-generations","expected":"reject"},
+    {"id":"zero-failure-window-or-orphan-horizon-or-rate","expected":"reject"},
+    {"id":"pulsar-entry-too-large-to-progress-within-one-block","expected":"reject before allocating or sending a zero-entry padding block"},
+    {"id":"pulsar-unknown-unbounded-entry-count-or-metadata","expected":"reject"},
+    {"id":"pulsar-retained-count-from-maximum-segment-size-alone","expected":"reject unless an independently enforced packing/minimum-fill or finite ledger-count premise is supplied"}
+  ]
+}

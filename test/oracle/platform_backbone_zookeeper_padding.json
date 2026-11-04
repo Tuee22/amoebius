@@ -1,0 +1,108 @@
+{
+  "schema": "phase30.independent.zookeeper-file-padding.v1",
+  "basis": "Pinned FileTxnLog flushes16byte header and sets currentSize16 before FilePadding.padFile. Literal cases are primary-source arithmetic; no actual log extent supplies an expectation.",
+  "source": "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/persistence/FilePadding.java",
+  "profile": {
+    "jvmProperty": "-Dzookeeper.preAllocSize=16380",
+    "units": "KiB",
+    "quantumBytes": 16773120,
+    "headerBytes": 16,
+    "firstPaddedFileBytes": 16773136,
+    "firstPaddedFileRoundedTo4096": 16777216,
+    "maximumLogExtentBytes": 16777216,
+    "padTriggerPosition": 16769040,
+    "maximumFinalFramedRecordBytesWithoutAnotherPaddingCheck": 16769023,
+    "strictFinalCensusCondition": "16 + serializedFramedRecordBytes < 16769040",
+    "caveat": "This only proves when a padding call can grow the first extent. A largest next write and actual cumulative bytes need their separate bound; restart/log/snapshot generation overlap remains charged."
+  },
+  "cases": [
+    {
+      "id": "small-initial-header",
+      "position": 16,
+      "currentSize": 16,
+      "quantumBytes": 8192,
+      "expectedFileSize": 8208,
+      "expectedWithin16MiBCap": true
+    },
+    {
+      "id": "small-one-before-pad-trigger",
+      "position": 4111,
+      "currentSize": 8208,
+      "quantumBytes": 8192,
+      "expectedFileSize": 8208,
+      "expectedWithin16MiBCap": true
+    },
+    {
+      "id": "small-exact-pad-trigger",
+      "position": 4112,
+      "currentSize": 8208,
+      "quantumBytes": 8192,
+      "expectedFileSize": 16400,
+      "expectedWithin16MiBCap": true
+    },
+    {
+      "id": "small-written-past-allocation-rounds",
+      "position": 8210,
+      "currentSize": 8208,
+      "quantumBytes": 8192,
+      "expectedFileSize": 16384,
+      "expectedWithin16MiBCap": true
+    },
+    {
+      "id": "old-16384kib-initial-exceeds-cap",
+      "position": 16,
+      "currentSize": 16,
+      "quantumBytes": 16777216,
+      "expectedFileSize": 16777232,
+      "expectedWithin16MiBCap": false
+    },
+    {
+      "id": "new-16380kib-initial-fits-cap",
+      "position": 16,
+      "currentSize": 16,
+      "quantumBytes": 16773120,
+      "expectedFileSize": 16773136,
+      "expectedWithin16MiBCap": true
+    },
+    {
+      "id": "new-one-before-pad-trigger",
+      "position": 16769039,
+      "currentSize": 16773136,
+      "quantumBytes": 16773120,
+      "expectedFileSize": 16773136,
+      "expectedWithin16MiBCap": true
+    },
+    {
+      "id": "new-exact-pad-trigger-exceeds-cap",
+      "position": 16769040,
+      "currentSize": 16773136,
+      "quantumBytes": 16773120,
+      "expectedFileSize": 33546256,
+      "expectedWithin16MiBCap": false
+    },
+    {
+      "id": "new-written-past-allocation-rounds",
+      "position": 16773137,
+      "currentSize": 16773136,
+      "quantumBytes": 16773120,
+      "expectedFileSize": 33546240,
+      "expectedWithin16MiBCap": false
+    },
+    {
+      "id": "proposed-history-cap-end-is-far-below-trigger",
+      "position": 349200,
+      "currentSize": 16773136,
+      "quantumBytes": 16773120,
+      "expectedFileSize": 16773136,
+      "expectedWithin16MiBCap": true
+    },
+    {
+      "id": "zero-quantum-no-padding",
+      "position": 16,
+      "currentSize": 16,
+      "quantumBytes": 0,
+      "expectedFileSize": 16,
+      "expectedWithin16MiBCap": true
+    }
+  ]
+}

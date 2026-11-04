@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -51,6 +52,7 @@ import Amoebius.Capacity.Storage
   , StorageAmount (..)
   )
 import Control.DeepSeq (NFData)
+import Control.Monad (unless)
 import Data.List (sortOn)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
@@ -127,6 +129,8 @@ data ProvisionedVolumeDemand = ProvisionedVolumeDemand
   , provisionedBytes :: Natural
   , provisionedGeometryWitness :: GeometryWitness
   , provisionedBackingWitness :: StorageWitness
+  , provisionedAllocationPolicy :: BackingAllocationPolicy
+  , provisionedPresentation :: FilesystemPresentation
   }
   deriving stock (Eq, Generic, Ord, Show)
   deriving anyclass (NFData)
@@ -135,6 +139,9 @@ data UniformClaimWitness = UniformClaimWitness
   { uniformClaimBytesByBacking :: Map BackingId Natural
   , uniformMemberBytesByBacking :: Map BackingId Natural
   , uniformMembersByBacking :: Map BackingId Natural
+  , uniformMemberBytesByTemplate :: Map (Text, Text) Natural
+  , uniformBytesBySlot :: Map StatefulSetClaimSlot Natural
+  , uniformBackingBySlot :: Map StatefulSetClaimSlot BackingId
   }
   deriving stock (Eq, Generic, Ord, Show)
   deriving anyclass (NFData)
@@ -312,17 +319,48 @@ provisionVolume demand = do
       , provisionedBytes = rounded
       , provisionedGeometryWitness = geometry
       , provisionedBackingWitness = backingWitness
+      , provisionedAllocationPolicy = backingAllocation (volumeBacking demand)
+      , provisionedPresentation = volumePresentation demand
       }
 
 uniformStatefulSetClaims :: [ProvisionedVolumeDemand] -> Either StorageError UniformClaimWitness
 uniformStatefulSetClaims demands = do
-  let groups = Map.fromListWith (<>) [(provisionedBacking demand, [demand]) | demand <- demands]
-      memberBytes = fmap (maximumTotal . fmap provisionedBytes) groups
+  unless (length demands == Set.size (Set.fromList (fmap provisionedClaim demands))
+    && length demands == Set.size (Set.fromList (fmap provisionedVolumeId demands)))
+    (Left (InvalidStorageGeometry "duplicate claim slot or volume identity"))
+  let template demand = (claimStatefulSet (provisionedClaim demand), claimTemplate (provisionedClaim demand))
+      templates = Map.fromListWith (<>) [(template demand, [demand]) | demand <- demands]
+      templateBytes = fmap (maximumTotal . fmap provisionedBytes) templates
+      groups = Map.fromListWith (<>) [(provisionedBacking demand, [demand]) | demand <- demands]
+      memberBytes = fmap (maximumTotal . fmap (\demand -> Map.findWithDefault 0 (template demand) templateBytes)) groups
       members = fmap (fromIntegral . length) groups
-      debit = Map.intersectionWith (*) memberBytes members
+      bytesBySlot = Map.fromList [(provisionedClaim demand, Map.findWithDefault 0 (template demand) templateBytes) | demand <- demands]
+      backingBySlot = Map.fromList [(provisionedClaim demand, provisionedBacking demand) | demand <- demands]
+#ifdef PLATFORM_BACKBONE_SUM_ORDINALS_MUTANT
+      debit = fmap (sum . fmap provisionedBytes) groups
+#else
+      debit = Map.fromListWith (+) [(provisionedBacking demand, Map.findWithDefault 0 (provisionedClaim demand) bytesBySlot) | demand <- demands]
+#endif
+  mapM_ (\group -> case group of
+    [] -> Right ()
+    first : rest -> unless (all ((== provisionedAllocationPolicy first) . provisionedAllocationPolicy) rest)
+      (Left (InvalidStorageGeometry "one uniform template cannot mix allocation policies"))) (Map.elems templates)
+  mapM_ (\group -> case group of
+    [] -> Right ()
+    first : rest -> unless (all ((== provisionedPresentation first) . provisionedPresentation) rest)
+      (Left (InvalidStorageGeometry "one uniform template cannot mix presentation models"))) (Map.elems templates)
+  mapM_ (\group -> case group of
+    [] -> Right ()
+    first : rest -> unless (all ((== available first) . available) rest)
+      (Left (InvalidStorageGeometry "conflicting capacities for one backing identity"))) (Map.elems groups)
+  mapM_ (\group -> case group of
+    [] -> Right ()
+    first : rest -> unless (all ((== provisionedAllocationPolicy first) . provisionedAllocationPolicy) rest)
+      (Left (InvalidStorageGeometry "conflicting allocation policies for one backing identity"))) (Map.elems groups)
   mapM_ (checkGroup debit) (Map.toList groups)
-  pure (UniformClaimWitness debit memberBytes members)
+  pure (UniformClaimWitness debit memberBytes members templateBytes bytesBySlot backingBySlot)
  where
+  available = amountBytes . witnessAvailable . provisionedBackingWitness
   checkGroup debit (owner, group) = case group of
     [] -> Right ()
     firstDemand : _ ->

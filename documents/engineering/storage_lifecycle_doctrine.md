@@ -711,7 +711,12 @@ To keep the SSoT boundaries crisp:
 Phase 29 exercised the Phase-28 retained-storage contract with the real root Vault: a 128 MiB fixed ext4 Raft
 image and a separate 64 MiB fixed ext4 rotated-audit image survived deletion of the kind node and every PV/PVC
 API object, rebound in a fresh cluster, and recovered the same Vault cluster id, canary, and PKI root by unseal
-only. The live Raft and audit high-water measurements remained below observed usable capacity. The proof ran on
+only. Both images and their parent pool are physically reserved; retry preserves existing bytes and a full
+claim cannot spill into sibling or parent space. External raw observations cover two distinct FSM databases
+during authenticated snapshot installation, compacted Raft prefixes, and committed suffix recovery. The
+reader allows only the pinned Raft library's independently observed restore-index hole. The native audit
+sink enforces bounded files, rotation, and retention. Current validation belongs to
+[Phase 29](../../DEVELOPMENT_PLAN/phase_29_vault_pki.md). The live high-water remains below observed usable capacity on
 the universally available `linux-cpu` lane; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or
 WSL2 on Windows.
 

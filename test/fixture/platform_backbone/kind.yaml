@@ -4,6 +4,11 @@ networking:
   apiServerAddress: 127.0.0.1
 nodes:
 - role: control-plane
+  kubeadmConfigPatches:
+  - |
+    kind: KubeletConfiguration
+    containerLogMaxSize: 1Mi
+    containerLogMaxFiles: 3
   extraMounts:
   - hostPath: __RETAINED_MOUNTS__
     containerPath: /amoebius-retained

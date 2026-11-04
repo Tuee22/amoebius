@@ -622,15 +622,18 @@ invoked by full path — there is no `PATH`-based discovery anywhere in the brin
 ### Validated Vault readiness floor
 
 Phase 29 supplied the first live amoebius proof of the Vault readiness edge: a secret consumer stayed blocked
-while Vault was sealed, then authenticated through `auth/kubernetes/login` and read the exact canary only after
-unseal. A real cluster delete/recreate retained Vault state and the PKI root without re-initialization. This was
-validated on `linux-cpu`, which every hardware substrate can always provide; use Incus on Linux/Linux-CUDA,
+while its named field was missing or Vault was sealed. Its native presence-only readiness probe uses the
+authoritative KV-v2 subkeys endpoint; it becomes ready after the ordinary scoped prompt write and unseal.
+The built-in client authenticates through `auth/kubernetes/login` and reads a fresh challenge. A real cluster
+delete/recreate retains Vault state and the PKI root without re-initialization. Current validation is owned
+by [Phase 29](../../DEVELOPMENT_PLAN/phase_29_vault_pki.md), on `linux-cpu`, which every hardware substrate can provide;
+use Incus on Linux/Linux-CUDA,
 Lima on Apple, or WSL2 on Windows when a pristine Linux host is required. The remaining service-DAG edges are
 owned by their later phases.
 
 ### Validated Phase-30 backbone
 
-Phase 30 live-tested MetalLB, distributed MinIO, the registry's MinIO S3 rehome, and Pulsar's
+The historical Phase-30 run live-tested MetalLB, distributed MinIO, the registry's MinIO S3 rehome, and Pulsar's
 ZooKeeper/BookKeeper/broker topology. External observations covered a stable reachable VIP, MinIO byte
 identity, registry source stability and target objects, native Pulsar CBOR/dedup traffic, size-triggered
 offload, and a hot tier below its committed cap. Fifty-three SSA-owned object projections and eleven freshly
@@ -638,6 +641,12 @@ rendered Haskell execution-unit projections were byte-identical to the live fiel
 image ID resolved to the baked Phase-25 digest and no public pull was observed. This is tested on `linux-cpu`,
 not a proof of third-party consensus or multi-zone HA. Every hardware substrate can always run `linux-cpu`;
 when a pristine Linux host is needed, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+That historical observation used a small fabricated registry artifact and compared selected manifest fields;
+it does not establish the complete source, migration, geometry, and resource identities required by the
+current [Phase-30 contract](../../DEVELOPMENT_PLAN/phase_30_platform_backbone.md). The native successor
+provisions the exact Phase-25 digest inventory, structural source populations, whole retained inventory,
+and complete execution envelopes before its live effects. Its full renderer, writer admission, and live
+acceptance remain obligations of that contract.
 
 ### Validated Phase-31 service set
 

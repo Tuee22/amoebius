@@ -68,17 +68,11 @@ catalog rather than hand-maintained. The build/publish contract, the acquisition
 host-bootstrap exception are owned by the
 [image-build doctrine](./documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster).
 
-**Observed implementation — refreshed 2026-08-16.** Phases 0–29 are Done under the repository-containment gate,
-Phase 30 is Active, and Phases 31–64 are Blocked. Phase 29 verifies the exact Phase-28 seal and Phase-25 OCI
-handoff, proves init-once retained Vault and PKI identity across a genuine private-cluster delete/recreate,
-rejects the cleartext test seam in production, destroys its marker-owned fixture, and retains only run
-evidence under `.build/**`.
-Earlier capability results remain historical evidence until their owner phase reruns; later tools still contain
-legacy repository-root, system-temp, user-home, and host-global container-engine assumptions. The exact
-current and historical divergences, their owners, and their closure conditions are recorded in the
-[legacy register](./DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md); the
-[development-plan tracker](./DEVELOPMENT_PLAN/README.md#current-implementation-audit) controls migration order
-and is the authority on status.
+Current implementation status and validation boundaries live in the
+[development-plan tracker](./DEVELOPMENT_PLAN/README.md#current-implementation-audit).
+It records reopened gates, external prerequisites, and the next permitted phase. The
+[legacy register](./DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) records each current or historical
+divergence, its owner, and its closure condition.
 
 The binary manages Kubernetes cluster lifecycle and interprets checked `.dhall` values into opinionated
 deployments and bounded low-code applications. A low-code app is finite `UiSource` data compiled into matching

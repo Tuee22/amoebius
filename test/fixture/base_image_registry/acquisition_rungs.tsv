@@ -11,6 +11,17 @@
 # chronology is Git-established. A catalog reconciled against its own value would pass for any
 # catalog, including one that scavenges everything.
 #
+# 2026-11-02 amendment, accepted after user-delegated assistant review: obsolete Ubuntu pins
+# are replaced from publisher Packages.xz indexes for BOTH architectures, before
+# any catalog change. Index roots: https://archive.ubuntu.com/ubuntu/dists/ and
+# https://ports.ubuntu.com/ubuntu-ports/dists/, noble-updates/{main,universe}/
+# binary-{amd64,arm64}/Packages.xz. The user explicitly asked the assistant to
+# evaluate and decide on both the Ubuntu and MinIO amendments; this is assistant
+# review against independent publisher data, not a claim of separate human review.
+# The Dockerfile.golden apt layer is amended from the same
+# intended coordinates, including acquisition tools ca-certificates
+# 20260816ubuntu0.24.04.1 and curl 8.5.0-2ubuntu10.16; unzip is unchanged.
+#
 # Every row was verified against the publisher or the archive, for BOTH linux/amd64 and
 # linux/arm64, before it was written here — not recalled. The apt rows were confirmed against
 # `apt-cache policy` in a real `ubuntu:24.04` container and against the `ports.ubuntu.com`
@@ -26,15 +37,15 @@
 
 # --- rung 1: apt, where Ubuntu 24.04 ships the binary for both arches ------------------
 distribution	AptPackage	docker-registry 2.8.2+ds1-1ubuntu0.24.04.3, identical on both arches (noble-updates/universe); ships /usr/bin/docker-registry
-redis-server	AptPackage	redis-server 5:7.0.15-1ubuntu0.24.04.4, identical on both arches (noble-updates/universe); apt gives 7.0.15 where the scavenged image gave 7.4.5, and /usr/bin/redis-server is a symlink onto the redis-check-rdb multi-call ELF rather than an ELF of its own
-redis-cli	AptPackage	redis-tools 5:7.0.15-1ubuntu0.24.04.4, identical on both arches (noble-updates/universe); a real ELF, and the same package supplies redis-server's multi-call target
-postgres	AptPackage	postgresql-16 16.14-0ubuntu0.24.04.1, identical on both arches (noble-updates/main); apt on noble means 16.14, not the 17.6 that was scavenged, and it replaces the hand-copied 23-library closure taken out of postgres:17.6-bookworm
+redis-server	AptPackage	redis-server 5:7.0.15-1ubuntu0.24.04.5, identical on both arches (noble-updates/universe); apt gives 7.0.15 where the scavenged image gave 7.4.5, and /usr/bin/redis-server is a symlink onto the redis-check-rdb multi-call ELF rather than an ELF of its own
+redis-cli	AptPackage	redis-tools 5:7.0.15-1ubuntu0.24.04.5, identical on both arches (noble-updates/universe); a real ELF, and the same package supplies redis-server's multi-call target
+postgres	AptPackage	postgresql-16 16.15-0ubuntu0.24.04.1, identical on both arches (noble-updates/main); apt on noble means 16.15, not the 17.6 that was scavenged, and it replaces the hand-copied 23-library closure taken out of postgres:17.6-bookworm
 patroni	AptPackage	patroni 3.2.2-2, identical on both arches (noble/universe); apt installs /usr/bin/patroni, not the /usr/local/bin/patroni the scavenged step declared, and it stays a Launcher (#!/usr/bin/python3)
-temurin	AptPackage	openjdk-21-jre-headless 21.0.11+10-1~24.04.2, identical on both arches (noble-updates/main); the JVM the doctrine calls a multi-arch Temurin requirement is in the archive
+temurin	AptPackage	openjdk-21-jre-headless 21.0.12.1+1-1~24.04.4, identical on both arches (noble-updates/main); the JVM the doctrine calls a multi-arch Temurin requirement is in the archive
 g++	AptPackage	g++ 13.3.0-6ubuntu2~24.04.1 (noble/main); the CUDA devel image it was scavenged from leaves with the accelerator lane
 
 # --- rung 2: the publisher's own multi-arch artifact + its own checksum manifest -------
-minio	OfficialArtifact	dl.min.io release binaries for both arches with the publisher's sibling .sha256sum. Verified 2026-08-14: linux-amd64/archive/minio.RELEASE.2025-07-23T15-54-02Z and linux-arm64/... both 200; per-asset manifest, sha256, digest+bare-name, bare binary
+minio	OfficialArtifact	2026-11-02 amendment, accepted after user-delegated assistant review: dl.min.io returns 410 Gone; the same publisher's https://github.com/minio/minio/releases/tag/RELEASE.2025-07-23T15-54-02Z supplies minio.linux-{amd64,arm64}.RELEASE.2025-07-23T15-54-02Z and their own .sha256sum files. Both downloaded binaries matched those manifests and their declared ELF architecture. Each manifest contains a single digest plus the old minio.RELEASE.2025-07-23T15-54-02Z filename; DigestOnly compares that sole digest without requiring the renamed download to match the historical filename. Version, bare-binary installation, and both architectures are preserved
 vault	OfficialArtifact	releases.hashicorp.com zip for both arches with the release's own SHA256SUMS. Verified 2026-08-14: vault_1.20.2_linux_{amd64,arm64}.zip both 200; one release-level manifest naming both, sha256, digest+name, zip archive holding the bare `vault`
 prometheus	OfficialArtifact	github prometheus/prometheus v3.5.0 tarballs for both arches; sha256sums.txt in the same release covers both and was checked with sha256sum -c. Verified 2026-08-14 through the release API: prometheus-3.5.0.linux-{amd64,arm64}.tar.gz and sha256sums.txt all present; sha256, digest+name, tar.gz whose top directory carries the arch
 alertmanager	OfficialArtifact	github prometheus/alertmanager v0.28.1 tarballs for both arches with the release's sha256sums.txt. Verified 2026-08-14 through the release API: alertmanager-0.28.1.linux-{amd64,arm64}.tar.gz and sha256sums.txt all present; sha256, digest+name, tar.gz

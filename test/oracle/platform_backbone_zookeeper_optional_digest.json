@@ -1,0 +1,626 @@
+{
+  "schema": "phase30.independent.zookeeper-optional-transaction-digest.v1",
+  "supersedes": "No old corpus is modified. This adds source-permitted per-record absence under the existing transaction_digest=true supported-feature profile.",
+  "sourceCorpusSha256": "20f299fee6edfe344581987c64d7ddd802b3f5521b99daaa4985de78bd87b341",
+  "sources": [
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/persistence/Util.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/Request.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/util/SerializeUtils.java",
+    "https://github.com/apache/zookeeper/blob/release-3.9.3/zookeeper-server/src/main/java/org/apache/zookeeper/server/PrepRequestProcessor.java"
+  ],
+  "rules": [
+    "When transaction_digest=true, after fully decoding the selected canonical operation, remaining0bytes means absent digest; exactly12bytes means a complete version2digest. This flag enables support, not mandatory presence on every row.",
+    "Remaining1..11or>12reject under this deliberately strict selected reader profile. Pinned upstream tolerates EOF while attempting digest parsing, including a partial suffix; this corpus does not grant that permissive partial encoding.",
+    "transaction_digest=false accepts no digest suffix; a complete suffix still rejects as trailing bytes under that explicit profile.",
+    "Snapshot digest/last-zxid seals remain explicit existing flags and are not changed. Missing transaction digest is not permission to skip operation fields, framing, checksum, zxid ordering or available digest checks.",
+    "Replay may compute state through a digest-free transaction, but must verify every present digest. No complete-current/history/committed endpoint premise follows from raw parser acceptance."
+  ],
+  "records": [
+    {
+      "id": "optional-session-absent",
+      "sourceRecord": "txn-1-CreateSession",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000002432058d00000024000000000000000700000001000000000000000100000000000003e8fffffff60000753042",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 1,
+          "zxid": 1,
+          "time": 1000,
+          "type": -10
+        },
+        "operation": {
+          "kind": "CreateSession",
+          "timeout": 30000
+        },
+        "digest": null,
+        "bodyBytes": 4,
+        "payloadBytes": 36,
+        "framedBytes": 49,
+        "adler32": 607257997
+      }
+    },
+    {
+      "id": "optional-container-present",
+      "sourceRecord": "txn-2-CreateContainer",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000cf0a089a00000055000000000000000700000002000000000000000200000000000007d000000013000000022f6100000000000000010000001f00000005776f726c6400000006616e796f6e6500000001000000020000000076b927dc42",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 2,
+          "zxid": 2,
+          "time": 2000,
+          "type": 19
+        },
+        "operation": {
+          "kind": "CreateContainer",
+          "path": "/a",
+          "dataHex": "",
+          "acls": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "parentCVersion": 1,
+          "dataNull": false
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 1991845852
+        },
+        "bodyBytes": 41,
+        "payloadBytes": 85,
+        "framedBytes": 98,
+        "adler32": 3473541274
+      }
+    },
+    {
+      "id": "optional-create-absent",
+      "sourceRecord": "txn-3-Create",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000c2c907fe0000004f00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e65000000000142",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 3,
+          "zxid": 3,
+          "time": 3000,
+          "type": 1
+        },
+        "operation": {
+          "kind": "Create",
+          "path": "/a/b",
+          "dataHex": "616263",
+          "acls": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "ephemeral": false,
+          "parentCVersion": 1,
+          "dataNull": false
+        },
+        "digest": null,
+        "bodyBytes": 47,
+        "payloadBytes": 79,
+        "framedBytes": 92,
+        "adler32": 3267954686
+      }
+    },
+    {
+      "id": "optional-ephemeral-present",
+      "sourceRecord": "txn-4-Create",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000fe72098e0000005900000000000000070000000400000000000000040000000000000fa000000001000000042f612f650000000165000000010000001f00000005776f726c6400000006616e796f6e6501000000020000000200000001b3b8b14142",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 4,
+          "zxid": 4,
+          "time": 4000,
+          "type": 1
+        },
+        "operation": {
+          "kind": "Create",
+          "path": "/a/e",
+          "dataHex": "65",
+          "acls": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ],
+          "ephemeral": true,
+          "parentCVersion": 2,
+          "dataNull": false
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 7310192961
+        },
+        "bodyBytes": 45,
+        "payloadBytes": 89,
+        "framedBytes": 102,
+        "adler32": 4268886414
+      }
+    },
+    {
+      "id": "optional-setdata-absent",
+      "sourceRecord": "txn-5-SetData",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "0000000028e40325000000330000000000000007000000050000000000000005000000000000138800000005000000042f612f62000000036e65770000000142",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 5,
+          "zxid": 5,
+          "time": 5000,
+          "type": 5
+        },
+        "operation": {
+          "kind": "SetData",
+          "path": "/a/b",
+          "dataHex": "6e6577",
+          "version": 1,
+          "dataNull": false
+        },
+        "digest": null,
+        "bodyBytes": 19,
+        "payloadBytes": 51,
+        "framedBytes": 64,
+        "adler32": 686031653
+      }
+    },
+    {
+      "id": "optional-error-absent",
+      "sourceRecord": "txn-7-Error",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "0000000029b1081b0000002400000000000000070000000700000000000000070000000000001b58ffffffffffffff9942",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 7,
+          "zxid": 7,
+          "time": 7000,
+          "type": -1
+        },
+        "operation": {
+          "kind": "Error",
+          "error": -103
+        },
+        "digest": null,
+        "bodyBytes": 4,
+        "payloadBytes": 36,
+        "framedBytes": 49,
+        "adler32": 699467803
+      }
+    },
+    {
+      "id": "optional-multi-absent",
+      "sourceRecord": "txn-8-Multi",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000ceb00b150000007700000000000000070000000800000000000000080000000000001f400000000e00000002000000010000002f000000042f612f630000000378797a000000010000001f00000005776f726c6400000006616e796f6e6500000000030000000500000014000000042f612f6200000004646f6e650000000242",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 8,
+          "zxid": 8,
+          "time": 8000,
+          "type": 14
+        },
+        "operation": {
+          "kind": "Multi",
+          "children": [
+            {
+              "kind": "Create",
+              "path": "/a/c",
+              "dataHex": "78797a",
+              "acls": [
+                {
+                  "perms": 31,
+                  "scheme": "world",
+                  "identity": "anyone"
+                }
+              ],
+              "ephemeral": false,
+              "parentCVersion": 3,
+              "dataNull": false
+            },
+            {
+              "kind": "SetData",
+              "path": "/a/b",
+              "dataHex": "646f6e65",
+              "version": 2,
+              "dataNull": false
+            }
+          ]
+        },
+        "digest": null,
+        "bodyBytes": 87,
+        "payloadBytes": 119,
+        "framedBytes": 132,
+        "adler32": 3467643669
+      }
+    },
+    {
+      "id": "optional-error-present",
+      "sourceRecord": "txn-7-Error",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000008e6309b20000003000000000000000070000000700000000000000070000000000001b58ffffffffffffff9900000002000000011ea51fb242",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 7,
+          "zxid": 7,
+          "time": 7000,
+          "type": -1
+        },
+        "operation": {
+          "kind": "Error",
+          "error": -103
+        },
+        "digest": {
+          "version": 2,
+          "treeDigest": 4809105330
+        },
+        "bodyBytes": 4,
+        "payloadBytes": 48,
+        "framedBytes": 61,
+        "adler32": 2388855218
+      }
+    },
+    {
+      "id": "optional-error-disabled-profile-absent",
+      "sourceRecord": "txn-7-Error",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": false,
+        "close_session_paths": true
+      },
+      "wireHex": "0000000029b1081b0000002400000000000000070000000700000000000000070000000000001b58ffffffffffffff9942",
+      "expected": {
+        "header": {
+          "clientId": 7,
+          "cxid": 7,
+          "zxid": 7,
+          "time": 7000,
+          "type": -1
+        },
+        "operation": {
+          "kind": "Error",
+          "error": -103
+        },
+        "digest": null,
+        "bodyBytes": 4,
+        "payloadBytes": 36,
+        "framedBytes": 49,
+        "adler32": 699467803
+      }
+    }
+  ],
+  "logs": [
+    {
+      "id": "mixed-optional-records-no-padding",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b4c4700000002ffffffffffffffff000000002432058d00000024000000000000000700000001000000000000000100000000000003e8fffffff6000075304200000000cf0a089a00000055000000000000000700000002000000000000000200000000000007d000000013000000022f6100000000000000010000001f00000005776f726c6400000006616e796f6e6500000001000000020000000076b927dc4200000000c2c907fe0000004f00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e6500000000014200000000fe72098e0000005900000000000000070000000400000000000000040000000000000fa000000001000000042f612f650000000165000000010000001f00000005776f726c6400000006616e796f6e6501000000020000000200000001b3b8b14142",
+      "recordIds": [
+        "optional-session-absent",
+        "optional-container-present",
+        "optional-create-absent",
+        "optional-ephemeral-present"
+      ],
+      "expectedTransactionCount": 4,
+      "expectedSerializedFramedBytes": 341,
+      "expectedWireBytes": 357,
+      "expectedPaddingBytes": 0
+    },
+    {
+      "id": "mixed-optional-records-with32zero-padding",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "5a4b4c4700000002ffffffffffffffff000000002432058d00000024000000000000000700000001000000000000000100000000000003e8fffffff6000075304200000000cf0a089a00000055000000000000000700000002000000000000000200000000000007d000000013000000022f6100000000000000010000001f00000005776f726c6400000006616e796f6e6500000001000000020000000076b927dc4200000000c2c907fe0000004f00000000000000070000000300000000000000030000000000000bb800000001000000042f612f6200000003616263000000010000001f00000005776f726c6400000006616e796f6e6500000000014200000000fe72098e0000005900000000000000070000000400000000000000040000000000000fa000000001000000042f612f650000000165000000010000001f00000005776f726c6400000006616e796f6e6501000000020000000200000001b3b8b141420000000000000000000000000000000000000000000000000000000000000000",
+      "recordIds": [
+        "optional-session-absent",
+        "optional-container-present",
+        "optional-create-absent",
+        "optional-ephemeral-present"
+      ],
+      "expectedTransactionCount": 4,
+      "expectedSerializedFramedBytes": 341,
+      "expectedWireBytes": 389,
+      "expectedPaddingBytes": 32
+    }
+  ],
+  "negativeCases": [
+    {
+      "id": "partial-digest-1bytes",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "0000000031cc081b0000002500000000000000070000000700000000000000070000000000001b58ffffffffffffff990042",
+      "expectedAdmission": "deny",
+      "reasonCategory": "partial-digest"
+    },
+    {
+      "id": "partial-digest-4bytes",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000004a1f081d0000002800000000000000070000000700000000000000070000000000001b58ffffffffffffff990000000242",
+      "expectedAdmission": "deny",
+      "reasonCategory": "partial-digest"
+    },
+    {
+      "id": "partial-digest-11bytes",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "0000000084b109000000002f00000000000000070000000700000000000000070000000000001b58ffffffffffffff9900000002000000011ea51f42",
+      "expectedAdmission": "deny",
+      "reasonCategory": "partial-digest"
+    },
+    {
+      "id": "one-byte-after-complete-digest",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000981509b20000003100000000000000070000000700000000000000070000000000001b58ffffffffffffff9900000002000000011ea51fb20042",
+      "expectedAdmission": "deny",
+      "reasonCategory": "digest-trailer"
+    },
+    {
+      "id": "unsupported-digest-version1",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "000000008e5a09b10000003000000000000000070000000700000000000000070000000000001b58ffffffffffffff9900000001000000011ea51fb242",
+      "expectedAdmission": "deny",
+      "reasonCategory": "digest-version"
+    },
+    {
+      "id": "absent-digest-checksum-tamper",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "0100000029b1081b0000002400000000000000070000000700000000000000070000000000001b58ffffffffffffff9942",
+      "expectedAdmission": "deny",
+      "reasonCategory": "checksum"
+    },
+    {
+      "id": "absent-digest-missing-terminator",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "0000000029b1081b0000002400000000000000070000000700000000000000070000000000001b58ffffffffffffff99",
+      "expectedAdmission": "deny",
+      "reasonCategory": "terminator"
+    },
+    {
+      "id": "operation-body-truncated-is-not-absent-digest",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": true,
+        "close_session_paths": true
+      },
+      "wireHex": "00000000219607820000002300000000000000070000000700000000000000070000000000001b58ffffffffffffff42",
+      "expectedAdmission": "deny",
+      "reasonCategory": "body-truncated"
+    },
+    {
+      "id": "digest-present-under-disabled-profile",
+      "kind": "record",
+      "profile": {
+        "stream_mode": "checked",
+        "snapshot_digest": true,
+        "snapshot_last_zxid": true,
+        "transaction_digest": false,
+        "close_session_paths": true
+      },
+      "wireHex": "000000008e6309b20000003000000000000000070000000700000000000000070000000000001b58ffffffffffffff9900000002000000011ea51fb242",
+      "expectedAdmission": "deny",
+      "reasonCategory": "disabled-profile"
+    }
+  ],
+  "replayCases": [
+    {
+      "id": "mixed-optional-prefix4-preserves-frozen-state",
+      "genesisSource": "zookeeper-wire-corpus-v4.json:syntheticGenesis",
+      "log": "mixed-optional-records-no-padding",
+      "expected": {
+        "nodes": {
+          "": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": -1,
+            "stat": {
+              "czxid": 0,
+              "mzxid": 0,
+              "ctime": 0,
+              "mtime": 0,
+              "version": 0,
+              "cversion": 1,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 2
+            }
+          },
+          "/a": {
+            "dataBytes": 0,
+            "dataNull": false,
+            "dataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "dataHex": "",
+            "aclId": 1,
+            "stat": {
+              "czxid": 2,
+              "mzxid": 2,
+              "ctime": 2000,
+              "mtime": 2000,
+              "version": 0,
+              "cversion": 2,
+              "aversion": 0,
+              "ephemeralOwner": -9223372036854775808,
+              "pzxid": 4
+            }
+          },
+          "/a/b": {
+            "dataBytes": 3,
+            "dataNull": false,
+            "dataSha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            "dataHex": "616263",
+            "aclId": 1,
+            "stat": {
+              "czxid": 3,
+              "mzxid": 3,
+              "ctime": 3000,
+              "mtime": 3000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 0,
+              "pzxid": 3
+            }
+          },
+          "/a/e": {
+            "dataBytes": 1,
+            "dataNull": false,
+            "dataSha256": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
+            "dataHex": "65",
+            "aclId": 1,
+            "stat": {
+              "czxid": 4,
+              "mzxid": 4,
+              "ctime": 4000,
+              "mtime": 4000,
+              "version": 0,
+              "cversion": 0,
+              "aversion": 0,
+              "ephemeralOwner": 7,
+              "pzxid": 4
+            }
+          }
+        },
+        "sessions": {
+          "7": 30000
+        },
+        "aclCache": {
+          "1": [
+            {
+              "perms": 31,
+              "scheme": "world",
+              "identity": "anyone"
+            }
+          ]
+        },
+        "lastProcessedZxid": 4,
+        "treeDigest": 7310192961
+      }
+    }
+  ]
+}

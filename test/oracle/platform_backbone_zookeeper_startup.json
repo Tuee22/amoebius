@@ -1,0 +1,332 @@
+{
+  "schema": "phase30.independent.zookeeper-genesis-startup-boundaries.v1",
+  "basis": "Intended shared monotonic deadline and exact pre-client742B source-derived genesis. No source corpus, file maximum or capacity operand is amended. Event times/devices/inodes are synthetic deterministic inputs, not observed startup latencies.",
+  "genesisCorpusSha256": "ceea94dbd3c418fbcf5888ead481936d6f89cd356af57cf3c8395477d9b4c2c2",
+  "expectedSourceDevice": 1,
+  "expectedWireBytes": 742,
+  "cases": [
+    {
+      "id": "stable-valid-before-deadline",
+      "initialSeconds": 0,
+      "deadlineSeconds": 1.0,
+      "events": [
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.1,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 1
+          }
+        },
+        {
+          "operation": "read",
+          "advanceSeconds": 0.1
+        },
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.1,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 1
+          }
+        }
+      ],
+      "expectedAdmission": "allow",
+      "expectedReasonCategory": null
+    },
+    {
+      "id": "late-first-stat-no-success",
+      "initialSeconds": 0,
+      "deadlineSeconds": 1.0,
+      "events": [
+        {
+          "operation": "stat",
+          "advanceSeconds": 1.1,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 1
+          }
+        }
+      ],
+      "expectedAdmission": "deny",
+      "expectedReasonCategory": "deadline"
+    },
+    {
+      "id": "late-read-no-success",
+      "initialSeconds": 0,
+      "deadlineSeconds": 1.0,
+      "events": [
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.1,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 1
+          }
+        },
+        {
+          "operation": "read",
+          "advanceSeconds": 1
+        }
+      ],
+      "expectedAdmission": "deny",
+      "expectedReasonCategory": "deadline"
+    },
+    {
+      "id": "after-stat-exact-deadline-no-success",
+      "initialSeconds": 0,
+      "deadlineSeconds": 1.0,
+      "events": [
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.25,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 1
+          }
+        },
+        {
+          "operation": "read",
+          "advanceSeconds": 0.25
+        },
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.5,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 1
+          }
+        }
+      ],
+      "expectedAdmission": "deny",
+      "expectedReasonCategory": "deadline"
+    },
+    {
+      "id": "after-stat-wrong-device-never-forgotten",
+      "initialSeconds": 0,
+      "deadlineSeconds": 1.0,
+      "events": [
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.1,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 1
+          }
+        },
+        {
+          "operation": "read",
+          "advanceSeconds": 0.1
+        },
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.1,
+          "value": {
+            "device": 2,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 1
+          }
+        }
+      ],
+      "expectedAdmission": "deny",
+      "expectedReasonCategory": "provenance"
+    },
+    {
+      "id": "after-stat-one-byte-oversize-never-forgotten",
+      "initialSeconds": 0,
+      "deadlineSeconds": 1.0,
+      "events": [
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.1,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 1
+          }
+        },
+        {
+          "operation": "read",
+          "advanceSeconds": 0.1
+        },
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.1,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 743,
+            "allocatedBytes": 4096,
+            "modifiedNs": 1
+          }
+        }
+      ],
+      "expectedAdmission": "deny",
+      "expectedReasonCategory": "provenance"
+    },
+    {
+      "id": "ordinary-stable-write-race-retries",
+      "initialSeconds": 0,
+      "deadlineSeconds": 1.0,
+      "events": [
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.05,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 1
+          }
+        },
+        {
+          "operation": "read",
+          "advanceSeconds": 0.05
+        },
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.05,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 2
+          }
+        },
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.05,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 2
+          }
+        },
+        {
+          "operation": "read",
+          "advanceSeconds": 0.05
+        },
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.05,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 2
+          }
+        }
+      ],
+      "expectedAdmission": "allow",
+      "expectedReasonCategory": null
+    },
+    {
+      "id": "after-stat-disappears-then-completes",
+      "initialSeconds": 0,
+      "deadlineSeconds": 1.0,
+      "events": [
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.05,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 1
+          }
+        },
+        {
+          "operation": "read",
+          "advanceSeconds": 0.05
+        },
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.05,
+          "value": null
+        },
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.05,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 1
+          }
+        },
+        {
+          "operation": "read",
+          "advanceSeconds": 0.05
+        },
+        {
+          "operation": "stat",
+          "advanceSeconds": 0.05,
+          "value": {
+            "device": 1,
+            "inode": 10,
+            "sizeBytes": 742,
+            "allocatedBytes": 4096,
+            "modifiedNs": 1
+          }
+        }
+      ],
+      "expectedAdmission": "allow",
+      "expectedReasonCategory": null
+    },
+    {
+      "id": "expired-shared-deadline-no-new-member-operations",
+      "initialSeconds": 180,
+      "deadlineSeconds": 180,
+      "events": [],
+      "expectedAdmission": "deny",
+      "expectedReasonCategory": "deadline"
+    },
+    {
+      "id": "permission-error-still-denies",
+      "initialSeconds": 0,
+      "deadlineSeconds": 1.0,
+      "events": [
+        {
+          "operation": "stat",
+          "advanceSeconds": 0,
+          "value": null,
+          "raises": "PermissionError"
+        }
+      ],
+      "expectedAdmission": "deny",
+      "expectedReasonCategory": "source-error"
+    }
+  ]
+}

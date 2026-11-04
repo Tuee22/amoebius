@@ -158,6 +158,7 @@ def execute_sprints(
     evidence: Path,
     image: str,
     environment: Mapping[str, str],
+    numbers: Sequence[int] = (1, 2, 3, 4, 5),
 ) -> None:
     evidence.mkdir(parents=True, exist_ok=True)
     drivers = {
@@ -167,7 +168,7 @@ def execute_sprints(
         4: "tools/object_reconciler_convergence_gate.py",
         5: "tools/object_reconciler_simulation_gate.py",
     }
-    for number in (1, 2, 3, 4, 5):
+    for number in numbers:
         arguments = [
             sys.executable, drivers[number], "--evidence", str(evidence),
         ]
@@ -324,6 +325,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             print(f"  ok    attestation {handoff.attestation}")
             print(f"  ok    index       {handoff.index_digest}")
+            # Sprint 26.1 includes the complete pure renderer gate, whose host
+            # inventory must be quiescent. Finish that prerequisite before the
+            # parent creates its legitimate live mounts and firewall rules.
+            evidence = gate.run_dir / "sprints"
+            print("\npure seam — sprint 26.1 before live fixture creation\n")
+            execute_sprints(evidence, "", run_environment, numbers=(1,))
             fixture = project_cluster_fixture.start(
                 # Keep daemon-internal Unix socket names below Linux's 108-byte
                 # sockaddr_un ceiling while retaining the gate timestamp as identity.
@@ -353,9 +360,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 + "\n",
                 encoding="utf-8",
             )
-            evidence = gate.run_dir / "sprints"
-            print("\nlive side — five sprints on this run's private linux-cpu kind cluster\n")
-            execute_sprints(evidence, image, fixture.environment)
+            print("\nlive side — sprints 26.2–26.5 on this run's private linux-cpu kind cluster\n")
+            execute_sprints(evidence, image, fixture.environment, numbers=(2, 3, 4, 5))
         elif evidence is None:
             raise GateFailure("phase-26 needs --execute or an --evidence bundle from a completed live run")
         else:

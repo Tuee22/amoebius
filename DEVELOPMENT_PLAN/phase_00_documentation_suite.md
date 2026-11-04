@@ -47,7 +47,11 @@ and remaining implementation are stated below.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15 with the repository-containment contract enforced. All ten sides of
+✅ Done — reopened and resealed 2026-10-31 after correcting relative Docker-cache ages in the host observer. Stable JSON metadata retains identity, size, usage, and reclaimability changes. Both independent observer regressions and all ten verifier sides pass, including source-snapshot closure, policy mutants, containment, and the authored-root guard. Verified run reference: `sha256:a39c8e8c9248e6f491136519f338ddb6203c014d00076d481b16cf9da1d4cfd2`.
+
+**Prior root-registry seal — 2026-10-30:** removing the retired `docker/` source-root entry passed all ten verifier sides without weakening the missing-root guard. Verified run reference: `sha256:3d5b77125ff4b779ef9e23a7ab669c7dbb4760fbe348e0edb1ecfa2f65e70439`.
+
+**Prior containment seal — 2026-08-15:** All ten sides of
 `python3 tools/doc_lint_verify.py` pass: 17 artifact-policy rules are clean and independently mutation-proven,
 Phase-0 output and attestation resolve beneath `.build/**`, and the filesystem/mount/loop/Docker host inventory
 is unchanged outside the physical checkout. The passing run attested
