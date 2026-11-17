@@ -1,0 +1,6 @@
+green	True
+spec-digest	7953b6326c15c36ac2b73e33b7ab787ee4e5184e65d37b56c5b041a10e3e706b
+chain	5714cc6c4d9576cbb5db06b834d3fba0198753c747ab546add85b0195c96a0cf
+reproducible-core	9c1dd547d259680674b940414ff05b783e456ab2f436e6df1221097c57a992fa
+capability	toolchain_spike
+claim	The shipped toolchain-report accepts native GHCup and GHC by their declared version requirements, with no toolchain digest pin, signature, archive, operating-system, architecture, or device prerequisite. Two observations agree on versions; the independent oracle judges version boundaries, actual missing/malformed/failed tools, retained decoder/simulator/codegen/provenance probes, and pure planning from supplied platform fixtures. The runner plants a nonce and requests an unsupported compiler version, which the shipped binary reports as refused. Builds remain serial. Compiler correctness and publisher identity remain assumptions.

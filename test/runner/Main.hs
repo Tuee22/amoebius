@@ -18,22 +18,17 @@ import Amoebius.Plan.StatusFrontier qualified as Status
 import Amoebius.Validation.Custody.Preflight
 import Amoebius.Validation.BootstrapPredicate (bootstrapSnapshotMatches)
 import Amoebius.Validation.BootstrapQualification.Internal
-import Amoebius.Validation.Custody (CommandOutcome (..), CustodyConfig (..), defaultCustodyConfig, resetGeneration, runFresh, voidFromPhase, receiptCompatibility, acceptPhase, previewPhase, receiptPublicationBound)
-import Amoebius.Validation.Compatibility (closureDigest)
-import Amoebius.Validation.Custody.Status
-import Amoebius.Validation.Custody.Store
+import Amoebius.Validation.Custody
 import Amoebius.Validation.GateSpec
 import Amoebius.Validation.GateSpec.Registry (specInputFor, registeredSpecInputs)
-import Amoebius.Validation.Runner.Binary (Nonce (..), perturbInput)
 import Amoebius.Validation.Runner.Capture
-import Amoebius.Validation.Runner (GateOutcome (..), RunnerConfig (..), RunnerRefusal (..), defaultRunnerConfig, renderRefusal, reproducibleCore, runGate, parseLedger, ledgerDigest, ledgerGreen, suiteLedger)
+import Amoebius.Validation.Runner (GateOutcome (..), RunnerConfig (..), RunnerRefusal (..), defaultRunnerConfig, renderRefusal, reproducibleCore, runGate, parseLedger, ledgerDigest, ledgerGreen, suiteLedger, Nonce (..), perturbInput, KillTable (..), Locus (..), MutantOutcome (..), Operator (..), SubjectChangeWitness (..), allOperators, applyLocus, renderMutantOutcome, enumerateLoci, isAttributed, truncateListLocus, killTable, renderKillTable, renderOperator, sampleLoci)
 import Data.ByteString qualified as ByteString
-import Amoebius.Validation.Runner.Hygiene
-import Amoebius.Validation.Runner.Mutants
-import Amoebius.Validation.Runner.Observer (sha256Hex, observe, observeNativeCabal, ObservedRun (..))
-import Amoebius.Validation.Runner.Spec
-import Amoebius.Validation.Runner.Legacy qualified as Analyzers
-import Control.Monad (forM, forM_)
+import Amoebius.Validation.Runner (sha256Hex, observe, observeNativeCabal, ObservedRun (..))
+import Amoebius.Validation.Runner (PackageGraph (..), SpecProblem (..), VerifiedSpec (..), executableClosure, libraryClosure, internalDependencies, loadPackageGraph, moduleSourcePath, parsePackageGraph, renderSpecProblem, verifySpec, verifySpecAgainst, verifyOracle, sourceTokens, sourceTree, sourceDirectives, compiledBlocks, resolveSpec, bindPhaseSpec, roleFor, requiredSuiteRows)
+import Amoebius.Validation.Runner qualified as Analyzers
+import Amoebius.Validation.Runner (HygieneReport (..), CapturedSource, captureSource, capturedSourceDigest, capturedSourceFiles, capturedSourceBytes, capturedSourceRuns, parseSourceInventory, docCheckRoot, hygieneGreen, hygieneProblems, hygieneRow, kernelBudget, kernelRoots, isRunModule, phaseLiteral, haskellFilesUnder, materializeSource, verifySourceCopy, rewriteCapturedSource, runRootWithinFrame, renderHygiene, vocabularyTypes, TreePurpose (..), TreeNode (..), classifyTreeNode, walkFilesUnder, walkFilesUnderWith, sourceAttempt, readSourceBytes, readSourceText)
+import Control.Monad (forM, forM_, unless)
 import Control.Exception (SomeException, IOException, fromException, try)
 import Distribution.Fields.ParseResult (runParseResult)
 import Distribution.PackageDescription.Parsec (parseGenericPackageDescription)
@@ -85,6 +80,16 @@ main = do
       createDirectoryIfMissing True output
       rows <- sourceTreeRows output
       TextIO.writeFile (output </> "source-tree.tsv") (Text.unlines (map (Text.intercalate "\t") rows))
+    ["--legacy-preflight", output] -> do
+      createDirectoryIfMissing True output
+      _ <- verifyRows output
+      _ <- hygieneRows output
+      rows <- legacyRows output
+      TextIO.writeFile (output </> "runner.tsv") (Text.unlines (map (Text.intercalate "\t") rows))
+    ["--attribution", output] -> do
+      createDirectoryIfMissing True output
+      rows <- killRows'
+      TextIO.writeFile (output </> "runner.tsv") (Text.unlines (map (Text.intercalate "\t") rows))
     ["--oracle-isolation", output] -> do
       rows <- oracleIsolationRows output
       TextIO.writeFile (output </> "oracle-isolation.tsv") (Text.unlines (map (Text.intercalate "\t") rows))
@@ -322,7 +327,7 @@ contractStructureRows = do
 canonicalSpineFixture :: Text
 canonicalSpineFixture = Text.replace "test-suite dsl-suite" "test-suite spine-suite"
   (Text.replace "exposed-modules: Amoebius.Dsl.Spec Amoebius.Dsl.Lower"
-    "exposed-modules: Amoebius.Dsl.Spec Amoebius.Dsl.Lower Amoebius.Dsl.Import Amoebius.Dsl.Decode Amoebius.Kernel.Step Amoebius.Kernel.Interpret Amoebius.Dsl.Pipeline" fixtureCabal)
+    "exposed-modules: Amoebius.Dsl.Spec Amoebius.Dsl.Lower Amoebius.Dsl.Import Amoebius.Dsl.Decode Amoebius.Kernel.Step Amoebius.Kernel.Interpret Amoebius.Dsl.Pipeline Amoebius.Pulsar.Wire Amoebius.Pulsar.Wire.Descriptor Amoebius.Pulsar.Wire.Generate Amoebius.Pulsar.Wire.Plugin Amoebius.Internal.Process.FileInput Amoebius.Pulsar.Internal.Protocol Pulsar.Protocol.Commands Amoebius.Pulsar.Compat.RoundTrip Amoebius.Toolchain.SourceOwnership" fixtureCabal)
 canonicalSpine :: Maybe (Int, GateSpec)
 canonicalSpine = do
   phase <- Identity.lookupCapabilityOrdinal "typed_spine"
@@ -1391,6 +1396,7 @@ operatorRows output = do
         <> applied
         <> stale
         <> stringRows
+        <> [["operator", "list-pattern-binders", Text.pack (show (all (null . enumerateLoci "M" "M.hs" ListTruncation) ["    [Just ghcup, Just ghc, Just cabal] -> do", "    | [locatedMatch] <- unLoc alternatives"]))]]
         <> [["string", "shipped-lanes-loci", Text.intercalate "," (map (Text.pack . show . locusLine) laneLoci)]
            , ["string", "shipped-lanes-witness", laneApplied]]
     )
@@ -1415,6 +1421,7 @@ killRows' = do
     , ["kill", "ratio", Text.pack (show (killRatioObserved table))]
     , ["kill", "rows", Text.pack (show (length (renderKillTable table)))]
     , ["attribution", "owned-red", Text.pack (show (isAttributed [("M", "a.")] "M" ["a.x", "b.y"]))]
+    , ["attribution", "owned-only", Text.pack (show (isAttributed [("M", "a.")] "M" ["a.x", "a.y"]))]
     , ["attribution", "unowned-red", Text.pack (show (isAttributed [("M", "a.")] "M" ["b.y"]))]
     , ["attribution", "no-policy", Text.pack (show (isAttributed [("N", "a.")] "M" ["b.y"]))]
     , ["attribution", "empty-ledger", Text.pack (show (isAttributed [("M", "a.")] "M" []))]
@@ -1468,6 +1475,15 @@ legacyRows output = do
   let ready = ["legacy", "clean-hygiene", Text.pack (show (hygieneGreen hygiene))]
   case canonicalSpine of
     Just (phase, spec) -> do
+      sourceRoot <- makeAbsolute (output </> "unsupported-wire-source")
+      unsupported <- makeAbsolute (output </> "unsupported-wire-qualification")
+      createDirectoryIfMissing True sourceRoot
+      initialized <- observe sourceRoot "git" ["init", "--quiet"]
+      unless (runExit initialized == ExitSuccess) (fail "unsupported qualification source fixture initialization failed")
+      TextIO.writeFile (sourceRoot </> "Fixture.hs") "module Fixture where\n"
+      source <- captureSource sourceRoot >>= either (fail . Text.unpack) pure
+      refused <- Analyzers.qualifyLegacy Legacy.LtdSrc003 "." unsupported phase Nothing Nothing source
+      unsupportedCreated <- doesPathExist unsupported
       rows <- mapM (\(name, enabled, candidateOrdinal) -> do
         let runRoot = root </> ".build" </> "runs" </> Text.unpack name
             config = (defaultRunnerConfig root candidateOrdinal)
@@ -1480,7 +1496,7 @@ legacyRows output = do
         pure [["legacy", name, observed], ["legacy", name <> ".run-root", Text.pack (show created)]])
         [("required-evidence", True, phase), ("preflight-disabled", False, phase),
          ("unknown-phase", True, Identity.phaseDomainUpperOrdinal + 1)]
-      pure (ready : concat rows)
+      pure (ready : ["legacy", "direct-unsupported", either id (const "qualified") refused] : ["legacy", "direct-unsupported.created", Text.pack (show unsupportedCreated)] : concat rows)
     _ -> pure [ready, ["legacy", "contract", "unavailable"]]
 
 -- Native entry points must preserve stale work and refuse an occupied candidate

@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 -- | Supplied boundaries exercise the actual shipped decoder, not a copied Core.
 module OracleTranscripts (oracleTranscriptRows) where
-import Amoebius.Validation.Runner.Observer
+import Amoebius.Validation.Runner
 import OracleTranscriptInputs (transcriptInputs)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO

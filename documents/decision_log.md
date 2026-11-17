@@ -452,6 +452,24 @@ Scope introduction consumes an opaque attestation from a verified principal or a
 **Replaces**: N/A
 **Replaced by**: N/A
 
+### DL-0043 — Reconcile Phase 2 source-boundary requirements with its acceptance
+
+**Date**: 2026-11-11
+**Contradiction**: The documentation checker reports three requirements as still owed by Phase 2 after its
+separate acceptance recorded [receipt `3a41a20c39f33dd7f1421f41ccf83c3c98617887c59543a3d1f11be2c51d887d`](../validation-records/generation-0161c20aea48e0c1/receipts/phase-02-3a41a20c39f33dd7f1421f41ccf83c3c98617887c59543a3d1f11be2c51d887d-fe04a1ae25334e63b4d4961850fc0e1d9ad1392f58437e8e2e8998792395dffc/receipt.tsv).
+**Decision**: Reconcile the tracked bootstrap boundary, six-class source boundary and whole-source graph
+passages to describe Phase 2's required gate and its historical acceptance. Preserve every source, hash,
+graph, root, role and separation requirement, as well as the distinction between bootstrap source admission
+and the later runtime handoff. The historical receipt establishes no current compatibility by itself: changed
+source, verifier or governance still require numerical replay and complete predecessor re-derivation before a
+successor gate. This amendment changes no status or receipt and supplies no Phase 3 result.
+**Rejected alternatives**: Leaving the contradictory owing language makes the documentation checker refuse
+the recorded status. Removing a requirement, treating this amendment or a component diagnostic as a gate pass,
+or claiming runtime bootstrap validation would exceed the accepted evidence.
+**Affected documents**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/development_plan_gate_integrity.md`
+**Replaces**: N/A
+**Replaced by**: N/A
+
 ## 3. Errata register
 
 Each erratum names the passage corrected and the entry that decided the correction. The corrected passage

@@ -25,6 +25,10 @@ import Amoebius.Dsl.Raw qualified as Raw
 import Amoebius.Dsl.Spec
 import Amoebius.Kernel.Interpret (sha256Hex)
 import Amoebius.Pulsar.Wire (ProtocolField (..), ProtocolMessage (..), protocolDeclarations, renderProtocol)
+import Amoebius.Pulsar.Wire.Descriptor (protocolDescriptorSet)
+import Amoebius.Pulsar.Compat.Diagnostics (forkWireObservation)
+import Amoebius.Pulsar.Compat.RoundTrip (wireRoundTripObservations)
+import Amoebius.Pulsar.Diagnostics (connectWireObservation)
 import Amoebius.Substrate.Classify (hostEnvironment)
 import Amoebius.Vocabulary (linuxCpuDetected)
 import Amoebius.Vocabulary
@@ -75,6 +79,11 @@ corpusSection suite = do
   mapM_ (\(path, contents) -> writeText (suite </> path) contents) renderExampleFiles
   writeLines (suite </> "corpus.tsv") [Text.pack path | (path, _) <- renderExampleFiles]
   writeText (suite </> "proto" </> "PulsarApi.proto") renderProtocol
+  either (fail . Text.unpack) (ByteString.writeFile (suite </> "proto" </> "PulsarApi.desc")) protocolDescriptorSet
+  native <- either (fail . show) pure connectWireObservation
+  writeText (suite </> "proto" </> "native-wire.tsv") native
+  writeText (suite </> "proto" </> "fork-wire.tsv") forkWireObservation
+  writeText (suite </> "proto" </> "roundtrip.tsv") wireRoundTripObservations
   writeLines (suite </> "wire.tsv") [tabs (protocolMessageName message : [protocolFieldName field <> ":" <> Text.pack (show (protocolFieldNumber field)) | field <- protocolMessageFields message]) | message <- protocolDeclarations]
 
 -- | Compile every example exactly as the compile command does, into its own directory.

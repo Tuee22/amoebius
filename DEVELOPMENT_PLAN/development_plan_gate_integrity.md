@@ -616,11 +616,11 @@ Every phase inherits the following postconditions. They are part of the gate, no
     type has exactly one definition under `src/`.
 21. **No authored mutant.** No `_MUTANT` symbol exists under `src/`, `app/`, or `test/`; every mutant is
     runner-generated beneath `.build/runs/**`.
-22. **Required source boundary** ([DL-0031](../documents/decision_log.md#dl-0031--unqualified-validation-claims-remain-obligations)).
-    Qualification is owed by [Phase 2](phase_02_repository_layout_conformance.md), which must establish that the admitted tracked non-`.hs`,
+22. Observed implementation: The [Phase 2](phase_02_repository_layout_conformance.md) gate established that the admitted tracked non-`.hs`,
     non-`.md` set contains only its six named build, ignore, licence and packaging inputs and the bounded
-    `pb/__main__.py` source exception. That gate must check the authored bootstrap source's SHA-256; the
-    source pin supplies no compiler admission or runtime handoff claim.
+    `pb/__main__.py` source exception. Each gate must retain that boundary and check the authored bootstrap source's SHA-256; the
+    source pin supplies no compiler admission or runtime handoff claim. Its historical acceptance and current
+    reuse requirements are recorded by [DL-0043](../documents/decision_log.md#dl-0043--reconcile-phase-2-source-boundary-requirements-with-its-acceptance) [GateSpec:repository_layout_conformance].
 
 <a id="s-commit-timing"></a>
 
@@ -696,7 +696,9 @@ normative tree and the mechanical file classification. The development plan adds
    Observed implementation: the accepted seed checks its validator root budget, exclusive oracle-area
    boundary and product-to-validator separation [GateSpec:documentation_suite].
 
-   Complete source-graph enforcement is owed by [Phase 2](phase_02_repository_layout_conformance.md).
+   Observed implementation: The [Phase 2](phase_02_repository_layout_conformance.md) gate qualified complete source-graph enforcement
+   [GateSpec:repository_layout_conformance];
+   [DL-0043](../documents/decision_log.md#dl-0043--reconcile-phase-2-source-boundary-requirements-with-its-acceptance) records its historical acceptance and current reuse requirements.
    The validator must use `src/gate-spec`, `src/plan-decisions`, `src/doc-check` and the retained
    `src/validation-kernel`. Product roots must follow the repository-layout doctrine. Each oracle area must
    have one exclusive directory and a named entry module, such as `test/oracle/dsl/Main.hs`. The public

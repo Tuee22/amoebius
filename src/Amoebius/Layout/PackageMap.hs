@@ -122,13 +122,13 @@ packageMapReport mainBytes probeBytes present = case (parse "amoebius.cabal" mai
   (Right mainPackage, Right probePackage) ->
     (runtimeComponentFindings "amoebius.cabal" mainBytes <> runtimeComponentFindings "probe/probe.cabal" probeBytes
       <> [ LayoutFinding "DeclaredModuleMissing" (Text.unpack (claimComponent claim) <> ":" <> claimFile claim)
-    | claim <- claims, null (matchingPaths claim), not (forwardOwned claim)]
+    | claim <- claims, null (matchingPaths claim), forwardRole claim == Nothing]
       <> [LayoutFinding "UnmappedHaskellSource" path
          | path <- haskellPaths, path `Set.notMember` mapped, standaloneSourceRole path == Nothing]
       <> [LayoutFinding "AmbiguousModuleSource" (Text.unpack (claimComponent claim) <> ":" <> claimFile claim)
          | claim <- claims, length (matchingPaths claim) > 1],
-     [Text.intercalate "\t" ["package-owed", claimComponent claim <> ":" <> Text.pack (claimFile claim), "generated-proto"]
-     | claim <- claims, null (matchingPaths claim), forwardOwned claim]
+     [Text.intercalate "\t" ["package-owed", claimComponent claim <> ":" <> Text.pack (claimFile claim), role]
+     | claim <- claims, null (matchingPaths claim), Just role <- [forwardRole claim]]
        <> [Text.intercalate "\t" ["package-standalone", Text.pack path, role]
           | path <- haskellPaths, path `Set.notMember` mapped
           , Just role <- [standaloneSourceRole path]]
@@ -144,8 +144,8 @@ packageMapReport mainBytes probeBytes present = case (parse "amoebius.cabal" mai
        [(claimComponent claim, claimPackageDependencies claim) | claim <- claims]),
      Map.fromList
        [((claimComponent claim, Text.replace "/" "." (Text.pack (dropExtension (claimFile claim)))),
-         (claimFile claim, "generated-proto"))
-       | claim <- claims, null (matchingPaths claim), forwardOwned claim])
+         (claimFile claim, role))
+       | claim <- claims, null (matchingPaths claim), Just role <- [forwardRole claim]])
    where
     claims = sourceClaims "" mainPackage <> sourceClaims "probe" probePackage
     presentSet = Set.fromList present
@@ -158,9 +158,13 @@ packageMapReport mainBytes probeBytes present = case (parse "amoebius.cabal" mai
             any (`prefix` path) ["src/", "app/", "test/", "probe/"]]
     -- These generated Haskell bindings belong to the typed Proto handoff.
     -- Their absence is an explicit later-owned source, not an unseen file.
-    forwardOwned claim = claimAutogen claim && claimComponent claim == "library:pulsar-client"
-      && claimFile claim `elem`
-      ["Proto/PulsarApi.hs", "Proto/PulsarApi_Fields.hs"]
+    forwardRole claim
+      | claimAutogen claim
+      , claimComponent claim `elem` ["library:pulsar-client", "library:pulsar-compat"]
+      , claimFile claim `elem` ["Proto/PulsarApi.hs", "Proto/PulsarApi_Fields.hs"] = Just "generated-proto"
+      | claimAutogen claim, claimComponent claim == "library:pulsar-compat"
+      , claimFile claim == "Paths_supernova.hs" = Just "generated-fork-identity"
+      | otherwise = Nothing
     standaloneSourceRole :: FilePath -> Maybe Text
     standaloneSourceRole path
       | "test/negative/" `prefix` path = Just "compile-negative"
@@ -171,6 +175,7 @@ packageMapReport mainBytes probeBytes present = case (parse "amoebius.cabal" mai
       | "test/spec/dsl/capacity_topology_compile_fail/" `prefix` path = Just "compile-negative"
       | path == "test/spec/formal/refinement/RefinementModelProjection.hs" = Just "model-projection"
       | path == "test/spec/formal/symbolic/FakeSmtSolver.hs" = Just "fake-boundary"
+      | path `elem` ["test/wire-generation/WireRoundTrip.hs", "test/wire-generation/ForkWire.hs", "test/wire-generation/NativeWire.hs"] = Just "generated-binding-probe"
       | path `Set.member` Set.fromList maintainedForkPaths = Just "maintained-fork"
       | otherwise = Nothing
  where

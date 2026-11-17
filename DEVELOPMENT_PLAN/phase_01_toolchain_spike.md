@@ -40,7 +40,7 @@ versions and the probe results. No toolchain archive or executable pin is requir
 ## Phase Status
 
 ✅ Done.
-**Receipt**: f553c8e9abcc4b3f8e8d6d303c4bfe496309a13a9e8a5315fa2b51896769aa9c
+**Receipt**: 84cf31fc6b2d5feaa6c086f59a616e188cec82ee77725396beb108093709c235
 
 **Historical predecessor repair — DL-0042.** The complete repaired Phase-0 preview passed,
 and its separate acceptance issued the [owning receipt](phase_00_documentation_suite.md#phase-status)
@@ -274,7 +274,7 @@ positive: case:report.cli.plan-a | input=public acquisition report first plan | 
 positive: case:report.cli.plan-b | input=public acquisition report second plan | expected=actual JSON units, compatible packages and digest match report
 positive: case:report.cli.plans-agree | input=public acquisition report repeated plans | expected=observed complete plans agree
 positive: case:report.cli.source | input=public report source inspection | expected=no tracked resolution findings
-mutants: stages=Amoebius.Toolchain.Versions,Amoebius.Toolchain.Acquire,Amoebius.Toolchain.Probe,Amoebius.Toolchain.Resolve,Amoebius.Toolchain.Provenance,Amoebius.Toolchain.Report per-module=8 cap=40 kill-ratio=3/5
+mutants: stages=Amoebius.Toolchain.Versions,Amoebius.Toolchain.Acquire,Amoebius.Toolchain.Probe,Amoebius.Toolchain.Resolve,Amoebius.Toolchain.Provenance,Amoebius.Toolchain.Report per-module=8 cap=40 kill-ratio=3/5 artefacts=Amoebius.Toolchain.Versions:version.,Amoebius.Toolchain.Versions:versions.,Amoebius.Toolchain.Versions:case:planner.paired-remedies,Amoebius.Toolchain.Versions:negative.MalformedVersion,Amoebius.Toolchain.Versions:negative.UnsupportedVersion,Amoebius.Toolchain.Versions:negative.UnsupportedGhcupVersion,Amoebius.Toolchain.Acquire:admission.,Amoebius.Toolchain.Acquire:child.,Amoebius.Toolchain.Acquire:second.,Amoebius.Toolchain.Acquire:versions.,Amoebius.Toolchain.Acquire:case:build.fixed-serial-arguments,Amoebius.Toolchain.Acquire:negative.MissingTool,Amoebius.Toolchain.Acquire:negative.FailedVersionCommand,Amoebius.Toolchain.Acquire:negative.MalformedVersion,Amoebius.Toolchain.Acquire:negative.UnsupportedVersion,Amoebius.Toolchain.Acquire:negative.UnsupportedGhcupVersion,Amoebius.Toolchain.Probe:probe.,Amoebius.Toolchain.Probe:report.probe.,Amoebius.Toolchain.Probe:probe-source.,Amoebius.Toolchain.Probe:case:simulation.terminal-pair,Amoebius.Toolchain.Probe:negative.TrackedProbeInput,Amoebius.Toolchain.Probe:negative.MissingDependency,Amoebius.Toolchain.Resolve:plan.,Amoebius.Toolchain.Resolve:report.plan.,Amoebius.Toolchain.Resolve:report.resolution.,Amoebius.Toolchain.Resolve:case:resolution.,Amoebius.Toolchain.Resolve:case:report.cli.plan-,Amoebius.Toolchain.Resolve:case:planner.paired-remedies,Amoebius.Toolchain.Resolve:negative.TrackedResolutionOutput,Amoebius.Toolchain.Resolve:negative.MissingDependency,Amoebius.Toolchain.Provenance:fork.,Amoebius.Toolchain.Provenance:upstream.,Amoebius.Toolchain.Provenance:vendor-source.,Amoebius.Toolchain.Provenance:report.provenance.,Amoebius.Toolchain.Provenance:case:upstream.,Amoebius.Toolchain.Provenance:layout.problems,Amoebius.Toolchain.Provenance:negative.MutableIdentity,Amoebius.Toolchain.Provenance:negative.TopLevelVendor,Amoebius.Toolchain.Provenance:negative.UpstreamDigestMismatch,Amoebius.Toolchain.Report:report.,Amoebius.Toolchain.Report:case:report.cli.,Amoebius.Toolchain.Report:negative.ReportUnknownArgument
 binary-fact: command=toolchain-report --request {input} --output {run}/toolchain-report.tsv --probe-root {run}/probe | input=toolchain-request.tsv | perturbation=staged(pre=toolchain-report --write-request {input} post= then=sentinel-to-nonce(0b5e17e11a0c0ffee0de1e9a7e5ba5ed),rewrite(ghc.requested-version	9.12.4 => ghc.requested-version	9.10.1)) | outputs={run}/toolchain-report.tsv
 substrate: none
 ```
@@ -283,6 +283,31 @@ substrate: none
 
 **Contract check**: BOUND — the gate specification above is the compiled value the runner executes; the
 documentation checker refuses a block that differs from it. Execution evidence remains phase-local.
+
+The current verifier refuses missing stage attribution and mixed owned and unowned red rows. Explicit
+toolchain row families are now declared above; their changed-source coverage and this phase's receipt must be
+reproduced under the current verifier. The existing Done status remains historical until verifier action.
+Each declared family matches at least one row in the independently declared full oracle inventory, and every
+stage has a family; that inventory check is not mutation coverage or a replay.
+The complete current-verifier replay reproduced Phase 0, then returned red for Mutants, Qualification, and
+Pass criterion in this phase. The verifier retained the Phase 1 void and did not advance the frontier. The
+changed-source matrix must be inspected and repaired before another complete replay.
+A source-bound diagnostic of that specification retained 13 kills, 36 viable mutations, and four compiler
+refusals; the 13/36 ratio is below the required threshold. Independent transcripts showed that several observed
+planner, resolution, upstream, simulation, and serial-build rows were absent from their owning families. Those
+specific families are now declared above. The changed specification selects a new deterministic sample, so a
+fresh complete matrix and replay are required; the prior diagnostic does not establish a pass.
+The next sample produced 26 kills from 40 viable rows, but its matrix completeness was red: a generated list
+truncation deleted a pattern binder and the compiler reported the missing variable on later lines, outside the
+required mutation locus. The list operator now excludes patterns followed by an arrow, and the independent
+runner oracle passed all 1,083 component rows including that control. A fresh complete matrix and replay must
+verify the change; the incomplete diagnostic is not a pass.
+
+The next full diagnostic recorded 25 attributable kills from 40 viable rows, but remained incomplete: a
+field-drop mutant caused a record-construction exception before the suite could publish its upstream
+observations. The suite now retains that exception at the observation boundary. The unchanged control passed
+all 135 independent toolchain rows, and the changed-source case completed the same inventory with six upstream
+rows red. These paired component observations are not a complete matrix or a phase-gate pass.
 
 | Key | Contract |
 |---|---|

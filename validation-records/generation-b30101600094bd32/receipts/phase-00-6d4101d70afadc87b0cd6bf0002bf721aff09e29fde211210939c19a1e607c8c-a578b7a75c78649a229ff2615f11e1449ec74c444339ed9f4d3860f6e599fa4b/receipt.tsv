@@ -1,0 +1,16 @@
+record	amoebius-phase-receipt.v2
+phase	0
+capability	documentation_suite
+generation	b30101600094bd32ac7fc2a9bf99688969e6c6d6b4967632562fe607ffd70768
+spec-digest	fddcf0e7070fcad3d2c802838bd2fde4d3cc2cda0a54b9788238c6caa2c293c8
+spec	capability: documentation_suite\nrole: seed\nclaim: For one snapshot, the standalone documentation checker reports zero findings on the governed corpus and the named finding on each rendered negative; the three bootstrap predicate mutants are judged by the independent driver; the custody probes pass; the hygiene row is green at the recorded cap; the generation-2 seed is content-addressed and agent-recorded with an immutable accepted bundle.\nsubjects: Amoebius.Validation.BootstrapPredicate, Amoebius.Doc.Check, Amoebius.Validation.Runner, Amoebius.Validation.Custody\nsuite: plan-decisions-suite\noracle: oracle-doc\npositive: clean-predicate | input=Amoebius.Validation.BootstrapPredicate | expected=silent ExitSuccess\nnegative: digest-equality-bypass | input=bootstrapDigestMatches | tag=digest-equality-bypass | stage=predicate\nnegative: snapshot-freshness-bypass | input=bootstrapSnapshotMatches | tag=snapshot-freshness-bypass | stage=predicate\nnegative: bootstrap-path-bypass | input=bootstrapInputPathAllowed | tag=bootstrap-path-bypass | stage=predicate\npositive: store-seed-roundtrip | input=SeedRecord | expected=equal\npositive: store-receipt-roundtrip | input=Receipt | expected=equal\nnegative: store-tampered-receipt | input=receipt payload | tag=record digest does not match its sidecar | stage=custody\npositive: receipt-reproducible-digest-stable | input=candidate rows | expected=same digest\nnegative: preflight-status-surface-dirty | input=surface digest | tag=StatusSurfaceDirty | stage=preflight\nnegative: preflight-predecessor-not-reproduced | input=receipt digest | tag=PredecessorNotReproduced | stage=preflight\nmutants: stages= per-module=8 cap=40 kill-ratio=3/5\nsubstrate: none\nseed: predicates=clean-predicate,digest-equality-bypass,snapshot-freshness-bypass,bootstrap-path-bypass | custody=store-seed-roundtrip,store-receipt-roundtrip,store-tampered-receipt,receipt-reproducible-digest-stable,preflight-status-surface-dirty,preflight-predecessor-not-reproduced\n
+candidate-digest	801bc910679e1d5c58e5d5a827f4d08a2209d0ca17da9d070ee11d6873dc4a19
+kill-table-digest	251d3999c0e9546c030d29f311b0fb153055bfb0078cf0cac32b4a6f32d24be2
+closure-digest	11e158ca3b7cf23688ca9e429478450e4f95b6cac43cae68939d541b6f08e633
+reproducible-digest	6d4101d70afadc87b0cd6bf0002bf721aff09e29fde211210939c19a1e607c8c
+verifier-digest	b30101600094bd32ac7fc2a9bf99688969e6c6d6b4967632562fe607ffd70768
+governance-digest	d8b56eb04b2d406fd9cc5ec690a7d3896af6c101d5176540546bd75434bea618
+status-postimage	1fb7f2d3f44e683b7018907da72d327a0204a7f617b3c2da3e13bb9eef5b925d
+tree-commit	848986ef603136586fc6ded513a0ec5f8a294bb5
+issued-at	2026-11-04 21:29:41.905091142 UTC
+accepted-prefix-digest	54d5486abbcf331a2cd63f2c2814301a9193e0912e9d34c9d74325cd52d336e0

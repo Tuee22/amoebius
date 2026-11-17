@@ -42,7 +42,7 @@ main = do
   parallel argument = "-j" `isPrefixOf` argument && argument /= "-j1"
   parallelCabal argument = parallel argument || ("--jobs" `isPrefixOf` argument && argument /= "--jobs=1")
   forbiddenCabal argument = parallelCabal argument
-    || any (`isPrefixOf` argument) ["--with-compiler", "--with-ghc", "-w"]
+    || any (`isPrefixOf` argument) ["--with-compiler", "--with-ghc", "--with-hc-pkg", "-w"]
     || ("--builddir" `isPrefixOf` argument && argument /= "--builddir=.build/dist-native")
 
 admit :: FilePath -> IO CheckedExtensionSource

@@ -4,7 +4,7 @@
 -- bytes the runner's own commands wrote, judges them against literals typed in
 -- "DslTables", and prints one row per judgement. It depends on no library of this
 -- repository; it does not run the product and does not parse the plan.
-module DslOracle (oracleMain, coreRows, coreRowsWithBinary) where
+module DslOracle (oracleMain, coreRows, coreRowsWithBinary, coreRowsWithCabal) where
 
 import Data.ByteString qualified as ByteString
 import Data.Char (isDigit)
@@ -17,11 +17,15 @@ import DslBinarySubstrates (BinaryTopology (..), binaryTopology, binarySubstrate
 import DslSubstrates (substrateRows)
 import DslRecipe (recipeControlRows)
 import DslFamilies
+import DslForkWire (forkWireRows)
+import DslLegacy (legacyRows)
+import DslNativeWire (nativeWireRows)
+import DslWireDefaults (wireLinkedRoundTripRows)
 import DslParse
 import DslScan (scanRows)
 import DslStages
 import DslTables
-import DslTwins (twinRows)
+import DslTwins (twinRowsWithCabal)
 import System.Directory (doesDirectoryExist)
 import System.Environment (getArgs)
 import System.Exit (ExitCode (ExitFailure, ExitSuccess), exitWith)
@@ -58,10 +62,16 @@ renderedExamples =
   appOnSecondNode unit = if "app/" `Text.isPrefixOf` unit then "kind-host-2" else "kind-host-1"
 
 coreRows :: Maybe FilePath -> FilePath -> FilePath -> IO [Row]
-coreRows = coreRowsWithBinary True binaryRows
+coreRows = coreRowsWithCabal Nothing
+
+coreRowsWithCabal :: Maybe FilePath -> Maybe FilePath -> FilePath -> FilePath -> IO [Row]
+coreRowsWithCabal cabal = coreRowsUsing True binaryRows cabal
 
 coreRowsWithBinary :: Bool -> (FilePath -> IO [Row]) -> Maybe FilePath -> FilePath -> FilePath -> IO [Row]
-coreRowsWithBinary includeDefaultBinaryCase binaryJudge compiler buildDirectory suite = do
+coreRowsWithBinary includeDefaultBinaryCase binaryJudge = coreRowsUsing includeDefaultBinaryCase binaryJudge Nothing
+
+coreRowsUsing :: Bool -> (FilePath -> IO [Row]) -> Maybe FilePath -> Maybe FilePath -> FilePath -> FilePath -> IO [Row]
+coreRowsUsing includeDefaultBinaryCase binaryJudge cabal compiler buildDirectory suite = do
   sections <- sectionRows suite
   vocab <- vocabRows suite
   spec <- specRows suite
@@ -76,14 +86,15 @@ coreRowsWithBinary includeDefaultBinaryCase binaryJudge compiler buildDirectory 
   chainTableRow <- chainTableRows suite
   interpret <- interpretRows suite
   wire <- wireRows suite
+  wireLegacy <- legacyRows "wire-schema" (suite </> "wire-legacy")
   diffs <- diffRows suite
   binary <- binaryJudge suite
-  twins <- twinRows compiler buildDirectory suite
+  twins <- twinRowsWithCabal cabal compiler buildDirectory suite
   capacity <- capacityRows suite
   substrates <- substrateRows suite
   recipeControls <- recipeControlRows suite
   scans <- scanRows
-  let detail = concat [sections, vocab, spec, freeze, decode, lower, stages, refusals, endpoint, consume, corpus, chainTableRow, interpret, wire, diffs, binary, twins, scans, capacity, substrates, recipeControls, environmentPolicyRows]
+  let detail = concat [sections, vocab, spec, freeze, decode, lower, stages, refusals, endpoint, consume, corpus, chainTableRow, interpret, wire, wireLegacy, diffs, binary, twins, scans, capacity, substrates, recipeControls, environmentPolicyRows]
   pure (detail <> caseRows (includeDefaultBinaryCase && not (null binary)) detail)
 
 -- | What separates the siblings from the baseline, and the twin from it.
@@ -150,6 +161,9 @@ kindBinaryRows suite input = do
         everything = Text.concat (map (fromMaybe "") (outputs <> appliedOutputs))
     stage <- stageRows (View compiled params namer)
     fake <- fakeTranscriptRows "binary.fake" (applied </> "fake") (maybe [] splitPayloads manifest)
+    nativeWire <- nativeWireRows (suite </> "binary" </> "wire" </> "native.tsv")
+    forkWire <- forkWireRows (suite </> "binary" </> "wire" </> "fork.tsv")
+    roundTrips <- wireLinkedRoundTripRows (suite </> "binary" </> "wire" </> "roundtrip.tsv")
     sourceHash <- maybe (pure Nothing) (independentHash (suite </> "binary" </> "input")) input
     frozenHash <- maybe (pure Nothing) (independentHash (suite </> "binary" </> "input")) frozen
     pure $
@@ -165,7 +179,9 @@ kindBinaryRows suite input = do
       ]
         <> stage
         <> fake
+        <> map binaryWire (nativeWire <> forkWire <> roundTrips)
  where
+  binaryWire (Row name verdict detail) = Row ("binary." <> name) verdict detail
   numberAfter key text = case Text.breakOn key text of
     (_, rest) | not (Text.null rest), digits <- Text.takeWhile isDigit (Text.drop (Text.length key) rest), not (Text.null digits) -> fromIntegral (Text.foldl' (\acc c -> acc * 10 + toInteger (fromEnum c - 48)) (0 :: Integer) digits)
     _ -> 0

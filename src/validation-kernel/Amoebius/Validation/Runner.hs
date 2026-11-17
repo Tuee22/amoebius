@@ -1,5 +1,11 @@
 -- | One generic gate runner. Suites and oracles provide observations; only this runner mints verdicts.
 module Amoebius.Validation.Runner
   ( GateOutcome (..), PassedGate, RunnerConfig (..), RunnerRefusal (..), compiledBlocks, defaultRunnerConfig, reproducibleCore, Ledger
-  , parseLedger, ledgerGreen, ledgerDigest, suiteLedger, renderRefusal, roleFor, runGate, specDigest ) where
+  , parseLedger, ledgerGreen, ledgerDigest, suiteLedger, renderRefusal, roleFor, runGate, specDigest
+  , BinaryOutcome (..), Nonce (..), SpineOutcome (..), freshNonce, perturbInput, runSpineFact
+  , PackageGraph (..), SpecProblem (..), VerifiedSpec (..), executableClosure, libraryClosure, internalDependencies, loadPackageGraph, moduleSourcePath, parsePackageGraph, renderSpecProblem, verifySpec, verifySpecAgainst, verifyOracle, sourceTokens, sourceTree, sourceDirectives, resolveSpec, bindPhaseSpec, requiredSuiteRows
+  , ObservedRun (..), chainDigest, observe, observeNativeCabal, observedDigest, renderObserved, sha256Hex, ActualPreparedTuple, observeActualTuple, observeActualNativeCabal, NativeCabalRequest, prepareNativeCabalRequest, nativePlanWireTool, sha256Bytes, renderTsv, OracleTranscriptKind (..), inspectOracleTranscript
+  , HygieneReport (..), CapturedSource, captureSource, capturedSourceDigest, capturedSourceFiles, capturedSourceBytes, capturedSourceRuns, parseSourceInventory, docCheckRoot, hygieneGreen, hygieneProblems, hygieneRow, kernelBudget, kernelRoots, isRunModule, phaseLiteral, haskellFilesUnder, materializeSource, verifySourceCopy, rewriteCapturedSource, runRootWithinFrame, renderHygiene, vocabularyTypes, TreePurpose (..), TreeNode (..), classifyTreeNode, walkFilesUnder, walkFilesUnderWith, sourceAttempt, readSourceBytes, readSourceText
+  , LegacyFinding (..), LegacyObservation (..), LegacyReport (..), legacyRequirementsAt, observeLegacy, observeLegacyMany, auditLegacyReports, renderLegacyReports, LegacyCollection, collectLegacy, inheritLegacyCollection, auditLegacyCollection, legacyCollectionRuns, legacyCollectionEvidence, legacyQualificationSupported, LegacyQualification, qualifyLegacy, qualifiedLegacyReports, auditQualifiedLegacyReports, runLegacyProbe, runAuthorityObservation, runSolverReintroductions, readImages
+  , KillTable (..), Locus (..), MutantOutcome (..), Operator (..), SubjectChangeWitness (..), allOperators, applyLocus, renderMutantOutcome, enumerateLoci, isAttributed, truncateListLocus, killTable, renderKillTable, renderOperator, sampleLoci ) where
 import Amoebius.Validation.Authority.Core

@@ -1,0 +1,56 @@
+record	amoebius-phase-receipt.v2
+phase	2
+capability	repository_layout_conformance
+generation	0161c20aea48e0c10aea52215e658ff99c04465a701d50b64a69aefc0d55e6f0
+spec-digest	988c5e89f99c4fea035e3e3f6d20698c6f2909a04b24b0a5c40225f153daf50a
+spec	capability: repository_layout_conformance\nrole: ordinary\nclaim: The shipped layout-report classifies every present source path, enforces the six admitted metadata paths and bounded bootstrap bytes, and resolves the compiler-backed whole-source graph. Complete stable native source bytes and modes bind its static-text observations to one parsed forest; an independent full-module reference judges structural identities and complete query traces, supplied-AST compatibility and opaque compiler clients. Planted foreign inputs and typed legacy ownership are independently judged. Archive custody remains verifier-owned; runtime evaluation and hardware remain outside the claim.\nsubjects: Amoebius.Layout.Classify, Amoebius.Layout.PackageMap, Amoebius.Layout.PbGrammar, Amoebius.Layout.Report, Amoebius.Layout.SourceGraph, Amoebius.Internal.SourceText.Lexical\nsuite: layout-suite\noracle: oracle-layout\npositive: case:positive.bootstrap | input=pb/__main__.py | expected=admitted\npositive: case:six-metadata-files | input=six metadata paths | expected=six classes\npositive: case:positive.archive | input=accepted bundle path | expected=historical-evidence\npositive: case:graph-qualified | input=whole source inventory | expected=resolved\npositive: static-text.discovery | input=shipped native text corpus | expected=complete independent inventory\npositive: static-text.closing-control.findings | input=stable native source | expected=no finding\npositive: lexical.discovery | input=supplied whole AST corpus | expected=complete independent inventory\npositive: opaque.getters.compiler | input=client of built layout unit | expected=exact compiler success\nnegative: case:negative.python | input=src/example.py | tag=NonHaskellSource | stage=classify\nnegative: case:negative.dhall | input=dhall/example.dhall | tag=ForeignSourceOwed | stage=classify\nnegative: case:negative.pulumi | input=pulumi/Pulumi.yaml | tag=TrackedPulumiProgram | stage=classify\nnegative: case:negative.test-table | input=test/layout/expected.tsv | tag=NonHaskellTestInput | stage=classify\nnegative: case:negative.ignore-root | input=ui/output | tag=RetiredIgnoreRoot | stage=classify\nnegative: case:negative.ordinal | input=src/Amoebius/Phase42Runtime.hs | tag=OrdinalRuntimeIdentity | stage=classify\nnegative: case:graph.ambiguous-import | input=ambiguous import fixture | tag=AmbiguousSourceImport | stage=graph\nnegative: case:graph.module-path-mismatch | input=misdeclared module fixture | tag=ModuleDeclarationPathMismatch | stage=graph\nnegative: static-text.closing-bytes.findings | input=bytes changed before closing read | tag=StaticTextSourceChanged | stage=capture\nnegative: static-text.closing-mode.findings | input=mode changed before closing read | tag=StaticTextSourceChanged | stage=capture\nnegative: static-text.manifest-empty.findings | input=omitted native source | tag=StaticTextSourceInventoryMismatch | stage=capture\nnegative: static-text.source-symlink.findings | input=symlink native input | tag=StaticTextCaptureUnavailable | stage=capture\nnegative: static-text.invalid-utf8.findings | input=invalid UTF-8 source | tag=HaskellSourceEncodingInvalid | stage=parse\nnegative: opaque.result-constructor.compiler | input=forged diagnostic carrier | tag=ConstructorNotExported | stage=compile\nnegative: opaque.result-read.compiler | input=decoded diagnostic carrier | tag=NoReadInstance | stage=compile\nnegative: opaque.result-generic.compiler | input=generic diagnostic carrier | tag=NoGenericInstance | stage=compile\nmutants: stages=Amoebius.Layout.Classify,Amoebius.Layout.PackageMap,Amoebius.Layout.PbGrammar,Amoebius.Layout.Report,Amoebius.Layout.SourceGraph,Amoebius.Internal.SourceText.Lexical per-module=8 cap=40 kill-ratio=3/5\nbinary-fact: command=layout-report --root {tree} --paths-file {input} --output {run}/layout-report.tsv | input=paths.txt | perturbation=plant-foreign-paths(src/Challenge{nonce}.py=NonHaskellSource,dhall/Challenge{nonce}.dhall=ForeignSourceOwed,pulumi/Pulumi{nonce}.yaml=TrackedPulumiProgram) | outputs={run}/layout-report.tsv\nsubstrate: none\n
+candidate-digest	39c1fa9cc28d81206ca9d0bb47875699e76e3e48f9505e81415fa862cff1ac17
+kill-table-digest	40e3520e4f11b641808eac0c8ff9b7124a7d33b761301ea20c4d568d7209280d
+closure-digest	c576f6ba9ce443aa04c3379e6ab7060ac87f9327bc0827ca52b6a737271ebb87
+reproducible-digest	3a41a20c39f33dd7f1421f41ccf83c3c98617887c59543a3d1f11be2c51d887d
+verifier-digest	0161c20aea48e0c10aea52215e658ff99c04465a701d50b64a69aefc0d55e6f0
+governance-digest	d8b56eb04b2d406fd9cc5ec690a7d3896af6c101d5176540546bd75434bea618
+status-postimage	bdf5e5e7045bc668775ad1597f0b27b875ba04e136f9cd9b02448d3a0c0b3e78
+tree-commit	848986ef603136586fc6ded513a0ec5f8a294bb5
+issued-at	2026-11-11 14:33:13.056357487 UTC
+accepted-prefix-digest	fd32e538aabbb01249ea6f93d45f7a6d7e4339e98c080b1c2798440ace229229
+witness	src/Amoebius/Layout/Classify.hs:83 constant-flip 9283fc10ed51->eb201a09a35a
+witness	src/Amoebius/Layout/PackageMap.hs:185 constant-flip 1479dea9557c->45cac88a900a
+witness	src/Amoebius/Layout/PbGrammar.hs:96 constant-flip 4f7b716ad3c2->29592395eab4
+witness	src/Amoebius/Layout/Report.hs:115 constant-flip 1dccba5c5007->58e631422d9b
+witness	src/Amoebius/Layout/SourceGraph.hs:490 list-truncation 325e8fa988f8->125faaede537
+witness	src/internal-source-text/Amoebius/Internal/SourceText/Lexical.hs:131 constant-flip 7c70bbdb4ab3->c146c6eb25b0
+witness	src/Amoebius/Layout/Classify.hs:95 constant-flip 9283fc10ed51->abed2fecd8e7
+witness	src/Amoebius/Layout/PackageMap.hs:240 constant-flip 1479dea9557c->181baab7ce85
+witness	src/Amoebius/Layout/PbGrammar.hs:128 constant-flip 4f7b716ad3c2->95ddd22fcaa3
+witness	src/Amoebius/Layout/Report.hs:130 constant-flip 1dccba5c5007->0eafc715b0a1
+witness	src/Amoebius/Layout/SourceGraph.hs:545 constant-flip 325e8fa988f8->aafbebc4b938
+witness	src/internal-source-text/Amoebius/Internal/SourceText/Lexical.hs:163 constant-flip 7c70bbdb4ab3->f2cd44f05869
+witness	src/Amoebius/Layout/Classify.hs:99 constant-flip 9283fc10ed51->3f9e89b6d603
+witness	src/Amoebius/Layout/PackageMap.hs:265 constant-flip 1479dea9557c->3bddc49f20f2
+witness	src/Amoebius/Layout/PbGrammar.hs:132 constant-flip 4f7b716ad3c2->0324cceea370
+witness	src/Amoebius/Layout/Report.hs:145 constant-flip 1dccba5c5007->0e8245660de9
+witness	src/Amoebius/Layout/SourceGraph.hs:1389 constant-flip 325e8fa988f8->a568855b1294
+witness	src/internal-source-text/Amoebius/Internal/SourceText/Lexical.hs:163 branch-swap 7c70bbdb4ab3->38cc1dc86bfb
+witness	src/Amoebius/Layout/Classify.hs:185 constant-flip 9283fc10ed51->0dad6687828d
+witness	src/Amoebius/Layout/PackageMap.hs:310 branch-swap 1479dea9557c->19c7550f1972
+witness	src/Amoebius/Layout/PbGrammar.hs:133 constant-flip 4f7b716ad3c2->928d9415a16c
+witness	src/Amoebius/Layout/Report.hs:188 constant-flip 1dccba5c5007->16c84b21ea56
+witness	src/Amoebius/Layout/SourceGraph.hs:1416 constant-flip 325e8fa988f8->782f696220e7
+witness	src/internal-source-text/Amoebius/Internal/SourceText/Lexical.hs:199 constant-flip 7c70bbdb4ab3->3c74bedf2501
+witness	src/Amoebius/Layout/Classify.hs:262 branch-swap 9283fc10ed51->0b37d3721fcc
+witness	src/Amoebius/Layout/PackageMap.hs:618 branch-swap 1479dea9557c->b22675d5173d
+witness	src/Amoebius/Layout/PbGrammar.hs:143 constant-flip 4f7b716ad3c2->d5ceb73188f5
+witness	src/Amoebius/Layout/Report.hs:190 constant-flip 1dccba5c5007->ce54026a9673
+witness	src/Amoebius/Layout/SourceGraph.hs:1695 constant-flip 325e8fa988f8->834003d28a69
+witness	src/internal-source-text/Amoebius/Internal/SourceText/Lexical.hs:425 constant-flip 7c70bbdb4ab3->0be9f02b3aa1
+witness	src/Amoebius/Layout/Classify.hs:287 constant-flip 9283fc10ed51->3a3fd4d48dc9
+witness	src/Amoebius/Layout/PackageMap.hs:682 constant-flip 1479dea9557c->55a45a17f424
+witness	src/Amoebius/Layout/PbGrammar.hs:144 constant-flip 4f7b716ad3c2->39a9fb4586e9
+witness	src/Amoebius/Layout/Report.hs:224 constant-flip 1dccba5c5007->5db31e4b4d92
+witness	src/Amoebius/Layout/SourceGraph.hs:2202 constant-flip 325e8fa988f8->ae1bc9067215
+witness	src/internal-source-text/Amoebius/Internal/SourceText/Lexical.hs:435 constant-flip 7c70bbdb4ab3->bc0f7f048a87
+witness	src/Amoebius/Layout/Classify.hs:295 constant-flip 9283fc10ed51->7802829bc1b0
+witness	src/Amoebius/Layout/PackageMap.hs:755 branch-swap 1479dea9557c->1108e01c25a7
+witness	src/Amoebius/Layout/PbGrammar.hs:269 constant-flip 4f7b716ad3c2->fc8613ad5744
+witness	src/Amoebius/Layout/Report.hs:252 constant-flip 1dccba5c5007->137eba8d7caa

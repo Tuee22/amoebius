@@ -24,7 +24,13 @@ capacityRows suite = do
   fits <- readRows (suite </> "fits.tsv")
   volumes <- readRows (suite </> "volumes.tsv")
   claims <- readRows (suite </> "claims.tsv")
-  pure (fitsRows fits <> volumeRows volumes <> claimRows claims)
+  pure (required fits fitsRows <> required volumes volumeRows <> required claims claimRows)
+ where
+  -- Missing input must fail every declared check while preserving the fixed
+  -- inventory; an aggregate fallback row would hide the missing checks.
+  required input judge = case input of
+    Just rows -> judge (Just rows)
+    Nothing -> [Row name False "the required table is absent or unreadable" | Row name _ _ <- judge (Just [])]
 
 readRows :: FilePath -> IO (Maybe [[Text]])
 readRows path = do

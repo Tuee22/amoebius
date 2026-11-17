@@ -5,7 +5,7 @@ module Portability (portabilityRows, verifierChild, observerRows, nativePreparat
 import Amoebius.Cli.Delegate (verifierFileName)
 import Amoebius.Doc.Check (discoverDocuments)
 import Amoebius.Doc.Types (Finding (..))
-import Amoebius.Validation.Runner.Observer (ObservedRun (..), observedDigest, renderObserved, observeActualNativeCabal, observeNativeCabal, prepareNativeCabalRequest)
+import Amoebius.Validation.Runner (ObservedRun (..), observedDigest, renderObserved, observeActualNativeCabal, observeNativeCabal, prepareNativeCabalRequest)
 import Control.Exception (IOException, try)
 import Control.Monad (forM)
 import Data.List (sort)

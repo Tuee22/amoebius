@@ -37,7 +37,7 @@ validator that judges every later phase, so nothing product-facing is a Phase-0 
 ## Phase Status
 
 ✅ Done.
-**Receipt**: 267a50b483f22beae70b42208dbd1b0f7d9a4463396c083fa6ff58ccc2dfe85f
+**Receipt**: d63eec54d322841b6ef6bc6c396afa7080daec8c2d98ddc68906d81bcc544d83
 
 **Historical accepted repair and governance replay — DL-0042.** The complete repaired preview passed all
 eighteen gate rows and the archive-evidence projection with exit zero and minted nothing. The separate
@@ -371,6 +371,26 @@ items is assigned to its numbered owner instead of extending Phase 0.
 phase receipt, and the closure-based compatibility decision are Haskell-owned inputs. Execution evidence
 remains phase-local and cannot be supplied by this prose.
 
+An earlier current-verifier replay returned red for Oracle, Positive controls, Paired negatives, Mutants, Challenge,
+Qualification, Legacy closure, and Pass criterion. The verifier published replay void markers for the affected
+recorded frontier; the existing Done lines remain until a successful replay or verifier reset. The underlying
+failures need diagnosis and correction before any successor gate can proceed.
+The runner suite subsequently exposed a stale synthetic Phase 3 subject closure and an oracle executable
+inventory that omitted the wire-preparation helper. After correcting both, the standalone runner and its
+independent oracle completed 1,082 rows green. This was a component diagnostic, not a phase pass.
+The source-bound authority qualification subsequently completed 355 independent rows green with matching
+opening and closing images. Its isolated command reported the other unsupplied phase qualifications as
+unavailable, so it is not a phase pass.
+After the fixture and oracle repairs, a second complete replay returned red only for Legacy closure and Pass
+criterion. The verifier again left the predecessor voided; the outstanding qualification must be isolated and
+corrected before another replay.
+The kernel-shape qualification was still anchored to the old expanded `renderVerdict` line, which no longer
+exists after the kernel reduction. Its paired phase-literal control and independent source expectation now
+target the current implementation. The source-bound kernel qualification passed all ten independent rows.
+A subsequent complete Phase-0 replay passed and refreshed the receipt above; Phase 0 also reproduced during
+the ordered replay through Phase 1. That Phase-1 replay returned red for Mutants, Qualification, and Pass
+criterion. Later verifier and plan changes require fresh ordered reproduction before successor reuse.
+
 | Key | Contract |
 |---|---|
 | `Claim` | For one exact source snapshot, the standalone documentation checker reports zero findings on the governed corpus and the named finding on each rendered negative; the three bootstrap mutants are judged by the independent driver; the six custody controls pass; the kernel hygiene row is green at the recorded ratchet; the generation-2 seed is content-addressed and agent-recorded with an immutable accepted bundle. Toolchain reproducibility, source closure, product, and live-resource claims are excluded ([DL-0018](../documents/decision_log.md#dl-0018--plan-claims-follow-the-keyless-gates-observed-scope)). |
@@ -454,7 +474,7 @@ same change that lands it, so the digest rows never lag the bytes they freeze.
 ## Sprint 0.2: Checker reconciliation ✅
 
 **Status**: Done
-**Implementation**: `src/validation-kernel/Amoebius/Validation/Runner/Spec.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Legacy.hs`, `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs`, `src/doc-check/Amoebius/Doc/Governance.hs`, `src/plan-decisions/Amoebius/Plan/PhaseIdentity.hs`, `test/runner/Main.hs`, `test/runner/LegacyAudit.hs`, `test/oracle/runner/Main.hs`, and `test/oracle/runner/LegacyAudit.hs`
+**Implementation**: `src/validation-kernel/Amoebius/Validation/Runner.hs`, `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs`, `src/doc-check/Amoebius/Doc/Governance.hs`, `src/plan-decisions/Amoebius/Plan/PhaseIdentity.hs`, `test/runner/Main.hs`, `test/runner/LegacyAudit.hs`, `test/oracle/runner/Main.hs`, and `test/oracle/runner/LegacyAudit.hs`
 **Blocked by**: Sprint 0.1
 **Independent Validation**: The reconciled checker reports zero findings over the fifty-six-phase plan; the expected findings recorded in [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice) are paired negatives. The five canonical `LTD-VAL-002` pairs exercise document/specification correspondence, role binding, render-equivalent argument lists, shipped-subject membership and the reserved phase gap. Each weakened production check must produce its exact independent red rows and qualification refusal, with changed source and image identities and no retained build-source tree. At the component checkpoint, integrated legacy closure and phase acceptance remained outstanding.
 **Oracle**: `test/oracle/doc/Main.hs` states the documentation findings from literals; `test/oracle/runner/Main.hs` and `test/oracle/runner/LegacyAudit.hs` independently state the native correspondence and evidence-binding expectations and import no product module.
@@ -563,7 +583,7 @@ mutation protocol. The component ledger cannot discharge the complete current Ph
 ## Sprint 0.4: Gate specification and runner core ✅
 
 **Status**: Done
-**Implementation**: `src/gate-spec/Amoebius/Validation/GateSpec.hs`, `src/internal-cabal/Amoebius/Internal/Cabal/ComponentDescription.hs`, `src/internal-process/Amoebius/Internal/Process/EmptyInput.hs`, `src/validation-kernel/Amoebius/Validation/Authority/Core.hs`, `src/validation-kernel/Amoebius/Validation/Runner.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Spec.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Mutants.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Binary.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Observer.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Hygiene.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Legacy.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Capture.hs`, `test/runner/Main.hs`, `test/runner/LegacyAudit.hs`, `test/oracle/runner/Main.hs`, `test/oracle/runner/LegacyAudit.hs`, and `test/oracle/runner/NativeApi.hs`
+**Implementation**: `src/gate-spec/Amoebius/Validation/GateSpec.hs`, `src/internal-cabal/Amoebius/Internal/Cabal/ComponentDescription.hs`, `src/internal-process/Amoebius/Internal/Process/EmptyInput.hs`, `src/validation-kernel/Amoebius/Validation/Authority/Core.hs`, `src/validation-kernel/Amoebius/Validation/Runner.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Capture.hs`, `test/runner/Main.hs`, `test/runner/LegacyAudit.hs`, `test/oracle/runner/Main.hs`, `test/oracle/runner/LegacyAudit.hs`, and `test/oracle/runner/NativeApi.hs`
 **Blocked by**: Sprint 0.3
 **Independent Validation**: A specification whose subjects are inside the executable's closure verifies; a kernel subject, a non-seed specification without a `BinaryFact`, and an oracle stanza with a product dependency are refused by the smart constructor or `verifySpec` at their exact loci. A generated mutant that changes suite bytes is killed; a stillborn mutant is excluded, not counted.
 **Oracle**: `test/oracle/runner/Main.hs` states the expected refusals, sampled loci and kill table from literals; `test/oracle/runner/NativeApi.hs` supplies independent native checker fakes, and `test/oracle/runner/LegacyAudit.hs` checks the source changes and evidence bindings.
@@ -929,10 +949,15 @@ At that checkpoint the direct-native Phase-0 preview refused with `LEGACY-ANALYZ
 eight due analyzer integrations. It produced no receipt or status transition; those component results did
 not discharge that historical refusal. The owning acceptance and current replay requirement are recorded in Sprint 0.5.
 
+A later component rerun of the runner's source API controls initially failed before its intended boundaries
+because the compiler clients did not expose the internal packages needed by the runner's source roots. The
+independent harness now supplies those package identities explicitly; its nine legal and illegal API checks
+were green. This repairs the component diagnostic and does not reproduce the complete Phase 0 gate.
+
 ## Sprint 0.5: Custody core and verifier commands ✅
 
 **Status**: Done
-**Implementation**: `src/validation-kernel/Amoebius/Validation/Custody.hs`, `src/validation-kernel/Amoebius/Validation/Custody/Store.hs`, `src/validation-kernel/Amoebius/Validation/Custody/Status.hs`, `src/validation-kernel/Amoebius/Validation/Custody/Preflight.hs`, `src/validation-kernel/Amoebius/Validation/Compatibility.hs`, `src/validation-kernel/Amoebius/Validation/Runner/Legacy.hs`, `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs`, `app/amoebius-validate/Main.hs`, `test/runner/Main.hs`, `test/runner/LegacyAudit.hs`, `test/oracle/runner/Main.hs`, and `test/oracle/runner/LegacyAudit.hs`
+**Implementation**: `src/validation-kernel/Amoebius/Validation/Custody.hs`, `src/validation-kernel/Amoebius/Validation/Custody/Preflight.hs`, `src/validation-kernel/Amoebius/Validation/Runner.hs`, `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs`, `app/amoebius-validate/Main.hs`, `test/runner/Main.hs`, `test/runner/LegacyAudit.hs`, `test/oracle/runner/Main.hs`, and `test/oracle/runner/LegacyAudit.hs`
 **Blocked by**: Sprint 0.4
 **Independent Validation**: `preview` runs the complete gate and mints nothing; agent-run `accept` applies exactly one phase's patch and publishes its immutable accepted bundle. A missing, altered, or incomplete tracked bundle is refused before predecessor use; distinct observed runs with the same reproducible digest retain distinct bundle addresses. Closure-based chaining keeps a receipt across an edit outside the closure and reopens across an edit inside it ([DL-0016](../documents/decision_log.md#dl-0016--acceptance-and-replay-publish-the-archive-with-the-status-projection)).
 **Oracle**: `test/oracle/runner/Main.hs` states the receipt, archive and dependency observations from literals; `test/oracle/runner/LegacyAudit.hs` independently checks the canonical native source changes and evidence bindings. Neither imports a product module.

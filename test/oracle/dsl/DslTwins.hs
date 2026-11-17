@@ -5,7 +5,7 @@
 -- twin must draw exactly one error at the pinned line and column with the pinned code and
 -- message. Nothing here is tracked.
 module DslTwins
-  ( twinRows
+  ( twinRows, twinRowsWithCabal
   , Diagnostic (..), compileWithLibraries
   ) where
 
@@ -44,14 +44,17 @@ data Twin = Twin
   }
 
 twinRows :: Maybe FilePath -> FilePath -> FilePath -> IO [Row]
-twinRows compiler buildDirectory suite = mapM (observe compiler buildDirectory suite) twins
+twinRows = twinRowsWithCabal Nothing
 
-observe :: Maybe FilePath -> FilePath -> FilePath -> Twin -> IO Row
-observe compiler buildDirectory suite twin = do
+twinRowsWithCabal :: Maybe FilePath -> Maybe FilePath -> FilePath -> FilePath -> IO [Row]
+twinRowsWithCabal cabal compiler buildDirectory suite = mapM (observe cabal compiler buildDirectory suite) twins
+
+observe :: Maybe FilePath -> Maybe FilePath -> FilePath -> FilePath -> Twin -> IO Row
+observe cabal compiler buildDirectory suite twin = do
   let directory = suite </> "compiler-negative" </> Text.unpack (twinName twin)
   createDirectoryIfMissing True directory
-  legal <- compile compiler buildDirectory directory "Legal" (twinLegal twin)
-  illegal <- compile compiler buildDirectory directory "Illegal" (twinIllegal twin)
+  legal <- compileWithCabal cabal compiler buildDirectory directory "Legal" (twinLegal twin)
+  illegal <- compileWithCabal cabal compiler buildDirectory directory "Illegal" (twinIllegal twin)
   let legalClean = case legal of
         Just (code, diagnostics) -> code == ExitSuccess && null [() | item <- diagnostics, diagnosticSeverity item == "Error"]
         Nothing -> False
@@ -66,11 +69,14 @@ observe compiler buildDirectory suite twin = do
         _ -> False
   pure (check ("twin." <> twinName twin) (legalClean && illegalPinned) (Text.pack (show (legalClean, illegalPinned, fmap (map diagnosticCode . snd) illegal))))
 
-compile :: Maybe FilePath -> FilePath -> FilePath -> Text -> Text -> IO (Maybe (ExitCode, [Diagnostic]))
-compile = compileWithLibraries testedLibraries
+compileWithCabal :: Maybe FilePath -> Maybe FilePath -> FilePath -> FilePath -> Text -> Text -> IO (Maybe (ExitCode, [Diagnostic]))
+compileWithCabal cabal = compileUsing cabal testedLibraries
 
 compileWithLibraries :: [Text] -> Maybe FilePath -> FilePath -> FilePath -> Text -> Text -> IO (Maybe (ExitCode, [Diagnostic]))
-compileWithLibraries libraries compiler buildDirectory directory name source = do
+compileWithLibraries = compileUsing Nothing
+
+compileUsing :: Maybe FilePath -> [Text] -> Maybe FilePath -> FilePath -> FilePath -> Text -> Text -> IO (Maybe (ExitCode, [Diagnostic]))
+compileUsing cabal libraries compiler buildDirectory directory name source = do
   let path = directory </> Text.unpack name <> ".hs"
   createDirectoryIfMissing True (directory </> Text.unpack name <> "-out")
   writeFile path (Text.unpack source)
@@ -80,7 +86,7 @@ compileWithLibraries libraries compiler buildDirectory directory name source = d
       arguments ids = ["exec", "--jobs=1", "--builddir=" <> buildDirectory] <> compilerOptions <> ["--", compilerExecutable, "-j1", "-fdiagnostics-as-json", "-fno-code", "-fforce-recomp", "-XGHC2024"] <> concatMap (\identity -> ["-package-id", identity]) ids <> ["-outputdir", directory </> Text.unpack name <> "-out", path]
   outcome <- try (case packageIds of
     Left problem -> fail (Text.unpack problem)
-    Right ids -> readProcessWithExitCode "cabal" (arguments ids) "") :: IO (Either SomeException (ExitCode, String, String))
+    Right ids -> readProcessWithExitCode (maybe "cabal" id cabal) (arguments ids) "") :: IO (Either SomeException (ExitCode, String, String))
   workingDirectory <- getCurrentDirectory
   writeFile (directory </> Text.unpack name <> ".cwd") workingDirectory
   case outcome of

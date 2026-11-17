@@ -35,6 +35,11 @@ import Dhall.Src (Src)
 import DslParse
 import DslStages (fakeTranscriptRows)
 import DslTables
+import DslWireSchema (expectedWireMessages, expectedWireSchema)
+import DslWireDescriptor (descriptorRow)
+import DslNativeWire (nativeWireRows)
+import DslForkWire (forkWireRows)
+import DslWireDefaults (wireLinkedRoundTripRows)
 import System.Directory (doesDirectoryExist, doesFileExist, listDirectory, withCurrentDirectory)
 import System.FilePath ((</>))
 
@@ -317,13 +322,18 @@ wireRows :: FilePath -> IO [Row]
 wireRows suite = do
   declared <- readTable (suite </> "wire.tsv")
   rendered <- readText (suite </> "proto" </> "PulsarApi.proto")
+  descriptor <- descriptorRow suite
+  native <- nativeWireRows (suite </> "proto" </> "native-wire.tsv")
+  fork <- forkWireRows (suite </> "proto" </> "fork-wire.tsv")
+  roundTrips <- wireLinkedRoundTripRows (suite </> "proto" </> "roundtrip.tsv")
   let fromDeclared = [(name, [(field, number) | entry <- entries, [field, digits] <- [Text.splitOn ":" entry], Just number <- [digitsOf digits]]) | name : entries <- fromMaybe [] declared]
       text = fromMaybe "" rendered
       fromSchema = messagesOf (Text.lines text)
-  pure
-    [ check "wire.declarations" (fromDeclared == wireMessages) (Text.pack (show fromDeclared))
-    , check "wire.schema" (fromSchema == wireMessages && take 2 (Text.lines text) == ["syntax = \"proto2\";", "package amoebius.pulsar.proto;"]) (Text.pack (show fromSchema))
-    ]
+  pure $
+    [ check "wire.declarations" (fromDeclared == expectedWireMessages) (Text.pack (show fromDeclared))
+    , descriptor
+    , check "wire.schema" (fromSchema == expectedWireMessages && text == expectedWireSchema) (Text.pack (show fromSchema))
+    ] <> native <> fork <> roundTrips
  where
   digitsOf digits = case reads (Text.unpack digits) of
     [(number, "")] -> Just number
@@ -333,5 +343,5 @@ wireRows suite = do
     header : rest ->
       let (body, remaining) = break (== "}") rest
           name = Text.takeWhile (/= ' ') (Text.drop (Text.length "message ") header)
-          fields = [(field, number) | row <- body, ["optional", "bytes", field, "=", digits] <- [Text.words (Text.filter (/= ';') row)], Just number <- [digitsOf digits]]
+          fields = [(field, number) | row <- body, label : _type : field : "=" : digits : _ <- [Text.words (Text.filter (/= ';') row)], label `elem` ["required", "optional", "repeated"], Just number <- [digitsOf digits]]
        in (name, fields) : messagesOf (drop 1 remaining)

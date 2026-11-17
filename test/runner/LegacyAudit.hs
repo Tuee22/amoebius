@@ -5,9 +5,8 @@ module LegacyAudit (legacyAuditRows, legacyKernelRows, legacyMutationRows, legac
 
 import Amoebius.Plan.Legacy qualified as L
 import Amoebius.Plan.PhaseIdentity qualified as P
-import Amoebius.Validation.Runner.Hygiene
-import Amoebius.Validation.Runner.Legacy
-import Amoebius.Validation.Runner.Observer (observe, runExit)
+import Amoebius.Validation.Runner
+import Amoebius.Validation.Runner (observe, runExit)
 import Control.Exception (finally)
 import Control.Monad (forM, unless)
 import Data.ByteString qualified as Bytes

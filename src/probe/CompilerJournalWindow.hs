@@ -15,7 +15,7 @@ import Control.Monad (forM, unless, void, when)
 import Crypto.Hash.SHA256 qualified as SHA256
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as Bytes
-import Data.List (foldl', isSuffixOf, sort, sortOn, stripPrefix)
+import Data.List (isPrefixOf, isSuffixOf, sort, sortOn, stripPrefix)
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.Text (Text)
 import Data.Text qualified as Text
@@ -24,7 +24,7 @@ import GHC.IO.Exception qualified as GHC
 import Numeric (showHex)
 import Numeric.Natural (Natural)
 import System.Directory
-  ( canonicalizePath, copyPermissions, createDirectory, createDirectoryIfMissing
+  ( canonicalizePath, copyPermissions, createDirectory, createDirectoryIfMissing, exeExtension
   , getCurrentDirectory, listDirectory, makeAbsolute, pathIsSymbolicLink
   , removeDirectory, removeFile )
 import System.Environment (getExecutablePath)
@@ -61,6 +61,7 @@ runRecordedCabal :: CheckedExtensionSource -> FilePath -> FilePath -> FilePath
   -> FilePath -> String -> [String] -> IO ExitCode
 runRecordedCabal seal root compiler cabal config command arguments = do
   compilerPath <- makeAbsolute compiler
+  physicalCompiler <- canonicalizePath compilerPath
   helper <- getExecutablePath
   window <- acquireFreshWindow root
   let owner = windowPath window
@@ -68,8 +69,10 @@ runRecordedCabal seal root compiler cabal config command arguments = do
       source = directory </> "Main.hs"
       output = owner </> "bootstrap/ghc.exe"
       copy = owner </> "compiler/ghc.exe"
+      compilerName = takeFileName physicalCompiler
+      packageTool = takeDirectory physicalCompiler </> (if "ghc" `isPrefixOf` compilerName then "ghc-pkg" <> drop 3 compilerName else "ghc-pkg" <> exeExtension)
       effective = ["--config-file=" <> config, command, "--offline", "--jobs=1",
-                   "--with-compiler=" <> copy] <> arguments
+                   "--with-compiler=" <> copy, "--with-hc-pkg=" <> packageTool] <> arguments
       admission = checkedProjection seal
       rendered = Encoding.encodeUtf8 (Text.pack (unlines (cabalBridgeLines helper compilerPath root)))
   createOwnedDirectory window (owner </> "bootstrap")

@@ -637,11 +637,12 @@ gate input. Current third-party dependencies and packaging machinery remain `LTD
 target installation contract. A running invocation cannot update itself: doing so would make the run's own
 provenance unanswerable.
 
-**Specification** ([DL-0033](../decision_log.md#dl-0033--image-and-bootstrap-source-claims-require-current-qualification)).
-Qualification is owed by [Phase 2](../../DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md) for the tracked
-`pb/**` source boundary, including the SHA-256 identity of `pb/__main__.py`. This source admission must
-not establish runtime handoff behavior or become a compiler admission pin. Runtime identity, unchanged
-argv and exec replacement remain owed by the bootstrap handoff.
+Observed implementation: The [Phase 2](../../DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md) gate qualifies the tracked
+`pb/**` source boundary, including the SHA-256 identity of `pb/__main__.py`; its accepted observation and
+current-reuse requirements are recorded by [DL-0043](../decision_log.md#dl-0043--reconcile-phase-2-source-boundary-requirements-with-its-acceptance) [GateSpec:repository_layout_conformance]. This source admission must
+not establish runtime handoff behavior or become a compiler admission pin.
+
+Runtime identity, unchanged argv and exec replacement remain owed by the [bootstrap handoff](../../DEVELOPMENT_PLAN/phase_50_host_assert_cli.md).
 
 Every phase through the DSL barrier (Phase 9) invokes the source-bound
 verifier directly and cannot use `pb` as evidence. [Phase 50](../../DEVELOPMENT_PLAN/phase_50_host_assert_cli.md) alone

@@ -57,7 +57,7 @@ surfaceChecks directory=do
   let sourceOkay source supplied actual=case supplied of
         Just (_,before,_,after)->before==Encoding.encodeUtf8 source && before==after && actual==before
         _->False
-      arguments name=["exec","--jobs=1","--builddir="<>buildRoot,"--","ghc","-j1","-fdiagnostics-as-json",
+      arguments name=["exec","-v0","--jobs=1","--builddir="<>buildRoot,"--","ghc","-j1","-fdiagnostics-as-json",
         "-fno-code","-fforce-recomp","-XGHC2024","-package-id",Text.unpack unit,"-outputdir",
         owner </> Text.unpack name </> "objects",owner </> Text.unpack name </> "Client.hs"]
       commandOkay name supplied=case supplied of Just (actual,_,_,_)->actual==arguments name;_->False

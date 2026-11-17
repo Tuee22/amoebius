@@ -35,7 +35,8 @@ from literals. Its predecessor is [Phase 1](phase_01_toolchain_spike.md).
 
 ## Phase Status
 
-🔄 Active — NOT VALIDATED.
+✅ Done.
+**Receipt**: 6263eabc33dc2091f7d8e2f9ed565b8cf44ecccc4afb1a06979b64211c15c0b8
 
 **Predecessor checkpoint on 2026-10-28 — DL-0042.** The repaired Phase-0 replay and the
 separate complete Phase-1 preview and acceptance had finished. That numerical reproduction issued
@@ -157,29 +158,124 @@ without fabricated graph facts. These are component observations, not a qualifie
 pass; current numerical predecessor reproduction, the complete gate and a separate fresh acceptance
 remain required.
 
-**Session handoff on 2026-10-30.** Development stopped at the user's request. The ordered native
-`replay --through 1` published a complete green Phase-0 reproduction at 02:18:45 UTC, with all eighteen
-categories green; its receipt is recorded in [Phase 0](phase_00_documentation_suite.md#phase-status).
-After the required nested predecessor admission, its own Phase-1 run reached the twelfth materialized
-mutation before interruption. The verified process group received SIGINT and the controller exited 130;
-no process from that run remained. The interrupted run published no Phase-1 receipt or revocation marker
-in its generation. An empty buffered terminal log supplies no additional result. No repaired complete
-Phase-2 preview or separate acceptance has finished, and all seven owning legacy bindings remain open.
+**Resumed checkpoint on 2026-11-04.** The native product, verifier and toolchain diagnostic targets
+build with GHC 9.12.4. Put its installed tool directory first on PATH as well as selecting the compiler
+explicitly: the first replay refused because the compiler wrapper was paired with ambient `ghc-pkg`
+9.14.1. Its verifier-issued revocation markers remain immutable. The earlier handoff's disposable
+scratch notes are absent; its interrupted Phase-1 run supplies no current phase pass.
 
-Resume by checking the worktree and canonical receipts, rebuilding the source-bound native verifier if
-needed, and performing fresh numerical predecessor reproduction at the resumed source and governance.
-Then run this phase's complete preview, require every gate category and the full forty-mutant matrix,
-including complete viable-mutant observations and each named subject kill, and run a separate fresh
-acceptance only after that preview passes. Preserve the per-record archive bounds, independent oracles,
-source closure and serial compiler execution. The documentation edits at this handoff require fresh
-affected-closure validation; the interrupted candidate cannot be resumed or reused as a pass.
+The corrected complete replay issued Phase-0 receipt
+`6d4101d70afadc87b0cd6bf0002bf721aff09e29fde211210939c19a1e607c8c` at
+2026-11-04 21:29:41.905091142 UTC: all eighteen gate categories, 1,120 ordinary oracle judgments and
+549 qualification judgments were green. The verifier refreshed the receipt field in
+[Phase 0](phase_00_documentation_suite.md#phase-status). Its separate complete predecessor
+re-derivation then admitted Phase 1, whose three owning qualifications returned 32 green judgments.
+Phase 1's unmodified matrix control nevertheless refused because the cached `supernova-0.0.3`
+archive was absent; its offline shipped-product build then refused an unavailable
+`typed-process-0.2.13.0` input. The replay exited 1, issued no Phase-1 pass and retained the
+verifier's revocation records. The forty-row mutation matrix was not admitted.
 
-Detailed commands, component logs and the interruption checkpoint are retained as disposable advisory
-notes in `.build/qualification-repair/layout-completion-20261028/session-handoff-20261030.txt` and
-`work-checkpoint.json` in that directory. They supply no validation authority. After actual acceptance,
-reconcile all six Remaining Work sections and the seven legacy bindings before continuing numerically
-with the complete Phase-3 contract. The later-phase backlog remains in scope; no successor implementation
-or live hardware work was undertaken during this wrap-up.
+The upstream archive, product dependencies and the three native units needed by the isolated
+`proto-lens-protoc` build (`ghc-paths-0.1.0.12`, `ghc-source-gen-0.4.7.0` and
+`proto-lens-runtime-0.7.0.8`) are now restored. A fresh complete toolchain component produced the
+two generated Haskell modules and passed all 135 independent judgments, with a complete all-green
+response and empty stderr. The three pinned fork-dependency units also remain registered uniquely.
+These component observations mint no phase evidence and change no status.
+
+**Compiler JSON transport checkpoint on 2026-11-05.** The subsequent complete ordered replay passed
+both predecessors. It refreshed Phase 0 with receipt
+`d3b02b0cc1e9babfa6cd990828a6ad8414f78cb0bc48fe43eb5e6049e3dbc86b` and issued
+Phase-1 receipt `064fc47af5af47e825ae858c2c3553f0c8e6b0cafbfc7e17ad2e6bf82bf144b6` at
+2026-11-05 02:55:22.655307111 UTC. At that source, Phase 1 passed all eighteen gate categories and
+139 ordinary oracle judgments; its complete forty-row matrix killed 35 of 39 viable mutants, with
+one exact compiler refusal and a kill for every named subject. The verifier published both immutable
+bundles and refreshed their receipt fields. Earlier revocation records remain historical evidence.
+
+A Phase-2 preview then re-derived both complete predecessor gates before reaching its owning
+qualifications. Whole-source graph discovery refused because the planned Pulsar client's exact
+`crc32c-0.2.2` unit was not registered. The preview was interrupted after that observed failure and
+supplies no complete gate result or receipt. Restoring the exact planned unit exposed a separate
+cold-build refusal: the whole graph left the intentionally illegal `CheckedExtensionSource` call
+opaque. A fresh-source qualification reproduced that result with twelve green judgments and
+`source-graph.discovery` red. The actual compiler still refused the call with diagnostic 1928 at
+the expected path and position, but a fresh-copy process trace showed Cabal writing its stale-index
+advisory before that JSON diagnostic. Strict parsing of the complete mixed stderr correctly refused it.
+
+The product's compile-negative carrier and the independent layout compiler checks now use
+`cabal exec -v0`, preserving `--jobs=1` and `ghc -j1`. They still parse every stderr byte; no banner
+filter or permissive diagnostic parser was added. Separate cold controls observed 133 advisory bytes
+at normal verbosity and empty stderr with the quiet carrier. The quiet compiler control retained
+exactly the expected GHC-9.12.4 diagnostic 1928, source path and position. The rebuilt native targets
+pass all 38 independent static-text surface checks. A distinct untraced qualification built a fresh
+source copy, resolved the whole graph, passed all thirteen independent source-graph judgments and
+its source/image/native-return checks, and removed the copied source. The diagnostic command
+qualified that binding but exited 1 because the other uncollected legacy bindings remained unavailable.
+These are component observations only. The changed product and oracle source requires fresh
+numerical predecessor reproduction before this phase's complete preview and separate acceptance.
+
+**Complete preview checkpoint on 2026-11-06.** The fresh ordered replay at the quiet-carrier source
+passed both predecessors, refreshing Phase 0 with receipt
+`6f150582a9e188466cf12bd40b6885aad98312ae9c395131c5db34d13239f7f1` and Phase 1 with
+`e44f4870e94e19548dda33c6050f4c0d141ae52e10171c88022164e9d9b76f59`. The subsequent complete
+Phase-2 preview re-derived both predecessor gates before admitting its own work. Its seven owning
+qualifications returned 65 green judgments. The complete forty-row matrix returned 34 qualified kills
+among forty viable mutants, no stillborn mutants, and a kill for every named subject. All eighteen
+candidate categories were green, including the independent clean-suite oracle, source and executable
+closure, challenge, cleanup and residue checks.
+
+The preview nevertheless failed: its `candidate.tsv` was 114,117,283 bytes, above the unchanged
+16 MiB per-record archive limit. It issued no receipt and did not admit acceptance. The verifier's
+complete terminal verdict and forty-row kill table are retained in ignored diagnostic output; its
+owned source tree was removed by normal cleanup. The archive representation requires another
+lossless capacity repair. Every actual native return, complete oracle frame and source/image join
+must remain recoverable; neither dropping observations nor increasing the archive limit qualifies.
+These candidate observations supply no phase pass.
+
+The repaired native representation now interns complete tuple fragments rather than alphanumeric
+runs, preserving its existing recoverable `interned-gzip-utf8-base64.v2` table schema. The independent
+layout oracle's large diagnostics retain an uncompressed `interned-utf8.v3` tuple dictionary so that
+the outer native dictionary can share their common fragments across changed subjects. Every ordered
+finding and observation remains present; neither codec supplies a semantic expectation.
+
+Four retained native fields recover byte-for-byte. Their combined repeated-envelope diagnostic
+shrinks from 1,833,733 to 397,057 bytes. A separate codec stress test varied one captured digest across
+forty synthetic fields derived from those four inputs; all forty fields and both combined envelopes
+recover exactly. The envelopes occupy 3,794,790 bytes together. All nine threshold and Unicode
+vectors and fourteen selected archived observations also recover exactly. These are encoding
+diagnostics, not forty new native executions, qualified mutants, or a complete candidate archive.
+The repaired verifier and layout oracle build successfully, the kernel remains exactly 3,353 lines,
+and documentation checking returns zero findings. The actual next candidate must still fit every
+unchanged archive bound.
+
+**Complete preview checkpoint on 2026-11-08.** Fresh predecessor replays passed and the subsequent
+preview re-derived both gates before executing Phase 2. All eighteen candidate categories were green;
+the seven owning qualifications had 65 green judgments, and the forty-row matrix had 34 kills among
+40 viable mutants, no stillborn mutants, and a kill for every named subject. Nevertheless the preview
+failed `ARCHIVE-RECORD-OVERSIZED`: `candidate.tsv` was 36,803,670 bytes and `oracle-ledger.tsv`
+was 17,113,087 bytes, each above the unchanged 16 MiB per-record bound. No Phase 2 receipt was
+issued. The complete verdict and captured candidate are retained in ignored diagnostic output.
+The candidate's completion-context observation and native call and image evidence dominate its size;
+the encoding needs further lossless repair and another complete ordered validation, not a status change.
+
+The follow-up representation interns a second layer of repeated escaped fields in large native
+diagnostics. The clean completion transcript is encoded in the candidate and restored exactly for
+archival; large ledger values are encoded individually, preserving readable row identities and
+verdicts. Against the captured preview, the completion-context field round-trips from 17,656,938
+characters to 506,393 encoded characters. The retained call and image dictionaries round-trip with
+their encoded sizes reduced from 5,172,501 and 10,891,421 bytes to 3,211,544 and 8,023,712 bytes.
+The 17,113,087-byte clean ledger recovers byte-for-byte from its 2,301,755-byte encoded form.
+These are component diagnostics on retained observations, not a new gate or archive verdict; the
+actual regenerated candidate and every archive member must still pass the fixed limit.
+
+Repeat complete numerical predecessor reproduction at this repaired source with matching native
+tools and restored software inputs, then run this phase's complete preview and separate fresh
+acceptance.
+Every gate category, the full forty-mutant matrix, complete viable-mutant observations and each named
+subject kill remain required. Preserve the per-record archive bounds, independent oracles, source
+closure and serial compiler execution. All seven owning legacy bindings remain open. After actual
+acceptance, reconcile all six Remaining Work sections and those bindings before proceeding to Phase 3.
+Continue numerically through hardware-free work; stop at the first phase requiring a specific
+hardware substrate.
 
 The contract is reopened under [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) by
 [DL-0008](../documents/decision_log.md#dl-0008--plan-re-sequence-into-a-vertical-slice): the subject moves
@@ -274,7 +370,7 @@ negative: static-text.invalid-utf8.findings | input=invalid UTF-8 source | tag=H
 negative: opaque.result-constructor.compiler | input=forged diagnostic carrier | tag=ConstructorNotExported | stage=compile
 negative: opaque.result-read.compiler | input=decoded diagnostic carrier | tag=NoReadInstance | stage=compile
 negative: opaque.result-generic.compiler | input=generic diagnostic carrier | tag=NoGenericInstance | stage=compile
-mutants: stages=Amoebius.Layout.Classify,Amoebius.Layout.PackageMap,Amoebius.Layout.PbGrammar,Amoebius.Layout.Report,Amoebius.Layout.SourceGraph,Amoebius.Internal.SourceText.Lexical per-module=8 cap=40 kill-ratio=3/5
+mutants: stages=Amoebius.Layout.Classify,Amoebius.Layout.PackageMap,Amoebius.Layout.PbGrammar,Amoebius.Layout.Report,Amoebius.Layout.SourceGraph,Amoebius.Internal.SourceText.Lexical per-module=8 cap=40 kill-ratio=3/5 artefacts=Amoebius.Layout.Classify:path-set,Amoebius.Layout.Classify:finding-set,Amoebius.Layout.Classify:challenge-set,Amoebius.Layout.Classify:challenge-finding:,Amoebius.Layout.Classify:case:positive.,Amoebius.Layout.Classify:case:negative.,Amoebius.Layout.Classify:case:challenge.,Amoebius.Layout.Classify:case:owner.,Amoebius.Layout.Classify:case:six-metadata-files,Amoebius.Layout.Classify:source-graph.,Amoebius.Layout.PackageMap:package-imports.,Amoebius.Layout.PackageMap:case:package.,Amoebius.Layout.PackageMap:case:graph.package-,Amoebius.Layout.PackageMap:compiler-cabal-dependency,Amoebius.Layout.PackageMap:compiler-component,Amoebius.Layout.PackageMap:fork-declared-packages,Amoebius.Layout.PbGrammar:bootstrap-source.,Amoebius.Layout.PbGrammar:bootstrap-call-sites,Amoebius.Layout.PbGrammar:bootstrap-effect-sites,Amoebius.Layout.PbGrammar:case:positive.bootstrap,Amoebius.Layout.PbGrammar:case:negative.bootstrap,Amoebius.Layout.PbGrammar:finding-set,Amoebius.Layout.Report:path-set,Amoebius.Layout.Report:path:,Amoebius.Layout.Report:finding-set,Amoebius.Layout.Report:challenge-set,Amoebius.Layout.Report:challenge-finding:,Amoebius.Layout.Report:compiler-,Amoebius.Layout.Report:source-graph.,Amoebius.Layout.Report:bootstrap-source.,Amoebius.Layout.Report:bootstrap-call-sites,Amoebius.Layout.Report:bootstrap-effect-sites,Amoebius.Layout.Report:static-text.,Amoebius.Layout.Report:consumer-,Amoebius.Layout.Report:case:identity.layout,Amoebius.Layout.Report:case:graph-qualified,Amoebius.Layout.Report:case:report.,Amoebius.Layout.Report:case:challenge.,Amoebius.Layout.Report:forward-owned-generated-proto,Amoebius.Layout.Report:route-,Amoebius.Layout.Report:fork-declared-packages,Amoebius.Layout.Report:sink-catalogue-recomputed,Amoebius.Layout.Report:test-source.product-examples,Amoebius.Layout.Report:tool-source.product-examples,Amoebius.Layout.Report:pulumi-source.product-examples,Amoebius.Layout.Report:runtime-identity.product-examples,Amoebius.Layout.Report:ignore-context.product-examples,Amoebius.Layout.Report:lexical.product-examples,Amoebius.Layout.Report:opaque.product-examples,Amoebius.Layout.SourceGraph:source-graph.,Amoebius.Layout.SourceGraph:compiler-,Amoebius.Layout.SourceGraph:case:graph.,Amoebius.Layout.SourceGraph:case:graph-qualified,Amoebius.Layout.SourceGraph:fixture-graph-,Amoebius.Layout.SourceGraph:route-,Amoebius.Layout.SourceGraph:sink-,Amoebius.Layout.SourceGraph:consumer-,Amoebius.Layout.SourceGraph:forward-owned-generated-proto,Amoebius.Layout.SourceGraph:standalone-,Amoebius.Internal.SourceText.Lexical:lexical.,Amoebius.Internal.SourceText.Lexical:static-text.,Amoebius.Internal.SourceText.Lexical:compiler-,Amoebius.Internal.SourceText.Lexical:case:graph.,Amoebius.Internal.SourceText.Lexical:route-,Amoebius.Internal.SourceText.Lexical:sink-,Amoebius.Internal.SourceText.Lexical:consumer-,Amoebius.Internal.SourceText.Lexical:finding-set,Amoebius.Internal.SourceText.Lexical:standalone-,Amoebius.Internal.SourceText.Lexical:case:graph-qualified,Amoebius.Internal.SourceText.Lexical:fork-declared-packages,Amoebius.Internal.SourceText.Lexical:fixture-,Amoebius.Internal.SourceText.Lexical:package-imports.,Amoebius.Internal.SourceText.Lexical:source-graph.,Amoebius.Internal.SourceText.Lexical:challenge-finding:syntax,Amoebius.Internal.SourceText.Lexical:forward-owned-generated-proto
 binary-fact: command=layout-report --root {tree} --paths-file {input} --output {run}/layout-report.tsv | input=paths.txt | perturbation=plant-foreign-paths(src/Challenge{nonce}.py=NonHaskellSource,dhall/Challenge{nonce}.dhall=ForeignSourceOwed,pulumi/Pulumi{nonce}.yaml=TrackedPulumiProgram) | outputs={run}/layout-report.tsv
 substrate: none
 ```
@@ -283,6 +379,40 @@ substrate: none
 
 **Contract check**: BOUND — the gate specification above is the compiled value the runner executes; the
 documentation checker refuses a block that differs from it. Execution evidence remains phase-local.
+
+The current verifier refuses missing stage attribution and mixed owned and unowned red rows. Explicit layout
+row families are now declared above; their changed-source coverage and this phase's receipt must be reproduced
+under the current verifier. The existing Done status remains historical until verifier action.
+Each declared family matches at least one row in the independently declared full oracle inventory, and every
+stage has a family; that inventory check is not mutation coverage or a replay.
+
+The ordered current-verifier replay reproduced Phases 0 and 1, then returned red for Phase 2's Positive
+controls, Paired negatives, Mutants, Qualification, and Pass criterion. The verifier published a revocation
+marker for the earlier receipt and left the Done projection in place. Its mutation matrix did not proceed past
+the clean control; diagnosis and a complete fresh ordered replay remain necessary before successor reuse.
+The independent layout oracle's generated-import control still expected 22 entries after the source graph
+acquired two additional declared imports. Its exact inventory and independent count now both require 24.
+A source-bound clean-control diagnostic completed all 1,884 oracle rows green, with seven observed processes,
+matching opening and closing source, and the generated-import control green at `(24,24)`. This diagnostic
+does not run the mutation matrix and is not a phase-gate pass.
+
+The next complete ordered replay again reproduced Phases 0 and 1. Phase 2 reached all forty sampled
+mutations and returned red for `Mutants`, `Qualification`, and `Pass criterion`; its other gate rows were
+green. The verifier left the prior Phase-2 receipt revoked. Retained scratch observations identify a
+pattern-binder truncation whose compiler error may move away from the changed line, and a changed snapshot
+walker that interrupted the source-graph fixture before its complete inventory was emitted. The sampler now
+refuses list patterns followed by `<-`, and the fixture records a snapshot exception explicitly while continuing
+the other observations. A source-bound diagnostic of the same changed walker then completed the subject and
+the independent oracle's full 1,884-row inventory; the oracle reported 1,204 red rows caused by its missing
+report. The report stage now declares those downstream output families explicitly. A runner diagnostic passed
+all 1,083 oracle rows, including the pattern-binder guard. A fresh clean source-bound layout control then
+completed all 1,884 oracle rows green with a matching source recheck. A selected lexical field-shape change also
+completed the full 1,884-row oracle inventory and made 374 rows red; the lexical stage now declares the
+downstream graph and package-route families that those observations exercise. A separate selected lexical
+scope-identifier change completed the same inventory with 22 red rows, all within those declared families; a
+scope-fact truncation retained the full inventory with 137 red rows in those families. The checked changed suite
+images differ from the clean image, and their source rechecks matched. A fresh complete
+ordered replay remains required; none of these component checks is a phase-gate pass.
 
 **Historical component checkpoint:** All seven owning bindings recorded component qualification. The whole-snapshot
 `bootstrap-source` factory passes nine focused oracle checks and all forty-three independent
@@ -384,9 +514,9 @@ store are ignored. The graph claim is bounded by the limits in the `Residue` row
 
 ## Sprints
 
-## Sprint 2.1: `test/**` is Haskell modules only 🔄
+## Sprint 2.1: `test/**` is Haskell modules only ✅
 
-**Status**: Active — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Layout/Classify.hs`
 **Blocked by**: [Phase 1](phase_01_toolchain_spike.md) gate pass
 **Independent Validation**: Every path beneath `test/**` classifying as a Haskell module is the positive control; a tracked script, table, golden, patch, or mutant body beneath `test/**` is a paired negative refused by name. A generated mutant that widens the test-tree arm is killed by the planted negatives.
@@ -440,9 +570,9 @@ findings. The runner regression exposed four stale expectations that still liste
 `LTD-SRC-006` as unavailable. Correcting only that literal list preserves the early refusals for the thirteen
 remaining unavailable analyzers in those later-phase fixtures; all 745 runner oracle checks then passed.
 
-## Sprint 2.2: The package-only roots become cabal stanzas ⏸️
+## Sprint 2.2: The package-only roots become cabal stanzas ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Layout/Classify.hs` and `amoebius.cabal`
 **Blocked by**: Sprint 2.1
 **Independent Validation**: One authored package description whose stanzas cover every Haskell source root is the positive control; a second package description outside the probe exception, an `hs-source-dirs` reaching outside the repository, and a tracked tool root are paired negatives refused by name.
@@ -527,9 +657,9 @@ and the reported opaque count is zero. The independent oracle recomputes the two
 partition, the lexical and record joins, the class-method dispatch routes, and the potential-effect closure from
 the report's own rows and, where it can, from raw source text through its own scanner.
 
-## Sprint 2.3: Tracked foreign roots enter typed ownership ⏸️
+## Sprint 2.3: Tracked foreign roots enter typed ownership ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Layout/Classify.hs`, the separate Phase-2 suite, and `src/plan-decisions/Amoebius/Plan/Legacy.hs`
 **Blocked by**: Sprint 2.2
 **Independent Validation**: A tracked Pulumi YAML is refused at the layout locus, closing `LTD-SRC-005`. A tracked Dhall file, a tracked Proto schema, and a tracked UI root are each classified to their typed owner — Phase 3 for `LTD-SRC-002` and `LTD-SRC-003`, Phase 8 for `LTD-SRC-004` — and reported as owed, never admitted. Phase 72 owns the generated-artifact share under `LTD-UI-001`.
@@ -581,9 +711,9 @@ suite joins those classes to typed legacy owners with literals in the separate o
 shipped-binary challenge plants fresh Python, Dhall, and Pulumi paths in separate copied trees and requires the
 exact nonce-bearing finding for each. The owners close their own rows in their own gates.
 
-## Sprint 2.4: Every authored name loses its phase ordinal ⏸️
+## Sprint 2.4: Every authored name loses its phase ordinal ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Layout/Classify.hs`, `src/Amoebius/Layout/PackageMap.hs`, the separate layout suite, and `src/plan-decisions/Amoebius/Plan/PhaseIdentity.hs`
 **Blocked by**: Sprint 2.3
 **Independent Validation**: Zero ordinal-bearing runtime identities is the positive control; a runtime path, build component, or product diagnostic name carrying a phase ordinal is refused; a phase-labelled validation contract is the unaffected control.
@@ -640,9 +770,9 @@ names, both text and path case folding, the validation-only component control, a
 component discovery. All forty-seven join checks pass, binding changed source and native images, preserving
 the required context/evidence refusals and confirming removal of every copied source tree.
 
-## Sprint 2.5: Ignore policy from the closed roots ⏸️
+## Sprint 2.5: Ignore policy from the closed roots ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Layout/Classify.hs`
 **Blocked by**: Sprint 2.4
 **Independent Validation**: Both ignore files derived from the closed roots `.build/**`, `.data/**`, and `.test_data/**` are the positive control; a retired generated-root pattern in either file and an ignored path beside authored source are paired negatives refused by name.
@@ -690,9 +820,9 @@ each changed product produces exactly its assigned red row with the other six ro
 witnesses, changed binaries, refusal loci and teardown are checked independently, and no copied source
 tree remains. These component results supply no phase evidence. The original policy files are unchanged.
 
-## Sprint 2.6: The layout report, the bounded bootstrap, and the six-file admitted set ⏸️
+## Sprint 2.6: The layout report, the bounded bootstrap, and the six-file admitted set ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/Amoebius/Layout/PbGrammar.hs`, `src/Amoebius/Layout/Report.hs`, `src/Amoebius/Layout/SourceGraph.hs`, `src/internal-source-text/Amoebius/Internal/SourceText/Lexical.hs`, `test/layout/StaticTextCases.hs`, `test/layout/LexicalCases.hs`, `test/layout/StaticTextSurfaceCases.hs`, `app/amoebius/Main.hs`, `src/gate-spec/Amoebius/Validation/GateSpec/Registry.hs`, and `amoebius.cabal`
 **Blocked by**: Sprint 2.5
 **Independent Validation**: `amoebius layout-report` classifies every tracked path exactly once and reports the admitted non-Haskell set as exactly six files by class; `pb/__main__.py` admits through the deny-by-default grammar; one forbidden node per family and a seventh non-Haskell file are refused; the compiled specification equals the fenced block above.

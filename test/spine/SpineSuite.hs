@@ -8,6 +8,7 @@ import SpineCapacity (capacitySection)
 import SpineSubstrates (substrateSection)
 import SpineDifferential (differentialSection)
 import SpineFake (chainSection, interpretSection)
+import SpineLegacy (legacySection)
 import SpineSections
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
@@ -22,6 +23,7 @@ runBase suite = do
      ("differential", differentialSection), ("chain", chainSection),
      ("interpret", interpretSection), ("endpoint", endpointSection),
      ("capacity", capacitySection), ("substrates", substrateSection)]
+  guarded suite "wire-legacy" (legacySection "wire-schema" (suite </> "wire-legacy"))
 
 guarded :: FilePath -> String -> IO () -> IO ()
 guarded suite family action = do

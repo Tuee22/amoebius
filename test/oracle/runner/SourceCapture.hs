@@ -73,7 +73,7 @@ sourceRewriteChecks directory = do
 sourceApiChecks :: FilePath -> IO [(Text, Bool, Text)]
 sourceApiChecks directory = do
   source <- nativeApiChecks directory unitIds roots
-    ["import Amoebius.Validation.Runner.Hygiene", "import Data.Text (Text)"]
+    ["import Amoebius.Validation.Runner", "import Data.Text (Text)"]
     [ ("source-api.constructor", signature, "captureSource", "\\_ -> pure (Right (CapturedSource undefined undefined))", 26,
         ["[GHC-01928]", "Illegal term-level use of the type constructor", "CapturedSource"])
     , ("source-api.read", signature, "captureSource", "\\_ -> pure (Right (read \"forged\"))", 26,
@@ -86,7 +86,7 @@ sourceApiChecks directory = do
       ["[GHC-22385]", "Not in scope: record field", "runnerProductBinary"])]
   predecessor <- predecessorApiChecks directory
   qualification <- nativeApiChecks directory unitIds (roots <> ["src/doc-check", "src"])
-    ["import Amoebius.Validation.Runner.Legacy", "import Data.Text (Text)"]
+    ["import Amoebius.Validation.Runner", "import Data.Text (Text)"]
     [ ("source-api.qualification-constructor", "LegacyQualification -> LegacyQualification", "id",
         "\\_ -> LegacyQualified undefined undefined undefined undefined undefined undefined", 13,
         ["[GHC-88464]", "Data constructor not in scope", "LegacyQualified"])
@@ -100,17 +100,24 @@ sourceApiChecks directory = do
     ]
   pure (source <> binary <> qualification <> predecessor)
  where signature = "FilePath -> IO (Either Text CapturedSource)"
-       unitIds = ["amoebius-0.1.0.0-inplace-validation-kernel"]
+       unitIds = runnerUnits
        roots = ["src/validation-kernel", "src/gate-spec", "src/plan-decisions"]
 
 predecessorApiChecks :: FilePath -> IO [(Text, Bool, Text)]
-predecessorApiChecks directory = nativeApiChecks directory ["amoebius-0.1.0.0-inplace-validation-kernel"]
+predecessorApiChecks directory = nativeApiChecks directory runnerUnits
   ["src/validation-kernel", "src/gate-spec", "src/plan-decisions", "src/doc-check", "src"]
   ["import Amoebius.Validation.Runner", "import Data.Text (Text)"]
   [("source-api.predecessor-constructor", "PassedGate -> PassedGate", "id", "\\_ -> PassedGate undefined undefined undefined", 13,
     ["[GHC-01928]", "Illegal term-level use of the type constructor", "PassedGate"])
   ,("source-api.predecessor-read", "PassedGate -> PassedGate", "id", "\\_ -> read \"forged\"", 13,
     ["[GHC-39999]", "No instance for", "Read PassedGate"])]
+
+-- The clients compile the runner from its source roots, so GHC must see each
+-- separately packaged dependency of that source as well as the seed package.
+runnerUnits :: [String]
+runnerUnits = map ("amoebius-0.1.0.0-inplace-" <>)
+  ["validation-kernel", "doc-check", "toolchain", "layout", "source-text-internal"
+  ,"process-io-internal", "compiler-journal-internal", "cabal-structure-internal"]
 
 sourceCaptureChecks :: FilePath -> IO [(Text, Bool, Text)]
 sourceCaptureChecks directory = do

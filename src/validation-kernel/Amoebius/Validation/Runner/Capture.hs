@@ -16,10 +16,7 @@ import Data.Text qualified as Text
 data RowVerdict = Green | Red | Unverified
   deriving (Eq, Ord, Show)
 renderVerdict :: RowVerdict -> Text
-renderVerdict verdict = case verdict of
-  Green -> "green"
-  Red -> "red"
-  Unverified -> "unverified"
+renderVerdict = Text.toLower . Text.pack . show
 data CandidateRow = CandidateRow
   { rowCategory :: GateCategory, rowVerdict :: RowVerdict, rowObservations :: [(Text, Text)] }
   deriving (Eq, Show)

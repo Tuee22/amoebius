@@ -2043,7 +2043,9 @@ observeRejectedNegativeCalls root modules byModuleName calls = do
           [absoluteRoot </> sourceRoot entry
           | reached <- Set.toList (reachable Set.empty [path])
           , Just entry <- [Map.lookup reached entries]])
-        arguments = ["exec", "--jobs=1", "--builddir=.build/dist-native", "--", "ghc", "-j1",
+        -- Quiet Cabal's advisory banners while retaining the compiler's complete
+        -- stderr for strict JSON parsing, without filtering any diagnostic bytes.
+        arguments = ["exec", "-v0", "--jobs=1", "--builddir=.build/dist-native", "--", "ghc", "-j1",
           "-fdiagnostics-as-json", "-fno-code", "-fforce-recomp", "-XGHC2024"]
           <> ["-i" <> directory | directory <- sourceRoots]
           <> ["-outputdir", outputDir, path]

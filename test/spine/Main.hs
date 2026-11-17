@@ -9,6 +9,9 @@ module Main (main) where
 
 import Control.Exception (SomeException, try)
 import SpineCapacity (capacitySection)
+import SpineLegacy (fakeWirePlugin, legacySection)
+import SpineLowering (decodedLoweringSection)
+import Data.Text qualified as Text
 import SpineSubstrates (substrateSection)
 import SpineDifferential (differentialSection)
 import SpineFake (chainSection, fakeImage, interpretSection)
@@ -22,26 +25,33 @@ import SpineSections
   , vocabularySection
   )
 import System.Directory (createDirectoryIfMissing, exeExtension, makeAbsolute)
-import System.Environment (getArgs, getProgName)
+import System.Environment (getArgs, getProgName, lookupEnv)
 import System.Exit (die)
 import System.FilePath ((</>))
 import System.Timeout (timeout)
 
 main :: IO ()
 main = do
-  name <- getProgName
-  if name `elem` ["kubectl", "kubectl" <> exeExtension]
-    then fakeImage
-    else do
-      arguments <- getArgs
-      case arguments of
-        [directory] -> makeAbsolute directory >>= run
-        _ -> die "usage: spine-suite SUITE-DIRECTORY"
+  mode <- lookupEnv "AMOEBIUS_SPINE_WIRE_PLUGIN"
+  case mode of
+    Just value -> fakeWirePlugin value
+    Nothing -> do
+      name <- getProgName
+      if name `elem` ["kubectl", "kubectl" <> exeExtension]
+        then fakeImage
+        else do
+          arguments <- getArgs
+          case arguments of
+            ["--decoded-lowering", directory] -> makeAbsolute directory >>= decodedLoweringSection
+            [flag, directory] | Just key <- stripLegacy flag -> makeAbsolute directory >>= legacySection (Text.pack key)
+            [directory] -> makeAbsolute directory >>= run
+            _ -> die "usage: spine-suite SUITE-DIRECTORY"
 
 run :: FilePath -> IO ()
 run suite = do
   createDirectoryIfMissing True (suite </> "sections")
   guarded suite "corpus" (corpusSection suite)
+  guarded suite "wire-legacy" (legacySection "wire-schema" (suite </> "wire-legacy"))
   guarded suite "stages" (stagesSection suite)
   guarded suite "vocab" (vocabularySection suite)
   guarded suite "spec" (specSection suite)
@@ -67,3 +77,8 @@ guarded suite family action = do
  where
   marker name = suite </> "sections" </> (name <> ".failed")
   budget = 900 * 1000000
+
+-- | The analyzer key of a @--<analyzer>@ flag.
+stripLegacy :: String -> Maybe String
+stripLegacy ('-' : '-' : key@(_ : _)) = Just key
+stripLegacy _ = Nothing

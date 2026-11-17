@@ -1,6 +1,7 @@
 module Main (main) where
 
 import SpineFake (fakeImage)
+import SpineLegacy (fakeWirePlugin)
 import SpineSuite (runBase, guarded)
 import SpineExtensionAst (extensionAstSection)
 import SpineExtensionCodec (extensionCodecSection)
@@ -14,12 +15,15 @@ import Data.Text qualified as Text
 import Data.Text.IO qualified as Text
 import System.Directory (createDirectoryIfMissing, exeExtension)
 import System.Directory (makeAbsolute)
-import System.Environment (getArgs, getProgName)
+import System.Environment (getArgs, getProgName, lookupEnv)
 import System.Exit (die)
 import System.FilePath ((</>))
 
 main :: IO ()
-main = do
+main = lookupEnv "AMOEBIUS_SPINE_WIRE_PLUGIN" >>= maybe normalMain fakeWirePlugin
+
+normalMain :: IO ()
+normalMain = do
   name <- getProgName
   if name `elem` ["kubectl", "kubectl" <> exeExtension] then fakeImage else do
     arguments <- getArgs

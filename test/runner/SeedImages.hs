@@ -3,8 +3,7 @@
 -- qualify input/image/refusal guards and add no product mutant to the seed.
 module SeedImages (seedImageRows) where
 import Amoebius.Validation.BootstrapQualification.Internal
-import Amoebius.Validation.Runner.Hygiene
-import Amoebius.Validation.Runner.Observer
+import Amoebius.Validation.Runner
 import Control.Monad (forM,forM_,unless)
 import Data.ByteString qualified as B
 import Data.Text qualified as T

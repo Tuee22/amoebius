@@ -3,8 +3,8 @@
 -- | Component observations from the real source-capture API. No verdicts.
 module SourceCapture (sourceCaptureRows, sourceRewriteRows, sourceTreeRows) where
 
-import Amoebius.Validation.Runner.Hygiene
-import Amoebius.Validation.Runner.Observer (ObservedRun (..), observe)
+import Amoebius.Validation.Runner
+import Amoebius.Validation.Runner (ObservedRun (..), observe)
 import Control.Exception (bracket_)
 import Control.Monad (forM, unless)
 import Data.ByteString qualified as Bytes

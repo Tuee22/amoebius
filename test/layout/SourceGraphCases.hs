@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 -- Raw observations of the shipped snapshot comparator and source graph.
-module SourceGraphCases (runSourceGraphCases) where
+module SourceGraphCases (runSourceGraphCases, observeSnapshot) where
 
 import Amoebius.Layout.Classify (renderFinding)
 import Amoebius.Layout.Report
@@ -26,7 +26,7 @@ runSourceGraphCases output = do
   createDirectoryIfMissing True directory
   root <- getCurrentDirectory
   paths <- sourcePathInventory root
-  original <- captureLayoutSnapshot root
+  original <- observeSnapshot root
   let file suffix = directory </> ("source-graph" <> suffix)
       tree = file "-tree"
       target = tree </> sourceGraphExamplePath
@@ -37,7 +37,7 @@ runSourceGraphCases output = do
     forM_ paths $ \path -> do
       createDirectoryIfMissing True (takeDirectory (tree </> path))
       copyFile (root </> path) (tree </> path)
-    baseline <- captureLayoutSnapshot tree
+    baseline <- observeSnapshot tree
     TextIO.writeFile (file "-baseline.data") (Text.pack (show (original,baseline)))
     mainPackage <- Bytes.readFile (tree </> "amoebius.cabal")
     probePackage <- Bytes.readFile (tree </> "probe/probe.cabal")
@@ -56,7 +56,7 @@ runSourceGraphCases output = do
     unless (sourceGraphExamplePath `notElem` paths) (fail "SourceGraphControlCollision")
     let restore = copyFile (root </> "test/layout/SourceGraphCases.hs") target >> TextIO.writeFile target sourceGraphExampleSource
     restore
-    reference <- captureLayoutSnapshot tree
+    reference <- observeSnapshot tree
     concat <$> forM sourceGraphExamples (\(name,edit) -> forM [False,True] $ \negative -> (do
       restore
       when negative $ case edit of
@@ -64,7 +64,7 @@ runSourceGraphCases output = do
         ChangeSourceMode -> pure () -- The reference-mode boundary is challenged below.
         AppendSourceBytes suffix -> TextIO.appendFile target suffix
         ReplaceSourceBytes bytes -> TextIO.writeFile target bytes
-      observed <- captureLayoutSnapshot tree
+      observed <- observeSnapshot tree
       let expected = case edit of
             ReplaceSourceBytes _ | negative -> observed
             ChangeSourceMode | negative -> [(path,kind,if path == sourceGraphExamplePath then mode `xor` 0o100 else mode,digest) | (path,kind,mode,digest) <- reference]
@@ -86,6 +86,20 @@ runSourceGraphCases output = do
   TextIO.writeFile (file ".data") (Text.pack (show rows))
   TextIO.writeFile (file "-controls.data") (Text.pack (show controls))
   TextIO.writeFile (file "-cleanup.data") (Text.pack (show removed))
+
+-- Keep a failed product snapshot visible while allowing the independent oracle
+-- to judge the remaining fixed inventory. The marker cannot be a source entry.
+observeSnapshot :: FilePath -> IO SourceSnapshot
+observeSnapshot root = do
+  attempted <- try (do
+    snapshot <- captureLayoutSnapshot root
+    _ <- evaluate (length (show snapshot))
+    pure snapshot) :: IO (Either SomeException SourceSnapshot)
+  case attempted of
+    Right snapshot -> pure snapshot
+    Left problem -> case fromException problem :: Maybe SomeAsyncException of
+      Just _ -> throwIO problem
+      Nothing -> pure [("<snapshot-exception>", "exception", 0, Text.pack (displayException problem))]
 
 -- A subject refusal must remain an observation, so the remaining independent
 -- contracts can still be judged. Force its complete payload within the same

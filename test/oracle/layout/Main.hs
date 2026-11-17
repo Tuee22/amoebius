@@ -19,7 +19,7 @@ import Crypto.Hash.SHA256 qualified as SHA256
 import Data.Aeson (Value, eitherDecodeStrict', withObject, (.:))
 import Data.Aeson.Types (Parser, parseEither)
 import Data.ByteString qualified as ByteString
-import Data.Char (intToDigit, isAlphaNum, isControl, isLower, isUpper)
+import Data.Char (intToDigit, isControl, isLower, isUpper)
 import Data.List (sort)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
@@ -43,8 +43,6 @@ import StaticTextCaptureOracle (staticTextReference)
 import StaticTextCasesOracle (staticTextChecks, staticTextCaseNames, staticTextExampleChecks, runStaticTextOracle)
 import LexicalCasesOracle (lexicalCompatibilityChecks, lexicalCompatibilityNames, lexicalCompatibilityExampleChecks, runLexicalCompatibilityOracle)
 import StaticTextSurfaceOracle (surfaceChecks,surfaceNames,surfaceExampleChecks,runSurfaceOracle)
-import Codec.Compression.GZip qualified as GZip
-import Data.ByteString.Lazy qualified as LazyBytes
 
 main :: IO ()
 main = do
@@ -1001,11 +999,13 @@ layoutChecks directory primary = do
       deferredImportKeys = Set.map (\(component, consumer, name, _, _) -> (component, consumer, name)) graphDeferredSeed
       unresolvedImportKeys = Set.map (\(component, consumer, name, _) -> (component, consumer, name)) graphUnresolved
       expectedForwardOwned = Set.fromList
-        [(component, consumer, name, Text.replace "." "/" name <> ".hs", "generated-proto")
+        [(component, consumer, name, Text.replace "." "/" name <> ".hs", role)
         | (consumer, name) <- Set.toList graphImports
         , (path, component) <- Set.toList graphComponents, path == consumer
-        , component == "library:pulsar-client"
-        , name `elem` ["Proto.PulsarApi", "Proto.PulsarApi_Fields"]]
+        , (owner, generated, role) <-
+          [(owner, generated, "generated-proto") | owner <- ["library:pulsar-client", "library:pulsar-compat"], generated <- ["Proto.PulsarApi", "Proto.PulsarApi_Fields"]]
+          <> [("library:pulsar-compat", "Paths_supernova", "generated-fork-identity")]
+        , owner == component, generated == name]
       -- A source with no component has its imports accounted apart: each is a source
       -- provider, an available registered unit, a recorded owed module, or an open
       -- unresolved import, and an unresolved import is never also accounted otherwise.
@@ -1275,7 +1275,8 @@ layoutChecks directory primary = do
                    , Just package <- [forkPackageOf (importModule statement)]]
                  observed = Set.fromList
                    [(path, name, package)
-                   | (path, name, package, _) <- Set.toList graphStandaloneAvailableUnits
+                   | (component, path, name, package, _) <- Set.toList graphExternalImports
+                   , component == "library:pulsar-compat"
                    , Just package == forkPackageOf name]
              in not (Set.null expected) && expected == observed,
            Text.pack (show (Set.size graphStandaloneAvailableUnits)))
@@ -1887,9 +1888,9 @@ layoutChecks directory primary = do
            grantCompilerDetail)
         , ("compiler-standalone-external-call-control",
              any (\(path, owner, _, target, imported, package, _, callee) ->
-                    path == "src/vendor/Pulsar/Connection.hs" && owner == "connect"
-                      && target == "async" && imported == "Control.Concurrent.Async"
-                      && package == "async" && callee == "async")
+                    path == "test/negative/compile_fail/artifact_calculus/handle_escapes_region.hs" && owner == "recipe"
+                      && target == "Encoding.encodeUtf8" && imported == "Data.Text.Encoding"
+                      && package == "text" && callee == "encodeUtf8")
                   (Set.toList graphStandaloneExternalCalls)
                && all (\(path, owner, site, target, imported, package, unit, callee) ->
                     path `Set.member` graphNoComponents
@@ -1994,7 +1995,10 @@ layoutChecks directory primary = do
            Text.pack (show [row | row <- constructorReexportRows,
              "graph-call-" `Text.isPrefixOf` row && not ("graph-call-site\t" `Text.isPrefixOf` row)]))
         , ("compiler-external-call-candidate-control",
-             not (Set.null graphExternalCallCandidates)
+             any (\(component, path, owner, _, target, imported, package, _, callee) ->
+               component == "library:pulsar-compat" && path == "src/vendor/Pulsar/Connection.hs"
+                 && owner == "connect" && target == "async" && imported == "Control.Concurrent.Async"
+                 && package == "async" && callee == "async") (Set.toList graphExternalCallCandidates)
                && all (\(component, path, owner, site, target, imported, package, unit, callee) ->
                  Set.member (path, owner, site, target) graphCallSites
                    && Set.member (component, path, imported, package, unit) graphExternalImports
@@ -2207,7 +2211,7 @@ layoutChecks directory primary = do
                (Set.toList graphModuleInterfaceMembers),
            Text.pack (show (Set.size graphModuleInterfaceMembers)))
         , ("compiler-forward-owned-import-control", graphForwardOwned == expectedForwardOwned
-             && Set.size graphForwardOwned == 11,
+             && Set.size graphForwardOwned == 24,
            Text.pack (show (Set.size graphForwardOwned, Set.size expectedForwardOwned)))
         , ("compiler-deferred-seed-import-control",
              graphDeferredSeed == Set.fromList
@@ -2248,8 +2252,9 @@ layoutChecks directory primary = do
            Text.pack (show (Set.size graphAvailableUnits)))
         , ("compiler-residual-ownership-control",
              all (\(component, _, name, reason) -> case reason of
-               "external-or-unknown" -> component == "library:pulsar-client"
-                 && name `elem` ["Proto.PulsarApi", "Proto.PulsarApi_Fields"]
+               "external-or-unknown" -> (component `elem` ["library:pulsar-client", "library:pulsar-compat"]
+                 && name `elem` ["Proto.PulsarApi", "Proto.PulsarApi_Fields"])
+                 || (component == "library:pulsar-compat" && name == "Paths_supernova")
                "component-not-in-plan" -> component `elem`
                  ["library:infernix", "library:infernix-ui", "library:jitml", "library:jitml-ui",
                   "test:infernix-core-artifact-lift-contract", "test:infernix-native-driver",
@@ -2299,7 +2304,10 @@ layoutChecks directory primary = do
            Text.pack (show (Set.toAscList bootstrapEffects)))
         , ("forward-owned-generated-proto", packageOwed == Set.fromList
              [("library:pulsar-client:Proto/PulsarApi.hs", "generated-proto"),
-              ("library:pulsar-client:Proto/PulsarApi_Fields.hs", "generated-proto")],
+              ("library:pulsar-client:Proto/PulsarApi_Fields.hs", "generated-proto"),
+              ("library:pulsar-compat:Proto/PulsarApi.hs", "generated-proto"),
+              ("library:pulsar-compat:Proto/PulsarApi_Fields.hs", "generated-proto"),
+              ("library:pulsar-compat:Paths_supernova.hs", "generated-fork-identity")],
            Text.pack (show packageOwed))
         ]
           <> routeChecks
@@ -2438,7 +2446,7 @@ observeMethodImportTwin directory = do
   compilerError (CompilerDiagnostic _ severity _ _ _ _ _) = severity == "Error"
   compile outputDir source =
     trySynchronous (readProcessWithExitCode "cabal"
-      ["exec", "--jobs=1", "--builddir=.build/dist-native", "--", "ghc", "-j1", "-fdiagnostics-as-json",
+      ["exec", "-v0", "--jobs=1", "--builddir=.build/dist-native", "--", "ghc", "-j1", "-fdiagnostics-as-json",
        "-fno-code", "-fforce-recomp", "-XGHC2024", "-outputdir", outputDir, source] "")
       :: IO (Either SomeException (ExitCode, String, String))
 
@@ -2485,7 +2493,7 @@ observeDeniedConstructor :: FilePath
 observeDeniedConstructor directory (path, owner, target, rootSite, line, column, provider) = do
   let outputDir = directory </> "compiler-negative" </> "denied"
         </> Text.unpack (sha256Text (TextEncoding.encodeUtf8 (Text.pack path)))
-      arguments = ["exec", "--jobs=1", "--builddir=.build/dist-native", "--", "ghc", "-j1",
+      arguments = ["exec", "-v0", "--jobs=1", "--builddir=.build/dist-native", "--", "ghc", "-j1",
         "-fdiagnostics-as-json", "-fno-code", "-fforce-recomp", "-XGHC2024"]
         <> ["-i" <> sourceDir | sourceDir <- sourceDirs]
         <> ["-outputdir", outputDir, path]
@@ -2549,7 +2557,7 @@ observeScopeRejection :: FilePath
 observeScopeRejection directory (path, owner, target, rootSite, line, column, code, fragment) = do
   let outputDir = directory </> "compiler-negative" </> "scope"
         </> Text.unpack (sha256Text (TextEncoding.encodeUtf8 (Text.pack path)))
-      arguments = ["exec", "--jobs=1", "--builddir=.build/dist-native", "--", "ghc", "-j1",
+      arguments = ["exec", "-v0", "--jobs=1", "--builddir=.build/dist-native", "--", "ghc", "-j1",
         "-fdiagnostics-as-json", "-fno-code", "-fforce-recomp", "-XGHC2024"]
         <> ["-i" <> sourceDir | sourceDir <- sourceDirs]
         <> ["-outputdir", outputDir, path]
@@ -2858,6 +2866,7 @@ expectedStandaloneRole path
   | "test/spec/dsl/capacity_topology_compile_fail/" `Text.isPrefixOf` path = Just "compile-negative"
   | path == "test/spec/formal/refinement/RefinementModelProjection.hs" = Just "model-projection"
   | path == "test/spec/formal/symbolic/FakeSmtSolver.hs" = Just "fake-boundary"
+  | path `elem` ["test/wire-generation/WireRoundTrip.hs", "test/wire-generation/ForkWire.hs", "test/wire-generation/NativeWire.hs"] = Just "generated-binding-probe"
   | otherwise = Nothing
 
 parsePairs :: Text -> Map Text Text
@@ -2967,18 +2976,17 @@ staticTextDiagnostic parsed = case parsed of
 
 -- Keep the complete diagnostic recoverable within the existing archive bound.
 -- This changes only its retained encoding, not any semantic judgment or input.
+-- Leave tuple fragments visible to the runner's shared dictionary: independently
+-- compressed copies hide their common bytes across changed production subjects.
 compactStaticTextDiagnostic :: Text -> Text
 compactStaticTextDiagnostic contents
   | ByteString.length encoded <= 1024 * 1024 = contents
-  | otherwise = "interned-gzip-utf8-hex.v1:" <> Text.pack (concatMap hexByte (ByteString.unpack compressed))
+  | otherwise = "interned-utf8.v3:" <> Text.pack (show (names,[dictionary Map.! token | token <- tokens]))
  where
   encoded = TextEncoding.encodeUtf8 contents
-  tokens = Text.groupBy (\left right -> isAlphaNum left == isAlphaNum right) contents
+  tokens = case Text.splitOn ",(" contents of [] -> []; first:rest -> first : map (",(" <>) rest
   names = Set.toAscList (Set.fromList tokens)
   dictionary = Map.fromList (zip names [0 :: Int ..])
-  retained = TextEncoding.encodeUtf8 (Text.pack (show (names,[dictionary Map.! token | token <- tokens])))
-  compressed = LazyBytes.toStrict (GZip.compress (LazyBytes.fromStrict retained))
-  hexByte byte = [intToDigit (fromIntegral byte `div` 16),intToDigit (fromIntegral byte `mod` 16)]
 
 renderCheck :: (Text, Bool, Text) -> Text
 renderCheck (name, green, observed) = Text.intercalate "\t" [name, if green then "green" else "red", observed]

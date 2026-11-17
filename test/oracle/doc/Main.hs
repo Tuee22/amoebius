@@ -371,12 +371,12 @@ expectedLegacy =
   ]
 
 expectedDecisions :: [Text]
-expectedDecisions = ["DL-0001", "DL-0002", "DL-0003", "DL-0004", "DL-0005", "DL-0006", "DL-0007", "DL-0008", "DL-0009", "DL-0010", "DL-0011", "DL-0012", "DL-0013", "DL-0014", "DL-0015", "DL-0016", "DL-0017", "DL-0018", "DL-0019", "DL-0020", "DL-0021", "DL-0022", "DL-0023", "DL-0024", "DL-0025", "DL-0026", "DL-0027", "DL-0028", "DL-0029", "DL-0030", "DL-0031", "DL-0032", "DL-0033", "DL-0034", "DL-0035", "DL-0036", "DL-0037", "DL-0038", "DL-0039", "DL-0040", "DL-0041", "DL-0042"]
+expectedDecisions = ["DL-0001", "DL-0002", "DL-0003", "DL-0004", "DL-0005", "DL-0006", "DL-0007", "DL-0008", "DL-0009", "DL-0010", "DL-0011", "DL-0012", "DL-0013", "DL-0014", "DL-0015", "DL-0016", "DL-0017", "DL-0018", "DL-0019", "DL-0020", "DL-0021", "DL-0022", "DL-0023", "DL-0024", "DL-0025", "DL-0026", "DL-0027", "DL-0028", "DL-0029", "DL-0030", "DL-0031", "DL-0032", "DL-0033", "DL-0034", "DL-0035", "DL-0036", "DL-0037", "DL-0038", "DL-0039", "DL-0040", "DL-0041", "DL-0042", "DL-0043"]
 
 expectedFrozenAmendments :: [(Text, Text)]
 expectedFrozenAmendments =
   [ ("AGENTS.md", "DL-0025")
-  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "DL-0037")
+  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "DL-0043")
   , ("DEVELOPMENT_PLAN/development_plan_phase_model.md", "DL-0026")
   , ("DEVELOPMENT_PLAN/development_plan_standards.md", "DL-0026")
   , ("DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md", "DL-0042")
@@ -398,7 +398,7 @@ expectedFrozenAmendments =
   , ("documents/engineering/resource_capacity_doctrine.md", "DL-0032")
   , ("documents/engineering/resource_capacity_folds.md", "DL-0032")
   , ("documents/engineering/service_capability_doctrine.md", "DL-0032")
-  , ("documents/engineering/substrate_doctrine.md", "DL-0033")
+  , ("documents/engineering/substrate_doctrine.md", "DL-0043")
   , ("documents/engineering/testing_doctrine.md", "DL-0031")
   , ("documents/engineering/testing_spoof_resistance.md", "DL-0027")
   , ("documents/engineering/validation_frame_doctrine.md", "DL-0025")
@@ -410,7 +410,7 @@ expectedFrozenAmendments =
 expectedFrozenAmendmentDigests :: [(Text, Text)]
 expectedFrozenAmendmentDigests =
   [ ("AGENTS.md", "7be90c67243b16190ea0e617001abffcbc1bfc2b4e964a009237a8a9ea497e4a")
-  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "0399ef282395ac29890123c00fb4c9c422d53a5b987527a57a7fbe1ecacf3cf2")
+  , ("DEVELOPMENT_PLAN/development_plan_gate_integrity.md", "03201238d406769001c68811d5f0e68f72ea73b2c745a621869b71bddfb12b19")
   , ("DEVELOPMENT_PLAN/development_plan_phase_model.md", "1136bf4ed4c58706bbf1b6b56be94fc53ac3f92c9ccdc0d23541818cb6029da4")
   , ("DEVELOPMENT_PLAN/development_plan_standards.md", "4c9e6cd0a1807fd567d016c957b4e1ab89a007a2dcd8e5fa8b9a25274da9d540")
   , ("DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md", "d0ac8b12e284a73c6169e2f4b17c61dcc0a6af7e81bc910e70076bd04591fa13")
@@ -432,7 +432,7 @@ expectedFrozenAmendmentDigests =
   , ("documents/engineering/resource_capacity_doctrine.md", "9da1a36d04e71eeb62ed8d19eaafa51f45f1e64e574169272132730557affc26")
   , ("documents/engineering/resource_capacity_folds.md", "0005bdd4b9cba4c4077666d270dee20cf62b4373ad31548718d32ffa49de9674")
   , ("documents/engineering/service_capability_doctrine.md", "b1e5f1e55ade47e3c9ff2b15fb40df78b470878943313e6f8326050f5900607b")
-  , ("documents/engineering/substrate_doctrine.md", "c3a29d025f2555a6fb13f6e9418d40f6f107d5feb39206b75724a5cca9a8fab8")
+  , ("documents/engineering/substrate_doctrine.md", "221379f80a2634c0c95b32577ed30263648ab5aca50edad9ee6cedcf16e99423")
   , ("documents/engineering/testing_doctrine.md", "9cb5839096e92d787c67cbcf6fa0183c148c2203275dccf0e2a9a5f86002ee61")
   , ("documents/engineering/testing_spoof_resistance.md", "c163e53389da71a20c30b5fd44a4641968b598381fe00625e24ae7c6cffe8f14")
   , ("documents/engineering/validation_frame_doctrine.md", "7d8db0a1730a300d5a6b57fdd8c0d9c3b17d9e7323fd8edbc6f108dac691ca91")

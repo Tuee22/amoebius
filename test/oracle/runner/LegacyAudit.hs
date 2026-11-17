@@ -682,17 +682,17 @@ kernelQualificationChecks directory sourceRoot = do
         | otherwise = controlSources
       expectedNegative key = case key of
         "per-phase-run-module" -> [(if file == target then "src/validation-kernel/Amoebius/Validation/Runner/CapturedRun.hs" else file, value) | (file, value) <- controlSources]
-        "phase-number-literal" -> replaced (Text.unlines [if number == (21 :: Int) then "  Red -> \"phase-0\"" else line | (number, line) <- zip [1 ..] (Text.lines original)])
+        "phase-number-literal" -> replaced (Text.unlines [if number == (19 :: Int) then "renderVerdict value = case value of { Red -> \"phase-0\"; _ -> Text.toLower (Text.pack (show value)) }" else line | (number, line) <- zip [1 ..] (Text.lines original)])
         _ -> replaced (original <> Text.replicate (padding + 1) "\n")
       expectedFinding key = case key of
         "per-phase-run-module" -> [("RunModule", "src/validation-kernel/Amoebius/Validation/Runner/CapturedRun.hs", "module")]
-        "phase-number-literal" -> [("PhaseLiteral", target, "21")]
+        "phase-number-literal" -> [("PhaseLiteral", target, "19")]
         _ -> [("KernelOverBudget", "validator", "kernel-lines")]
       row key control green details = ("kernel." <> key <> "." <> control, green, details)
   pure (("kernel.discovery", scope == "snapshot" && padding >= 0 && cap <= 14000 && cap > 0
     && sort [(key, control) | (key, control, _) <- cases] == sort names
     && sort [(key, control) | (key, control, _) <- results] == sort names
-    && length (Text.lines original) >= 21 && Text.lines original !! 20 == "  Red -> \"red\"", Text.pack (show (cap, names)))
+    && length (Text.lines original) >= 19 && Text.lines original !! 18 == "renderVerdict = Text.toLower . Text.pack . show", Text.pack (show (cap, names)))
     : concat
       [ [row key "positive" (observed key "positive" == Just (Right [])) (Text.pack (show (observed key "positive")))
         ,row key "negative" (observed key "negative" == Just (Right (expectedFinding key))) (Text.pack (show (observed key "negative")))

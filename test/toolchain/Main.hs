@@ -10,7 +10,7 @@ import Amoebius.Toolchain.Report
 import Amoebius.Toolchain.Resolve
 import Amoebius.Build.Serial (serialCabalArguments, serialGhcArguments)
 import Amoebius.Internal.Process.EmptyInput (tryReadEmptyInput)
-import Control.Exception (IOException, evaluate, finally)
+import Control.Exception (IOException, RecConError, evaluate, finally, try)
 import Control.Monad (forM, forM_, when, filterM)
 import Data.List (isPrefixOf, isSuffixOf, sort)
 import Data.Text (Text)
@@ -289,7 +289,7 @@ observations root directory = do
       let renderedUpstream = either (Left . renderProvenanceRefusal) (Right . renderAcquiredUpstream)
           invalidIdentity = forkUpstream {upstreamName = "amoebius-other"}
           invalidRoot = directory </> "upstream-invalid"
-      TextIO.writeFile (directory </> "upstream-rendered.data") (Text.pack (show (renderedUpstream upstream, renderedUpstream repeated)))
+      writeUpstreamObservation (directory </> "upstream-rendered.data") (show (renderedUpstream upstream, renderedUpstream repeated))
       invalidUpstream <- case upstream of
         Right acquired -> acquireUpstreamFromArchive (acquiredArchive acquired) invalidRoot invalidIdentity
         Left problem -> pure (Left problem)
@@ -307,10 +307,10 @@ observations root directory = do
              acquiredArchive value, acquiredArchiveDigest value, acquiredRoot value,
              fmap (\child -> (childExit child, childArgv child)) (acquiredCacheQuery value),
              [case action of CachedArchiveRead path digest -> ("read" :: Text,path,digest); ArchiveDirectoryCreated path -> ("directory",path,""); ArchiveFileWritten path digest -> ("file",path,digest) | action <- acquiredActions value]))
-      TextIO.writeFile (directory </> "upstream.data") (Text.pack (show
+      writeUpstreamObservation (directory </> "upstream.data") (show
         (projectUpstream upstream, projectUpstream repeated, either (Left . renderProvenanceRefusal) (const (Right ())) mismatch,
-         mismatchCreated, either (Left . renderProvenanceRefusal) (const (Right ())) missingUpstream, missingCreated)))
-      TextIO.writeFile (directory </> "upstream-raw.data") (Text.pack (show (upstream,repeated,mismatch,missingUpstream)))
+         mismatchCreated, either (Left . renderProvenanceRefusal) (const (Right ())) missingUpstream, missingCreated))
+      writeUpstreamObservation (directory </> "upstream-raw.data") (show (upstream,repeated,mismatch,missingUpstream))
       identities <- forM [("empty-name",forkUpstream {upstreamName = ""}), ("empty-version",forkUpstream {upstreamVersion = ""})] $ \(name, identity) -> do
         let destination = directory </> "upstream-identity" </> name
         value <- acquireUpstream native destination identity
@@ -356,6 +356,11 @@ observations root directory = do
   none [] = "none"
   none values = Text.intercalate "; " values
   showT = Text.pack . show
+
+writeUpstreamObservation :: FilePath -> String -> IO ()
+writeUpstreamObservation path observation = do
+  result <- try (evaluate (length observation)) :: IO (Either RecConError Int)
+  TextIO.writeFile path (case result of Left problem -> "record construction exception: " <> Text.pack (show problem); Right _ -> Text.pack observation)
 
 recordCodegen :: FilePath -> Either Text ([FilePath],ChildRecord) -> IO Text
 recordCodegen directory result = do

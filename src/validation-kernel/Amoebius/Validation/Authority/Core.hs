@@ -1,15 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PackageImports #-}
 -- | Shared generic runner and retained custody implementation.
--- Public compatibility modules expose only their original API subsets.
+-- Public runner and custody modules expose only their intended API subsets.
 module Amoebius.Validation.Authority.Core
-( SeedCase (..), SeedAttempt (..), SeedOutcome (..), SeedProtocol (..), defaultSeedProtocol, renderSeedOutcome, runSeedProtocol, runCapturedSeedProtocol, seedCases , seedGreen, attemptRuns, seedInterrupted   , closureDigest , CommandOutcome (..), CustodyConfig (..), defaultCustodyConfig, acceptPhase, demoFile, previewPhase, replayThrough, receiptPublicationBound, resetGeneration, runFresh, voidFromPhase, receiptCompatibility , StatusSurface (..), patchToFrontier, recordedFrontier, statusSurface, statusPrefixDigest, surfaceConsistent, surfaceDigest   , GenerationId, Receipt (..), SeedRecord (..), Store (..), archivedBundlePath, archivedKernelCap, auditArchivedInventory , digestShape, generationDirectory, governanceDigest, latestGeneration, latestWholePostimage, parseReceipt, parseSeed, readArchivedBundles, readArchivedBundlesWith, readCurrentArchivedBundles, readRecord, readSeed , renderReceipt, renderSeed, verifierDigest, writeArchivedReceipt, writeRecord, writeReplayVoid, writeSeed, rollbackOnLeft, withResult, withResults , GateOutcome (..), PassedGate, RunnerConfig (..), RunnerRefusal (..), compiledBlocks, defaultRunnerConfig, reproducibleCore, Ledger, parseLedger, ledgerGreen, ledgerDigest, suiteLedger, renderRefusal, roleFor, runGate, specDigest , BinaryOutcome (..), Nonce (..), SpineOutcome (..), freshNonce, perturbInput, runBinaryFact, runSpineFact, HygieneReport (..), CapturedSource, captureSource, capturedSourceDigest, capturedSourceFiles, capturedSourceBytes , capturedSourceRuns, parseSourceInventory, docCheckRoot, hygieneGreen, hygieneProblems, hygieneRow, kernelBudget, kernelRoots, isRunModule, phaseLiteral, haskellFilesUnder, materializeSource, verifySourceCopy , rewriteCapturedSource, runRootWithinFrame, renderHygiene, vocabularyTypes, TreePurpose (..), TreeNode (..), classifyTreeNode, walkFilesUnder, walkFilesUnderWith, sourceAttempt, readSourceBytes, readSourceText, LegacyFinding (..), LegacyObservation (..), LegacyReport (..) , legacyRequirementsAt, observeLegacy, observeLegacyMany, auditLegacyReports, renderLegacyReports, LegacyCollection, collectLegacy, inheritLegacyCollection, auditLegacyCollection, legacyCollectionRuns, legacyCollectionEvidence, legacyQualificationSupported , LegacyQualification, qualifyLegacy, qualifiedLegacyReports, auditQualifiedLegacyReports, runLegacyProbe, runAuthorityObservation, runSolverReintroductions, readImages, KillTable (..), Locus (..), MutantOutcome (..), Operator (..), SubjectChangeWitness (..), allOperators, applyLocus , renderMutantOutcome, enumerateLoci, isAttributed, truncateListLocus, killTable, renderKillTable, renderOperator, sampleLoci , ObservedRun (..), chainDigest, observe, observeNativeCabal, buildProductBinary, observedDigest, renderObserved, sha256Hex, ActualPreparedTuple, observeActualTuple, observeActualNativeCabal , NativeCabalRequest, prepareNativeCabalRequest, sha256Bytes, renderTsv, OracleTranscriptKind (..), inspectOracleTranscript , PackageGraph (..), SpecProblem (..), VerifiedSpec (..), executableClosure, libraryClosure, internalDependencies, loadPackageGraph, moduleSourcePath, parsePackageGraph, renderSpecProblem, verifySpec, verifySpecAgainst, verifyOracle, sourceTokens , sourceTree, sourceDirectives, resolveSpec, bindPhaseSpec, requiredSuiteRows) where
+( SeedCase (..), SeedAttempt (..), SeedOutcome (..), SeedProtocol (..), defaultSeedProtocol, renderSeedOutcome, runSeedProtocol, runCapturedSeedProtocol, seedCases , seedGreen, attemptRuns, seedInterrupted   , closureDigest , CommandOutcome (..), CustodyConfig (..), defaultCustodyConfig, acceptPhase, demoFile, previewPhase, replayThrough, receiptPublicationBound, resetGeneration, runFresh, voidFromPhase, receiptCompatibility , StatusSurface (..), patchToFrontier, recordedFrontier, statusSurface, statusPrefixDigest, surfaceConsistent, surfaceDigest   , GenerationId, Receipt (..), SeedRecord (..), Store (..), archivedBundlePath, archivedKernelCap, auditArchivedInventory , digestShape, generationDirectory, governanceDigest, latestGeneration, latestWholePostimage, parseReceipt, parseSeed, readArchivedBundles, readArchivedBundlesWith, readCurrentArchivedBundles, readRecord, readSeed , renderReceipt, renderSeed, verifierDigest, writeArchivedReceipt, writeRecord, writeReplayVoid, writeSeed, rollbackOnLeft, withResult, withResults , GateOutcome (..), PassedGate, RunnerConfig (..), RunnerRefusal (..), compiledBlocks, defaultRunnerConfig, reproducibleCore, Ledger, parseLedger, ledgerGreen, ledgerDigest, suiteLedger, renderRefusal, roleFor, runGate, specDigest , BinaryOutcome (..), Nonce (..), SpineOutcome (..), freshNonce, perturbInput, runSpineFact, HygieneReport (..), CapturedSource, captureSource, capturedSourceDigest, capturedSourceFiles, capturedSourceBytes , capturedSourceRuns, parseSourceInventory, docCheckRoot, hygieneGreen, hygieneProblems, hygieneRow, kernelBudget, kernelRoots, isRunModule, phaseLiteral, haskellFilesUnder, materializeSource, verifySourceCopy , rewriteCapturedSource, runRootWithinFrame, renderHygiene, vocabularyTypes, TreePurpose (..), TreeNode (..), classifyTreeNode, walkFilesUnder, walkFilesUnderWith, sourceAttempt, readSourceBytes, readSourceText, LegacyFinding (..), LegacyObservation (..), LegacyReport (..) , legacyRequirementsAt, observeLegacy, observeLegacyMany, auditLegacyReports, renderLegacyReports, LegacyCollection, collectLegacy, inheritLegacyCollection, auditLegacyCollection, legacyCollectionRuns, legacyCollectionEvidence, legacyQualificationSupported , LegacyQualification, qualifyLegacy, qualifiedLegacyReports, auditQualifiedLegacyReports, runLegacyProbe, runAuthorityObservation, runSolverReintroductions, readImages, KillTable (..), Locus (..), MutantOutcome (..), Operator (..), SubjectChangeWitness (..), allOperators, applyLocus , renderMutantOutcome, enumerateLoci, isAttributed, truncateListLocus, killTable, renderKillTable, renderOperator, sampleLoci , ObservedRun (..), chainDigest, observe, observeNativeCabal, observedDigest, renderObserved, sha256Hex, ActualPreparedTuple, observeActualTuple, observeActualNativeCabal , NativeCabalRequest, prepareNativeCabalRequest, nativePlanWireTool, sha256Bytes, renderTsv, OracleTranscriptKind (..), inspectOracleTranscript , PackageGraph (..), SpecProblem (..), VerifiedSpec (..), executableClosure, libraryClosure, internalDependencies, loadPackageGraph, moduleSourcePath, parsePackageGraph, renderSpecProblem, verifySpec, verifySpecAgainst, verifyOracle, sourceTokens , sourceTree, sourceDirectives, resolveSpec, bindPhaseSpec, requiredSuiteRows) where
 import Control.Monad (forM, unless, when, foldM, join, filterM, void, forM_, guard)
 import Data.Either (isRight)
 import Data.Maybe (listToMaybe, fromMaybe, isJust, isNothing, mapMaybe, catMaybes)
 import Data.Text (Text)
 import Data.Text qualified as Text
-import System.Directory ( canonicalizePath, createDirectory, createDirectoryIfMissing, doesPathExist, findExecutable , makeAbsolute, removePathForcibly, doesFileExist, doesDirectoryExist, getFileSize, listDirectory , pathIsSymbolicLink, renameDirectory, renameFile, executable, getPermissions, setPermissions, findFile )
+import System.Directory ( canonicalizePath, createDirectory, createDirectoryIfMissing, doesPathExist, exeExtension, findExecutable , makeAbsolute, removePathForcibly, doesFileExist, doesDirectoryExist, getFileSize, listDirectory , pathIsSymbolicLink, renameDirectory, renameFile, executable, getPermissions, setPermissions, findFile )
 import System.Exit (ExitCode (..))
 import System.FilePath ( (</>), equalFilePath, isAbsolute, makeRelative, splitDirectories, takeDirectory, takeFileName , normalise, takeBaseName, takeExtension, (<.>), dropExtension )
 import Amoebius.Doc.Check (discoverDocuments, checkTree)
@@ -66,7 +66,7 @@ import Data.Ratio ((%))
 import Data.Word (Word64)
 import Numeric.Natural (Natural)
 import Amoebius.Internal.Process.EmptyInput (presentEnvironment, tryReadEmptyInput)
-import Amoebius.Compiler.Journal.Raw qualified as Journal
+import Amoebius.Internal.Process.FileInput (tryRunFileInput); import Amoebius.Compiler.Journal.Raw qualified as Journal
 import Amoebius.Toolchain.Acquire (nativeCabalConfig, sha256Bytes)
 import Amoebius.Internal.Cabal.ComponentDescription ( DescriptionAttempt (..), parseDescription, aggregateAll, conditionalValues, dependencyLibrariesFor , reachableFrom )
 import Data.Aeson qualified as Aeson
@@ -383,7 +383,7 @@ archiveEvidence spec outcome = case cleanOracle of
     [ ("candidate.tsv", renderCandidate candidate)
     , ("kill-table.tsv", Text.unlines (renderKillTable (outcomeKillTable outcome)))
     , ("outcome.tsv", Text.unlines ["green\tTrue", "spec-digest\t" <> candidateSpecDigest candidate, "chain\t" <> candidateChain candidate, "reproducible-core\t" <> candidateReproducibleCore candidate, "capability\t" <> gateCapability spec, "claim\t" <> gateClaim spec])
-    , ("oracle-ledger.tsv", Text.concat (reverse ledgers))
+    , ("oracle-ledger.tsv", Text.unlines [case Text.splitOn "\t" line of name:verdict:rest -> Text.intercalate "\t" (name:verdict:map nativeDiagnostic rest); _ -> line | line <- Text.lines (Text.concat (reverse ledgers))])
     , ("observer.tsv", Text.unlines [key <> "\t" <> value | (index, run) <- zip [1 :: Int ..] (outcomeRuns outcome), (key, value) <- renderObserved ("run." <> Text.pack (show index)) run])
     ]
   _ -> Left "ARCHIVE-ORACLE-CARDINALITY: clean oracle transcripts are missing or repeated"
@@ -394,7 +394,7 @@ archiveEvidence spec outcome = case cleanOracle of
     [ prefix | row <- candidateRows candidate, rowCategory row == Oracle
     , ("oracle.completion-contexts", encoded) <- rowObservations row
     , Just contexts <- [readMaybe (Text.unpack encoded) :: Maybe [((Text,FilePath,FilePath,Maybe FilePath),[Text],Text)]]
-    , (_,_,prefix) <- contexts
+    , (_,_,encodedPrefix) <- contexts, Just prefix <- [nativeRestore encodedPrefix]
     ]
 publishReceipt :: CustodyConfig -> GateSpec -> GateOutcome -> [(FilePath, Text)] -> Receipt -> IO (Either Text FilePath)
 publishReceipt config spec outcome patch receipt = either (pure . Left) (publishEvidenceReceipt config patch receipt) (archiveEvidence spec outcome)
@@ -1079,16 +1079,18 @@ executeCopy scope config spec vspec hygiene openingSource liveRoot = do
   (custodyRuns, custody) <- maybe (pure ([], parseLedger (Just ExitSuccess) "")) (\seedSpec -> suiteAndOracle scope config openingSource root (CabalTarget "runner-suite") (OracleExecutable "oracle-runner") False (seedCustodyProbes seedSpec) (runRoot </> "custody")) (gateSeed spec)
   -- The shipped binary runs before the clean suite, inside its directory, so the independent oracle can judge what it wrote.
   let binaryRoot = runRoot </> "clean" </> "suite" </> "binary"
-  (binaryBuilds, built) <- case gateBinaryFact spec of
-    Nothing -> pure ([], Right Nothing)
+  (binaryBuilds, built, wireOpening) <- case gateBinaryFact spec of
+    Nothing -> pure ([], Right Nothing, Nothing)
     Just _ -> do
-      (runs, result) <- buildProductBinary root (runnerCabal config) (runnerCompiler config)
-      pure (runs, fmap Just result)
+      (preparation, ready) <- prepareNativeWireTool scope root (runnerCabal config) (runnerCompiler config)
+      (runs, result) <- case ready of {Left problem -> pure ([],Left problem); Right _ -> buildNativeTargetWith "exe:amoebius" (ownedCabal scope root (runnerCabal config) (runnerCompiler config))}
+      pure (preparation <> runs, fmap Just result, either (const Nothing) Just ready)
   binary <- case (gateBinaryFact spec, built) of
-    (Just fact, Right (Just binaryPath)) -> Just <$> runBinaryFact (runnerCabal config) (runnerCompiler config) openingSource root binaryRoot binaryPath fact nonce
+    (Just fact, Right (Just binaryPath)) -> do { before <- productImageBinding scope root binaryPath "product-before"; result <- runBinaryFact scope (runnerCabal config) (runnerCompiler config) openingSource root binaryRoot binaryPath fact nonce; after <- productImageBinding scope root binaryPath "product-after"; withNativeScope scope (unless (before == after) (fail "ProductImageOrPlanChanged")); pure (Just result) }
     _ -> pure Nothing
   spine <- traverse (runSpineFact binaryRoot) (gateSpineFact spec)
   (cleanRuns, clean) <- suiteAndOracle scope config openingSource root (gateSuite spec) (gateOracle spec) (isJust (gateBinaryFact spec)) (requiredSuiteRows spec) (runRoot </> "clean")
+  forM_ wireOpening (verifyWireGenerated scope root "wire-closing")
   let ledger = if isNothing (gateSeed spec) then clean else mergeCompletionLedgers clean custody
   nativeEvidence <- nativeScopeEvidence scope
   closingSource <- captureSource liveRoot
@@ -1155,13 +1157,15 @@ parseLedger exit output = Ledger exit rows (sha256Hex output) valid [] []
     && all (\(name, verdict, _) -> not (Text.null name) && verdict `elem` ["green", "red"]) rows
 suiteLedger :: [Text] -> ObservedRun -> ObservedRun -> ObservedRun -> Ledger
 suiteLedger required subject oracle probe = let parsed = parseLedger (Just (runExit oracle)) (runStdout oracle) in parsed {ledgerValid = ledgerValid parsed && runExit subject == ExitSuccess && all (isNothing . runSpawnFailure) [subject,oracle,probe] && runExit probe /= ExitSuccess && all (`elem` map (\(name,_,_) -> name) (ledgerRows parsed)) required}
+ownedCabal :: NativeScope -> FilePath -> FilePath -> Maybe FilePath -> [String] -> IO (ObservedRun,Bool)
+ownedCabal scope@(NativeScope _ _ calls _) root cabal compiler args = do { observed <- observeOwnedNative scope (NativeCabalIntent root cabal compiler args); retained <- readIORef calls; let { bound = case retained of {call:_ -> case [paths | WindowRequestsMatched paths<-nativeWindowObservations call] of {[[_]] -> True; _ -> False}; [] -> False} }; unless bound (recordNativeScope scope (CompletionFailure (NativeWindowRequestUnavailable args))); pure (observed,bound) }
 suiteAndOracle :: NativeScope -> RunnerConfig -> CapturedSource -> FilePath -> CabalTarget -> OracleExecutable -> Bool -> [Text] -> FilePath -> IO ([ObservedRun], Ledger)
-suiteAndOracle scope@(NativeScope _ _ calls _) config source treeRoot suiteTarget oracleTarget withBinary required workRoot = withNativeScope scope $ do
+suiteAndOracle scope config source treeRoot suiteTarget oracleTarget withBinary required workRoot = withNativeScope scope $ do
   let suiteDir = workRoot </> "suite"; completion = workRoot </> "completion"; empty = completion </> "oracle-empty"
       suite = "amoebius:test:" <> Text.unpack (cabalTargetName suiteTarget); oracle = "amoebius:test:" <> Text.unpack (oracleExecutableName oracleTarget)
-      native args = do { observed <- observeOwnedNative scope (NativeCabalIntent treeRoot (runnerCabal config) (runnerCompiler config) args); retained <- readIORef calls; let { bound = case retained of {call:_ -> case [paths | WindowRequestsMatched paths<-nativeWindowObservations call] of {[[_]] -> True; _ -> False}; [] -> False} }; unless bound (recordNativeScope scope (CompletionFailure (NativeWindowRequestUnavailable args))); pure (observed,bound) }
+      native = ownedCabal scope treeRoot (runnerCabal config) (runnerCompiler config)
       direct image args = observeOwnedNative scope (NativeDirectIntent treeRoot image args)
-      profile = lookup (cabalTargetName suiteTarget,oracleExecutableName oracleTarget) [(("layout-suite","oracle-layout"),let name=if withBinary then "layout.gate.v1" else "layout.full.v1" in (name,"paths.txt",["--oracle-profile",Text.unpack name])),(("plan-decisions-suite","oracle-doc"),("doc.full.v1","plan-decisions.tsv",[])),(("runner-suite","oracle-runner"),("runner.full.v2","runner.tsv",[])),(("toolchain-suite","oracle-toolchain"),let name=if withBinary then "toolchain.gate.v1" else "toolchain.full.v1" in (name,"toolchain.tsv",["--oracle-profile",Text.unpack name]))]
+      profile = lookup (cabalTargetName suiteTarget,oracleExecutableName oracleTarget) [(("layout-suite","oracle-layout"),let name=if withBinary then "layout.gate.v1" else "layout.full.v1" in (name,"paths.txt",["--oracle-profile",Text.unpack name])),(("plan-decisions-suite","oracle-doc"),("doc.full.v1","plan-decisions.tsv",[])),(("runner-suite","oracle-runner"),("runner.full.v2","runner.tsv",[])),(("toolchain-suite","oracle-toolchain"),let name=if withBinary then "toolchain.gate.v1" else "toolchain.full.v1" in (name,"toolchain.tsv",["--oracle-profile",Text.unpack name])),(("wire-preparation","oracle-dsl"),("wire.prepare.v1","current/PulsarApi.proto",["--oracle-profile","wire.prepare.v1"])),(("spine-suite","oracle-dsl"),let name=if withBinary then "spine.gate.v1" else "spine.full.v1" in (name,"complete.marker",["--oracle-profile",Text.unpack name,"--builddir",".build/dist-native","--cabal",runnerCabal config] <> maybe [] (\compiler -> ["--ghc",compiler]) (runnerCompiler config)))]
       invalid runs = pure (runs,parseLedger Nothing "")
   recordNativeScope scope (CompletionFact "request" (showText (capturedSourceDigest source,treeRoot,workRoot,runnerCabal config,runnerCompiler config,suiteTarget,oracleTarget,fmap (\(name,_,_)->name) profile)))
   opening <- verifySourceCopy source treeRoot
@@ -1284,7 +1288,7 @@ mutantMatrix scope@(NativeScope _ _ calls _) config spec vspec graph digest sour
         retained <- readIORef calls
         closing <- verifySourceCopy changed copyRoot
         let stillborn = closing == Right () && matrixCompilationRefused copyRoot locus runs retained
-            images = boundSuiteImageChange control ledger
+            images = if complete then boundSuiteImageChange control ledger else Nothing
             complete = ledgerValid ledger && Set.fromList [name | (name, _, _) <- ledgerRows ledger] == Set.fromList [name | (name, _, _) <- ledgerRows control]
             imageBound = isJust images && witnessBeforeDigest witness /= witnessAfterDigest witness
             outcome
@@ -1293,9 +1297,9 @@ mutantMatrix scope@(NativeScope _ _ calls _) config spec vspec graph digest sour
               | otherwise = Killed (Text.intercalate "," (take 3 (ledgerRedRows ledger)))
         imageBound `seq` Text.length (renderMutantOutcome id outcome) `seq` pure ((locus, Just witness {witnessImages = maybe [] pure images}, outcome), runs, closing == Right () && (stillborn || imageBound && complete))
   pure (killTable [row | (row, _, _) <- results], (control, controlSource, and [complete | (_, _, complete) <- results]), controlRuns <> concat [runs | (_, runs, _) <- results])
- where matrixSuite bound tree = suiteAndOracle scope config bound tree (gateSuite spec) (gateOracle spec) False (requiredSuiteRows spec) (tree </> ".build" </> "observations")
+ where matrixSuite bound tree = do { let { needsWire = do { g <- graph; (info,_) <- Map.lookup (cabalTargetName (gateSuite spec)) (graphTestSuites g); pure (Set.member "pulsar-wire" (libraryClosure g (Set.toList (internalDependencies info)))) } }; (preparation,ready) <- case needsWire of { Nothing -> pure ([],Left "SuiteDependencyClosureUnavailable"); Just True -> prepareNativeWireTool scope tree (runnerCabal config) (runnerCompiler config); Just False -> pure ([],Right []) }; case ready of { Left "WirePluginObservationMismatch" -> do { let { work=tree </> ".build" </> "wire-preparation-observation"; actual=tree </> ".build" </> "proto" </> "current"; observed=work </> "suite" </> "current" }; createDirectoryIfMissing True work; (runs,ledger) <- suiteAndOracle scope config bound tree (CabalTarget "wire-preparation") (OracleExecutable "oracle-dsl") False ["wire.prepared-schema","wire.plugin-request"] work; pairs <- readScopeImages scope "wire-preparation-pair" tree [actual </> "PulsarApi.proto",actual </> "plugin.request",observed </> "PulsarApi.proto",observed </> "plugin.request"]; unless (take 2 pairs == drop 2 pairs) (fail "WirePreparationPairMismatch"); pure (preparation <> runs,ledger) }; Left _ -> pure (preparation,parseLedger Nothing ""); Right opening -> do { (runs,ledger) <- suiteAndOracle scope config bound tree (gateSuite spec) (gateOracle spec) False (filter (/= "case:shipped-binary") (requiredSuiteRows spec)) (tree </> ".build" </> "observations"); unless (null opening) (verifyWireGenerated scope tree "wire-matrix-closing" opening); pure (preparation <> runs,ledger) } } }
 matrixCompilationRefused :: FilePath -> Locus -> [ObservedRun] -> [NativeCall] -> Bool
-matrixCompilationRefused root locus runs retained = case (runs,retained) of
+matrixCompilationRefused root locus runs retained = case (take 1 (reverse runs),retained) of
   ([build],call:_) -> runCwd build == root && (case nativeIntent call of NativeCabalIntent actual _ _ ("build":_) -> actual == root; _ -> False) && runSpawnFailure build == Nothing && completionTerminal build == Right 1 && any (\line -> (Text.pack (locusFile locus) <> ":" <> showText (locusLine locus) <> ":") `Text.isPrefixOf` line && ": error:" `Text.isInfixOf` line) (Text.lines (runStderr build)) && not ("[-Werror" `Text.isInfixOf` runStderr build) && case ([window | WindowRequestsMatched [window]<-nativeWindowObservations call],[window | WindowJournalClosed window codes<-nativeWindowObservations call,any (\(ordinal,code)->ordinal>0 && code==ExitFailure 1) codes]) of
     ([window],[closed]) -> window == closed && or [Journal.requestWindowRoot request == window && Journal.requestOrdinal request > 0 && Journal.compilerSite request == Journal.ReAdmittedDelegatedCompiler && Journal.actualRawCompilerReturn returned == Journal.ActualRawSystemReturned (ExitFailure 1) | WindowRecordReturned path (RetainedPlanBytes bytes)<-nativeWindowObservations call,takeFileName path=="return.data",Just returned<-[decodeNativeWindow bytes],let request=Journal.returnRequest returned]
     _ -> False
@@ -1341,7 +1345,7 @@ capture config spec vspec hygiene digest nonce chain (opening, closing) table (m
       Claim -> (Green, [("claim", gateClaim spec), ("spec-digest", digest), ("role", Text.pack (show (gateRole spec)))])
       Subject -> (verdictOf (not (Map.null (verifiedStanzaOf vspec))), [("subject." <> productionModuleName m, stanza) | (m, stanza) <- Map.toList (verifiedStanzaOf vspec)])
       Command -> (Green, [("command", "amoebius-validate preview phase " <> Text.pack (show (runnerPhase config))), ("suite", cabalTargetName (gateSuite spec)), ("oracle", oracleExecutableName (gateOracle spec))])
-      Oracle -> (verdictOf (ledgerValid ledger), [("oracle.completion-contexts", showText (ledgerContexts ledger)), ("oracle.images", showText [(root,[(path,ByteString.length opening,sha256Bytes opening,ByteString.length closing,sha256Bytes closing) | (path,opening,closing) <- images]) | (root,images) <- ledgerImages ledger]), ("oracle.directories", Text.intercalate "," (map Text.pack (verifiedOracleDirectories vspec))), ("oracle.ledger-sha256", ledgerDigest ledger), ("oracle.rows", showText (length (ledgerRows ledger)))])
+      Oracle -> (verdictOf (ledgerValid ledger), [("oracle.completion-contexts", showText [(identity,rows,nativeDiagnostic prefix) | (identity,rows,prefix) <- ledgerContexts ledger]), ("oracle.images", showText [(root,[(path,ByteString.length opening,sha256Bytes opening,ByteString.length closing,sha256Bytes closing) | (path,opening,closing) <- images]) | (root,images) <- ledgerImages ledger]), ("oracle.directories", Text.intercalate "," (map Text.pack (verifiedOracleDirectories vspec))), ("oracle.ledger-sha256", ledgerDigest ledger), ("oracle.rows", showText (length (ledgerRows ledger)))])
       PositiveControls -> (verdictOf (not (null positives) && ledgerGreen ledger && all ledgerCaseGreen positives && (not seed || (seedOk && docOk))), [("positive.count", showText (length positives)), ("ledger.red-rows", Text.intercalate "," (ledgerRedRows ledger))] <> docObservations)
       PairedNegatives -> (verdictOf (not (null negatives) && ledgerGreen ledger && all ledgerCaseGreen negatives && (not seed || (seedOk && docOk))), [("negative.count", showText (length negatives)), ("ledger.red-rows", Text.intercalate "," (ledgerRedRows ledger))] <> docObservations)
       Mutants -> (if seed then verdictOf seedOk else verdictOf mutantsGreen, if seed then seedObservations else [("mutants.killed", showText (killedCount table)), ("mutants.viable", showText (viableCount table)), ("mutants.stillborn", showText (stillbornCount table)), ("mutants.ratio", Text.pack (show (killRatioObserved table))), ("mutants.rows", showText (length (killRows table))), ("matrix.control.source", Text.pack (show controlSource)), ("matrix.control.valid", Text.pack (show (ledgerValid matrixControl))), ("matrix.control.exit", Text.pack (show (ledgerExit matrixControl))), ("matrix.control.rows", Text.intercalate "," [name | (name, _, _) <- ledgerRows matrixControl]), ("matrix.control.ledger-sha256", ledgerDigest matrixControl), ("matrix.control.red-rows", Text.intercalate "," (ledgerRedRows matrixControl)), ("matrix.control.raw", nativeDiagnostic (Text.pack (show [run | run <- runs, runCwd run == runnerRunRoot config </> "mutants" </> "control"]))), ("matrix.applied", Text.pack (show matrixApplied)), ("matrix.image-witnesses", showText [(locus,witnessBeforeDigest witness,witnessAfterDigest witness,witnessImages witness) | (locus,Just witness,_) <- killRows table])] <> [("mutant." <> showText i, line) | (i, line) <- zip [1 :: Int ..] (renderKillTable table)])
@@ -1377,8 +1381,8 @@ perturbInput perturbation (Nonce nonce) contents = case perturbation of
   PlantForeignPaths _ -> Left "planted paths require the runner's source-copy input"
   SourceSibling _ _ _ -> Left "source sibling requires the runner's observed build boundary"
 data BinaryOutcome = BinaryOutcome { binaryRuns :: [ObservedRun], binaryNonce :: Nonce , binaryOutputDigests :: [(FilePath, Text)], binaryNonceRecovered :: [(FilePath, Bool)] , binaryEvidence :: [(Text, Text)], binaryProblems :: [Text] } deriving (Eq, Show)
-runBinaryFact :: FilePath -> Maybe FilePath -> CapturedSource -> FilePath -> FilePath -> FilePath -> BinaryFact -> Nonce -> IO BinaryOutcome
-runBinaryFact cabal compiler snapshot root runRoot productBinary fact nonce@(Nonce nonceText) = case factPerturbation fact of
+runBinaryFact :: NativeScope -> FilePath -> Maybe FilePath -> CapturedSource -> FilePath -> FilePath -> FilePath -> BinaryFact -> Nonce -> IO BinaryOutcome
+runBinaryFact scope cabal compiler snapshot root runRoot productBinary fact nonce@(Nonce nonceText) = case factPerturbation fact of
   PlantForeignPaths challenges -> do
     outcomes <- forM (zip [1 :: Int ..] challenges) $ \(index, challenge) -> runOne (runRoot </> show index) (Just challenge)
     pure (BinaryOutcome (concatMap binaryRuns outcomes) nonce (concatMap binaryOutputDigests outcomes)
@@ -1435,20 +1439,19 @@ runBinaryFact cabal compiler snapshot root runRoot productBinary fact nonce@(Non
       _ <- materializeSource snapshot tree >>= either (fail . Text.unpack) pure
       witness <- applyLocus tree locus >>= either (fail . Text.unpack) pure
       if Text.strip (locusAfter locus) /= binding <> " = []" || witnessBeforeDigest witness == witnessAfterDigest witness then fail "source sibling did not empty its binding" else pure ()
-      inputBefore <- readSourceBytes inputPath
-      binaryBefore <- ByteString.readFile productBinary
-      (builds, built) <- buildProductBinary tree cabal compiler
+      (inputBefore, binaryBefore) <- (,) <$> readSourceBytes inputPath <*> ByteString.readFile productBinary
+      (preparation, ready) <- prepareNativeWireTool scope tree cabal compiler; (runs, built) <- either (\problem -> pure ([],Left problem)) (const (buildNativeTargetWith "exe:amoebius" (ownedCabal scope tree cabal compiler))) ready; let builds = preparation <> runs
       case built of
         Left problem -> pure (builds, [], [problem])
         Right image -> do
-          observed <- observe tree image (map (substitute child) (factCommand fact))
-          binaryAfter <- ByteString.readFile image
+          beforeBinding <- productImageBinding scope tree image "sibling-before"; observed <- observe tree image (map (substitute child) (factCommand fact))
+          afterBinding@(_, binaryAfter) <- productImageBinding scope tree image "sibling-after"; forM_ ready (verifyWireGenerated scope tree "wire-sibling-closing")
           inputAfter <- readSourceBytes inputPath
           let evidence = [("nonce", nonceText), ("module", productionModuleName subject), ("binding", binding), ("operator", renderOperator (witnessOperator witness)),
                 ("source-before", witnessBeforeDigest witness), ("source-after", witnessAfterDigest witness), ("source-diff", Text.pack (show (witnessDiff witness))),
                 ("binary-before", sha256Bytes binaryBefore), ("binary-after", sha256Bytes binaryAfter), ("input-before", sha256Bytes inputBefore), ("input-after", sha256Bytes inputAfter)]
           TextIO.writeFile (child </> "witness.tsv") (renderTsv [[key, value] | (key, value) <- evidence])
-          pure (builds <> [observed], evidence, ["source sibling binary unchanged" | binaryBefore == binaryAfter] <> ["source sibling input changed" | inputBefore /= inputAfter] <> ["source sibling did not refuse" | runExit observed /= ExitFailure 1])
+          pure (builds <> [observed], evidence, ["source sibling binary unchanged" | binaryBefore == binaryAfter] <> ["source sibling input changed" | inputBefore /= inputAfter] <> ["source sibling image or plan changed" | beforeBinding /= afterBinding] <> ["source sibling did not refuse" | runExit observed /= ExitFailure 1])
     pure (either (\problem -> ([], [], [Text.pack (show (problem :: IOException))])) id result)
   one :: String -> [value] -> IO value
   one label values = case values of [value] -> pure value; _ -> fail label
@@ -1551,8 +1554,7 @@ materializeSource (CapturedSource _ entries _) destination = sourceAttempt $ do
   root <- makeAbsolute destination
   parent <- canonicalizePath (takeDirectory root)
   unless (equalFilePath parent (takeDirectory root)) (fail "SourceCopyParentSymlink")
-  exists <- doesPathExist root
-  unless (not exists) (fail "SourceCopyNotFresh")
+  doesPathExist root >>= \present -> when present (fail "SourceCopyNotFresh")
   createDirectoryIfMissing True parent
   createDirectory root
   forM_ [(file, value) | (file, Just value) <- entries] $ \(file, (mode, bytes)) -> do
@@ -1831,7 +1833,7 @@ selectorExpressions file tree = traverse position (concatMap walk (Lexical.modul
   position (RealSrcSpan span_ _) = Right ("MutantSelector", file, T.pack (show (srcSpanStartLine span_) <> ":" <> show (srcSpanStartCol span_)))
   position _ = Left "SelectorPositionUnscanned"
 -- Opaque source-bound readiness for one query; no detached pass or serialization.
-data LegacyQualification = LegacyQualified Legacy.LegacyId Legacy.LegacyScope Text Int [Text] Text [ObservedRun] Tools.Acquisition [(FilePath,Text,Text)] deriving (Eq, Show)
+data LegacyQualification = LegacyQualified Legacy.LegacyId Legacy.LegacyScope Text Int [Text] Text [ObservedRun] Tools.Acquisition [(FilePath,Text,Text)] [(Text,Text)] deriving (Eq, Show)
 canonicalRequirement :: Int -> Legacy.LegacyId -> Legacy.LegacyRequirement
 canonicalRequirement phase identifier = if identifier == Legacy.LtdSrc008 && phase == PhaseIdentity.phaseDomainLowerOrdinal then Legacy.legacyBootstrapSourceRequirement else Legacy.legacyRequirement identifier
 -- Untrusted observations through the shipped module; this creates no readiness.
@@ -1867,13 +1869,13 @@ runLegacyProbe identifier file = do
 kernelCases :: Int -> [(FilePath, Text)] -> Either Text KernelCases
 kernelCases cap files = do
   original <- maybe (Left "KernelQualificationLocusMissing") Right (lookup target files)
-  unless (length (filter (== "  Red -> \"red\"") (T.lines original)) == 1) (Left "KernelQualificationLocusMissing")
+  unless (length (filter (== "renderVerdict = Text.toLower . Text.pack . show") (T.lines original)) == 1) (Left "KernelQualificationLocusMissing")
   let replace text = [(file, if file == target then text else body) | (file, body) <- files]
       padding = cap - sum (map (length . T.lines . snd) files)
       pair key positive negative = [(key, "positive", positive), (key, "negative", negative)]
   if padding < 0 then Left "KernelQualificationOverBudget" else Right (cap,
     pair "per-phase-run-module" files [(if file == target then "src/validation-kernel/Amoebius/Validation/Runner/CapturedRun.hs" else file, body) | (file, body) <- files]
-    <> pair "phase-number-literal" files (replace (T.replace "  Red -> \"red\"" ("  Red -> \"phase-" <> T.pack (show PhaseIdentity.phaseDomainLowerOrdinal) <> "\"") original))
+    <> pair "phase-number-literal" files (replace (T.replace "renderVerdict = Text.toLower . Text.pack . show" ("renderVerdict value = case value of { Red -> \"phase-" <> T.pack (show PhaseIdentity.phaseDomainLowerOrdinal) <> "\"; _ -> Text.toLower (Text.pack (show value)) }") original))
     <> pair "kernel-over-ratchet" (replace (original <> T.replicate padding "\n")) (replace (original <> T.replicate (padding + 1) "\n")))
  where target = "src/validation-kernel/Amoebius/Validation/Runner/Capture.hs"
 mutationCases :: Int -> [(FilePath, Text)] -> Either Text KernelCases
@@ -1923,8 +1925,7 @@ readImages tree images = do
 runSolverReintroductions :: CapturedSource -> FilePath -> FilePath -> FilePath -> IO [ObservedRun]
 runSolverReintroductions original destination cabal compiler = do
   absolute <- makeAbsolute destination
-  present <- doesPathExist absolute
-  unless (not present) (fail "LegacyQualificationRunNotFresh")
+  doesPathExist absolute >>= \present -> when present (fail "LegacyQualificationRunNotFresh")
   createDirectoryIfMissing True absolute
   results <- forM solverVariants $ \(name, target, replacements) -> do
     let work = absolute </> T.unpack name
@@ -1968,17 +1969,17 @@ authoritySeedRows = "finite.discovery" : ["finite." <> name <> "." <> field
   , field <- ["identity","attempt-inventory","native-count","verdict","copy-closing","retained-leaves","unknown-prefix","image-count","image-window","native-request","generated-readback"] <> ["source-inputs" | name /= "source-mismatch"] <> ["exact-protocol" | name `elem` ["normal","same-image","changed-image","generated-change"]] <> ["changed-images" | name `elem` ["normal","changed-image"]] <> ["same-image-refused" | name == "same-image"] <> ["known-code-preserved" | name == "known-127"] <> ["source-refusal" | name == "source-mismatch"]]
 qualifyLegacy :: Legacy.LegacyId -> FilePath -> FilePath -> Int -> Maybe FilePath -> Maybe FilePath -> CapturedSource -> IO (Either Text LegacyQualification)
 qualifyLegacy identifier repository destination phase cabal compiler source = do
-  attempted <- try acquire :: IO (Either IOException LegacyQualification)
+  attempted <- try (acquire `catch` \(NativeStopped original _) -> throwIO original) :: IO (Either IOException LegacyQualification)
   pure (either (Left . T.pack . show) Right attempted)
  where
-  required = canonicalRequirement phase identifier; wholeBootstrap = identifier == Legacy.LtdSrc008 && required /= Legacy.legacyBootstrapSourceRequirement; oracleName = if wholeBootstrap || identifier `elem` [Legacy.LtdSrc000,Legacy.LtdSrc001,Legacy.LtdSrc005,Legacy.LtdSrc006,Legacy.LtdName001,Legacy.LtdMeta001] then "oracle-layout" else if identifier `elem` [Legacy.LtdBoot001,Legacy.LtdSrc007,Legacy.LtdSrc009] then "oracle-toolchain" else "oracle-runner"
-  behavioral = wholeBootstrap || identifier `elem` [Legacy.LtdVal001,Legacy.LtdVal002,Legacy.LtdVal003,Legacy.LtdVal004,Legacy.LtdVal006,Legacy.LtdBoot001,Legacy.LtdSrc000,Legacy.LtdSrc001,Legacy.LtdSrc005,Legacy.LtdSrc006,Legacy.LtdName001,Legacy.LtdMeta001,Legacy.LtdSrc007,Legacy.LtdSrc009]
+  required = canonicalRequirement phase identifier; wholeBootstrap = identifier == Legacy.LtdSrc008 && required /= Legacy.legacyBootstrapSourceRequirement; oracleName = if identifier `elem` spineLegacy then "oracle-dsl" else if wholeBootstrap || identifier `elem` [Legacy.LtdSrc000,Legacy.LtdSrc001,Legacy.LtdSrc005,Legacy.LtdSrc006,Legacy.LtdName001,Legacy.LtdMeta001] then "oracle-layout" else if identifier `elem` [Legacy.LtdBoot001,Legacy.LtdSrc007,Legacy.LtdSrc009] then "oracle-toolchain" else "oracle-runner"
+  behavioral = wholeBootstrap || identifier `elem` [Legacy.LtdVal001,Legacy.LtdVal002,Legacy.LtdVal003,Legacy.LtdVal004,Legacy.LtdVal006,Legacy.LtdBoot001,Legacy.LtdSrc000,Legacy.LtdSrc001,Legacy.LtdSrc005,Legacy.LtdSrc006,Legacy.LtdName001,Legacy.LtdMeta001,Legacy.LtdSrc007,Legacy.LtdSrc009] <> spineLegacy
   manifest = either (const []) requiredSuiteRows (mkGateSpec SeedGate phaseZeroSpecInput)
-  (stem, makeCases) = case identifier of Legacy.LtdSrc000 -> ("source-graph", behavioralCases); Legacy.LtdMeta001 -> ("ignore-context", behavioralCases); Legacy.LtdName001 -> ("runtime-identity", behavioralCases); Legacy.LtdSrc001 -> ("tool-source", behavioralCases); Legacy.LtdSrc005 -> ("pulumi-source", behavioralCases); Legacy.LtdSrc006 -> ("test-source", behavioralCases); Legacy.LtdSrc009 -> ("vendor-source", behavioralCases); Legacy.LtdSrc007 -> ("probe-source", behavioralCases); Legacy.LtdBoot001 -> ("admission", behavioralCases); Legacy.LtdVal006 -> ("fresh", behavioralCases); Legacy.LtdVal001 -> ("authority", behavioralCases); Legacy.LtdKrn001 -> ("kernel", kernelCases); Legacy.LtdKrn003 -> ("solver", solverCases); Legacy.LtdSrc008 -> if wholeBootstrap then ("bootstrap-source", behavioralCases) else ("bootstrap", bootstrapCases); Legacy.LtdVal002 -> ("correspondence", behavioralCases); Legacy.LtdVal003 -> ("custody", behavioralCases); Legacy.LtdVal004 -> ("status", behavioralCases); _ -> ("mutation", mutationCases)
+  (stem, makeCases) = case identifier of _ | identifier `elem` spineLegacy -> (T.unpack (Legacy.renderLegacyAnalyzerKey (Legacy.legacyRequirementAnalyzer required)), behavioralCases); Legacy.LtdSrc000 -> ("source-graph", behavioralCases); Legacy.LtdMeta001 -> ("ignore-context", behavioralCases); Legacy.LtdName001 -> ("runtime-identity", behavioralCases); Legacy.LtdSrc001 -> ("tool-source", behavioralCases); Legacy.LtdSrc005 -> ("pulumi-source", behavioralCases); Legacy.LtdSrc006 -> ("test-source", behavioralCases); Legacy.LtdSrc009 -> ("vendor-source", behavioralCases); Legacy.LtdSrc007 -> ("probe-source", behavioralCases); Legacy.LtdBoot001 -> ("admission", behavioralCases); Legacy.LtdVal006 -> ("fresh", behavioralCases); Legacy.LtdVal001 -> ("authority", behavioralCases); Legacy.LtdKrn001 -> ("kernel", kernelCases); Legacy.LtdKrn003 -> ("solver", solverCases); Legacy.LtdSrc008 -> if wholeBootstrap then ("bootstrap-source", behavioralCases) else ("bootstrap", bootstrapCases); Legacy.LtdVal002 -> ("correspondence", behavioralCases); Legacy.LtdVal003 -> ("custody", behavioralCases); Legacy.LtdVal004 -> ("status", behavioralCases); _ -> ("mutation", mutationCases)
   keys = map Legacy.renderLegacyCaseKey (NE.toList (Legacy.legacyRequirementCases required))
   behavioralCases cap _ = Right (cap, [(key,control,[]) | key <- keys, control <- ["positive","negative"]])
   acquire = do
-    unless ((if required == Legacy.legacyBootstrapSourceRequirement then Just PhaseIdentity.phaseDomainLowerOrdinal else Legacy.legacyOwnerOrdinal identifier) == Just phase) (fail "LegacyQualificationWrongOwner")
+    unless ((if required == Legacy.legacyBootstrapSourceRequirement then Just PhaseIdentity.phaseDomainLowerOrdinal else Legacy.legacyOwnerOrdinal identifier) == Just phase) (fail "LegacyQualificationWrongOwner"); unless (legacyQualificationSupported required) (fail "LegacyQualificationUnsupported")
     unless (not (any (\file -> any (`T.isPrefixOf` T.pack file) [".build/", ".data/", ".test_data/"]) (capturedSourceFiles source))) (fail "LegacyQualificationCandidateStatePresent")
     cap <- archivedKernelCap repository >>= either (fail . T.unpack) (pure . maybe kernelBudget (min kernelBudget))
     files <- if behavioral then pure [] else either (fail . T.unpack) pure (queryInputs required source)
@@ -1987,67 +1988,66 @@ qualifyLegacy identifier repository destination phase cabal compiler source = do
     unless (sort (nub [key | (key, _, _) <- inputs]) == sort keys && length inputs == 2 * length keys) (fail "LegacyQualificationCasesMismatch")
     tools <- Tools.selectToolchain repository (Tools.ToolchainPaths Nothing compiler cabal) >>= either (fail . show) pure
     work <- makeAbsolute destination
-    present <- doesPathExist work
-    unless (not present) (fail "LegacyQualificationRunNotFresh")
+    doesPathExist work >>= \present -> when present (fail "LegacyQualificationRunNotFresh")
     createDirectoryIfMissing True (takeDirectory work)
     createDirectory work
     interrupted <- newIORef False
     let tree = work </> "source"; input = work </> (stem <> "-inputs.data")
         native = observeNativeCabal tree (Tools.acquisitionPackageTool tools) (Just (Tools.acquisitionCompiler tools))
     (do
-      _ <- materializeSource source tree >>= either (fail . T.unpack) pure
+      _ <- materializeSource source tree >>= either (fail . T.unpack) pure; nativeScope <- NativeScope tree source <$> newIORef [] <*> newIORef []
       graph <- loadPackageGraph tree >>= either (fail . show) pure
       problems <- verifyOracle tree graph (OracleExecutable oracleName)
       unless (null problems) (fail (show problems))
       mapM_ (\(file, body) -> TextIO.writeFile file body) [(input, T.pack (show cases)), (work </> "scope.data", scope required), (work </> "tools.data", T.pack (show tools))]
       (events,images,before,legacySubject,runtimeRuns,oracle,after,output,complete) <- if identifier == Legacy.LtdVal001 then do
-        nativeScope <- NativeScope tree source <$> newIORef [] <*> newIORef []
         result <- withNativeScope nativeScope $ do
           createDirectoryIfMissing True (tree </> ".build/candidate")
           let config = (defaultRunnerConfig tree phase) {runnerCabal=Tools.acquisitionPackageTool tools,runnerCompiler=Just (Tools.acquisitionCompiler tools)}
           (runs,ledger) <- suiteAndOracle nativeScope config source tree (CabalTarget "runner-suite") (OracleExecutable "oracle-runner") False [] (tree </> ".build/authority-qualification")
-          evidence <- nativeScopeEvidence nativeScope
-          TextIO.writeFile (work </> "native-context.data") (showText evidence)
           pure $ case (runs,ledgerImages ledger) of
             ([_,_,_,_,subject,_,judged],[(owner,pairs)]) | owner == tree && length pairs == 2 -> Right (runs,[path | (path,_,_)<-pairs],[bytes | (_,bytes,_)<-pairs],subject,[],judged,[bytes | (_,_,bytes)<-pairs],renderTsv [[name,verdict,detail] | (name,verdict,detail)<-ledgerRows ledger,"authority." `Text.isPrefixOf` name],ledgerValid ledger)
             _ -> Left "LegacyQualificationCompletionUnavailable"
         either (fail . Text.unpack) pure result
       else do
-          (builds, images) <- nativeImages (\args -> native (args <> ["exe:amoebius" | identifier == Legacy.LtdSrc000, take 1 args == ["build"]])) [if oracleName == "oracle-layout" then "test:layout-suite" else if identifier `elem` [Legacy.LtdBoot001,Legacy.LtdSrc007,Legacy.LtdSrc009] then "test:toolchain-suite" else if behavioral then "test:runner-suite" else "exe:amoebius-validate", "test:" <> T.unpack oracleName]
+          let wire = identifier == Legacy.LtdSrc000 || identifier `elem` spineLegacy; cabalPath = Tools.acquisitionPackageTool tools; ghcPath = Just (Tools.acquisitionCompiler tools); runNative args = if wire then do { (run,bound) <- ownedCabal nativeScope tree cabalPath ghcPath args; unless bound (fail "LegacyQualificationJournalUnavailable"); pure run } else native args
+          (preparation,ready) <- if wire then prepareNativeWireTool nativeScope tree cabalPath ghcPath else pure ([],Right []); wireOpening <- either (fail . T.unpack) pure ready
+          let targets = [if oracleName == "oracle-layout" then "test:layout-suite" else if identifier `elem` [Legacy.LtdBoot001,Legacy.LtdSrc007,Legacy.LtdSrc009] then "test:toolchain-suite" else if identifier `elem` spineLegacy then "test:spine-suite" else if behavioral then "test:runner-suite" else "exe:amoebius-validate", "test:" <> T.unpack oracleName]
+          (builds, images) <- nativeImages (\args -> runNative (args <> ["exe:amoebius" | identifier == Legacy.LtdSrc000, take 1 args == ["build"]])) targets
           (subjectImage, oracleImage) <- case images of [a, b] -> pure (a, b); _ -> fail "LegacyQualificationBinaryAbsent"
-          before <- readImages tree images
+          beforePlan <- if wire then readScopePlan nativeScope "legacy-before" tree else pure ByteString.empty; when wire (unless (map (\target -> nativePlanImage (T.pack target) tree beforePlan) targets == map Just images) (fail "LegacyQualificationPlanMismatch")); before <- if wire then readScopeImages nativeScope "legacy-before" tree images else readImages tree images
           legacySubject <- observe tree subjectImage (if behavioral then ["--" <> T.unpack (Legacy.renderLegacyAnalyzerKey (Legacy.legacyRequirementAnalyzer required)),work] else [stem <> "-observe", "--input", input])
           unless behavioral (TextIO.writeFile (work </> (stem <> "-output.data")) (runStdout legacySubject))
           runtimeRuns <- if identifier == Legacy.LtdKrn003 then runSolverReintroductions source (work </> "solver-runtime") (Tools.acquisitionPackageTool tools) (Tools.acquisitionCompiler tools) else pure []
           oracle <- observe tree oracleImage (if behavioral then ["--" <> T.unpack (Legacy.renderLegacyAnalyzerKey (Legacy.legacyRequirementAnalyzer required)),work] else ["--legacy-" <> stem, work, tree])
-          after <- readImages tree images
-          pure (builds <> [legacySubject] <> runtimeRuns <> [oracle],images,before,legacySubject,runtimeRuns,oracle,after,runStdout oracle,True)
+          after <- if wire then readScopeImages nativeScope "legacy-after" tree images else readImages tree images; afterPlan <- if wire then readScopePlan nativeScope "legacy-after" tree else pure ByteString.empty; unless (beforePlan == afterPlan) (fail "LegacyQualificationPlanChanged"); when wire (verifyWireGenerated nativeScope tree "wire-legacy-closing" wireOpening)
+          pure (preparation <> builds <> [legacySubject] <> runtimeRuns <> [oracle],images,before,legacySubject,runtimeRuns,oracle,after,runStdout oracle,True)
       when behavioral (TextIO.writeFile (work </> (stem <> "-output.data")) (runStdout legacySubject))
       mapM_ (\(role,beforeBytes,afterBytes) -> ByteString.writeFile (work </> role <> "-image.before") beforeBytes >> ByteString.writeFile (work </> role <> "-image.after") afterBytes) (zip3 ["subject","oracle"] before after)
-      unchanged <- verifySourceCopy source tree
+      unchanged <- verifySourceCopy source tree; nativeEvidence <- if identifier == Legacy.LtdVal001 || identifier == Legacy.LtdSrc000 || identifier `elem` spineLegacy then nativeScopeEvidence nativeScope else pure []
       let rows = map (T.splitOn "\t") (T.lines output)
-          names = [T.pack stem <> ".discovery"] <> [T.pack stem <> "." <> key <> "." <> control | key <- keys, control <- if behavioral then ["positive","negative"] else ["positive", "negative", "delta"]] <> [T.pack stem <> "." <> field | behavioral, field <- if identifier == Legacy.LtdSrc009 then ["control.fork","control.cleanup"] else if identifier `elem` [Legacy.LtdSrc000,Legacy.LtdSrc001,Legacy.LtdSrc005,Legacy.LtdSrc006,Legacy.LtdName001,Legacy.LtdMeta001,Legacy.LtdSrc007,Legacy.LtdSrc008] then ["control.inventory","control.cleanup"] else if identifier == Legacy.LtdBoot001 then ["control.cleanup"] else if identifier == Legacy.LtdVal006 then ["control." <> key | key <- ["stale-sentinel","ignored-captured","source-changed","replayed-copy","authored-restored","ambient-entry","ambient-created","cleanup","collection-unknown","collection-phase","collection-source"]] else if identifier == Legacy.LtdVal001 then ["control." <> key | key <- ["subject-exit","subject-token","constant-probe","missing-probe","cleanup"]] <> ["manifest.seed-names","manifest.seed-positive"] <> ["manifest.omitted." <> key | key <- manifest] <> authoritySeedRows <> authorityTranscriptRows else if identifier == Legacy.LtdVal004 then [part <> "." <> key | part <- ["accept","preview","unchanged"], key <- keys] <> ["control.cleanup"] else if identifier == Legacy.LtdVal002 then ["control.render-collision","snapshot.contracts","snapshot.selected"] <> [part <> "." <> key | part <- ["entry","entry-root"], key <- ["phase-role-swap","byte-copy-equivalence"]] else ["binding.verifier-positive","binding.verifier-negative"] <> ["prefix." <> key | key <- ["publication-prefixes","earlier-whole-changed","latest-whole","uncommitted-observed","metadata-red","prefix-heading","prefix-receipt","prefix-tracker","prefix-phase","prefix-sprint","malformed-target","ambiguous-bound","latest-anchor","current-selection","missing-target","stale-identity","verifier","governance","reset-target","legacy-none","legacy-bytes","legacy-whole","legacy-durable","malformed","repeated","duplicate-reader","corrupt-reader","missing-reader","ambiguous-latest","unknown-phase","inconsistent-surface","public-evidence-refusal","public-evidence-reason","replay-stale-prefix","superseded","voided"]] <> ["control." <> key | key <- ["closure-source","closure-restored","outside-closure","unknown-closure","closure-sentinel","capability-binding","governance-binding","specification-binding","phase-binding"]] <> ["dependency." <> key | key <- ["suite","oracle","custody-suite","entry","build-tool","seed-driver","metadata","bootstrap","documentation","status-projection","cleanup"]]]
+          names = [T.pack stem <> ".discovery"] <> [T.pack stem <> "." <> key <> "." <> control | key <- keys, control <- if behavioral then ["positive","negative"] else ["positive", "negative", "delta"]] <> [T.pack stem <> "." <> field | behavioral, field <- if identifier == Legacy.LtdSrc009 then ["control.fork","control.cleanup"] else if identifier `elem` [Legacy.LtdSrc000,Legacy.LtdSrc001,Legacy.LtdSrc005,Legacy.LtdSrc006,Legacy.LtdName001,Legacy.LtdMeta001,Legacy.LtdSrc007,Legacy.LtdSrc008] then ["control.inventory","control.cleanup"] else if identifier `elem` spineLegacy then ["control.complete"] else if identifier == Legacy.LtdBoot001 then ["control.cleanup"] else if identifier == Legacy.LtdVal006 then ["control." <> key | key <- ["stale-sentinel","ignored-captured","source-changed","replayed-copy","authored-restored","ambient-entry","ambient-created","cleanup","collection-unknown","collection-phase","collection-source"]] else if identifier == Legacy.LtdVal001 then ["control." <> key | key <- ["subject-exit","subject-token","constant-probe","missing-probe","cleanup"]] <> ["manifest.seed-names","manifest.seed-positive"] <> ["manifest.omitted." <> key | key <- manifest] <> authoritySeedRows <> authorityTranscriptRows else if identifier == Legacy.LtdVal004 then [part <> "." <> key | part <- ["accept","preview","unchanged"], key <- keys] <> ["control.cleanup"] else if identifier == Legacy.LtdVal002 then ["control.render-collision","snapshot.contracts","snapshot.selected"] <> [part <> "." <> key | part <- ["entry","entry-root"], key <- ["phase-role-swap","byte-copy-equivalence"]] else ["binding.verifier-positive","binding.verifier-negative"] <> ["prefix." <> key | key <- ["publication-prefixes","earlier-whole-changed","latest-whole","uncommitted-observed","metadata-red","prefix-heading","prefix-receipt","prefix-tracker","prefix-phase","prefix-sprint","malformed-target","ambiguous-bound","latest-anchor","current-selection","missing-target","stale-identity","verifier","governance","reset-target","legacy-none","legacy-bytes","legacy-whole","legacy-durable","malformed","repeated","duplicate-reader","corrupt-reader","missing-reader","ambiguous-latest","unknown-phase","inconsistent-surface","public-evidence-refusal","public-evidence-reason","replay-stale-prefix","superseded","voided"]] <> ["control." <> key | key <- ["closure-source","closure-restored","outside-closure","unknown-closure","closure-sentinel","capability-binding","governance-binding","specification-binding","phase-binding"]] <> ["dependency." <> key | key <- ["suite","oracle","custody-suite","entry","build-tool","seed-driver","metadata","bootstrap","documentation","status-projection","cleanup"]]]
             <> (["solver-reintroduction.discovery", "solver-reintroduction.baseline"] <> ["solver-reintroduction." <> key <> "." <> field | key <- "clean" : keys, field <- ["runtime", "api", "execution", "source", "images", "teardown"]] >>= \key -> [key | identifier == Legacy.LtdKrn003])
       mapM_ (\(file, body) -> TextIO.writeFile (work </> file) body) [("processes.data", T.pack (show events)), ("identities.data", T.pack (show (Legacy.renderLegacyId identifier, capturedSourceDigest source, cap, keys, zip3 images (map sha256Bytes before) (map sha256Bytes after)))), ("oracle-ledger.tsv", output), ("checks.data", T.pack (show (unchanged, runExit legacySubject, T.null (runStderr legacySubject), runExit oracle, before == after, sort names, sort [name | name : "green" : _ <- rows], length rows)))]
       unless (complete && runExit legacySubject == ExitSuccess && T.null (runStderr legacySubject) && runExit oracle == ExitSuccess && before == after && unchanged == Right ()
         && sort [name | name : "green" : _ <- rows] == sort names && length rows == length names) (when (identifier == Legacy.LtdVal001) (removePathForcibly tree) >> fail "LegacyQualificationRefused")
-      pure (LegacyQualified identifier (Legacy.legacyRequirementScope required) (capturedSourceDigest source) cap keys (sha256Hex (T.pack (show (scope required, map sha256Bytes before, cases, runStdout legacySubject, runStdout oracle, map observedDigest runtimeRuns, Tools.renderAcquisition tools)))) events tools (zip3 images (map sha256Bytes before) (map sha256Bytes after))))
+      pure (LegacyQualified identifier (Legacy.legacyRequirementScope required) (capturedSourceDigest source) cap keys (sha256Hex (T.pack (show (scope required, map sha256Bytes before, cases, runStdout legacySubject, runStdout oracle, map observedDigest runtimeRuns, Tools.renderAcquisition tools)))) events tools (zip3 images (map sha256Bytes before) (map sha256Bytes after)) nativeEvidence))
       `onException` when (identifier == Legacy.LtdVal001) (writeIORef interrupted True) `finally` (readIORef interrupted >>= \stopped -> unless stopped (removePathForcibly tree))
 qualifiedLegacyReports :: Int -> CapturedSource -> [LegacyQualification] -> [LegacyReport]
-qualifiedLegacyReports phase source = let observed = observeLegacy phase source Nothing in \evidence -> [if reportedIdentity report `elem` [Legacy.LtdVal001,Legacy.LtdVal002,Legacy.LtdVal003,Legacy.LtdVal004,Legacy.LtdVal006,Legacy.LtdBoot001,Legacy.LtdSrc000,Legacy.LtdSrc008,Legacy.LtdSrc001,Legacy.LtdSrc005,Legacy.LtdSrc006,Legacy.LtdName001,Legacy.LtdMeta001,Legacy.LtdSrc007,Legacy.LtdSrc009] && any (\(LegacyQualified identifier scoped digest _ _ _ _ _ _) -> identifier == reportedIdentity report && scope (canonicalRequirement phase identifier) == reportedScope report && scoped == Legacy.legacyRequirementScope (canonicalRequirement phase identifier) && digest == capturedSourceDigest source) evidence then report {reportedObservation = AnalyzerFindings []} else report | report <- observed]
+qualifiedLegacyReports phase source = let observed = observeLegacy phase source Nothing in \evidence -> [if reportedIdentity report `elem` [Legacy.LtdVal001,Legacy.LtdVal002,Legacy.LtdVal003,Legacy.LtdVal004,Legacy.LtdVal006,Legacy.LtdBoot001,Legacy.LtdSrc000,Legacy.LtdSrc008,Legacy.LtdSrc001,Legacy.LtdSrc005,Legacy.LtdSrc006,Legacy.LtdName001,Legacy.LtdMeta001,Legacy.LtdSrc007,Legacy.LtdSrc009] <> spineLegacy && any (\(LegacyQualified identifier scoped digest _ _ _ _ _ _ _) -> identifier == reportedIdentity report && scope (canonicalRequirement phase identifier) == reportedScope report && scoped == Legacy.legacyRequirementScope (canonicalRequirement phase identifier) && digest == capturedSourceDigest source) evidence then report {reportedObservation = AnalyzerFindings []} else report | report <- observed]
 auditQualifiedLegacyReports :: Int -> CapturedSource -> [LegacyQualification] -> [LegacyReport] -> [Text]
 auditQualifiedLegacyReports phase source = audit
  where
   expected = qualifiedLegacyReports phase source
   audit evidence reports = let expectedReports = expected evidence in
-    ["LegacyQualificationSourceMismatch" | any (\(LegacyQualified _ _ digest _ _ _ _ _ _) -> digest /= capturedSourceDigest source) evidence]
-    <> ["LegacyQualificationDuplicate" | let keys = [(identifier, scoped) | LegacyQualified identifier scoped _ _ _ _ _ _ _ <- evidence], length keys /= length (nub keys)]
-    <> ["LegacyQualificationUnexpected" | any (\(LegacyQualified identifier scoped _ _ _ _ _ _ _) -> (identifier, Legacy.renderLegacyScope scoped) `notElem` [(Legacy.legacyRequirementId r, scope r) | r <- legacyRequirementsAt phase]) evidence]
+    ["LegacyQualificationSourceMismatch" | any (\(LegacyQualified _ _ digest _ _ _ _ _ _ _) -> digest /= capturedSourceDigest source) evidence]
+    <> ["LegacyQualificationDuplicate" | let keys = [(identifier, scoped) | LegacyQualified identifier scoped _ _ _ _ _ _ _ _ <- evidence], length keys /= length (nub keys)]
+    <> ["LegacyQualificationUnexpected" | any (\(LegacyQualified identifier scoped _ _ _ _ _ _ _ _) -> (identifier, Legacy.renderLegacyScope scoped) `notElem` [(Legacy.legacyRequirementId r, scope r) | r <- legacyRequirementsAt phase]) evidence]
     <> ["LegacyObservationMismatch" | any (`notElem` expectedReports) reports]
-    <> auditReports [(identifier, Legacy.renderLegacyScope scoped) | LegacyQualified identifier scoped digest _ _ _ _ _ _ <- evidence, digest == capturedSourceDigest source] phase source reports
+    <> auditReports [(identifier, Legacy.renderLegacyScope scoped) | LegacyQualified identifier scoped digest _ _ _ _ _ _ _ <- evidence, digest == capturedSourceDigest source] phase source reports
 data LegacyCollection = LegacyCollected Int Text [LegacyQualification] [LegacyReport] [Text] deriving (Eq, Show)
-legacyQualificationSupported :: Legacy.LegacyRequirement -> Bool
-legacyQualificationSupported requirement = requirement == Legacy.legacyBootstrapSourceRequirement || Legacy.legacyRequirementId requirement `elem` [Legacy.LtdVal001,Legacy.LtdVal002,Legacy.LtdVal003,Legacy.LtdVal004,Legacy.LtdVal006,Legacy.LtdBoot001,Legacy.LtdSrc000,Legacy.LtdSrc008,Legacy.LtdSrc001,Legacy.LtdSrc005,Legacy.LtdSrc006,Legacy.LtdName001,Legacy.LtdMeta001,Legacy.LtdSrc007,Legacy.LtdSrc009,Legacy.LtdKrn001,Legacy.LtdKrn002,Legacy.LtdKrn003]
+spineLegacy :: [Legacy.LegacyId]; spineLegacy = [Legacy.LtdDsl001, Legacy.LtdDsl002, Legacy.LtdDsl009, Legacy.LtdVal005, Legacy.LtdDoc001, Legacy.LtdSrc002, Legacy.LtdSrc003]
+legacyQualificationSupported :: Legacy.LegacyRequirement -> Bool; legacyQualificationSupported requirement = Legacy.legacyRequirementId requirement /= Legacy.LtdSrc003 && (requirement == Legacy.legacyBootstrapSourceRequirement || Legacy.legacyRequirementId requirement `elem` [Legacy.LtdVal001,Legacy.LtdVal002,Legacy.LtdVal003,Legacy.LtdVal004,Legacy.LtdVal006,Legacy.LtdBoot001,Legacy.LtdSrc000,Legacy.LtdSrc008,Legacy.LtdSrc001,Legacy.LtdSrc005,Legacy.LtdSrc006,Legacy.LtdName001,Legacy.LtdMeta001,Legacy.LtdSrc007,Legacy.LtdSrc009,Legacy.LtdKrn001,Legacy.LtdKrn002,Legacy.LtdKrn003] <> spineLegacy)
 collectLegacy :: FilePath -> FilePath -> Int -> Maybe FilePath -> Maybe FilePath -> CapturedSource -> IO LegacyCollection
 collectLegacy repository destination phase cabal compiler source = do
   results <- forM [requirement | requirement <- legacyRequirementsAt phase, (if requirement == Legacy.legacyBootstrapSourceRequirement then Just PhaseIdentity.phaseDomainLowerOrdinal else Legacy.legacyOwnerOrdinal (Legacy.legacyRequirementId requirement)) == Just phase] $ \requirement -> do
@@ -2061,18 +2061,18 @@ auditLegacyCollection phase source (LegacyCollected ordinal digest qualification
 inheritLegacyCollection :: CapturedSource -> LegacyCollection -> LegacyCollection -> LegacyCollection
 inheritLegacyCollection source prior@(LegacyCollected predecessor bound older _ _) (LegacyCollected phase digest current _ errors) =
   let admitted = [(Legacy.legacyRequirementId r, Legacy.legacyRequirementScope r) | r <- legacyRequirementsAt phase, Legacy.legacyRequirementRetired r, maybe False (< phase) (Legacy.legacyOwnerOrdinal (Legacy.legacyRequirementId r))]
-      combined = current <> [q | q@(LegacyQualified identifier scoped _ _ _ _ _ _ _) <- older, (identifier, scoped) `elem` admitted]
+      combined = current <> [q | q@(LegacyQualified identifier scoped _ _ _ _ _ _ _ _) <- older, (identifier, scoped) `elem` admitted]
   in LegacyCollected phase digest combined (qualifiedLegacyReports phase source combined) (errors <> auditLegacyCollection predecessor source prior <> ["LegacyInheritanceContextMismatch" | PhaseIdentity.predecessorOrdinal phase /= Just predecessor || bound /= digest || digest /= capturedSourceDigest source])
 legacyCollectionRuns :: LegacyCollection -> [ObservedRun]
-legacyCollectionRuns (LegacyCollected _ _ qualifications _ _) = concat [runs | LegacyQualified _ _ _ _ _ _ runs _ _ <- qualifications]
+legacyCollectionRuns (LegacyCollected _ _ qualifications _ _) = concat [runs | LegacyQualified _ _ _ _ _ _ runs _ _ _ <- qualifications]
 legacyCollectionEvidence :: LegacyCollection -> [(Text,Text)]
-legacyCollectionEvidence (LegacyCollected phase digest qualifications reports errors) = [("legacy.phase",T.pack (show phase)),("legacy.source",digest),("legacy.report-count",T.pack (show (length reports))),("legacy.qualification-count",T.pack (show (length qualifications))),("legacy.reports",renderLegacyReports reports)] <> [("legacy.qualification." <> Legacy.renderLegacyId identifier <> "." <> Legacy.renderLegacyScope scoped,nativeDiagnostic (T.pack (show (source,cap,keys,proof,runs,Tools.renderAcquisition tools,images)))) | LegacyQualified identifier scoped source cap keys proof runs tools images <- qualifications] <> [("legacy.refusal",problem) | problem <- errors]
+legacyCollectionEvidence (LegacyCollected phase digest qualifications reports errors) = [("legacy.phase",T.pack (show phase)),("legacy.source",digest),("legacy.report-count",T.pack (show (length reports))),("legacy.qualification-count",T.pack (show (length qualifications))),("legacy.reports",renderLegacyReports reports)] <> [("legacy.qualification." <> Legacy.renderLegacyId identifier <> "." <> Legacy.renderLegacyScope scoped,nativeDiagnostic (T.pack (show (source,cap,keys,proof,runs,Tools.renderAcquisition tools,images,native)))) | LegacyQualified identifier scoped source cap keys proof runs tools images native <- qualifications] <> [("legacy.refusal",problem) | problem <- errors]
 data Operator = ConstantFlip | BoundaryShift | BranchSwap | FieldDrop | ListTruncation deriving (Bounded, Enum, Eq, Ord, Show)
 allOperators :: [Operator]
 allOperators = [minBound .. maxBound]
 -- module that owns none keeps the rule that any red row kills.
 isAttributed :: [(Text, Text)] -> Text -> [Text] -> Bool
-isAttributed owned moduleName reds = null mine || any (\row -> any (`Text.isPrefixOf` row) mine) reds
+isAttributed owned moduleName reds = not (null reds) && all (\row -> any (`Text.isPrefixOf` row) mine) reds
  where
   mine = [prefix | (owner, prefix) <- owned, owner == moduleName]
 renderOperator :: Operator -> Text
@@ -2144,7 +2144,7 @@ listTruncation :: Text -> Maybe Text
 listTruncation line = case Text.breakOnEnd "]" line of
   (closed, after) | not (Text.null closed), (prefix, body) <- Text.breakOnEnd "[" (Text.dropEnd 1 closed),
     not (Text.null prefix || Text.null (Text.strip body)), not (Text.any (`elem` ("[]\"" :: String)) body),
-    not ("::" `Text.isInfixOf` prefix || ".." `Text.isInfixOf` body) ->
+    not ("::" `Text.isInfixOf` prefix || ".." `Text.isInfixOf` body || any (`Text.isPrefixOf` Text.stripStart after) ["->", "<-"]) ->
       Just (prefix <> Text.intercalate ", " (init (Text.splitOn ", " body)) <> "]" <> after)
   _ -> Nothing
 truncateListLocus :: Locus -> Locus
@@ -2225,22 +2225,26 @@ ownedOracleCall scope@(NativeScope _ _ _ events) source tree completion image by
   (,) challenge <$> observeOwnedNative scope (NativeDirectIntent tree image (["--oracle-invocation",Text.unpack challenge] <> args))
 imagePathsAllowed :: FilePath -> [FilePath] -> [FilePath] -> Bool
 imagePathsAllowed tree images resolved = and (zipWith equalFilePath resolved images) && all (\image -> isAbsolute image && let relative = makeRelative tree image in not (isAbsolute relative || ".." `elem` splitDirectories relative)) images
-readScopeImages :: NativeScope -> Text -> FilePath -> [FilePath] -> IO [ByteString.ByteString]
-readScopeImages scope point tree paths = withNativeScope scope $ do
+readScopeImages :: NativeScope -> Text -> FilePath -> [FilePath] -> IO [ByteString.ByteString]; readScopeImages = readScopeFiles False
+readScopeFiles :: Bool -> NativeScope -> Text -> FilePath -> [FilePath] -> IO [ByteString.ByteString]; readScopeFiles allowEmpty scope point tree paths = withNativeScope scope $ do
   recordNativeScope scope (ImageBatchStarted point tree paths)
   resolved <- forM paths $ \path -> do actual <- canonicalizePath path; recordNativeScope scope (ImagePathResolved path actual); pure actual
   unless (imagePathsAllowed tree paths resolved) (fail "LegacyQualificationForeignBinary")
   kinds <- forM paths $ \path -> do kind <- getFileType path; recordNativeScope scope (ImageFileTypeRead path (showText kind)); pure kind
   unless (all ((== TreeFile) . classifyTreeNode False True) kinds) (fail "LegacyQualificationBinaryNotRegular")
   bytes <- forM paths $ \path -> do actual <- ByteString.readFile path; recordNativeScope scope (ImageBytesRead path (ByteString.length actual) (sha256Bytes actual)); pure actual
-  unless (all (not . ByteString.null) bytes) (fail "LegacyQualificationBinaryEmpty")
+  unless (allowEmpty || all (not . ByteString.null) bytes) (fail "LegacyQualificationBinaryEmpty")
   pure bytes
 readScopePlan :: NativeScope -> Text -> FilePath -> IO ByteString.ByteString
 readScopePlan scope point tree = withNativeScope scope $ do
   let path = tree </> ".build/dist-native/cache/plan.json"
-  recordNativeScope scope (CompletionFact "native-plan-read-start" (showText (point,path)))
-  bytes <- ByteString.readFile path
+  [bytes] <- readScopeImages scope point tree [path]
   recordNativeScope scope (NativePlanRead point path (RetainedPlanBytes bytes)); pure bytes
+productImageBinding :: NativeScope -> FilePath -> FilePath -> Text -> IO (ByteString.ByteString,ByteString.ByteString)
+productImageBinding scope tree image point = withNativeScope scope $ do
+  plan <- readScopePlan scope point tree
+  unless (maybe False (equalFilePath image) (nativePlanImage "exe:amoebius" tree plan)) (fail "ProductImageNotSelectedByPlan"); [bytes] <- readScopeImages scope point tree [image]
+  pure (plan,bytes)
 boundSuiteImageChange :: Ledger -> Ledger -> Maybe (FilePath, Text, FilePath, Text)
 boundSuiteImageChange control mutant = case (ledgerImages control, ledgerImages mutant) of
   ([(cleanRoot, [(clean, before, after), (cleanOracle, oracleBefore, oracleAfter)])], [(changedRoot, [(changed, newBefore, newAfter), (changedOracle, changedOracleBefore, changedOracleAfter)])])
@@ -2248,7 +2252,7 @@ boundSuiteImageChange control mutant = case (ledgerImages control, ledgerImages 
       && all (not . ByteString.null) [before,after,oracleBefore,oracleAfter,newBefore,newAfter,changedOracleBefore,changedOracleAfter]
       && before == after && oracleBefore == oracleAfter && newBefore == newAfter && changedOracleBefore == changedOracleAfter && before /= newBefore -> let cleanDigest = sha256Bytes before; changedDigest = sha256Bytes newBefore in cleanDigest `seq` changedDigest `seq` Just (clean, cleanDigest, changed, changedDigest)
   _ -> Nothing
-data NativeIntent = NativeCabalIntent FilePath FilePath (Maybe FilePath) [String] | NativeDirectIntent FilePath FilePath [String] deriving Show
+data NativeIntent = NativeCabalIntent FilePath FilePath (Maybe FilePath) [String] | NativeDirectIntent FilePath FilePath [String] | NativeFileIntent FilePath FilePath FilePath FilePath FilePath deriving Show
 data NativeStep = ResolveNativeCompiler | EnsureNativeOwner | SelectNativeConfiguration | AssembleNativeRequest | ObserveNativeRequest | NativeTupleReturned | NativeConfigurationBefore | NativeConfigurationAfter deriving Show
 data NativeWindowObservation = WindowNodeStarted FilePath | WindowNodeObserved FilePath FilePath Text | WindowInventoryStarted Text FilePath | WindowInventoryReturned Text FilePath Bool (Maybe [FilePath]) | WindowInputStarted FilePath | WindowInputReturned FilePath RetainedPlanBytes | WindowRequestsMatched [FilePath] | WindowRecordStarted FilePath | WindowRecordReturned FilePath RetainedPlanBytes | WindowJournalInventory Text FilePath [FilePath] | WindowJournalUnclosed FilePath Text | WindowJournalClosed FilePath [(Natural,ExitCode)] deriving Show
 data NativeCall = NativeCall { nativeIntent :: NativeIntent, nativeStep :: NativeStep, nativeCompiler :: Maybe FilePath , nativeOwner :: Maybe FilePath, nativeOwnerEnsured :: Bool , nativeConfigAttempt :: Maybe Tools.NativeCabalConfigAttempt , nativeRequest :: Maybe NativeCabalRequest, nativeActual :: Maybe ActualPreparedTuple, nativeConfigurationReads :: [(NativeStep,FilePath,ByteString.ByteString)], nativeWindowObservations :: [NativeWindowObservation] }
@@ -2258,11 +2262,11 @@ instance Show NativeStopped where show (NativeStopped original _) = show origina
 instance Exception NativeStopped
 nativeDiagnostic :: Text -> Text
 nativeDiagnostic value | ByteString.length (E.encodeUtf8 value) <= 1024 * 1024 = value
-nativeDiagnostic value = "interned-gzip-utf8-base64.v2:" <> E.decodeUtf8 (Base64.encode (Lazy.toStrict (GZip.compress (Lazy.fromStrict (E.encodeUtf8 (showText (names,[dictionary Map.! token | token<-tokens])))))))
+nativeDiagnostic value = "interned-gzip-utf8-base64.v3:" <> E.decodeUtf8 (Base64.encode (Lazy.toStrict (GZip.compress (Lazy.fromStrict (E.encodeUtf8 (intern "\\\\t" (intern ",(" value)))))))
  where
-  tokens = Text.groupBy (\a b -> isAlphaNum a == isAlphaNum b) value
-  names = Set.toAscList (Set.fromList tokens)
-  dictionary = Map.fromList (zip names [0 :: Int ..])
+  intern separator input = showText (names,[dictionary Map.! token | token <- tokens]) where { tokens = case Text.splitOn separator input of { [] -> []; first:rest -> first : map (separator <>) rest }; names = Set.toAscList (Set.fromList tokens); dictionary = Map.fromList (zip names [0 :: Int ..]) }
+nativeRestore :: Text -> Maybe Text
+nativeRestore value = case Text.stripPrefix "interned-gzip-utf8-base64.v3:" value of { Nothing -> Just value; Just encoded -> do { compressed <- either (const Nothing) Just (Base64.decode (E.encodeUtf8 encoded)); outer <- either (const Nothing) Just (E.decodeUtf8' (Lazy.toStrict (GZip.decompress (Lazy.fromStrict compressed)))); inner <- expand outer; expand inner } } where { expand input = do { (names,indices) <- readMaybe (Text.unpack input) :: Maybe ([Text],[Int]); Text.concat <$> traverse (`Map.lookup` (Map.fromList (zip [0 :: Int ..] names))) indices } }
 nativeScopeEvidence :: NativeScope -> IO [(Text, Text)]
 nativeScopeEvidence (NativeScope root source calls events) = do
   retained <- reverse <$> readIORef calls
@@ -2300,13 +2304,13 @@ canonicalWindowInput input bytes = E.encodeUtf8 (showText input <> "\n") == byte
 associateNativeWindows :: NativeScope -> FilePath -> NativeCabalRequest -> [String] -> Either Text [FilePath] -> Either Text [FilePath] -> ExitCode -> IO ()
 associateNativeWindows scope root (cabal,_,_,config,compiler) arguments before after parent = do
   found <- case (before,after,arguments) of
-    (Right opening,Right closing,command:rest) -> mapM (matches command ("--offline":rest)) [path | path<-closing,windowIsNew opening path]
+    (Right opening,Right closing,command:rest) -> do { physical <- canonicalizePath compiler; let { name = takeFileName physical; packageTool = takeDirectory physical </> (if "ghc" `isPrefixOf` name then "ghc-pkg" <> drop 3 name else "ghc-pkg" <> exeExtension) }; mapM (matches packageTool command ("--offline":rest)) [path | path<-closing,windowIsNew opening path] }
     _ -> pure []
   let matched = catMaybes found
   recordNativeWindow scope (WindowRequestsMatched [path | (path,_,_)<-matched])
   case matched of {[(window,input,bytes)] -> checkNativeJournal scope root window input bytes parent; _ -> pure ()}
  where
-  matches command received window = do
+  matches packageTool command received window = do
     owned <- inspectNativeWindow scope root FTDirectory window
     if not owned then pure Nothing else do
       let path = window </> "window-input.data"
@@ -2316,7 +2320,7 @@ associateNativeWindows scope root (cabal,_,_,config,compiler) arguments before a
         bytes <- ByteString.readFile path
         recordNativeWindow scope (WindowInputReturned path (RetainedPlanBytes bytes))
         pure $ case either (const Nothing) (readMaybe . Text.unpack) (E.decodeUtf8' bytes) of
-          Just input | Journal.requestedConfig input == Just config && canonicalWindowInput input bytes && Journal.windowProfile input == Journal.CabalWindow && Journal.freshPhysicalWindowRoot input == window && equalFilePath (Journal.checkedRepositoryRoot input) root && Journal.requestedNativeCompiler input == compiler && Journal.requestedCabal input == Just cabal && Journal.selectedCabalCommand input == Just command && Journal.receivedCabalArguments input == received && Journal.exactForwardedCabalArguments input == ["--config-file="<>config,command,"--offline","--jobs=1","--with-compiler="<>(window </> "compiler/ghc.exe")] <> received -> Just (window,input,bytes)
+          Just input | Journal.requestedConfig input == Just config && canonicalWindowInput input bytes && Journal.windowProfile input == Journal.CabalWindow && Journal.freshPhysicalWindowRoot input == window && equalFilePath (Journal.checkedRepositoryRoot input) root && Journal.requestedNativeCompiler input == compiler && Journal.requestedCabal input == Just cabal && Journal.selectedCabalCommand input == Just command && Journal.receivedCabalArguments input == received && Journal.exactForwardedCabalArguments input == ["--config-file="<>config,command,"--offline","--jobs=1","--with-compiler="<>(window </> "compiler/ghc.exe"),"--with-hc-pkg="<>packageTool] <> received -> Just (window,input,bytes)
           _ -> Nothing
 nativeWindowNode :: NativeScope -> FilePath -> FilePath -> IO (Bool,FileType)
 nativeWindowNode scope root path = do
@@ -2380,28 +2384,58 @@ uniqueJsonTokens value = case value of {Json.TkLit _ next -> Just next; Json.TkT
  where
   array rows = case rows of {Json.TkItem item -> uniqueJsonTokens item >>= array; Json.TkArrayEnd next -> Just next; Json.TkArrayErr _ -> Nothing}
   object keys rows = case rows of {Json.TkPair key item -> if Set.member key keys then Nothing else uniqueJsonTokens item >>= object (Set.insert key keys); Json.TkRecordEnd next -> Just next; Json.TkRecordErr _ -> Nothing}
-nativePlanHelper :: FilePath -> ByteString.ByteString -> Maybe FilePath
-nativePlanHelper = nativePlanImage "exe:extension-source-admission"
-nativePlanImage :: Text -> FilePath -> ByteString.ByteString -> Maybe FilePath
-nativePlanImage target root bytes = do
-  rest <- uniqueJsonTokens (JsonBytes.bsToTokens bytes); guard (ByteString.all (`elem` [9,10,13,32]) rest)
+nativePlanUnits :: ByteString.ByteString -> Maybe [(Aeson.Object,Text,Text)]
+nativePlanUnits bytes = do
+  guard (ByteString.length bytes <= 64 * 1024 * 1024); rest <- uniqueJsonTokens (JsonBytes.bsToTokens bytes); guard (ByteString.all (`elem` [9,10,13,32]) rest)
   Aeson.Object plan <- Aeson.decodeStrict' bytes
   Aeson.Array entries <- JsonMap.lookup "install-plan" plan
   units <- forM (toList entries) $ \value -> do {Aeson.Object unit <- Just value; Aeson.String package <- JsonMap.lookup "pkg-name" unit; Aeson.String identity <- JsonMap.lookup "id" unit; guard (not (Text.null package || Text.null identity)); pure (unit,package,identity)}
-  let ids = [identity | (_,_,identity)<-units]; matching = [unit | (unit,"amoebius",_)<-units,JsonMap.lookup "component-name" unit == Just (Aeson.String target)]
-  guard (length ids == Set.size (Set.fromList ids))
+  guard (length units == Set.size (Set.fromList [identity | (_,_,identity)<-units]))
+  pure units
+nativePlanImage :: Text -> FilePath -> ByteString.ByteString -> Maybe FilePath
+nativePlanImage target root bytes = do
+  units <- nativePlanUnits bytes
+  let matching = [unit | (unit,"amoebius",_)<-units,JsonMap.lookup "component-name" unit == Just (Aeson.String target)]
   unit <- case matching of [one] -> Just one; _ -> Nothing
   guard (JsonMap.lookup "style" unit == Just (Aeson.String "local"))
   Aeson.Object source <- JsonMap.lookup "pkg-src" unit
   Aeson.String path <- JsonMap.lookup "path" source
   guard (JsonMap.lookup "type" source == Just (Aeson.String "local") && equalFilePath (Text.unpack path) root)
   Aeson.String image <- JsonMap.lookup "bin-file" unit; guard (not (Text.null image)); pure (Text.unpack image)
+nativePlanWireTool :: FilePath -> ByteString.ByteString -> Maybe (FilePath,FilePath)
+nativePlanWireTool root bytes = do
+  units <- nativePlanUnits bytes
+  helper <- nativePlanImage "exe:amoebius-wire-prepare" root bytes; guard (imagePathsAllowed (root </> ".build/dist-native") [helper] [helper])
+  unit <- case [u | (u,"amoebius",_)<-units,JsonMap.lookup "component-name" u == Just (Aeson.String "exe:amoebius-wire-prepare")] of [one] -> Just one; _ -> Nothing
+  (plugin,identity) <- case [(u,i) | (u,"proto-lens-protoc",i)<-units,JsonMap.lookup "component-name" u == Just (Aeson.String "exe:proto-lens-protoc"),JsonMap.lookup "style" u == Just (Aeson.String "global")] of [one] -> Just one; _ -> Nothing
+  Aeson.Array dependencies <- JsonMap.lookup "exe-depends" unit
+  guard (toList dependencies == [Aeson.String identity])
+  Aeson.String version <- JsonMap.lookup "pkg-version" plugin
+  guard (case Text.splitOn "." version of "0":"9":rest -> all (\part -> not (Text.null part) && Text.all (\c -> c >= '0' && c <= '9') part) rest; _ -> False)
+  Aeson.String image <- JsonMap.lookup "bin-file" plugin; guard (isAbsolute (Text.unpack image)); pure (helper,Text.unpack image)
+wireGeneratedPaths :: FilePath -> [FilePath]; wireGeneratedPaths tree = map (tree </>) [".build/proto/current/PulsarApi.proto", ".build/proto/current/generated/Proto/PulsarApi.hs", ".build/proto/current/generated/Proto/PulsarApi_Fields.hs", ".build/proto/current/generated/Paths_supernova.hs", ".build/proto/current/plugin.request", ".build/proto/current/plugin.response"]
+verifyWireGenerated :: NativeScope -> FilePath -> Text -> [ByteString.ByteString] -> IO (); verifyWireGenerated scope tree point opening = withNativeScope scope $ do { closing <- readScopeImages scope point tree (wireGeneratedPaths tree); unless (opening == closing) (fail "WireGeneratedFilesChanged") }
+prepareNativeWireTool :: NativeScope -> FilePath -> FilePath -> Maybe FilePath -> IO ([ObservedRun],Either Text [ByteString.ByteString])
+prepareNativeWireTool scope tree cabal compiler = withNativeScope scope $ do
+  (runs,built) <- buildNativeTargetWith "exe:amoebius-wire-prepare" (ownedCabal scope tree cabal compiler)
+  case built of
+    Left problem -> pure (runs,Left problem)
+    Right image -> do
+      plan <- readScopePlan scope "wire-tool-plan" tree
+      case nativePlanWireTool tree plan of
+        Just (helper,plugin) | equalFilePath image helper -> do
+          helperBefore <- readScopeImages scope "wire-helper-before" tree [helper]; pluginBefore <- readScopeImages scope "wire-plugin-before" (takeDirectory plugin) [plugin]; started <- observeOwnedNative scope (NativeDirectIntent tree helper ["begin-plugin","current"]); let { paths = wireGeneratedPaths tree; outputs = take 4 paths; owner = tree </> ".build/proto/current"; schema = owner </> "PulsarApi.proto"; request = owner </> "plugin.request"; response = owner </> "plugin.response"; errors = owner </> "plugin.stderr"; matches run expected = let actual = map Text.unpack (Text.lines (runStdout run)) in length actual == length expected && and (zipWith equalFilePath actual expected) }
+          unless (runExit started == ExitSuccess && isNothing (runSpawnFailure started) && matches started [schema,request]) (fail "WirePreparationObservationMismatch"); opening <- readScopeImages scope "wire-input-before" tree [schema,request]; forM_ [response,errors] $ \path -> do { present <- doesPathExist path; linked <- pathIsSymbolicLink path `catch` (\problem -> if isDoesNotExistError problem then pure False else throwIO (problem :: IOException)); when (present || linked) (fail "WirePluginOutputNotFresh") }
+          pluginRun <- observeOwnedNative scope (NativeFileIntent tree plugin request response errors); if runExit pluginRun /= ExitSuccess || isJust (runSpawnFailure pluginRun) then do { inputAfter <- readScopeImages scope "wire-input-after-refusal" tree [schema,request]; helperAfter <- readScopeImages scope "wire-helper-after-refusal" tree [helper]; pluginAfter <- readScopeImages scope "wire-plugin-after-refusal" (takeDirectory plugin) [plugin]; closing <- readScopePlan scope "wire-tool-after-refusal" tree; unless (opening == inputAfter && helperBefore == helperAfter && pluginBefore == pluginAfter && plan == closing) (fail "WireRefusalObservationMismatch"); pure (runs <> [started,pluginRun],Left "WirePluginObservationMismatch") } else do
+            afterPlugin <- readScopeImages scope "wire-input-after-plugin" tree [schema,request,response]; finished <- observeOwnedNative scope (NativeDirectIntent tree helper ["finish-plugin","current"]); helperAfter <- readScopeImages scope "wire-helper-after" tree [helper]; pluginAfter <- readScopeImages scope "wire-plugin-after" (takeDirectory plugin) [plugin]; closing <- readScopePlan scope "wire-tool-after" tree
+            unless (runExit finished == ExitSuccess && isNothing (runSpawnFailure finished) && plan == closing && helperBefore == helperAfter && pluginBefore == pluginAfter && take 2 afterPlugin == opening && matches finished outputs) (fail "WireGenerationObservationMismatch"); files <- readScopeImages scope "wire-generated" tree paths; unless (take 1 files == take 1 opening && drop 4 files == drop 1 afterPlugin) (fail "WireGeneratedInputMismatch"); pure (runs <> [started,pluginRun,finished],Right files)
+        _ -> pure (runs,Left "WireToolPlanMismatch")
 -- Opening and closing reads are post-return observations, not an execution seal.
 nativeHelperContext :: NativeScope -> FilePath -> FilePath -> (FilePath -> IO ByteString.ByteString) -> Journal.WindowInput -> IO (IO ())
 nativeHelperContext scope root window readBytes input = do
   let planPath = root </> ".build/source-admission-bootstrap/cache/plan.json"; require = journalRequire scope window
   plan <- readBytes planPath
-  helper <- maybe (stopNativeJournal scope window "helper-plan-unavailable") pure (nativePlanHelper root plan)
+  helper <- maybe (stopNativeJournal scope window "helper-plan-unavailable") pure (nativePlanImage "exe:extension-source-admission" root plan)
   require (helper == Journal.requestedHelper input) "helper-plan-disagrees"
   image <- readBytes helper; require (not (ByteString.null image)) "helper-image-empty"
   pure $ do
@@ -2469,11 +2503,12 @@ readNativeConfiguration scope@(NativeScope _ _ calls _) step path = do
   pure bytes
 observeOwnedNative :: NativeScope -> NativeIntent -> IO ObservedRun
 observeOwnedNative scope@(NativeScope _ _ calls _) intent = withNativeScope scope $ do
-  let initial = NativeCall intent (case intent of NativeDirectIntent {} -> ObserveNativeRequest; _ -> ResolveNativeCompiler) Nothing Nothing False Nothing Nothing Nothing [] []
+  let initial = NativeCall intent (case intent of NativeDirectIntent {} -> ObserveNativeRequest; NativeFileIntent {} -> ObserveNativeRequest; _ -> ResolveNativeCompiler) Nothing Nothing False Nothing Nothing Nothing [] []
       update = modifyNativeCall scope
   atomicModifyIORef' calls (\prior -> (initial : prior,()))
   (actual@(_,_,_,_,_,result),configurationInput) <- case intent of
     NativeDirectIntent root executable arguments -> (\tuple -> (tuple,Nothing)) <$> observeActualTuple root executable arguments
+    NativeFileIntent root executable input output errors -> do { environment <- minimalEnvironment root; result <- tryRunFileInput root executable [] (Just environment) input output errors; (out,err) <- case result of { Left _ -> pure ("",""); Right _ -> do { [stdoutBytes,stderrBytes] <- readScopeFiles True scope "wire-plugin-streams" root [output,errors]; pure (Text.unpack (showText (ByteString.length stdoutBytes,sha256Bytes stdoutBytes)), Text.unpack (showText (ByteString.length stderrBytes,sha256Bytes stderrBytes))) } }; pure ((executable,[],root,environment,"binary-file-stdio:size-and-sha256;environment:minimal-allowlist",fmap (\code -> (code,out,err)) result),Nothing) }
     NativeCabalIntent root cabal compiler arguments -> do
       ghc <- maybe (maybe "ghc" id <$> findExecutable "ghc") pure compiler
       let owner = root </> ".build/source-admission-bootstrap"
@@ -2541,14 +2576,14 @@ prepareNativeCabalWith configuration root cabal compiler arguments = do
 observeActualNativeCabal :: FilePath -> FilePath -> Maybe FilePath -> [String] -> IO ActualPreparedTuple
 observeActualNativeCabal root cabal compiler arguments = prepareNativeCabalWith (\owner -> Tools.acquireNativeCabalConfigAttempt owner >>= either throwIO pure . Tools.actualNativeCabalConfigResult) root cabal compiler arguments
   >>= \(exe,args,cwd,_,_) -> observeActualTuple cwd exe args
-buildProductBinary :: FilePath -> FilePath -> Maybe FilePath -> IO ([ObservedRun], Either Text FilePath)
-buildProductBinary root cabal compiler = do
-  built <- observeNativeCabal root cabal compiler ["build", "-v0", "--builddir=.build/dist-native", "exe:amoebius"]
-  if runExit built /= ExitSuccess then pure ([built], Left ("exe:amoebius did not build: " <> Text.take 400 (runStderr built))) else do
-    located <- observeNativeCabal root cabal compiler ["list-bin", "--builddir=.build/dist-native", "exe:amoebius"]
+buildNativeTargetWith :: String -> ([String] -> IO (ObservedRun,Bool)) -> IO ([ObservedRun], Either Text FilePath)
+buildNativeTargetWith target native = do
+  (built,buildBound) <- native ["build", "-v0", "--builddir=.build/dist-native", target]
+  if not buildBound || runExit built /= ExitSuccess then pure ([built], Left (Text.pack target <> " did not build: " <> Text.take 400 (runStderr built))) else do
+    (located,locateBound) <- native ["list-bin", "--builddir=.build/dist-native", target]
     let path = Text.unpack (Text.strip (runStdout located))
     present <- doesFileExist path
-    pure ([built, located], if runExit located == ExitSuccess && present then Right path else Left ("exe:amoebius not located: " <> Text.take 200 (runStderr located)))
+    pure ([built, located], if locateBound && runExit located == ExitSuccess && present then Right path else Left (Text.pack target <> " not located: " <> Text.take 200 (runStderr located)))
 observedDigest :: ObservedRun -> Text
 observedDigest = sha256Hex . Text.pack . show . observedFields
 chainDigest :: Text -> ObservedRun -> Text

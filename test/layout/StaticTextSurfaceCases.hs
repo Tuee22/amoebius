@@ -30,7 +30,7 @@ runStaticTextSurfaceCases directory=do
   names<-forM staticTextSurfaceExamples $ \(name,source)->do
     let root=owner </> Text.unpack name
         path=root </> "Client.hs"
-        args=["exec","--jobs=1","--builddir="<>buildRoot,"--","ghc","-j1","-fdiagnostics-as-json",
+        args=["exec","-v0","--jobs=1","--builddir="<>buildRoot,"--","ghc","-j1","-fdiagnostics-as-json",
           "-fno-code","-fforce-recomp","-XGHC2024","-package-id",Text.unpack unit,"-outputdir",root </> "objects",path]
     createDirectoryIfMissing True (root </> "objects")
     Bytes.writeFile path (Encoding.encodeUtf8 source)

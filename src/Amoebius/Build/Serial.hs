@@ -9,6 +9,7 @@ module Amoebius.Build.Serial
   , serialCabalArguments
   , serialGhcArguments
   , spawnCabal
+  , spawnCabalIn
   , spawnToolInstall
   ) where
 
@@ -86,9 +87,12 @@ serialCabalArguments compiler arguments = clean (withoutJobs options)
 -- | Observe requested and effective arguments separately. Native tool digests
 -- are historical observations only; no byte or platform admission occurs here.
 spawnCabal :: FilePath -> FilePath -> FilePath -> [String] -> IO (BuildObservation, String, String)
-spawnCabal directory tool compiler requested = withMVar compilerLock $ \() -> do
-  let owner = directory </> ".build"
-      normalized = serialCabalArguments compiler (withoutOptions ["--config-file"] [] requested)
+spawnCabal directory = spawnCabalIn directory (directory </> ".build")
+
+-- | Use an explicit observation owner beneath the repository's build tree.
+spawnCabalIn :: FilePath -> FilePath -> FilePath -> FilePath -> [String] -> IO (BuildObservation, String, String)
+spawnCabalIn directory owner tool compiler requested = withMVar compilerLock $ \() -> do
+  let normalized = serialCabalArguments compiler (withoutOptions ["--config-file"] [] requested)
   createDirectoryIfMissing True owner
   selected <- nativeCabalConfig owner
   result@(child, out, err) <- case selected of

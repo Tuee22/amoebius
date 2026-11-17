@@ -1,4 +1,5 @@
 -- | Verifier commands and reproducible receipt custody (gate_runner_doctrine.md section 6; DL-0013).
 module Amoebius.Validation.Custody
-( CommandOutcome (..), CustodyConfig (..), defaultCustodyConfig, acceptPhase, demoFile, previewPhase, replayThrough, receiptPublicationBound, resetGeneration, runFresh, voidFromPhase, receiptCompatibility ) where
+( CommandOutcome (..), CustodyConfig (..), defaultCustodyConfig, acceptPhase, demoFile, previewPhase, replayThrough, receiptPublicationBound, resetGeneration, runFresh, voidFromPhase, receiptCompatibility, closureDigest, StatusSurface (..), patchToFrontier, recordedFrontier, statusSurface, statusPrefixDigest, surfaceConsistent, surfaceDigest
+, GenerationId, Receipt (..), SeedRecord (..), Store (..), archivedBundlePath, archivedKernelCap, auditArchivedInventory, digestShape, generationDirectory, governanceDigest, latestGeneration, latestWholePostimage, parseReceipt, parseSeed, readArchivedBundles, readArchivedBundlesWith, readCurrentArchivedBundles, readRecord, readSeed, renderReceipt, renderSeed, verifierDigest, writeArchivedReceipt, writeRecord, writeReplayVoid, writeSeed, rollbackOnLeft, withResult, withResults ) where
 import Amoebius.Validation.Authority.Core

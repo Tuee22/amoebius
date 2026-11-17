@@ -14,12 +14,10 @@ import Amoebius.Plan.Legacy qualified as Legacy
 import Amoebius.Plan.PhaseIdentity (phaseDomainLowerOrdinal)
 import Amoebius.Validation.Custody
 import Amoebius.Validation.Runner qualified as Runner
-import Amoebius.Validation.Runner.Hygiene (captureSource)
-import Amoebius.Validation.Runner.Legacy (observeLegacy, auditLegacyReports, renderLegacyReports, runLegacyProbe, runAuthorityObservation, qualifyLegacy, qualifiedLegacyReports, auditQualifiedLegacyReports)
-import Amoebius.Validation.Custody.Store (Store (..), archivedKernelCap)
+import Amoebius.Validation.Runner (captureSource, observeLegacy, auditLegacyReports, renderLegacyReports, runLegacyProbe, runAuthorityObservation, qualifyLegacy, qualifiedLegacyReports, auditQualifiedLegacyReports)
 import Amoebius.Validation.GateSpec (renderGateSpec)
 import Amoebius.Validation.GateSpec.Registry (registeredSpecInputs)
-import Amoebius.Validation.Runner.Spec (resolveSpec)
+import Amoebius.Validation.Runner (resolveSpec)
 import Control.Monad (forM, unless)
 import Data.List (nub, sort)
 import Data.Text (Text)

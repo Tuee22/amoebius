@@ -52,7 +52,6 @@ module DslTables
   , schemaLiteral
   , stageFiles
   , refusalStageFiles
-  , wireMessages
   , differentialEnvelopes
   ) where
 
@@ -768,14 +767,6 @@ schemaLiteral =
     <> ", rootApps : List { appName : Text, needs : List { needCapability : < ObjectStore | SecretStore | MessageBus | Sql | Identity | Observability | Registry | Edge | InferenceEngine >, needName : Text }, workload : { workloadRequests : { podCpu : Natural, podMemory : Natural, podEphemeral : Natural }, workloadLimits : { podCpu : Natural, podMemory : Natural, podEphemeral : Natural }, workloadHeadroom : Optional { podCpu : Natural, podMemory : Natural, podEphemeral : Natural } } }"
     <> ", rootDeployments : List { deploymentOf : Text, bindings : List { bindingNeed : Text, bindingProvider : Text, bindingShape : < SingleNode | Distributed : Natural >, bindingInference : Optional { engineRuntime : < AppleMetal | Cuda | LinuxCpu >, engineFamily : < LlamaCpp | WhisperCpp | Onnx | Vllm | Pytorch | Diffusers | Transformers | Audiveris > } }, distribution : { replicas : Natural } }"
     <> ", rootExtensions : List { extensionId : Text, extensionParameters : < BuildCacheParameters : { cacheBudgetBytes : Natural, cacheTemporaryBytes : Natural, cacheFirstMissConcurrency : Natural } | CoordinationParameters : Text | InferenceParameters : Natural | TrainingParameters : Text > } }"
-
--- | The wire messages the repository declares: name, then field names with their numbers.
-wireMessages :: [(Text, [(Text, Integer)])]
-wireMessages =
-  [ ("MessageIdData", [("ledgerId", 1), ("entryId", 2), ("partition", 3)])
-  , ("MessageMetadata", [("producer_name", 1), ("sequence_id", 2), ("publish_time", 3)])
-  , ("CommandConnect", [("client_version", 1), ("protocol_version", 4)])
-  ]
 
 -- | The application's resource envelope after each leaf that feeds it is changed alone; every
 -- other leaf leaves the baseline's envelope.

@@ -65,6 +65,7 @@ data DecisionId
   | DL0040
   | DL0041
   | DL0042
+  | DL0043
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 allDecisionIds :: [DecisionId]
@@ -114,6 +115,7 @@ renderDecisionId identifier = case identifier of
   DL0040 -> "DL-0040"
   DL0041 -> "DL-0041"
   DL0042 -> "DL-0042"
+  DL0043 -> "DL-0043"
 
 parseDecisionId :: Text -> Maybe DecisionId
 parseDecisionId rendered =
@@ -203,7 +205,7 @@ frozenBaseline =
   , FrozenRow "documents/engineering/service_capability_doctrine.md" "b1e5f1e55ade47e3c9ff2b15fb40df78b470878943313e6f8326050f5900607b" DL0032
   , FrozenRow "documents/engineering/single_logical_data_plane_doctrine.md" "80b7f51d35de20a3799c8a49edeab29139b27757ea70ec08a5f6bd316c3ee792" DL0006
   , FrozenRow "documents/engineering/storage_lifecycle_doctrine.md" "735104f10f59ea24ada4b608722268f90f9ae103cf47ff32dbb85e5db2a6d0a9" DL0028
-  , FrozenRow "documents/engineering/substrate_doctrine.md" "c3a29d025f2555a6fb13f6e9418d40f6f107d5feb39206b75724a5cca9a8fab8" DL0033
+  , FrozenRow "documents/engineering/substrate_doctrine.md" "221379f80a2634c0c95b32577ed30263648ab5aca50edad9ee6cedcf16e99423" DL0043
   , FrozenRow "documents/engineering/substrate_node_inventory.md" "1ad803874233ddb00b712d199293e9662f26404cdf44f1f4629de736fabfc4e1" DL0006
   , FrozenRow "documents/engineering/tenancy_doctrine.md" "282b5959061365be51af5844a7a019aadc11f084eaa27119ab13df042e8bf49e" DL0006
   , FrozenRow "documents/engineering/test_derivation_analysis.md" "a1e66c2df7273a5b180a2b8fa79c89e68cc9a04a539070bcd76a1a05f7338583" DL0006
@@ -230,6 +232,6 @@ frozenBaseline =
   , FrozenRow "AGENTS.md" "7be90c67243b16190ea0e617001abffcbc1bfc2b4e964a009237a8a9ea497e4a" DL0025
   , FrozenRow "DEVELOPMENT_PLAN/development_plan_standards.md" "4c9e6cd0a1807fd567d016c957b4e1ab89a007a2dcd8e5fa8b9a25274da9d540" DL0026
   , FrozenRow "DEVELOPMENT_PLAN/development_plan_phase_model.md" "1136bf4ed4c58706bbf1b6b56be94fc53ac3f92c9ccdc0d23541818cb6029da4" DL0026
-  , FrozenRow "DEVELOPMENT_PLAN/development_plan_gate_integrity.md" "0399ef282395ac29890123c00fb4c9c422d53a5b987527a57a7fbe1ecacf3cf2" DL0037
+  , FrozenRow "DEVELOPMENT_PLAN/development_plan_gate_integrity.md" "03201238d406769001c68811d5f0e68f72ea73b2c745a621869b71bddfb12b19" DL0043
   , FrozenRow "DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md" "d0ac8b12e284a73c6169e2f4b17c61dcc0a6af7e81bc910e70076bd04591fa13" DL0042
   ]

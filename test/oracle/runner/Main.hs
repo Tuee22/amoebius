@@ -73,6 +73,17 @@ legacyMain arguments = do
     ["--oracle-build", directory] -> oracleBuildChecks directory
     ["--oracle-input", directory] -> oracleInputJudge . map (Text.splitOn "\t") . Text.lines <$> TextIO.readFile (directory </> "oracle-input.tsv")
     ["--source-tree", directory] -> map (\(name,green,observed) -> LedgerRow name green observed) <$> sourceTreeChecks directory
+    ["--legacy-preflight", directory] -> do
+      rows <- map (Text.splitOn "\t") . Text.lines <$> TextIO.readFile (directory </> "runner.tsv")
+      let selected = [row | row <- judge rows, rowName row `elem` ["legacy.direct-unsupported", "legacy.direct-unsupported.created"]]
+      unless (length selected == 2) (fail "legacy preflight oracle inventory incomplete")
+      pure selected
+    ["--attribution", directory] -> do
+      rows <- map (Text.splitOn "\t") . Text.lines <$> TextIO.readFile (directory </> "runner.tsv")
+      let names = ["attribution.owned-red", "attribution.owned-only", "attribution.unowned-red", "attribution.no-policy", "attribution.empty-ledger"]
+          selected = [row | row <- judge rows, rowName row `elem` names]
+      unless (length selected == length names) (fail "attribution oracle inventory incomplete")
+      pure selected
     ["--oracle-isolation", directory] -> oracleIsolationJudge . map (Text.splitOn "\t") . Text.lines <$> TextIO.readFile (directory </> "oracle-isolation.tsv")
     ["--source-read", directory] -> sourceReadJudge . map (Text.splitOn "\t") . Text.lines <$> TextIO.readFile (directory </> "source-read.tsv")
     ["--contracts", directory] -> contractStructureJudge . map (Text.splitOn "\t") . Text.lines <$> TextIO.readFile (directory </> "contracts.tsv")
@@ -174,6 +185,7 @@ runnerInventoryNames =
   , "loci.branch-swap"
   , "loci.field-drop"
   , "loci.list-truncation"
+  , "operator.list-pattern-binders"
   , "sample.deterministic"
   , "sample.seed-sensitive"
   , "sample.size"
@@ -204,6 +216,7 @@ runnerInventoryNames =
   , "kill.ratio"
   , "kill.rows"
   , "attribution.owned-red"
+  , "attribution.owned-only"
   , "attribution.unowned-red"
   , "attribution.no-policy"
   , "attribution.empty-ledger"
@@ -219,6 +232,8 @@ runnerInventoryNames =
   , "hygiene.clean.green"
   , "hygiene.clean.cap"
   , "legacy.clean-hygiene"
+  , "legacy.direct-unsupported"
+  , "legacy.direct-unsupported.created"
   , "legacy.required-evidence"
   , "legacy.required-evidence.run-root"
   , "legacy.preflight-disabled"
@@ -1278,6 +1293,7 @@ judge rows =
   , expect "loci.branch-swap" "12" (value3 "loci" "branch-swap")
   , expect "loci.field-drop" "18" (value3 "loci" "field-drop")
   , expect "loci.list-truncation" "22" (value3 "loci" "list-truncation")
+  , expect "operator.list-pattern-binders" "True" (value "operator" "list-pattern-binders")
   , expect "sample.deterministic" "equal" (value "sample" "deterministic")
   , expect "sample.seed-sensitive" "differs" (value "sample" "seed-sensitive")
   , expect "sample.size" "4" (value "sample" "size")
@@ -1307,9 +1323,10 @@ judge rows =
   , expect "kill.stillborn" "2" (value "kill" "stillborn")
   , expect "kill.ratio" "3 % 4" (value "kill" "ratio")
   , expect "kill.rows" "8" (value "kill" "rows")
-  , expect "attribution.owned-red" "True" (value "attribution" "owned-red")
+  , expect "attribution.owned-red" "False" (value "attribution" "owned-red")
+  , expect "attribution.owned-only" "True" (value "attribution" "owned-only")
   , expect "attribution.unowned-red" "False" (value "attribution" "unowned-red")
-  , expect "attribution.no-policy" "True" (value "attribution" "no-policy")
+  , expect "attribution.no-policy" "False" (value "attribution" "no-policy")
   , expect "attribution.empty-ledger" "False" (value "attribution" "empty-ledger")
   , expect "hygiene.fixture.kernel-lines" "13" (value "hygiene" "fixture.kernel-lines")
   , expect "hygiene.fixture.cap" "5" (value "hygiene" "fixture.cap")
@@ -1323,6 +1340,8 @@ judge rows =
   , expect "hygiene.clean.green" "True" (value "hygiene" "clean.green")
   , expect "hygiene.clean.cap" "14000" (value "hygiene" "clean.cap")
   , expect "legacy.clean-hygiene" "True" (value "legacy" "clean-hygiene")
+  , expect "legacy.direct-unsupported" "user error (LegacyQualificationUnsupported)" (value "legacy" "direct-unsupported")
+  , expect "legacy.direct-unsupported.created" "False" (value "legacy" "direct-unsupported.created")
   , expect "legacy.required-evidence" legacyUnavailable (value "legacy" "required-evidence")
   , expect "legacy.required-evidence.run-root" "False" (value "legacy" "required-evidence.run-root")
   , expect "legacy.preflight-disabled" legacyUnavailable (value "legacy" "preflight-disabled")
@@ -1424,7 +1443,7 @@ judge rows =
   , expect "package.product-closure-validator-free" "True" (value "package" "product-closure-validator-free")
   , expect "package.verifier-links-runner" "True" (value "package" "verifier-links-runner")
   , expectAtMost "package.flags" 20 (value "package" "flags")
-  , expect "package.executables" "amoebius,amoebius-validate,extension-source-admission" (value "package" "executables")
+  , expect "package.executables" "amoebius,amoebius-validate,amoebius-wire-prepare,extension-source-admission" (value "package" "executables")
   ] <> [expect ("oracle-syntax." <> name) (Text.pack (show expected)) (value "oracle-syntax" name) | (name, expected) <- oracleSyntaxExpected]
     <> oracleBuildJudge [values | "oracle-build" : values <- rows]
     <> oracleInputJudge [values | "oracle-input" : values <- rows]
@@ -1612,7 +1631,8 @@ inventoryChecks rows =
   actual = [(identifier, fields) | ("legacy-inventory" : identifier : fields) <- rows]
   bootstrap = [fields | ("legacy-bootstrap" : fields) <- rows]
   supported = [fields | ("legacy-supported" : fields) <- rows]
-  qualified = ["LTD-VAL-001","LTD-VAL-002","LTD-VAL-003","LTD-VAL-004","LTD-VAL-006","LTD-KRN-001","LTD-KRN-002","LTD-KRN-003","LTD-BOOT-001","LTD-SRC-000","LTD-SRC-008","LTD-SRC-001","LTD-SRC-005","LTD-SRC-006","LTD-NAME-001","LTD-META-001","LTD-SRC-007","LTD-SRC-009"]
+  qualified = ["LTD-VAL-001","LTD-VAL-002","LTD-VAL-003","LTD-VAL-004","LTD-VAL-006","LTD-KRN-001","LTD-KRN-002","LTD-KRN-003","LTD-BOOT-001","LTD-SRC-000","LTD-SRC-008","LTD-SRC-001","LTD-SRC-005","LTD-SRC-006","LTD-NAME-001","LTD-META-001","LTD-SRC-007","LTD-SRC-009"
+    ,"LTD-DSL-001","LTD-DSL-002","LTD-DSL-009","LTD-VAL-005","LTD-DOC-001","LTD-SRC-002"]
   expected = [(identifier, [owner, if identifier `elem` retired then "retired" else "active", "snapshot", analyzer, cases]) | (identifier, owner, analyzer, cases) <- obligations]
   retired = ["LTD-VAL-001", "LTD-VAL-002", "LTD-VAL-003", "LTD-VAL-004", "LTD-VAL-006", "LTD-KRN-001", "LTD-KRN-002", "LTD-KRN-003", "LTD-BOOT-001", "LTD-SRC-007", "LTD-SRC-009"]
   obligations =
@@ -1662,10 +1682,11 @@ inventoryChecks rows =
     , ("LTD-HELPER-001", "host_assert_cli", "runtime-handoff", "python-runtime-helper,foreign-deploy-command")
     ]
 
--- The typed-spine entry owes its own analyzers and every earlier owner. This
--- literal does not import the production inventory or derive expected owners.
+-- The wire analyzer remains unavailable until the typed-spine gate owns its complete
+-- binding and consumer observations. Refusal precedes source capture and transport.
+-- This literal does not import the production inventory.
 legacyUnavailable :: Text
-legacyUnavailable = "LEGACY-ANALYZER-UNAVAILABLE: LTD-SRC-002,LTD-SRC-003,LTD-VAL-005,LTD-DOC-001,LTD-DSL-001,LTD-DSL-002,LTD-DSL-009"
+legacyUnavailable = "LEGACY-ANALYZER-UNAVAILABLE: LTD-SRC-003"
 
 expect :: Text -> Text -> Text -> LedgerRow
 expect name expected observed = LedgerRow name (expected == observed) observed

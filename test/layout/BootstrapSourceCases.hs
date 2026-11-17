@@ -3,7 +3,7 @@
 module BootstrapSourceCases (runBootstrapSourceCases) where
 
 import Amoebius.Layout.PbGrammar
-import Amoebius.Layout.Report (captureLayoutSnapshot)
+import SourceGraphCases (observeSnapshot)
 import SourcePathCases (sourcePathInventory)
 import Control.Exception (finally)
 import Control.Monad (forM, forM_, unless, when)
@@ -22,7 +22,7 @@ runBootstrapSourceCases output = do
   createDirectoryIfMissing True directory
   root <- getCurrentDirectory
   paths <- sourcePathInventory root
-  original <- captureLayoutSnapshot root
+  original <- observeSnapshot root
   originalBytes <- Bytes.readFile (root </> target)
   originalText <- either (fail . show) pure (Encoding.decodeUtf8' originalBytes)
   unless (Text.count argv originalText == 1) (fail "BootstrapSourceArgvLocus")
@@ -39,7 +39,7 @@ runBootstrapSourceCases output = do
     forM_ paths $ \path -> do
       createDirectoryIfMissing True (takeDirectory (tree </> path))
       copyFile (root </> path) (tree </> path)
-    baseline <- captureLayoutSnapshot tree
+    baseline <- observeSnapshot tree
     TextIO.writeFile (file "-baseline.data") (Text.pack (show (original,baseline)))
     rows <- concat <$> forM bootstrapSourceExamples (\(name,edit) -> forM [False,True] $ \negative -> (do
       restore
@@ -47,14 +47,14 @@ runBootstrapSourceCases output = do
         AppendBootstrapBytes suffix -> originalText <> suffix
         RewriteBootstrapArguments -> Text.replace argv "    bootstrap(adapter, [])" originalText))
       inputs <- readInputs
-      snapshot <- captureLayoutSnapshot tree
+      snapshot <- observeSnapshot tree
       body <- Bytes.readFile (tree </> target) >>= either (fail . show) pure . Encoding.decodeUtf8'
       let role = if negative then "negative" else "positive" :: Text
           row = (name,role,snapshot,body,verdict inputs)
       TextIO.writeFile (file "-current.data") (Text.pack (show row))
       pure row) `finally` restore)
     let observe name inputs body = do
-          snapshot <- captureLayoutSnapshot tree
+          snapshot <- observeSnapshot tree
           pure (name :: Text,snapshot,map fst inputs,body :: Text,verdict inputs)
     missing <- (do
       removePathForcibly (tree </> target)
